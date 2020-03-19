@@ -1,0 +1,116 @@
+.k-summary {
+  width: 100%;
+  font-family: PingFangSC-Regular;
+  background: #fff;
+  .k-row-1 {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    border-bottom: solid 1px #e8e8e8;
+    div {
+      flex: 1;
+      line-height: 48px;
+      padding-left: 32px;
+      font-size: 15px;
+      color: rgba(0,0,0,0.85);
+    }
+    div + div {
+      border-left: solid 1px #e8e8e8;
+    }
+  }
+  .k-row-2 {
+    width: 100%;
+    padding: 24px 0;
+    border-top: solid 1px #e8e8e8;
+    border-bottom: solid 1px #e8e8e8;
+    display: flex;
+    text-align: center;
+    div {
+      height: 58px;
+      flex: 1;
+      span {
+        display: block;
+        line-height: 22px;
+        color: rgba(0,0,0,0.45);
+        font-size: 14px;
+      }
+      p {
+        line-height: 32px;
+        margin-top: 4px;
+        font-size: 24px;
+        font-weight: 400;
+        color: rgba(0,0,0,0.85);
+      }
+    }
+    div + div {
+      border-left: solid 2px #e8e8e8;
+    }
+  }
+  .k-row-3 {
+    width: 100%;
+    height: 64px;
+    text-align: center;
+    display: flex;
+    div {
+      padding: 9px 0;
+      flex: 1;
+      span {
+        display: block;
+        line-height: 22px;
+        color: rgba(0,0,0,0.45);
+        font-size: 14px;
+      }
+      p {
+        line-height: 22px;
+        margin-top: 1px;
+        font-size: 18px;
+        font-weight: 400;
+        color: rgba(0,0,0,0.85);
+      }
+    }
+    .long-text {
+      font-size: 12px;
+    }
+    div + div {
+      border-left: solid 2px #e8e8e8;
+    }
+  }
+}
+
+.p-description {
+  margin-left: 20px;
+  span {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+    margin-right: 10px;
+  }
+}
+
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  min-width: 1200px;
+  > div {
+    width: 48%;
+    margin: 15px 24px 15px 0px;
+    background-color: #fff;
+    padding: 15px 0px;
+    &:hover {
+      box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+    }
+    p {
+      padding-left: 16px;
+      font-weight: 700;
+      height: 32px;
+      border-bottom: 1px dashed #ccc;
+    }
+  }
+  .emptyChart {
+    background-color: transparent;
+    &:hover {
+      box-shadow: none;
+    }
+  }
+}

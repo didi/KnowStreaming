@@ -1,0 +1,89 @@
+.l-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-size: 100% 100%;
+  top: -20px;
+  .top-title {
+    width: 320px;
+    height: 57px;
+    margin-bottom: 24px;
+  }
+  .f-container {
+    padding: 20px 30px;
+    background-color: #fff;
+    box-shadow: 0px 0px 6px 2px #999;
+    overflow: hidden;
+    transition: all 500ms ease-in-out;
+    width:540px;
+    height:320px;
+    background:rgba(255,255,255,1);
+    box-shadow:0px 2px 16px 0px rgba(0,0,0,0.1);
+    border-radius:8px;
+    position: relative;
+
+    .item-style {
+      width:400px;
+      margin-bottom: 20px;
+    }
+    .btn-style {
+      width:400px;
+      height:56px;
+      background:rgba(255,129,0,1);
+      border-radius:4px;
+      text-align: center;
+    }
+    .ant-input-affix-wrapper {
+      font-size: 14px;
+    }
+    .ant-input-suffix {
+      top: 40%;
+      color: rgba(0, 0, 0, 0.25);
+    }
+    .title {
+      font-size: 20px;
+      line-height: 35px;
+      margin-bottom: 26px;
+      transition: all 500ms ease-in-out;
+      text-align: center;
+    }
+    .ant-form {
+      position: absolute;
+      box-sizing: border-box;
+      top: 17%;
+      left: 13%;
+  }
+    .ant-input {
+      height:56px;
+      background:rgba(0,0,0,0.02);
+      font-size: 18px;
+      border-radius:4px;
+      font-family:PingFangSC-Regular,PingFang SC;
+      font-weight:400;
+      color:rgba(153,153,153,1);
+      line-height:25px;
+      border: none;
+    }
+    .b-item {
+      button {
+        background-color: transparent;
+        border-style: none;
+        height: 56px;
+        font-weight: 400;
+        color: rgba(255,255,255,1);
+        line-height: 25px;
+        font-size: 18px;
+        width: 100%;
+      }
+    }
+    &.show {
+      .b-item {
+        left: 219px;
+      }
+    }
+  }
+}

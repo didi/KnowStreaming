@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OperationHistoryDao">
+  <resultMap id="OperationHistoryMap" type="OperationHistoryDO">
+    <id column="id" property="id" />
+    <result column="cluster_id"  property="clusterId" />
+    <result column="topic_name" property="topicName" />
+    <result column="operator" property="operator" />
+    <result column="operation" property="operation" />
+    <result column="gmt_create" property="gmtCreate" />
+  </resultMap>
+
+  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.po.OperationHistoryDO">
+    INSERT INTO operation_history (
+      cluster_id, topic_name, operator, operation)
+    VALUES (
+      #{clusterId}, #{topicName}, #{operator}, #{operation}
+    )
+  </insert>
+
+</mapper>

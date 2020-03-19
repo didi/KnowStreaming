@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BrokerDao">
+    <resultMap id="BrokerDOMap" type="BrokerDO">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="cluster_id" jdbcType="BIGINT" property="clusterId" />
+        <result column="broker_id" jdbcType="BIGINT" property="brokerId" />
+        <result column="host" jdbcType="VARCHAR" property="host" />
+        <result column="port" jdbcType="INTEGER" property="port" />
+        <result column="timestamp" jdbcType="BIGINT" property="timestamp" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+        <result column="gmt_modify" jdbcType="TIMESTAMP" property="gmtModify" />
+    </resultMap>
+
+    <insert id="replace" parameterType="BrokerDO">
+        REPLACE broker
+        (cluster_id, broker_id, host, port, timestamp, status)
+        VALUES
+        (#{clusterId}, #{brokerId}, #{host}, #{port}, #{timestamp}, #{status})
+    </insert>
+
+    <delete id="deleteById" parameterType="java.util.Map">
+        DELETE FROM broker WHERE cluster_id = #{clusterId} AND broker_id = #{brokerId}
+    </delete>
+
+    <select id="getDead" parameterType="java.lang.Long" resultMap="BrokerDOMap">
+        SELECT * from broker where cluster_id = #{clusterId} AND status = -1
+    </select>
+</mapper>

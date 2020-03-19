@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderTopicDao">
+  <resultMap id="OrderTopicMap" type="OrderTopicDO">
+    <id column="id" property="id" />
+    <id column="status" property="status" />
+    <result column="gmt_create" property="gmtCreate" />
+    <result column="gmt_modify" property="gmtModify" />
+
+    <result column="cluster_id"  property="clusterId" />
+    <result column="cluster_name"  property="clusterName" />
+    <result column="topic_name" property="topicName" />
+    <result column="retention_time" property="retentionTime" />
+    <result column="partition_num" property="partitionNum" />
+    <result column="replica_num" property="replicaNum" />
+    <result column="regions" property="regions" />
+    <result column="brokers" property="brokers" />
+    <result column="applicant" property="applicant" />
+    <result column="principals" property="principals" />
+    <result column="peak_bytes_in" property="peakBytesIn" />
+    <result column="description" property="description" />
+    <result column="order_status" property="orderStatus" />
+    <result column="approver" property="approver" />
+    <result column="opinion" property="opinion" />
+  </resultMap>
+
+  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.po.OrderTopicDO">
+    INSERT INTO order_topic (
+      cluster_id, cluster_name, topic_name,
+      retention_time, partition_num, replica_num,
+      applicant, peak_bytes_in, description, principals
+    )
+    VALUES (
+      #{clusterId}, #{clusterName}, #{topicName},
+      #{retentionTime}, #{partitionNum}, #{replicaNum},
+      #{applicant}, #{peakBytesIn}, #{description}, #{principals}
+    )
+  </insert>
+
+  <delete id="deleteById" parameterType="java.lang.Long">
+    DELETE FROM order_topic WHERE id=#{id}
+  </delete>
+
+  <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.po.OrderTopicDO">
+    UPDATE order_topic SET
+      cluster_id=#{clusterId},
+      cluster_name=#{clusterName},
+      topic_name=#{topicName},
+      retention_time=#{retentionTime},
+      partition_num=#{partitionNum},
+      replica_num=#{replicaNum},
+      regions=#{regions},
+      brokers=#{brokers},
+      applicant=#{applicant},
+      principals=#{principals},
+      peak_bytes_in=#{peakBytesIn},
+      description=#{description},
+      order_status=#{orderStatus},
+      approver=#{approver},
+      opinion=#{opinion}
+    WHERE id=#{id}
+  </update>
+
+  <select id="getById" parameterType="java.lang.Long" resultMap="OrderTopicMap">
+    SELECT * FROM order_topic WHERE id=#{id}
+  </select>
+
+  <select id="list" resultMap="OrderTopicMap">
+    SELECT * FROM order_topic ORDER BY gmt_create DESC
+  </select>
+
+  <select id="getByUsername" parameterType="java.lang.String" resultMap="OrderTopicMap">
+    SELECT * FROM order_topic WHERE applicant=#{username} ORDER BY gmt_create DESC
+  </select>
+</mapper>

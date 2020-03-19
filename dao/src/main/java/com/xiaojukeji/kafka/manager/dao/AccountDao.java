@@ -1,0 +1,21 @@
+package com.xiaojukeji.kafka.manager.dao;
+
+import com.xiaojukeji.kafka.manager.common.entity.po.AccountDO;
+
+import java.util.List;
+
+/**
+ * @author zengqiao
+ * @date 19/5/3
+ */
+public interface AccountDao {
+    int addNewAccount(AccountDO userDO);
+
+    int deleteByName(String username);
+
+    int updateAccount(AccountDO userDO);
+
+    List<AccountDO> list();
+
+    AccountDO getByName(String username);
+}

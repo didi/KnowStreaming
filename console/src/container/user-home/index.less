@@ -1,0 +1,73 @@
+.content-container {
+  position: relative;
+  .table-operation {
+    a {
+      color: #f38031;
+    }
+    a + a {
+      margin-left: 10px;
+    }
+  }
+  .table-operation-bar {
+    position: absolute;
+    right: 24px;
+    z-index: 100;
+    li {
+      display: inline-block;
+      vertical-align: middle;
+      .ant-select {
+        width: 150px;
+      }
+      .ant-input-search {
+        width: 200px;
+      }
+      &.new-topic {
+        margin-right: 30px;
+        cursor: pointer;
+        & > i {
+          margin-right: 5px;
+        }
+      }
+    }
+  }
+  .k-collect {
+    width: 300px;
+    position: relative;
+    margin-bottom: 12px;
+    .ant-alert-close-icon {
+      top: 7px;
+    }
+    .k-coll-btn {
+      position: absolute;
+      top: 9px;
+      right: 15px;
+    }
+  }
+  .p-params {
+    display: inline-block;
+    padding: 0px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(217, 217, 217, 1);
+    margin: 0px 8px 8px 0px;
+    &-unFinished {
+      background: rgba(245, 34, 45, 0.2);
+    }
+  }
+}
+
+.icon:hover {
+  position: relative;
+  .ant-checkbox-disabled {
+    &::after {
+      content: '已收藏';
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.65);
+      position: absolute;
+      padding: 8px 0px;
+      width: 60px;
+      border-radius: 4px;
+      top: -30px;
+      left: 1px;
+    }
+  }
+}

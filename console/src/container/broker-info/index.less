@@ -1,0 +1,84 @@
+.square-container {
+  width: 100%;
+  background-color: #fff;
+  padding: 17px 20px;
+  a {
+    display: inline-block;
+    width: 35px;
+    height: 22px;
+    background: rgba(255, 241, 240, 1);
+    border-radius: 4px;
+    line-height: 22px;
+    margin-right: 20px;
+    text-align: center;
+    color: #f5222d;
+    &.finished {
+      background: rgba(47, 194, 91, 0.2);
+      color: #2fc25b;
+    }
+  }
+}
+
+.topic-line-tool {
+  height: 48px;
+  font-size: 14px;
+  font-family: PingFangSC-Regular;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.85);
+  background: rgba(250, 250, 250);
+  li {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 24px;
+    line-height: 48px;
+    span.label {
+      padding-right: 10px;
+    }
+    &.introduce {
+      float: right;
+      span.common {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 8px;
+        vertical-align: middle;
+        margin-right: 10px;
+        &-green {
+          background: rgba(47, 194, 91, 1);
+        }
+        &-red {
+          background: rgba(245, 34, 45, 1);
+        }
+      }
+    }
+  }
+}
+
+.k-tab {
+  width: 100%;
+  height: 48px;
+  line-height: 48px;
+  background: rgba(0, 0, 0, 0.02);
+  padding: 0px 24px;
+  font-size: 14px;
+  font-family: PingFangSC-Medium;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 0;
+  .k-tab-button {
+    position: absolute;
+    right: 213px;
+  }
+}
+
+.deleteButton {
+  &.ant-btn {
+    color: #f38031;
+    text-decoration: none;
+    border: none;
+    background-color: transparent;
+  }
+}
