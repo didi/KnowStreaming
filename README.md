@@ -80,7 +80,7 @@ nohup java -jar kafka-manager-web-1.0.0-SNAPSHOT.jar --spring.config.location=./
 
 ### 使用
 
-本地启动的话，访问`http://localhost:8080`，输入帐号及密码进行登录。更多参考：[kafka-manager使用手册](./user_cn_guide.md)
+本地启动的话，访问`http://localhost:8080`，输入帐号及密码进行登录。更多参考：[kafka-manager使用手册](doc/user_cn_guide.md)
 
 
 ---
