@@ -4,9 +4,9 @@
   "description": "",
   "scripts": {
     "start": "webpack-dev-server",
-    "daily-build": "rm -rf dist && NODE_ENV=production webpack",
-    "pre-build": "rm -rf dist && NODE_ENV=production webpack",
-    "prod-build": "rm -rf dist && NODE_ENV=production webpack"
+    "daily-build": "cross-env NODE_ENV=production webpack",
+    "pre-build": "cross-env NODE_ENV=production webpack",
+    "prod-build": "cross-env NODE_ENV=production webpack"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,8 @@
     "@types/react-dom": "^16.8.2",
     "@types/react-router-dom": "^4.3.1",
     "antd": "^3.16.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "cross-env": "^7.0.2",
     "css-loader": "^2.1.0",
     "echarts": "^4.2.1",
     "file-loader": "^5.0.2",

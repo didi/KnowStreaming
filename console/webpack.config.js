@@ -4,6 +4,7 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const isProd = process.env.NODE_ENV === 'production';
 const outPath = `${__dirname}/dist`;
@@ -20,7 +21,7 @@ const plugins = [
 if (isProd) {
   plugins.push(new MiniCssExtractPlugin({
     filename: `${filename}.css`,
-  }));
+  }), new CleanWebpackPlugin());
 }
 
 module.exports = {
