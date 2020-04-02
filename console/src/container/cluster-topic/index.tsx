@@ -49,14 +49,14 @@ export class SearchAndFilter extends React.Component<any, IState> {
   }
 
   public handleVisble = (type: string) => {
-    if (this.timer) clearTimeout(this.timer);
-    setTimeout(() => {
+    if (this.timer) window.clearTimeout(this.timer);
+    window.setTimeout(() => {
       this.setState({ [type]: true });
     });
   }
 
   public handleUnVisble = (type: string) => {
-    this.timer = setTimeout(() => {
+    this.timer = window.setTimeout(() => {
       this.setState({ [type]: false });
     }, 100);
   }

@@ -19,7 +19,7 @@ class ResetOffset extends React.Component<any> {
       consume.offsetPartition(Object.assign({ timestamp: +moment(timestamp).format('x') }, topic.currentGroup))
         .then(() => {
           message.success('重置时间成功');
-          setTimeout(() => {
+          window.setTimeout(() => {
             location.reload();
           }, 200);
         });
@@ -28,7 +28,7 @@ class ResetOffset extends React.Component<any> {
   public submitPartiton = () => {
     consume.offsetPartition(topic.currentGroup, 1).then(() => {
       message.success('重置分区成功');
-      setTimeout(() => {
+      window.setTimeout(() => {
         location.reload();
       }, 200);
     });

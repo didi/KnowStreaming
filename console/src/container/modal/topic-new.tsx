@@ -36,7 +36,7 @@ class Topic extends React.Component<any> {
       this.setState({ loading: true });
       createTopic(values).then(data => {
         notification.success({ message: '申请Topic成功' });
-        setTimeout(() => location.assign('/user/my_order'), 500);
+        window.setTimeout(() => location.assign('/user/my_order'), 500);
         modal.close();
       }, (err) => {
         this.setState({ loading: false });
