@@ -92,6 +92,9 @@ nohup java -jar kafka-manager-web-1.0.0-SNAPSHOT.jar --spring.config.location=./
 
 ## 钉钉交流群
 
+搜索群号：`32821440` 或者扫码可入群交流
+
+
 ![dingding_group](doc/assets/images/common/dingding_group.jpg)
 
 
