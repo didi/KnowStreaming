@@ -92,6 +92,9 @@ nohup java -jar kafka-manager-web-1.0.0-SNAPSHOT.jar --spring.config.location=./
 
 ## 钉钉交流群
 
+搜索群号：`32821440` 或者扫码可入群交流. 备注：在钉钉搜索框搜索`32821440`，然后搜索结果中点击 "网络查找手机/邮箱/钉钉号" 即可看到我们的钉钉群：滴滴KafkaManager开源用户群。
+
+
 ![dingding_group](doc/assets/images/common/dingding_group.jpg)
 
 

@@ -4,8 +4,8 @@ USE `kafka_manager`;
 
 CREATE TABLE `account` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `username` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT '用户名',
-  `password` varchar(256) NOT NULL DEFAULT '' COMMENT '密码',
+  `username` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT '用户名',
+  `password` varchar(128) NOT NULL DEFAULT '' COMMENT '密码',
   `role` int(16) NOT NULL DEFAULT '0' COMMENT '角色类型, 0:普通用户',
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '0标识使用中，-1标识已废弃',
   `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -33,7 +33,7 @@ CREATE TABLE `alarm_rule` (
 
 CREATE TABLE `broker` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `cluster_id` bigint(128) NOT NULL DEFAULT '-1' COMMENT '集群ID',
+  `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
   `broker_id` int(11) NOT NULL DEFAULT '-1' COMMENT 'BrokerID',
   `host` varchar(128) NOT NULL DEFAULT '' COMMENT 'Broker主机名',
   `port` int(32) NOT NULL DEFAULT '-1' COMMENT 'Broker端口',
@@ -48,7 +48,7 @@ CREATE TABLE `broker` (
 
 CREATE TABLE `broker_metrics` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
-  `cluster_id` bigint(11) NOT NULL DEFAULT '-1' COMMENT '集群ID',
+  `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
   `broker_id` int(11) NOT NULL DEFAULT '-1' COMMENT 'BrokerID',
   `bytes_in` double(53,2) NOT NULL DEFAULT '0.00' COMMENT '每秒字节流入',
   `bytes_out` double(53,2) NOT NULL DEFAULT '0.00' COMMENT '每秒字节流出',
@@ -93,7 +93,7 @@ CREATE TABLE `cluster` (
 
 CREATE TABLE `cluster_metrics` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
-  `cluster_id` bigint(11) NOT NULL DEFAULT '0' COMMENT '集群ID',
+  `cluster_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '集群ID',
   `topic_num` int(11) NOT NULL DEFAULT '0' COMMENT 'Topic数',
   `partition_num` int(11) NOT NULL DEFAULT '0' COMMENT '分区数',
   `broker_num` int(11) NOT NULL DEFAULT '0' COMMENT 'Broker数',
@@ -121,8 +121,8 @@ CREATE TABLE `controller` (
 
 CREATE TABLE `migration_task` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
-  `cluster_id` bigint(128) NOT NULL DEFAULT '0' COMMENT '集群ID',
-  `topic_name` varchar(256) NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `cluster_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '集群ID',
+  `topic_name` varchar(192) NOT NULL DEFAULT '' COMMENT 'Topic名称',
   `reassignment_json` text COMMENT '任务参数',
   `real_throttle` bigint(20) NOT NULL DEFAULT '0' COMMENT '实际限流值(B/s)',
   `operator` varchar(128) NOT NULL DEFAULT '' COMMENT '操作人',
@@ -135,8 +135,8 @@ CREATE TABLE `migration_task` (
 
 CREATE TABLE `operation_history` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `cluster_id` bigint(128) NOT NULL DEFAULT '-1' COMMENT '集群ID',
-  `topic_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
+  `topic_name` varchar(192) NOT NULL DEFAULT '' COMMENT 'Topic名称',
   `operator` varchar(128) NOT NULL DEFAULT '' COMMENT '操作人',
   `operation` varchar(256) NOT NULL DEFAULT '' COMMENT '操作描述',
   `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -147,8 +147,8 @@ CREATE TABLE `operation_history` (
 CREATE TABLE `order_partition` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
-  `cluster_name` varchar(256) NOT NULL DEFAULT '' COMMENT '集群名称',
-  `topic_name` varchar(256) NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `cluster_name` varchar(128) NOT NULL DEFAULT '' COMMENT '集群名称',
+  `topic_name` varchar(192) NOT NULL DEFAULT '' COMMENT 'Topic名称',
   `applicant` varchar(128) NOT NULL DEFAULT '' COMMENT '申请人',
   `peak_bytes_in` bigint(20) NOT NULL DEFAULT '0' COMMENT '峰值流量',
   `description` text COMMENT '备注信息',
@@ -164,8 +164,8 @@ CREATE TABLE `order_partition` (
 CREATE TABLE `order_topic` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
-  `cluster_name` varchar(256) NOT NULL DEFAULT '' COMMENT '集群名称',
-  `topic_name` varchar(256) NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `cluster_name` varchar(128) NOT NULL DEFAULT '' COMMENT '集群名称',
+  `topic_name` varchar(192) NOT NULL DEFAULT '' COMMENT 'Topic名称',
   `retention_time` bigint(20) NOT NULL DEFAULT '-1' COMMENT '保留时间(ms)',
   `partition_num` int(16) NOT NULL DEFAULT '-1' COMMENT '分区数',
   `replica_num` int(16) NOT NULL DEFAULT '-1' COMMENT '副本数',
@@ -187,7 +187,7 @@ CREATE TABLE `order_topic` (
 CREATE TABLE `region` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
-  `region_name` varchar(256) NOT NULL DEFAULT '' COMMENT 'Region名称',
+  `region_name` varchar(128) NOT NULL DEFAULT '' COMMENT 'Region名称',
   `broker_list` varchar(256) NOT NULL DEFAULT '' COMMENT 'Broker列表',
   `level` int(16) NOT NULL DEFAULT '0' COMMENT 'Region重要等级, 0级普通, 1极重要，2级极重要',
   `operator` varchar(45) NOT NULL DEFAULT '' COMMENT '操作人',
@@ -201,8 +201,8 @@ CREATE TABLE `region` (
 
 CREATE TABLE `topic` (
   `id` bigint(128) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `cluster_id` bigint(128) NOT NULL DEFAULT '-1' COMMENT '集群ID',
-  `topic_name` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
+  `topic_name` varchar(192) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT 'Topic名称',
   `applicant` varchar(256) NOT NULL DEFAULT '' COMMENT '申请人',
   `principals` varchar(256) NOT NULL DEFAULT '' COMMENT '负责人',
   `description` text COMMENT '备注信息',
@@ -216,9 +216,9 @@ CREATE TABLE `topic` (
 
 CREATE TABLE `topic_favorite` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增Id',
-  `username` varchar(128) NOT NULL DEFAULT '' COMMENT '用户名',
+  `username` varchar(64) NOT NULL DEFAULT '' COMMENT '用户名',
   `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
-  `topic_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `topic_name` varchar(192) NOT NULL DEFAULT '' COMMENT 'Topic名称',
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '删除标记, 0表示未删除, -1表示删除',
   `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -228,8 +228,8 @@ CREATE TABLE `topic_favorite` (
 
 CREATE TABLE `topic_metrics` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
-  `cluster_id` bigint(11) NOT NULL DEFAULT '-1' COMMENT '集群ID',
-  `topic_name` varchar(256) NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
+  `topic_name` varchar(192) NOT NULL DEFAULT '' COMMENT 'Topic名称',
   `messages_in` double(53,2) NOT NULL DEFAULT '0.00' COMMENT '每秒进入消息条数',
   `bytes_in` double(53,2) NOT NULL DEFAULT '0.00' COMMENT '每秒字节流入',
   `bytes_out` double(53,2) NOT NULL DEFAULT '0.00' COMMENT '每秒字节流出',
