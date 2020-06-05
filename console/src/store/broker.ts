@@ -35,6 +35,7 @@ export interface IBrokerPartition extends IBroker {
   leaderCount: number;
   partitionCount: number;
   notUnderReplicatedPartitionCount: number;
+  underReplicatedPartitionCount?: number;
   regionName: string;
   bytesInPerSec: number;
 }
@@ -74,6 +75,9 @@ interface IBrokerOption {
 }
 
 class Broker {
+  @observable
+  public loading: boolean = false;
+
   @observable
   public brokerBaseInfo: IBrokerBaseInfo = {} as IBrokerBaseInfo;
 
@@ -118,6 +122,11 @@ class Broker {
 
   @observable
   public BrokerOptions: IValueLabel[] = [{ value: null, label: '请选择Broker' }];
+
+  @action.bound
+  public setLoading(value: boolean) {
+    this.loading = value;
+  }
 
   @action.bound
   public setBrokerBaseInfo(data: IBrokerBaseInfo) {
@@ -216,7 +225,8 @@ class Broker {
   }
 
   public getBrokerList(clusterId: number) {
-    getBrokerList(clusterId).then(this.setBrokerList);
+    this.setLoading(true);
+    getBrokerList(clusterId).then(this.setBrokerList).finally(() => this.setLoading(false));
   }
 
   public getBrokerNetwork(clusterId: number) {
@@ -224,7 +234,8 @@ class Broker {
   }
 
   public getBrokerPartition(clusterId: number) {
-    getBrokerPartition(clusterId).then(this.setBrokerPartition);
+    this.setLoading(true);
+    getBrokerPartition(clusterId).then(this.setBrokerPartition).finally(() => this.setLoading(false));
   }
 
   public getOneBrokerNetwork(clusterId: number, brokerId: number) {
