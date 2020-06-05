@@ -78,6 +78,7 @@ public class BrokerModelConverter {
                 Double bytesInPerSec = brokerOverallDTO.getBytesInPerSec() / 1024.0 / 1024.0;
                 brokerOverviewVO.setBytesInPerSec(Math.round(bytesInPerSec * 100) / 100.0);
             }
+            brokerOverviewVO.setUnderReplicatedPartitionCount(brokerOverallDTO.getUnderReplicatedPartitions());
             brokerOverviewVO.setLeaderCount(brokerOverallDTO.getLeaderCount());
             if (brokerOverallDTO.getPartitionCount() != null && brokerOverallDTO.getUnderReplicatedPartitions() != null) {
                 brokerOverviewVO.setNotUnderReplicatedPartitionCount(brokerOverallDTO.getPartitionCount() - brokerOverallDTO.getUnderReplicatedPartitions());
