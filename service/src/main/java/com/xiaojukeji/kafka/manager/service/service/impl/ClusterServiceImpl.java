@@ -10,6 +10,7 @@ import com.xiaojukeji.kafka.manager.dao.ClusterDao;
 import com.xiaojukeji.kafka.manager.dao.ClusterMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.ControllerDao;
 import com.xiaojukeji.kafka.manager.service.cache.ClusterMetadataManager;
+import com.xiaojukeji.kafka.manager.service.schedule.ScheduleCollectDataManager;
 import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
@@ -38,6 +39,9 @@ public class ClusterServiceImpl implements ClusterService {
     private ClusterMetadataManager clusterMetadataManager;
 
     @Autowired
+    private ScheduleCollectDataManager scheduleCollectDataManager;
+
+    @Autowired
     private ControllerDao controllerDao;
 
     @Override
@@ -57,6 +61,7 @@ public class ClusterServiceImpl implements ClusterService {
         if (!status) {
             return new Result(StatusCode.OPERATION_ERROR, "add zookeeper watch failed");
         }
+        scheduleCollectDataManager.start(clusterDO);
 
         if (clusterDO.getAlarmFlag() == null || clusterDO.getAlarmFlag() <= 0) {
             return new Result();
