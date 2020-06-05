@@ -80,7 +80,7 @@ nohup java -jar kafka-manager-web-1.0.0-SNAPSHOT.jar --spring.config.location=./
 
 ### 使用
 
-本地启动的话，访问`http://localhost:8080`，输入帐号及密码进行登录。更多参考：[kafka-manager使用手册](./user_cn_guide.md)
+本地启动的话，访问`http://localhost:8080`，输入帐号及密码进行登录。更多参考：[kafka-manager使用手册](doc/user_cn_guide.md)
 
 
 ---
@@ -91,6 +91,9 @@ nohup java -jar kafka-manager-web-1.0.0-SNAPSHOT.jar --spring.config.location=./
 
 
 ## 钉钉交流群
+
+搜索群号：`32821440` 或者扫码可入群交流. 备注：在钉钉搜索框搜索`32821440`，然后搜索结果中点击 "网络查找手机/邮箱/钉钉号" 即可看到我们的钉钉群：滴滴KafkaManager开源用户群。
+
 
 ![dingding_group](doc/assets/images/common/dingding_group.jpg)
 

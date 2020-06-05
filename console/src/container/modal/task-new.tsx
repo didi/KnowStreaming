@@ -28,7 +28,7 @@ class Task extends React.Component<any> {
       values.partitionIdList = typeof partitionIdList === 'string' ? values.partitionIdList.split(',') : [];
       if (this.getDisabled()) {
         const { taskId } = operation.taskDetail;
-        modifyTask({ throttle, taskId, action: 'modify' }).then(() => {
+        modifyTask({ throttle: values.throttle, taskId, action: 'modify' }).then(() => {
           notification.success({ message: '修改成功' });
           operation.getTask();
           modal.close();

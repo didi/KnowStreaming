@@ -111,7 +111,7 @@ class Cluster {
     return getRebalanceStatus(clusterId).then((type) => {
       this.setLeaderStatus(type);
       if (type === 'RUNNING') {
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.getRebalance(clusterId);
         }, 1000 * 2);
       }
