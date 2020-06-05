@@ -45,14 +45,19 @@ class LeaderRebalance extends React.Component<any> {
   constructor(props: any) {
     super(props);
     const url = Url();
-    this.clusterName = decodeURI(atob(url.search.clusterName));
+    if (url.search.clusterName) {
+      this.clusterName = decodeURI(url.search.clusterName);
+    }
     this.clusterId = Number(url.search.clusterId);
   }
 
   public handleSubmit = (e: React.MouseEvent<any, MouseEvent>) => {
     e.preventDefault();
-    this.setState({ loading: true });
     this.props.form.validateFieldsAndScroll((err: any, values: any) => {
+      if (err) {
+        return;
+      }
+      this.setState({ loading: true });
       this.brokerId = Number(values.brokerId);
       addRebalance({ brokerId: this.brokerId, clusterId: this.clusterId, dimension: 0 }).then(() => {
         cluster.getRebalance(this.clusterId).then(() => {
