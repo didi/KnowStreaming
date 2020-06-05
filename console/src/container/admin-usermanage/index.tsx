@@ -39,10 +39,10 @@ export class UserManage extends SearchAndFilter {
   public renderColumns = () => {
     const role = Object.assign({
       title: '角色',
-      key: 'role',
-      dataIndex: 'role',
+      key: 'roleName',
+      dataIndex: 'roleName',
       filters: users.filterRole,
-      onFilter: (value: string, record: any) => record.role.indexOf(value) === 0,
+      onFilter: (value: string, record: any) => record.roleName.indexOf(value) === 0,
     }, this.renderColumnsFilter('filterVisible'));
 
     return [

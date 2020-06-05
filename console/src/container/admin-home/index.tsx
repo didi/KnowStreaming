@@ -10,7 +10,7 @@ import { IClusterData } from 'types/base-type';
 
 const TabPane = Tabs.TabPane;
 
-const detailUrl ='/admin/cluster_detail?clusterId=';
+const detailUrl = '/admin/cluster_detail?clusterId=';
 
 const collectionColumns: Array<ColumnProps<IClusterData>> = [
   {
@@ -24,7 +24,8 @@ const collectionColumns: Array<ColumnProps<IClusterData>> = [
     key: 'clusterName',
     sorter: (a: IClusterData, b: IClusterData) => a.clusterName.charCodeAt(0) - b.clusterName.charCodeAt(0),
     render: (text, record) => {
-      return <a href={`${detailUrl}${record.clusterId}`}>{record.clusterName}</a>;
+      const url = `${detailUrl}${record.clusterId}&clusterName=${record.clusterName}`;
+      return <a href={encodeURI(url)}>{record.clusterName}</a>;
     },
   },
   {

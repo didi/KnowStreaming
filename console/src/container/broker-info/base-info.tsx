@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './index.less';
-import { Table, Modal, notification, PaginationConfig, Button } from 'component/antd';
+import { Table, Modal, notification, PaginationConfig, Button, Spin } from 'component/antd';
 import { broker, IBroker, IBrokerNetworkInfo, IBrokerPartition } from 'store/broker';
 import { observer } from 'mobx-react';
 import { StatusGraghCom } from 'component/flow-table';
@@ -49,10 +49,19 @@ export class BrokerList extends SearchAndFilter {
 
     const status = Object.assign({
       title: '已同步',
-      dataIndex: 'status',
-      key: 'status',
-      filters: [{ text: '是', value: '是' }, { text: '否', value: '否' }],
-      onFilter: (value: string, record: IBrokerPartition) => record.status === value,
+      dataIndex: 'underReplicatedPartitionCount',
+      key: 'underReplicatedPartitionCount',
+      filters: [{ text: '是', value: '1' }, { text: '否', value: '0' }],
+      onFilter: (value: string, record: IBrokerPartition) => {
+        // underReplicatedPartitionCount > 0 表示未同步完成
+        const syncStatus = record.underReplicatedPartitionCount ? '0' : '1';
+        return syncStatus === value;
+      },
+      render: (text: number) => (
+        <>
+          <span style={{ marginRight: 8 }}>{text ? '否' : '是'}</span>
+        </>
+      ),
     }, this.renderColumnsFilter('filterVisible'));
 
     return [{
@@ -80,7 +89,8 @@ export class BrokerList extends SearchAndFilter {
       title: '未同步副本数量',
       dataIndex: 'notUnderReplicatedPartitionCount',
       key: 'notUnderReplicatedPartitionCount',
-      sorter: (a: IBrokerPartition, b: IBrokerPartition) => a.notUnderReplicatedPartitionCount - b.notUnderReplicatedPartitionCount,
+      sorter: (a: IBrokerPartition, b: IBrokerPartition) =>
+        a.notUnderReplicatedPartitionCount - b.notUnderReplicatedPartitionCount,
     },
       status,
       region,
@@ -205,7 +215,7 @@ export class BrokerList extends SearchAndFilter {
     const dataPartitions = this.state.searchId !== '' ?
       broker.partitions.filter((d) => d.brokerId === +this.state.searchId) : broker.partitions;
     return (
-      <>
+      <Spin spinning={broker.loading}>
         <div className="k-row">
           <ul className="k-tab">
             <li>Broker概览</li>
@@ -239,7 +249,7 @@ export class BrokerList extends SearchAndFilter {
             pagination={pagination}
           />
         </div>
-      </>
+      </Spin>
     );
   }
 }
