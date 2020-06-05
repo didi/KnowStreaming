@@ -30,8 +30,12 @@ public class BrokerOverallVO {
     @ApiModelProperty(value = "分区数")
     private Integer partitionCount;
 
-    @ApiModelProperty(value = "未同步分区数")
+    @Deprecated
+    @ApiModelProperty(value = "同步分区数")
     private Integer notUnderReplicatedPartitionCount;
+
+    @ApiModelProperty(value = "未同步分区数")
+    private Integer underReplicatedPartitionCount;
 
     @ApiModelProperty(value = "leader数")
     private Integer leaderCount;
@@ -103,6 +107,14 @@ public class BrokerOverallVO {
         this.notUnderReplicatedPartitionCount = notUnderReplicatedPartitionCount;
     }
 
+    public Integer getUnderReplicatedPartitionCount() {
+        return underReplicatedPartitionCount;
+    }
+
+    public void setUnderReplicatedPartitionCount(Integer underReplicatedPartitionCount) {
+        this.underReplicatedPartitionCount = underReplicatedPartitionCount;
+    }
+
     public Integer getLeaderCount() {
         return leaderCount;
     }
@@ -130,6 +142,7 @@ public class BrokerOverallVO {
                 ", bytesInPerSec=" + bytesInPerSec +
                 ", partitionCount=" + partitionCount +
                 ", notUnderReplicatedPartitionCount=" + notUnderReplicatedPartitionCount +
+                ", underReplicatedPartitionCount=" + underReplicatedPartitionCount +
                 ", leaderCount=" + leaderCount +
                 ", regionName='" + regionName + '\'' +
                 '}';
