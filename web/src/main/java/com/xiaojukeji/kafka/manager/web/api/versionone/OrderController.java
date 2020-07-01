@@ -176,7 +176,7 @@ public class OrderController {
         TopicDO topicInfoDO = OrderConverter.convert2TopicInfoDO(orderTopicDO);
         List<Integer> brokerIdList = regionService.getFullBrokerId(clusterDO.getId(), reqObj.getRegionIdList(), reqObj.getBrokerIdList());
         Properties topicConfig = new Properties();
-        topicConfig.setProperty("retention.ms", String.valueOf(reqObj.getRetentionTime()));
+        topicConfig.setProperty("retention.ms", String.valueOf(reqObj.getRetentionTime() * 60 * 60 * 1000));
         try {
             TopicMetadata topicMetadata = new TopicMetadata();
             topicMetadata.setTopic(orderTopicDO.getTopicName());
