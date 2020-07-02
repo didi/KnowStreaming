@@ -11,10 +11,17 @@ spring:
     name: kafkamanager
   datasource:
     kafka-manager:
+      #driver-class-name: org.postgresql.Driver
+      #jdbc-url: jdbc:postgresql://localhost:5432/kafka_manager?reWriteBatchedInserts=true
+      driver-class-name: org.mariadb.jdbc.Driver
       jdbc-url: jdbc:mysql://localhost:3306/kafka_manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8
       username: admin
       password: admin
-      driver-class-name: org.mariadb.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      # PostgreSQL 使用
+      #connection-init-sql: "SET TIME ZONE 'Asia/Chongqing';SET CLIENT_ENCODING TO 'UTF-8';"
+      connection-test-query: "select 1;"
   main:
     allow-bean-definition-overriding: true
 
