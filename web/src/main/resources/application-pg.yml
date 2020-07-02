@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  tomcat:
+    accept-count: 100
+    max-connections: 1000
+    max-threads: 20
+    min-spare-threads: 20
+
+spring:
+  application:
+    name: kafkamanager
+  datasource:
+    kafka-manager:
+      driver-class-name: org.postgresql.Driver
+      jdbc-url: jdbc:postgresql://localhost:5432/kafka_manager?reWriteBatchedInserts=true
+      username: admin
+      password: admin
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-init-sql: "SET TIME ZONE 'Asia/Chongqing';SET CLIENT_ENCODING TO 'UTF-8';"
+      connection-test-query: "select 1;"
+  main:
+    allow-bean-definition-overriding: true
+
+  profiles:
+    active: dev
+
+logging:
+  config: classpath:logback-spring.xml
+
+# kafka监控
+kafka-monitor:
+  enabled: true
+  notify-kafka:
+    cluster-id: 95
+    topic-name: kmo_monitor
