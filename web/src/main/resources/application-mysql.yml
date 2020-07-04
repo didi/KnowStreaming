@@ -18,9 +18,6 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-  profiles:
-    active: dev
-
 logging:
   config: classpath:logback-spring.xml
 

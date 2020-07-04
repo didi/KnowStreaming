@@ -21,6 +21,15 @@
     (#{regionName}, #{clusterId}, #{brokerList}, #{description}, #{operator})
   </insert>
 
+  <insert id="insertOnPG" parameterType="com.xiaojukeji.kafka.manager.common.entity.po.RegionDO">
+    insert into region
+        (region_name, cluster_id, broker_list, description, operator)
+    values (#{regionName}, #{clusterId}, #{brokerList}, #{description}, #{operator})
+    on conflict (region_name, cluster_id) do update set broker_list = excluded.broker_list,
+                                                        description = excluded.description,
+                                                        operator    = excluded.operator
+  </insert>
+
   <delete id="deleteById" parameterType="java.lang.Long">
     DELETE FROM region WHERE id = #{id}
   </delete>

@@ -25,12 +25,18 @@ public class TopicFavoriteDaoImpl implements TopicFavoriteDao {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private KafkaManagerProperties kafkaManagerProperties;
+
     public void setSqlSession(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 
     @Override
     public int batchAdd(List<TopicFavoriteDO> topicFavoriteDOList) {
+        if (kafkaManagerProperties.hasPG()) {
+            return sqlSession.insert("TopicFavoriteDao.batchAddOnPG", topicFavoriteDOList);
+        }
         return sqlSession.insert("TopicFavoriteDao.batchAdd", topicFavoriteDOList);
     }
 
