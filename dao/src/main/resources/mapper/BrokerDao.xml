@@ -22,12 +22,12 @@
 
     <insert id="replaceOnPG" parameterType="BrokerDO">
         insert into broker
-        (cluster_id, broker_id, host, port, timestamp, status)
-        values
+            (cluster_id, broker_id, host, port, timestamp, status)
+        values (#{clusterId}, #{brokerId}, #{host}, #{port}, #{timestamp}, #{status})
         on conflict (cluster_id, broker_id) do update set host      = excluded.host,
-                                                  port      = excluded.port,
-                                                  timestamp = excluded.timestamp,
-                                                  status    = excluded.status
+                                                          port      = excluded.port,
+                                                          timestamp = excluded.timestamp,
+                                                          status    = excluded.status
     </insert>
 
     <delete id="deleteById" parameterType="java.util.Map">
