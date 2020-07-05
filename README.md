@@ -76,7 +76,7 @@ create user admin encrypted password 'admin';
 create database kafka_manager owner=admin template=template0 encoding='UTF-8' lc_collate='zh_CN.UTF-8' lc_ctype='zh_CN.UTF-8';
 ```
 
-***根据所选择的数据库，使用 `-Dspring.profiles.active=pg` 指定配置文件，默认使用 `mysql`。***
+***默认配置使用 MySQL 数据库，若要使用 PostgreSQL 数据库，使用 `-Dspring.profiles.active=pg` 指定 `application-pg.yml` 配置文件。***
 
 ---
 
