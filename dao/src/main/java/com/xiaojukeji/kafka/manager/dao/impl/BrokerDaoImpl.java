@@ -19,12 +19,18 @@ public class BrokerDaoImpl implements BrokerDao {
     @Autowired
     private SqlSessionTemplate sqlSession;
 
+    @Autowired
+    private KafkaManagerProperties kafkaManagerProperties;
+
     public void setSqlSession(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 
     @Override
     public int replace(BrokerDO brokerInfoDO) {
+        if (kafkaManagerProperties.hasPG()) {
+            return sqlSession.insert("BrokerDao.replaceOnPG", brokerInfoDO);
+        }
         return sqlSession.insert("BrokerDao.replace", brokerInfoDO);
     }
 

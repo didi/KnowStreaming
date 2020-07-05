@@ -17,12 +17,18 @@ public class RegionDaoImpl implements RegionDao {
     @Autowired
     private SqlSessionTemplate sqlSession;
 
+    @Autowired
+    private KafkaManagerProperties kafkaManagerProperties;
+
     public void setSqlSession(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 
     @Override
     public int insert(RegionDO regionDO) {
+        if (kafkaManagerProperties.hasPG()) {
+            return sqlSession.insert("RegionDao.insertOnPG", regionDO);
+        }
         return sqlSession.insert("RegionDao.insert", regionDO);
     }
 
