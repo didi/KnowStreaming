@@ -1,0 +1,32 @@
+server:
+  port: 8080
+  tomcat:
+    accept-count: 100
+    max-connections: 1000
+    max-threads: 20
+    min-spare-threads: 20
+
+spring:
+  application:
+    name: kafkamanager
+  datasource:
+    kafka-manager:
+      jdbc-url: jdbc:mysql://mysqldbserver:3306/kafka_manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8
+      username: admin
+      password: 12345678
+      driver-class-name: org.mariadb.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
+
+  profiles:
+    active: dev
+
+logging:
+  config: classpath:logback-spring.xml
+
+# kafka监控
+kafka-monitor:
+  enabled: true
+  notify-kafka:
+    cluster-id: 95
+    topic-name: kmo_monitor
