@@ -76,6 +76,7 @@ public class AdminTopicServiceImpl implements AdminTopicService {
             OperationHistoryDO operationHistoryDO = OperationHistoryDO.newInstance(topicDO.getClusterId(), topicDO.getTopicName(), operator, OperationEnum.CREATE_TOPIC.message);
             operationHistoryDao.insert(operationHistoryDO);
             topicDao.replace(topicDO);
+
         } catch (Exception e) {
             return AdminTopicStatusEnum.REPLACE_DB_FAILED;
         }
@@ -188,4 +189,5 @@ public class AdminTopicServiceImpl implements AdminTopicService {
         }
         return AdminTopicStatusEnum.SUCCESS;
     }
+
 }
