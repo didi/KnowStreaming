@@ -86,7 +86,8 @@ public class OrderConverter {
 
     public static OrderPartitionVO convert2OrderPartitionVO(OrderPartitionDO orderPartitionDO,
                                                             TopicMetadata topicMetadata,
-                                                            Long maxAvgBytes, List<RegionDO> regionDOList) {
+                                                            Long maxAvgBytes,
+                                                            List<RegionDO> regionDOList) {
         if (orderPartitionDO == null) {
             return null;
         }
@@ -100,8 +101,12 @@ public class OrderConverter {
         if (topicMetadata == null) {
             return orderPartitionVO;
         }
-        orderPartitionVO.setPartitionNum(topicMetadata.getPartitionNum());
+
+        orderPartitionVO.setPartitionNum(null);
         orderPartitionVO.setBrokerIdList(new ArrayList<>(topicMetadata.getBrokerIdSet()));
+        if (OrderStatusEnum.PASSED.getCode().equals(orderPartitionDO.getOrderStatus())) {
+            orderPartitionVO.setPartitionNum(orderPartitionDO.getPartitionNum());
+        }
 
         if (regionDOList == null || regionDOList.isEmpty()) {
             orderPartitionVO.setRegionNameList(new ArrayList<>());

@@ -9,6 +9,10 @@ public class OrderPartitionDO extends BaseDO{
 
     private String applicant;
 
+    private Integer partitionNum;
+
+    private String brokerList;
+
     private Long peakBytesIn;
 
     private String description;
@@ -49,6 +53,22 @@ public class OrderPartitionDO extends BaseDO{
 
     public void setApplicant(String applicant) {
         this.applicant = applicant;
+    }
+
+    public Integer getPartitionNum() {
+        return partitionNum;
+    }
+
+    public void setPartitionNum(Integer partitionNum) {
+        this.partitionNum = partitionNum;
+    }
+
+    public String getBrokerList() {
+        return brokerList;
+    }
+
+    public void setBrokerList(String brokerList) {
+        this.brokerList = brokerList;
     }
 
     public Long getPeakBytesIn() {
@@ -98,6 +118,8 @@ public class OrderPartitionDO extends BaseDO{
                 ", clusterName='" + clusterName + '\'' +
                 ", topicName='" + topicName + '\'' +
                 ", applicant='" + applicant + '\'' +
+                ", partitionNum=" + partitionNum +
+                ", brokerList='" + brokerList + '\'' +
                 ", peakBytesIn=" + peakBytesIn +
                 ", description='" + description + '\'' +
                 ", orderStatus=" + orderStatus +

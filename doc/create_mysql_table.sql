@@ -149,6 +149,8 @@ CREATE TABLE `order_partition` (
   `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群ID',
   `cluster_name` varchar(128) NOT NULL DEFAULT '' COMMENT '集群名称',
   `topic_name` varchar(192) NOT NULL DEFAULT '' COMMENT 'Topic名称',
+  `broker_list` varchar(256) NOT NULL DEFAULT '' COMMENT 'Broker列表, 逗号分割',
+  `partition_num` int(11) NOT NULL DEFAULT 0 COMMENT '新增分区数',
   `applicant` varchar(128) NOT NULL DEFAULT '' COMMENT '申请人',
   `peak_bytes_in` bigint(20) NOT NULL DEFAULT '0' COMMENT '峰值流量',
   `description` text COMMENT '备注信息',
