@@ -332,7 +332,9 @@ public class OrderController {
         return new Result();
     }
 
-    private Result expandTopic(ClusterDO clusterDO, OrderPartitionExecModel reqObj, OrderPartitionDO orderPartitionDO) {
+    private Result expandTopic(ClusterDO clusterDO,
+                               OrderPartitionExecModel reqObj,
+                               OrderPartitionDO orderPartitionDO) {
         List<Integer> brokerIdList = regionService.getFullBrokerId(clusterDO.getId(), reqObj.getRegionIdList(), reqObj.getBrokerIdList());
         try {
             TopicMetadata topicMetadata = new TopicMetadata();
@@ -343,6 +345,8 @@ public class OrderController {
             if (!AdminTopicStatusEnum.SUCCESS.equals(adminTopicStatusEnum)) {
                 return new Result(StatusCode.OPERATION_ERROR, adminTopicStatusEnum.getMessage());
             }
+            orderPartitionDO.setPartitionNum(reqObj.getPartitionNum());
+            orderPartitionDO.setBrokerList(ListUtils.intList2String(brokerIdList));
         } catch (Exception e) {
             logger.error("expandTopic@OrderController, create failed, req:{}.", reqObj);
             return new Result(StatusCode.OPERATION_ERROR, Constant.KAFKA_MANAGER_INNER_ERROR);

@@ -198,6 +198,8 @@ CREATE TABLE order_partition
     cluster_name  varchar(128) NOT NULL DEFAULT '',                -- '集群名称',
     topic_name    varchar(192) NOT NULL DEFAULT '',                -- 'Topic名称',
     applicant     varchar(128) NOT NULL DEFAULT '',                -- '申请人',
+    partition_num int          NOT NULL DEFAULT '0',               -- '分区数',
+    broker_list   varchar(128) NOT NULL DEFAULT '',                -- 'Broker列表',
     peak_bytes_in bigint       NOT NULL DEFAULT '0',               -- '峰值流量',
     description   text,                                            -- '备注信息',
     order_status  int          NOT NULL DEFAULT '0',               -- '工单状态',

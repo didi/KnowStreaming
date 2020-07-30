@@ -11,6 +11,8 @@
     <result column="cluster_name"  property="clusterName" />
     <result column="topic_name" property="topicName" />
     <result column="applicant" property="applicant" />
+    <result column="partition_num" property="partitionNum" />
+    <result column="broker_list" property="brokerList" />
     <result column="peak_bytes_in" property="peakBytesIn" />
     <result column="description" property="description" />
     <result column="order_status" property="orderStatus" />
@@ -38,6 +40,16 @@
       cluster_name=#{clusterName},
       topic_name=#{topicName},
       applicant=#{applicant},
+      <trim>
+        <if test="partitionNum!=null">
+          partition_num=#{partitionNum},
+        </if>
+      </trim>
+      <trim>
+        <if test="brokerList!=null">
+          broker_list=#{brokerList},
+        </if>
+      </trim>
       peak_bytes_in=#{peakBytesIn},
       description=#{description},
       order_status=#{orderStatus},
