@@ -72,6 +72,9 @@ public class JmxServiceImpl implements JmxService {
             List<Attribute> attributeValueList = null;
             try {
                 attributeValueList = connection.getAttributes(new ObjectName(mbean.getObjectName()), properties).asList();
+            } catch (InstanceNotFoundException e) {
+                logger.warn("getSpecifiedBrokerMetricsFromJmx@JmxServiceImpl, get metrics fail, objectName:{}.", mbean.getObjectName(), e);
+                continue;
             } catch (Exception e) {
                 logger.error("getSpecifiedBrokerMetricsFromJmx@JmxServiceImpl, get metrics fail, objectName:{}.", mbean.getObjectName(), e);
                 continue;
