@@ -325,9 +325,9 @@ public class OrderController {
         orderPartitionDO.setApprover(username);
         orderPartitionDO.setOpinion(reqObj.getApprovalOpinions());
         orderPartitionDO.setOrderStatus(reqObj.getOrderStatus());
-        result = orderService.modifyOrderPartition(orderPartitionDO, username);
+        result = orderService.modifyOrderPartition(orderPartitionDO, username, true);
         if (!StatusCode.SUCCESS.equals(result.getCode())) {
-            return new Result(StatusCode.OPERATION_ERROR, "create topic success, but update order status failed, err:" + result.getMessage());
+            return new Result(StatusCode.OPERATION_ERROR, "expand topic success, but update order status failed, err:" + result.getMessage());
         }
         return new Result();
     }

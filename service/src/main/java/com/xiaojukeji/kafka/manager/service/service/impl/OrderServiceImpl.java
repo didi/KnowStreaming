@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
             if (orderPartitionDO != null) {
                 orderPartitionDO.setOrderStatus(OrderStatusEnum.CANCELLED.getCode());
             }
-            return modifyOrderPartition(orderPartitionDO, operator);
+            return modifyOrderPartition(orderPartitionDO, operator, false);
         }
         return new Result(StatusCode.PARAM_ERROR, "order type illegal");
     }
@@ -74,10 +74,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Result modifyOrderPartition(OrderPartitionDO newOrderPartitionDO, String operator) {
+    public Result modifyOrderPartition(OrderPartitionDO newOrderPartitionDO, String operator, boolean admin) {
         if (newOrderPartitionDO == null) {
             return new Result(StatusCode.PARAM_ERROR, "param illegal, order not exist");
-        } else if (!newOrderPartitionDO.getApplicant().equals(operator)) {
+        } else if (!admin && !newOrderPartitionDO.getApplicant().equals(operator)) {
             return new Result(StatusCode.PARAM_ERROR, "without authority to cancel the order");
         }
         OrderPartitionDO oldOrderPartitionDO = orderPartitionDao.getById(newOrderPartitionDO.getId());

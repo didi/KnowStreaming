@@ -45,7 +45,7 @@ public interface OrderService {
      * @date 19/6/23
      * @return Result
      */
-    Result modifyOrderPartition(OrderPartitionDO orderPartitionDO, String operator);
+    Result modifyOrderPartition(OrderPartitionDO orderPartitionDO, String operator, boolean admin);
 
     /**
      * 查询Topic工单
