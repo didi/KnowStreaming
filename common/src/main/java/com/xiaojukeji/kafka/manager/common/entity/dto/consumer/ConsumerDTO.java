@@ -1,8 +1,5 @@
 package com.xiaojukeji.kafka.manager.common.entity.dto.consumer;
 
-import com.xiaojukeji.kafka.manager.common.entity.zookeeper.PartitionState;
-
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,20 +8,33 @@ import java.util.Map;
  * @date 2015/11/12
  */
 public class ConsumerDTO {
-    /**
-     * 消费group名
-     */
+    private Long clusterId;
+
+    private String topicName;
+
     private String consumerGroup;
 
-    /**
-     * 消费类型，一般为static
-     */
     private String location;
 
-    /**
-     * 订阅的每个topic的partition状态列表
-     */
-    private Map<String, List<PartitionState>> topicPartitionMap;
+    private Map<Integer, Long> partitionOffsetMap;
+
+    private Map<Integer, Long> consumerOffsetMap;
+
+    public Long getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(Long clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public String getTopicName() {
+        return topicName;
+    }
+
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
+    }
 
     public String getConsumerGroup() {
         return consumerGroup;
@@ -42,20 +52,31 @@ public class ConsumerDTO {
         this.location = location;
     }
 
-    public Map<String, List<PartitionState>> getTopicPartitionMap() {
-        return topicPartitionMap;
+    public Map<Integer, Long> getPartitionOffsetMap() {
+        return partitionOffsetMap;
     }
 
-    public void setTopicPartitionMap(Map<String, List<PartitionState>> topicPartitionMap) {
-        this.topicPartitionMap = topicPartitionMap;
+    public void setPartitionOffsetMap(Map<Integer, Long> partitionOffsetMap) {
+        this.partitionOffsetMap = partitionOffsetMap;
+    }
+
+    public Map<Integer, Long> getConsumerOffsetMap() {
+        return consumerOffsetMap;
+    }
+
+    public void setConsumerOffsetMap(Map<Integer, Long> consumerOffsetMap) {
+        this.consumerOffsetMap = consumerOffsetMap;
     }
 
     @Override
     public String toString() {
-        return "Consumer{" +
-                "consumerGroup='" + consumerGroup + '\'' +
+        return "ConsumerDTO{" +
+                "clusterId=" + clusterId +
+                ", topicName='" + topicName + '\'' +
+                ", consumerGroup='" + consumerGroup + '\'' +
                 ", location='" + location + '\'' +
-                ", topicPartitionMap=" + topicPartitionMap +
+                ", partitionOffsetMap=" + partitionOffsetMap +
+                ", consumerOffsetMap=" + consumerOffsetMap +
                 '}';
     }
 }

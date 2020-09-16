@@ -2,12 +2,12 @@ package com.xiaojukeji.kafka.manager.service.collector;
 
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.entity.ConsumerMetrics;
-import com.xiaojukeji.kafka.manager.common.entity.zookeeper.PartitionState;
 import com.xiaojukeji.kafka.manager.common.entity.dto.consumer.ConsumerDTO;
 import com.xiaojukeji.kafka.manager.common.entity.po.ClusterDO;
 import com.xiaojukeji.kafka.manager.service.cache.ClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.service.ConsumerService;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +34,8 @@ public class CollectConsumerMetricsTask extends BaseCollectTask {
         if (clusterDO == null) {
             return;
         }
-        Map<String, List<PartitionState>> topicNamePartitionStateListMap = new HashMap<>();
-        List<ConsumerDTO> consumerDTOList = consumerService.getMonitoredConsumerList(clusterDO, topicNamePartitionStateListMap);
+        Map<TopicPartition, Long> allPartitionOffsetMap = new HashMap<>();
+        List<ConsumerDTO> consumerDTOList = consumerService.getMonitoredConsumerList(clusterDO, allPartitionOffsetMap);
 
         List<ConsumerMetrics> consumerMetricsList = convert2ConsumerMetrics(consumerDTOList);
         KafkaMetricsCache.putConsumerMetricsToCache(clusterId, consumerMetricsList);
@@ -47,23 +47,27 @@ public class CollectConsumerMetricsTask extends BaseCollectTask {
     private List<ConsumerMetrics> convert2ConsumerMetrics(List<ConsumerDTO> consumerDTOList) {
         List<ConsumerMetrics> consumerMetricsList = new ArrayList<>();
         for (ConsumerDTO consumerDTO : consumerDTOList) {
-            Map<String, List<PartitionState>> topicNamePartitionStateListMap = consumerDTO.getTopicPartitionMap();
-            for(Map.Entry<String, List<PartitionState>> entry : topicNamePartitionStateListMap.entrySet()){
-                String topicName = entry.getKey();
-                List<PartitionState> partitionStateList = entry.getValue();
-                ConsumerMetrics consumerMetrics = new ConsumerMetrics();
-                consumerMetrics.setClusterId(clusterId);
-                consumerMetrics.setConsumerGroup(consumerDTO.getConsumerGroup());
-                consumerMetrics.setLocation(consumerDTO.getLocation());
-                consumerMetrics.setTopicName(topicName);
-                long sumLag = 0;
-                for (PartitionState partitionState : partitionStateList) {
-                    Map.Entry<Long, Long> offsetEntry = new AbstractMap.SimpleEntry<>(partitionState.getOffset(), partitionState.getConsumeOffset());
-                    sumLag += (offsetEntry.getKey() - offsetEntry.getValue() > 0 ? offsetEntry.getKey() - offsetEntry.getValue(): 0);
-                }
-                consumerMetrics.setSumLag(sumLag);
-                consumerMetricsList.add(consumerMetrics);
+            if (consumerDTO.getPartitionOffsetMap() == null || consumerDTO.getConsumerOffsetMap() == null) {
+                continue;
             }
+
+            ConsumerMetrics consumerMetrics = new ConsumerMetrics();
+            consumerMetrics.setClusterId(consumerDTO.getClusterId());
+            consumerMetrics.setConsumerGroup(consumerDTO.getConsumerGroup());
+            consumerMetrics.setLocation(consumerDTO.getLocation());
+            consumerMetrics.setTopicName(consumerDTO.getTopicName());
+
+            long sumLag = 0;
+            for(Map.Entry<Integer, Long> entry : consumerDTO.getPartitionOffsetMap().entrySet()){
+                Long partitionOffset = entry.getValue();
+                Long consumerOffset = consumerDTO.getConsumerOffsetMap().get(entry.getKey());
+                if (partitionOffset == null || consumerOffset == null) {
+                    continue;
+                }
+                sumLag += Math.max(partitionOffset - consumerOffset, 0);
+            }
+            consumerMetrics.setSumLag(sumLag);
+            consumerMetricsList.add(consumerMetrics);
         }
         return consumerMetricsList;
     }

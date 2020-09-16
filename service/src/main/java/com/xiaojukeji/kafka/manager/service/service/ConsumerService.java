@@ -7,6 +7,7 @@ import com.xiaojukeji.kafka.manager.common.entity.dto.consumer.ConsumerGroupDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.consumer.ConsumeDetailDTO;
 import com.xiaojukeji.kafka.manager.common.entity.po.ClusterDO;
+import org.apache.kafka.common.TopicPartition;
 
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,7 @@ public interface ConsumerService {
      * @return
      */
     List<ConsumerDTO> getMonitoredConsumerList(ClusterDO clusterDO,
-                                               Map<String, List<PartitionState>> topicNamePartitionStateListMap);
+                                               Map<TopicPartition, Long> partitionOffsetMap);
 
     /**
      * 重置offset
