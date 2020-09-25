@@ -95,7 +95,7 @@ create database kafka_manager owner=admin template=template0 encoding='UTF-8' lc
 ############# application.yml 是配置文件
 cp web/src/main/resources/application.yml web/target/
 cd web/target/
-nohup java -jar kafka-manager-web-1.0.0-SNAPSHOT.jar --spring.config.location=./application.yml > /dev/null 2>&1 &
+nohup java -jar kafka-manager-web-1.1.0-SNAPSHOT.jar --spring.config.location=./application.yml > /dev/null 2>&1 &
 ```
 
 ### 使用

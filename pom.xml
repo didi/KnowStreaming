@@ -6,7 +6,7 @@
     <groupId>com.xiaojukeji.kafka</groupId>
     <artifactId>kafka-manager</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <kafka-manager.revision>1.0.0-SNAPSHOT</kafka-manager.revision>
+        <kafka-manager.revision>1.1.0-SNAPSHOT</kafka-manager.revision>
         <jackson.version>2.9.0</jackson.version>
 
         <!-- maven properties -->
@@ -77,7 +77,7 @@
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
-                <version>1.2.58</version>
+                <version>1.2.68</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.zookeeper</groupId>
