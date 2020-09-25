@@ -45,11 +45,13 @@
 - `Maven 3.5.0+`(后端打包依赖)
 - `node v8.12.0+`(前端打包依赖)
 - `Java 8+`(运行环境需要)
-- `MySQL`(数据存储)
+- `MySQL` 或 `PostgreSQL`(数据存储)
 
 ---
 
 ### 环境初始化
+
+**MySQL**
 
 执行[create_mysql_table.sql](doc/create_mysql_table.sql)中的SQL命令，从而创建所需的MySQL库及表，默认创建的库名是`kafka_manager`。
 
@@ -57,6 +59,24 @@
 #############  示例：
 mysql -uXXXX -pXXX -h XXX.XXX.XXX.XXX -PXXXX < ./create_mysql_table.sql
 ```
+
+**PostgreSQL**
+
+执行[create_postgresql_table.sql](doc/create_postgresql_table.sql)中的SQL命令，从而创建所需的PostgreSQL表。
+
+```
+#############  示例：
+psql -h XXX.XXX.XXX.XXX -U XXXX -d kafka_manager -f ./create_postgresql_table.sql
+```
+
+*PostgreSQL 用户、数据库创建方式*
+
+```sql
+create user admin encrypted password 'admin';
+create database kafka_manager owner=admin template=template0 encoding='UTF-8' lc_collate='zh_CN.UTF-8' lc_ctype='zh_CN.UTF-8';
+```
+
+***默认配置使用 MySQL 数据库，若要使用 PostgreSQL 数据库，使用 `-Dspring.profiles.active=pg` 指定 `application-pg.yml` 配置文件。***
 
 ---
 

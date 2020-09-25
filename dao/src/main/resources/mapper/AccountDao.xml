@@ -22,6 +22,18 @@
     ]]>
     </insert>
 
+    <insert id="insertOnPG" parameterType="com.xiaojukeji.kafka.manager.common.entity.po.AccountDO">
+        <![CDATA[
+        insert into account
+        (username, password, role, status)
+        values
+        (#{username}, #{password}, #{role}, #{status})
+        on conflict (username) do update set password = excluded.password,
+                                             role     = excluded.role,
+                                             status   = excluded.status
+    ]]>
+    </insert>
+
     <delete id="deleteByName" parameterType="java.lang.String">
       DELETE FROM account WHERE username = #{username}
     </delete>

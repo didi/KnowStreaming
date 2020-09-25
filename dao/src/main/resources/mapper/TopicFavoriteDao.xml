@@ -21,6 +21,15 @@
     </foreach>
   </insert>
 
+  <insert id="batchAddOnPG" parameterType="java.util.List">
+    insert into topic_favorite (cluster_id, topic_name, username)
+    values
+    <foreach item="TopicFavoriteDO" index="index" collection="list" separator=",">
+      (#{TopicFavoriteDO.clusterId}, #{TopicFavoriteDO.topicName}, #{TopicFavoriteDO.username})
+    </foreach>
+    on conflict (cluster_id, topic_name, username) do update set gmt_modify = now();
+  </insert>
+
   <delete id="deleteById" parameterType="java.lang.Long">
     DELETE FROM topic_favorite WHERE id=#{id}
   </delete>

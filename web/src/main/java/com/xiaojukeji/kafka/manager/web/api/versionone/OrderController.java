@@ -176,7 +176,7 @@ public class OrderController {
         TopicDO topicInfoDO = OrderConverter.convert2TopicInfoDO(orderTopicDO);
         List<Integer> brokerIdList = regionService.getFullBrokerId(clusterDO.getId(), reqObj.getRegionIdList(), reqObj.getBrokerIdList());
         Properties topicConfig = new Properties();
-        topicConfig.setProperty("retention.ms", String.valueOf(reqObj.getRetentionTime()));
+        topicConfig.setProperty("retention.ms", String.valueOf(reqObj.getRetentionTime() * 60 * 60 * 1000));
         try {
             TopicMetadata topicMetadata = new TopicMetadata();
             topicMetadata.setTopic(orderTopicDO.getTopicName());
@@ -325,14 +325,16 @@ public class OrderController {
         orderPartitionDO.setApprover(username);
         orderPartitionDO.setOpinion(reqObj.getApprovalOpinions());
         orderPartitionDO.setOrderStatus(reqObj.getOrderStatus());
-        result = orderService.modifyOrderPartition(orderPartitionDO, username);
+        result = orderService.modifyOrderPartition(orderPartitionDO, username, true);
         if (!StatusCode.SUCCESS.equals(result.getCode())) {
-            return new Result(StatusCode.OPERATION_ERROR, "create topic success, but update order status failed, err:" + result.getMessage());
+            return new Result(StatusCode.OPERATION_ERROR, "expand topic success, but update order status failed, err:" + result.getMessage());
         }
         return new Result();
     }
 
-    private Result expandTopic(ClusterDO clusterDO, OrderPartitionExecModel reqObj, OrderPartitionDO orderPartitionDO) {
+    private Result expandTopic(ClusterDO clusterDO,
+                               OrderPartitionExecModel reqObj,
+                               OrderPartitionDO orderPartitionDO) {
         List<Integer> brokerIdList = regionService.getFullBrokerId(clusterDO.getId(), reqObj.getRegionIdList(), reqObj.getBrokerIdList());
         try {
             TopicMetadata topicMetadata = new TopicMetadata();
@@ -343,6 +345,8 @@ public class OrderController {
             if (!AdminTopicStatusEnum.SUCCESS.equals(adminTopicStatusEnum)) {
                 return new Result(StatusCode.OPERATION_ERROR, adminTopicStatusEnum.getMessage());
             }
+            orderPartitionDO.setPartitionNum(reqObj.getPartitionNum());
+            orderPartitionDO.setBrokerList(ListUtils.intList2String(brokerIdList));
         } catch (Exception e) {
             logger.error("expandTopic@OrderController, create failed, req:{}.", reqObj);
             return new Result(StatusCode.OPERATION_ERROR, Constant.KAFKA_MANAGER_INNER_ERROR);

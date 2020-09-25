@@ -19,12 +19,18 @@ public class TopicDaoImpl implements TopicDao {
     @Autowired
     private SqlSessionTemplate sqlSession;
 
+    @Autowired
+    private KafkaManagerProperties kafkaManagerProperties;
+
     public void setSqlSession(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 
     @Override
     public int replace(TopicDO topicDO) {
+        if (kafkaManagerProperties.hasPG()) {
+            return sqlSession.insert("TopicDao.replaceOnPG", topicDO);
+        }
         return sqlSession.insert("TopicDao.replace", topicDO);
     }
 

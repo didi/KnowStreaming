@@ -19,6 +19,15 @@
     (#{clusterId}, #{topicName}, #{principals}, #{description}, #{status})
   </insert>
 
+  <insert id="replaceOnPG" parameterType="com.xiaojukeji.kafka.manager.common.entity.po.TopicDO">
+    insert into topic
+    (cluster_id, topic_name, principals, description, status)
+    values (#{clusterId}, #{topicName}, #{principals}, #{description}, #{status})
+    on conflict (cluster_id, topic_name) do update set principals  = excluded.principals,
+                                                       description = excluded.description,
+                                                       status      = excluded.status
+  </insert>
+
   <delete id="deleteById" parameterType="java.lang.Long">
     DELETE FROM topic WHERE id = #{id}
   </delete>

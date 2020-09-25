@@ -17,7 +17,7 @@ export class Users {
   @action.bound
   public setUserData(data: []) {
     this.userData = data.map((d: any) => {
-      d.role = this.roleMap[d.role];
+      d.roleName = this.roleMap[d.role];
       return d;
     });
   }

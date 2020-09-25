@@ -345,7 +345,7 @@ public class TopicServiceImpl implements TopicService {
         } else {
             topicMetrics = jmxService.getSpecifiedTopicMetricsFromJmx(clusterId, topicName, TopicMetrics.getFieldNameList(MetricsType.TOPIC_FLOW_DETAIL), true);
             topicOverviewDTO.setBytesInPerSec(topicMetrics.getBytesInPerSec());
-            topicOverviewDTO.setProduceRequestPerSec(topicMetrics.getTotalProduceRequestsPerSec());
+            topicOverviewDTO.setProduceRequestPerSec(topicMetrics.getBytesOutPerSec());
         }
         return topicOverviewDTO;
     }

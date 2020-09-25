@@ -18,6 +18,9 @@ public class AccountDaoImpl implements AccountDao {
     @Autowired
     private SqlSessionTemplate sqlSession;
 
+    @Autowired
+    private KafkaManagerProperties kafkaManagerProperties;
+
     public void setSqlSession(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
@@ -25,7 +28,7 @@ public class AccountDaoImpl implements AccountDao {
     @Override
     public int addNewAccount(AccountDO accountDO) {
         accountDO.setStatus(DBStatusEnum.NORMAL.getStatus());
-        return sqlSession.insert("AccountDao.insert", accountDO);
+        return updateAccount(accountDO);
     }
 
     @Override
@@ -35,6 +38,9 @@ public class AccountDaoImpl implements AccountDao {
 
     @Override
     public int updateAccount(AccountDO accountDO) {
+        if (kafkaManagerProperties.hasPG()) {
+            return sqlSession.insert("AccountDao.insertOnPG", accountDO);
+        }
         return sqlSession.insert("AccountDao.insert", accountDO);
     }
 
