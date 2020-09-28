@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ControllerDao">
+  <resultMap id="ControllerMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.ControllerDO">
+    <id column="id"             property="id" />
+    <result column="gmt_create" property="gmtCreate" />
+
+    <result column="cluster_id" property="clusterId" />
+    <result column="broker_id"  property="brokerId" />
+    <result column="host"       property="host" />
+    <result column="timestamp"  property="timestamp" />
+    <result column="version"    property="version" />
+  </resultMap>
+
+  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ControllerDO">
+    INSERT INTO controller (
+      cluster_id, broker_id, host, timestamp, version
+    ) VALUES (
+      #{clusterId}, #{brokerId}, #{host}, #{timestamp}, #{version}
+    )
+  </insert>
+
+  <select id="getByClusterId" parameterType="java.lang.Long" resultMap="ControllerMap">
+    SELECT * FROM controller WHERE cluster_id=#{clusterId} ORDER BY gmt_create DESC
+  </select>
+
+</mapper>

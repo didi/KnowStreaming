@@ -1,0 +1,64 @@
+.alarm-history{
+  display: flex;
+  justify-content: space-around;
+  .history-left{
+    width: 60%;
+  }
+  .history-right{
+    width: 30%;
+    padding: 15px 20px;
+    background: #fff;
+    .history-right-divider{
+      margin-top: -5px;
+      margin-bottom: 10px;
+    }
+    .history-right-header{
+      display: flex;
+      justify-content: space-between;
+      h2{
+        font-size: 14px;
+        line-height: 38px;
+      }
+    }
+    ul{
+      li{
+        width: 100%;
+        font-size: 12px;
+        line-height: 24px;
+        overflow: hidden;
+        text-overflow: ellipsis; //超出部分以省略号显示
+        white-space: nowrap;
+        b{
+          font-size: 13px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+.alarm-history-day{
+  width: 160px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.monitor-detail{
+  font-size: 13px;
+  line-height: 24px;
+}
+
+.metric-head{
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  span{
+    font-size: 13px;
+  }
+  a{
+    margin: 0 5px;
+    font-size: 12px;
+    line-height: 24px;
+  }
+}

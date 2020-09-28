@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ConfigDao">
+    <resultMap id="ConfigMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.ConfigDO">
+        <id property="id"                       column="id" />
+        <result property="status"               column="status" />
+        <result property="gmtCreate"            column="gmt_create" />
+        <result property="gmtModify"            column="gmt_modify" />
+        <result property="configKey"            column="config_key" />
+        <result property="configValue"          column="config_value" />
+        <result property="configDescription"    column="config_description" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ConfigDO">
+        INSERT INTO config (
+          config_key, config_value, config_description
+        ) VALUES (
+          #{configKey}, #{configValue}, #{configDescription}
+        )
+    </insert>
+
+    <delete id="deleteByKey" parameterType="java.lang.String">
+		DELETE FROM config WHERE config_key = #{configKey}
+    </delete>
+
+    <select id="updateByKey" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ConfigDO">
+		UPDATE config SET
+		  config_value=#{configValue},
+		  config_description=#{configDescription}
+		WHERE config_key=#{configKey}
+    </select>
+
+    <select id="getByKey" parameterType="java.lang.String" resultMap="ConfigMap">
+		SELECT * FROM config WHERE config_key = #{configKey}
+    </select>
+
+    <select id="listAll" resultMap="ConfigMap">
+        SELECT * FROM config ORDER BY gmt_modify DESC
+    </select>
+</mapper>

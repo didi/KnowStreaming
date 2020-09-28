@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ClusterDao">
+  <resultMap id="ClusterMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO">
+    <id column="id"                       property="id" />
+    <id column="status"                   property="status" />
+    <result column="gmt_create"           property="gmtCreate" />
+    <result column="gmt_modify"           property="gmtModify" />
+
+    <result column="cluster_name"         property="clusterName" />
+    <result column="zookeeper"            property="zookeeper" />
+    <result column="bootstrap_servers"    property="bootstrapServers" />
+    <result column="mode"                 property="mode" />
+    <result column="security_properties"  property="securityProperties" />
+    <result column="kafka_version"        property="kafkaVersion" />
+  </resultMap>
+
+  <insert id="insert"
+          parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO cluster (
+      cluster_name, zookeeper, bootstrap_servers, mode, security_properties
+    ) VALUES (
+      #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{mode}, #{securityProperties}
+    )
+  </insert>
+
+  <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO">
+    UPDATE cluster SET
+      cluster_name=#{clusterName},
+      bootstrap_servers=#{bootstrapServers},
+      mode=#{mode},
+      security_properties=#{securityProperties},
+      status=#{status}
+    WHERE id = #{id}
+  </update>
+
+  <select id="getById" parameterType="java.lang.Long" resultMap="ClusterMap">
+    SELECT * FROM cluster where id=#{id}
+  </select>
+
+  <select id="list" resultMap="ClusterMap">
+    SELECT * FROM cluster WHERE status = 1
+  </select>
+
+  <select id="listAll" resultMap="ClusterMap">
+    SELECT * FROM cluster ORDER BY status DESC
+  </select>
+</mapper>

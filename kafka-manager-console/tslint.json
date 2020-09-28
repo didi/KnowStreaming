@@ -1,0 +1,52 @@
+{
+  "extends": ["tslint:recommended", "tslint-react"],
+  "rules": {
+    "no-import-side-effect": false,
+    "quotemark": [ true, "single", "jsx-double" ],
+    "curly": [true, "ignore-same-line"],
+    "ordered-imports": false,
+    "max-line-length": [
+      true,
+      {
+        "limit": 140,
+        "ignore-pattern": "^import |^export {(.*?)}"
+      }
+    ],
+    "jsx-no-multiline-js": false,
+    "jsx-no-lambda": [ false ],
+    "object-literal-sort-keys": false,
+    "arrow-parens": false,
+    "max-classes-per-file": false,
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-module",
+      "check-separator",
+      "check-rest-spread",
+      "check-type",
+      "check-typecast",
+      "check-type-operator",
+      "check-preblock"
+    ],
+    "no-shadowed-variable": false,
+    "typedef-whitespace": [
+      true,
+      {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      },
+      {
+        "call-signature": "onespace",
+        "index-signature": "onespace",
+        "parameter": "onespace",
+        "property-declaration": "onespace",
+        "variable-declaration": "onespace"
+      }
+    ]
+  }
+}

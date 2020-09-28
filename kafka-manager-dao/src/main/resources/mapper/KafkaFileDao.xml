@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="KafkaFileDao">
+  <resultMap id="KafkaFileMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaFileDO">
+    <id column="id" property="id" />
+    <result column="cluster_id"   property="clusterId" />
+    <result column="file_name"    property="fileName" />
+    <result column="file_md5"     property="fileMd5" />
+    <result column="file_type"    property="fileType" />
+    <result column="description"  property="description" />
+    <result column="operator"     property="operator" />
+    <result column="gmt_create"   property="gmtCreate" />
+    <result column="gmt_modify"   property="gmtModify" />
+  </resultMap>
+
+  <insert id="insert"
+          parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaFileDO"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    insert into kafka_file (
+      cluster_id, file_name, file_md5,
+      file_type, description, operator
+    )
+    values (
+      #{clusterId}, #{fileName}, #{fileMd5},
+      #{fileType}, #{description}, #{operator}
+    )
+  </insert>
+
+  <delete id="deleteById" parameterType="java.lang.Long">
+    delete from kafka_file where id=#{id}
+  </delete>
+
+  <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaFileDO">
+    UPDATE kafka_file
+    SET file_md5=#{fileMd5},
+        file_name=#{fileName},
+        operator=#{operator},
+    <trim>
+      <if test="description!=null">
+            description=#{description},
+      </if>
+    </trim>
+        gmt_modify=now()
+    where id=#{id}
+  </update>
+
+  <select id="list" resultMap="KafkaFileMap">
+    select * from kafka_file order by gmt_modify desc
+  </select>
+
+  <select id="getById" parameterType="java.lang.Long" resultMap="KafkaFileMap">
+    select * from kafka_file where id=#{id}
+  </select>
+
+  <select id="getFileByFileName" parameterType="java.lang.String" resultMap="KafkaFileMap">
+    select * from kafka_file where file_name=#{fileName}
+  </select>
+
+</mapper>

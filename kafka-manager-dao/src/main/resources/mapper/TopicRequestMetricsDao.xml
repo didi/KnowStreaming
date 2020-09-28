@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TopicRequestMetricsDao">
+	<resultMap id="TopicRequestMetricsMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO">
+		<id column="id" 							property="id" />
+		<result column="cluster_id" 				property="clusterId" />
+		<result column="topic_name" 				property="topicName" />
+		<result column="metrics" 					property="metrics" />
+		<result column="gmt_create" 				property="gmtCreate" />
+	</resultMap>
+
+	<insert id="batchAdd" parameterType="java.util.List">
+		INSERT INTO topic_request_time_metrics
+		(cluster_id, topic_name, metrics, gmt_create)
+		values
+		<foreach item="TopicMetricsDO" index="index" collection="list" separator=",">
+			(#{TopicMetricsDO.clusterId}, #{TopicMetricsDO.topicName}, #{TopicMetricsDO.metrics}, now())
+		</foreach>
+	</insert>
+
+	<insert id="add" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO">
+	  INSERT INTO topic_request_time_metrics
+		(id, cluster_id, topic_name, metrics, gmt_create)
+	  VALUES
+		(#{id}, #{clusterId}, #{topicName}, #{metrics}, #{gmtCreate})
+	</insert>
+
+    <select id="selectByTime" parameterType="java.util.Map" resultMap="TopicRequestMetricsMap">
+		SELECT * FROM topic_request_time_metrics
+		WHERE cluster_id = #{clusterId}
+			AND topic_name = #{topicName}
+			AND gmt_create BETWEEN #{startTime} AND #{endTime}
+        ORDER BY gmt_create ASC
+    </select>
+
+	<delete id="deleteBeforeTime" parameterType="java.util.Date">
+		<![CDATA[
+		DELETE FROM topic_request_time_metrics WHERE gmt_create < #{endTime} LIMIT 2000
+	]]>
+	</delete>
+
+	<delete id="deleteBeforeId" parameterType="java.lang.Long">
+		<![CDATA[
+		DELETE FROM topic_request_time_metrics WHERE id < #{id} LIMIT 20000
+	]]>
+	</delete>
+
+	<select id="getById" parameterType="java.util.Map" resultMap="TopicRequestMetricsMap">
+		<![CDATA[
+		SELECT * FROM topic_request_time_metrics WHERE id >= #{startId} AND id < #{endId}
+	]]>
+	</select>
+</mapper>

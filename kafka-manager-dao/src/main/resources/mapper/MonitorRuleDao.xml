@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MonitorRuleDao">
+    <resultMap id="MonitorRuleMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.MonitorRuleDO">
+        <id column="id"                 property="id" />
+        <result column="strategy_id"    property="strategyId" />
+        <result column="app_id"         property="appId" />
+        <result column="name"           property="name" />
+        <result column="operator"       property="operator" />
+        <result column="create_time"    property="createTime" />
+        <result column="modify_time"    property="modifyTime" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.MonitorRuleDO" >
+      INSERT INTO monitor_rule (
+        strategy_id,
+        app_id,
+        name,
+        operator
+      )
+      VALUES (
+        #{strategyId},
+        #{appId},
+        #{name},
+        #{operator}
+      )
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Long" >
+      DELETE FROM monitor_rule WHERE id=#{id}
+    </delete>
+
+    <update id="updateById" parameterType="java.util.Map" >
+      UPDATE monitor_rule
+      SET
+        app_id=#{appId},
+        name=#{name},
+        operator=#{operator}
+      WHERE id=#{id}
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="MonitorRuleMap">
+        SELECT * FROM monitor_rule WHERE id=#{id}
+    </select>
+
+    <select id="getByStrategyId" parameterType="java.lang.Long" resultMap="MonitorRuleMap">
+        SELECT * FROM monitor_rule WHERE strategy_id=#{strategyId}
+    </select>
+
+    <select id="listAll" resultMap="MonitorRuleMap">
+      SELECT * FROM monitor_rule
+    </select>
+</mapper>

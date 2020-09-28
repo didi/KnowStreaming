@@ -1,0 +1,80 @@
+.status-box{
+  float: left;
+  margin: 0 5px;
+  width: 100%;
+  .status-graph {
+    position: relative;
+    height: 48px;
+    width: 100%;
+    background: rgba(255, 255, 255, 255);
+    display: flex;
+    justify-content: space-between;
+    line-height: 48px;
+    font-family: PingFangSC-Regular;
+    color: rgba(0, 0, 0, 0.85);
+    padding: 0 5px;
+    margin: -15px 0;
+    .k-toolbar {
+      &>span.label {
+        padding: 10px;
+        font-size: 12px;
+      }
+
+      li {
+        float: left;
+        vertical-align: middle;
+        line-height: 48px;
+        margin-right: 20px;
+
+        &>span.label {
+          padding-right: 10px;
+        }
+      }
+
+      .title-toolbar {
+        float: right;
+        right: 30px;
+
+        span:first-child {
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+  .graph-none{
+    display: none;
+  }
+}
+.nothing-style {
+  height: 300px;
+  line-height: 300px;
+  text-align: center;
+}
+
+.chart {
+  height: 400px;
+  padding: 10px 20px;
+}
+.doughnut-chart {
+  width: 500px;
+  height: 350px;
+}
+
+.chart-no-data {
+  height: 0px;
+  display: none;
+}
+
+.ant-spin-nested-loading {
+  margin: 0 auto;
+}
+
+.no-footer {
+  .ant-modal-confirm-btns {
+    display: none;
+  }
+}
+
+.no-data-info {
+  text-align: center;
+}

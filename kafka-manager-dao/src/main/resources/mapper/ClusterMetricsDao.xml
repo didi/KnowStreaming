@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ClusterMetricsDao">
+    <resultMap id="ClusterMetricsMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterMetricsDO">
+        <id property="id" column="id" />
+        <result property="clusterId"            column="cluster_id" />
+        <result property="metrics"              column="metrics" />
+        <result property="gmtCreate"            column="gmt_create" />
+    </resultMap>
+
+    <select id="getClusterMetrics" parameterType="java.util.Map" resultMap="ClusterMetricsMap">
+        <![CDATA[
+		SELECT * FROM cluster_metrics
+		WHERE cluster_id = #{clusterId}
+		  AND gmt_create BETWEEN #{startTime}
+		  AND #{endTime} ORDER BY gmt_create ASC
+	]]>
+    </select>
+
+    <insert id="batchAdd" parameterType="java.util.List">
+        INSERT INTO cluster_metrics
+          (cluster_id, metrics, gmt_create)
+        VALUES
+        <foreach item="ClusterMetricsDO" index="index" collection="list" separator=",">
+            (#{ClusterMetricsDO.clusterId}, #{ClusterMetricsDO.metrics}, now())
+        </foreach>
+    </insert>
+
+    <delete id="deleteBeforeTime" parameterType="java.util.Date">
+        <![CDATA[
+		DELETE FROM cluster_metrics WHERE gmt_create < #{endTime} LIMIT 200
+	]]>
+    </delete>
+</mapper>

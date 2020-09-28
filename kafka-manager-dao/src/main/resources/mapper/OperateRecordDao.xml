@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OperateRecordDao">
+  <resultMap id="OperateRecordMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO">
+    <id column="id"               property="id" />
+    <result column="module_id"    property="moduleId" />
+    <result column="operate_id"   property="operateId" />
+    <result column="resource"     property="resource" />
+    <result column="content"      property="content" />
+    <result column="operator"     property="operator" />
+    <result column="create_time"  property="createTime" />
+    <result column="modify_time"  property="modifyTime" />
+  </resultMap>
+
+  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO">
+    insert into operate_record (
+      module_id, operate_id, resource, content, operator
+    )
+    values (
+      #{moduleId}, #{operateId}, #{resource}, #{content},#{operator}
+    )
+  </insert>
+
+  <select id="queryByCondt" parameterType="java.util.Map" resultMap="OperateRecordMap">
+    select *
+    from operate_record
+    where
+      module_id = #{moduleId}
+    <trim>
+      <if test="operateId!=null">
+        and operate_id=#{operateId}
+      </if>
+    </trim>
+    <trim>
+      <if test="operator!=null">
+        and operator=#{operator}
+      </if>
+    </trim>
+    <trim>
+      <if test="startTime!=null">
+        and create_time>=#{startTime}
+      </if>
+    </trim>
+    <trim>
+      <if test="endTime!=null">
+        and #{endTime}>=create_time
+      </if>
+    </trim>
+    order by id desc
+  </select>
+</mapper>

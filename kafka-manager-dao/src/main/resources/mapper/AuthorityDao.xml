@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AuthorityDao">
+    <resultMap id="AuthorityMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO">
+        <id column="id"               jdbcType="BIGINT"     property="id" />
+        <result column="cluster_id"   jdbcType="BIGINT"     property="clusterId" />
+        <result column="topic_name"   jdbcType="VARCHAR"    property="topicName" />
+        <result column="app_id"       jdbcType="VARCHAR"    property="appId" />
+        <result column="access"       jdbcType="INTEGER"    property="access" />
+        <result column="create_time"   jdbcType="TIMESTAMP"  property="createTime" />
+        <result column="modify_time"   jdbcType="TIMESTAMP"  property="modifyTime" />
+    </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO">
+      REPLACE INTO authority
+        (cluster_id, topic_name, app_id, access)
+      VALUES
+        (#{clusterId}, #{topicName}, #{appId}, #{access})
+    </insert>
+
+    <select id="getAuthority" parameterType="java.util.Map" resultMap="AuthorityMap">
+        SELECT * FROM authority
+        WHERE cluster_id=#{clusterId}
+        AND topic_name=#{topicName}
+        <trim>
+            <if test="appId!=null">
+                AND app_id=#{appId}
+            </if>
+        </trim>
+    </select>
+
+    <select id="getAuthorityByTopic" parameterType="java.util.Map" resultMap="AuthorityMap">
+        SELECT * FROM authority
+        WHERE cluster_id=#{clusterId} AND (topic_name=#{topicName} OR topic_name='*')
+    </select>
+
+    <select id="getByAppId" parameterType="java.lang.String" resultMap="AuthorityMap">
+        SELECT * FROM authority WHERE app_id=#{appId}
+    </select>
+
+    <select id="listAll" resultMap="AuthorityMap">
+        SELECT * FROM authority
+    </select>
+
+    <select id="listAfterTime" parameterType="java.util.Date" resultMap="AuthorityMap">
+        SELECT * FROM authority WHERE modify_time >= #{afterTime}
+    </select>
+</mapper>
