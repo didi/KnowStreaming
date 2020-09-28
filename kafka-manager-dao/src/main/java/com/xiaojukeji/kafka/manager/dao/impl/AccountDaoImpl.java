@@ -48,6 +48,6 @@ public class AccountDaoImpl implements AccountDao {
 
     @Override
     public List<AccountDO> searchByNamePrefix(String prefix) {
-        return sqlSession.selectOne("AccountDao.searchByNamePrefix", prefix);
+        return sqlSession.selectList("AccountDao.searchByNamePrefix", prefix);
     }
 }
