@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="KafkaAclDao">
+    <resultMap id="KafkaAclMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaAclDO">
+        <id column="id"                 property="id" />
+        <result column="app_id"         property="appId" />
+        <result column="cluster_id"     property="clusterId" />
+        <result column="topic_name"     property="topicName" />
+        <result column="access"         property="access" />
+        <result column="operation"      property="operation" />
+        <result column="create_time"    property="createTime" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaAclDO">
+      INSERT INTO kafka_acl
+        (app_id, cluster_id, topic_name, access, operation)
+      VALUES
+        ( #{appId}, #{clusterId}, #{topicName}, #{access}, #{operation})
+    </insert>
+
+    <select id="getKafkaAcls" parameterType="java.util.Map" resultMap="KafkaAclMap">
+        SELECT * FROM kafka_acl WHERE cluster_id=#{clusterId} AND create_time>=#{startTime} AND #{endTime}>=create_time
+    </select>
+
+    <select id="listAll" resultMap="KafkaAclMap">
+        SELECT * FROM kafka_acl ORDER BY create_time ASC
+    </select>
+</mapper>

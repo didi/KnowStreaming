@@ -1,0 +1,82 @@
+.left-menu {
+  width: 64px;
+  background: rgba(25, 24, 24, 1);
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: all 150ms ease-in-out;
+  &.k-open {
+    width: 170px;
+    .k-float-op {
+      width: 156px;
+    }
+  }
+  .k-float-op {
+    color: #878380;
+    position: absolute;
+    left: 0px;
+    bottom: 0;
+    width: 64px;
+    height: 28px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 150ms ease-in-out;
+    z-index: 10;
+    i {
+      vertical-align: -6px;
+    }
+  }
+  ul {
+    margin-top: 40px;
+
+    li {
+      padding-left: 20px;
+      margin-bottom: 20px;
+      line-height: 24px;
+      width: 160px;
+
+      a {
+        display: inline-block;
+        font-size: 0;
+        i,
+        span {
+          display: inline-block;
+          vertical-align: middle;
+        }
+
+        i {
+          font-size: 24px;
+        }
+
+        span {
+          position: absolute;
+          padding-left: 16px;
+          font-size: 14px;
+        }
+        &.active {
+          i,
+          span {
+            color: @primary-color;
+          }
+        }
+      }
+
+      &:not(.active) {
+        i,
+        span {
+          color: #878380;
+        }
+      }
+      &:hover {
+        i,
+        span {
+          color: @primary-color;
+        }
+      }
+    }
+    
+    .approval{
+      width: 130px;
+    }
+  }
+}

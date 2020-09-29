@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AppDao">
+    <resultMap id="AppMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO">
+        <id property="id" column="id"/>
+        <result property="appId" column="app_id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+        <result property="type" column="type"/>
+        <result property="applicant" column="applicant"/>
+        <result property="principals" column="principals"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO">
+      INSERT INTO app
+        (app_id, `name`, password, `type`, applicant, principals, description)
+      VALUES
+        (#{appId}, #{name}, #{password}, #{type}, #{applicant}, #{principals}, #{description})
+    </insert>
+
+    <delete id="deleteByName" parameterType="java.lang.String" >
+        DELETE FROM app WHERE `name`=#{appName};
+    </delete>
+
+    <select id="getByPrincipal" parameterType="java.lang.String" resultMap="AppMap">
+        SELECT * FROM app WHERE principals like CONCAT('%',#{principal},'%')
+    </select>
+
+    <select id="getByAppId" parameterType="java.lang.String" resultMap="AppMap">
+        SELECT * FROM app WHERE app_id = #{appId}
+    </select>
+
+    <select id="getByName" parameterType="java.lang.String" resultMap="AppMap">
+        SELECT * FROM app WHERE name = #{name}
+    </select>
+
+    <select id="listAll" resultMap="AppMap">
+        SELECT * FROM app
+    </select>
+
+    <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO">
+      UPDATE app SET
+        `name`=#{name},
+        `type`=#{type},
+        <trim>
+            <if test="description!=null">
+                description=#{description},
+            </if>
+        </trim>
+        principals=#{principals}
+        WHERE id = #{id}
+    </update>
+
+    <select id="listAfterTime" parameterType="java.util.Date" resultMap="AppMap">
+        SELECT * FROM app WHERE modify_time >= #{afterTime}
+    </select>
+
+    <select id="listNewAll" resultMap="AppMap">
+        SELECT * FROM app
+    </select>
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="KafkaUserDao">
+    <resultMap id="KafkaUserMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaUserDO">
+        <id column="id"                 property="id" />
+        <result column="create_time"    property="createTime" />
+        <result column="app_id"         property="appId" />
+        <result column="password"       property="password" />
+        <result column="user_type"      property="userType" />
+        <result column="operation"      property="operation" />
+    </resultMap>
+
+    <select id="getKafkaUsers" parameterType="java.util.Map" resultMap="KafkaUserMap">
+        SELECT * FROM kafka_user WHERE create_time>=#{startTime} AND #{endTime}>=create_time
+    </select>
+
+    <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaUserDO">
+      INSERT INTO kafka_user
+        (app_id, password, user_type, operation)
+      VALUES
+        (#{appId}, #{password}, #{userType}, #{operation})
+    </insert>
+
+    <select id="listAll" resultMap="KafkaUserMap">
+        SELECT * FROM kafka_user
+    </select>
+
+</mapper>

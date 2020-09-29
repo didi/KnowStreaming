@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ClusterTaskDao">
+    <resultMap id="ClusterTaskMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterTaskDO">
+        <id column="id"                             property="id" />
+        <id column="task_status"                    property="taskStatus" />
+        <result column="create_time"                property="createTime" />
+        <result column="modify_time"                property="modifyTime" />
+
+        <result column="uuid"                       property="uuid" />
+        <result column="cluster_id"                 property="clusterId" />
+        <result column="task_type"                  property="taskType" />
+        <result column="kafka_package"              property="kafkaPackage" />
+        <result column="kafka_package_md5"          property="kafkaPackageMd5" />
+        <result column="server_properties"          property="serverProperties" />
+        <result column="server_properties_md5"      property="serverPropertiesMd5" />
+        <result column="agent_task_id"              property="agentTaskId" />
+        <result column="agent_rollback_task_id"     property="agentRollbackTaskId" />
+        <result column="host_list"                  property="hostList" />
+        <result column="pause_host_list"            property="pauseHostList" />
+        <result column="rollback_host_list"         property="rollbackHostList" />
+        <result column="rollback_pause_host_list"   property="rollbackPauseHostList" />
+        <result column="operator"                   property="operator" />
+    </resultMap>
+
+    <insert id="insert"
+            parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterTaskDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+      INSERT INTO cluster_tasks (
+        uuid,
+        cluster_id,
+        task_type,
+        kafka_package,
+        kafka_package_md5,
+        server_properties,
+        server_properties_md5,
+        agent_task_id,
+        agent_rollback_task_id,
+        host_list,
+        pause_host_list,
+        rollback_host_list,
+        rollback_pause_host_list,
+        operator
+      ) VALUES (
+        #{uuid},
+        #{clusterId},
+        #{taskType},
+        #{kafkaPackage},
+        #{kafkaPackageMd5},
+        #{serverProperties},
+        #{serverPropertiesMd5},
+        #{agentTaskId},
+        #{agentRollbackTaskId},
+        #{hostList},
+        #{pauseHostList},
+        #{rollbackHostList},
+        #{rollbackPauseHostList},
+        #{operator}
+      )
+    </insert>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="ClusterTaskMap">
+        SELECT * FROM cluster_tasks where id=#{id}
+    </select>
+
+    <select id="listAll" resultMap="ClusterTaskMap">
+        SELECT * FROM cluster_tasks ORDER BY id DESC
+    </select>
+
+    <select id="updateTaskState" parameterType="java.util.Map">
+        UPDATE cluster_tasks SET task_status=#{taskStatus} WHERE id=#{taskId}
+    </select>
+
+    <select id="updateRollback" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterTaskDO">
+      UPDATE cluster_tasks SET
+        agent_rollback_task_id=#{agentRollbackTaskId},
+        rollback_host_list=#{rollbackHostList},
+        rollback_pause_host_list=#{rollbackPauseHostList}
+      WHERE id=#{id}
+    </select>
+</mapper>

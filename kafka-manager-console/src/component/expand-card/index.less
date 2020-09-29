@@ -1,0 +1,39 @@
+.card-wrapper {
+  margin: 24px 0 32px;
+}
+.card-title {
+  font-family: PingFangSC-Medium;
+  font-size: 14px;
+  color: #333333;
+  height: 22px;
+  line-height: 22px;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  i {
+    font-size: 15px;
+    margin-right: 8px;
+  }
+}
+.card-content {
+  background-color: #FAFAFA;
+  padding: 16px;
+  overflow: auto;
+  .chart-row {
+    overflow: hidden;
+    width: 100%;
+  }
+  .chart-row:not(:first-child) {
+    margin-top: 16px;
+  }
+  .chart-wrapper {
+    background-color: #FFFFFF;
+    width: calc(50% - 8px);
+    float: left;
+    padding: 16px;
+  }
+  .chart-wrapper:nth-child(2n) {
+    margin-left: 16px;
+  }
+}

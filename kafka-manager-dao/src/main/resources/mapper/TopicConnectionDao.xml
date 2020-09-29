@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TopicConnectionDao">
+    <resultMap id="TopicConnectionMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO">
+        <id property="id"                   column="id"/>
+        <result property="clusterId"        column="cluster_id"/>
+        <result property="topicName"        column="topic_name"/>
+        <result property="type"             column="type"/>
+        <result property="appId"            column="app_id"/>
+        <result property="ip"               column="ip"/>
+        <result property="clientVersion"    column="client_version"/>
+        <result property="createTime"       column="create_time"/>
+    </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO">
+        REPLACE INTO topic_connections (
+            cluster_id,
+            topic_name,
+            `type`,
+            app_id,
+            ip,
+            client_version,
+            create_time
+          )
+        VALUES (
+            #{clusterId},
+            #{topicName},
+            #{type},
+            #{appId},
+            #{ip},
+            #{clientVersion},
+            #{createTime}
+          )
+    </insert>
+
+    <select id="getByTopicName" parameterType="java.util.Map" resultMap="TopicConnectionMap">
+        <![CDATA[
+        SELECT * FROM topic_connections
+        WHERE cluster_id = #{clusterId}
+          AND topic_name = #{topicName}
+          AND create_time >= #{startTime} AND #{endTime} >= create_time
+    ]]>
+    </select>
+
+    <select id="getByAppId" parameterType="java.util.Map" resultMap="TopicConnectionMap">
+        <![CDATA[
+        SELECT * FROM topic_connections
+        WHERE app_id = #{appId}
+          AND create_time >= #{startTime} AND #{endTime} >= create_time
+    ]]>
+    </select>
+</mapper>

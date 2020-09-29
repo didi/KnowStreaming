@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ReassignTaskDao">
+    <resultMap id="ReassignTaskDOMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.ReassignTaskDO">
+        <id property="id"                           column="id" />
+        <id property="taskId"                       column="task_id" />
+        <result property="clusterId"                column="cluster_id" />
+        <result property="topicName"                column="topic_name" />
+        <result property="partitions"               column="partitions" />
+        <result property="reassignmentJson"         column="reassignment_json" />
+        <result property="realThrottle"             column="real_throttle" />
+        <result property="maxThrottle"              column="max_throttle" />
+        <result property="minThrottle"              column="min_throttle" />
+        <result property="beginTime"                column="begin_time" />
+        <result property="originalRetentionTime"    column="original_retention_time" />
+        <result property="reassignRetentionTime"    column="reassign_retention_time" />
+        <result property="srcBrokers"               column="src_brokers" />
+        <result property="destBrokers"              column="dest_brokers" />
+        <result property="operator"                 column="operator" />
+        <result property="description"              column="description" />
+        <result property="status"                   column="status" />
+        <result property="gmtCreate"                column="gmt_create" />
+        <result property="gmtModify"                column="gmt_modify" />
+    </resultMap>
+
+    <insert id="batchCreate" parameterType="java.util.List">
+        INSERT INTO reassign_task (
+          task_id,
+          cluster_id,
+          topic_name,
+          partitions,
+          reassignment_json,
+          real_throttle,
+          max_throttle,
+          min_throttle,
+          begin_time,
+          original_retention_time,
+          reassign_retention_time,
+          src_brokers,
+          dest_brokers,
+          description,
+          operator
+        )
+        VALUES
+        <foreach item="ReassignTaskDO" index="index" collection="list" separator=",">
+        (
+          #{ReassignTaskDO.taskId},
+          #{ReassignTaskDO.clusterId},
+          #{ReassignTaskDO.topicName},
+          #{ReassignTaskDO.partitions},
+          #{ReassignTaskDO.reassignmentJson},
+          #{ReassignTaskDO.realThrottle},
+          #{ReassignTaskDO.maxThrottle},
+          #{ReassignTaskDO.minThrottle},
+          #{ReassignTaskDO.beginTime},
+          #{ReassignTaskDO.originalRetentionTime},
+          #{ReassignTaskDO.reassignRetentionTime},
+          #{ReassignTaskDO.srcBrokers},
+          #{ReassignTaskDO.destBrokers},
+          #{ReassignTaskDO.description},
+          #{ReassignTaskDO.operator}
+        )
+        </foreach>
+    </insert>
+
+    <select id="getByTaskId" parameterType="java.lang.Long" resultMap="ReassignTaskDOMap">
+        SELECT * FROM reassign_task WHERE task_id=#{taskId}
+    </select>
+
+    <select id="getSubTask" parameterType="java.lang.Long" resultMap="ReassignTaskDOMap">
+        SELECT * FROM reassign_task WHERE id=#{subTaskId}
+    </select>
+
+    <select id="listAll" resultMap="ReassignTaskDOMap">
+        SELECT * FROM reassign_task ORDER BY gmt_create DESC
+    </select>
+
+    <select id="listAfterTime" resultMap="ReassignTaskDOMap">
+        SELECT * FROM reassign_task WHERE gmt_create > #{gmtCreate} ORDER BY gmt_create DESC
+    </select>
+
+    <update id="updateById" parameterType="java.util.Map">
+        UPDATE reassign_task
+        SET
+          reassignment_json=#{reassignmentJson},
+          real_throttle=#{realThrottle},
+          max_throttle=#{maxThrottle},
+          min_throttle=#{minThrottle},
+          begin_time=#{beginTime},
+          status=#{status}
+        WHERE id=#{id}
+    </update>
+</mapper>

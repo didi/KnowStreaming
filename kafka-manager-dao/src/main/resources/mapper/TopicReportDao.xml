@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TopicReportDao">
+    <resultMap id="TopicReportMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicReportDO">
+        <id property="id" column="id" />
+        <result property="clusterId" column="cluster_id" />
+        <result property="topicName" column="topic_name" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+        <result property="createTime" column="create_time" />
+        <result property="modifyTime" column="modify_time" />
+    </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicReportDO">
+        <![CDATA[
+        replace INTO topic_report
+        (cluster_id, topic_name, start_time, end_time)
+        VALUES
+        (#{clusterId}, #{topicName}, #{startTime}, #{endTime})
+        ]]>
+    </insert>
+
+    <delete id="deleteByTopicName" parameterType="java.util.Map">
+        <![CDATA[
+        DELETE FROM topic_report WHERE cluster_id = #{clusterId} AND topic_name = #{topicName}
+        ]]>
+    </delete>
+
+    <select id="getNeedReportTopics" parameterType="java.util.Map" resultMap="TopicReportMap">
+        <![CDATA[
+        SELECT *
+        FROM topic_report
+        WHERE (cluster_id = #{clusterId}
+            AND start_time <= #{now}
+            And end_time >= #{now})
+        ]]>
+    </select>
+
+    <select id="getTopicReport" parameterType="java.util.Map" resultMap="TopicReportMap">
+        <![CDATA[
+        SELECT * FROM topic_report
+        WHERE cluster_id = #{clusterId}
+            AND topic_name = #{topicName}
+            AND now() BETWEEN start_time AND end_time
+        ]]>
+    </select>
+</mapper>

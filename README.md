@@ -1,7 +1,7 @@
 
 ---
 
-![kafka-manager-logo](doc/assets/images/common/logo_name.png)
+![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
@@ -12,110 +12,39 @@
 
 ### 集群监控维度
 
-- 多版本集群管控，支持从`0.10.2`到`2.4`版本；
+- 多版本集群管控，支持从`0.10.2`到`2.x`版本；
 - 集群Topic、Broker等多维度历史与实时关键指标查看；
 
 
 ### 集群管控维度
 
-- 集群运维，包括逻辑Region方式管理集群；
-- Broker运维，包括优先副本选举；
+- 集群运维，包括逻辑Region方式管理集群
+- Broker运维，包括优先副本选举
 - Topic运维，包括创建、查询、扩容、修改属性、数据采样及迁移等；
-- 消费组运维，包括指定时间或指定偏移两种方式进行重置消费偏移；
+- 消费组运维，包括指定时间或指定偏移两种方式进行重置消费偏移
 
 
 ### 用户使用维度
 
-- 管理员用户与普通用户视角区分；
-- 管理员用户与普通用户权限区分；
+- Kafka用户、Kafka研发、Kafka运维 视角区分
+- Kafka用户、Kafka研发、Kafka运维 权限区分
 
----
 
 ## kafka-manager架构图
 
-![kafka-manager-arch](doc/assets/images/common/arch.png)
+![kafka-manager-arch](./docs/assets/images/common/arch.png)
 
-
----
-
-## 安装手册
-
-### 环境依赖
-
-- `Maven 3.5.0+`(后端打包依赖)
-- `node v8.12.0+`(前端打包依赖)
-- `Java 8+`(运行环境需要)
-- `MySQL` 或 `PostgreSQL`(数据存储)
-
----
-
-### 环境初始化
-
-**MySQL**
-
-执行[create_mysql_table.sql](doc/create_mysql_table.sql)中的SQL命令，从而创建所需的MySQL库及表，默认创建的库名是`kafka_manager`。
-
-```
-#############  示例：
-mysql -uXXXX -pXXX -h XXX.XXX.XXX.XXX -PXXXX < ./create_mysql_table.sql
-```
-
-**PostgreSQL**
-
-执行[create_postgresql_table.sql](doc/create_postgresql_table.sql)中的SQL命令，从而创建所需的PostgreSQL表。
-
-```
-#############  示例：
-psql -h XXX.XXX.XXX.XXX -U XXXX -d kafka_manager -f ./create_postgresql_table.sql
-```
-
-*PostgreSQL 用户、数据库创建方式*
-
-```sql
-create user admin encrypted password 'admin';
-create database kafka_manager owner=admin template=template0 encoding='UTF-8' lc_collate='zh_CN.UTF-8' lc_ctype='zh_CN.UTF-8';
-```
-
-***默认配置使用 MySQL 数据库，若要使用 PostgreSQL 数据库，使用 `-Dspring.profiles.active=pg` 指定 `application-pg.yml` 配置文件。***
-
----
-
-
-### 打包
-
-执行`mvn install`命令即可。
-
-备注：每一次执行`mvn install`命令，都将在`web/src/main/resources/templates`下面生成最新的前端资源文件，如果`console`模块下的代码没有变更，可以修改`./pom.xml`文件，忽略对`console`模块的打包。
-
----
-
-### 启动
-
-```
-############# application.yml 是配置文件
-cp web/src/main/resources/application.yml web/target/
-cd web/target/
-nohup java -jar kafka-manager-web-1.1.0-SNAPSHOT.jar --spring.config.location=./application.yml > /dev/null 2>&1 &
-```
-
-### 使用
-
-本地启动的话，访问`http://localhost:8080`，输入帐号及密码进行登录。更多参考：[kafka-manager使用手册](doc/user_cn_guide.md)
-
-
----
 
 ## 相关文档
 
-- [kafka-manager使用手册](doc/user_cn_guide.md)
+- [kafka-manager安装手册](./docs/install_cn_guide.md)
+- [kafka-manager接入集群](./docs/manual_kafka_op/add_cluster.md)
+- [kafka-manager使用手册-待更新](./docs/user_cn_guide.md)
 
 
 ## 钉钉交流群
 
-搜索群号：`32821440` 或者扫码可入群交流. 备注：在钉钉搜索框搜索`32821440`，然后搜索结果中点击 "网络查找手机/邮箱/钉钉号" 即可看到我们的钉钉群：滴滴KafkaManager开源用户群。
-
-
-![dingding_group](doc/assets/images/common/dingding_group.jpg)
+![dingding_group](./docs/assets/images/common/dingding_group.jpg)
 
 
 ## 项目成员

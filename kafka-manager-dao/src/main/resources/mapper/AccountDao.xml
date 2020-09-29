@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="AccountDao">
+    <resultMap id="AccountMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO">
+        <id property="id"               column="id" />
+        <result property="username"     column="username" />
+        <result property="password"     column="password" />
+        <result property="role"         column="role" />
+        <result property="gmtCreate"    column="gmt_create" />
+        <result property="gmtModify"    column="gmt_modify" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO">
+        <![CDATA[
+        REPLACE account
+        (username, password, role)
+        VALUES
+        (#{username}, #{password}, #{role})
+    ]]>
+    </insert>
+
+    <delete id="deleteByName" parameterType="java.lang.String">
+      DELETE FROM account WHERE username = #{username}
+    </delete>
+
+    <update id="updateByName" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO">
+        <![CDATA[
+        UPDATE account SET
+            password=#{password},
+            role=#{role}
+        WHERE username=#{username}
+    ]]>
+    </update>
+
+    <select id="getByName" parameterType="java.lang.String" resultMap="AccountMap">
+        <![CDATA[
+        SELECT * FROM account WHERE username = #{username}
+    ]]>
+    </select>
+
+    <select id="list" resultMap="AccountMap">
+        <![CDATA[
+        SELECT * FROM account
+        ]]>
+    </select>
+
+    <select id="searchByNamePrefix" parameterType="java.lang.String" resultMap="AccountMap">
+        <![CDATA[
+        SELECT * FROM account WHERE username like CONCAT(#{prefix},'%')
+        ]]>
+    </select>
+</mapper>
