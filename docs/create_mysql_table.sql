@@ -105,8 +105,6 @@ CREATE TABLE `cluster` (
   `zookeeper` varchar(512) NOT NULL DEFAULT '' COMMENT 'zk地址',
   `bootstrap_servers` varchar(512) NOT NULL DEFAULT '' COMMENT 'server地址',
   `kafka_version` varchar(32) NOT NULL DEFAULT '' COMMENT 'kafka版本',
-  `idc` varchar(64) NOT NULL DEFAULT '' COMMENT '数据中心',
-  `mode` tinyint(4) NOT NULL DEFAULT '0' COMMENT '集群模式, 0:共享, 1:独享, 2:独立',
   `security_properties` text COMMENT '安全认证参数',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT ' 监控标记, 0表示未监控, 1表示监控中',
   `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

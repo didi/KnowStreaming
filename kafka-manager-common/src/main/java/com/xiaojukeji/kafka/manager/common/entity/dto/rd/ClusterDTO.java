@@ -24,12 +24,6 @@ public class ClusterDTO {
     @ApiModelProperty(value="bootstrap地址")
     private String bootstrapServers;
 
-    @ApiModelProperty(value="kafka版本")
-    private String kafkaVersion;
-
-    @ApiModelProperty(value="集群类型")
-    private Integer mode;
-
     @ApiModelProperty(value="数据中心")
     private String idc;
 
@@ -68,28 +62,12 @@ public class ClusterDTO {
         this.bootstrapServers = bootstrapServers;
     }
 
-    public String getKafkaVersion() {
-        return kafkaVersion;
-    }
-
-    public void setKafkaVersion(String kafkaVersion) {
-        this.kafkaVersion = kafkaVersion;
-    }
-
     public String getIdc() {
         return idc;
     }
 
     public void setIdc(String idc) {
         this.idc = idc;
-    }
-
-    public Integer getMode() {
-        return mode;
-    }
-
-    public void setMode(Integer mode) {
-        this.mode = mode;
     }
 
     public String getSecurityProperties() {
@@ -107,9 +85,7 @@ public class ClusterDTO {
                 ", clusterName='" + clusterName + '\'' +
                 ", zookeeper='" + zookeeper + '\'' +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
-                ", kafkaVersion='" + kafkaVersion + '\'' +
                 ", idc='" + idc + '\'' +
-                ", mode='" + mode + '\'' +
                 ", securityProperties='" + securityProperties + '\'' +
                 '}';
     }
@@ -118,7 +94,6 @@ public class ClusterDTO {
         if (ValidateUtils.isNull(clusterName)
                 || ValidateUtils.isNull(zookeeper)
                 || ValidateUtils.isNull(idc)
-                || ValidateUtils.isNull(mode)
                 || ValidateUtils.isNull(bootstrapServers)
                 ) {
             return false;

@@ -11,14 +11,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.0.5.RELEASE</version>  <!-- 莫要修改该版本, 否则可能会导致自自定义的schedule不生效 -->
+        <version>2.1.1.RELEASE</version>  <!-- 莫要修改该版本, 否则可能会导致自自定义的schedule不生效 -->
         <!--<relativePath/>-->
     </parent>
 
     <properties>
-        <kafka-manager.revision>1.0.0-SNAPSHOT</kafka-manager.revision>
-        <jackson.version>2.9.7</jackson.version>
+        <kafka-manager.revision>2.0.0-SNAPSHOT</kafka-manager.revision>
         <swagger2.version>2.7.0</swagger2.version>
+        <swagger.version>1.5.13</swagger.version>
 
         <!-- maven properties -->
         <maven.test.skip>true</maven.test.skip>
@@ -56,6 +56,11 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${swagger2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
             </dependency>
 
             <!-- javax -->
@@ -109,6 +114,11 @@
                 <artifactId>mybatis-spring</artifactId>
                 <version>1.3.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>1.3.2</version>
+            </dependency>
 
             <!-- kafka -->
             <dependency>
@@ -128,12 +138,19 @@
                 <version>0.10.2.2</version>
             </dependency>
 
-            <!-- commons -->
+            <!-- json -->
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>1.2.70</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.9.10.5</version>
+            </dependency>
+
+            <!-- commons -->
             <dependency>
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
@@ -175,6 +192,36 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-pool2</artifactId>
                 <version>2.6.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.11</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+                <version>9.2.24.v20180105</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>2.6.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>1.9.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>2.10.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
