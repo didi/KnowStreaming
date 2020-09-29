@@ -1,0 +1,103 @@
+.ml-5 {
+  margin-left: 5px;
+}
+.order-detail {
+  .ant-collapse-header {
+    font-size: 15px;
+    outline: none;
+  }
+}
+.b-container {
+  text-align: right;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  // margin-top: 20px;
+  .ant-col-14 {
+    width: 100%;
+    button {
+      margin: 20px 10px 0 0;
+    }
+  }
+}
+
+.u-password {
+  width: 100%;
+  margin-left: 30px;
+}
+
+.t-expand {
+  .ant-input,
+  .ant-select {
+    width: 87%;
+  }
+}
+
+.ant-collapse > .ant-collapse-item {
+  border: none;
+}
+.ruleArea {
+  border: 1px solid #eaeefb;
+  border-radius: 4px;
+  transition: 0.2s;
+  width: 380px;
+  padding: 15px 2px 0 17px;
+  margin-bottom: 17px;
+  &:hover {
+    box-shadow: 0px 0px 2px 0px #afafaf;
+  }
+  .label {
+    display: inline-block;
+    width: 72px;
+    margin-top: 10px;
+    text-align: right;
+    padding-right: 10px;
+  }
+}
+
+.t-input {
+  display: inline-block;
+  width: 72%;
+}
+
+.region_style {
+  width: 100%;
+  li {
+    float: left;
+    padding: 8px;
+    border-radius: 9px;
+    margin: 0px 5px 9px 0px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    &.success {
+      background-color: rgba(47, 194, 91, 0.2);
+      color: #2fc25b;
+    }
+    &.fail {
+      background: rgb(241, 243, 243);
+      color: #f5222d;
+    }
+    &.executing {
+      background: rgb(190, 214, 203);
+      color: rgb(112, 164, 189);
+    }
+    &.cancel {
+      background: rgb(241, 226, 148);
+      color: rgb(177, 174, 174);
+    }
+    &.pending {
+      background: linear-gradient(
+        to top right,
+        rgba(47, 194, 91, 0.2) 60%,
+        #fff 40%
+      );
+      color: #2fc25b;
+    }
+  }
+}
+
+.ant-input-affix-wrapper .ant-input-disabled ~ .ant-input-suffix .icon-color {
+  color: @primary-color;
+}
+
+.question-icon {
+  color: @primary-color;
+  margin-left: 15px;
+}

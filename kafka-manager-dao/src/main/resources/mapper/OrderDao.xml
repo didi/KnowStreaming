@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderDao">
+  <resultMap id="OrderMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO">
+    <id column="id"               property="id" />
+    <result column="type"         property="type" />
+    <result column="title"        property="title" />
+    <result column="applicant"    property="applicant" />
+    <result column="description"  property="description" />
+    <result column="approver"     property="approver" />
+    <result column="gmt_handle"   property="gmtHandle" />
+    <result column="opinion"      property="opinion" />
+    <result column="extensions"   property="extensions" />
+    <result column="status"       property="status" />
+    <result column="gmt_create"   property="gmtCreate" />
+    <result column="gmt_modify"   property="gmtModify" />
+  </resultMap>
+
+  <insert id="directSaveHandled" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO">
+    <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into work_order (
+      status, type, title, applicant, description, extensions, approver, opinion
+    )
+    values (
+      #{status}, #{type}, #{title}, #{applicant}, #{description}, #{extensions}, #{approver}, #{opinion}
+    )
+  </insert>
+
+  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO">
+    <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    INSERT INTO work_order (
+      type, title, applicant, description, extensions
+    )
+    VALUES (
+      #{type}, #{title}, #{applicant}, #{description},#{extensions}
+    )
+  </insert>
+
+  <select id="list" resultMap="OrderMap">
+    select * from work_order order by gmt_create desc
+  </select>
+
+  <select id="getById" parameterType="java.lang.Long" resultType="com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO">
+    select * from work_order where id=#{id}
+  </select>
+
+  <update id="updateOrderStatusById" parameterType="java.util.Map">
+    update work_order
+    set status = #{status}, gmt_modify=now()
+    where id = #{id}
+  </update>
+
+  <update id="updateOrderById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO">
+    update work_order set
+      approver = #{approver},
+      gmt_handle=now(),
+      opinion= #{opinion},
+      status = #{status},
+      extensions = #{extensions},
+      gmt_modify=now()
+    where id = #{id}
+  </update>
+
+  <select id="getByApplicantAndStatus" parameterType="java.util.Map" resultMap="OrderMap">
+    select *
+    from work_order
+    where applicant=#{applicant}
+    <trim>
+      <if test="status!=null">
+        and status=#{status}
+      </if>
+    </trim>
+    order by status,gmt_create desc
+  </select>
+
+  <select id="getByApproverAndStatus" parameterType="java.util.Map" resultMap="OrderMap">
+    select *
+    from work_order
+    where approver=#{approver}
+    <trim>
+      <if test="status!=null">
+        and status=#{status}
+      </if>
+    </trim>
+    order by status,gmt_create desc
+  </select>
+
+  <select id="getByStatus" parameterType="java.lang.Integer" resultMap="OrderMap">
+    select * from work_order where status=#{status}
+    order by gmt_create desc
+  </select>
+
+  <select id="getByGmtHandle" parameterType="java.util.Date" resultMap="OrderMap">
+    select * from work_order where gmt_handle >= #{startTime} and status = 1
+  </select>
+
+  <update id="updateExtensionsById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO">
+    UPDATE work_order SET
+      extensions=#{extensions},
+      gmt_modify=now()
+    WHERE id = #{id}
+  </update>
+
+  <select id="getByHandleTime" parameterType="java.util.Map" resultMap="OrderMap">
+    select * from work_order where gmt_handle >= #{startTime} and #{endTime} >= gmt_handle
+  </select>
+</mapper>

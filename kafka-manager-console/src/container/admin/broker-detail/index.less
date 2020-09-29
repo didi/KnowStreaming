@@ -1,0 +1,139 @@
+.p-params {
+  display: inline-block;
+  padding: 0px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(217, 217, 217, 1);
+  margin: 0px 8px 8px 0px;
+  &-unFinished {
+    background: rgba(245, 34, 45, 0.2);
+  }
+}
+
+.p-description {
+  margin-left: 20px;
+  span {
+    display: inline-block;
+    width: 180px;
+    text-align: right;
+    margin-right: 10px;
+  }
+}
+
+p.k-title {
+  width: 100%;
+  font-size: 14px;
+  font-family: PingFangSC-Medium;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  height: 48px;
+  line-height: 48px;
+  background: rgba(0, 0, 0, 0.02);
+  padding-left: 24px;
+  margin: 0;
+}
+
+.right-flow {
+  .k-abs {
+    right: 24px;
+    cursor: pointer;
+    & > i {
+      margin-right: 5px;
+    }
+  }
+}
+
+.title-flow{
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  .k-text{
+    width: 420px;
+    line-height: 50px;
+    background: #00000005;
+  }
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.k-summary {
+  width: 100%;
+  font-family: PingFangSC-Regular;
+  background: #fff;
+  .k-row-1 {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    border-bottom: solid 1px #e8e8e8;
+    div {
+      flex: 1;
+      line-height: 48px;
+      padding-left: 32px;
+      font-size: 15px;
+      color: rgba(0, 0, 0, 0.85);
+    }
+    div + div {
+      border-left: solid 1px #e8e8e8;
+    }
+  }
+  .k-row-2 {
+    width: 100%;
+    padding: 24px 0;
+    border-top: solid 1px #e8e8e8;
+    border-bottom: solid 1px #e8e8e8;
+    display: flex;
+    text-align: center;
+    div {
+      height: 58px;
+      flex: 1;
+      span {
+        display: block;
+        line-height: 22px;
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 14px;
+      }
+      p {
+        line-height: 32px;
+        margin-top: 4px;
+        font-size: 24px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.85);
+      }
+    }
+    div + div {
+      border-left: solid 2px #e8e8e8;
+    }
+  }
+  .k-row-3 {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    div {
+      padding: 9px 0;
+      flex: 1;
+      span {
+        display: block;
+        line-height: 22px;
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 14px;
+      }
+      p {
+        line-height: 22px;
+        margin-top: 1px;
+        font-size: 18px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.85);
+      }
+    }
+    .long-text {
+      font-size: 12px;
+    }
+    div + div {
+      border-left: solid 2px #e8e8e8;
+    }
+  }
+}
+.option-map {
+  min-width: 1200px;
+}

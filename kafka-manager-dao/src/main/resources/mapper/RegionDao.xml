@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RegionDao">
+  <resultMap id="RegionMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO">
+    <id column="id"                 property="id" />
+    <result column="status"         property="status" />
+    <result column="gmt_create"     property="gmtCreate" />
+    <result column="gmt_modify"     property="gmtModify" />
+
+    <result column="name"           property="name" />
+    <result column="cluster_id"     property="clusterId" />
+    <result column="broker_list"    property="brokerList" />
+    <result column="capacity"       property="capacity" />
+    <result column="real_used"      property="realUsed" />
+    <result column="estimate_used"  property="estimateUsed" />
+    <result column="description"    property="description" />
+  </resultMap>
+
+  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO">
+    INSERT INTO region
+    (name, cluster_id, broker_list, status, description)
+    VALUES
+    (#{name}, #{clusterId}, #{brokerList}, #{status}, #{description})
+  </insert>
+
+  <delete id="deleteById" parameterType="java.lang.Long">
+    DELETE FROM region WHERE id = #{id}
+  </delete>
+
+  <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO">
+    UPDATE region SET
+      name=#{name},
+      cluster_id=#{clusterId},
+      broker_list=#{brokerList},
+    <trim>
+      <if test="description!=null">
+        description=#{description},
+      </if>
+    </trim>
+      status=#{status}
+    WHERE id=#{id}
+  </update>
+
+  <update id="updateCapacityById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO">
+    UPDATE region SET
+      capacity=#{capacity},
+      real_used=#{realUsed},
+      estimate_used=#{estimateUsed}
+    WHERE id=#{id}
+  </update>
+
+  <select id="getById" parameterType="java.lang.Long" resultMap="RegionMap">
+    SELECT * FROM region WHERE id=#{id}
+  </select>
+
+  <select id="getByClusterId" parameterType="java.lang.Long" resultMap="RegionMap">
+    SELECT * FROM region WHERE cluster_id=#{clusterId}
+  </select>
+
+  <select id="listAll" resultMap="RegionMap">
+    <![CDATA[
+    SELECT * FROM region
+    ]]>
+  </select>
+</mapper>

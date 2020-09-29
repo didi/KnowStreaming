@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TopicAppMetricsDao">
+	<resultMap id="TopicAppMetricsMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO">
+		<id column="id" 				property="id" />
+		<result column="cluster_id" 	property="clusterId" />
+		<result column="topic_name" 	property="topicName" />
+		<result column="app_id" 		property="appId" />
+		<result column="metrics" 		property="metrics" />
+		<result column="gmt_create" 	property="gmtCreate" />
+	</resultMap>
+
+	<insert id="batchAdd" parameterType="java.util.List">
+		INSERT INTO topic_app_metrics
+			(cluster_id, topic_name, app_id, metrics, gmt_create)
+		values
+		<foreach item="TopicMetricsDO" index="index" collection="list" separator=",">
+			(#{TopicMetricsDO.clusterId}, #{TopicMetricsDO.topicName}, #{TopicMetricsDO.appId}, #{TopicMetricsDO.metrics}, now())
+		</foreach>
+	</insert>
+
+	<select id="getTopicAppMetrics" parameterType="java.util.Map" resultMap="TopicAppMetricsMap">
+		<![CDATA[
+		SELECT * FROM topic_app_metrics
+		WHERE cluster_id = #{clusterId}
+			AND topic_name = #{topicName}
+			AND app_id = #{appId}
+			AND gmt_create BETWEEN #{startTime} AND #{endTime}
+	]]>
+	</select>
+
+	<delete id="deleteBeforeTime" parameterType="java.util.Date">
+		<![CDATA[
+		DELETE FROM topic_app_metrics WHERE gmt_create < #{endTime} LIMIT 3000
+	]]>
+	</delete>
+</mapper>

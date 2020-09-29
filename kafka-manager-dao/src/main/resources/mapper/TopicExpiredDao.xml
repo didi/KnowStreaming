@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TopicExpiredDao">
+    <resultMap id="TopicExpiredMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicExpiredDO">
+        <id column="id"                         property="id" />
+        <result column="cluster_id"             property="clusterId" />
+        <result column="topic_name"             property="topicName" />
+        <result column="expired_day"            property="expiredDay" />
+        <result column="gmt_retain"             property="gmtRetain" />
+        <result column="status"                 property="status" />
+        <result column="gmt_modify"             property="gmtModify" />
+        <result column="gmt_create"             property="gmtCreate" />
+    </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicExpiredDO">
+        REPLACE INTO topic_expired(
+          cluster_id, topic_name, expired_day, gmt_retain, status
+        ) VALUES (
+          #{clusterId}, #{topicName}, #{expiredDay}, #{gmtRetain}, #{status}
+        )
+    </insert>
+
+    <update id="modifyTopicExpiredTime" parameterType="java.util.Map">
+        UPDATE topic_expired SET gmt_retain=#{gmtRetain} WHERE cluster_id = #{clusterId} AND topic_name = #{topicName}
+    </update>
+
+    <select id="listAll" resultMap="TopicExpiredMap">
+        SELECT * FROM topic_expired
+    </select>
+
+    <select id="getExpiredTopics" parameterType="java.lang.Integer" resultMap="TopicExpiredMap">
+        SELECT * FROM topic_expired WHERE expired_day >= #{expiredDay} AND now() >= gmt_retain
+    </select>
+
+    <select id="getByTopic" parameterType="java.util.Map" resultMap="TopicExpiredMap">
+        SELECT * FROM topic_expired WHERE cluster_id = #{clusterId} AND topic_name = #{topicName}
+    </select>
+</mapper>

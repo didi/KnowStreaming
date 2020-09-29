@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BrokerMetricsDao">
+	<resultMap id="BrokerMetricsMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerMetricsDO">
+		<id 	property="id" 			column="id" />
+		<result property="clusterId" 	column="cluster_id" />
+		<result property="brokerId" 	column="broker_id" />
+		<result property="metrics" 		column="metrics" />
+		<result property="gmtCreate" 	column="gmt_create" />
+	</resultMap>
+
+	<insert id="batchAdd" parameterType="java.util.List">
+	  INSERT INTO broker_metrics (cluster_id, broker_id, metrics, gmt_create
+	  )
+	  VALUES
+		<foreach item="BrokerMetricsDO" index="index" collection="list" separator=",">
+		  (#{BrokerMetricsDO.clusterId}, #{BrokerMetricsDO.brokerId}, #{BrokerMetricsDO.metrics}, now())
+		</foreach>
+	</insert>
+
+	<select id="getBrokerMetrics" parameterType="java.util.Map" resultMap="BrokerMetricsMap">
+		<![CDATA[
+		SELECT * FROM broker_metrics
+		WHERE cluster_id = #{clusterId}
+		AND broker_id = #{brokerId}
+		AND gmt_create BETWEEN #{startTime} AND #{endTime}
+		ORDER BY gmt_create ASC
+	]]>
+	</select>
+
+	<delete id="deleteBeforeTime" parameterType="java.util.Date">
+		<![CDATA[
+		DELETE FROM broker_metrics WHERE gmt_create < #{endTime} LIMIT 1000
+	]]>
+	</delete>
+</mapper>

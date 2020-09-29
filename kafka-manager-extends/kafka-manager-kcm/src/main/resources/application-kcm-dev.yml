@@ -1,0 +1,7 @@
+agent:
+  n9e:
+    base-url: http://127.0.0.1/api
+    username: admin
+    user-token: admin
+    tpl-id: 123456
+    timeout: 30

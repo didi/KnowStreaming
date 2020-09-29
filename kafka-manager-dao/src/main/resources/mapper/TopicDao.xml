@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TopicDao">
+  <resultMap id="TopicMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO">
+    <id column="id"                property="id" />
+    <result column="cluster_id"    property="clusterId" />
+    <result column="topic_name"    property="topicName" />
+    <result column="app_id"        property="appId" />
+    <result column="peak_bytes_in" property="peakBytesIn" />
+    <result column="description"   property="description" />
+    <result column="gmt_create"    property="gmtCreate" />
+    <result column="gmt_modify"    property="gmtModify" />
+  </resultMap>
+
+  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO">
+    INSERT INTO topic
+    (cluster_id, topic_name, app_id, peak_bytes_in, description)
+    VALUES
+    (#{clusterId}, #{topicName}, #{appId}, #{peakBytesIn}, #{description})
+  </insert>
+
+  <delete id="deleteById" parameterType="java.lang.Long">
+    DELETE FROM topic WHERE id = #{id}
+  </delete>
+
+  <delete id="deleteByName" parameterType="java.util.Map">
+    DELETE FROM topic WHERE cluster_id=#{clusterId} AND topic_name=#{topicName}
+  </delete>
+
+  <update id="updateByName" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO">
+    UPDATE topic SET
+    <trim>
+      <if test="description!=null">
+        description=#{description},
+      </if>
+    </trim>
+    app_id=#{appId}
+    WHERE cluster_id=#{clusterId} AND topic_name=#{topicName}
+  </update>
+
+  <select id="getByTopicName" parameterType="java.util.Map" resultMap="TopicMap">
+    SELECT * FROM topic WHERE cluster_id = #{clusterId} AND topic_name = #{topicName}
+  </select>
+
+  <select id="getTopic" parameterType="java.util.Map" resultMap="TopicMap">
+    SELECT * FROM topic WHERE cluster_id = #{clusterId} AND topic_name = #{topicName} and app_id=#{appId}
+  </select>
+
+  <select id="getByClusterId" parameterType="java.lang.Long" resultMap="TopicMap">
+    SELECT * FROM topic WHERE cluster_id = #{clusterId}
+  </select>
+
+  <select id="getByAppId" parameterType="java.lang.String" resultMap="TopicMap">
+    SELECT * FROM topic WHERE app_id = #{appId}
+  </select>
+
+  <select id="listAll" resultMap="TopicMap">
+    SELECT * FROM topic
+  </select>
+
+  <select id="listAfterTime" parameterType="java.util.Date" resultMap="TopicMap">
+    SELECT * FROM topic WHERE gmt_modify >= #{afterTime}
+  </select>
+</mapper>

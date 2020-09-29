@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BrokerDao">
+    <resultMap id="BrokerDOMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerDO">
+        <id column="id"                     property="id" />
+        <result column="cluster_id"         property="clusterId" />
+        <result column="broker_id"          property="brokerId" />
+        <result column="host"               property="host" />
+        <result column="port"               property="port" />
+        <result column="timestamp"          property="timestamp" />
+        <result column="max_avg_bytes_in"   property="maxAvgBytesIn" />
+        <result column="status"             property="status" />
+        <result column="gmt_create"         property="gmtCreate" />
+        <result column="gmt_modify"         property="gmtModify" />
+    </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerDO">
+        REPLACE broker
+        (cluster_id, broker_id, host, port, timestamp, max_avg_bytes_in, status)
+        VALUES
+        (#{clusterId}, #{brokerId}, #{host}, #{port}, #{timestamp}, #{maxAvgBytesIn}, #{status})
+    </insert>
+
+    <delete id="deleteById" parameterType="java.util.Map">
+        DELETE FROM broker WHERE cluster_id = #{clusterId} AND broker_id = #{brokerId}
+    </delete>
+
+    <select id="getDead" parameterType="java.lang.Long" resultMap="BrokerDOMap">
+        SELECT * FROM broker WHERE cluster_id = #{clusterId} AND status = -1
+    </select>
+
+    <select id="listAll" resultMap="BrokerDOMap">
+        SELECT * FROM broker
+    </select>
+
+    <select id="getByClusterId" parameterType="java.lang.Long" resultMap="BrokerDOMap">
+        SELECT * FROM broker WHERE cluster_id = #{clusterId}
+    </select>
+</mapper>

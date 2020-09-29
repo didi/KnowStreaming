@@ -1,0 +1,52 @@
+server:
+  port: 8080
+  tomcat:
+    accept-count: 1000
+    max-connections: 10000
+    max-threads: 800
+    min-spare-threads: 100
+
+spring:
+  application:
+    name: kafkamanager
+  datasource:
+    kafka-manager:
+      jdbc-url: jdbc:mysql://127.0.0.1:3306/kafka_manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8
+      username: admin
+      password: admin
+      driver-class-name: com.mysql.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
+
+  profiles:
+    active: dev,account-dev,monitor-dev,notify-dev,kcm-dev
+  servlet:
+    multipart:
+      max-file-size: 60MB
+      max-request-size: 60MB
+
+logging:
+  config: classpath:logback-spring.xml
+
+custom:
+  idc: cn
+
+agent:
+  n9e:
+    base-url: http://127.0.0.1/api
+    username: admin
+    user-token: admin
+    tpl-id: 123456
+    timeout: 30
+
+monitor:
+  n9e:
+    base-url: http://127.0.0.1/api
+
+notify:
+  order:
+    detail-url: http://127.0.0.1
+
+kafka:
+  cluster-id: 12
+  topic-name: 123

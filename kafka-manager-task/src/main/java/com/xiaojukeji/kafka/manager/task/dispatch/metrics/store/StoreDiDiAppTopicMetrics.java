@@ -1,0 +1,70 @@
+package com.xiaojukeji.kafka.manager.task.dispatch.metrics.store;
+
+import com.xiaojukeji.kafka.manager.common.constant.Constant;
+import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
+import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
+import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.dao.TopicAppMetricsDao;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO;
+import com.xiaojukeji.kafka.manager.service.service.ClusterService;
+import com.xiaojukeji.kafka.manager.service.service.JmxService;
+import com.xiaojukeji.kafka.manager.service.utils.MetricsConvertUtils;
+import com.xiaojukeji.kafka.manager.task.component.AbstractScheduledTask;
+import com.xiaojukeji.kafka.manager.task.component.CustomScheduled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+
+/**
+ * @author zengqiao
+ * @date 20/7/21
+ */
+@CustomScheduled(name = "storeDiDiAppTopicMetrics", cron = "41 0/1 * * * ?", threadNum = 5)
+public class StoreDiDiAppTopicMetrics extends AbstractScheduledTask<ClusterDO> {
+    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+
+    @Autowired
+    private JmxService jmxService;
+
+    @Autowired
+    private ClusterService clusterService;
+
+    @Autowired
+    private TopicAppMetricsDao topicAppMetricsDao;
+
+    @Override
+    protected List<ClusterDO> listAllTasks() {
+        return clusterService.list();
+    }
+
+    @Override
+    public void processTask(ClusterDO clusterDO) {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            getAndBatchAddTopicAppMetrics(startTime, clusterDO.getId());
+        } catch (Throwable t) {
+            LOGGER.error("save topic metrics failed, clusterId:{}.", clusterDO.getId(), t);
+        }
+    }
+
+    private void getAndBatchAddTopicAppMetrics(Long startTime, Long clusterId) {
+        List<TopicMetrics> metricsList =
+                jmxService.getTopicAppMetrics(clusterId, KafkaMetricsCollections.APP_TOPIC_METRICS_TO_DB);
+        if (ValidateUtils.isEmptyList(metricsList)) {
+            return;
+        }
+        List<TopicMetricsDO> doList =
+                MetricsConvertUtils.convertAndUpdateCreateTime2TopicMetricsDOList(startTime, metricsList);
+        int i = 0;
+        do {
+            topicAppMetricsDao.batchAdd(doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size())));
+            i += Constant.BATCH_INSERT_SIZE;
+        } while (i < doList.size());
+    }
+}

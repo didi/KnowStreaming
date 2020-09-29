@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TopicStatisticsDao">
+    <resultMap id="TopicStatisticsMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicStatisticsDO">
+        <id column="id"                         property="id" />
+        <result column="cluster_id"             property="clusterId" />
+        <result column="topic_name"             property="topicName" />
+        <result column="offset_sum"             property="offsetSum" />
+        <result column="max_avg_bytes_in"       property="maxAvgBytesIn" />
+        <result column="gmt_day"                property="gmtDay" />
+        <result column="gmt_create"             property="gmtCreate" />
+    </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.TopicStatisticsDO">
+      REPLACE INTO topic_statistics
+        (cluster_id, topic_name, offset_sum, max_avg_bytes_in, gmt_day)
+      values
+        (#{clusterId}, #{topicName}, #{offsetSum}, #{maxAvgBytesIn}, #{gmtDay})
+    </insert>
+
+    <select id="getByTopicAndDay" parameterType="java.util.Map" resultMap="TopicStatisticsMap">
+        SELECT * FROM topic_statistics
+        WHERE cluster_id=#{clusterId}
+          AND topic_name=#{topicName}
+          AND gmt_day=#{gmtDay}
+    </select>
+
+    <select id="getTopicStatistic" parameterType="java.util.Map" resultMap="TopicStatisticsMap">
+        SELECT * FROM topic_statistics
+        WHERE cluster_id=#{clusterId}
+          AND topic_name=#{topicName}
+          AND gmt_create>=#{startTime} AND #{endTime}>=gmt_create
+    </select>
+
+    <select id="getTopicStatisticData" parameterType="java.util.Map" resultMap="TopicStatisticsMap">
+        SELECT * FROM topic_statistics
+        WHERE cluster_id=#{clusterId}
+          AND gmt_create>#{startTime}
+          AND max_avg_bytes_in>#{minMaxAvgBytesIn}
+    </select>
+
+    <select id="getTopicMaxAvgBytesIn" parameterType="java.util.Map" resultType="java.lang.Double">
+        SELECT
+          AVG(TEMP.max_avg_bytes_in) AS max_avg_bytes_in
+        FROM (
+            SELECT
+              max_avg_bytes_in
+            FROM topic_statistics
+            WHERE cluster_id=#{clusterId}
+                AND topic_name=#{topicName}
+                AND gmt_create>=#{startTime} AND #{endTime}>=gmt_create
+            limit #{maxAvgDay}
+        )AS TEMP;
+    </select>
+
+    <delete id="deleteBeforeTime" parameterType="java.util.Date">
+		<![CDATA[
+		DELETE FROM topic_statistics WHERE gmt_create < #{endTime} LIMIT 2000
+	]]>
+	</delete>
+</mapper>
