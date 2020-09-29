@@ -288,7 +288,6 @@ public class ClusterServiceImpl implements ClusterService {
         dto.setBootstrapServers(clusterDO.getBootstrapServers());
         dto.setKafkaVersion(physicalClusterMetadataManager.getKafkaVersion(clusterDO.getId()));
         dto.setIdc(configUtils.getIdc());
-        dto.setMode(clusterDO.getMode());
         dto.setSecurityProperties(clusterDO.getSecurityProperties());
         dto.setStatus(clusterDO.getStatus());
         dto.setGmtCreate(clusterDO.getGmtCreate());

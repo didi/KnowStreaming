@@ -109,3 +109,4 @@ web/src/main/resources/templates/*
 */out/*
 */dist/*
 .DS_Store
+kafka-manager-web/src/main/resources/templates/*

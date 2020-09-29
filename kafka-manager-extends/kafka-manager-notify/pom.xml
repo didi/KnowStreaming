@@ -2,36 +2,53 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.xiaojukeji.kafka</groupId>
+    <artifactId>kafka-manager-notify</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
     <parent>
         <artifactId>kafka-manager</artifactId>
         <groupId>com.xiaojukeji.kafka</groupId>
         <version>2.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>kafka-manager-notify</artifactId>
+    <properties>
+        <!-- maven properties -->
+        <maven.test.skip>true</maven.test.skip>
+        <downloadSources>true</downloadSources>
+
+        <!-- compiler settings properties -->
+        <java_source_version>1.8</java_source_version>
+        <java_target_version>1.8</java_target_version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <file_encoding>UTF-8</file_encoding>
+        <spring-version>5.1.3.RELEASE</spring-version>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>kafka-manager-common</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>kafka-manager-core</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>5.0.9.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.xiaojukeji.kafka</groupId>
-            <artifactId>kafka-manager-core</artifactId>
-            <version>2.0.0-SNAPSHOT</version>
+            <version>${spring-version}</version>
         </dependency>
     </dependencies>
 </project>

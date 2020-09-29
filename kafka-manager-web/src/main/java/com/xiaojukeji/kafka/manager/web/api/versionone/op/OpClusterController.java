@@ -27,13 +27,13 @@ public class OpClusterController {
     @ApiOperation(value = "接入集群")
     @RequestMapping(value = "clusters", method = RequestMethod.POST)
     @ResponseBody
-    public Result addNew(@RequestBody ClusterDTO reqObj) {
-        if (ValidateUtils.isNull(reqObj) || !reqObj.legal()) {
+    public Result addNew(@RequestBody ClusterDTO dto) {
+        if (ValidateUtils.isNull(dto) || !dto.legal()) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
         return Result.buildFrom(
                 clusterService.addNew(
-                        ClusterModelConverter.convert2ClusterDO(reqObj),
+                        ClusterModelConverter.convert2ClusterDO(dto),
                         SpringTool.getUserName()
                 )
         );

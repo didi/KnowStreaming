@@ -11,9 +11,7 @@
     <result column="cluster_name"         property="clusterName" />
     <result column="zookeeper"            property="zookeeper" />
     <result column="bootstrap_servers"    property="bootstrapServers" />
-    <result column="mode"                 property="mode" />
     <result column="security_properties"  property="securityProperties" />
-    <result column="kafka_version"        property="kafkaVersion" />
   </resultMap>
 
   <insert id="insert"
@@ -21,9 +19,9 @@
           useGeneratedKeys="true"
           keyProperty="id">
     INSERT INTO cluster (
-      cluster_name, zookeeper, bootstrap_servers, mode, security_properties
+      cluster_name, zookeeper, bootstrap_servers, security_properties
     ) VALUES (
-      #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{mode}, #{securityProperties}
+      #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{securityProperties}
     )
   </insert>
 
@@ -31,7 +29,6 @@
     UPDATE cluster SET
       cluster_name=#{clusterName},
       bootstrap_servers=#{bootstrapServers},
-      mode=#{mode},
       security_properties=#{securityProperties},
       status=#{status}
     WHERE id = #{id}
