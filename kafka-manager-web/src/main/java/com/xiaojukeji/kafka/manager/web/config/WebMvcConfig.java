@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.web.config;
 
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.web.inteceptor.PermissionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -31,7 +32,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(permissionInterceptor).addPathPatterns("/api/v1/**");
+        registry.addInterceptor(permissionInterceptor).addPathPatterns(ApiPrefix.API_PREFIX + "**");
     }
 
     @Override

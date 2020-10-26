@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
  */
 @Service("notifyService")
 public class KafkaNotifierService extends AbstractNotifyService {
-    @Value("${kafka.cluster-id:}")
+    @Value("${notify.kafka.cluster-id:}")
     private Long clusterId;
 
-    @Value("${notify.topic-name:}")
+    @Value("${notify.kafka.topic-name:}")
     private String topicName;
 
     @Override

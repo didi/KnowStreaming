@@ -22,9 +22,12 @@ public class BrokerStateListener implements StateChangeListener {
 
     private ZkConfigImpl zkConfig;
 
-    public BrokerStateListener(Long clusterId, ZkConfigImpl zkConfig) {
+    private Integer jmxMaxConn;
+
+    public BrokerStateListener(Long clusterId, ZkConfigImpl zkConfig, Integer jmxMaxConn) {
         this.clusterId = clusterId;
         this.zkConfig = zkConfig;
+        this.jmxMaxConn = jmxMaxConn;
     }
 
     @Override
@@ -81,7 +84,7 @@ public class BrokerStateListener implements StateChangeListener {
             }
             brokerMetadata.setClusterId(clusterId);
             brokerMetadata.setBrokerId(brokerId);
-            PhysicalClusterMetadataManager.putBrokerMetadata(clusterId, brokerId, brokerMetadata);
+            PhysicalClusterMetadataManager.putBrokerMetadata(clusterId, brokerId, brokerMetadata, jmxMaxConn);
         } catch (Exception e) {
             LOGGER.error("add broker failed, clusterId:{} brokerMetadata:{}.", clusterId, brokerMetadata, e);
         }

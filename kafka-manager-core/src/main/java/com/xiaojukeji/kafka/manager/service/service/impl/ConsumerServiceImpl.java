@@ -390,7 +390,7 @@ public class ConsumerServiceImpl implements ConsumerService {
     @Override
     public boolean checkConsumerGroupExist(OffsetLocationEnum offsetLocation, Long clusterId, String topicName, String consumerGroup) {
         List<ConsumerGroupDTO>  consumerGroupList = getConsumerGroupList(clusterId, topicName).stream()
-                .filter(group -> offsetLocation.location.equals(group.getOffsetStoreLocation()) && consumerGroup.equals(group.getConsumerGroup()))
+                .filter(group -> offsetLocation.location.equals(group.getOffsetStoreLocation().location) && consumerGroup.equals(group.getConsumerGroup()))
                 .collect(Collectors.toList());
         return !ValidateUtils.isEmptyList(consumerGroupList);
     }

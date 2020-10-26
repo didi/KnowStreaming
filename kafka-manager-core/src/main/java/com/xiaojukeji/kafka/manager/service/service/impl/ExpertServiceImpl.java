@@ -186,7 +186,7 @@ public class ExpertServiceImpl implements ExpertService {
                 continue;
             }
             Integer suggestedPartitionNum = (int) Math.round(
-                    bytesIn / topicMetadata.getPartitionNum() / config.getMaxBytesInPerPartitionUnitB()
+                    bytesIn / config.getMaxBytesInPerPartitionUnitB()
             );
             if (suggestedPartitionNum - topicMetadata.getPartitionNum() < 1) {
                 continue;

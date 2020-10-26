@@ -8,7 +8,10 @@ import com.xiaojukeji.kafka.manager.common.constant.Constant;
  * @date 20/4/16
  */
 public enum ResultStatus {
+    GATEWAY_INVALID_REQUEST(-1, "invalid request"),
+
     SUCCESS(Constant.SUCCESS, "success"),
+
     LOGIN_FAILED(1, "login failed, please check username and password"),
 
 

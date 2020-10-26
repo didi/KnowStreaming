@@ -35,6 +35,7 @@ public class HttpUtils {
     private static final String METHOD_GET = "GET";
     private static final String METHOD_POST = "POST";
     private static final String METHOD_PUT = "PUT";
+    private static final String METHOD_DELETE = "DELETE";
 
     private static final String CHARSET_UTF8 = "UTF-8";
 
@@ -117,6 +118,18 @@ public class HttpUtils {
             throw new RuntimeException(e);
         }
         return sendRequest(url, METHOD_PUT, null, headers, in);
+    }
+
+    public static String deleteForString(String url, String content, Map<String, String> headers) {
+        InputStream in = null;
+        try {
+            if (content != null && !content.isEmpty()) {
+                in = new ByteArrayInputStream(content.getBytes(CHARSET_UTF8));
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        return sendRequest(url, METHOD_DELETE, null, headers, in);
     }
 
     /**

@@ -2,7 +2,7 @@ package com.xiaojukeji.kafka.manager.web.api.versionone.gateway;
 
 import com.xiaojukeji.kafka.manager.common.annotations.ApiLevel;
 import com.xiaojukeji.kafka.manager.common.constant.ApiLevelContent;
-import com.xiaojukeji.kafka.manager.common.entity.DeprecatedResponseResult;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicReportDO;
@@ -35,15 +35,15 @@ public class GatewayReportController {
     @ApiOperation(value = "查询开启JMX采集的Topic", notes = "")
     @RequestMapping(value = "report/jmx/topics", method = RequestMethod.GET)
     @ResponseBody
-    public DeprecatedResponseResult getJmxReportTopics(@RequestParam("clusterId") Long clusterId) {
+    public Result getJmxReportTopics(@RequestParam("clusterId") Long clusterId) {
         List<TopicReportDO> doList = topicReportService.getNeedReportTopic(clusterId);
-        if (ValidateUtils.isEmptyList(doList)) {
-            return DeprecatedResponseResult.success();
+        if (ValidateUtils.isNull(doList)) {
+            doList = new ArrayList<>();
         }
         List<String> topicNameList = new ArrayList<>();
         for (TopicReportDO elem: doList) {
             topicNameList.add(elem.getTopicName());
         }
-        return DeprecatedResponseResult.success(ListUtils.strList2String(topicNameList));
+        return Result.buildSuc(ListUtils.strList2String(topicNameList));
     }
 }

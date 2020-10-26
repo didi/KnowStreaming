@@ -18,6 +18,9 @@ public class AppVO {
     @ApiModelProperty(value="App密码")
     private String password;
 
+    @ApiModelProperty(value="申请人")
+    private String applicant;
+
     @ApiModelProperty(value="App描述")
     private String description;
 
@@ -48,6 +51,14 @@ public class AppVO {
         this.password = password;
     }
 
+    public String getApplicant() {
+        return applicant;
+    }
+
+    public void setApplicant(String applicant) {
+        this.applicant = applicant;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -70,6 +81,7 @@ public class AppVO {
                 "appId='" + appId + '\'' +
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
+                ", applicant='" + applicant + '\'' +
                 ", description='" + description + '\'' +
                 ", principals='" + principals + '\'' +
                 '}';

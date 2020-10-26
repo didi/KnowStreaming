@@ -38,6 +38,10 @@
     SELECT * FROM cluster where id=#{id}
   </select>
 
+  <delete id="deleteById" parameterType="java.lang.Long">
+    DELETE FROM cluster where id=#{id}
+  </delete>
+
   <select id="list" resultMap="ClusterMap">
     SELECT * FROM cluster WHERE status = 1
   </select>

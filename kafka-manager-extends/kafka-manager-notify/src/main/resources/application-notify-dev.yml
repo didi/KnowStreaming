@@ -1,8 +1,0 @@
-notify:
-  order:
-    detail-url: http://127.0.0.1
-
-kafka:
-  cluster-id: 12
-  topic-name: 123
-
