@@ -38,10 +38,10 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
             }
             Long maxVersion = Long.MIN_VALUE;
 
-            Map<Long, List<String>> clusterIdBootstrapServersMap = new HashMap<>(doList.size());
+            Map<String, List<String>> clusterIdBootstrapServersMap = new HashMap<>(doList.size());
             for (GatewayConfigDO configDO: doList) {
                 clusterIdBootstrapServersMap.put(
-                        Long.valueOf(configDO.getName()),
+                        configDO.getName().trim(),
                         ListUtils.string2StrList(configDO.getValue())
                 );
                 if (configDO.getVersion().compareTo(maxVersion) > 0) {

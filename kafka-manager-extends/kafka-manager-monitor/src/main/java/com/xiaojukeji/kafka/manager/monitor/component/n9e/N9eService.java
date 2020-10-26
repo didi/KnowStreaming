@@ -2,17 +2,18 @@ package com.xiaojukeji.kafka.manager.monitor.component.n9e;
 
 import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.common.utils.HttpUtils;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.monitor.component.AbstractMonitorService;
 import com.xiaojukeji.kafka.manager.monitor.common.entry.*;
+import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.N9eNotifyGroup;
 import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.N9eResult;
+import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.N9eStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 夜莺
@@ -23,21 +24,28 @@ import java.util.Properties;
 public class N9eService extends AbstractMonitorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(N9eService.class);
 
+    @Value("${monitor.n9e.nid}")
+    private Integer monitorN9eNid;
+
+    @Value("${monitor.n9e.user-token}")
+    private String monitorN9eToken;
+
     @Value("${monitor.n9e.base-url}")
     private String monitorN9eBaseUrl;
 
     /**
      * 告警策略
      */
-    private static final String STRATEGY_ADD_URL = "/auth/v1/strategy/add";
+    private static final String STRATEGY_ADD_URL = "/api/mon/stra";
 
-    private static final String STRATEGY_DEL_URL = "/auth/v1/strategy/del";
+    private static final String STRATEGY_DEL_URL = "/api/mon/stra";
 
-    private static final String STRATEGY_MODIFY_URL = "/auth/v1/strategy/modify";
+    private static final String STRATEGY_MODIFY_URL = "/api/mon/stra";
 
-    private static final String STRATEGY_QUERY_BY_NS_URL = "/auth/v1/strategy/query/ns";
+    private static final String STRATEGY_QUERY_BY_NS_URL = "/api/mon/stra";
 
-    private static final String STRATEGY_QUERY_BY_ID_URL = "/auth/v1/strategy/query/id";
+    private static final String STRATEGY_QUERY_BY_ID_URL = "/api/mon/stra";
+
 
     private static final String ALERT_QUERY_BY_NS_AND_PERIOD_URL = "/auth/v1/event/query/ns/period";
 
@@ -57,41 +65,121 @@ public class N9eService extends AbstractMonitorService {
     /**
      * 指标数据
      */
-    private static final String COLLECTOR_SINK_DATA_URL = "/api/collector/push";
+    private static final String COLLECTOR_SINK_DATA_URL = "/api/transfer/push";
 
     private static final String COLLECTOR_DOWNLOAD_DATA_URL = "/data/query/graph/dashboard/history";
 
     /**
      * 告警组
      */
-    private static final String ALL_NOTIFY_GROUP_URL = "/auth/v1/usergroup/group/all";
+    private static final String ALL_NOTIFY_GROUP_URL = "/api/mon/teams/all";
 
     /**
      * 监控策略的增删改查
      */
     @Override
     public Integer createStrategy(Strategy strategy) {
-        return 0;
+        String response = null;
+        try {
+            response = HttpUtils.postForString(
+                    monitorN9eBaseUrl + STRATEGY_ADD_URL,
+                    JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid)),
+                    buildHeader()
+            );
+            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
+                LOGGER.error("create strategy failed, strategy:{} response:{}.", strategy, response);
+                return null;
+            }
+            return (Integer) n9eResult.getDat();
+        } catch (Exception e) {
+            LOGGER.error("create strategy failed, strategy:{} response:{}.", strategy, response, e);
+        }
+        return null;
     }
 
     @Override
     public Boolean deleteStrategyById(Long strategyId) {
-        return true;
+        Map<String, List<Long>> params = new HashMap<>(1);
+        params.put("ids", Arrays.asList(strategyId));
+
+        String response = null;
+        try {
+            response = HttpUtils.deleteForString(
+                    monitorN9eBaseUrl + STRATEGY_DEL_URL,
+                    JSON.toJSONString(params),
+                    buildHeader()
+            );
+            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
+                LOGGER.error("delete strategy failed, strategyId:{} response:{}.", strategyId, response);
+                return Boolean.FALSE;
+            }
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            LOGGER.error("delete strategy failed, strategyId:{} response:{}.", strategyId, response, e);
+        }
+        return Boolean.FALSE;
     }
 
     @Override
     public Boolean modifyStrategy(Strategy strategy) {
-        return true;
+        String response = null;
+        try {
+            response = HttpUtils.putForString(
+                    monitorN9eBaseUrl + STRATEGY_MODIFY_URL,
+                    JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid)),
+                    buildHeader()
+            );
+            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
+                LOGGER.error("modify strategy failed, strategy:{} response:{}.", strategy, response);
+                return Boolean.FALSE;
+            }
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            LOGGER.error("modify strategy failed, strategy:{} response:{}.", strategy, response, e);
+        }
+        return Boolean.FALSE;
     }
 
     @Override
     public List<Strategy> getStrategies() {
+        Map<String, String> params = new HashMap<>();
+        params.put("nid", String.valueOf(monitorN9eNid));
+
+        String response = null;
+        try {
+            response = HttpUtils.get(monitorN9eBaseUrl + STRATEGY_QUERY_BY_NS_URL, params, buildHeader());
+            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
+                LOGGER.error("get monitor strategies failed, response:{}.", response);
+                return new ArrayList<>();
+            }
+            return N9eConverter.convert2StrategyList(JSON.parseArray(JSON.toJSONString(n9eResult.getDat()), N9eStrategy.class));
+        } catch (Exception e) {
+            LOGGER.error("get monitor strategies failed, response:{}.", response, e);
+        }
         return new ArrayList<>();
     }
 
     @Override
     public Strategy getStrategyById(Long strategyId) {
-        return new Strategy();
+        String uri = STRATEGY_QUERY_BY_ID_URL + "/" + String.valueOf(strategyId);
+
+        String response = null;
+        try {
+            response = HttpUtils.get(monitorN9eBaseUrl + uri, new HashMap<>(0), buildHeader());
+            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
+                LOGGER.error("get monitor strategy failed, response:{}.", response);
+                return null;
+            }
+            return N9eConverter.convert2Strategy(JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eStrategy.class));
+        } catch (Exception e) {
+            LOGGER.error("get monitor strategy failed, response:{}.", response, e);
+        }
+        return null;
     }
 
     @Override
@@ -161,6 +249,26 @@ public class N9eService extends AbstractMonitorService {
 
     @Override
     public List<NotifyGroup> getNotifyGroups() {
+        String response = null;
+        try {
+            response = HttpUtils.get(monitorN9eBaseUrl + ALL_NOTIFY_GROUP_URL, new HashMap<>(0), buildHeader());
+            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
+                LOGGER.error("get notify group failed, response:{}.", response);
+                return new ArrayList<>();
+            }
+            return N9eConverter.convert2NotifyGroupList(JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eNotifyGroup.class));
+        } catch (Exception e) {
+            LOGGER.error("get notify group failed, response:{}.", response, e);
+        }
         return new ArrayList<>();
     }
+
+    private Map<String, String> buildHeader() {
+        Map<String, String> header = new HashMap<>(2);
+        header.put("Content-Type", "application/json");
+        header.put("X-User-Token", monitorN9eToken);
+        return header;
+    }
+
 }

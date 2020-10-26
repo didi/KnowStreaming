@@ -3,7 +3,8 @@ package com.xiaojukeji.kafka.manager.web.api.versionone.gateway;
 import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.common.annotations.ApiLevel;
 import com.xiaojukeji.kafka.manager.common.constant.ApiLevelContent;
-import com.xiaojukeji.kafka.manager.common.entity.DeprecatedResponseResult;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.dto.gateway.KafkaAclSearchDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.gateway.KafkaUserSearchDTO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.gateway.KafkaSecurityVO;
@@ -40,9 +41,9 @@ public class GatewaySecurityController {
     @ApiOperation(value = "Kafka用户查询", notes = "")
     @RequestMapping(value = "security/users", method = RequestMethod.POST)
     @ResponseBody
-    public DeprecatedResponseResult<String> getKafkaUsers(@RequestBody KafkaUserSearchDTO dto) {
+    public Result<String> getKafkaUsers(@RequestBody KafkaUserSearchDTO dto) {
         if (ValidateUtils.isNull(dto) || !dto.paramLegal()) {
-            return DeprecatedResponseResult.failure("invalid request");
+            return Result.buildFrom(ResultStatus.GATEWAY_INVALID_REQUEST);
         }
 
         try {
@@ -50,16 +51,16 @@ public class GatewaySecurityController {
                     dto.getStart(),
                     dto.getEnd().equals(0L)? System.currentTimeMillis(): dto.getEnd()
             );
-            if (ValidateUtils.isEmptyList(doList)) {
-                return DeprecatedResponseResult.success();
+            if (ValidateUtils.isNull(doList)) {
+                doList = new ArrayList<>();
             }
 
             KafkaSecurityVO vo = new KafkaSecurityVO();
             vo.setRows(new ArrayList<>(GatewayModelConverter.convert2KafkaUserVOList(doList)));
-            return DeprecatedResponseResult.success(JSON.toJSONString(vo));
+            return Result.buildSuc(JSON.toJSONString(vo));
         } catch (Exception e) {
             LOGGER.error("get kafka users failed, req:{}.", dto, e);
-            return DeprecatedResponseResult.failure("get kafka users exception");
+            return Result.buildFrom(ResultStatus.MYSQL_ERROR);
         }
     }
 
@@ -67,9 +68,9 @@ public class GatewaySecurityController {
     @ApiOperation(value = "Kafka用户权限查询", notes = "")
     @RequestMapping(value = "security/acls", method = RequestMethod.POST)
     @ResponseBody
-    public DeprecatedResponseResult<String> getKafkaAcls(@RequestBody KafkaAclSearchDTO dto) {
+    public Result<String> getKafkaAcls(@RequestBody KafkaAclSearchDTO dto) {
         if (ValidateUtils.isNull(dto) || !dto.paramLegal()) {
-            return DeprecatedResponseResult.failure("invalid request");
+            return Result.buildFrom(ResultStatus.GATEWAY_INVALID_REQUEST);
         }
 
         try {
@@ -78,16 +79,16 @@ public class GatewaySecurityController {
                     dto.getStart(),
                     dto.getEnd().equals(0L)? System.currentTimeMillis(): dto.getEnd()
             );
-            if (ValidateUtils.isEmptyList(doList)) {
-                return DeprecatedResponseResult.success();
+            if (ValidateUtils.isNull(doList)) {
+                doList = new ArrayList<>();
             }
 
             KafkaSecurityVO vo = new KafkaSecurityVO();
             vo.setRows(new ArrayList<>(GatewayModelConverter.convert2KafkaAclVOList(doList)));
-            return DeprecatedResponseResult.success(JSON.toJSONString(vo));
+            return Result.buildSuc(JSON.toJSONString(vo));
         } catch (Exception e) {
             LOGGER.error("get kafka acls failed, req:{}.", dto, e);
-            return DeprecatedResponseResult.failure("get kafka acls exception");
+            return Result.buildFrom(ResultStatus.MYSQL_ERROR);
         }
     }
 }

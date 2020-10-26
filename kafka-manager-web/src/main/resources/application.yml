@@ -30,8 +30,13 @@ logging:
 
 custom:
   idc: cn
+  jmx:
+    max-conn: 10
 
-agent:
+account:
+  ldap:
+
+kcm:
   n9e:
     base-url: http://127.0.0.1/api
     username: admin
@@ -42,11 +47,13 @@ agent:
 monitor:
   n9e:
     base-url: http://127.0.0.1/api
+    username: admin
+    user-token: admin
+    nid: 10
 
 notify:
+  kafka:
+    cluster-id: 95
+    topic-name: didi-kafka-notify
   order:
     detail-url: http://127.0.0.1
-
-kafka:
-  cluster-id: 12
-  topic-name: 123

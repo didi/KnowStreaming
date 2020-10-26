@@ -30,19 +30,19 @@ import java.util.Map;
 public class N9e extends AbstractAgent {
     private static final Logger LOGGER = LoggerFactory.getLogger(N9e.class);
 
-    @Value("${agent.n9e.base-url}")
+    @Value("${kcm.n9e.base-url}")
     private String baseUrl;
 
-    @Value("${agent.n9e.username}")
+    @Value("${kcm.n9e.username}")
     private String username;
 
-    @Value("${agent.n9e.user-token}")
+    @Value("${kcm.n9e.user-token}")
     private String userToken;
 
-    @Value("${agent.n9e.tpl-id}")
+    @Value("${kcm.n9e.tpl-id}")
     private Integer tplId;
 
-    @Value("${agent.n9e.timeout}")
+    @Value("${kcm.n9e.timeout}")
     private Integer timeout;
 
     /**

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.common.annotations.ApiLevel;
 import com.xiaojukeji.kafka.manager.common.bizenum.gateway.GatewayConfigKeyEnum;
 import com.xiaojukeji.kafka.manager.common.constant.ApiLevelContent;
-import com.xiaojukeji.kafka.manager.common.entity.DeprecatedResponseResult;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.*;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.GatewayConfigDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.gateway.GatewayConfigVO;
@@ -54,33 +54,27 @@ public class GatewayServiceDiscoveryController {
     @ApiOperation(value = "获取集群服务地址", notes = "")
     @RequestMapping(value = "discovery/init", method = RequestMethod.GET)
     @ResponseBody
-    public DeprecatedResponseResult<String> getAllKafkaBootstrapServers() {
+    public Result<String> getAllKafkaBootstrapServers() {
         KafkaBootstrapServerConfig config =
                 gatewayConfigService.getKafkaBootstrapServersConfig(Long.MIN_VALUE);
         if (ValidateUtils.isNull(config) || ValidateUtils.isNull(config.getClusterIdBootstrapServersMap())) {
-            return DeprecatedResponseResult.failure("call init kafka bootstrap servers failed");
+            return Result.buildFailure("call init kafka bootstrap servers failed");
         }
-        if (config.getClusterIdBootstrapServersMap().isEmpty()) {
-            return DeprecatedResponseResult.success();
-        }
-        return DeprecatedResponseResult.success(JSON.toJSONString(config.getClusterIdBootstrapServersMap()));
+        return Result.buildSuc(JSON.toJSONString(config.getClusterIdBootstrapServersMap()));
     }
 
     @ApiLevel(level = ApiLevelContent.LEVEL_IMPORTANT_2)
     @ApiOperation(value = "获取集群服务地址", notes = "")
     @RequestMapping(value = "discovery/update", method = RequestMethod.GET)
     @ResponseBody
-    public DeprecatedResponseResult getBootstrapServersIfNeeded(@RequestParam("versionNumber") long versionNumber) {
+    public Result<String> getBootstrapServersIfNeeded(@RequestParam("versionNumber") long versionNumber) {
         KafkaBootstrapServerConfig config =
                 gatewayConfigService.getKafkaBootstrapServersConfig(versionNumber);
         if (ValidateUtils.isNull(config) || ValidateUtils.isNull(config.getClusterIdBootstrapServersMap())) {
-            return DeprecatedResponseResult.failure("call update kafka bootstrap servers failed");
+            return Result.buildFailure("call update kafka bootstrap servers failed");
         }
 
-        if (config.getClusterIdBootstrapServersMap().isEmpty()) {
-            return DeprecatedResponseResult.success();
-        }
-        return DeprecatedResponseResult.success(JSON.toJSONString(new GatewayConfigVO(
+        return Result.buildSuc(JSON.toJSONString(new GatewayConfigVO(
                 String.valueOf(config.getVersion()),
                 JSON.toJSONString(config.getClusterIdBootstrapServersMap())
         )));
@@ -90,15 +84,13 @@ public class GatewayServiceDiscoveryController {
     @ApiOperation(value = "最大并发请求数", notes = "")
     @RequestMapping(value = "discovery/max-request-num", method = RequestMethod.GET)
     @ResponseBody
-    public DeprecatedResponseResult getMaxRequestNum(@RequestParam("versionNumber") long versionNumber) {
+    public Result<String> getMaxRequestNum(@RequestParam("versionNumber") long versionNumber) {
         RequestQueueConfig config = gatewayConfigService.getRequestQueueConfig(versionNumber);
         if (ValidateUtils.isNull(config)) {
-            return DeprecatedResponseResult.failure("call get request queue size config failed");
+            return Result.buildFailure("call get request queue size config failed");
         }
-        if (ValidateUtils.isNull(config.getMaxRequestQueueSize())) {
-            return DeprecatedResponseResult.success();
-        }
-        return DeprecatedResponseResult.success(JSON.toJSONString(
+
+        return Result.buildSuc(JSON.toJSONString(
                 new GatewayConfigVO(
                         String.valueOf(config.getVersion()),
                         String.valueOf(config.getMaxRequestQueueSize())
@@ -110,15 +102,13 @@ public class GatewayServiceDiscoveryController {
     @ApiOperation(value = "最大APP请求速率", notes = "")
     @RequestMapping(value = "discovery/appId-rate", method = RequestMethod.GET)
     @ResponseBody
-    public DeprecatedResponseResult getAppIdRate(@RequestParam("versionNumber") long versionNumber) {
+    public Result<String> getAppIdRate(@RequestParam("versionNumber") long versionNumber) {
         AppRateConfig config = gatewayConfigService.getAppRateConfig(versionNumber);
         if (ValidateUtils.isNull(config)) {
-            return DeprecatedResponseResult.failure("call get app rate config failed");
+            return Result.buildFailure("call get app rate config failed");
         }
-        if (ValidateUtils.isNull(config.getAppRateLimit())) {
-            return DeprecatedResponseResult.success();
-        }
-        return DeprecatedResponseResult.success(JSON.toJSONString(
+
+        return Result.buildSuc(JSON.toJSONString(
                 new GatewayConfigVO(
                         String.valueOf(config.getVersion()),
                         String.valueOf(config.getAppRateLimit())
@@ -130,15 +120,12 @@ public class GatewayServiceDiscoveryController {
     @ApiOperation(value = "最大IP请求速率", notes = "")
     @RequestMapping(value = "discovery/ip-rate", method = RequestMethod.GET)
     @ResponseBody
-    public DeprecatedResponseResult getIpRate(@RequestParam("versionNumber") long versionNumber) {
+    public Result getIpRate(@RequestParam("versionNumber") long versionNumber) {
         IpRateConfig config = gatewayConfigService.getIpRateConfig(versionNumber);
         if (ValidateUtils.isNull(config)) {
-            return DeprecatedResponseResult.failure("call get ip rate config failed");
+            return Result.buildFailure("call get ip rate config failed");
         }
-        if (ValidateUtils.isNull(config.getIpRateLimit())) {
-            return DeprecatedResponseResult.success();
-        }
-        return DeprecatedResponseResult.success(JSON.toJSONString(
+        return Result.buildSuc(JSON.toJSONString(
                 new GatewayConfigVO(
                         String.valueOf(config.getVersion()),
                         String.valueOf(config.getIpRateLimit())
@@ -150,15 +137,11 @@ public class GatewayServiceDiscoveryController {
     @ApiOperation(value = "最大SP请求速率", notes = "")
     @RequestMapping(value = "discovery/sp-limit", method = RequestMethod.GET)
     @ResponseBody
-    public DeprecatedResponseResult getSpLimit(@RequestParam("versionNumber") long versionNumber) {
+    public Result<String> getSpLimit(@RequestParam("versionNumber") long versionNumber) {
         SpRateConfig config =
                 gatewayConfigService.getSpRateConfig(versionNumber);
         if (ValidateUtils.isNull(config) || ValidateUtils.isNull(config.getSpRateMap())) {
-            return DeprecatedResponseResult.failure("call update kafka bootstrap servers failed");
-        }
-
-        if (config.getSpRateMap().isEmpty()) {
-            return DeprecatedResponseResult.success();
+            return Result.buildFailure("call update kafka bootstrap servers failed");
         }
 
         List<String> strList = new ArrayList<>();
@@ -166,7 +149,7 @@ public class GatewayServiceDiscoveryController {
             strList.add(entry.getKey() + "#" + String.valueOf(entry.getValue()));
         }
 
-        return DeprecatedResponseResult.success(JSON.toJSONString(new GatewayConfigVO(
+        return Result.buildSuc(JSON.toJSONString(new GatewayConfigVO(
                 String.valueOf(config.getVersion()),
                 ListUtils.strList2String(strList)
         )));
