@@ -9,23 +9,19 @@ import java.util.Date;
 public class ClusterDO implements Comparable<ClusterDO> {
     private Long id;
 
-    private Integer status;
-
-    private Date gmtCreate;
-
-    private Date gmtModify;
-
     private String clusterName;
 
     private String zookeeper;
 
     private String bootstrapServers;
 
-    private Integer mode;
-
     private String securityProperties;
 
-    private String kafkaVersion;
+    private Integer status;
+
+    private Date gmtCreate;
+
+    private Date gmtModify;
 
     public Long getId() {
         return id;
@@ -83,14 +79,6 @@ public class ClusterDO implements Comparable<ClusterDO> {
         this.bootstrapServers = bootstrapServers;
     }
 
-    public Integer getMode() {
-        return mode;
-    }
-
-    public void setMode(Integer mode) {
-        this.mode = mode;
-    }
-
     public String getSecurityProperties() {
         return securityProperties;
     }
@@ -99,27 +87,17 @@ public class ClusterDO implements Comparable<ClusterDO> {
         this.securityProperties = securityProperties;
     }
 
-    public String getKafkaVersion() {
-        return kafkaVersion;
-    }
-
-    public void setKafkaVersion(String kafkaVersion) {
-        this.kafkaVersion = kafkaVersion;
-    }
-
     @Override
     public String toString() {
         return "ClusterDO{" +
                 "id=" + id +
-                ", status=" + status +
-                ", gmtCreate=" + gmtCreate +
-                ", gmtModify=" + gmtModify +
                 ", clusterName='" + clusterName + '\'' +
                 ", zookeeper='" + zookeeper + '\'' +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
-                ", mode=" + mode +
                 ", securityProperties='" + securityProperties + '\'' +
-                ", kafkaVersion='" + kafkaVersion + '\'' +
+                ", status=" + status +
+                ", gmtCreate=" + gmtCreate +
+                ", gmtModify=" + gmtModify +
                 '}';
     }
 
