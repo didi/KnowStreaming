@@ -204,6 +204,11 @@ CREATE TABLE `gateway_config` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_type_name` (`type`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='gateway配置';
+INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_QUEUE_SIZE', 'SERVICE_DISCOVERY_QUEUE_SIZE', 100000000, 1);
+INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_APPID_RATE', 'SERVICE_DISCOVERY_APPID_RATE', 100000000, 1);
+INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_IP_RATE', 'SERVICE_DISCOVERY_IP_RATE', 100000000, 1);
+INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_SP_RATE', 'app_01234567', 100000000, 1);
+INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_SP_RATE', '192.168.0.1', 100000000, 1);
 
 --
 -- Table structure for table `heartbeat`

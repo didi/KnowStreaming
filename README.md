@@ -37,9 +37,9 @@
 
 ## 相关文档
 
-- [kafka-manager安装手册](./docs/install_cn_guide.md)
-- [kafka-manager接入集群](./docs/manual_kafka_op/add_cluster.md)
-- [kafka-manager使用手册-待更新](./docs/user_cn_guide.md)
+- [kafka-manager 安装手册](docs/install_guide/install_guide_cn.md)
+- [kafka-manager 接入集群](docs/user_guide/add_cluster/add_cluster.md)
+- [kafka-manager 用户使用手册](docs/user_guide/user_guide_cn.md)
 
 
 ## 钉钉交流群
