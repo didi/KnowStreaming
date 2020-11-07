@@ -2,7 +2,6 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.common.constant.ConfigConstant;
-import com.xiaojukeji.kafka.manager.common.constant.SystemCodeConstant;
 import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.config.*;
@@ -11,7 +10,6 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ConfigDO;
 import com.xiaojukeji.kafka.manager.dao.ConfigDao;
-import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.ConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,11 +164,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public CreateTopicElemConfig getCreateTopicConfig(Long clusterId, String systemCode) {
         String configKey = TopicCreationConstant.INNER_CREATE_TOPIC_CONFIG_KEY;
-        if (SystemCodeConstant.LOG_X.equals(systemCode)) {
-            configKey = TopicCreationConstant.LOG_X_CREATE_TOPIC_CONFIG_KEY_NAME;
-        } else if (SystemCodeConstant.CHORUS.equals(systemCode)) {
-            configKey = TopicCreationConstant.CHORUS_CREATE_TOPIC_CONFIG_KEY_NAME;
-        }
         CreateTopicConfig configValue = this.getByKey(
                 configKey,
                 CreateTopicConfig.class

@@ -88,6 +88,22 @@ public class Result<T> implements Serializable {
         return result;
     }
 
+    public static <T> Result<T> buildSuc(T data) {
+        Result<T> result = new Result<T>();
+        result.setCode(ResultStatus.SUCCESS.getCode());
+        result.setMessage(ResultStatus.SUCCESS.getMessage());
+        result.setData(data);
+        return result;
+    }
+
+    public static <T> Result<T> buildFailure(String message) {
+        Result<T> result = new Result<T>();
+        result.setCode(ResultStatus.GATEWAY_INVALID_REQUEST.getCode());
+        result.setMessage(message);
+        result.setData(null);
+        return result;
+    }
+
     public static Result buildFrom(ResultStatus resultStatus) {
         Result result = new Result();
         result.setCode(resultStatus.getCode());

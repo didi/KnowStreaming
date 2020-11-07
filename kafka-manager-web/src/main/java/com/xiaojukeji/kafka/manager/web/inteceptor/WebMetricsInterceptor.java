@@ -3,7 +3,7 @@ package com.xiaojukeji.kafka.manager.web.inteceptor;
 import com.codahale.metrics.Timer;
 import com.xiaojukeji.kafka.manager.common.annotations.ApiLevel;
 import com.xiaojukeji.kafka.manager.common.constant.ApiLevelContent;
-import com.xiaojukeji.kafka.manager.common.entity.DeprecatedResponseResult;
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.api.ApiCount;
@@ -118,8 +118,8 @@ public class WebMetricsInterceptor {
 
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String uri = attributes.getRequest().getRequestURI();
-        if (uri.contains("gateway/api/v1")) {
-            return DeprecatedResponseResult.failure("api limited");
+        if (uri.contains(ApiPrefix.GATEWAY_API_V1_PREFIX)) {
+            return Result.buildFailure("api limited");
         }
         return new Result<>(ResultStatus.OPERATION_FORBIDDEN);
     }

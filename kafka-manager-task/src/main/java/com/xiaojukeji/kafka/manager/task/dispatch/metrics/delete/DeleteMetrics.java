@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.metrics.delete;
 
 import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
-import com.xiaojukeji.kafka.manager.common.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.kafka.manager.dao.*;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import com.xiaojukeji.kafka.manager.task.component.AbstractScheduledTask;

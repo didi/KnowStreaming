@@ -8,18 +8,18 @@ import java.util.Map;
  * @date 20/7/29
  */
 public class KafkaBootstrapServerConfig extends BaseGatewayConfig {
-    private Map<Long, List<String>> clusterIdBootstrapServersMap;
+    private Map<String, List<String>> clusterIdBootstrapServersMap;
 
-    public KafkaBootstrapServerConfig(Long version, Map<Long, List<String>> clusterIdBootstrapServersMap) {
+    public KafkaBootstrapServerConfig(Long version, Map<String, List<String>> clusterIdBootstrapServersMap) {
         this.version = version;
         this.clusterIdBootstrapServersMap = clusterIdBootstrapServersMap;
     }
 
-    public Map<Long, List<String>> getClusterIdBootstrapServersMap() {
+    public Map<String, List<String>> getClusterIdBootstrapServersMap() {
         return clusterIdBootstrapServersMap;
     }
 
-    public void setClusterIdBootstrapServersMap(Map<Long, List<String>> clusterIdBootstrapServersMap) {
+    public void setClusterIdBootstrapServersMap(Map<String, List<String>> clusterIdBootstrapServersMap) {
         this.clusterIdBootstrapServersMap = clusterIdBootstrapServersMap;
     }
 

@@ -28,10 +28,13 @@ public class JmxConnectorWrap {
 
     private AtomicInteger atomicInteger;
 
-    public JmxConnectorWrap(String host, int port) {
+    public JmxConnectorWrap(String host, int port, int maxConn) {
         this.host = host;
         this.port = port;
-        this.atomicInteger = new AtomicInteger(25);
+        if (maxConn <= 0) {
+            maxConn = 1;
+        }
+        this.atomicInteger = new AtomicInteger(maxConn);
     }
 
     public boolean checkJmxConnectionAndInitIfNeed() {

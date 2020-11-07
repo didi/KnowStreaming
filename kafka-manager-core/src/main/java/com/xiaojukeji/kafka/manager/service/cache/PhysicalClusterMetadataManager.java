@@ -14,6 +14,7 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.dao.ControllerDao;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConnectorWrap;
 import com.xiaojukeji.kafka.manager.service.service.JmxService;
+import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import com.xiaojukeji.kafka.manager.service.zookeeper.*;
 import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkPathUtil;
@@ -43,6 +44,9 @@ public class PhysicalClusterMetadataManager {
 
     @Autowired
     private ClusterService clusterService;
+
+    @Autowired
+    private ConfigUtils configUtils;
 
     private final static Map<Long, ClusterDO> CLUSTER_MAP = new ConcurrentHashMap<>();
 
@@ -89,7 +93,7 @@ public class PhysicalClusterMetadataManager {
             BROKER_METADATA_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
             JMX_CONNECTOR_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
             KAFKA_VERSION_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
-            BrokerStateListener brokerListener = new BrokerStateListener(clusterDO.getId(), zkConfig);
+            BrokerStateListener brokerListener = new BrokerStateListener(clusterDO.getId(), zkConfig, configUtils.getJmxMaxConn());
             brokerListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_IDS_ROOT, brokerListener);
 
@@ -255,7 +259,7 @@ public class PhysicalClusterMetadataManager {
 
     //---------------------------Broker元信息相关--------------
 
-    public static void putBrokerMetadata(Long clusterId, Integer brokerId, BrokerMetadata brokerMetadata) {
+    public static void putBrokerMetadata(Long clusterId, Integer brokerId, BrokerMetadata brokerMetadata, Integer jmxMaxConn) {
         Map<Integer, BrokerMetadata> metadataMap = BROKER_METADATA_MAP.get(clusterId);
         if (metadataMap == null) {
             return;
@@ -263,7 +267,7 @@ public class PhysicalClusterMetadataManager {
         metadataMap.put(brokerId, brokerMetadata);
 
         Map<Integer, JmxConnectorWrap> jmxMap = JMX_CONNECTOR_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());
-        jmxMap.put(brokerId, new JmxConnectorWrap(brokerMetadata.getHost(), brokerMetadata.getJmxPort()));
+        jmxMap.put(brokerId, new JmxConnectorWrap(brokerMetadata.getHost(), brokerMetadata.getJmxPort(), jmxMaxConn));
         JMX_CONNECTOR_MAP.put(clusterId, jmxMap);
 
         Map<Integer, KafkaVersion> versionMap = KAFKA_VERSION_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());
