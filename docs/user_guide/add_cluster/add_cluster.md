@@ -1,7 +1,7 @@
 
 ---
 
-![kafka-manager-logo](../assets/images/common/logo_name.png)
+![kafka-manager-logo](../../assets/images/common/logo_name.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
@@ -19,13 +19,13 @@
 
 ## 1、接入物理集群
 
-![op_add_cluster](./imgs/op_add_cluster.jpg)
+![op_add_cluster](assets/op_add_cluster.jpg)
 
 如上图所示，填写集群信息，然后点击确定，即可完成集群的接入。因为考虑到分布式部署，添加集群之后，需要稍等**`1分钟`**才可以在界面上看到集群的详细信息。
 
 ## 2、创建Region
 
-![op_add_region](./imgs/op_add_region.jpg)
+![op_add_region](assets/op_add_region.jpg)
 
 如上图所示，填写Region信息，然后点击确定，即可完成Region的创建。
 
@@ -33,7 +33,7 @@
 
 ## 3、创建逻辑集群
 
-![op_add_logical_cluster](./imgs/op_add_logical_cluster.jpg)
+![op_add_logical_cluster](assets/op_add_logical_cluster.jpg)
 
 
 如上图所示，填写逻辑集群信息，然后点击确定，即可完成逻辑集群的创建。
