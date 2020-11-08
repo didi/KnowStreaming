@@ -35,12 +35,12 @@
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>kafka-manager-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>kafka-manager-bpm</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
