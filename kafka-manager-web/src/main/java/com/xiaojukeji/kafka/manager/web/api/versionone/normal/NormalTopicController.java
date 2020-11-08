@@ -18,7 +18,6 @@ import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.TopicConnectionService;
-import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.web.converters.CommonModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.TopicModelConverter;
@@ -53,9 +52,6 @@ public class NormalTopicController {
     private LogicalClusterMetadataManager logicalClusterMetadataManager;
 
     @Autowired
-    private ConfigUtils configUtils;
-
-    @Autowired
     private KafkaBillService kafkaBillService;
 
     @ApiOperation(value = "Topic基本信息", notes = "")
@@ -71,7 +67,7 @@ public class NormalTopicController {
         }
         return new Result<>(TopicModelConverter.convert2TopicBasicVO(
                 topicService.getTopicBasicDTO(physicalClusterId, topicName),
-                ""
+                clusterService.getById(physicalClusterId)
         ));
     }
 

@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.web.converters;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.TopicBusinessInfoVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.vo.rd.TopicBrokerVO;
@@ -21,7 +22,7 @@ import java.util.List;
  * @date 2017/6/1.
  */
 public class TopicModelConverter {
-    public static TopicBasicVO convert2TopicBasicVO(TopicBasicDTO dto, String serviceDiscoveryAddress) {
+    public static TopicBasicVO convert2TopicBasicVO(TopicBasicDTO dto, ClusterDO clusterDO) {
         TopicBasicVO vo = new TopicBasicVO();
         vo.setClusterId(dto.getClusterId());
         vo.setAppId(dto.getAppId());
@@ -35,7 +36,10 @@ public class TopicModelConverter {
         vo.setScore(dto.getScore());
         vo.setTopicCodeC(dto.getTopicCodeC());
         vo.setDescription(dto.getDescription());
-        vo.setBootstrapServers(serviceDiscoveryAddress);
+        vo.setBootstrapServers("");
+        if (!ValidateUtils.isNull(clusterDO)) {
+            vo.setBootstrapServers(clusterDO.getBootstrapServers());
+        }
         return vo;
     }
 
