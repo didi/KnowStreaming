@@ -85,7 +85,7 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
     ],
     formData: record,
     visible: true,
-    title: `${isDisabled ? '详情' : record ? '修改' : '应用申请'}`,
+    title: `${isDisabled ? '详情' : record ? '编辑' : '应用申请'}`,
     onSubmit: (value: IAppItem) => {
       if (isDisabled) {
         return;

@@ -11,10 +11,10 @@ export const  createMonitorSilences = (monitorId: number, monitorName: string) =
     formMap: [
       {
         key: 'monitorName',
-        label: '告警名称',
+        label: '告警规则',
         rules: [{
           required: true,
-          message: '请输入告警名称',
+          message: '请输入告警规则',
         }],
         attrs: {
           disabled: true,

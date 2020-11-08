@@ -133,7 +133,7 @@ export const showModifyModal = (record: IUploadFile) => {
     formData: record || {},
     visible: true,
     isWaitting: true,
-    title: '修改',
+    title: '编辑',
     onSubmit: async (value: IUploadFile) => {
       value.file = value.uploadFile[0].originFileObj;
       const md5 = await computeChecksumMd5(value.file);
@@ -175,11 +175,11 @@ export const showConfigureModal = (record?: IConfigure) => {
     formData: record || {},
     visible: true,
     isWaitting: true,
-    title: `${record ? '修改配置' : '新建配置'}`,
+    title: `${record ? '编辑配置' : '新建配置'}`,
     onSubmit: async (value: IConfigure) => {
       if (record) {
         return admin.editConfigure(value).then(data => {
-          notification.success({ message: '修改配置成功' });
+          notification.success({ message: '编辑配置成功' });
         });
       }
       return admin.addNewConfigure(value).then(data => {

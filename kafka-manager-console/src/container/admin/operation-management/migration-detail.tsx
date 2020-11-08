@@ -130,7 +130,7 @@ export class MigrationDetail extends SearchAndFilterContainer {
         render: (text: string, item: IReassign) => (
           <>
           <a onClick={() => this.renderRessignDetail(item)} style={{ marginRight: 16 }}>详情</a>
-          <a onClick={() => modifyTransferTask(item, 'modify', this.taskId)}>修改</a>
+          <a onClick={() => modifyTransferTask(item, 'modify', this.taskId)}>编辑</a>
           </>
         ),
       },

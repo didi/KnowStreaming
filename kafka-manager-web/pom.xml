@@ -19,28 +19,29 @@
         <springframework.boot.version>2.1.1.RELEASE</springframework.boot.version>
         <spring-version>5.1.3.RELEASE</spring-version>
         <failOnMissingWebXml>false</failOnMissingWebXml>
+        <tomcat.version>8.5.37</tomcat.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>kafka-manager-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>kafka-manager-kcm</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>kafka-manager-task</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>kafka-manager-monitor</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>

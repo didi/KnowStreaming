@@ -134,19 +134,19 @@ export class ClusterList extends SearchAndFilterContainer {
       formData: item ? item : {},
       visible: true,
       width: 590,
-      title: '注册集群',
+      title: item ? '编辑' : '接入集群',
       onSubmit: (value: IRegister) => {
         value.idc = region.currentRegion;
         if (item) {
           value.clusterId = item.clusterId;
           registerCluster(value).then(data => {
             admin.getMetaData(true);
-            notification.success({ message: '修改集群成功' });
+            notification.success({ message: '编辑集群成功' });
           });
         } else {
           createCluster(value).then(data => {
             admin.getMetaData(true);
-            notification.success({ message: '注册集群成功' });
+            notification.success({ message: '接入集群成功' });
           });
         }
 
@@ -256,7 +256,7 @@ export class ClusterList extends SearchAndFilterContainer {
           <a
             onClick={this.createOrRegisterCluster.bind(this, item)}
             className="action-button"
-          >修改
+          >编辑
           </a>
           <Popconfirm
             title={`确定${item.status === 1 ? '暂停' : '开始'}${item.clusterName}监控？`}
@@ -286,7 +286,7 @@ export class ClusterList extends SearchAndFilterContainer {
             <ul>
               {this.renderSearch('', '请输入集群名称')}
               <li className="right-btn-1">
-                <Button type="primary" onClick={this.createOrRegisterCluster.bind(this, null)}>注册集群</Button>
+                <Button type="primary" onClick={this.createOrRegisterCluster.bind(this, null)}>接入集群</Button>
               </li>
             </ul>
           </div>

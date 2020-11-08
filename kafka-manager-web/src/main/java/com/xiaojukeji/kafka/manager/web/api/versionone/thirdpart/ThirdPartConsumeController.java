@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.bizenum.ConsumeHealthEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetLocationEnum;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
+import com.xiaojukeji.kafka.manager.common.constant.SystemCodeConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumeDetailDTO;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -55,6 +57,8 @@ public class ThirdPartConsumeController {
 
     @Autowired
     private ThirdPartService thirdPartService;
+
+    private static final List<String> WHITE_SYS_CODES_LIST = Arrays.asList(SystemCodeConstant.KAFKA_MANAGER);
 
     @ApiOperation(value = "消费组健康", notes = "消费组是否健康")
     @RequestMapping(value = "clusters/consumer-health", method = RequestMethod.POST)
@@ -97,18 +101,20 @@ public class ThirdPartConsumeController {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
         }
 
-        // 检查AppID权限
-        if (!appService.verifyAppIdByPassword(dto.getAppId(), dto.getPassword())) {
-            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-        }
-        // 检查权限
-        AuthorityDO authority =
+        if (!WHITE_SYS_CODES_LIST.contains(dto.getSystemCode())) {
+            // 检查AppID权限
+            if (!appService.verifyAppIdByPassword(dto.getAppId(), dto.getPassword())) {
+                return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+            }
+            // 检查权限
+            AuthorityDO authority =
                 authorityService.getAuthority(dto.getClusterId(), dto.getTopicName(), dto.getAppId());
-        if (ValidateUtils.isNull(authority) || (authority.getAccess() & 1) <= 0) {
-            authority = authorityService.getAuthority(dto.getClusterId(), "*", dto.getAppId());
-        }
-        if (authority == null || (authority.getAccess() & 1) <= 0) {
-            return Result.buildFrom(ResultStatus.USER_WITHOUT_AUTHORITY);
+            if (ValidateUtils.isNull(authority) || (authority.getAccess() & 1) <= 0) {
+                authority = authorityService.getAuthority(dto.getClusterId(), "*", dto.getAppId());
+            }
+            if (authority == null || (authority.getAccess() & 1) <= 0) {
+                return Result.buildFrom(ResultStatus.USER_WITHOUT_AUTHORITY);
+            }
         }
 
         List<Result> resultList = thirdPartService.resetOffsets(clusterDO, dto);
