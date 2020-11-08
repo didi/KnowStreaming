@@ -25,9 +25,10 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
         label: '应用ID',
         rules: [{
           required: true,
+          message: '请输入应用ID',
         }],
         attrs: {
-          disabled: true,
+          placeholder: '请输入应用ID',
         },
       },
       {

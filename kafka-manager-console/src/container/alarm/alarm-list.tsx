@@ -52,11 +52,11 @@ export class AlarmList extends SearchAndFilterContainer {
     return (
       <>
         {this.renderApp('应用：')}
-        {this.renderSearch('名称：', '请输入告警名称或者操作人')}
+        {this.renderSearch('名称：', '请输入告警规则或者操作人')}
         <li className="right-btn-1">
           <Button type="primary">
             <a href={`${urlPrefix}/alarm/add`}>
-              新建告警
+              新增规则
             </a>
           </Button>
         </li>

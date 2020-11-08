@@ -92,7 +92,7 @@ export class CommonAppList extends SearchAndFilterContainer {
         render: (text: any, record: IAppItem) => {
           return (
             <span className="table-operation">
-              <a onClick={() => showEditModal(record, this.from)}>修改</a>
+              <a onClick={() => showEditModal(record, this.from)}>编辑</a>
               <a onClick={() => showEditModal(record, this.from, true)}>详情</a>
               <a onClick={() => this.getOnlineConnect(record)}>申请下线</a>
             </span>);

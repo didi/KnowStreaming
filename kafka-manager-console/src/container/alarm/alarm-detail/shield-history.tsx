@@ -34,7 +34,7 @@ export class ShieldHistory extends React.Component {
       title: '详情',
       content: (
         <ul className="monitor-detail">
-          <li><b>告警名称：</b>{record.monitorName}</li>
+          <li><b>告警规则：</b>{record.monitorName}</li>
           <li><b>开始时间：</b>{moment(record.startTime).format(timeFormat)}</li>
           <li><b>结束时间：</b>{moment(record.endTime).format(timeFormat)}</li>
           <li><b>说明：</b>{record.description}</li>
@@ -48,10 +48,10 @@ export class ShieldHistory extends React.Component {
       formMap: [
         {
           key: 'monitorName',
-          label: '告警名称',
+          label: '告警规则',
           rules: [{
             required: true,
-            message: '请输入告警名称',
+            message: '请输入告警规则',
           }],
           attrs: {
             disabled: true,
@@ -112,7 +112,7 @@ export class ShieldHistory extends React.Component {
           monitorId: record.monitorId,
         } as IMonitorSilences;
         alarm.modifyMask(params, this.id).then(data => {
-          notification.success({ message: '修改成功' });
+          notification.success({ message: '编辑成功' });
         });
       },
     };
@@ -158,7 +158,7 @@ export class ShieldHistory extends React.Component {
         render: (action: any, record: IMonitorSilences) => {
           return(
             <>
-              <a onClick={() => this.modifyMonitor(record)} className="action-button">修改</a>
+              <a onClick={() => this.modifyMonitor(record)} className="action-button">编辑</a>
               <a onClick={() => this.silencesDetail(record)} className="action-button">详情</a>
               <Popconfirm
                 title="确定删除？"

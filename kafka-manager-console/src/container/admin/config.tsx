@@ -26,7 +26,7 @@ export const getUserColumns = () => {
       render: (text: string, record: IUser) => {
         return (
           <span className="table-operation">
-            <a onClick={() => showApplyModal(record)}>修改</a>
+            <a onClick={() => showApplyModal(record)}>编辑</a>
             <Popconfirm
               title="确定删除？"
               onConfirm={() => users.deleteUser(record.username)}
@@ -105,7 +105,7 @@ export const getVersionColumns = () => {
         render: (text: string, record: IUploadFile) => {
           return (
             <span className="table-operation">
-              <a onClick={() => showModifyModal(record)}>修改</a>
+              <a onClick={() => showModifyModal(record)}>编辑</a>
               <Popconfirm
                 title="确定删除？"
                 onConfirm={() => version.deleteFile(record.id)}
@@ -164,7 +164,7 @@ export const getConfigureColumns = () => {
       render: (text: string, record: IConfigure) => {
         return (
           <span className="table-operation">
-            <a onClick={() => showConfigureModal(record)}>修改</a>
+            <a onClick={() => showConfigureModal(record)}>编辑</a>
             <Popconfirm
               title="确定删除？"
               onConfirm={() => admin.deleteConfigure(record.configKey)}

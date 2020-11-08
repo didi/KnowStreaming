@@ -152,7 +152,7 @@ export class AddAlarm extends SearchAndFilterContainer {
           <PageHeader
             className={this.isDetailPage ? 'is-show' : 'btn-group'}
             onBack={() => handlePageBack('/alarm')}
-            title={(this.id || this.id === 0) ? '修改告警配置' : '新建告警配置'}
+            title={(this.id || this.id === 0) ? '编辑告警规则' : '新建告警规则'}
             extra={[
               <Button key="1" type="primary" onClick={() => this.handleSubmit()}>提交</Button>,
               <Button key="2" onClick={() => this.handleResetForm(this.id)}>重置</Button>,

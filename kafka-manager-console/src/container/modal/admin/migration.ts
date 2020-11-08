@@ -104,7 +104,7 @@ export const modifyTransferTask = (item: IReassign, action: string, taskId: numb
       minThrottle: transBToMB(item.minThrottle),
     },
     visible: true,
-    title: '修改',
+    title: '编辑',
     onSubmit: (value: IExecute) => {
       const params = {
         action,

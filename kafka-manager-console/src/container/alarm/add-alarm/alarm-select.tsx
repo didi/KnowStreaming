@@ -52,7 +52,7 @@ export class AlarmSelect extends React.Component<IAlarmSelectProps> {
           target="_blank"
           href="https://github.com/didi/kafka-manager"
         >
-          新建告警组？
+          新增规则组？
         </a>
       </>
     );

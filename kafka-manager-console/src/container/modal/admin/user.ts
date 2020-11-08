@@ -30,7 +30,7 @@ export const showApplyModal = (record?: IUser) => {
     ],
     formData: record || {},
     visible: true,
-    title: record ? '修改用户信息' : '新增用户',
+    title: record ? '修改用户' : '新增用户',
     onSubmit: (value: IUser) => {
       if (record) {
         return users.modfiyUser(value).then(() => {

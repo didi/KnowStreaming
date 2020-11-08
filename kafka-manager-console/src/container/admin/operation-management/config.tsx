@@ -45,7 +45,7 @@ export const migrationTaskColumns = (migrationUrl: string) => {
             <a style={{ marginRight: 16 }}>开始</a>
           </Popconfirm>}
         {[0, 1].indexOf(item.status) > -1 &&
-          <a onClick={() => modifyMigrationTask(item, 'modify')} style={{ marginRight: 16 }}>修改</a>}
+          <a onClick={() => modifyMigrationTask(item, 'modify')} style={{ marginRight: 16 }}>编辑</a>}
         {item.status === 0 &&
           <Popconfirm
             title="确定取消？"

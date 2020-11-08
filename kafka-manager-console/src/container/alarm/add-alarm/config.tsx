@@ -14,7 +14,7 @@ import { region } from 'store/region';
 export const getAlarmColumns = (urlPrefix: string) => {
   const columns = [
     {
-      title: '告警名称',
+      title: '告警规则',
       dataIndex: 'name',
       key: 'name',
       width: '25%',
@@ -32,7 +32,7 @@ export const getAlarmColumns = (urlPrefix: string) => {
           </Tooltip>);
       },
     }, {
-      title: '应用名称',
+      title: '所属应用',
       dataIndex: 'appName',
       key: 'appName',
       width: '25%',
@@ -72,7 +72,7 @@ export const getAlarmColumns = (urlPrefix: string) => {
       width: '10%',
       render: (text: string, item: IMonitorStrategies) => (
         <>
-          <a href={`${urlPrefix}/alarm/modify?id=${item.id}`} className="action-button">修改</a>
+          <a href={`${urlPrefix}/alarm/modify?id=${item.id}`} className="action-button">编辑</a>
           <Popconfirm
             title="确定删除？"
             onConfirm={() => deteleMonitor(item)}
@@ -205,8 +205,8 @@ export const xActionFormMap = [{
 
 export const xTypeFormMap = [{
   key: 'alarmName',
-  label: '告警名称',
-  rules: [{ required: true, message: '请输入告警名称' }],
+  label: '告警规则',
+  rules: [{ required: true, message: '请输入告警规则' }],
   attrs: {placeholder: '请输入', disabled: isDetailPage},
 }, {
   key: 'app',
