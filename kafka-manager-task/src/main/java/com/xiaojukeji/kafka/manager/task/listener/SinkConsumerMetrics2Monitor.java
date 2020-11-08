@@ -19,6 +19,7 @@ import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,7 @@ import java.util.*;
  * @date 20/9/2
  */
 @Component("sinkConsumerMetrics2Monitor")
+@ConditionalOnProperty(prefix = "monitor", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SinkConsumerMetrics2Monitor implements ApplicationListener<ConsumerMetricsCollectedEvent> {
     private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
