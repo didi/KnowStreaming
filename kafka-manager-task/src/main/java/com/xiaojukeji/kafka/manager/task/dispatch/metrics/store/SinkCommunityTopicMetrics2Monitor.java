@@ -19,6 +19,7 @@ import com.xiaojukeji.kafka.manager.task.component.CustomScheduled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import java.util.List;
  * @author zengqiao
  * @date 20/8/10
  */
+@ConditionalOnProperty(prefix = "monitor", name = "enabled", havingValue = "true", matchIfMissing = true)
 @CustomScheduled(name = "sinkCommunityTopicMetrics2Monitor", cron = "1 0/1 * * * ?", threadNum = 5)
 public class SinkCommunityTopicMetrics2Monitor extends AbstractScheduledTask<ClusterDO> {
     private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);

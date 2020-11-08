@@ -12,6 +12,7 @@ import com.xiaojukeji.kafka.manager.monitor.component.AbstractMonitorService;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.task.common.TopicThrottledMetricsCollectedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.List;
  * @date 20/9/24
  */
 @Component("sinkTopicThrottledMetrics2Monitor")
+@ConditionalOnProperty(prefix = "monitor", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SinkTopicThrottledMetrics2Monitor implements ApplicationListener<TopicThrottledMetricsCollectedEvent> {
     @Autowired
     private AbstractMonitorService abstractMonitor;

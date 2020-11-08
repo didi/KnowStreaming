@@ -45,6 +45,7 @@ kcm:
     timeout: 30
 
 monitor:
+  enabled: false
   n9e:
     base-url: http://127.0.0.1/api
     username: admin
