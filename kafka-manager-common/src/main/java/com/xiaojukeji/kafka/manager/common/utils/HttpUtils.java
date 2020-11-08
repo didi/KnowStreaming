@@ -30,7 +30,7 @@ public class HttpUtils {
     private static int CONNECT_TIME_OUT = 15000;
 
     // 读取超时时间, 单位: ms
-    private static int READ_TIME_OUT = 2000;
+    private static int READ_TIME_OUT = 3000;
 
     private static final String METHOD_GET = "GET";
     private static final String METHOD_POST = "POST";
