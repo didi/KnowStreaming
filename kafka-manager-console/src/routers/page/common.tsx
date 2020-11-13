@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import './index.less';
+import 'styles/font.css';
 import 'styles/header-search.less';
 import { Header } from 'container/header';
 import { LeftMenu } from 'container/left-menu';
