@@ -36,7 +36,6 @@ CREATE TABLE `app` (
   UNIQUE KEY `uniq_name` (`name`),
   UNIQUE KEY `uniq_app_id` (`app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='应用信息';
-INSERT INTO app(app_id, name, password, type, applicant, principals, description) VALUES ('km-admin-tmp', 'km-admin-tmp', '123456', 0, 'admin', 'admin', '临时应用');
 
 
 --
@@ -295,6 +294,9 @@ CREATE TABLE `kafka_user` (
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='kafka用户表';
+INSERT INTO app(app_id, name, password, type, applicant, principals, description) VALUES ('dkm_admin', 'KM管理员', 'km_kMl4N8as1Kp0CCY', 1, 'admin', 'admin', 'KM管理员应用-谨慎对外提供');
+INSERT INTO kafka_user(app_id, password, user_type, operation) VALUES ('dkm_admin', 'km_kMl4N8as1Kp0CCY', 1, 0);
+
 
 --
 -- Table structure for table `logical_cluster`
