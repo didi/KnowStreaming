@@ -72,7 +72,7 @@ public class N9eService extends AbstractMonitorService {
     /**
      * 告警组
      */
-    private static final String ALL_NOTIFY_GROUP_URL = "/api/mon/teams/all";
+    private static final String ALL_NOTIFY_GROUP_URL = "/api/rdb/teams/all";
 
     /**
      * 监控策略的增删改查

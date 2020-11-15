@@ -2,7 +2,6 @@ package com.xiaojukeji.kafka.manager.service.service.gateway.impl;
 
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
-import com.xiaojukeji.kafka.manager.common.entity.dto.gateway.TopicConnectionDTO;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.gateway.TopicConnectionDao;
@@ -28,23 +27,16 @@ public class TopicConnectionServiceImpl implements TopicConnectionService {
     private TopicConnectionDao topicConnectionDao;
 
     @Override
-    public int batchAdd(List<TopicConnectionDTO> dtoList) {
-        if (ValidateUtils.isEmptyList(dtoList)) {
+    public int batchAdd(List<TopicConnectionDO> doList) {
+        if (ValidateUtils.isEmptyList(doList)) {
             return 0;
         }
         int count = 0;
-        for (TopicConnectionDTO dto: dtoList) {
+        for (TopicConnectionDO connectionDO: doList) {
             try {
-                TopicConnectionDO topicConnectionDO = new TopicConnectionDO();
-                topicConnectionDO.setClusterId(dto.getClusterId());
-                topicConnectionDO.setTopicName(dto.getTopicName());
-                topicConnectionDO.setType(dto.getType());
-                topicConnectionDO.setAppId(dto.getAppId());
-                topicConnectionDO.setIp(dto.getIp());
-                topicConnectionDO.setClientVersion(dto.getClientVersion());
-                count += topicConnectionDao.replace(topicConnectionDO);
+                count += topicConnectionDao.replace(connectionDO);
             } catch (Exception e) {
-                LOGGER.error("replace topic connections failed, data:{}.", dto);
+                LOGGER.error("replace topic connections failed, data:{}.", connectionDO);
             }
         }
         return count;

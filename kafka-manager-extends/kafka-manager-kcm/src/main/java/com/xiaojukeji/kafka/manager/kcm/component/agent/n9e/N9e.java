@@ -1,6 +1,8 @@
 package com.xiaojukeji.kafka.manager.kcm.component.agent.n9e;
 
 import com.alibaba.fastjson.JSON;
+import com.xiaojukeji.kafka.manager.common.bizenum.KafkaFileEnum;
+import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskTypeEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.CreationTaskData;
 import com.xiaojukeji.kafka.manager.common.utils.HttpUtils;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
@@ -18,6 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,19 +38,21 @@ public class N9e extends AbstractAgent {
     private static final Logger LOGGER = LoggerFactory.getLogger(N9e.class);
 
     @Value("${kcm.n9e.base-url}")
-    private String baseUrl;
-
-    @Value("${kcm.n9e.username}")
-    private String username;
+    private String      baseUrl;
 
     @Value("${kcm.n9e.user-token}")
-    private String userToken;
+    private String      userToken;
 
-    @Value("${kcm.n9e.tpl-id}")
-    private Integer tplId;
+    @Value("${kcm.n9e.account}")
+    private String      account;
 
     @Value("${kcm.n9e.timeout}")
-    private Integer timeout;
+    private Integer     timeout;
+
+    @Value("${kcm.n9e.script-file}")
+    private String      scriptFile;
+
+    private String      script;
 
     /**
      * 并发度，顺序执行
@@ -67,21 +76,14 @@ public class N9e extends AbstractAgent {
 
     private static final String TASK_STD_LOG_URI = "/api/job-ce/task/{taskId}/stdout.json";
 
-    @Override
-    public Long createTask(CreationTaskData dto) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(dto.getKafkaPackageName()).append(",,").append(dto.getKafkaPackageMd5()).append(",,");
-        sb.append(dto.getServerPropertiesName()).append(",,").append(dto.getServerPropertiesMd5());
+    @PostConstruct
+    public void init() {
+        this.script = readScriptInJarFile(scriptFile);
+    }
 
-        Map<String, Object> param = new HashMap<>();
-        param.put("tpl_id", tplId);
-        param.put("batch", BATCH);
-        param.put("tolerance", TOLERANCE);
-        param.put("timeout", timeout);
-        param.put("hosts", dto.getHostList());
-        param.put("pause", ListUtils.strList2String(dto.getPauseList()));
-        param.put("action", "pause");
-        param.put("args", sb.toString());
+    @Override
+    public Long createTask(CreationTaskData creationTaskData) {
+        Map<String, Object> param = buildCreateTaskParam(creationTaskData);
 
         String response = null;
         try {
@@ -96,7 +98,7 @@ public class N9e extends AbstractAgent {
             }
             return Long.valueOf(zr.getDat().toString());
         } catch (Exception e) {
-            LOGGER.error("create task failed, dto:{}.", dto, e);
+            LOGGER.error("create task failed, req:{}.", creationTaskData, e);
         }
         return null;
     }
@@ -126,7 +128,7 @@ public class N9e extends AbstractAgent {
 
     @Override
     public Boolean actionHostTask(Long taskId, String action, String hostname) {
-        Map<String, Object> param = new HashMap<>(3);
+        Map<String, Object> param = new HashMap<>(2);
         param.put("action", action);
         param.put("hostname", hostname);
 
@@ -143,7 +145,7 @@ public class N9e extends AbstractAgent {
             }
             return false;
         } catch (Exception e) {
-            LOGGER.error("action task failed, taskId:{}, action:{}, hostname:{}.", taskId, action, hostname, e);
+            LOGGER.error("action task failed, taskId:{} action:{} hostname:{}.", taskId, action, hostname, e);
         }
         return false;
     }
@@ -186,7 +188,7 @@ public class N9e extends AbstractAgent {
                     JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eTaskResultDTO.class);
             return n9eTaskResultDTO.convert2HostnameStatusMap();
         } catch (Exception e) {
-            LOGGER.error("get task status failed, agentTaskId:{}.", agentTaskId, e);
+            LOGGER.error("get task result failed, agentTaskId:{} response:{}.", agentTaskId, response, e);
         }
         return null;
     }
@@ -217,9 +219,63 @@ public class N9e extends AbstractAgent {
     }
 
     private Map<String, String> buildHeader() {
-        Map<String,String> headers = new HashMap<>(1);
+        Map<String,String> headers = new HashMap<>(2);
         headers.put("Content-Type", "application/json;charset=UTF-8");
         headers.put("X-User-Token", userToken);
         return headers;
+    }
+
+    private Map<String, Object> buildCreateTaskParam(CreationTaskData creationTaskData) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(creationTaskData.getUuid()).append(",,");
+        sb.append(creationTaskData.getClusterId()).append(",,");
+        sb.append(ClusterTaskTypeEnum.getByName(creationTaskData.getTaskType()).getWay()).append(",,");
+        sb.append(creationTaskData.getKafkaPackageName().replace(KafkaFileEnum.PACKAGE.getSuffix(), "")).append(",,");
+        sb.append(creationTaskData.getKafkaPackageMd5()).append(",,");
+        sb.append(creationTaskData.getKafkaPackageUrl()).append(",,");
+        sb.append(creationTaskData.getServerPropertiesName().replace(KafkaFileEnum.SERVER_CONFIG.getSuffix(), "")).append(",,");
+        sb.append(creationTaskData.getServerPropertiesMd5()).append(",,");
+        sb.append(creationTaskData.getServerPropertiesUrl());
+
+        Map<String, Object> params = new HashMap<>(10);
+        params.put("title", String.format("集群ID=%d-升级部署", creationTaskData.getClusterId()));
+        params.put("batch", BATCH);
+        params.put("tolerance", TOLERANCE);
+        params.put("timeout", timeout);
+        params.put("pause", ListUtils.strList2String(creationTaskData.getPauseList()));
+        params.put("script", this.script);
+        params.put("args", sb.toString());
+        params.put("account", account);
+        params.put("action", "pause");
+        params.put("hosts", creationTaskData.getHostList());
+        return params;
+    }
+
+    private static String readScriptInJarFile(String fileName) {
+        InputStream inputStream = N9e.class.getClassLoader().getResourceAsStream(fileName);
+        if (inputStream == null) {
+            LOGGER.error("read kcm script failed, filename:{}", fileName);
+            return "";
+        }
+
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = null;
+            StringBuilder stringBuilder = new StringBuilder("");
+
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            return stringBuilder.toString();
+        } catch (IOException e) {
+            LOGGER.error("read kcm script failed, filename:{}", fileName, e);
+            return "";
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                LOGGER.error("close reading kcm script failed, filename:{}", fileName, e);
+            }
+        }
     }
 }

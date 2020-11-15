@@ -1,8 +1,11 @@
 package com.xiaojukeji.kafka.manager.common.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -47,5 +50,33 @@ public class JsonUtils {
 
     public static String toJSONString(Object obj) {
         return JSON.toJSONString(obj);
+    }
+
+    public static List<TopicConnectionDO> parseTopicConnections(Long clusterId, JSONObject jsonObject) {
+        List<TopicConnectionDO> connectionDOList = new ArrayList<>();
+        for (String clientType: jsonObject.keySet()) {
+            JSONObject topicObject = jsonObject.getJSONObject(clientType);
+
+            // 解析单个Topic的连接信息
+            for (String topicName: topicObject.keySet()) {
+                JSONArray appIdArray = topicObject.getJSONArray(topicName);
+                for (Object appIdDetail : appIdArray.toArray()) {
+                    TopicConnectionDO connectionDO = new TopicConnectionDO();
+
+                    String[] appIdDetailArray = appIdDetail.toString().split("#");
+                    if (appIdDetailArray.length == 3) {
+                        connectionDO.setAppId(appIdDetailArray[0]);
+                        connectionDO.setIp(appIdDetailArray[1]);
+                        connectionDO.setClientVersion(appIdDetailArray[2]);
+                    }
+
+                    connectionDO.setClusterId(clusterId);
+                    connectionDO.setTopicName(topicName);
+                    connectionDO.setType(clientType);
+                    connectionDOList.add(connectionDO);
+                }
+            }
+        }
+        return connectionDOList;
     }
 }

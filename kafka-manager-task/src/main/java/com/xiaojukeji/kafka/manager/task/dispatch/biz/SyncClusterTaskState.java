@@ -11,6 +11,7 @@ import com.xiaojukeji.kafka.manager.task.component.EmptyEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
  * @date 20/9/7
  */
 @CustomScheduled(name = "syncClusterTaskState", cron = "0 0/1 * * * ?", threadNum = 1)
+@ConditionalOnProperty(prefix = "kcm", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SyncClusterTaskState extends AbstractScheduledTask<EmptyEntry> {
     private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
