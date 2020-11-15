@@ -56,6 +56,7 @@ fabric.properties
 *.jar
 *.war
 *.ear
+*.tar.gz
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -99,14 +100,14 @@ target/
 */velocity.log*
 */*.log
 */*.log.*
-web/node_modules/
-web/node_modules/*
+node_modules/
+node_modules/*
 workspace.xml
 /output/*
 .gitversion
-*/node_modules/*
-web/src/main/resources/templates/*
-*/out/*
-*/dist/*
+node_modules/*
+out/*
+dist/
+dist/*
+kafka-manager-web/src/main/resources/templates/
 .DS_Store
-kafka-manager-web/src/main/resources/templates/*
