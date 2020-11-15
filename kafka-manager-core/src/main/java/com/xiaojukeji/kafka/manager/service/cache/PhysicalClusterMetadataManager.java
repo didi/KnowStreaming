@@ -311,6 +311,19 @@ public class PhysicalClusterMetadataManager {
         return metadataMap.get(brokerId);
     }
 
+    public static BrokerMetadata getBrokerMetadata(Long clusterId, String hostname) {
+        Map<Integer, BrokerMetadata> metadataMap = BROKER_METADATA_MAP.get(clusterId);
+        if (metadataMap == null) {
+            return null;
+        }
+        for (BrokerMetadata brokerMetadata: metadataMap.values()) {
+            if (brokerMetadata.getHost().equals(hostname)) {
+                return brokerMetadata;
+            }
+        }
+        return null;
+    }
+
     public static Map<String, List<String>> getBrokerHostKafkaRoleMap(Long clusterId) {
         Map<String, List<String>> hostRoleMap = new HashMap<>();
         ControllerData controllerData = CONTROLLER_DATA_MAP.get(clusterId);

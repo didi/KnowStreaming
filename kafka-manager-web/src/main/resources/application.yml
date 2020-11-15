@@ -37,12 +37,13 @@ account:
   ldap:
 
 kcm:
+  enabled: false
   n9e:
-    base-url: http://127.0.0.1/api
-    username: admin
-    user-token: admin
-    tpl-id: 123456
-    timeout: 30
+    base-url: http://127.0.0.1:8080
+    user-token: 12345678
+    timeout: 300
+    account: km
+    script-file: kcm_script.sh
 
 monitor:
   enabled: false

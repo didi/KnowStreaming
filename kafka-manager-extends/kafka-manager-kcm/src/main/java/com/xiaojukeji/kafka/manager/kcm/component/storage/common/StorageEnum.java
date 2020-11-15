@@ -6,6 +6,7 @@ package com.xiaojukeji.kafka.manager.kcm.component.storage.common;
  * @date 20/4/29
  */
 public enum StorageEnum {
+    GIFT(0, "gift"),
     GIT(1, "git"),
     S3(2, "S3"),
     ;

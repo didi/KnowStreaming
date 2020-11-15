@@ -1,7 +1,7 @@
 package com.xiaojukeji.kafka.manager.service.service.gateway;
 
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
-import com.xiaojukeji.kafka.manager.common.entity.dto.gateway.TopicConnectionDTO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO;
 
 import java.util.Date;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  * @date 20/4/13
  */
 public interface TopicConnectionService {
-    int batchAdd(List<TopicConnectionDTO> dtoList);
+    int batchAdd(List<TopicConnectionDO> doList);
 
     /**
      * 查询连接信息
