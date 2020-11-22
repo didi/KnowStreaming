@@ -28,10 +28,13 @@ public class N9eService extends AbstractMonitorService {
     private Integer monitorN9eNid;
 
     @Value("${monitor.n9e.user-token}")
-    private String monitorN9eToken;
+    private String monitorN9eUserToken;
 
-    @Value("${monitor.n9e.base-url}")
-    private String monitorN9eBaseUrl;
+    @Value("${monitor.n9e.mon.base-url}")
+    private String monitorN9eMonBaseUrl;
+
+    @Value("${monitor.n9e.sink.base-url}")
+    private String monitorN9eSinkBaseUrl;
 
     /**
      * 告警策略
@@ -82,7 +85,7 @@ public class N9eService extends AbstractMonitorService {
         String response = null;
         try {
             response = HttpUtils.postForString(
-                    monitorN9eBaseUrl + STRATEGY_ADD_URL,
+                    monitorN9eMonBaseUrl + STRATEGY_ADD_URL,
                     JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid)),
                     buildHeader()
             );
@@ -106,7 +109,7 @@ public class N9eService extends AbstractMonitorService {
         String response = null;
         try {
             response = HttpUtils.deleteForString(
-                    monitorN9eBaseUrl + STRATEGY_DEL_URL,
+                    monitorN9eMonBaseUrl + STRATEGY_DEL_URL,
                     JSON.toJSONString(params),
                     buildHeader()
             );
@@ -127,7 +130,7 @@ public class N9eService extends AbstractMonitorService {
         String response = null;
         try {
             response = HttpUtils.putForString(
-                    monitorN9eBaseUrl + STRATEGY_MODIFY_URL,
+                    monitorN9eMonBaseUrl + STRATEGY_MODIFY_URL,
                     JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid)),
                     buildHeader()
             );
@@ -150,7 +153,7 @@ public class N9eService extends AbstractMonitorService {
 
         String response = null;
         try {
-            response = HttpUtils.get(monitorN9eBaseUrl + STRATEGY_QUERY_BY_NS_URL, params, buildHeader());
+            response = HttpUtils.get(monitorN9eMonBaseUrl + STRATEGY_QUERY_BY_NS_URL, params, buildHeader());
             N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
             if (!ValidateUtils.isBlank(n9eResult.getErr())) {
                 LOGGER.error("get monitor strategies failed, response:{}.", response);
@@ -169,7 +172,7 @@ public class N9eService extends AbstractMonitorService {
 
         String response = null;
         try {
-            response = HttpUtils.get(monitorN9eBaseUrl + uri, new HashMap<>(0), buildHeader());
+            response = HttpUtils.get(monitorN9eMonBaseUrl + uri, new HashMap<>(0), buildHeader());
             N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
             if (!ValidateUtils.isBlank(n9eResult.getErr())) {
                 LOGGER.error("get monitor strategy failed, response:{}.", response);
@@ -221,13 +224,13 @@ public class N9eService extends AbstractMonitorService {
     public Boolean sinkMetrics(List<MetricSinkPoint> pointList) {
         String response = null;
         try {
-            String content = JSON.toJSONString(N9eConverter.convert2N9eMetricSinkPointList(pointList));
+            String content = JSON.toJSONString(N9eConverter.convert2N9eMetricSinkPointList(String.valueOf(this.monitorN9eNid), pointList));
 
             long startTime = System.currentTimeMillis();
             response = HttpUtils.postForString(
-                    monitorN9eBaseUrl + COLLECTOR_SINK_DATA_URL,
+                    monitorN9eSinkBaseUrl + COLLECTOR_SINK_DATA_URL,
                     content,
-                    null
+                    buildHeader()
             );
             LOGGER.info("sinkMetrics cost-time:{}.", System.currentTimeMillis() - startTime);
 
@@ -251,7 +254,7 @@ public class N9eService extends AbstractMonitorService {
     public List<NotifyGroup> getNotifyGroups() {
         String response = null;
         try {
-            response = HttpUtils.get(monitorN9eBaseUrl + ALL_NOTIFY_GROUP_URL, new HashMap<>(0), buildHeader());
+            response = HttpUtils.get(monitorN9eMonBaseUrl + ALL_NOTIFY_GROUP_URL, new HashMap<>(0), buildHeader());
             N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
             if (!ValidateUtils.isBlank(n9eResult.getErr())) {
                 LOGGER.error("get notify group failed, response:{}.", response);
@@ -267,8 +270,7 @@ public class N9eService extends AbstractMonitorService {
     private Map<String, String> buildHeader() {
         Map<String, String> header = new HashMap<>(2);
         header.put("Content-Type", "application/json");
-        header.put("X-User-Token", monitorN9eToken);
+        header.put("X-User-Token", monitorN9eUserToken);
         return header;
     }
-
 }

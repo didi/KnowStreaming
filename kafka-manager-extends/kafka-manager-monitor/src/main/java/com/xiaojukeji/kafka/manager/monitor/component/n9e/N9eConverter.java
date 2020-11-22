@@ -13,13 +13,14 @@ import java.util.List;
  * @date 20/8/26
  */
 public class N9eConverter {
-    public static List<N9eMetricSinkPoint> convert2N9eMetricSinkPointList(List<MetricSinkPoint> pointList) {
+    public static List<N9eMetricSinkPoint> convert2N9eMetricSinkPointList(String nid, List<MetricSinkPoint> pointList) {
         if (pointList == null || pointList.isEmpty()) {
             return new ArrayList<>();
         }
         List<N9eMetricSinkPoint> n9ePointList = new ArrayList<>();
         for (MetricSinkPoint sinkPoint: pointList) {
             n9ePointList.add(new N9eMetricSinkPoint(
+                    nid,
                     sinkPoint.getName(),
                     sinkPoint.getValue(),
                     sinkPoint.getStep(),

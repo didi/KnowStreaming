@@ -5,8 +5,6 @@ package com.xiaojukeji.kafka.manager.monitor.common;
  * @date 17/5/24.
  */
 public class MonitorSinkConstant {
-    public static final String MONITOR_SYSTEM_TAG_DEFAULT_HOST = "kafka-manager-ser01.ys01";
-
     /**
      * 指标名前缀
      */

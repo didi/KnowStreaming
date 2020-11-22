@@ -11,7 +11,7 @@ import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.monitor.common.entry.MetricSinkPoint;
 import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.MonitorConsumePartitionSinkTag;
-import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.MonitorConsumerSinkTag;
+import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.MonitorConsumeTopicSinkTag;
 import com.xiaojukeji.kafka.manager.monitor.component.AbstractMonitorService;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
@@ -99,7 +99,6 @@ public class SinkConsumerMetrics2Monitor implements ApplicationListener<Consumer
                     MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                     timestamp,
                     new MonitorConsumePartitionSinkTag(
-                            MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
                             logicalClusterName,
                             metrics.getTopicName(),
                             partitionId,
@@ -115,8 +114,7 @@ public class SinkConsumerMetrics2Monitor implements ApplicationListener<Consumer
                 maxLag,
                 MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                 timestamp,
-                new MonitorConsumerSinkTag(
-                        MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
+                new MonitorConsumeTopicSinkTag(
                         logicalClusterName,
                         metrics.getTopicName(),
                         metrics.getConsumerGroup()
@@ -139,8 +137,7 @@ public class SinkConsumerMetrics2Monitor implements ApplicationListener<Consumer
                 maxDelayTime,
                 MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                 timestamp,
-                new MonitorConsumerSinkTag(
-                        MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
+                new MonitorConsumeTopicSinkTag(
                         logicalClusterName,
                         metrics.getTopicName(),
                         metrics.getConsumerGroup()

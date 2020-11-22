@@ -4,20 +4,11 @@ package com.xiaojukeji.kafka.manager.monitor.common.entry.sink;
  * @author huangjw
  * @date 17/5/24.
  */
-public class MonitorTopicSinkTag extends MonitorKafkaBaseSinkTag {
+public class MonitorTopicSinkTag extends AbstractMonitorKafkaSinkTag {
+    protected String topic;
 
-    private String topic;
-
-    public MonitorTopicSinkTag(String host, String cluster, String topic) {
-        super(host, cluster);
-        this.topic = topic;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
+    public MonitorTopicSinkTag(String cluster, String topic) {
+        super(cluster);
         this.topic = topic;
     }
 
@@ -26,7 +17,11 @@ public class MonitorTopicSinkTag extends MonitorKafkaBaseSinkTag {
         return "MonitorTopicSinkTag{" +
                 "topic='" + topic + '\'' +
                 ", cluster='" + cluster + '\'' +
-                ", host='" + host + '\'' +
                 '}';
+    }
+
+    @Override
+    public String convert2Tags() {
+        return String.format("cluster=%s,topic=%s", cluster, topic);
     }
 }
