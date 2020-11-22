@@ -40,7 +40,7 @@
 - [kafka-manager 安装手册](docs/install_guide/install_guide_cn.md)
 - [kafka-manager 接入集群](docs/user_guide/add_cluster/add_cluster.md)
 - [kafka-manager 用户使用手册](docs/user_guide/user_guide_cn.md)
-
+- [kafka-manager FAQ](docs/user_guide/faq.md)
 
 ## 钉钉交流群
 
