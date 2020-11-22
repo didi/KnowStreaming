@@ -1,6 +1,8 @@
 package com.xiaojukeji.kafka.manager.monitor.component.n9e;
 
 import com.alibaba.fastjson.JSON;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.xiaojukeji.kafka.manager.common.utils.HttpUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.monitor.component.AbstractMonitorService;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 夜莺
@@ -35,6 +38,13 @@ public class N9eService extends AbstractMonitorService {
 
     @Value("${monitor.n9e.sink.base-url}")
     private String monitorN9eSinkBaseUrl;
+
+    @Value("${monitor.n9e.rdb.base-url}")
+    private String monitorN9eRdbBaseUrl;
+
+    private static final Cache<String, NotifyGroup> NOTIFY_GROUP_CACHE = Caffeine.newBuilder()
+            .maximumSize(100000)
+            .expireAfterWrite(60, TimeUnit.MINUTES).build();
 
     /**
      * 告警策略
@@ -75,7 +85,7 @@ public class N9eService extends AbstractMonitorService {
     /**
      * 告警组
      */
-    private static final String ALL_NOTIFY_GROUP_URL = "/api/rdb/teams/all";
+    private static final String ALL_NOTIFY_GROUP_URL = "/api/rdb/teams/all?limit=10000";
 
     /**
      * 监控策略的增删改查
@@ -86,7 +96,7 @@ public class N9eService extends AbstractMonitorService {
         try {
             response = HttpUtils.postForString(
                     monitorN9eMonBaseUrl + STRATEGY_ADD_URL,
-                    JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid)),
+                    JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid, getNotifyGroupsFromCacheFirst())),
                     buildHeader()
             );
             N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
@@ -94,7 +104,7 @@ public class N9eService extends AbstractMonitorService {
                 LOGGER.error("create strategy failed, strategy:{} response:{}.", strategy, response);
                 return null;
             }
-            return (Integer) n9eResult.getDat();
+            return JSON.parseObject(JSON.toJSONString(n9eResult.getDat())).getInteger("id");
         } catch (Exception e) {
             LOGGER.error("create strategy failed, strategy:{} response:{}.", strategy, response, e);
         }
@@ -131,7 +141,7 @@ public class N9eService extends AbstractMonitorService {
         try {
             response = HttpUtils.putForString(
                     monitorN9eMonBaseUrl + STRATEGY_MODIFY_URL,
-                    JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid)),
+                    JSON.toJSONString(N9eConverter.convert2N9eStrategy(strategy, monitorN9eNid, getNotifyGroupsFromCacheFirst())),
                     buildHeader()
             );
             N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
@@ -159,7 +169,7 @@ public class N9eService extends AbstractMonitorService {
                 LOGGER.error("get monitor strategies failed, response:{}.", response);
                 return new ArrayList<>();
             }
-            return N9eConverter.convert2StrategyList(JSON.parseArray(JSON.toJSONString(n9eResult.getDat()), N9eStrategy.class));
+            return N9eConverter.convert2StrategyList(JSON.parseArray(JSON.toJSONString(n9eResult.getDat()), N9eStrategy.class), getNotifyGroupsFromCacheFirst());
         } catch (Exception e) {
             LOGGER.error("get monitor strategies failed, response:{}.", response, e);
         }
@@ -178,7 +188,7 @@ public class N9eService extends AbstractMonitorService {
                 LOGGER.error("get monitor strategy failed, response:{}.", response);
                 return null;
             }
-            return N9eConverter.convert2Strategy(JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eStrategy.class));
+            return N9eConverter.convert2Strategy(JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eStrategy.class), getNotifyGroupsFromCacheFirst());
         } catch (Exception e) {
             LOGGER.error("get monitor strategy failed, response:{}.", response, e);
         }
@@ -254,17 +264,32 @@ public class N9eService extends AbstractMonitorService {
     public List<NotifyGroup> getNotifyGroups() {
         String response = null;
         try {
-            response = HttpUtils.get(monitorN9eMonBaseUrl + ALL_NOTIFY_GROUP_URL, new HashMap<>(0), buildHeader());
+            response = HttpUtils.get(monitorN9eRdbBaseUrl + ALL_NOTIFY_GROUP_URL, new HashMap<>(0), buildHeader());
             N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
             if (!ValidateUtils.isBlank(n9eResult.getErr())) {
                 LOGGER.error("get notify group failed, response:{}.", response);
                 return new ArrayList<>();
             }
-            return N9eConverter.convert2NotifyGroupList(JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eNotifyGroup.class));
+            List<NotifyGroup> notifyGroupList = N9eConverter.convert2NotifyGroupList(JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eNotifyGroup.class));
+            if (ValidateUtils.isEmptyList(notifyGroupList)) {
+                return new ArrayList<>();
+            }
+            for (NotifyGroup notifyGroup: notifyGroupList) {
+                NOTIFY_GROUP_CACHE.put(notifyGroup.getName(), notifyGroup);
+            }
+            return notifyGroupList;
         } catch (Exception e) {
             LOGGER.error("get notify group failed, response:{}.", response, e);
         }
         return new ArrayList<>();
+    }
+
+    private Map<String, NotifyGroup> getNotifyGroupsFromCacheFirst() {
+        Map<String, NotifyGroup> notifyGroupMap = NOTIFY_GROUP_CACHE.asMap();
+        if (ValidateUtils.isEmptyMap(notifyGroupMap)) {
+            this.getNotifyGroups();
+        }
+        return NOTIFY_GROUP_CACHE.asMap();
     }
 
     private Map<String, String> buildHeader() {
