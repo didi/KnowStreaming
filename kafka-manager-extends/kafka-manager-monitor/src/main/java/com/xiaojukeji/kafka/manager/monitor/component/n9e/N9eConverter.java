@@ -1,12 +1,11 @@
 package com.xiaojukeji.kafka.manager.monitor.component.n9e;
 
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.monitor.common.entry.*;
 import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author zengqiao
@@ -31,13 +30,20 @@ public class N9eConverter {
         return n9ePointList;
     }
 
-    public static N9eStrategy convert2N9eStrategy(Strategy strategy, Integer monitorN9eNid) {
+    public static N9eStrategy convert2N9eStrategy(Strategy strategy,
+                                                  Integer monitorN9eNid,
+                                                  Map<String, NotifyGroup> notifyGroupMap) {
         if (strategy == null) {
             return null;
         }
+        if (ValidateUtils.isNull(notifyGroupMap)) {
+            notifyGroupMap = new HashMap<>();
+        }
 
         N9eStrategy n9eStrategy = new N9eStrategy();
-        n9eStrategy.setId(strategy.getId().intValue());
+        if (!ValidateUtils.isNull(strategy.getId())) {
+            n9eStrategy.setId(strategy.getId().intValue());
+        }
         n9eStrategy.setCategory(1);
         n9eStrategy.setName(strategy.getName());
         n9eStrategy.setNid(monitorN9eNid);
@@ -72,7 +78,17 @@ public class N9eConverter {
 
         StrategyAction strategyAction = strategy.getStrategyActionList().get(0);
         n9eStrategy.setConverge(ListUtils.string2IntList(strategyAction.getConverge()));
-        n9eStrategy.setNotify_group(ListUtils.string2StrList(strategyAction.getNotifyGroup()));
+
+        List<Integer> notifyGroups = new ArrayList<>();
+        for (String name: ListUtils.string2StrList(strategyAction.getNotifyGroup())) {
+            NotifyGroup notifyGroup = notifyGroupMap.get(name);
+            if (ValidateUtils.isNull(notifyGroup)) {
+                continue;
+            }
+            notifyGroups.add(notifyGroup.getId().intValue());
+        }
+        n9eStrategy.setNotify_group(notifyGroups);
+
         n9eStrategy.setNotify_user(new ArrayList<>());
         n9eStrategy.setCallback(strategyAction.getCallback());
         n9eStrategy.setEnable_stime("00:00");
@@ -80,26 +96,36 @@ public class N9eConverter {
         n9eStrategy.setEnable_days_of_week(ListUtils.string2IntList(strategy.getPeriodDaysOfWeek()));
 
         n9eStrategy.setNeed_upgrade(0);
-        n9eStrategy.setAlert_upgrade(new ArrayList<>());
+        n9eStrategy.setAlert_upgrade(new N9eStrategyAlertUpgrade());
         return n9eStrategy;
     }
 
-    public static List<Strategy> convert2StrategyList(List<N9eStrategy> n9eStrategyList) {
+    public static List<Strategy> convert2StrategyList(List<N9eStrategy> n9eStrategyList,
+                                                      Map<String, NotifyGroup> notifyGroupMap) {
         if (n9eStrategyList == null || n9eStrategyList.isEmpty()) {
             return new ArrayList<>();
         }
 
         List<Strategy> strategyList = new ArrayList<>();
         for (N9eStrategy n9eStrategy: n9eStrategyList) {
-            strategyList.add(convert2Strategy(n9eStrategy));
+            strategyList.add(convert2Strategy(n9eStrategy, notifyGroupMap));
         }
         return strategyList;
     }
 
-    public static Strategy convert2Strategy(N9eStrategy n9eStrategy) {
+    public static Strategy convert2Strategy(N9eStrategy n9eStrategy, Map<String, NotifyGroup> notifyGroupMap) {
         if (n9eStrategy == null) {
             return null;
         }
+        if (ValidateUtils.isNull(notifyGroupMap)) {
+            notifyGroupMap = new HashMap<>();
+        }
+
+        Map<Integer, NotifyGroup> newNotifyGroupMap = new HashMap<>(notifyGroupMap.size());
+        for (NotifyGroup notifyGroup: notifyGroupMap.values()) {
+            newNotifyGroupMap.put(notifyGroup.getId().intValue(), notifyGroup);
+        }
+
         Strategy strategy = new Strategy();
         strategy.setId(n9eStrategy.getId().longValue());
         strategy.setName(n9eStrategy.getName());
@@ -130,7 +156,17 @@ public class N9eConverter {
         strategy.setStrategyFilterList(strategyFilterList);
 
         StrategyAction strategyAction = new StrategyAction();
-        strategyAction.setNotifyGroup(ListUtils.strList2String(n9eStrategy.getNotify_group()));
+
+        List<String> notifyGroups = new ArrayList<>();
+        for (Integer id: n9eStrategy.getNotify_group()) {
+            NotifyGroup notifyGroup = newNotifyGroupMap.get(id);
+            if (ValidateUtils.isNull(notifyGroup)) {
+                continue;
+            }
+            notifyGroups.add(notifyGroup.getName());
+        }
+        strategyAction.setNotifyGroup(ListUtils.strList2String(notifyGroups));
+
         strategyAction.setConverge(ListUtils.intList2String(n9eStrategy.getConverge()));
         strategyAction.setCallback(n9eStrategy.getCallback());
         strategy.setStrategyActionList(Arrays.asList(strategyAction));

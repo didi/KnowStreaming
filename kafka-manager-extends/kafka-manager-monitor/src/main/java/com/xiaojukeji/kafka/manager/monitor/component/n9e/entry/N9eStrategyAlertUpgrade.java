@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.monitor.component.n9e.entry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,13 +8,13 @@ import java.util.List;
  * @date 20/10/19
  */
 public class N9eStrategyAlertUpgrade {
-    private Integer duration;
+    private Integer duration = 60;
 
-    private Integer level;
+    private Integer level = 1;
 
-    private List<Integer> users;
+    private List<Integer> users = new ArrayList<>();
 
-    private List<String> groups;
+    private List<Integer> groups = new ArrayList<>();
 
     public Integer getDuration() {
         return duration;
@@ -39,11 +40,11 @@ public class N9eStrategyAlertUpgrade {
         this.users = users;
     }
 
-    public List<String> getGroups() {
+    public List<Integer> getGroups() {
         return groups;
     }
 
-    public void setGroups(List<String> groups) {
+    public void setGroups(List<Integer> groups) {
         this.groups = groups;
     }
 

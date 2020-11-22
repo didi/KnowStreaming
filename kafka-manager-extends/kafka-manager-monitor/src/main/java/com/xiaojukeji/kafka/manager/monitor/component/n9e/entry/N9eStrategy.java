@@ -36,11 +36,11 @@ public class N9eStrategy {
 
     private Integer recovery_notify;
 
-    private List<N9eStrategyAlertUpgrade> alert_upgrade = new ArrayList<>();
+    private N9eStrategyAlertUpgrade alert_upgrade;
 
     private List<Integer> converge;
 
-    private List<String> notify_group;
+    private List<Integer> notify_group;
 
     private List<Integer> notify_user;
 
@@ -142,11 +142,11 @@ public class N9eStrategy {
         this.recovery_notify = recovery_notify;
     }
 
-    public List<N9eStrategyAlertUpgrade> getAlert_upgrade() {
+    public N9eStrategyAlertUpgrade getAlert_upgrade() {
         return alert_upgrade;
     }
 
-    public void setAlert_upgrade(List<N9eStrategyAlertUpgrade> alert_upgrade) {
+    public void setAlert_upgrade(N9eStrategyAlertUpgrade alert_upgrade) {
         this.alert_upgrade = alert_upgrade;
     }
 
@@ -158,11 +158,11 @@ public class N9eStrategy {
         this.converge = converge;
     }
 
-    public List<String> getNotify_group() {
+    public List<Integer> getNotify_group() {
         return notify_group;
     }
 
-    public void setNotify_group(List<String> notify_group) {
+    public void setNotify_group(List<Integer> notify_group) {
         this.notify_group = notify_group;
     }
 
