@@ -100,7 +100,6 @@ public class SinkCommunityTopicMetrics2Monitor extends AbstractScheduledTask<Clu
                         MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                         timestamp,
                         new MonitorTopicSinkTag(
-                                MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
                                 logicalClusterName,
                                 metrics.getTopicName()
                         )
@@ -112,7 +111,6 @@ public class SinkCommunityTopicMetrics2Monitor extends AbstractScheduledTask<Clu
                         MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                         timestamp,
                         new MonitorTopicSinkTag(
-                                MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
                                 logicalClusterName,
                                 metrics.getTopicName()
                         )
@@ -124,7 +122,6 @@ public class SinkCommunityTopicMetrics2Monitor extends AbstractScheduledTask<Clu
                         MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                         timestamp,
                         new MonitorTopicSinkTag(
-                                MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
                                 logicalClusterName,
                                 metrics.getTopicName()
                         )

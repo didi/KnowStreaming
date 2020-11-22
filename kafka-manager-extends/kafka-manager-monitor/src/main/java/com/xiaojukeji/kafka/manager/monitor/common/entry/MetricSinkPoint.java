@@ -1,8 +1,6 @@
 package com.xiaojukeji.kafka.manager.monitor.common.entry;
 
-import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.MonitorBaseSinkTag;
-
-import java.text.DecimalFormat;
+import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.AbstractMonitorSinkTag;
 
 /**
  * @author huangjw
@@ -17,7 +15,7 @@ public class MetricSinkPoint {
     /**
      * 指标值
      */
-    private String value;
+    private Double value;
 
     /**
      * 上报周期
@@ -32,16 +30,11 @@ public class MetricSinkPoint {
     /**
      * tags
      */
-    private MonitorBaseSinkTag tags;
+    private AbstractMonitorSinkTag tags;
 
-    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.00");
-
-    public MetricSinkPoint(String name, double value, int step, long timestamp, MonitorBaseSinkTag tags) {
-        if (value <= 0.001) {
-            value = 0.0;
-        }
+    public MetricSinkPoint(String name, double value, int step, long timestamp, AbstractMonitorSinkTag tags) {
         this.name = name;
-        this.value = DECIMAL_FORMAT.format(value);
+        this.value = value;
         this.step = step;
         this.timestamp = timestamp;
         this.tags = tags;
@@ -51,25 +44,45 @@ public class MetricSinkPoint {
         return name;
     }
 
-    public String getValue() {
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getValue() {
         return value;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public MonitorBaseSinkTag getTags() {
-        return tags;
+    public void setValue(Double value) {
+        this.value = value;
     }
 
     public int getStep() {
         return step;
     }
 
+    public void setStep(int step) {
+        this.step = step;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public AbstractMonitorSinkTag getTags() {
+        return tags;
+    }
+
+    public void setTags(AbstractMonitorSinkTag tags) {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
-        return "MetricPoint{" +
+        return "MetricSinkPoint{" +
                 "name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 ", timestamp=" + timestamp +

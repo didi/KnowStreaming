@@ -19,7 +19,7 @@ spring:
     allow-bean-definition-overriding: true
 
   profiles:
-    active: dev,account-dev,monitor-dev,notify-dev,kcm-dev
+    active: dev
   servlet:
     multipart:
       max-file-size: 60MB
@@ -48,10 +48,12 @@ kcm:
 monitor:
   enabled: false
   n9e:
-    base-url: http://127.0.0.1/api
-    username: admin
-    user-token: admin
-    nid: 10
+    nid: 2
+    user-token: 1234567890
+    mon:
+      base-url: http://127.0.0.1:8032
+    sink:
+      base-url: http://127.0.0.1:8008
 
 notify:
   kafka:

@@ -85,7 +85,6 @@ public class SinkTopicThrottledMetrics2Monitor implements ApplicationListener<To
                     MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                     startTime / 1000,
                     new MonitorTopicThrottledSinkTag(
-                            MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
                             logicalClusterName,
                             metrics.getTopicName(),
                             metrics.getAppId()
@@ -100,7 +99,6 @@ public class SinkTopicThrottledMetrics2Monitor implements ApplicationListener<To
                     MonitorSinkConstant.MONITOR_SYSTEM_SINK_STEP,
                     startTime / 1000,
                     new MonitorTopicThrottledSinkTag(
-                            MonitorSinkConstant.MONITOR_SYSTEM_TAG_DEFAULT_HOST,
                             logicalClusterName,
                             metrics.getTopicName(),
                             metrics.getAppId()

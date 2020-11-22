@@ -4,19 +4,11 @@ package com.xiaojukeji.kafka.manager.monitor.common.entry.sink;
  * @author zengqiao
  * @date 20/09/02
  */
-public class MonitorConsumePartitionSinkTag extends MonitorTopicPartitionSinkTag {
+public class MonitorConsumePartitionSinkTag extends MonitorPartitionSinkTag {
     private String consumerGroup;
 
-    public MonitorConsumePartitionSinkTag(String host, String cluster, String topic, Integer partition, String consumerGroup) {
-        super(host, cluster, topic, partition);
-        this.consumerGroup = consumerGroup;
-    }
-
-    public String getConsumerGroup() {
-        return consumerGroup;
-    }
-
-    public void setConsumerGroup(String consumerGroup) {
+    public MonitorConsumePartitionSinkTag(String cluster, String topic, Integer partition, String consumerGroup) {
+        super(cluster, topic, partition);
         this.consumerGroup = consumerGroup;
     }
 
@@ -27,7 +19,11 @@ public class MonitorConsumePartitionSinkTag extends MonitorTopicPartitionSinkTag
                 ", topic='" + topic + '\'' +
                 ", partition='" + partition + '\'' +
                 ", cluster='" + cluster + '\'' +
-                ", host='" + host + '\'' +
                 '}';
+    }
+
+    @Override
+    public String convert2Tags() {
+        return String.format("cluster=%s,topic=%s,partition=%s,consumerGroup=%s", cluster, topic, partition, consumerGroup);
     }
 }

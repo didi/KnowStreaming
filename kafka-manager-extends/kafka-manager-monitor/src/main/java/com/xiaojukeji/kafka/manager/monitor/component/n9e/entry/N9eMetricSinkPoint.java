@@ -1,6 +1,6 @@
 package com.xiaojukeji.kafka.manager.monitor.component.n9e.entry;
 
-import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.MonitorBaseSinkTag;
+import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.AbstractMonitorSinkTag;
 
 /**
  * 夜莺上报监控数据点
@@ -9,19 +9,19 @@ import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.MonitorBaseSinkTag
  */
 public class N9eMetricSinkPoint {
     /**
+     * 节点ID
+     */
+    private String nid;
+
+    /**
      * 指标名
      */
     private String metric;
 
     /**
-     * 指标对应的机器
-     */
-    private String endpoint;
-
-    /**
      * 指标值
      */
-    private String value;
+    private Double value;
 
     /**
      * 上报周期
@@ -36,19 +36,28 @@ public class N9eMetricSinkPoint {
     /**
      * tags
      */
-    private MonitorBaseSinkTag tags;
+    private String tags;
 
-    public N9eMetricSinkPoint(String metric,
-                              String value,
+    public N9eMetricSinkPoint(String nid,
+                              String metric,
+                              Double value,
                               int step,
                               long timestamp,
-                              MonitorBaseSinkTag tags) {
+                              AbstractMonitorSinkTag tags) {
+        this.nid = nid;
         this.metric = metric;
-        this.endpoint = tags.getHost();
         this.value = value;
         this.step = step;
         this.timestamp = timestamp;
-        this.tags = tags;
+        this.tags = tags.convert2Tags();
+    }
+
+    public String getNid() {
+        return nid;
+    }
+
+    public void setNid(String nid) {
+        this.nid = nid;
     }
 
     public String getMetric() {
@@ -59,19 +68,11 @@ public class N9eMetricSinkPoint {
         this.metric = metric;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public String getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
@@ -91,23 +92,23 @@ public class N9eMetricSinkPoint {
         this.timestamp = timestamp;
     }
 
-    public MonitorBaseSinkTag getTags() {
+    public String getTags() {
         return tags;
     }
 
-    public void setTags(MonitorBaseSinkTag tags) {
+    public void setTags(String tags) {
         this.tags = tags;
     }
 
     @Override
     public String toString() {
         return "N9eMetricSinkPoint{" +
-                "metric='" + metric + '\'' +
-                ", endpoint='" + endpoint + '\'' +
-                ", value='" + value + '\'' +
+                "nid=" + nid +
+                ", metric='" + metric + '\'' +
+                ", value=" + value +
                 ", step=" + step +
                 ", timestamp=" + timestamp +
-                ", tags=" + tags +
+                ", tags='" + tags + '\'' +
                 '}';
     }
 }
