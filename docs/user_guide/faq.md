@@ -14,6 +14,7 @@
 - 3、登录失败？
 - 4、页面流量信息等无数据？
 - 5、如何对接夜莺的监控告警功能？
+- 6、如何使用`MySQL 8`？
 
 ---
 
@@ -58,4 +59,10 @@
 
 ### 5、如何对接夜莺的监控告警功能？
 
-- 参看 [kafka-manager 对接夜莺监控](docs/dev_guide/intergration_n9e_monitor.md) 说明。
+- 参看 [kafka-manager 对接夜莺监控](../dev_guide/Intergration_n9e_monitor.md) 说明。
+
+---
+
+### 6、如何使用`MySQL 8`？
+
+- 参看 [kafka-manager 使用`MySQL 8`](../dev_guide/use_mysql_8.md) 说明。
