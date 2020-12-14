@@ -5,6 +5,9 @@
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
+项目地址：http://10.179.37.199:8008/kafka/
+初始用户名／密码：admin／admin
+
 --- 
 
 ## 主要功能特性
@@ -51,7 +54,7 @@
 
 ### 内部核心人员
 
-`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`
+`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`mrazkong`、`zhaoyinrui`
 
 
 ### 外部贡献者
