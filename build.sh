@@ -3,8 +3,8 @@ workspace=$(cd $(dirname $0) && pwd -P)
 cd $workspace
 
 ## constant
-app_name=kafka-manager
-output_dir=output
+km_version=2.1.0
+app_name=kafka-manager-$km_version
 
 gitversion=.gitversion
 control=./control.sh
@@ -38,17 +38,17 @@ function build() {
 
 function make_output() {
 	# 新建output目录
-	rm -rf $output_dir &>/dev/null
-	mkdir -p $output_dir &>/dev/null
+	rm -rf $app_name &>/dev/null
+	mkdir -p $app_name &>/dev/null
 
 	# 填充output目录, output内的内容 即为 线上部署内容
 	(
 #        cp -rf $control $output_dir &&                 # 拷贝 control.sh 脚本    至output目录
-        cp -rf $create_mysql_table $output_dir &&       # 拷贝 sql 初始化脚本      至output目录
-        cp -rf $app_config_file $output_dir &&          # 拷贝 application.yml   至output目录
+        cp -rf $create_mysql_table $app_name &&       # 拷贝 sql 初始化脚本      至output目录
+        cp -rf $app_config_file $app_name &&          # 拷贝 application.yml   至output目录
 
         # 拷贝程序包到output路径
-		cp kafka-manager-web/target/${app_name}-*-SNAPSHOT.jar ${output_dir}/${app_name}.jar
+		cp kafka-manager-web/target/kafka-manager-web-$km_version-SNAPSHOT.jar ${app_name}/${app_name}-SNAPSHOT.jar
         echo -e "make output ok."
 	) || { echo -e "make output error"; exit 2; } # 填充output目录失败后, 退出码为 非0
 }
@@ -56,7 +56,7 @@ function make_output() {
 function make_package() {
 	# 压缩output目录
 	(
-	    tar cvzf ${app_name}.tar.gz ${output_dir}
+	    tar cvzf ${app_name}.tar.gz ${app_name}
         echo -e "make package ok."
 	) || { echo -e "make package error"; exit 2; } # 压缩output目录失败后, 退出码为 非0
 }
