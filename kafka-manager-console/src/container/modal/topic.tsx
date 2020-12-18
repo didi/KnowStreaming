@@ -22,7 +22,7 @@ export const applyTopic = () => {
     formMap: [
       {
         key: 'clusterId',
-        label: '所属集群：',
+        label: '所属逻辑集群：',
         type: 'select',
         options: cluster.clusterData,
         rules: [{ required: true, message: '请选择' }],
@@ -36,8 +36,8 @@ export const applyTopic = () => {
           addonBefore: region.currentRegion === 'us' || region.currentRegion === 'ru' ? `${region.currentRegion}01_` : '',
         },
         rules: [
-          { required: true },
           {
+            required: true,
             pattern: /^[-\w]{3,128}$/,
             message: '只能包含字母、数字、下划线（_）和短划线(-),长度限制在3-128字符之间',
           },
@@ -90,6 +90,8 @@ export const applyTopic = () => {
     visible: true,
     title: '申请Topic',
     okText: '确认',
+    // customRenderElement: <span className="tips">集群资源充足时，预计1分钟自动审批通过</span>,
+    isWaitting: true,
     onSubmit: (value: any) => {
       value.topicName = region.currentRegion === 'us' || region.currentRegion === 'ru' ?
         `${region.currentRegion}01_` + value.topicName : value.topicName;
@@ -102,11 +104,21 @@ export const applyTopic = () => {
         description: value.description,
         extensions: JSON.stringify(params),
       };
-      topic.applyTopic(quotaParams).then(data => {
-        notification.success({ message: '申请Topic成功' });
+      return topic.applyTopic(quotaParams).then(data => {
         window.location.href = `${urlPrefix}/user/order-detail/?orderId=${data.id}&region=${region.currentRegion}`;
-      });
+      })
     },
+    onSubmitFaild: (err: any, ref: any, formData: any, formMap: any) => {
+      if (err.message === 'topic already existed') {
+        const topic = ref.getFieldValue('topicName');
+        ref.setFields({
+          topicName: {
+            value: topic,
+            errors: [new Error('该topic名称已存在')],
+          }
+        })
+      }
+    }
   };
   wrapper.open(xFormModal);
 };
@@ -170,7 +182,7 @@ export const showApplyQuatoModal = (item: ITopic | IAppsIdInfo, record: IQuotaQu
     formMap: [
       {
         key: 'clusterName',
-        label: '集群名称',
+        label: '逻辑集群名称',
         rules: [{ required: true, message: '' }],
         attrs: { disabled: true },
         invisible: !item.hasOwnProperty('clusterName'),
@@ -187,7 +199,7 @@ export const showApplyQuatoModal = (item: ITopic | IAppsIdInfo, record: IQuotaQu
         attrs: { disabled: true },
       }, {
         key: 'produceQuota',
-        label: '发送数据速率',
+        label: '申请发送数据速率',
         attrs: {
           disabled: isProduce,
           placeholder: '请输入',
@@ -199,7 +211,7 @@ export const showApplyQuatoModal = (item: ITopic | IAppsIdInfo, record: IQuotaQu
         }],
       }, {
         key: 'consumeQuota',
-        label: '消费数据速率',
+        label: '申请消费数据速率',
         attrs: {
           disabled: isConsume,
           placeholder: '请输入',
@@ -282,10 +294,10 @@ export const showTopicApplyQuatoModal = (item: ITopic) => {
     formMap: [
       {
         key: 'clusterName',
-        label: '集群名称',
+        label: '逻辑集群名称',
         rules: [{ required: true, message: '' }],
         attrs: { disabled: true },
-        invisible: !item.hasOwnProperty('clusterName'),
+        // invisible: !item.hasOwnProperty('clusterName'),
       }, {
         key: 'topicName',
         label: 'Topic名称',
@@ -318,7 +330,7 @@ export const showTopicApplyQuatoModal = (item: ITopic) => {
         },
       }, {  // 0 无权限 1可读 2可写 3 可读写 4可读写可管理
         key: 'produceQuota',
-        label: '发送数据速率',
+        label: '申请发送数据速率',
         attrs: {
           disabled: false,
           placeholder: '请输入',
@@ -330,7 +342,7 @@ export const showTopicApplyQuatoModal = (item: ITopic) => {
         }],
       }, {
         key: 'consumeQuota',
-        label: '消费数据速率',
+        label: '申请消费数据速率',
         attrs: {
           disabled: false,
           placeholder: '请输入',
@@ -704,14 +716,14 @@ export const applyExpandModal = (item: ITopic) => {
         rules: [{ required: true }],
       }, {
         key: 'needIncrPartitionNum',
-        label: '分区',
+        label: '申请增加分区数量',
         type: 'input_number',
         rules: [{
           required: true,
-          message: '请输入0-100正整数',
-          pattern: /^((?!0)\d{1,2}|100)$/,
+          message: '请输入0-1000正整数',
+          pattern: /^((?!0)\d{1,3}|1000)$/,
         }],
-        attrs: { placeholder: '0-100正整数' },
+        attrs: { placeholder: '0-1000正整数' },
         renderExtraElement: () => <div className="form-tip mr--10">分区标准为3MB/s一个，请按需申请</div>,
       }, {
         key: 'description',

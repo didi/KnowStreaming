@@ -59,7 +59,7 @@ export class RenderOrderOpResult extends React.Component {
           maskClosable={false}
           onCancel={this.handleCancel}
           onOk={this.handleSubmit}
-          okText="下线"
+          okText="确认"
           cancelText="取消"
           okButtonProps={{ disabled: topic.connectLoading || !!topic.connectionInfo.length }}
           width={700}

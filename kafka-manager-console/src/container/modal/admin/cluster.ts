@@ -29,6 +29,7 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
         }],
         attrs: {
           placeholder: '请输入应用ID',
+          disabled: true,
         },
       },
       {
@@ -57,7 +58,7 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
         key: 'properties',
         label: 'Topic属性列表',
         type: 'text_area',
-        rules: [{ required: false}],
+        rules: [{ required: false }],
         attrs: {
           placeholder: '请输入Topic属性列表',
         },
@@ -78,7 +79,7 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
       clusterName: item.clusterName,
       appId: item.appId,
       topicName: item.topicName,
-      retentionTime:  transMSecondToHour(item.retentionTime),
+      retentionTime: transMSecondToHour(item.retentionTime),
       properties: JSON.stringify(item.properties, null, 4),
       description: item.description,
     },
@@ -97,18 +98,13 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
 };
 
 export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCluster) => {
-  let clusterModes = [] as  IConfigInfo[];
-  clusterModes = cluster.clusterModes ?  cluster.clusterModes : clusterModes;
-  const xFormModal = {
-    formMap: [
-      {
-        key: 'logicalClusterName',
-        label: '逻辑集群名称',
-        rules: [{ required: true, message: '请输入逻辑集群名称' }],
-        attrs: {
-          disabled: record ? true : false,
-        },
-      },
+  let isShow = false;
+  if (record && record.mode != 0) {
+    isShow = true;
+  }
+  const updateFormModal = (isShow: boolean) => {
+    const formMap = wrapper.xFormWrapper.formMap;
+    isShow ? formMap.splice(2, 0,
       {
         key: 'appId',
         label: '所属应用',
@@ -123,6 +119,41 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
         attrs: {
           placeholder: '请选择所属应用',
         },
+      }) : formMap.splice(2, 1);
+    const formData = wrapper.xFormWrapper.formData;
+    wrapper.ref && wrapper.ref.updateFormMap$(formMap, formData || {});
+  };
+  let clusterModes = [] as IConfigInfo[];
+  clusterModes = cluster.clusterModes ? cluster.clusterModes : clusterModes;
+  let xFormModal = {
+    formMap: [
+      {
+        key: 'logicalClusterName',
+        label: '逻辑集群中文名称',
+        // defaultValue:'',
+        rules: [{ 
+          required: true, 
+          message: '请输入逻辑集群中文名称，支持中文、字母、数字、下划线(_)和短划线(-)组成，长度在3-128字符之间', // 不能以下划线（_）和短划线(-)开头和结尾
+          pattern: /^[a-zA-Z0-9_\-\u4e00-\u9fa5]{3,128}$/g, //(?!(_|\-))(?!.*?(_|\-)$)
+        }],
+        attrs: {
+          // disabled: record ? true : false,
+          placeholder:'请输入逻辑集群中文名称'
+        },
+      },
+      {
+        key: 'logicalClusterName1',
+        label: '逻辑集群英文名称',
+        // defaultValue:'',
+        rules: [{ 
+          required: true, 
+          message: '请输入逻辑集群英文名称，支持字母、数字、下划线(_)和短划线(-)组成，长度在3-128字符之间', //不能以下划线（_）和短划线(-)开头和结尾
+          pattern:/^[a-zA-Z0-9_\-]{3,128}$/g, //(?!(_|\-))(?!.*?(_|\-)$)
+        }],
+        attrs: {
+          disabled: record ? true : false,
+          placeholder:'请输入逻辑集群英文名称，创建后无法修改'
+        },
       },
       {
         key: 'mode',
@@ -136,8 +167,32 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
           };
         }),
         attrs: {
+          onChange(item: any) {
+            if (isShow && item == 0) {
+              updateFormModal(false);
+              isShow = false;
+            } else if (!isShow && (item == 1 || item == 2)) {
+              updateFormModal(true);
+              isShow = true;
+            }
+          },
         },
       },
+      // {
+      //   key: 'appId',
+      //   label: '所属应用',
+      //   rules: [{ required: true , message: '请选择所属应用' }],
+      //   type: 'select',
+      //   options: app.adminAppData.map(item => {
+      //     return {
+      //       label: item.name,
+      //       value: item.appId,
+      //     };
+      //   }),
+      //   attrs: {
+      //     placeholder: '请选择所属应用',
+      //   },
+      // },
       {
         key: 'regionIdList',
         label: 'RegionIdList',
@@ -149,10 +204,10 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
             value: item.id,
           };
         }),
-        rules: [{ required: true, message: '请选择BrokerIdList' }],
+        rules: [{ required: true, message: '请选择RegionIdList' }],
         attrs: {
           mode: 'multiple',
-          placeholder: '请选择BrokerIdList',
+          placeholder: '请选择RegionIdList',
         },
       },
       {
@@ -169,7 +224,7 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
     ],
     formData: record,
     visible: true,
-    title: '新增逻辑集群',
+    title: record ? '编辑逻辑集群' : '新增逻辑集群',
     onSubmit: (value: INewLogical) => {
       const params = {
         appId: value.appId,
@@ -178,6 +233,7 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
         id: record ? record.logicalClusterId : '',
         mode: value.mode,
         name: value.logicalClusterName,
+        englishName:value.logicalClusterEName, // 存储逻辑集群英文名称
         regionIdList: value.regionIdList,
       } as INewLogical;
       if (record) {
@@ -190,11 +246,12 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
       });
     },
   };
+
   wrapper.open(xFormModal);
 };
 
 export const showClusterRegionOpModal = (clusterId: number, content: IMetaData, record?: IBrokersRegions) => {
- const xFormModal = {
+  const xFormModal = {
     formMap: [
       {
         key: 'name',
@@ -216,9 +273,9 @@ export const showClusterRegionOpModal = (clusterId: number, content: IMetaData, 
         key: 'brokerIdList',
         label: 'Broker列表',
         defaultValue: record ? record.brokerIdList.join(',') : [] as any,
-        rules: [{ required: true, message: '请输入BrokerIdList' }],
+        rules: [{ required: true, message: '请输入BrokerID,多个BrokerID用半角逗号分隔' }],
         attrs: {
-          placeholder: '请输入BrokerIdList',
+          placeholder: '请输入BrokerID,多个BrokerID用半角逗号分隔',
         },
       },
       {
@@ -274,5 +331,5 @@ export const showClusterRegionOpModal = (clusterId: number, content: IMetaData, 
       });
     },
   };
- wrapper.open(xFormModal);
+  wrapper.open(xFormModal);
 };

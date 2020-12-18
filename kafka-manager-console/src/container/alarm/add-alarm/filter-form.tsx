@@ -260,7 +260,7 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
       rules: [{ required: showMore, message: '请选择消费组' }],
       attrs: {
         placeholder: '请选择消费组',
-        className: 'middle-size',
+        className: 'large-size',
         disabled: this.isDetailPage,
         onChange: (e: string) => this.handleSelectChange(e, 'consumerGroup'),
       },

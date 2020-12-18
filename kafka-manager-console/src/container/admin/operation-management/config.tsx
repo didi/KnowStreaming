@@ -41,6 +41,8 @@ export const migrationTaskColumns = (migrationUrl: string) => {
           <Popconfirm
             title="确定开始？"
             onConfirm={() => startMigrationTask(item, 'start')}
+            cancelText="取消"
+            okText="确认"
           >
             <a style={{ marginRight: 16 }}>开始</a>
           </Popconfirm>}
@@ -49,6 +51,8 @@ export const migrationTaskColumns = (migrationUrl: string) => {
         {item.status === 0 &&
           <Popconfirm
             title="确定取消？"
+            cancelText="取消"
+            okText="确认"
             onConfirm={() => cancelMigrationTask(item, 'cancel')}
           ><a>取消</a>
           </Popconfirm>}

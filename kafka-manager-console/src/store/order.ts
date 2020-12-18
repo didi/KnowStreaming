@@ -20,6 +20,9 @@ class Order {
   public loading: boolean = false;
 
   @observable
+  public selectedRows: any[] = [];
+
+  @observable
   public orderList: IBaseOrder[] = [];
 
   @observable
@@ -53,6 +56,15 @@ class Order {
   @action.bound
   public setLoading(value: boolean) {
     this.loading = value;
+  }
+
+  @action.bound
+  public setSelectedRows(rows?: any[]) {
+    if (rows) {
+      this.selectedRows = rows;
+    } else {
+      this.selectedRows = [];
+    }
   }
 
   @action.bound

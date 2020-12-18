@@ -31,8 +31,13 @@ export class ClusterOverview extends React.Component<IOverview> {
     const content = this.props.basicInfo as IBasicInfo;
     const clusterContent = [{
       value: content.clusterName,
-      label: '集群名称',
-    }, {
+      label: '集群中文名称',
+    },
+    {
+      value: content.clusterName,
+      label: '集群英文名称',
+    },
+    {
       value: clusterTypeMap[content.mode],
       label: '集群类型',
     }, {
@@ -55,23 +60,23 @@ export class ClusterOverview extends React.Component<IOverview> {
         <PageHeader className="detail" title="">
           <Descriptions size="small" column={3}>
             {clusterContent.map((item: ILabelValue, index: number) => (
-                <Descriptions.Item key={index} label={item.label} >
-                  {item.value}
-                </Descriptions.Item>
+              <Descriptions.Item key={index} label={item.label} >
+                {item.value}
+              </Descriptions.Item>
             ))}
             {clusterInfo.map((item: ILabelValue, index: number) => (
-                <Descriptions.Item key={index} label={item.label}>
-                  <Tooltip placement="bottomLeft" title={item.value}>
-                    <span className="overview-bootstrap">
-                      <Icon
-                        onClick={() => copyString(item.value)}
-                        type="copy"
-                        className="didi-theme overview-theme"
-                      />
-                      <i className="overview-boot">{item.value}</i>
-                    </span>
-                  </Tooltip>
-                </Descriptions.Item>
+              <Descriptions.Item key={index} label={item.label}>
+                <Tooltip placement="bottomLeft" title={item.value}>
+                  <span className="overview-bootstrap">
+                    <Icon
+                      onClick={() => copyString(item.value)}
+                      type="copy"
+                      className="didi-theme overview-theme"
+                    />
+                    <i className="overview-boot">{item.value}</i>
+                  </span>
+                </Tooltip>
+              </Descriptions.Item>
             ))}
           </Descriptions>
         </PageHeader>

@@ -28,8 +28,8 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
         defaultValue: record && record.name || '',
         rules: [{
           required: isDisabled ? false : true,
-          message: '请输入不得超过64个字符',
-          pattern: /^.{1,64}$/,
+          message: '应用名称只支持中文、字母、数字、下划线、短划线，长度限制在3-64字符',
+          pattern: /[\u4e00-\u9fa5_a-zA-Z0-9_-]{3,64}/,
         }],
         attrs: { disabled: isDisabled },
       }, {
@@ -45,11 +45,11 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
         attrs: {
           disabled: true,
           suffix: (
-          <Icon
-            onClick={() => copyString(record.password)}
-            type="copy"
-            className="icon-color"
-          />),
+            <Icon
+              onClick={() => copyString(record.password)}
+              type="copy"
+              className="icon-color"
+            />),
         },
       }, {
         key: 'idc',
@@ -64,7 +64,7 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
         key: 'principalList',
         label: '负责人',
         type: 'custom',
-        customFormItem: <StaffSelect isDisabled={isDisabled}/>,
+        customFormItem: <StaffSelect isDisabled={isDisabled} />,
         rules: [{
           required: isDisabled ? false : true,
           message: '请选择负责人（至少两人）',
@@ -74,18 +74,20 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
             }
             return true;
           },
-       }],
+        }],
       }, {
         key: 'description',
         label: '应用描述',
         type: 'text_area',
-        rules: [{ required: isDisabled ? false : true, message: '请输入描述'}],
+        rules: [{ required: isDisabled ? false : true, message: '请输入描述' }],
         attrs: { disabled: isDisabled },
       },
     ],
     formData: record,
     visible: true,
-    title: `${isDisabled ? '详情' : record ? '编辑' : '应用申请'}`,
+    title: isDisabled ? '详情' : record ? '编辑' : <div><span>应用申请</span><a className='applicationDocument' href="###" target='_blank'>应用申请文档</a></div>,
+    // customRenderElement: isDisabled ? '' : record ? '' : <span className="tips">集群资源充足时，预计1分钟自动审批通过</span>,
+    isWaitting: true,
     onSubmit: (value: IAppItem) => {
       if (isDisabled) {
         return;
@@ -98,7 +100,18 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
         }
       });
     },
-};
+    onSubmitFaild: (err: any, ref: any, formData: any, formMap: any) => {
+      if (err.message == '资源已经存在') {
+        const topic = ref.getFieldValue('name');
+        ref.setFields({
+          name: {
+            value: topic,
+            errors: [new Error('该应用名称已存在')],
+          }
+        })
+      }
+    }
+  };
   wrapper.open(xFormModal);
 };
 
@@ -116,7 +129,7 @@ const operateApp = (isEdit: boolean, value: IAppItem, record?: IAppItem, from?: 
   params.extensions = JSON.stringify({ principals, idc: value.idc, name: value.name });
   let modifyParams = {};
   if (isEdit) {
-     modifyParams = {
+    modifyParams = {
       appId: record.appId,
       description: value.description,
       name: value.name,

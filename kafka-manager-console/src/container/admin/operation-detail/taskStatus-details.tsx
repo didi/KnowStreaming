@@ -87,6 +87,8 @@ export class TaskStatusDetails extends SearchAndFilterContainer {
           <Popconfirm
             title={`确定忽略？`}
             onConfirm={() => this.bindClick(record, 'ignore')}
+            cancelText="取消"
+            okText="确认"
           >
             <a>忽略</a>
           </Popconfirm>
@@ -130,7 +132,7 @@ export class TaskStatusDetails extends SearchAndFilterContainer {
     return (
       <>
         <div className="config-info">
-          {admin.clusterTaskLog}
+          {admin.clusterTaskLog ? admin.clusterTaskLog : '暂无数据'}
         </div>
       </>
     );

@@ -1,4 +1,4 @@
-import fetch , { formFetch } from './fetch';
+import fetch, { formFetch } from './fetch';
 import { IUploadFile, IUser, IQuotaModelItem, ILimitsItem, ITopic, IOrderParams, ISample, IMigration, IExecute, IEepand, IUtils, ITopicMetriceParams, IRegister, IEditTopic, IExpand, IDeleteTopic, INewRegions, INewLogical, IRebalance, INewBulidEnums, ITrigger, IApprovalOrder, IMonitorSilences, IConfigure, IBatchApproval } from 'types/base-type';
 import { IRequestParams } from 'types/alarm';
 import { apiCache } from 'lib/api-cache';
@@ -94,8 +94,8 @@ export const getRealTimeTraffic = (clusterId: number, topicName: string) => {
   return fetch(`/normal/${clusterId}/topics/${topicName}/metrics`);
 };
 
-export const getRealConsume = (clusterId: number, topicName: string) => {
-  return fetch(`/normal/${clusterId}/topics/${topicName}/request-time`);
+export const getRealConsume = (clusterId: number, topicName: string, percentile: string) => {
+  return fetch(`/normal/${clusterId}/topics/${topicName}/request-time?percentile=${percentile}`);
 };
 
 export const getConnectionInfo = (clusterId: number, topicName: string, appId?: string) => {
@@ -354,12 +354,12 @@ export const approvalOrder = (params: IApprovalOrder) => {
  * @see http://127.0.0.1:8080/swagger-ui.html#!/OP4524037213333045620851255092147540REST41/getOrderAppDetailUsingGET
  */
 export const getOrderTypeList = () => {
-  return fetch('/normal/orders/type-enums') ;
+  return fetch('/normal/orders/type-enums');
 };
 
 // 我的申请
 export const getApplyOrderList = (status: number) => {
-  return fetch(`/normal/orders?status=${status === 2 ? '' : status}`) ;
+  return fetch(`/normal/orders?status=${status === 2 ? '' : status}`);
 };
 
 export const getOrderDetail = (orderId: number) => {
@@ -436,7 +436,7 @@ export const editConfigure = (params: IConfigure) => {
   });
 };
 
-export const deleteConfigure  = (configKey: string) => {
+export const deleteConfigure = (configKey: string) => {
   return fetch(`/rd/configs?config-key=${configKey}`, {
     method: 'DELETE',
   });
@@ -800,21 +800,21 @@ export const getTicketBycode = (code: string) => {
     method: 'POST',
     body: JSON.stringify({ code }),
   });
- };
+};
 
 export const userLogOut = () => {
   return fetch('/sso/logout', {
     method: 'DELETE',
   });
- };
+};
 
- /**
-  *  监控报警 alarm
-  */
+/**
+ *  监控报警 alarm
+ */
 
 export const getMonitorStrategies = () => {
   return fetch('/normal/monitor-strategies');
- };
+};
 
 export const deteleMonitorStrategies = (monitorId: number) => {
   return fetch(`/normal/monitor-strategies?monitorId=${monitorId}`, {
@@ -873,7 +873,7 @@ export const getMonitorDetail = (monitorId: number) => {
 };
 
 export const modifyMonitorStrategy = (params: IRequestParams) => {
-  return fetch('/normal/monitor-strategies',  {
+  return fetch('/normal/monitor-strategies', {
     method: 'PUT',
     body: JSON.stringify(params),
   });

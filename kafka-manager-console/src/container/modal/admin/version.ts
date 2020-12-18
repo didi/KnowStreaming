@@ -1,10 +1,15 @@
+import * as React from 'react';
 import { notification } from 'component/antd';
 import { IUploadFile, IConfigure } from 'types/base-type';
 import { version } from 'store/version';
 import { admin } from 'store/admin';
 import { wrapper } from 'store';
 import { computeChecksumMd5 } from 'lib/utils';
+import format2json from 'format-to-json';
 
+interface ISearchAndFilterState {
+  [filter: string]: boolean | string | number | any[];
+}
 const handleSelectChange = (e: number) => {
   version.setAcceptFileType(e);
   updateFormModal(e);
@@ -150,7 +155,11 @@ export const showModifyModal = (record: IUploadFile) => {
   wrapper.open(xFormModal);
 };
 
-export const showConfigureModal = (record?: IConfigure) => {
+export const showConfigureModal = async (record?: IConfigure) => {
+  if (record) {
+    const result:any = await format2json(record.configValue);
+    record.configValue = result.result;
+  }
   const xFormModal = {
     formMap: [
       {
@@ -163,8 +172,11 @@ export const showConfigureModal = (record?: IConfigure) => {
       }, {
         key: 'configValue',
         label: '配置值',
-        type: 'text_area',
-        rules: [{ required: true, message: '请输入配置值' }],
+        type: 'monaco_editor',
+        rules: [{
+          required: true,
+          message: '请输入配置值',
+        }],
       }, {
         key: 'configDescription',
         label: '备注',

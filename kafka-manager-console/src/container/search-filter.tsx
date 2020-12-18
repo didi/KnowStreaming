@@ -18,7 +18,7 @@ interface IFilterParams {
 }
 
 interface ISearchAndFilterState {
-  [filter: string]: boolean | string | number;
+  [filter: string]: boolean | string | number | any[];
 }
 
 export class SearchAndFilterContainer extends React.Component<any, ISearchAndFilterState> {
@@ -88,14 +88,14 @@ export class SearchAndFilterContainer extends React.Component<any, ISearchAndFil
           {...searchProps}
         >
           {cluster.selectAllData.map((d, index) =>
-          <Select.Option
-            value={d.value}
-            key={index}
-          >
-            {d.label.length > 16 ?
-              <Tooltip placement="bottomLeft" title={d.label}>{d.label}</Tooltip>
-              : d.label}
-          </Select.Option>)}
+            <Select.Option
+              value={d.value}
+              key={index}
+            >
+              {d.label.length > 16 ?
+                <Tooltip placement="bottomLeft" title={d.label}>{d.label}</Tooltip>
+                : d.label}
+            </Select.Option>)}
         </Select>
       </li>
     );
@@ -113,14 +113,14 @@ export class SearchAndFilterContainer extends React.Component<any, ISearchAndFil
           {...searchProps}
         >
           {expert.metaData.map((d, index) =>
-          <Select.Option
-            value={d.clusterId}
-            key={index}
-          >
-            {d.clusterName.length > 16 ?
-              <Tooltip placement="bottomLeft" title={d.clusterName}>{d.clusterName}</Tooltip>
-              : d.clusterName}
-          </Select.Option>)}
+            <Select.Option
+              value={d.clusterId}
+              key={index}
+            >
+              {d.clusterName.length > 16 ?
+                <Tooltip placement="bottomLeft" title={d.clusterName}>{d.clusterName}</Tooltip>
+                : d.clusterName}
+            </Select.Option>)}
         </Select>
       </li>
     );

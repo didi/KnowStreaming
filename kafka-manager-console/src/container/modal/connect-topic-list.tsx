@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table, Modal, Tooltip, Icon, message, notification } from 'component/antd';
+import { Table, Modal, Tooltip, Icon, message, notification, Alert } from 'component/antd';
 import { getApplyOnlineColumns } from 'container/topic/config';
 import { observer } from 'mobx-react';
 import { modal } from 'store/modal';
@@ -59,7 +59,7 @@ export class ConnectTopicList extends React.Component {
           maskClosable={false}
           onCancel={this.handleCancel}
           onOk={this.handleSubmit}
-          okText="下线"
+          okText="确认"
           cancelText="取消"
           okButtonProps={{ disabled: topic.connectLoading || !!topic.connectionInfo.length }}
           width={700}
@@ -74,6 +74,7 @@ export class ConnectTopicList extends React.Component {
           pagination={false}
           bordered={true}
         />
+        <Alert message="如若有连接信息，则表示资源正处于使用中，禁止下线操作。如需下线，烦请关闭连接信息中的Kafka发送/消费客户端后再进行下线。" type="error" showIcon />
         </Modal>
       </>
     );

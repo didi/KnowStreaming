@@ -11,6 +11,7 @@ import { PartitionInformation } from './partition-information';
 import { BrokersInformation } from './brokers-information';
 import { AppIdInformation } from './appid-information';
 import { BillInformation } from './bill-information';
+import { showAllPermissionModal } from 'container/modal';
 import { IXFormWrapper, ITopic } from 'types/base-type';
 import { getTopicCompile, getTopicSampling } from 'lib/api';
 import { copyString } from 'lib/utils';
@@ -22,17 +23,22 @@ import { users } from 'store/users';
 import { urlPrefix } from 'constants/left-menu';
 import { handlePageBack } from 'lib/utils';
 import Url from 'lib/url-parser';
+import router from 'routers/router';
 const { TabPane } = Tabs;
+import { app } from 'store/app';
 
 interface IInfoData {
   value: string;
+  history: any;
 }
 
 @observer
-export class TopicDetail extends React.Component {
+export class TopicDetail extends React.Component<any> {
   public clusterId: number;
   public topicName: string;
   public isPhysicalTrue: string;
+  public needAuth: string;
+  public clusterName: string;
 
   public state = {
     drawerVisible: false,
@@ -47,6 +53,8 @@ export class TopicDetail extends React.Component {
     super(props);
     const url = Url();
     this.clusterId = Number(url.search.clusterId);
+    this.needAuth = url.search.needAuth;
+    this.clusterName = url.search.clusterName;
     this.topicName = url.search.topic;
     const isPhysical = Url().search.hasOwnProperty('isPhysicalClusterId');
     this.isPhysicalTrue = isPhysical ? '&isPhysicalClusterId=true' : '';
@@ -110,11 +118,11 @@ export class TopicDetail extends React.Component {
     const formMap = [
       {
         key: 'maxMsgNum',
-        label: '最大采样数据条数',
+        label: '最大采样条数',
         type: 'input_number',
         rules: [{
           required: true,
-          message: '请输入最大采样数据条数',
+          message: '请输入最大采样条数',
         }],
         attrs: {
           max: 100,
@@ -122,32 +130,32 @@ export class TopicDetail extends React.Component {
       },
       {
         key: 'timeout',
-        label: '最大采样时间',
+        label: '采样超时时间(ms)',
         type: 'input_number',
         rules: [{
           required: true,
-          message: '请输入最大采样时间',
+          message: '请输入采样超时时间(ms)',
         }],
         attrs: {
-          max: 300000,
+          max: 500000,
         },
       },
       {
         key: 'partitionId',
-        label: '分区号',
+        label: '采样分区号',
         type: 'input_number',
         rules: [{
           required: false,
-          message: '请输入分区号',
+          message: '请输入采样分区号',
         }],
       },
       {
         key: 'offset',
-        label: '偏移量',
+        label: '采样offset位置',
         type: 'input_number',
         rules: [{
           required: false,
-          message: '请输入偏移量',
+          message: '请输入采样offset位置',
         }],
       },
       {
@@ -167,13 +175,13 @@ export class TopicDetail extends React.Component {
           message: '请选择是否截断',
         }],
       },
-    ] as IFormItem [];
+    ] as IFormItem[];
     const formData = {
       maxMsgNum: 1,
-      timeout: 3000,
+      timeout: 5000,
     };
     const { infoVisible } = this.state;
-    return(
+    return (
       <>
         <Drawer
           title="Topic 采样"
@@ -198,7 +206,7 @@ export class TopicDetail extends React.Component {
 
   public getAllValue = () => {
     const { infoTopicList } = this.state;
-    const text = infoTopicList.map(ele => ele.value );
+    const text = infoTopicList.map(ele => ele.value);
     return text.join('\n\n');
   }
 
@@ -274,11 +282,11 @@ export class TopicDetail extends React.Component {
     let idx = str.indexOf(findStr);
     let count = 1;
     while (idx >= 0 && count < num) {
-        idx = str.indexOf(findStr, idx + 1);
-        count++;
+      idx = str.indexOf(findStr, idx + 1);
+      count++;
     }
     if (idx < 0) {
-        return '';
+      return '';
     }
     return str.substring(0, idx);
   }
@@ -312,11 +320,13 @@ export class TopicDetail extends React.Component {
   public render() {
     const role = users.currentUser.role;
     const baseInfo = topic.baseInfo as ITopicBaseInfo;
-    const showEditBtn = topic.topicBusiness && topic.topicBusiness.principals.includes(users.currentUser.username);
+    const showEditBtn = (role == 1 || role == 2) || (topic.topicBusiness && topic.topicBusiness.principals.includes(users.currentUser.username));
     const topicRecord = {
       clusterId: this.clusterId,
       topicName: this.topicName,
+      clusterName: this.clusterName
     } as ITopic;
+    app.getAppList();
 
     return (
       <>
@@ -329,10 +339,12 @@ export class TopicDetail extends React.Component {
                 title={this.topicName || ''}
                 extra={
                   <>
-                  <Button key="1" type="primary" onClick={() => applyTopicQuotaQuery(topicRecord)} >申请配额</Button>
-                  <Button key="2" type="primary" onClick={() => applyExpandModal(topicRecord)} >申请分区</Button>
-                  <Button key="3" type="primary" onClick={this.showDrawer.bind(this)} >采样</Button>
-                  {showEditBtn && <Button key="4" onClick={() => this.compileDetails()} type="primary">编辑</Button>}
+                    {this.needAuth == "true" && <Button key="0" type="primary" onClick={() => showAllPermissionModal(topicRecord)} >申请权限</Button>}
+                    <Button key="1" type="primary" onClick={() => applyTopicQuotaQuery(topicRecord)} >申请配额</Button>
+                    <Button key="2" type="primary" onClick={() => applyExpandModal(topicRecord)} >申请分区</Button>
+                    <Button key="3" type="primary" onClick={() => this.props.history.push(`/alarm/add`)} >新建告警规则</Button>
+                    <Button key="4" type="primary" onClick={this.showDrawer.bind(this)} >采样</Button>
+                    {showEditBtn && <Button key="5" onClick={() => this.compileDetails()} type="primary">编辑</Button>}
                   </>
                 }
               />
@@ -359,9 +371,9 @@ export class TopicDetail extends React.Component {
                 </TabPane>
                 {
                   role === 0 ? null :
-                  <TabPane tab="Broker信息" key="6">
-                    <BrokersInformation />
-                  </TabPane>
+                    <TabPane tab="Broker信息" key="6">
+                      <BrokersInformation />
+                    </TabPane>
                 }
                 <TabPane tab="应用信息" key="7">
                   <AppIdInformation />

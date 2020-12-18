@@ -24,6 +24,7 @@ class Wrapper {
     });
   }
 
+
   @action.bound
   public setXFormWrapper(xFormWrapper: IXFormWrapper) {
     this.xFormWrapper = xFormWrapper;

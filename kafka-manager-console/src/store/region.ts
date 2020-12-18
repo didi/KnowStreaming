@@ -22,8 +22,8 @@ class RegionCenter {
   @observable
   public regionIdcList: IRegionIdcs[] = [
     { name: '国内', idc: 'cn' },
-    { name: '美东', idc: 'us' },
-    { name: '俄罗斯', idc: 'ru' },
+    // { name: '美东', idc: 'us' },
+    // { name: '俄罗斯', idc: 'ru' },
   ];
 
   @action.bound

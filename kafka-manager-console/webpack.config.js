@@ -9,7 +9,7 @@ const path = require('path')
 const isProd = process.env.NODE_ENV === 'production';
 const outPath = path.resolve('../kafka-manager-web/src/main/resources/templates');
 const filename = isProd ? '[name].[contenthash]' : '[name]';
-
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 let publicPath = '/';
 
 const plugins = [
@@ -17,6 +17,7 @@ const plugins = [
     template: './src/routers/index.htm',
     favicon: './src/assets/image/logo.ico'
   }),
+  new MonacoWebpackPlugin()
 ];
 
 if (isProd) {
@@ -52,7 +53,7 @@ module.exports = {
     rules: [
       {
         test: /\.(css|less)$/,
-        use: [ isProd ? {
+        use: [isProd ? {
           loader: MiniCssExtractPlugin.loader,
           options: {
             publicPath,
@@ -75,17 +76,28 @@ module.exports = {
         loader: 'ts-loader',
       },
       {
-        test:/\.(png|svg|jpeg|jpg|gif)$/,
-        use:[       
+        test: /\.(png|svg|jpeg|jpg|gif)$/,
+        use: [
           {
-              loader:'file-loader',
-              options:{
-                  name:'[name].[ext]',  
-                  outputPath:'./assets/image/',                             
-              }
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: './assets/image/',
+            }
           }
         ]
-      }
+      },
+      {
+        test: /\.(ttf)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+            },
+          },
+        ],
+      },
     ],
   },
   optimization: {
@@ -118,7 +130,9 @@ module.exports = {
     historyApiFallback: true,
     proxy: {
       '/api/v1/': {
-        target: 'http://127.0.0.1:8080',
+        // target: 'http://127.0.0.1:8080',
+        target: 'http://10.179.37.199:8008',
+        // target: 'http://99.11.45.164:8888',
         changeOrigin: true,
       }
     },

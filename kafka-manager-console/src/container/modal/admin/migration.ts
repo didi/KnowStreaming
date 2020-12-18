@@ -19,42 +19,42 @@ export const startMigrationTask = (item: IReassignTasks, action: string) => {
 };
 
 export const modifyMigrationTask = (item: IReassignTasks, action: string) => {
-    const status: number = item.status;
-    const xFormModal = {
-      formMap: [
-        {
-          key: 'beginTime',
-          label: '计划开始时间',
-          type: 'date_picker',
-          rules: [{
-            required: status === 0,
-            message: '请输入计划开始时间',
-          }],
-          attrs: {
-            placeholder: '请输入计划开始时间',
-            format: timeFormat,
-            showTime: true,
-            disabled: status !== 0,
-          },
+  const status: number = item.status;
+  const xFormModal = {
+    formMap: [
+      {
+        key: 'beginTime',
+        label: '计划开始时间',
+        type: 'date_picker',
+        rules: [{
+          required: status === 0,
+          message: '请输入计划开始时间',
+        }],
+        attrs: {
+          placeholder: '请输入计划开始时间',
+          format: timeFormat,
+          showTime: true,
+          disabled: status !== 0,
         },
-      ],
-      formData: {
-        beginTime: moment(item.beginTime),
       },
-      visible: true,
-      title: '操作迁移任务',
-      onSubmit: (value: IExecute) => {
-        const params = {
-          action,
-          beginTime: +moment(value.beginTime).format('x'),
-          taskId: item.taskId,
-        } as IExecute;
-        expert.getExecuteTask(params).then(data => {
-          notification.success({ message: '操作成功' });
-        });
-      },
-    };
-    wrapper.open(xFormModal);
+    ],
+    formData: {
+      beginTime: moment(item.beginTime),
+    },
+    visible: true,
+    title: '操作迁移任务',
+    onSubmit: (value: IExecute) => {
+      const params = {
+        action,
+        beginTime: +moment(value.beginTime).format('x'),
+        taskId: item.taskId,
+      } as IExecute;
+      expert.getExecuteTask(params).then(data => {
+        notification.success({ message: '操作成功' });
+      });
+    },
+  };
+  wrapper.open(xFormModal);
 };
 
 export const modifyTransferTask = (item: IReassign, action: string, taskId: number) => {
@@ -287,6 +287,7 @@ export const addMigrationTask = () => {
     formData: {},
     visible: true,
     title: '新建集群任务',
+    isWaitting: true,
     onSubmit: (value: INewBulidEnums) => {
       value.kafkaPackageName = value.kafkafileNameMd5.split(',')[0];
       value.kafkaPackageMd5 = value.kafkafileNameMd5.split(',')[1];
@@ -294,10 +295,21 @@ export const addMigrationTask = () => {
       value.serverPropertiesMd5 = value.serverfileNameMd5.split(',')[1];
       delete value.kafkafileNameMd5;
       delete value.serverfileNameMd5;
-      admin.addMigrationTask(value).then(data => {
+      return admin.addMigrationTask(value).then(data => {
         notification.success({ message: '新建集群任务成功' });
       });
     },
+    onSubmitFaild: (err: any, ref: any, formData: any, formMap: any) => {
+      if (err.message === '主机列表错误，请检查主机列表') {
+        const hostList = ref.getFieldValue('hostList');
+        ref.setFields({
+          hostList: {
+            value: hostList,
+            errors: [new Error('主机列表错误，请检查主机列表')],
+          }
+        })
+      }
+    }
   };
   wrapper.open(xFormModal);
 };

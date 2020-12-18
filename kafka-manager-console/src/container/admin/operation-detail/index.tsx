@@ -82,6 +82,8 @@ export class OperationDetail extends React.Component {
             <Popconfirm
               title={`确定${showContinue ? '开始' : '暂停'}？`}
               onConfirm={() => this.bindClick()}
+              cancelText="取消"
+              okText="确认"
             >
               <a>{showContinue ? '开始' : '暂停'}</a>
             </Popconfirm>
@@ -94,6 +96,8 @@ export class OperationDetail extends React.Component {
             <Popconfirm
               title={`确定回滚？`}
               onConfirm={() => this.callBackOrCancel('rollback')}
+              cancelText="取消"
+              okText="确认"
             >
               <a>回滚</a>
             </Popconfirm>
@@ -106,6 +110,8 @@ export class OperationDetail extends React.Component {
             <Popconfirm
               title={`确定回滚？`}
               onConfirm={() => this.callBackOrCancel('cancel')}
+              cancelText="取消"
+              okText="确认"
             >
               <a>取消</a>
             </Popconfirm>

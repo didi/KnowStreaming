@@ -74,7 +74,7 @@ export class OfflineClusterModal extends React.Component {
           maskClosable={false}
           onCancel={this.handleCancel}
           onOk={this.handleSubmit}
-          okText="下线"
+          okText="确认"
           cancelText="取消"
           okButtonProps={{ disabled: cluster.filterLoading || !!cluster.clusterMetaTopics.length }}
           width={700}

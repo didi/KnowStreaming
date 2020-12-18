@@ -76,7 +76,8 @@ export const getPieChartOption = (data: ILabelValue[], legend: string[]) => {
         },
         emphasis: {
           label: {
-            show: true,
+            // show: true,
+            show: false,
             fontSize: '16',
             fontWeight: 'bold',
           },

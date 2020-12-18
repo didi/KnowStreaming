@@ -35,7 +35,7 @@ export class MigrationDetail extends SearchAndFilterContainer {
     const detail = expert.tasksDetail;
     const gmtCreate = moment(detail.gmtCreate).format(timeFormat);
     const startTime = moment(detail.beginTime).format(timeFormat);
-    const endTime = moment(detail.endTime).format(timeFormat);
+    const endTime = detail.endTime == null ? '任务运行中' : moment(detail.endTime).format(timeFormat);
     const options = [{
       value: detail.taskName,
       label: '任务名称',
