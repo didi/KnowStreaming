@@ -13,7 +13,6 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
-import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConstant;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
@@ -44,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author limeng
@@ -79,6 +79,9 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private ClusterService clusterService;
+
+    @Autowired
+    private RegionService regionService;
 
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
@@ -228,25 +231,10 @@ public class TopicServiceImpl implements TopicService {
             basicDTO.setPrincipals(appDO.getPrincipals());
         }
 
-        LogicalClusterDO logicalClusterDO = logicalClusterMetadataManager.getTopicLogicalCluster(clusterId, topicName);
-        if (!ValidateUtils.isNull(logicalClusterDO)) {
-            basicDTO.setRegion(logicalClusterDO.getName());
-        }
+        List<RegionDO> regionDOList = regionService.getRegionListByTopicName(clusterId, topicName);
+        basicDTO.setRegionNameList(regionDOList.stream().map(RegionDO::getName).collect(Collectors.toList()));
 
-        TopicMetrics metrics = jmxService.getTopicMetrics(
-                clusterId,
-                topicName,
-                KafkaMetricsCollections.TOPIC_BASIC_PAGE_METRICS,
-                true
-        );
-
-        String compressionType = null;
-        if (!ValidateUtils.isNull(metrics)) {
-            compressionType = metrics.getSpecifiedMetrics("TopicCodeCValue", String.class);
-        }
-        basicDTO.setTopicCodeC(
-                ListUtils.strList2String(new ArrayList<>(new HashSet<>(ListUtils.string2StrList(compressionType))))
-        );
+        basicDTO.setTopicCodeC(jmxService.getTopicCodeCValue(clusterId, topicName));
         basicDTO.setScore(100);
         return basicDTO;
     }
@@ -469,6 +457,7 @@ public class TopicServiceImpl implements TopicService {
             return overview;
         }
         overview.setByteIn(metrics.getBytesInPerSecOneMinuteRate(null));
+        overview.setByteOut(metrics.getBytesOutPerSecOneMinuteRate(null));
         overview.setProduceRequest(metrics.getTotalProduceRequestsPerSecOneMinuteRate(null));
         return overview;
     }

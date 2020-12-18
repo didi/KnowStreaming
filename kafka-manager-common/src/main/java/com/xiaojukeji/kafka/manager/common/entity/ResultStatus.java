@@ -86,6 +86,8 @@ public enum ResultStatus {
     APP_ID_OR_PASSWORD_ILLEGAL(1000, "app or password illegal"),
     SYSTEM_CODE_ILLEGAL(1000, "system code illegal"),
 
+    CLUSTER_TASK_HOST_LIST_ILLEGAL(1000, "主机列表错误，请检查主机列表"),
+
 
 
 

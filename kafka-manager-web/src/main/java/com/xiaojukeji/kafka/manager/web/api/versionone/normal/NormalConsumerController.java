@@ -79,6 +79,7 @@ public class NormalConsumerController {
             @RequestParam("location") String location,
             @RequestParam(value = "isPhysicalClusterId", required = false) Boolean isPhysicalClusterId) {
         if (ValidateUtils.isNull(location)) {
+
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
         Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(clusterId, isPhysicalClusterId);

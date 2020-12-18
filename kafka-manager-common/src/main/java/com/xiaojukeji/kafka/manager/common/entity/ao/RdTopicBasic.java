@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.common.entity.ao;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -22,6 +23,8 @@ public class RdTopicBasic {
     private Properties properties;
 
     private String description;
+
+    private List<String> regionNameList;
 
     public Long getClusterId() {
         return clusterId;
@@ -87,6 +90,14 @@ public class RdTopicBasic {
         this.description = description;
     }
 
+    public List<String> getRegionNameList() {
+        return regionNameList;
+    }
+
+    public void setRegionNameList(List<String> regionNameList) {
+        this.regionNameList = regionNameList;
+    }
+
     @Override
     public String toString() {
         return "RdTopicBasic{" +
@@ -98,6 +109,7 @@ public class RdTopicBasic {
                 ", appName='" + appName + '\'' +
                 ", properties=" + properties +
                 ", description='" + description + '\'' +
+                ", regionNameList='" + regionNameList + '\'' +
                 '}';
     }
 }

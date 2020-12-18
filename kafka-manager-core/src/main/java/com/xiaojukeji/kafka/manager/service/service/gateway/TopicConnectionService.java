@@ -11,7 +11,7 @@ import java.util.List;
  * @date 20/4/13
  */
 public interface TopicConnectionService {
-    int batchAdd(List<TopicConnectionDO> doList);
+    void batchAdd(List<TopicConnectionDO> doList);
 
     /**
      * 查询连接信息

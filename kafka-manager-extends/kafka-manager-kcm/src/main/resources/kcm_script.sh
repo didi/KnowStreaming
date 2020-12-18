@@ -19,12 +19,13 @@ p_kafka_server_properties_md5=${8}    #server配置MD5
 p_kafka_server_properties_url=${9}    #server配置文件下载地址
 
 #----------------------------------------配置信息------------------------------------------------------#
-g_hostname=`hostname`
-g_base_dir='/home/km'
+g_base_dir='/home'
 g_cluster_task_dir=${g_base_dir}"/kafka_cluster_task/task_${p_task_id}"  #部署升级路径
 g_rollback_version=${g_cluster_task_dir}"/rollback_version"              #回滚版本
 g_new_kafka_package_name=''                                              #最终的包名
 g_kafka_manager_addr=''                                                  #kafka-manager地址
+g_local_ip=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
+g_hostname=${g_local_ip}
 
 #----------------------------------------操作函数------------------------------------------------------#
 
@@ -71,11 +72,11 @@ function check_and_init_env() {
 
 # 检查并等待集群所有的副本处于同步的状态
 function check_and_wait_broker_stabled() {
-    under_replication_count=`curl -s -G -d "hostname="#{g_hostname} ${g_kafka_manager_addr}/api/v1/third-part/${p_cluster_id}/broker-stabled | python -m json.tool | grep true |wc -l`
+    under_replication_count=`curl -s -G -d "hostname="${g_hostname} ${g_kafka_manager_addr}/api/v1/third-part/${p_cluster_id}/broker-stabled | python -m json.tool | grep true |wc -l`
     while [ "$under_replication_count" -ne 1 ]; do
         ECHO_LOG "存在${under_replication_count}个副本未同步, sleep 10s"
         sleep 10
-        under_replication_count=`curl -s ${g_kafka_manager_addr}/api/v1/${p_cluster_id}/overview | python -m json.tool | grep false |wc -l`
+        under_replication_count=`curl -s -G -d "hostname="${g_hostname} ${g_kafka_manager_addr}/api/v1/third-part/${p_cluster_id}/broker-stabled | python -m json.tool | grep true |wc -l`
     done
     ECHO_LOG "集群副本都已经处于同步的状态, 可以进行集群升级"
 }
@@ -136,6 +137,9 @@ function prepare_cluster_task_files() {
         dchat_alarm "拷贝${p_kafka_server_properties_name}.properties失败, 退出集群任务"
         exit 1
     fi
+
+    # listeners配置，换成当前机器的IP，写到server.properties最后一行
+    echo "listeners=SASL_PLAINTEXT://${g_local_ip}:9093,PLAINTEXT://${g_local_ip}:9092" >> "${g_cluster_task_dir}/${p_kafka_package_name}/config/server.properties"
 
     # 将MD5信息写到包中
     echo "package_md5:${p_kafka_package_md5}    server_properties_md5:${p_kafka_package_md5}" > "${g_cluster_task_dir}/${p_kafka_package_name}/package_and_properties.md5"

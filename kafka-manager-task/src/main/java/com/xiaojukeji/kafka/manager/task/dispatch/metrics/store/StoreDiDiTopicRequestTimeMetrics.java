@@ -16,6 +16,7 @@ import com.xiaojukeji.kafka.manager.task.component.CustomScheduled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.util.*;
 
@@ -24,6 +25,7 @@ import java.util.*;
  * @date 20/7/21
  */
 @CustomScheduled(name = "storeDiDiTopicRequestTimeMetrics", cron = "51 0/1 * * * ?", threadNum = 5)
+@ConditionalOnProperty(prefix = "custom.store-metrics-task.didi", name = "topic-request-time-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreDiDiTopicRequestTimeMetrics extends AbstractScheduledTask<ClusterDO> {
     private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 

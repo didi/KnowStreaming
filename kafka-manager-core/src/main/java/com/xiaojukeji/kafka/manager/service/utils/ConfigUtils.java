@@ -19,6 +19,9 @@ public class ConfigUtils {
     @Value(value = "${spring.profiles.active}")
     private String kafkaManagerEnv;
 
+    @Value(value = "${custom.store-metrics-task.save-days}")
+    private Integer maxMetricsSaveDays;
+
     public String getIdc() {
         return idc;
     }
@@ -41,5 +44,13 @@ public class ConfigUtils {
 
     public void setKafkaManagerEnv(String kafkaManagerEnv) {
         this.kafkaManagerEnv = kafkaManagerEnv;
+    }
+
+    public Integer getMaxMetricsSaveDays() {
+        return maxMetricsSaveDays;
+    }
+
+    public void setMaxMetricsSaveDays(Integer maxMetricsSaveDays) {
+        this.maxMetricsSaveDays = maxMetricsSaveDays;
     }
 }

@@ -8,7 +8,7 @@ package com.xiaojukeji.kafka.manager.common.zookeeper;
 public class ZkPathUtil {
     private static final String     ZOOKEEPER_SEPARATOR         = "/";
 
-    private static final String     BROKER_ROOT_NODE            = ZOOKEEPER_SEPARATOR + "brokers";
+    public static final String      BROKER_ROOT_NODE            = ZOOKEEPER_SEPARATOR + "brokers";
 
     public static final String      CONTROLLER_ROOT_NODE        = ZOOKEEPER_SEPARATOR + "controller";
 

@@ -27,19 +27,20 @@ public class TopicConnectionServiceImpl implements TopicConnectionService {
     private TopicConnectionDao topicConnectionDao;
 
     @Override
-    public int batchAdd(List<TopicConnectionDO> doList) {
+    public void batchAdd(List<TopicConnectionDO> doList) {
         if (ValidateUtils.isEmptyList(doList)) {
-            return 0;
+            return;
         }
+
         int count = 0;
         for (TopicConnectionDO connectionDO: doList) {
             try {
                 count += topicConnectionDao.replace(connectionDO);
             } catch (Exception e) {
-                LOGGER.error("replace topic connections failed, data:{}.", connectionDO);
+                LOGGER.error("class=TopicConnectionServiceImpl||method=batchAdd||connectionDO={}||errMsg={}", connectionDO, e.getMessage());
             }
         }
-        return count;
+        LOGGER.info("class=TopicConnectionServiceImpl||method=batchAdd||allSize={}||successSize={}", doList.size(), count);
     }
 
     @Override

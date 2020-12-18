@@ -31,6 +31,8 @@ public interface ConfigService {
 
     List<ConfigDO> listAll();
 
+    Integer getAutoPassedTopicApplyOrderNumPerTask();
+
     CreateTopicElemConfig getCreateTopicConfig(Long clusterId, String systemCode);
 
     ClusterDO getClusterDO(Long clusterId);

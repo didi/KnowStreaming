@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.kcm.component.storage.local;
 
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.xiaojukeji.kafka.manager.kcm.component.storage.AbstractStorageService;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Service("storageService")
 public class Local extends AbstractStorageService {
+    @Value("${kcm.storage.base-url}")
+    private String      baseUrl;
+
     @Override
     public boolean upload(String fileName, String fileMd5, MultipartFile uploadFile) {
         return false;
@@ -24,6 +28,6 @@ public class Local extends AbstractStorageService {
 
     @Override
     public String getDownloadBaseUrl() {
-        return "";
+        return baseUrl;
     }
 }

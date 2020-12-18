@@ -24,7 +24,7 @@ public class ClusterHostTaskService extends AbstractClusterTaskService {
         CreationTaskData dto = new CreationTaskData();
         for (String hostname: clusterHostTaskDTO.getHostList()) {
             if (!NetUtils.hostnameLegal(hostname)) {
-                return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+                return Result.buildFrom(ResultStatus.CLUSTER_TASK_HOST_LIST_ILLEGAL);
             }
         }
         dto.setHostList(clusterHostTaskDTO.getHostList());

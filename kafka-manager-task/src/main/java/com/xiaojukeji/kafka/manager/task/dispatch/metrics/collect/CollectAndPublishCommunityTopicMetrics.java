@@ -1,4 +1,4 @@
-package com.xiaojukeji.kafka.manager.task.dispatch.metrics.store;
+package com.xiaojukeji.kafka.manager.task.dispatch.metrics.collect;
 
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
@@ -16,12 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 
 /**
- * Topic社区指标存储
+ * Topic社区指标收集
  * @author zengqiao
  * @date 20/7/21
  */
-@CustomScheduled(name = "storeCommunityTopicMetrics", cron = "31 0/1 * * * ?", threadNum = 5)
-public class StoreCommunityTopicMetrics extends AbstractScheduledTask<ClusterDO> {
+@CustomScheduled(name = "collectAndPublishCommunityTopicMetrics", cron = "31 0/1 * * * ?", threadNum = 5)
+public class CollectAndPublishCommunityTopicMetrics extends AbstractScheduledTask<ClusterDO> {
     @Autowired
     private JmxService jmxService;
 

@@ -52,6 +52,13 @@ public interface AppService {
     List<AppDO> getByPrincipal(String principal);
 
     /**
+     * 通过appId来查,需要check当前登录人是否有权限.
+     * @param appId appId
+     * @return AppDO
+     */
+    AppDO getAppByUserAndId(String appId, String curUser);
+
+    /**
      * 通过appId来查
      * @param appId appId
      * @return AppDO

@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.common.entity.vo.rd;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -34,6 +35,9 @@ public class RdTopicBasicVO {
 
     @ApiModelProperty(value = "备注")
     private String description;
+
+    @ApiModelProperty(value = "所属region")
+    private List<String> regionNameList;
 
     public Long getClusterId() {
         return clusterId;
@@ -99,6 +103,14 @@ public class RdTopicBasicVO {
         this.description = description;
     }
 
+    public List<String> getRegionNameList() {
+        return regionNameList;
+    }
+
+    public void setRegionNameList(List<String> regionNameList) {
+        this.regionNameList = regionNameList;
+    }
+
     @Override
     public String toString() {
         return "RdTopicBasicVO{" +
@@ -110,6 +122,7 @@ public class RdTopicBasicVO {
                 ", appName='" + appName + '\'' +
                 ", properties=" + properties +
                 ", description='" + description + '\'' +
+                ", regionNameList='" + regionNameList + '\'' +
                 '}';
     }
 }

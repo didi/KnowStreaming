@@ -261,6 +261,14 @@ public class OrderServiceImpl implements OrderService {
                 resultList.add(new OrderResult(id, Result.buildFrom(ResultStatus.ORDER_NOT_EXIST)));
                 continue;
             }
+            // topic申请、topic分区申请不支持批量审批通过.
+            if (orderDO.getType().equals(OrderTypeEnum.APPLY_TOPIC.getCode())
+              || orderDO.getType().equals(OrderTypeEnum.APPLY_PARTITION.getCode())) {
+                if (OrderStatusEnum.PASSED.getCode().equals(reqObj.getStatus())) {
+                    continue;
+                }
+            }
+
             orderDOList.add(orderDO);
         }
         // 根据创建时间排序

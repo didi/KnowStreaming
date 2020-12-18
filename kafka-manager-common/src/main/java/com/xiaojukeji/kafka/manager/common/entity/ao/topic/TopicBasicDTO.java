@@ -1,5 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.ao.topic;
 
+import java.util.List;
+
 /**
  * @author arthur
  * @date 2018/09/03
@@ -17,7 +19,7 @@ public class TopicBasicDTO {
 
     private String description;
 
-    private String region;
+    private List<String> regionNameList;
 
     private Integer score;
 
@@ -83,12 +85,12 @@ public class TopicBasicDTO {
         this.description = description;
     }
 
-    public String getRegion() {
-        return region;
+    public List<String> getRegionNameList() {
+        return regionNameList;
     }
 
-    public void setRegion(String region) {
-        this.region = region;
+    public void setRegionNameList(List<String> regionNameList) {
+        this.regionNameList = regionNameList;
     }
 
     public Integer getScore() {
@@ -164,7 +166,7 @@ public class TopicBasicDTO {
                 ", principals='" + principals + '\'' +
                 ", topicName='" + topicName + '\'' +
                 ", description='" + description + '\'' +
-                ", region='" + region + '\'' +
+                ", regionNameList='" + regionNameList + '\'' +
                 ", score=" + score +
                 ", topicCodeC='" + topicCodeC + '\'' +
                 ", partitionNum=" + partitionNum +

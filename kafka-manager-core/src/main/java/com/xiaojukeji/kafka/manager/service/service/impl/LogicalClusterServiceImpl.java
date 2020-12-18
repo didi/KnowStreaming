@@ -88,6 +88,7 @@ public class LogicalClusterServiceImpl implements LogicalClusterService {
     public LogicalCluster getLogicalCluster(Long logicalClusterId) {
         LogicalClusterDO logicalClusterDO = logicClusterMetadataManager.getLogicalCluster(logicalClusterId);
         if (ValidateUtils.isNull(logicalClusterDO)) {
+            LOGGER.warn("class=LogicalClusterServiceImpl||method=getLogicalCluster||logicalClusterId={}||msg=logicalClusterDO is null!", logicalClusterId);
             return null;
         }
         return convert2LogicalCluster(logicalClusterDO);
@@ -223,8 +224,7 @@ public class LogicalClusterServiceImpl implements LogicalClusterService {
                 return ResultStatus.SUCCESS;
             }
         } catch (DuplicateKeyException e) {
-            LOGGER.error("create logical cluster failed, name already existed, newLogicalClusterDO:{}.",
-                    logicalClusterDO, e);
+            LOGGER.error("create logical cluster failed, name already existed, newLogicalClusterDO:{}.", logicalClusterDO, e);
             return ResultStatus.RESOURCE_ALREADY_EXISTED;
         } catch (Exception e) {
             LOGGER.error("create logical cluster failed, mysql error, newLogicalClusterDO:{}.", logicalClusterDO, e);
@@ -264,6 +264,7 @@ public class LogicalClusterServiceImpl implements LogicalClusterService {
             }
             return ResultStatus.RESOURCE_NOT_EXIST;
         } catch (Exception e) {
+            LOGGER.error("class=LogicalClusterServiceImpl||method=getById||errMsg={}||logicalClusterId={}", e.getMessage(), logicalClusterId, e);
             return ResultStatus.MYSQL_ERROR;
         }
     }

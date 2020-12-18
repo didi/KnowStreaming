@@ -76,6 +76,7 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             LOGGER.error("create account failed, operate mysql failed, accountDO:{}.", accountDO, e);
         }
+        LOGGER.warn("class=AccountServiceImpl||method=createAccount||accountDO={}||msg=add account fail，{}!", accountDO,ResultStatus.MYSQL_ERROR.getMessage());
         return ResultStatus.MYSQL_ERROR;
     }
 
@@ -88,6 +89,7 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             LOGGER.error("delete account failed, username:{}.", username, e);
         }
+        LOGGER.warn("class=AccountServiceImpl||method=deleteByName||username={}||msg=delete account fail,{}!", username,ResultStatus.MYSQL_ERROR.getMessage());
         return ResultStatus.MYSQL_ERROR;
     }
 
@@ -110,6 +112,7 @@ public class AccountServiceImpl implements AccountService {
         } catch (Exception e) {
             LOGGER.error("update account failed, accountDO:{}.", accountDO, e);
         }
+        LOGGER.warn("class=AccountServiceImpl||method=updateAccount||accountDO={}||msg=update account fail,{}!", accountDO,ResultStatus.MYSQL_ERROR.getMessage());
         return ResultStatus.MYSQL_ERROR;
     }
 

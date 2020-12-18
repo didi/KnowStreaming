@@ -31,9 +31,6 @@ public class FlushClusterMetadata {
        Set<Long> oldClusterIdSet = physicalClusterMetadataManager.getClusterIdSet();
        for (ClusterDO clusterDO: doList) {
            newClusterIdSet.add(clusterDO.getId());
-           if (oldClusterIdSet.contains(clusterDO.getId())) {
-               continue;
-           }
 
            // 添加集群
            physicalClusterMetadataManager.addNew(clusterDO);

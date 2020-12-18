@@ -23,6 +23,7 @@ import com.xiaojukeji.kafka.manager.task.component.CustomScheduled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ import java.util.Map;
  * @date 20/5/7
  */
 @CustomScheduled(name = "storeBrokerMetrics", cron = "21 0/1 * * * ?", threadNum = 2)
+@ConditionalOnProperty(prefix = "custom.store-metrics-task.community", name = "broker-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreBrokerMetrics extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 

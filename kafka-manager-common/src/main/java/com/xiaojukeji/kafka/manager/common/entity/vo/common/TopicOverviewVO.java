@@ -28,6 +28,9 @@ public class TopicOverviewVO {
     @ApiModelProperty(value = "每秒流入流量(B)")
     private Object byteIn;
 
+    @ApiModelProperty(value = "每秒流出流量(B)")
+    private Object byteOut;
+
     @ApiModelProperty(value = "发送请求数(个/秒)")
     private Object produceRequest;
 
@@ -94,6 +97,14 @@ public class TopicOverviewVO {
         this.byteIn = byteIn;
     }
 
+    public Object getByteOut() {
+        return byteOut;
+    }
+
+    public void setByteOut(Object byteOut) {
+        this.byteOut = byteOut;
+    }
+
     public Object getProduceRequest() {
         return produceRequest;
     }
@@ -151,6 +162,7 @@ public class TopicOverviewVO {
                 ", partitionNum=" + partitionNum +
                 ", retentionTime=" + retentionTime +
                 ", byteIn=" + byteIn +
+                ", byteOut=" + byteOut +
                 ", produceRequest=" + produceRequest +
                 ", appName='" + appName + '\'' +
                 ", appId='" + appId + '\'' +

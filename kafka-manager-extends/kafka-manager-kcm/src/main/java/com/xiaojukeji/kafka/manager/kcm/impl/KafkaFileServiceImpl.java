@@ -56,6 +56,7 @@ public class KafkaFileServiceImpl implements KafkaFileService {
             }
             return ResultStatus.SUCCESS;
         } catch (DuplicateKeyException e) {
+            LOGGER.error("class=KafkaFileServiceImpl||method=uploadKafkaFile||errMsg={}||kafkaFileDTO={}||username={}", e.getMessage(), kafkaFileDTO, username, e);
             return ResultStatus.RESOURCE_ALREADY_EXISTED;
         } catch (Exception e) {
             LOGGER.error("upload kafka file failed, kafkaFileDTO:{}.", kafkaFileDTO, e);
@@ -93,6 +94,7 @@ public class KafkaFileServiceImpl implements KafkaFileService {
                 return ResultStatus.MYSQL_ERROR;
             }
         } catch (DuplicateKeyException e) {
+            LOGGER.error("class=KafkaFileServiceImpl||method=modifyKafkaFile||errMsg={}||kafkaFileDTO={}||userName={}", e.getMessage(), kafkaFileDTO, userName, e);
             return ResultStatus.RESOURCE_NAME_DUPLICATED;
         } catch (Exception e) {
             LOGGER.error("modify kafka file failed, kafkaFileDTO:{}.", kafkaFileDTO, e);

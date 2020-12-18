@@ -68,6 +68,8 @@ public class RegionServiceImpl implements RegionService {
             LOGGER.error("create region failed, newRegionDO:{}.", regionDO, e);
             return ResultStatus.MYSQL_ERROR;
         }
+
+        LOGGER.warn("class=RegionServiceImpl||method=createRegion||regionDO={}||msg=create region failed", regionDO);
         return ResultStatus.MYSQL_ERROR;
     }
 
@@ -107,6 +109,7 @@ public class RegionServiceImpl implements RegionService {
                 if (regionDao.updateById(newRegionDO) > 0) {
                     return ResultStatus.SUCCESS;
                 }
+                LOGGER.warn("class=RegionServiceImpl||method=updateRegion||newRegionDO={}||msg=update region failed", newRegionDO);
                 return ResultStatus.MYSQL_ERROR;
             }
             List<Integer> newBrokerIdList = ListUtils.string2IntList(newRegionDO.getBrokerList());
@@ -125,6 +128,7 @@ public class RegionServiceImpl implements RegionService {
         } catch (Exception e) {
             LOGGER.error("update region failed, newRegionDO:{}", newRegionDO, e);
         }
+        LOGGER.warn("class=RegionServiceImpl||method=updateRegion||newRegionDO={}||msg=update region failed", newRegionDO);
         return ResultStatus.MYSQL_ERROR;
     }
 

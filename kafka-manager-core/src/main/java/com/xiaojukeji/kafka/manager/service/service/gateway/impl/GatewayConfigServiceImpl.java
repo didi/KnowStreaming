@@ -120,6 +120,7 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
         try {
             doList = gatewayConfigDao.getByConfigType(GatewayConfigKeyEnum.SD_SP_RATE.getConfigType());
             if (ValidateUtils.isEmptyList(doList)) {
+                LOGGER.debug("class=GatewayConfigServiceImpl||method=getSpRateConfig||requestVersion={}||msg=doList is empty!",requestVersion);
                 return new SpRateConfig(Long.MIN_VALUE, new HashMap<>(0));
             }
             Long maxVersion = Long.MIN_VALUE;

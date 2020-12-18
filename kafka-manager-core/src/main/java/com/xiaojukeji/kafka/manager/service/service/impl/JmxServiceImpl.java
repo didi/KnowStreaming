@@ -1,11 +1,13 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
+import com.google.common.base.Joiner;
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.entity.KafkaVersion;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BrokerMetrics;
+import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionAttributeDTO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
@@ -123,11 +125,19 @@ public class JmxServiceImpl implements JmxService {
             return null;
         }
         TopicMetrics metrics = null;
+        List<BrokerMetrics> brokerMetricsList = new ArrayList<>();
         for (Integer brokerId : topicMetadata.getBrokerIdSet()) {
             TopicMetrics subMetrics = getTopicMetrics(clusterId, brokerId, topicName, metricsCode, byAdd);
+
             if (ValidateUtils.isNull(subMetrics)) {
                 continue;
             }
+
+            BrokerMetrics brokerMetrics = new BrokerMetrics(clusterId, brokerId);
+            brokerMetrics.setMetricsMap(subMetrics.getMetricsMap());
+
+            brokerMetricsList.add(brokerMetrics);
+
             if (ValidateUtils.isNull(metrics)) {
                 metrics = new TopicMetrics(clusterId, topicName);
             }
@@ -137,6 +147,10 @@ public class JmxServiceImpl implements JmxService {
                 metrics.mergeByMax(subMetrics);
             }
         }
+        if (!ValidateUtils.isNull(metrics)) {
+            metrics.setBrokerMetricsList(brokerMetricsList);
+        }
+
         return metrics;
     }
 
@@ -167,6 +181,77 @@ public class JmxServiceImpl implements JmxService {
             }
         }
         return metrics;
+    }
+
+    @Override
+    public String getTopicCodeCValue(Long clusterId, String topicName) {
+        TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterId, topicName);
+        if (topicMetadata == null) {
+            return null;
+        }
+
+        MbeanV2 topicCodeCMBean = null;
+        List<MbeanV2> mbeanV2List = MbeanNameUtilV2.getMbeanList(KafkaMetricsCollections.TOPIC_BASIC_PAGE_METRICS);
+        if (!ValidateUtils.isEmptyList(mbeanV2List)) {
+            topicCodeCMBean = mbeanV2List.stream()
+                    .filter(mbeanV2 -> "TopicCodeC".equals(mbeanV2.getFieldName()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (topicCodeCMBean == null) {
+            return null;
+        }
+
+        KafkaVersion kafkaVersion;
+        Set<String> codeCValues = new HashSet<>();
+        TopicMetrics metrics = new TopicMetrics(clusterId, topicName);
+        for (Integer brokerId : topicMetadata.getBrokerIdSet()) {
+            JmxConnectorWrap jmxConnectorWrap = PhysicalClusterMetadataManager.getJmxConnectorWrap(clusterId, brokerId);
+            if (ValidateUtils.isNull(jmxConnectorWrap)|| !jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
+                continue;
+            }
+            kafkaVersion = physicalClusterMetadataManager.getKafkaVersion(clusterId, brokerId);
+            // 如果是高版本,需要获取指标{kafka.server:type=AppIdTopicMetrics,name=RecordCompression,appId=*,topic=xxx}
+            if (kafkaVersion.getVersionNum() > KafkaVersion.VERSION_0_10_3.longValue()) {
+                try {
+                    ObjectName objectNameRegX = new ObjectName(topicCodeCMBean.getObjectName(kafkaVersion.getVersionNum())
+                            + "*,topic=" + topicName);
+                    QueryExp exp = Query.match(Query.attr("Value"), Query.value("*"));
+                    Set<ObjectName> objectNames = jmxConnectorWrap.queryNames(objectNameRegX, exp);
+                    for (ObjectName objectName : objectNames) {
+                        if (objectName.toString().indexOf(",appId=admin,") == -1) {
+                            String value = (String) jmxConnectorWrap.getAttribute(objectName, "Value");
+                            if (!codeCValues.contains(value)) {
+                                codeCValues.add(value);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("get topic codec metrics failed, clusterId:{} brokerId:{} topicName:{} mbean:{}.",
+                            clusterId, brokerId, topicName, topicCodeCMBean, e
+                    );
+                }
+            } else {
+                // 低版本沿用老逻辑...
+                try {
+                    getAndSupplyAttributes2BaseMetrics(
+                            metrics,
+                            jmxConnectorWrap,
+                            topicCodeCMBean,
+                            new ObjectName(topicCodeCMBean.getObjectName(kafkaVersion.getVersionNum()) + ",topic=" + topicName)
+                    );
+                } catch (Exception e) {
+                    LOGGER.error("get topic codec metrics failed, clusterId:{} topicName:{} mbean:{}.",
+                            clusterId, topicName, topicCodeCMBean, e
+                    );
+                }
+            }
+        }
+
+        codeCValues.addAll(ListUtils.string2StrList(metrics.getSpecifiedMetrics("TopicCodeCValue", String.class)));
+
+        return Joiner.on(",").join(codeCValues);
     }
 
     private void getAndSupplyAttributes2BaseMetrics(BaseMetrics metrics,

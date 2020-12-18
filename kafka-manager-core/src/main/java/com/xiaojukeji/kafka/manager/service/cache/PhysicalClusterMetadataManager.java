@@ -86,19 +86,36 @@ public class PhysicalClusterMetadataManager {
             if (ZK_CONFIG_MAP.containsKey(clusterDO.getId())) {
                 return;
             }
-
             ZkConfigImpl zkConfig = new ZkConfigImpl(clusterDO.getZookeeper());
 
-            //增加Broker监控
+            // 初始化broker-map
             BROKER_METADATA_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
             JMX_CONNECTOR_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
             KAFKA_VERSION_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
+
+            // 初始化topic-map
+            TOPIC_METADATA_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
+            TOPIC_RETENTION_TIME_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
+
+            // 初始化cluster-map
+            CLUSTER_MAP.put(clusterDO.getId(), clusterDO);
+
+            if (!zkConfig.checkPathExists(ZkPathUtil.BROKER_ROOT_NODE)) {
+                LOGGER.info("ignore add cluster, zk path=/brokers not exist, clusterId:{}.", clusterDO.getId());
+                try {
+                    zkConfig.close();
+                } catch (Exception e) {
+                    LOGGER.warn("ignore add cluster, close zk connection failed, cluster:{}.", clusterDO, e);
+                }
+                return;
+            }
+
+            //增加Broker监控
             BrokerStateListener brokerListener = new BrokerStateListener(clusterDO.getId(), zkConfig, configUtils.getJmxMaxConn());
             brokerListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_IDS_ROOT, brokerListener);
 
             //增加Topic监控
-            TOPIC_METADATA_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
             TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig);
             topicListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_TOPICS_ROOT, topicListener);
@@ -109,10 +126,6 @@ public class PhysicalClusterMetadataManager {
             controllerListener.init();
             zkConfig.watch(ZkPathUtil.CONTROLLER_ROOT_NODE, controllerListener);
 
-            //增加Config变更监控
-            TOPIC_RETENTION_TIME_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
-
-            CLUSTER_MAP.put(clusterDO.getId(), clusterDO);
             ZK_CONFIG_MAP.put(clusterDO.getId(), zkConfig);
         } catch (Exception e) {
             LOGGER.error("add cluster failed, cluster:{}.", clusterDO, e);
@@ -444,8 +457,16 @@ public class PhysicalClusterMetadataManager {
         return kafkaVersion;
     }
 
-    public String getKafkaVersion(Long clusterId) {
-        return getKafkaVersion(clusterId, PhysicalClusterMetadataManager.getBrokerIdList(clusterId));
+    public String getKafkaVersionFromCache(Long clusterId) {
+        Set<String> kafkaVersionSet = new HashSet<>();
+        for (Integer brokerId: PhysicalClusterMetadataManager.getBrokerIdList(clusterId)) {
+            String kafkaVersion = this.getKafkaVersionFromCache(clusterId, brokerId);
+            if (ValidateUtils.isBlank(kafkaVersion)) {
+                continue;
+            }
+            kafkaVersionSet.add(kafkaVersion);
+        }
+        return ListUtils.strList2String(new ArrayList<>(kafkaVersionSet));
     }
 
     public String getKafkaVersion(Long clusterId, List<Integer> brokerIdList) {

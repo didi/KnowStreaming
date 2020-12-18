@@ -31,4 +31,6 @@ public interface TopicThrottledMetricsDao {
     List<TopicThrottledMetricsDO> getAppIdThrottle(long clusterId, String appId, Date startTime, Date endTime);
 
     List<TopicThrottledMetricsDO> getLatestTopicThrottledMetrics(Long clusterId, Date afterTime);
+
+    int deleteBeforeTime(Date endTime);
 }

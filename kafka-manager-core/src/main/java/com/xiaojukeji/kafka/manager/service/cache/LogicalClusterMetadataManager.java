@@ -79,6 +79,7 @@ public class LogicalClusterMetadataManager {
 
         Long logicalClusterId = logicalClusterIdMap.get(topicName);
         if (ValidateUtils.isNull(logicalClusterId)) {
+            LOGGER.debug("class=LogicalClusterMetadataManager||method=getTopicLogicalCluster||topicName={}||msg=logicalClusterId is null!",topicName);
             return null;
         }
         return LOGICAL_CLUSTER_MAP.get(logicalClusterId);
@@ -107,6 +108,7 @@ public class LogicalClusterMetadataManager {
 
     public Long getPhysicalClusterId(Long logicalClusterId) {
         if (ValidateUtils.isNull(logicalClusterId)) {
+            LOGGER.debug("class=LogicalClusterMetadataManager||method=getPhysicalClusterId||msg=logicalClusterId is null!");
             return null;
         }
         if (!LOADED.get()) {
@@ -114,6 +116,7 @@ public class LogicalClusterMetadataManager {
         }
         LogicalClusterDO logicalClusterDO = LOGICAL_CLUSTER_MAP.get(logicalClusterId);
         if (ValidateUtils.isNull(logicalClusterDO)) {
+            LOGGER.debug("class=LogicalClusterMetadataManager||method=getPhysicalClusterId||logicalClusterId={}||msg=logicalClusterDO is null!",logicalClusterId);
             return null;
         }
         return logicalClusterDO.getClusterId();
@@ -124,6 +127,7 @@ public class LogicalClusterMetadataManager {
             return clusterId;
         }
         if (ValidateUtils.isNull(clusterId)) {
+            LOGGER.warn("class=LogicalClusterMetadataManager||method=getPhysicalClusterId||isPhysicalClusterId={}||msg=clusterId is null!",isPhysicalClusterId);
             return null;
         }
         if (!LOADED.get()) {
@@ -131,6 +135,7 @@ public class LogicalClusterMetadataManager {
         }
         LogicalClusterDO logicalClusterDO = LOGICAL_CLUSTER_MAP.get(clusterId);
         if (ValidateUtils.isNull(logicalClusterDO)) {
+            LOGGER.debug("class=LogicalClusterMetadataManager||method=getPhysicalClusterId||clusterId={}||msg=logicalClusterDO is null!",clusterId);
             return null;
         }
         return logicalClusterDO.getClusterId();
@@ -171,8 +176,7 @@ public class LogicalClusterMetadataManager {
         for (Long regionId: regionIdList) {
             RegionDO regionDO = regionMap.get(regionId);
             if (ValidateUtils.isNull(regionDO) || !logicalClusterDO.getClusterId().equals(regionDO.getClusterId())) {
-                LOGGER.warn("flush logical cluster metadata failed, exist illegal region, logicalCluster:{} region:{}.",
-                        logicalClusterDO, regionId);
+                LOGGER.warn("flush logical cluster metadata failed, exist illegal region, logicalCluster:{} region:{}.", logicalClusterDO, regionId);
                 continue;
             }
             brokerIdSet.addAll(ListUtils.string2IntList(regionDO.getBrokerList()));
