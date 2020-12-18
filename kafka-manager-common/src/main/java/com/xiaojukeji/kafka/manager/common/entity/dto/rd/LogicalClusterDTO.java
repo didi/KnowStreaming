@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.dto.rd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.xiaojukeji.kafka.manager.common.bizenum.ClusterModeEnum;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -108,10 +109,13 @@ public class LogicalClusterDTO {
         if (ValidateUtils.isNull(clusterId)
                 || ValidateUtils.isNull(clusterId)
                 || ValidateUtils.isEmptyList(regionIdList)
-                || ValidateUtils.isNull(appId)
                 || ValidateUtils.isNull(mode)) {
             return false;
         }
+        if (!ClusterModeEnum.SHARED_MODE.getCode().equals(mode) && ValidateUtils.isNull(appId)) {
+            return false;
+        }
+        appId = ValidateUtils.isNull(appId)? "": appId;
         description = ValidateUtils.isNull(description)? "": description;
         return true;
     }

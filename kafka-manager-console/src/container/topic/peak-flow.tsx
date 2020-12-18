@@ -1,6 +1,7 @@
 import { Input } from 'component/antd';
 import { region } from 'store';
 import * as React from 'react';
+import { indexUrl } from 'constants/strategy';
 
 interface IPeakFlowProps {
   value?: any;
@@ -23,7 +24,7 @@ export class PeakFlowInput extends React.Component<IPeakFlowProps> {
           预估费用：{region.currentRegion === 'cn' ? value * 40 : value * 45}元/月，
           <a
             // tslint:disable-next-line:max-line-length
-            href="https://github.com/didi/kafka-manager"
+            href={indexUrl.indexUrl}
             target="_blank"
           >kafka计价方式
           </a>

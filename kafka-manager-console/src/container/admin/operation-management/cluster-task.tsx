@@ -78,10 +78,10 @@ export class ClusterTask extends SearchAndFilterContainer {
       cluster,
       {
         title: '创建时间',
-        dataIndex: 'gmtCreate',
-        key: 'gmtCreate',
+        dataIndex: 'createTime',
+        key: 'createTime',
         width: '15%',
-        sorter: (a: ITaskManage, b: ITaskManage) => b.gmtCreate - a.gmtCreate,
+        sorter: (a: ITaskManage, b: ITaskManage) => b.createTime - a.createTime,
         render: (t: number) => moment(t).format(timeFormat),
       },
       {

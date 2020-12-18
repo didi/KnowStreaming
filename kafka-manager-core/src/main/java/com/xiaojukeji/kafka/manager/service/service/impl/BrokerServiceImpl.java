@@ -150,6 +150,8 @@ public class BrokerServiceImpl implements BrokerService {
         for (Integer brokerId: brokerIdSet) {
             BrokerMetadata brokerMetadata = PhysicalClusterMetadataManager.getBrokerMetadata(clusterId, brokerId);
             if (ValidateUtils.isNull(brokerMetadata)) {
+                LOGGER.warn("class=BrokerServiceImpl||method=getBrokerOverviewList||brokerId={}|||msg=brokerMetadata is null!",
+                        brokerId);
                 continue;
             }
             overviewDTOMap.put(brokerId, BrokerOverviewDTO.newInstance(

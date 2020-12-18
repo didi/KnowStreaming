@@ -54,4 +54,9 @@
         AND gmt_create > #{afterTime}
     </select>
 
+    <delete id="deleteBeforeTime" parameterType="java.util.Date">
+        <![CDATA[
+		DELETE FROM topic_throttled_metrics WHERE gmt_create < #{endTime} LIMIT 3000
+	]]>
+    </delete>
 </mapper>

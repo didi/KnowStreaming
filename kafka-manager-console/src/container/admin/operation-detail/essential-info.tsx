@@ -55,7 +55,9 @@ export class EassentialInfo extends React.Component<IEassProps> {
           <Descriptions.Item key={item.label || index} label={item.label}>{item.value}</Descriptions.Item>
         ))}
         <Descriptions.Item key="server" label="server配置名">
-          <a href={`${urlPrefix}/info?fileId=${tasks.serverPropertiesFileId || ''}`} target="_blank">{tasks.serverPropertiesName}</a>
+          {/* /api/v1/rd/kafka-files/66/config-files?dataCenter=cn */}
+          
+          <a href={`${window.origin}/api/v1/rd/kafka-files/${tasks.serverPropertiesFileId}/config-files?dataCenter=cn`} target="_blank">{tasks.serverPropertiesName}</a>
         </Descriptions.Item>
         <Descriptions.Item key="server" label="server配置 MD5">{tasks.serverPropertiesMd5}</Descriptions.Item>
       </Descriptions>

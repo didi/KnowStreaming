@@ -3,13 +3,16 @@ import './index.less';
 import Url from 'lib/url-parser';
 import { observer } from 'mobx-react';
 import { topic, IAppsIdInfo } from 'store/topic';
+import { ITopic } from 'types/base-type';
 import { Table, Tooltip } from 'component/antd';
 import { SearchAndFilterContainer } from 'container/search-filter';
 import { IQuotaQuery } from 'types/base-type';
 import { showApplyQuatoModal } from 'container/modal';
 import { pagination, cellStyle } from 'constants/table';
 import { transBToMB } from 'lib/utils';
-
+import { topicStatusMap } from 'constants/status-map';
+import { tableFilter } from 'lib/utils';
+import { users } from 'store/users';
 @observer
 export class AppIdInformation extends SearchAndFilterContainer {
   public clusterId: number;
@@ -26,7 +29,20 @@ export class AppIdInformation extends SearchAndFilterContainer {
     this.topicName = url.search.topic;
   }
 
-  public renderColumns = () => {
+  public renderColumns = (data: any) => {
+    const statusColumn = Object.assign({
+      title: '权限',
+      dataIndex: 'access',
+      key: 'access',
+      filters: tableFilter<ITopic>(data, 'access', topicStatusMap),
+      onFilter: (text: number, record: ITopic) => record.access === text,
+      render: (val: number) => (
+        <div className={val === 0 ? '' : 'success'}>
+          {topicStatusMap[val] || ''}
+        </div>
+      ),
+    }, this.renderColumnsFilter('filterStatus')) as any;
+
     return [{
       title: '应用Id',
       key: 'appId',
@@ -53,7 +69,9 @@ export class AppIdInformation extends SearchAndFilterContainer {
             {text}
           </Tooltip>);
       },
-    }, {
+    },
+      statusColumn,
+    {
       title: '生产配额(MB/s)',
       key: 'produceQuota',
       dataIndex: 'produceQuota',
@@ -77,8 +95,13 @@ export class AppIdInformation extends SearchAndFilterContainer {
       title: '操作',
       key: 'action',
       dataIndex: 'action',
-      render: (val: string, item: IAppsIdInfo) =>
-        <a onClick={() => this.applyQuotaQuery(item)}>申请配额</a>,
+      render: (val: string, item: IAppsIdInfo) => {
+        const role = users.currentUser.role;
+        const showEditBtn = (role == 1 || role == 2) || (item && item.appPrincipals.includes(users.currentUser.username));
+        return (
+          showEditBtn ? <a onClick={() => this.applyQuotaQuery(item)}>申请配额</a> : '--'
+        )
+      }
     }];
   }
 
@@ -116,7 +139,7 @@ export class AppIdInformation extends SearchAndFilterContainer {
           <div style={searchKey ? { minHeight: 700 } : null}>
             <Table
               loading={topic.loading}
-              columns={this.renderColumns()}
+              columns={this.renderColumns(this.getData(topic.appsIdInfo))}
               table-Layout="fixed"
               dataSource={this.getData(topic.appsIdInfo)}
               rowKey="key"

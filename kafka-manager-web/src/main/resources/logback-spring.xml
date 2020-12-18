@@ -143,7 +143,7 @@
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
-            <maxHistory>5</maxHistory>
+            <maxHistory>3</maxHistory>
         </rollingPolicy>
     </appender>
 
@@ -159,7 +159,7 @@
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
-            <maxHistory>5</maxHistory>
+            <maxHistory>3</maxHistory>
         </rollingPolicy>
     </appender>
 

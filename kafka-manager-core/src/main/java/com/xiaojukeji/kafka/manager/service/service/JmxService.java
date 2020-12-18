@@ -31,6 +31,11 @@ public interface JmxService {
 
     TopicMetrics getTopicMetrics(Long clusterId, Integer brokerId, String topicName, Integer metricsCode, Boolean byAdd);
 
+    /**
+     * 获取topic消息压缩指标
+     */
+    String getTopicCodeCValue(Long clusterId, String topicName);
+
     List<TopicMetrics> getTopicMetrics(Long clusterId, Integer metricsCode, Boolean byAdd);
 
     /**

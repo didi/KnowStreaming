@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Table, notification, Tooltip, Popconfirm } from 'component/antd';
+import { Table, notification, Tooltip, Popconfirm, Modal, Button } from 'component/antd';
 import { observer } from 'mobx-react';
 import { SearchAndFilterContainer } from 'container/search-filter';
 import { pagination, cellStyle } from 'constants/table';
@@ -21,6 +21,8 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
   public state = {
     searchKey: '',
     filterStatus: false,
+    deteleRegion: false,
+    logicalClusterName: '',
   };
 
   private xFormModal: IXFormWrapper;
@@ -78,7 +80,7 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
         }),
         render: (value: number[]) => {
           const num = value ? value.join(',') : '';
-          return(
+          return (
             <Tooltip placement="bottomLeft" title={num}>
               {num}
             </Tooltip>);
@@ -143,6 +145,8 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
               <Popconfirm
                 title="确定删除？"
                 onConfirm={() => this.handleDeleteRegion(record)}
+                cancelText="取消"
+                okText="确认"
               >
                 <a>删除</a>
               </Popconfirm>
@@ -154,10 +158,31 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
   }
 
   public handleDeleteRegion = (record: IBrokersRegions) => {
-    deleteRegions(record.id).then(() => {
-      notification.success({ message: '删除成功' });
-      admin.getBrokersRegions(this.clusterId);
-    });
+    const filterRegion = admin.logicalClusters.filter(item => item.regionIdList.includes(record.id));
+
+    if (!filterRegion) {
+      return;
+    }
+    if (filterRegion && filterRegion.length < 1) {
+      deleteRegions(record.id).then(() => {
+        notification.success({ message: '删除成功' });
+        admin.getBrokersRegions(this.clusterId);
+      });
+      return;
+    }
+    this.setState({ deteleRegion: true, logicalClusterName: filterRegion[0].logicalClusterName });
+    // deleteRegions(record.id).then(() => {
+    //   notification.success({ message: '删除成功' });
+    //   admin.getBrokersRegions(this.clusterId);
+    // });
+  }
+
+  public handleExpandOk = () => {
+    this.setState({ deteleRegion: false });
+  }
+
+  public handleExpandCancel = () => {
+    this.setState({ deteleCluster: false });
   }
 
   public addOrModifyRegion(record?: IBrokersRegions) {
@@ -185,9 +210,9 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
           key: 'brokerIdList',
           label: 'Broker列表',
           defaultValue: record ? record.brokerIdList.join(',') : [],
-          rules: [{ required: true, message: '请输入BrokerIdList' }],
+          rules: [{ required: true, message: '请输入BrokerID,多个BrokerID用半角逗号分隔' }],
           attrs: {
-            placeholder: '请输入BrokerIdList',
+            placeholder: '请输入BrokerID,多个BrokerID用半角逗号分隔',
           },
         },
         {
@@ -248,6 +273,7 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
 
   public componentDidMount() {
     admin.getBrokersRegions(this.clusterId);
+    admin.getLogicalClusters(this.clusterId);
     admin.getBrokersMetadata(this.clusterId);
   }
 
@@ -255,10 +281,10 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
     let data: T[] = origin;
     let { searchKey } = this.state;
     searchKey = (searchKey + '').trim().toLowerCase();
-
     data = searchKey ? origin.filter((item: IBrokersRegions) =>
-      (item.name !== undefined && item.name !== null) && item.name.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+      (item.name !== undefined && item.name !== null) && item.name.toLowerCase().includes(searchKey as string)
+      || item.brokerIdList && item.brokerIdList.map(item => "" + item).join(',').includes(searchKey as string),
+    ) : origin;
     return data;
   }
 
@@ -272,6 +298,30 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
       />
     );
   }
+  // -删除RegionModal
+  public renderDeleteRegionModal() {
+    return (
+      <Modal
+        title="提示"
+        visible={this.state.deteleRegion}
+        // okText="确定"
+        // cancelText="取消"
+        maskClosable={false}
+        // onCancel={() => this.handleExpandCancel()}
+        closable={false}
+        // onOk={() => this.handleExpandOk()}
+        footer={<Button style={{ width: '80px' }} type="primary" onClick={() => this.handleExpandOk()}>确定</Button>}
+      // onCancel={() => this.handleExpandCancel()}
+      >
+        <div className="region-prompt">
+          <span>
+            由于该Region已被逻辑集群【 {this.state.logicalClusterName} 】使用
+            请先解除Region与逻辑集群的关系
+          </span>
+        </div>
+      </Modal>
+    );
+  }
 
   public render() {
     return (
@@ -282,10 +332,10 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
             <i className="k-icon-xinjian didi-theme" />
             <span>新增Region</span>
           </li>
-          {this.renderSearch('', '请输入Region名称')}
+          {this.renderSearch('', '请输入Region名称／broker ID')}
         </ul>
-         {this.renderRegion()}
-      </div>
+        {this.renderRegion()}
+      </div >
     );
   }
 }

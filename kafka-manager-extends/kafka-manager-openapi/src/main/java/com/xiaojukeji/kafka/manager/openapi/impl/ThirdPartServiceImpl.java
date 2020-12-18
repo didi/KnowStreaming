@@ -132,14 +132,12 @@ public class ThirdPartServiceImpl implements ThirdPartService {
         if (ValidateUtils.isNull(dto)) {
             return null;
         }
-        List<PartitionOffsetDTO> offsetDTOList = dto.getPartitionOffsetDTOList();
-        if (ValidateUtils.isEmptyList(offsetDTOList)) {
-            offsetDTOList = topicService.getPartitionOffsetList(
-                        clusterDO, dto.getTopicName(), dto.getTimestamp());
-        }
+
+        List<PartitionOffsetDTO> offsetDTOList = this.getPartitionOffsetDTOList(clusterDO, dto);
         if (ValidateUtils.isEmptyList(offsetDTOList)) {
             return null;
         }
+
         OffsetLocationEnum offsetLocation = dto.getLocation().equals(
                 OffsetLocationEnum.ZOOKEEPER.location) ? OffsetLocationEnum.ZOOKEEPER : OffsetLocationEnum.BROKER;
         ResultStatus result = checkConsumerGroupExist(clusterDO, dto.getTopicName(), dto.getConsumerGroup(), offsetLocation, dto.getCreateIfAbsent());
@@ -158,6 +156,39 @@ public class ThirdPartServiceImpl implements ThirdPartService {
                 consumerGroupDTO,
                 offsetDTOList
         );
+    }
+
+    private List<PartitionOffsetDTO> getPartitionOffsetDTOList(ClusterDO clusterDO, OffsetResetDTO dto) {
+        List<PartitionOffsetDTO> offsetDTOList = dto.getPartitionOffsetDTOList();
+        if (!ValidateUtils.isEmptyList(offsetDTOList)) {
+            return offsetDTOList;
+        }
+
+        offsetDTOList = topicService.getPartitionOffsetList(clusterDO, dto.getTopicName(), dto.getTimestamp());
+        if (!ValidateUtils.isEmptyList(offsetDTOList)) {
+            return offsetDTOList;
+        }
+
+        Map<TopicPartition, Long> endOffsetMap = topicService.getPartitionOffset(clusterDO, dto.getTopicName(), OffsetPosEnum.END);
+        if (ValidateUtils.isEmptyMap(endOffsetMap)) {
+            return new ArrayList<>();
+        }
+
+        Map<TopicPartition, Long> beginOffsetMap = topicService.getPartitionOffset(clusterDO, dto.getTopicName(), OffsetPosEnum.BEGINNING);
+        if (ValidateUtils.isEmptyMap(beginOffsetMap)) {
+            return new ArrayList<>();
+        }
+
+        offsetDTOList = new ArrayList<>();
+        for (Map.Entry<TopicPartition, Long> entry: endOffsetMap.entrySet()) {
+            Long beginOffset = beginOffsetMap.get(entry.getKey());
+            if (ValidateUtils.isNull(beginOffset) || !beginOffset.equals(entry.getValue())) {
+                // offset 不相等, 表示还有数据, 则直接返回
+                return new ArrayList<>();
+            }
+            offsetDTOList.add(new PartitionOffsetDTO(entry.getKey().partition(), entry.getValue()));
+        }
+        return offsetDTOList;
     }
 
     private ResultStatus checkConsumerGroupExist(ClusterDO clusterDO,

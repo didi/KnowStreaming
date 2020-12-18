@@ -18,6 +18,8 @@ public class TopicOverview {
 
     private Object byteIn;
 
+    private Object byteOut;
+
     private Object produceRequest;
 
     private String appName;
@@ -78,6 +80,14 @@ public class TopicOverview {
         this.byteIn = byteIn;
     }
 
+    public Object getByteOut() {
+        return byteOut;
+    }
+
+    public void setByteOut(Object byteOut) {
+        this.byteOut = byteOut;
+    }
+
     public Object getProduceRequest() {
         return produceRequest;
     }
@@ -135,6 +145,7 @@ public class TopicOverview {
                 ", partitionNum=" + partitionNum +
                 ", retentionTime=" + retentionTime +
                 ", byteIn=" + byteIn +
+                ", byteOut=" + byteOut +
                 ", produceRequest=" + produceRequest +
                 ", appName='" + appName + '\'' +
                 ", appId='" + appId + '\'' +

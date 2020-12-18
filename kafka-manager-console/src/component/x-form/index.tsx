@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Select, Input, InputNumber, Form, Switch, Checkbox, DatePicker, Radio, Upload, Button, Icon, Tooltip } from 'component/antd';
+import Monacoeditor from 'component/editor/monacoEditor';
 import { searchProps } from 'constants/table';
 import './index.less';
 
@@ -19,6 +20,7 @@ export enum FormItemType {
   rangePicker = 'range_picker',
   radioGroup = 'radio_group',
   upload = 'upload',
+  monacoEditor = 'monaco_editor',
 }
 
 export interface IFormItem {
@@ -105,13 +107,11 @@ class XForm extends React.Component<IXFormProps> {
       <Form layout={layout || 'horizontal'} onSubmit={() => ({})}>
         {formMap.map(formItem => {
           const { initialValue, valuePropName } = this.handleFormItem(formItem, formData);
-
           const getFieldValue = {
             initialValue,
             rules: formItem.rules || [{ required: false, message: '' }],
             valuePropName,
           };
-
           if (formItem.type === FormItemType.upload) {
             Object.assign(getFieldValue, {
               getValueFromEvent: this.onUploadFileChange,
@@ -137,7 +137,6 @@ class XForm extends React.Component<IXFormProps> {
   }
 
   public renderFormItem(item: IFormItem) {
-
     switch (item.type) {
       default:
       case FormItemType.input:
@@ -148,6 +147,9 @@ class XForm extends React.Component<IXFormProps> {
         return <InputNumber {...item.attrs} />;
       case FormItemType.textArea:
         return <TextArea rows={5} {...item.attrs} />;
+      case FormItemType.monacoEditor:
+        // tslint:disable-next-line: jsx-wrap-multiline
+        return <Monacoeditor {...item.attrs} />;
       case FormItemType.select:
         return (
           <Select

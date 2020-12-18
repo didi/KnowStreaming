@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, Table, Button, notification, message, Tooltip, Icon, Popconfirm } from 'component/antd';
+import { Modal, Table, Button, notification, message, Tooltip, Icon, Popconfirm, Alert } from 'component/antd';
 import { wrapper } from 'store';
 import { observer } from 'mobx-react';
 import { IXFormWrapper, IMetaData, IRegister } from 'types/base-type';
@@ -9,6 +9,7 @@ import { SearchAndFilterContainer } from 'container/search-filter';
 import { cluster } from 'store/cluster';
 import { customPagination } from 'constants/table';
 import { urlPrefix } from 'constants/left-menu';
+import { indexUrl } from 'constants/strategy'
 import { region } from 'store';
 import './index.less';
 import { getAdminClusterColumns } from '../config';
@@ -126,8 +127,13 @@ export class ClusterList extends SearchAndFilterContainer {
             message: '请输入安全协议',
           }],
           attrs: {
-            placeholder: '请输入安全协议',
-            rows: 6,
+            placeholder: `请输入安全协议，例如：
+{ 
+  "security.protocol": "SASL_PLAINTEXT", 
+  "sasl.mechanism": "PLAIN", 
+  "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"xxxxxx\" password=\"xxxxxx\";"
+}`,
+            rows: 8,
           },
         },
       ],
@@ -172,7 +178,7 @@ export class ClusterList extends SearchAndFilterContainer {
           <span className="offline_span">
             删除集群&nbsp;
           <a>
-              <Tooltip placement="right" title={'当前集群存在逻辑集群，无法申请下线'} >
+              <Tooltip placement="right" title={'若当前集群存在逻辑集群，则无法删除'} >
                 <Icon type="question-circle" />
               </Tooltip>
             </a>
@@ -185,7 +191,7 @@ export class ClusterList extends SearchAndFilterContainer {
         cancelText: '取消',
         onOk() {
           if (data.length) {
-            return message.warning('存在逻辑集群，无法申请下线！');
+            return message.warning('存在逻辑集群，无法删除！');
           }
           admin.deleteCluster(record.clusterId).then(data => {
             notification.success({ message: '删除成功' });
@@ -204,7 +210,7 @@ export class ClusterList extends SearchAndFilterContainer {
     };
     const monitorColumns = [
       {
-        title: '集群名称',
+        title: '逻辑集群列表',
         dataIndex: 'name',
         key: 'name',
         onCell: () => ({
@@ -231,6 +237,7 @@ export class ClusterList extends SearchAndFilterContainer {
             pagination={false}
             bordered={true}
           />
+          <Alert message="若当前集群存在逻辑集群，则无法删除" type="error" showIcon={true} />
         </div>
       </>
     );
@@ -243,7 +250,7 @@ export class ClusterList extends SearchAndFilterContainer {
 
     data = searchKey ? origin.filter((item: IMetaData) =>
       (item.clusterName !== undefined && item.clusterName !== null) && item.clusterName.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 
@@ -261,6 +268,8 @@ export class ClusterList extends SearchAndFilterContainer {
           <Popconfirm
             title={`确定${item.status === 1 ? '暂停' : '开始'}${item.clusterName}监控？`}
             onConfirm={() => this.pauseMonitor(item)}
+            cancelText="取消"
+            okText="确认"
           >
             <a
               className="action-button"
@@ -286,6 +295,7 @@ export class ClusterList extends SearchAndFilterContainer {
             <ul>
               {this.renderSearch('', '请输入集群名称')}
               <li className="right-btn-1">
+                <a style={{ display: 'inline-block', marginRight: '20px' }} href={indexUrl.cagUrl} target="_blank">集群接入指南</a>
                 <Button type="primary" onClick={this.createOrRegisterCluster.bind(this, null)}>接入集群</Button>
               </li>
             </ul>

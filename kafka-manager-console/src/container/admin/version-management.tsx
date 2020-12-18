@@ -20,7 +20,7 @@ export class VersionManagement extends SearchAndFilterContainer {
 
   public async componentDidMount() {
     if (!version.fileTypeList.length) {
-     await version.getFileTypeList();
+      await version.getFileTypeList();
     }
 
     if (!version.fileList.length) {
@@ -58,7 +58,7 @@ export class VersionManagement extends SearchAndFilterContainer {
 
     if (searchKey) {
       data = origin.filter((item: IUploadFile) => item.id + '' === searchKey
-       || ((item.fileName !== undefined && item.fileName !== null) && item.fileName.toLowerCase().includes(searchKey as string)));
+        || ((item.fileName !== undefined && item.fileName !== null) && item.fileName.toLowerCase().includes(searchKey as string)));
     }
     return data;
   }

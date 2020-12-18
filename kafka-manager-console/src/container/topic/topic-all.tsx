@@ -15,7 +15,7 @@ import 'styles/table-filter.less';
 @observer
 export class AllTopic extends SearchAndFilterContainer {
   public state = {
-    searchKey: '',
+    searchKey: ''
   };
 
   public componentDidMount() {

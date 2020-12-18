@@ -69,6 +69,7 @@ public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
             return ;
         }
 
+        Integer maxPassedOrderNumPerTask = configService.getAutoPassedTopicApplyOrderNumPerTask();
         for (OrderDO orderDO: doList) {
             if (!OrderTypeEnum.APPLY_TOPIC.getCode().equals(orderDO.getType())) {
                 continue;
@@ -77,7 +78,11 @@ public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
                 if (!handleApplyTopicOrder(orderDO)) {
                     continue;
                 }
-                return;
+                maxPassedOrderNumPerTask -= 1;
+                if (maxPassedOrderNumPerTask <= 0) {
+                    return;
+                }
+                LOGGER.info("class=AutoHandleTopicOrder||method=processTask||msg=passed id:{}", orderDO.getId());
             } catch (Exception e) {
                 LOGGER.error("handle apply topic order failed, orderDO:{}.", orderDO, e);
             }

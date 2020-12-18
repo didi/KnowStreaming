@@ -72,7 +72,7 @@ export class ClusterConsumer extends SearchAndFilterContainer {
     data = searchKey ? origin.filter((item: IOffset) =>
       (item.consumerGroup !== undefined && item.consumerGroup !== null) && item.consumerGroup.toLowerCase().includes(searchKey as string)
       || (item.location !== undefined && item.location !== null) && item.location.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 
@@ -82,7 +82,7 @@ export class ClusterConsumer extends SearchAndFilterContainer {
 
   public render() {
     let details: any[];
-    details =  this.consumerDetails ? this.consumerDetails.map((ele, index) => {
+    details = this.consumerDetails ? this.consumerDetails.map((ele, index) => {
       return {
         key: index,
         topicName: ele,
@@ -90,41 +90,43 @@ export class ClusterConsumer extends SearchAndFilterContainer {
     }) : [];
 
     const consumptionColumns = [{
-      title: 'Topic名称',
+      title: '消费的Topic列表',
       dataIndex: 'topicName',
       key: 'topicName',
     }];
 
     return (
       <>
-      <div className="k-row">
-        <ul className="k-tab">
-          <li>{this.props.tab}</li>
-          {this.renderSearch()}
-        </ul>
-        <Table
+        <div className="k-row">
+          <ul className="k-tab">
+            <li>{this.props.tab}</li>
+            {this.renderSearch()}
+          </ul>
+          <Table
             columns={this.columns}
             dataSource={this.getData(admin.consumerData)}
             pagination={pagination}
             rowKey="key"
-        />
-      </div>
-      <Modal
-        title="消费的Topic"
-        visible={this.state.detailsVisible}
-        onOk={() => this.handleDetailsOk()}
-        onCancel={() => this.handleDetailsCancel()}
-        maskClosable={false}
-        footer={null}
-      >
-        <Table
-          columns={consumptionColumns}
-          dataSource={details}
-          pagination={pagination}
-          rowKey="key"
-          scroll={{ y: 260 }}
-        />
-      </Modal>
+          />
+        </div>
+        <Modal
+          title="消费的Topic"
+          visible={this.state.detailsVisible}
+          onOk={() => this.handleDetailsOk()}
+          onCancel={() => this.handleDetailsCancel()}
+          maskClosable={false}
+          footer={null}
+        // centered={true}
+        >
+          <Table
+            columns={consumptionColumns}
+            dataSource={details}
+            // 运维管控－消费组列表－详情
+            pagination={details.length < 10 ? false : pagination}
+            rowKey="key"
+            scroll={{ y: 260 }}
+          />
+        </Modal>
       </>
     );
   }

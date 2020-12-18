@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicPartitionDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
@@ -14,6 +15,7 @@ import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaBillDO;
+import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxAttributeEnum;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
@@ -134,18 +136,27 @@ public class NormalTopicController {
     public Result<List<TopicRequestTimeDetailVO>> getTopicRequestMetrics(
             @PathVariable Long clusterId,
             @PathVariable String topicName,
-            @RequestParam(value = "isPhysicalClusterId", required = false) Boolean isPhysicalClusterId) {
+            @RequestParam(value = "isPhysicalClusterId", required = false) Boolean isPhysicalClusterId,
+            @RequestParam(value = "percentile", required = false, defaultValue = "75thPercentile") String percentile) {
         Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(clusterId, isPhysicalClusterId);
         if (ValidateUtils.isNull(physicalClusterId)) {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
         }
+
+        Boolean isPercentileLegal = Arrays.stream(JmxAttributeEnum.PERCENTILE_ATTRIBUTE.getAttribute())
+                .anyMatch(percentile::equals);
+
+        if (!isPercentileLegal) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+
         BaseMetrics metrics = topicService.getTopicMetricsFromJMX(
                 physicalClusterId,
                 topicName,
                 KafkaMetricsCollections.TOPIC_REQUEST_TIME_DETAIL_PAGE_METRICS,
                 false
         );
-        return new Result<>(TopicModelConverter.convert2TopicRequestTimeDetailVOList(metrics));
+        return new Result<>(TopicModelConverter.convert2TopicRequestTimeDetailVOList(metrics, percentile));
     }
 
     @ApiOperation(value = "Topic历史请求耗时信息", notes = "")
@@ -184,14 +195,26 @@ public class NormalTopicController {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
         }
 
-        return new Result<>(TopicModelConverter.convert2TopicConnectionVOList(
-                connectionService.getByTopicName(
-                        physicalClusterId,
-                        topicName,
-                        new Date(System.currentTimeMillis() - Constant.TOPIC_CONNECTION_LATEST_TIME_MS),
-                        new Date()
-                )
-        ));
+        List<TopicConnection> connections;
+
+        if (ValidateUtils.isBlank(appId)) {
+            connections = connectionService.getByTopicName(
+                    physicalClusterId,
+                    topicName,
+                    new Date(System.currentTimeMillis() - Constant.TOPIC_CONNECTION_LATEST_TIME_MS),
+                    new Date()
+            );
+        } else {
+            connections = connectionService.getByTopicName(
+                    physicalClusterId,
+                    topicName,
+                    appId,
+                    new Date(System.currentTimeMillis() - Constant.TOPIC_CONNECTION_LATEST_TIME_MS),
+                    new Date()
+            );
+        }
+
+        return new Result<>(TopicModelConverter.convert2TopicConnectionVOList(connections));
     }
 
     @ApiOperation(value = "Topic分区信息", notes = "")

@@ -94,6 +94,7 @@ public class N9e extends AbstractAgent {
             );
             N9eResult zr = JSON.parseObject(response, N9eResult.class);
             if (!ValidateUtils.isBlank(zr.getErr())) {
+                LOGGER.warn("class=N9e||method=createTask||param={}||errMsg={}||msg=call create task fail", JsonUtils.toJSONString(param),zr.getErr());
                 return null;
             }
             return Long.valueOf(zr.getDat().toString());
@@ -110,7 +111,7 @@ public class N9e extends AbstractAgent {
 
         String response = null;
         try {
-            response = HttpUtils.postForString(
+            response = HttpUtils.putForString(
                     baseUrl + ACTION_TASK_URI.replace("{taskId}", taskId.toString()),
                     JSON.toJSONString(param),
                     buildHeader()
@@ -119,6 +120,7 @@ public class N9e extends AbstractAgent {
             if (ValidateUtils.isBlank(zr.getErr())) {
                 return true;
             }
+            LOGGER.warn("class=N9e||method=actionTask||param={}||errMsg={}||msg=call action task fail", JSON.toJSONString(param),zr.getErr());
             return false;
         } catch (Exception e) {
             LOGGER.error("action task failed, taskId:{}, action:{}.", taskId, action, e);
@@ -134,7 +136,7 @@ public class N9e extends AbstractAgent {
 
         String response = null;
         try {
-            response = HttpUtils.postForString(
+            response = HttpUtils.putForString(
                     baseUrl + ACTION_HOST_TASK_URI.replace("{taskId}", taskId.toString()),
                     JSON.toJSONString(param),
                     buildHeader()
@@ -143,6 +145,7 @@ public class N9e extends AbstractAgent {
             if (ValidateUtils.isBlank(zr.getErr())) {
                 return true;
             }
+            LOGGER.warn("class=N9e||method=actionHostTask||param={}||errMsg={}||msg=call action host task fail", JSON.toJSONString(param),zr.getErr());
             return false;
         } catch (Exception e) {
             LOGGER.error("action task failed, taskId:{} action:{} hostname:{}.", taskId, action, hostname, e);
@@ -265,6 +268,7 @@ public class N9e extends AbstractAgent {
 
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line);
+                stringBuilder.append("\n");
             }
             return stringBuilder.toString();
         } catch (IOException e) {

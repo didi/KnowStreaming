@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table, notification, Button, Modal, Input, Form, Select, message, Tooltip } from 'component/antd';
+import { Table, notification, Button, Modal, Input, Form, Select, message, Tooltip, Icon, Spin } from 'component/antd';
 import { IBrokersMetadata, IRebalance } from 'types/base-type';
 import { admin } from 'store/admin';
 import { implementRegions, rebalanceStatus } from 'lib/api';
@@ -27,6 +27,7 @@ class LeaderRebalanceModal extends React.Component<IXFormProps> {
   public state = {
     imVisible: false,
     status: '',
+    isExecutionBtn: false
   };
 
   public handleRebalanceCancel() {
@@ -48,6 +49,7 @@ class LeaderRebalanceModal extends React.Component<IXFormProps> {
   public handleSubmit = (e: any) => {
     e.preventDefault();
     this.props.form.validateFields((err: any, values: any) => {
+      values.brokerId && this.setState({ isExecutionBtn: true })
       if (!err) {
         let params = {} as IRebalance;
         params = {
@@ -58,12 +60,19 @@ class LeaderRebalanceModal extends React.Component<IXFormProps> {
           topicName: '',
         };
         implementRegions(params).then(data => {
-          message.success('获取成功');
+          // message.success('获取成功');
           this.getStatus();
           this.setState({
             imVisible: true,
+            isExecutionBtn: false
           });
-        });
+        }).catch((err) => {
+          message.error('获取失败')
+          this.setState({
+            imVisible: true,
+            isExecutionBtn: false
+          });
+        })
       }
     });
   }
@@ -77,7 +86,7 @@ class LeaderRebalanceModal extends React.Component<IXFormProps> {
 
   public getStatus() {
     rebalanceStatus(this.props.clusterId).then((data: any) => {
-      message.success('状态更新成功');
+      // message.success('状态更新成功');
       if (data.code === 30) { // code -1 未知 101 成功 30 运行中
         setTimeout(this.iTimer, 0);
       } else {
@@ -91,6 +100,8 @@ class LeaderRebalanceModal extends React.Component<IXFormProps> {
   public componentWillUnmount() {
     clearInterval(this.timer);
   }
+  // 执行加载图标
+  public antIcon = <Icon type="loading" style={{ fontSize: 12, color: '#cccccc' }} spin />
 
   public render() {
     const { visible } = this.props;
@@ -140,21 +151,21 @@ class LeaderRebalanceModal extends React.Component<IXFormProps> {
               {getFieldDecorator('brokerId', {
                 rules: [{ required: true, message: '请输入Broker' }],
               })(
-              <Select
-                onChange={(value: number) => this.onMetaChange(value)}
-                {...searchProps}
-              >
-                {this.metadata.map((v, index) => (
-                  <Select.Option
-                    key={v.brokerId || v.key || index}
-                    value={v.brokerId}
-                  >
-                    {v.host.length > 16 ?
-                      <Tooltip placement="bottomLeft" title={v.host}> {v.host} </Tooltip>
-                      : v.host}
-                  </Select.Option>
-                ))}
-              </Select>)}
+                <Select
+                  onChange={(value: number) => this.onMetaChange(value)}
+                  {...searchProps}
+                >
+                  {this.metadata.map((v, index) => (
+                    <Select.Option
+                      key={v.brokerId || v.key || index}
+                      value={v.brokerId}
+                    >
+                      {v.host.length > 16 ?
+                        <Tooltip placement="bottomLeft" title={v.host}> {v.host} </Tooltip>
+                        : v.host}
+                    </Select.Option>
+                  ))}
+                </Select>)}
             </Form.Item>
             <Form.Item label="" >
               {getFieldDecorator('submit')(
@@ -162,8 +173,9 @@ class LeaderRebalanceModal extends React.Component<IXFormProps> {
                   htmlType="submit"
                   type="primary"
                   className="implement-button"
+                  disabled={this.state.isExecutionBtn}
                 >
-                  执行
+                  {this.state.isExecutionBtn ? (<span>执行中<Spin indicator={this.antIcon} size="small" /></span>) : '执行'}
                 </Button>,
               )}
             </Form.Item>

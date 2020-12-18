@@ -33,7 +33,7 @@ export class ClusterController extends SearchAndFilterContainer {
 
     data = searchKey ? origin.filter((item: IController) =>
       (item.host !== undefined && item.host !== null) && item.host.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 
@@ -46,18 +46,24 @@ export class ClusterController extends SearchAndFilterContainer {
         key: 'brokerId',
         width: '30%',
         sorter: (a: IController, b: IController) => b.brokerId - a.brokerId,
-      },
-      {
-        title: 'BrokerHost',
-        key: 'host',
-        dataIndex: 'host',
-        width: '30%',
         render: (r: string, t: IController) => {
           return (
             <a href={`${this.urlPrefix}/admin/broker-detail?clusterId=${this.clusterId}&brokerId=${t.brokerId}`}>{r}
             </a>
           );
         },
+      },
+      {
+        title: 'BrokerHost',
+        key: 'host',
+        dataIndex: 'host',
+        width: '30%',
+        // render: (r: string, t: IController) => {
+        //   return (
+        //     <a href={`${this.urlPrefix}/admin/broker-detail?clusterId=${this.clusterId}&brokerId=${t.brokerId}`}>{r}
+        //     </a>
+        //   );
+        // },
       },
       {
         title: '变更时间',

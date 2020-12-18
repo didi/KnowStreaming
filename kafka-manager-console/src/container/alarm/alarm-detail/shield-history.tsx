@@ -163,6 +163,8 @@ export class ShieldHistory extends React.Component {
               <Popconfirm
                 title="确定删除？"
                 onConfirm={() => this.deleteSilences(record)}
+                cancelText="取消"
+                okText="确认"
               >
                 <a>删除</a>
               </Popconfirm>

@@ -2,13 +2,13 @@ import * as React from 'react';
 import { Drawer, Modal, Button, message } from 'component/antd';
 import { XFormComponent } from 'component/x-form';
 import { IXFormWrapper } from 'types/base-type';
+import { wrapper } from 'store';
 
 export class XFormWrapper extends React.Component<IXFormWrapper> {
-
   public state = {
     confirmLoading: false,
     formMap: this.props.formMap || [] as any,
-    formData: this.props.formData || {},
+    formData: this.props.formData || {}
   };
 
   private $formRef: any;
@@ -108,7 +108,7 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
       if (error) {
         return;
       }
-      const { onSubmit, isWaitting } = this.props;
+      const { onSubmit, isWaitting, onSubmitFaild } = this.props;
 
       if (typeof onSubmit === 'function') {
         if (isWaitting) {
@@ -116,12 +116,16 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
             confirmLoading: true,
           });
           onSubmit(result).then(() => {
-            this.setState({
-              confirmLoading: false,
-            });
             message.success('操作成功');
             this.resetForm();
             this.closeModalWrapper();
+          }).catch((err: any) => {
+            const { formMap, formData } = wrapper.xFormWrapper;
+            onSubmitFaild(err, this.$formRef, formData, formMap);
+          }).finally(() => {
+            this.setState({
+              confirmLoading: false,
+            });
           });
           return;
         }

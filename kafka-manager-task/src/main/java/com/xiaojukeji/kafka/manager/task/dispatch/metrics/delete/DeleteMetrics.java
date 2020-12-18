@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.metrics.delete;
 
+import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.dao.*;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
@@ -19,27 +20,30 @@ import java.util.List;
  * @author zengqiao
  * @date 20/1/8
  */
-@CustomScheduled(name = "deleteMetrics", cron = "0 0/1 * * * ?", threadNum = 1)
+@CustomScheduled(name = "deleteMetrics", cron = "0 0/2 * * * ?", threadNum = 1)
 public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
     private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
     @Autowired
-    private TopicMetricsDao topicMetricsDao;
+    private ConfigUtils                 configUtils;
 
     @Autowired
-    private TopicAppMetricsDao topicAppMetricsDao;
+    private TopicMetricsDao             topicMetricsDao;
 
     @Autowired
-    private TopicRequestMetricsDao topicRequestMetricsDao;
+    private TopicAppMetricsDao          topicAppMetricsDao;
 
     @Autowired
-    private BrokerMetricsDao brokerMetricsDao;
+    private TopicRequestMetricsDao      topicRequestMetricsDao;
 
     @Autowired
-    private ClusterMetricsDao clusterMetricsDao;
+    private BrokerMetricsDao            brokerMetricsDao;
 
     @Autowired
-    private ConfigUtils configUtils;
+    private ClusterMetricsDao           clusterMetricsDao;
+
+    @Autowired
+    private TopicThrottledMetricsDao    topicThrottledMetricsDao;
 
     @Override
     public List<EmptyEntry> listAllTasks() {
@@ -50,8 +54,8 @@ public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
 
     @Override
     public void processTask(EmptyEntry entryEntry) {
-        if (!"dev".equals(configUtils.getKafkaManagerEnv())) {
-            // 非预发&线上环境直接跳过
+        if (Constant.INVALID_CODE.equals(configUtils.getMaxMetricsSaveDays())) {
+            // 无需数据删除
             return;
         }
 
@@ -76,6 +80,12 @@ public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
         }
 
         try {
+            deleteThrottledMetrics();
+        } catch (Exception e) {
+            LOGGER.error("delete topic throttled metrics failed.", e);
+        }
+
+        try {
             deleteBrokerMetrics();
         } catch (Exception e) {
             LOGGER.error("delete broker metrics failed.", e);
@@ -90,27 +100,32 @@ public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
     }
 
     private void deleteTopicMetrics() {
-        Date endTime = new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000);
+        Date endTime = new Date(System.currentTimeMillis() - configUtils.getMaxMetricsSaveDays() * 24 * 60 * 60 * 1000);
         topicMetricsDao.deleteBeforeTime(endTime);
     }
 
     private void deleteTopicAppMetrics() {
-        Date endTime = new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000);
+        Date endTime = new Date(System.currentTimeMillis() - configUtils.getMaxMetricsSaveDays() * 24 * 60 * 60 * 1000);
         topicAppMetricsDao.deleteBeforeTime(endTime);
     }
 
     private void deleteTopicRequestMetrics() {
-        Date endTime = new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000);
+        Date endTime = new Date(System.currentTimeMillis() - configUtils.getMaxMetricsSaveDays() * 24 * 60 * 60 * 1000);
         topicRequestMetricsDao.deleteBeforeTime(endTime);
     }
 
+    private void deleteThrottledMetrics() {
+        Date endTime = new Date(System.currentTimeMillis() - configUtils.getMaxMetricsSaveDays() * 24 * 60 * 60 * 1000);
+        topicThrottledMetricsDao.deleteBeforeTime(endTime);
+    }
+
     private void deleteBrokerMetrics() {
-        Date endTime = new Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
+        Date endTime = new Date(System.currentTimeMillis() - configUtils.getMaxMetricsSaveDays() * 24 * 60 * 60 * 1000);
         brokerMetricsDao.deleteBeforeTime(endTime);
     }
 
     private void deleteClusterMetrics() {
-        Date endTime = new Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
+        Date endTime = new Date(System.currentTimeMillis() - configUtils.getMaxMetricsSaveDays() * 24 * 60 * 60 * 1000);
         clusterMetricsDao.deleteBeforeTime(endTime);
     }
 }

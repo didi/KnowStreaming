@@ -66,7 +66,10 @@ export const timeMonthStr = 'YYYY/MM';
 
 // tslint:disable-next-line:max-line-length
 
-export const indexUrl = 'https://github.com/didi/kafka-manager';
+export const indexUrl ={
+  indexUrl:'https://github.com/didi/kafka-manager',
+  cagUrl:'https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/add_cluster/add_cluster.md', // 集群接入指南 Cluster access Guide
+} 
 
 export const expandRemarks = `请填写不少于5字的申请原因！以便工作人员判断审核`;
 

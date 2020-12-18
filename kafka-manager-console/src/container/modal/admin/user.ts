@@ -12,6 +12,9 @@ export const showApplyModal = (record?: IUser) => {
         key: 'username',
         label: '用户名',
         rules: [{ required: true, message: '请输入用户名' }],
+        attrs: {
+          disabled: record ? true : false
+        }
       }, {
         key: 'role',
         label: '角色',

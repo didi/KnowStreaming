@@ -116,11 +116,11 @@ export class CancelTopicPermission extends React.Component {
         type: 'check_box',
         defaultValue: accessStatus,
         options: [{
-          label: '消费权限',
+          label: '取消消费权限',
           value: '1',
           disabled: send,
         }, {
-          label: '发送权限',
+          label: '取消发送权限',
           value: '2',
           disabled: consume,
         }],

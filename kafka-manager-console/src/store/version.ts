@@ -8,7 +8,7 @@ interface IEnum {
   suffix?: string;
 }
 interface IUploadFileType {
-  fileEnum: IEnum[] ;
+  fileEnum: IEnum[];
   storageEnum: IEnum[];
 }
 
@@ -44,11 +44,10 @@ export class Version {
 
   @action.bound
   public setFileList(data: IUploadFile[]) {
-
     this.fileList = (data || []).map((item, index) => {
       return {
         ...item,
-        configType: this.acceptFileMap[item.fileType],
+        configType: this.acceptFileMap[item.fileType] || '',
         key: index,
       };
     });

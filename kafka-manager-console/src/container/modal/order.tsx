@@ -57,25 +57,26 @@ export const showApprovalModal = (info: IOrderInfo, status: number, from?: strin
     }],
   }, {
     key: 'retentionTime',
-    label: '保存时间',
-    defaultValue: '48',
-    type: 'select',
-    options: [{
-      label: '12小时',
-      value: '12',
-    }, {
-      label: '24小时',
-      value: '24',
-    }, {
-      label: '48小时',
-      value: '48',
-    }, {
-      label: '72小时',
-      value: '72',
-    }],
+    label: '保存时间（/小时）',
+    defaultValue: '12',
+    type: 'input_number',
+    // options: [{
+    //   label: '12小时',
+    //   value: '12',
+    // }, {
+    //   label: '24小时',
+    //   value: '24',
+    // }, {
+    //   label: '48小时',
+    //   value: '48',
+    // }, {
+    //   label: '72小时',
+    //   value: '72',
+    // }],
     rules: [{
       required: true,
-      message: '请选择',
+      message: '请输入大于12小于999的整数',
+      pattern: /^([1-9]{1}[0-9]{2})$|^([2-9]{1}[0-9]{1})$|^(1[2-9]{1})$/,
     }],
   }, {
     key: 'species',
@@ -242,11 +243,15 @@ export const showApprovalModal = (info: IOrderInfo, status: number, from?: strin
   if ((type === 2 || type === 12) && status === 1) { // 通过配额  12分区
     xFormWrapper.formMap.splice(1, 0, ...quotaFormMap);
   }
-
   wrapper.open(xFormWrapper);
 };
 
-export const renderOrderOpModal = (selectedRowKeys: IBaseOrder[], status: number) => {
+export const renderOrderOpModal = (selectedRowKeys: IBaseOrder[], status: number, rowsCallBack?: any) => {
+  if (modal.actionAfterClose === 'close') {
+    // tslint:disable-next-line: no-unused-expression
+    rowsCallBack && rowsCallBack.onChange([], []);
+    order.setSelectedRows([]);
+  }
   const orderIdList = selectedRowKeys.map((ele: IBaseOrder) => {
     return ele.id;
   });
@@ -283,6 +288,7 @@ export const renderOrderOpModal = (selectedRowKeys: IBaseOrder[], status: number
       order.batchApprovalOrders(params).then(data => {
         modal.setAction('close');
         modal.showOrderOpResult();
+        order.setSelectedRows();
       });
     },
   };
@@ -293,6 +299,7 @@ export const RenderOrderOpResult = () => {
   const handleOk = () => {
     order.getApplyOrderList(0);
     order.getApprovalList(0);
+    order.setSelectedRows();
     modal.close();
   };
 
@@ -309,7 +316,7 @@ export const RenderOrderOpResult = () => {
       render: (t: number) => {
         return (
           <span className={t === 0 ? 'success' : 'fail'}>
-              {t === 0 ? '成功' : '失败'}
+            {t === 0 ? '成功' : '失败'}
           </span>
         );
       },
@@ -327,7 +334,7 @@ export const RenderOrderOpResult = () => {
       render: (text: string) => {
         return (
           <Tooltip placement="bottomLeft" title={text} >
-              {text}
+            {text}
           </Tooltip>);
       },
     },

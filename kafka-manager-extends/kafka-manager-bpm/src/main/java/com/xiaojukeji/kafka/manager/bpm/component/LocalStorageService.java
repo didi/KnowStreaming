@@ -3,11 +3,8 @@ package com.xiaojukeji.kafka.manager.bpm.component;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderStatusEnum;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
-import com.xiaojukeji.kafka.manager.common.events.OrderApplyEvent;
-import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.OrderDao;
-import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +24,12 @@ public class LocalStorageService extends AbstractOrderStorageService {
     @Autowired
     private OrderDao orderDao;
 
-    @Autowired
-    private ConfigUtils configUtils;
-
     @Override
     public ResultStatus directSaveHandledOrder(OrderDO orderDO) {
         try {
             if (orderDao.directSaveHandledOrder(orderDO) <= 0) {
                 return ResultStatus.MYSQL_ERROR;
             }
-//            无需进行通知
-//            SpringTool.publish(new OrderApplyEvent(this, orderDO, configUtils.getIdc()));
             return ResultStatus.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("add order failed, orderDO:{}.", orderDO, e);
@@ -52,7 +44,6 @@ public class LocalStorageService extends AbstractOrderStorageService {
                 return false;
             }
 
-            SpringTool.publish(new OrderApplyEvent(this, orderDO, configUtils.getIdc()));
             return true;
         } catch (Exception e) {
             LOGGER.error("add order failed, orderDO:{}.", orderDO, e);

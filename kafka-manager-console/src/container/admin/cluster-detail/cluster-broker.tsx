@@ -169,6 +169,8 @@ export class ClusterBroker extends SearchAndFilterContainer {
                 title="确定删除？"
                 onConfirm={() => this.deteleTopic(record)}
                 disabled={record.status === 0}
+                cancelText="取消"
+                okText="确认"
               >
                 <a style={record.status === 0 ? { cursor: 'not-allowed', color: '#999' } : {}}>
                   删除

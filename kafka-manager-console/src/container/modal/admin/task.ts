@@ -12,12 +12,12 @@ const updateFormModal = (topicName?: string) => {
   const formMap = wrapper.xFormWrapper.formMap;
   const formData = wrapper.xFormWrapper.formData;
   if (topicName) {
-    formMap[5].options = expert.partitionIdMap[topicName]; // 3
+    formMap[2].options = expert.partitionIdMap[topicName]; // 3
     formData.originalRetentionTime = transMSecondToHour(admin.topicsBasic.retentionTime);
   } else {
     formMap[1].options = expert.taskTopicMetadata;
-    formMap[3].options = admin.brokersMetadata; // 2
-    formMap[4].options = admin.brokersRegions;
+    formMap[4].options = admin.brokersMetadata; // 2
+    formMap[5].options = admin.brokersRegions;
   }
   // tslint:disable-next-line:no-unused-expression
   wrapper.ref && wrapper.ref.updateFormMap$(formMap, wrapper.xFormWrapper.formData, !!topicName, ['partitionIdList']);
@@ -25,11 +25,11 @@ const updateFormModal = (topicName?: string) => {
 
 const updateInputModal = (status?: string) => {
   const formMap = wrapper.xFormWrapper.formMap;
-  formMap[3].invisible = status === 'region';
-  formMap[4].invisible = status !== 'region';
+  formMap[4].invisible = status === 'region';
+  formMap[5].invisible = status !== 'region';
 
-  formMap[3].rules = [{required: status !== 'region'}];
-  formMap[4].rules = [{required: status === 'region'}];
+  formMap[4].rules = [{required: status !== 'region'}];
+  formMap[5].rules = [{required: status === 'region'}];
   // tslint:disable-next-line:no-unused-expression
   wrapper.ref && wrapper.ref.updateFormMap$(formMap, wrapper.xFormWrapper.formData);
 };
@@ -82,6 +82,19 @@ export const createMigrationTasks = () => {
         },
       },
       {
+        key: 'partitionIdList',
+        label: '分区ID',
+        type: 'select',
+        defaultValue: [] as any,
+        rules: [{
+          required: false,
+        }],
+        attrs: {
+          mode: 'tags',
+          placeholder: '请选择PartitionIdList',
+        },
+      },
+      {
         key: 'species',
         label: '类型',
         type: 'radio_group',
@@ -110,10 +123,10 @@ export const createMigrationTasks = () => {
         defaultValue: [] as any,
         invisible: false,
         options: admin.brokersMetadata,
-        rules: [{ required: true, message: '请选择Broker' }],
+        rules: [{ required: true, message: '请选择目标Broker,Broker数量需大于等于副本数量' }],
         attrs: {
           mode: 'multiple',
-          placeholder: '请选择Broker',
+          placeholder: '请选择目标Broker,Broker数量需大于等于副本数量',
         },
       },
       {
@@ -123,24 +136,12 @@ export const createMigrationTasks = () => {
         defaultValue: [] as any,
         invisible: true,
         options: admin.brokersRegions,
-        rules: [{ required: false, message: '请选择Region' }],
+        rules: [{ required: false, message: '请选择目标Region' }],
         attrs: {
-          placeholder: '请选择Region',
+          placeholder: '请选择目标Region',
         },
       },
-      {
-        key: 'partitionIdList',
-        label: '分区ID',
-        type: 'select',
-        defaultValue: [] as any,
-        rules: [{
-          required: false,
-        }],
-        attrs: {
-          mode: 'tags',
-          placeholder: '请选择PartitionIdList',
-        },
-      },
+      
       {
         key: 'beginTime',
         label: '计划开始时间',

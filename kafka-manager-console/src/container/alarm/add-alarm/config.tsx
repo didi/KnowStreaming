@@ -76,6 +76,8 @@ export const getAlarmColumns = (urlPrefix: string) => {
           <Popconfirm
             title="确定删除？"
             onConfirm={() => deteleMonitor(item)}
+            cancelText="取消"
+            okText="确认"
           >
             <a>删除</a>
           </Popconfirm>
@@ -193,21 +195,21 @@ export const xActionFormMap = [{
   key: 'acceptGroup',
   label: '报警接收组',
   type: 'custom',
-  customFormItem: <AlarmSelect isDisabled={isDetailPage}/>,
+  customFormItem: <AlarmSelect isDisabled={isDetailPage} />,
   rules: [{ required: true, message: '请输入报警接收组' }],
 },
 {
   key: 'callback',
   label: '回调地址',
   rules: [{ required: false, message: '请输入回调地址' }],
-  attrs: {disabled: isDetailPage},
+  attrs: { disabled: isDetailPage },
 }] as unknown as IFormSelect[]; // as IFormItem[];
 
 export const xTypeFormMap = [{
   key: 'alarmName',
-  label: '告警规则',
+  label: '告警规则名称',
   rules: [{ required: true, message: '请输入告警规则' }],
-  attrs: {placeholder: '请输入', disabled: isDetailPage},
+  attrs: { placeholder: '请输入告警规则名称', disabled: isDetailPage },
 }, {
   key: 'app',
   label: '所属应用',
@@ -217,8 +219,8 @@ export const xTypeFormMap = [{
     optionFilterProp: 'children',
     showSearch: true,
     filterOption: (input: any, option: any) => {
-      if ( typeof option.props.children === 'object' ) {
-        const { props } =  option.props.children as any;
+      if (typeof option.props.children === 'object') {
+        const { props } = option.props.children as any;
         return (props.children + '').toLowerCase().indexOf(input.toLowerCase()) >= 0;
       }
       return (option.props.children + '').toLowerCase().indexOf(input.toLowerCase()) >= 0;

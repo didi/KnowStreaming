@@ -35,6 +35,8 @@ export interface ITopicBaseInfo {
   score: number;
   topicCodeC: string;
   physicalClusterId: number;
+  percentile: string;
+  regionNameList: any;
 }
 
 export interface IRealTimeTraffic {
@@ -488,9 +490,9 @@ class Topic {
     return getRealTimeTraffic(clusterId, topicName).then(this.setRealTimeTraffic);
   }
 
-  public getRealConsume(clusterId: number, topicName: string) {
+  public getRealConsume(clusterId: number, topicName: string, percentile: string) {
     this.setConsumeLoading(true);
-    return getRealConsume(clusterId, topicName).then(this.setRealConsume);
+    return getRealConsume(clusterId, topicName, percentile).then(this.setRealConsume);
   }
 
   public getConnectionInfo(clusterId: number, topicName: string, appId?: string) {

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { admin } from 'store/admin';
-import { notification, Modal, Form, Input, Switch, Select, Tooltip } from 'antd';
+import { notification, Modal, Form, Input, Switch, Select, Tooltip, Radio } from 'antd';
 import { IBrokersMetadata, IBrokersRegions, IExpand } from 'types/base-type';
 import { searchProps } from 'constants/table';
 import { expandPartition } from 'lib/api';
@@ -89,14 +89,31 @@ class CustomForm extends React.Component<IXFormProps> {
               rules: [{ required: true, message: '请输入Topic名称' }],
             })(<Input disabled={true} placeholder="请输入Topic名称" />)}
           </Form.Item>
+
+          {/* 运维管控-topic信息-扩分区操作 */}
+          <Form.Item label="所属region" >
+            {getFieldDecorator('regionNameList', {
+              initialValue: admin.topicsBasic ? admin.topicsBasic.regionNameList : '',
+              rules: [{ required: true, message: '请输入所属region' }],
+            })(<Input disabled={true} />)}
+          </Form.Item>
+          {/* 运维管控-topic信息-扩分区操作 */}
+
           <Form.Item label="分区数" >
             {getFieldDecorator('partitionNum', {
-              rules: [{ required: true,
-                message: '请输入分区数' }],
+              rules: [{
+                required: true,
+                message: '请输入分区数',
+              }],
             })(<Input placeholder="请输入分区数" />)}
           </Form.Item>
-          <Form.Item label={this.state.checked ? 'Region类型' : 'Borker类型'} >
-            <Switch onChange={(checked) => this.onSwitchChange(checked)} />
+          <Form.Item label="类型">
+            {/* <Form.Item label={this.state.checked ? 'Region类型' : 'Borker类型'} > */}
+            {/* <Switch onChange={(checked) => this.onSwitchChange(checked)} /> */}
+            <Radio.Group value={this.state.checked ? 'region' : 'broker'} onChange={(e) => { this.onSwitchChange(e.target.value === 'region' ? true : false); }}>
+              <Radio.Button value="region">Region类型</Radio.Button>
+              <Radio.Button value="broker">Borker类型</Radio.Button>
+            </Radio.Group>
           </Form.Item>
           <Form.Item label="brokerIdList" style={{ display: this.state.checked ? 'none' : '' }}>
             {getFieldDecorator('brokerIdList', {
@@ -107,14 +124,14 @@ class CustomForm extends React.Component<IXFormProps> {
                 mode="multiple"
                 {...searchProps}
               >
-                { metadata.map((v, index) => (
+                {metadata.map((v, index) => (
                   <Select.Option
                     key={v.brokerId || v.key || index}
                     value={v.brokerId}
                   >
-                  {v.host.length > 16 ?
-                    <Tooltip placement="bottomLeft" title={v.host}> {v.host} </Tooltip>
-                    : v.host}
+                    {v.host.length > 16 ?
+                      <Tooltip placement="bottomLeft" title={v.host}> {v.host} </Tooltip>
+                      : v.host}
                   </Select.Option>
                 ))}
               </Select>,
@@ -127,7 +144,7 @@ class CustomForm extends React.Component<IXFormProps> {
               rules: [{ required: this.state.checked, message: '请选择regionId' }],
             })(
               <Select {...searchProps}>
-                { regions.map((v, index) => (
+                {regions.map((v, index) => (
                   <Select.Option
                     key={v.id || v.key || index}
                     value={v.id}

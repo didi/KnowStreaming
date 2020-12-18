@@ -22,8 +22,8 @@ spring:
     active: dev
   servlet:
     multipart:
-      max-file-size: 60MB
-      max-request-size: 60MB
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 logging:
   config: classpath:logback-spring.xml
@@ -32,24 +32,35 @@ custom:
   idc: cn
   jmx:
     max-conn: 10
+  store-metrics-task:
+    community:
+      broker-metrics-enabled: true
+      topic-metrics-enabled: true
+    didi:
+      app-topic-metrics-enabled: true
+      topic-request-time-metrics-enabled: true
+      topic-throttled-metrics: true
+    save-days: 7
 
 account:
   ldap:
 
 kcm:
   enabled: false
+  storage:
+    base-url: http://127.0.0.1
   n9e:
-    base-url: http://127.0.0.1:8080
+    base-url: http://127.0.0.1:8004
     user-token: 12345678
     timeout: 300
-    account: km
+    account: root
     script-file: kcm_script.sh
 
 monitor:
   enabled: false
   n9e:
     nid: 2
-    user-token: 123456
+    user-token: 1234567890
     mon:
       base-url: http://127.0.0.1:8032
     sink:

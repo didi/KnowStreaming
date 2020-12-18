@@ -3,6 +3,8 @@ package com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+
 /**
  * @author zengqiao
  * @date 20/4/8
@@ -32,6 +34,8 @@ public class TopicRequestTimeDetailVO {
 
     @ApiModelProperty(value = "totalTimeMs")
     private Object totalTimeMs;
+
+    private List<TopicBrokerRequestTimeVO> brokerRequestTimeList;
 
     public String getRequestTimeType() {
         return requestTimeType;
@@ -95,6 +99,14 @@ public class TopicRequestTimeDetailVO {
 
     public void setTotalTimeMs(Object totalTimeMs) {
         this.totalTimeMs = totalTimeMs;
+    }
+
+    public List<TopicBrokerRequestTimeVO> getBrokerRequestTimeList() {
+        return brokerRequestTimeList;
+    }
+
+    public void setBrokerRequestTimeList(List<TopicBrokerRequestTimeVO> brokerRequestTimeList) {
+        this.brokerRequestTimeList = brokerRequestTimeList;
     }
 
     @Override

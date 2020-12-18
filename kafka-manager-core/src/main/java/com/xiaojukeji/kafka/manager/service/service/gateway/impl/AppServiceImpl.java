@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author zhongyuankai
@@ -59,10 +60,13 @@ public class AppServiceImpl implements AppService {
     @Autowired
     private OperateRecordService operateRecordService;
 
+
+
     @Override
     public ResultStatus addApp(AppDO appDO) {
         try {
             if (appDao.insert(appDO) < 1) {
+                LOGGER.warn("class=AppServiceImpl||method=addApp||AppDO={}||msg=add fail,{}",appDO,ResultStatus.MYSQL_ERROR.getMessage());
                 return ResultStatus.MYSQL_ERROR;
             }
             KafkaUserDO kafkaUserDO = new KafkaUserDO();
@@ -72,6 +76,7 @@ public class AppServiceImpl implements AppService {
             kafkaUserDO.setUserType(0);
             kafkaUserDao.insert(kafkaUserDO);
         } catch (DuplicateKeyException e) {
+            LOGGER.error("class=AppServiceImpl||method=addApp||errMsg={}||appDO={}|", e.getMessage(), appDO, e);
             return ResultStatus.RESOURCE_ALREADY_EXISTED;
         } catch (Exception e) {
             LOGGER.error("add app failed, appDO:{}.", appDO, e);
@@ -139,21 +144,40 @@ public class AppServiceImpl implements AppService {
                 return ResultStatus.SUCCESS;
             }
         } catch (DuplicateKeyException e) {
+            LOGGER.error("class=AppServiceImpl||method=updateByAppId||errMsg={}||AppDTO={}||operator={}||adminApi={}", e.getMessage(), dto, operator, adminApi, e);
             return ResultStatus.RESOURCE_NAME_DUPLICATED;
         } catch (Exception e) {
             LOGGER.error("update app failed, dto:{}, operator:{}, adminApi:{}.", dto, operator, adminApi, e);
         }
+        LOGGER.warn("class=AppServiceImpl||method=updateByAppId||dto={}||operator={}||adminApi={}||msg=update app fail,{}!", dto,operator,adminApi,ResultStatus.MYSQL_ERROR.getMessage());
         return ResultStatus.MYSQL_ERROR;
     }
 
     @Override
-    public List<AppDO> getByPrincipal(String principals) {
+    public List<AppDO> getByPrincipal(String principal) {
         try {
-            return appDao.getByPrincipal(principals);
+            List<AppDO> appDOs = appDao.getByPrincipal(principal);
+            if (!ValidateUtils.isEmptyList(appDOs)) {
+                return appDOs.stream()
+                        .filter(appDO -> ListUtils.string2StrList(appDO.getPrincipals()).contains(principal))
+                        .collect(Collectors.toList());
+            }
         } catch (Exception e) {
-            LOGGER.error("get app list failed, principals:{}.", principals);
+            LOGGER.error("get app list failed, principals:{}.", principal);
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public AppDO getAppByUserAndId(String appId, String curUser) {
+        AppDO appDO = this.getByAppId(appId);
+        if (appDO != null) {
+            if (ListUtils.string2StrList(appDO.getPrincipals()).contains(curUser)) {
+                return appDO;
+            }
+        }
+        LOGGER.debug("class=AppServiceImpl||method=getAppByUserAndId||appId={}||curUser={}||msg=appDO is null!", appId, curUser);
+        return null;
     }
 
     @Override
@@ -177,6 +201,7 @@ public class AppServiceImpl implements AppService {
         // 查询AppID
         AppDO appDO = appDao.getByAppId(appId);
         if (ValidateUtils.isNull(appDO)) {
+            LOGGER.debug("class=AppServiceImpl||method=getAppTopicDTOList||appId={}||msg=appDO is null!", appId);
             return new ArrayList<>();
         }
 
@@ -220,6 +245,7 @@ public class AppServiceImpl implements AppService {
                 appTopicDTO.setLogicalClusterId(logicalClusterDO.getId());
                 appTopicDTO.setLogicalClusterName(logicalClusterDO.getName());
             } else {
+                LOGGER.warn("class=AppServiceImpl||method=getAppTopicDTOList||clusterId={}||topicName={}||msg=logicalClusterDO is null!", authorityDO.getClusterId(), authorityDO.getTopicName());
                 continue;
             }
             appTopicDTO.setOperator("");

@@ -32,10 +32,12 @@ export class ClusterOverview extends React.Component<IOverview> {
     const clusterContent = [{
       value: content.clusterName,
       label: '集群名称',
-    }, {
-      value: clusterTypeMap[content.mode],
-      label: '集群类型',
-    }, {
+    }, 
+    // {
+    //   value: clusterTypeMap[content.mode],
+    //   label: '集群类型',
+    // }, 
+    {
       value: gmtCreate,
       label: '接入时间',
     }];

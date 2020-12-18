@@ -55,7 +55,7 @@ export class NetWorkFlow extends React.Component<any> {
       <div className="chart-box-0">
         <div className="chart-title">
           <span className="action-button">历史流量</span>
-          <a href={indexUrl} target="_blank">指标说明</a>
+          <a href={indexUrl.indexUrl} target="_blank">指标说明</a>
         </div>
         <Divider />
         <ChartWithDatePicker
@@ -70,18 +70,18 @@ export class NetWorkFlow extends React.Component<any> {
 
 export const renderTrafficTable = (updateRealStatus: any, Element: React.ComponentClass) => {
   return (
-      <div className="traffic-table">
-        <div className="traffic-header">
-          <span>
-            <span className="action-button">实时流量</span>
-            <a href={indexUrl} target="_blank">指标说明</a>
-          </span>
-          <span className="k-abs" onClick={updateRealStatus}>
-            <i className="k-icon-shuaxin didi-theme mr-5" />
-            <a>刷新</a>
-          </span>
-        </div>
-        <Element />
+    <div className="traffic-table">
+      <div className="traffic-header">
+        <span>
+          <span className="action-button">实时流量</span>
+          <a href={indexUrl.indexUrl} target="_blank">指标说明</a>
+        </span>
+        <span className="k-abs" onClick={updateRealStatus}>
+          <i className="k-icon-shuaxin didi-theme mr-5" />
+          <a>刷新</a>
+        </span>
       </div>
+      <Element />
+    </div>
   );
 };

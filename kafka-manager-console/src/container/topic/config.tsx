@@ -28,7 +28,7 @@ export const renderMyTopicOperation = (record: ITopic) => {
           item.clickFunc ? <a type="javascript;" key={index} onClick={() => item.clickFunc(record)}>{item.label}</a> :
             <span key={index} className="mr-10">{item.label}</span>
         ))}
-        {getTopicBtn(record).length > 2 && <MoreBtns btns={leftBtns} data={record}/>}
+        {getTopicBtn(record).length > 2 && <MoreBtns btns={leftBtns} data={record} />}
       </span>
     </>);
 };
@@ -72,7 +72,7 @@ const getTopicBtn = (record: ITopic) => {
 export const renderAllTopicOperation = (item: ITopic) => {
   return (
     <>
-    {item.needAuth && <a className="mr-10" onClick={() => showAllPermissionModal(item)}>申请权限</a>}
+      {item.needAuth && <a className="mr-10" onClick={() => showAllPermissionModal(item)}>申请权限</a>}
     </>
   );
 };
@@ -85,6 +85,7 @@ export const applyQuotaQuery = (item: ITopic) => {
 };
 
 export const applyTopicQuotaQuery = async (item: ITopic) => {
+  console.log(item)
   await app.getTopicAppQuota(item.clusterId, item.topicName);
   await showTopicApplyQuatoModal(item);
 };
@@ -141,10 +142,8 @@ export const getAllTopicColumns = (urlPrefix: string) => {
           <Tooltip placement="bottomLeft" title={record.topicName} >
             <a
               // tslint:disable-next-line:max-line-length
-              href={`${urlPrefix}/topic/topic-detail?clusterId=${record.clusterId}&topic=${record.topicName}&region=${region.currentRegion}`}
-            >
-              {text}
-            </a>
+              href={`${urlPrefix}/topic/topic-detail?clusterId=${record.clusterId}&topic=${record.topicName}&region=${region.currentRegion}&needAuth=${record.needAuth}&clusterName=${record.clusterName}`}
+            >{text}</a>
           </Tooltip>);
       },
     }, {
@@ -276,7 +275,7 @@ export const getMyTopicColumns = (urlPrefix: string) => {
       render: (text: string, record: ITopic) => (
         <>
           <Tooltip placement="bottomLeft" title={record.appId} >
-              {text}
+            {text}
           </Tooltip>
         </>
       ),

@@ -70,6 +70,7 @@ public class RdTopicController {
         RdTopicBasicVO vo = new RdTopicBasicVO();
         CopyUtils.copyProperties(vo, result.getData());
         vo.setProperties(result.getData().getProperties());
+        vo.setRegionNameList(result.getData().getRegionNameList());
         return new Result<>(vo);
     }
 }

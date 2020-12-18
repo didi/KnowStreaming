@@ -46,4 +46,15 @@ public class TopicCreationConstant {
     public static final String TOPIC_NAME_PREFIX_RU = "ru01_";
 
     public static final Integer TOPIC_NAME_MAX_LENGTH = 255;
+
+
+    /**
+     * 单次自动化审批, 默认允许的通过单子
+     */
+    public static final Integer DEFAULT_MAX_PASSED_ORDER_NUM_PER_TASK = 1;
+
+    /**
+     * 单次自动化审批, 最多允许的通过单子
+     */
+    public static final Integer MAX_PASSED_ORDER_NUM_PER_TASK = 200;
 }

@@ -30,6 +30,8 @@ export const getUserColumns = () => {
             <Popconfirm
               title="确定删除？"
               onConfirm={() => users.deleteUser(record.username)}
+              cancelText="取消"
+              okText="确认"
             >
               <a>删除</a>
             </Popconfirm>
@@ -54,7 +56,7 @@ export const getVersionColumns = () => {
       render: (text: string, record: IUploadFile) => {
         return (
           <Tooltip placement="topLeft" title={text} >
-              <a href={`${urlPrefix}/info?fileId=${record.id}`} target="_blank">{text}</a>
+            <a href={`${window.origin}/api/v1/rd/kafka-files/${record.id}/config-files?dataCenter=cn`} target="_blank">{text}</a>
           </Tooltip>);
       },
     }, {
@@ -70,7 +72,7 @@ export const getVersionColumns = () => {
       render: (text: string) => {
         return (
           <Tooltip placement="bottomLeft" title={text} >
-              {text.substring(0, 8)}
+            {text.substring(0, 8)}
           </Tooltip>);
       },
     }, {
@@ -95,26 +97,28 @@ export const getVersionColumns = () => {
       render: (text: string) => {
         return (
           <Tooltip placement="topLeft" title={text} >
-              {text}
+            {text}
           </Tooltip>);
       },
     }, {
       title: '操作',
-        dataIndex: 'operation',
-        key: 'operation',
-        render: (text: string, record: IUploadFile) => {
-          return (
-            <span className="table-operation">
-              <a onClick={() => showModifyModal(record)}>编辑</a>
-              <Popconfirm
-                title="确定删除？"
-                onConfirm={() => version.deleteFile(record.id)}
-              >
-                <a>删除</a>
-              </Popconfirm>
-            </span>);
-        },
+      dataIndex: 'operation',
+      key: 'operation',
+      render: (text: string, record: IUploadFile) => {
+        return (
+          <span className="table-operation">
+            <a onClick={() => showModifyModal(record)}>编辑</a>
+            <Popconfirm
+              title="确定删除？"
+              onConfirm={() => version.deleteFile(record.id)}
+              cancelText="取消"
+              okText="确认"
+            >
+              <a>删除</a>
+            </Popconfirm>
+          </span>);
       },
+    },
   ];
   return columns;
 };
@@ -168,6 +172,8 @@ export const getConfigureColumns = () => {
             <Popconfirm
               title="确定删除？"
               onConfirm={() => admin.deleteConfigure(record.configKey)}
+              cancelText="取消"
+              okText="确认"
             >
               <a>删除</a>
             </Popconfirm>
@@ -178,11 +184,11 @@ export const getConfigureColumns = () => {
   return columns;
 };
 
-const  renderClusterHref = (value: number | string, item: IMetaData, key: number) => {
+const renderClusterHref = (value: number | string, item: IMetaData, key: number) => {
   return ( // 0 暂停监控--不可点击  1 监控中---可正常点击
     <>
-    {item.status === 1 ? <a href={`${urlPrefix}/admin/cluster-detail?clusterId=${item.clusterId}#${key}`}>{value}</a>
-      : <a style={{ cursor: 'not-allowed', color: '#999' }}>{value}</a>}
+      {item.status === 1 ? <a href={`${urlPrefix}/admin/cluster-detail?clusterId=${item.clusterId}#${key}`}>{value}</a>
+        : <a style={{ cursor: 'not-allowed', color: '#999' }}>{value}</a>}
     </>
   );
 };
@@ -190,13 +196,13 @@ const  renderClusterHref = (value: number | string, item: IMetaData, key: number
 export const getAdminClusterColumns = () => {
   return [
     {
-      title: '集群ID',
+      title: '物理集群ID',
       dataIndex: 'clusterId',
       key: 'clusterId',
       sorter: (a: IMetaData, b: IMetaData) => b.clusterId - a.clusterId,
     },
     {
-      title: '集群名称',
+      title: '物理集群名称',
       dataIndex: 'clusterName',
       key: 'clusterName',
       sorter: (a: IMetaData, b: IMetaData) => a.clusterName.charCodeAt(0) - b.clusterName.charCodeAt(0),

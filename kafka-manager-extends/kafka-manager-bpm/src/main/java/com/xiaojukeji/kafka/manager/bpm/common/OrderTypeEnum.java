@@ -6,23 +6,24 @@ package com.xiaojukeji.kafka.manager.bpm.common;
  * @date 19/6/23
  */
 public enum OrderTypeEnum {
-    APPLY_TOPIC         (00,     "Topic申请", "applyTopicOrder"),
-    DELETE_TOPIC        (10,     "Topic下线", "deleteTopicOrder"),
+    APPLY_TOPIC                 (00,     "Topic申请", "applyTopicOrder"),
+    DELETE_TOPIC                (10,     "Topic下线", "deleteTopicOrder"),
+    THIRD_PART_DELETE_TOPIC     (20,     "第三方Topic下线申请", "thirdPartDeleteTopicOrder"),
 
-    APPLY_APP           (01,     "应用申请", "applyAppOrder"),
-    DELETE_APP          (11,     "应用下线", "deleteAppOrder"),
+    APPLY_APP                   (01,     "应用申请", "applyAppOrder"),
+    DELETE_APP                  (11,     "应用下线", "deleteAppOrder"),
 
-    APPLY_QUOTA         (02,     "配额申请", "applyQuotaOrder"),
-    APPLY_PARTITION     (12,     "分区申请", "applyPartitionOrder"),
+    APPLY_QUOTA                 (02,     "配额申请", "applyQuotaOrder"),
+    APPLY_PARTITION             (12,     "分区申请", "applyPartitionOrder"),
 
-    APPLY_AUTHORITY     (03,     "权限申请", "applyAuthorityOrder"),
-    DELETE_AUTHORITY    (13,     "权限删除", "deleteAuthorityOrder"),
+    APPLY_AUTHORITY             (03,     "权限申请", "applyAuthorityOrder"),
+    DELETE_AUTHORITY            (13,     "权限删除", "deleteAuthorityOrder"),
 
-    APPLY_CLUSTER       (04,     "集群申请", "applyClusterOrder"),
-    DELETE_CLUSTER      (14,     "集群下线", "deleteClusterOrder"),
+    APPLY_CLUSTER               (04,     "集群申请", "applyClusterOrder"),
+    DELETE_CLUSTER              (14,     "集群下线", "deleteClusterOrder"),
 
-    APPLY_EXPAND_CLUSTER(05,     "集群扩容", "modifyClusterOrder"),
-    APPLY_REDUCE_CLUSTER(15,     "集群缩容", "modifyClusterOrder"),
+    APPLY_EXPAND_CLUSTER        (05,     "集群扩容", "modifyClusterOrder"),
+    APPLY_REDUCE_CLUSTER        (15,     "集群缩容", "modifyClusterOrder"),
 
     ;
 

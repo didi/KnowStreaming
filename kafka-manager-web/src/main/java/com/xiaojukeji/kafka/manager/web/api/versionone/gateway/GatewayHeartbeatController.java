@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.common.annotations.ApiLevel;
 import com.xiaojukeji.kafka.manager.common.constant.ApiLevelContent;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.service.service.gateway.TopicConnectionService;
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author zengqiao
@@ -35,15 +38,22 @@ public class GatewayHeartbeatController {
     public Result receiveTopicConnections(@RequestParam("clusterId") Long clusterId,
                                           @RequestParam("brokerId") Integer brokerId,
                                           @RequestBody JSONObject jsonObject) {
-        try {
-            if (ValidateUtils.isNull(jsonObject) || jsonObject.isEmpty()) {
-                return Result.buildSuc();
-            }
-            topicConnectionService.batchAdd(JsonUtils.parseTopicConnections(clusterId, jsonObject));
+        if (ValidateUtils.isNull(jsonObject) || jsonObject.isEmpty()) {
+            LOGGER.info("class=GatewayHeartbeatController||method=receiveTopicConnections||clusterId={}||brokerId={}||msg=connections empty!", clusterId, brokerId);
             return Result.buildSuc();
-        } catch (Exception e) {
-            LOGGER.error("receive topic connections failed, clusterId:{} brokerId:{} req:{}", clusterId, brokerId, jsonObject, e);
         }
-        return Result.buildFailure("fail");
+
+        LOGGER.info("class=GatewayHeartbeatController||method=receiveTopicConnections||clusterId={}||brokerId={}||size={}||msg=receive connections", clusterId, brokerId, jsonObject.size());
+
+        List<TopicConnectionDO> doList = null;
+        try {
+            doList = JsonUtils.parseTopicConnections(clusterId, jsonObject);
+        } catch (Exception e) {
+            LOGGER.error("class=GatewayHeartbeatController||method=receiveTopicConnections||clusterId={}||brokerId={}||msg=parse data failed||exception={}", clusterId, brokerId, e.getMessage());
+            return Result.buildFailure("fail");
+        }
+
+        topicConnectionService.batchAdd(doList);
+        return Result.buildSuc();
     }
 }

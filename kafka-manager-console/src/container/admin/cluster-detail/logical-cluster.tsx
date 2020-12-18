@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Table, notification, Popconfirm } from 'component/antd';
+import { Modal } from 'antd';
 import { observer } from 'mobx-react';
 import { SearchAndFilterContainer } from 'container/search-filter';
 import { pagination } from 'constants/table';
@@ -21,6 +22,8 @@ export class LogicalCluster extends SearchAndFilterContainer {
   public state = {
     searchKey: '',
     filterStatus: false,
+    deteleCluster: false,
+    logicalClusterId: -1,
   };
 
   constructor(props: any) {
@@ -37,9 +40,16 @@ export class LogicalCluster extends SearchAndFilterContainer {
         key: 'logicalClusterId',
       },
       {
-        title: '逻辑集群名称',
+        title: '逻辑集群中文名称',
         dataIndex: 'logicalClusterName',
         key: 'logicalClusterName',
+        width: '150px'
+      },
+      {
+        title: '逻辑集群英文名称',
+        dataIndex: 'logicalClusterName',
+        key: 'logicalClusterName1',
+        width: '150px'
       },
       {
         title: '应用ID',
@@ -52,7 +62,7 @@ export class LogicalCluster extends SearchAndFilterContainer {
         key: 'regionIdList',
         render: (value: number[]) => {
           const num = value ? `[${value.join(',')}]` : '';
-          return(
+          return (
             <span>{num}</span>
           );
         },
@@ -63,12 +73,12 @@ export class LogicalCluster extends SearchAndFilterContainer {
         key: 'mode',
         render: (value: number) => {
           let val = '';
-          cluster.clusterModes.forEach((ele: any) => {
+          cluster.clusterModes && cluster.clusterModes.forEach((ele: any) => {
             if (value === ele.code) {
               val = ele.message;
             }
           });
-          return(<span>{val}</span>);
+          return (<span>{val}</span>);
         },
       },
       {
@@ -84,16 +94,20 @@ export class LogicalCluster extends SearchAndFilterContainer {
       },
       {
         title: '操作',
+        width: '120px',
         render: (text: string, record: ILogicalCluster) => {
           return (
             <span className="table-operation">
               <a onClick={() => this.editRegion(record)}>编辑</a>
-              <Popconfirm
+              <a onClick={() => this.handleDeleteRegion(record)}>删除</a>
+              {/* <Popconfirm
                 title="确定删除？"
+                cancelText="取消"
+                okText="确认"
                 onConfirm={() => this.handleDeleteRegion(record)}
               >
                 <a>删除</a>
-              </Popconfirm>
+              </Popconfirm> */}
             </span>
           );
         },
@@ -102,9 +116,24 @@ export class LogicalCluster extends SearchAndFilterContainer {
   }
 
   public handleDeleteRegion = (record: ILogicalCluster) => {
-    admin.deteleLogicalClusters(this.clusterId, record.logicalClusterId).then(() => {
+    this.setState({ deteleCluster: true, logicalClusterId: record.logicalClusterId });
+    // admin.deteleLogicalClusters(this.clusterId, record.logicalClusterId).then(() => {
+    //   notification.success({ message: '删除成功' });
+    // });
+  }
+
+  // -删除逻辑集群
+
+  public handleExpandOk = () => {
+    const { logicalClusterId } = this.state;
+    admin.deteleLogicalClusters(this.clusterId, logicalClusterId).then(() => {
       notification.success({ message: '删除成功' });
     });
+    this.setState({ deteleCluster: false });
+  }
+
+  public handleExpandCancel = () => {
+    this.setState({ deteleCluster: false });
   }
 
   public async editRegion(record: ILogicalCluster) {
@@ -131,12 +160,11 @@ export class LogicalCluster extends SearchAndFilterContainer {
     let data: T[] = origin;
     let { searchKey } = this.state;
     searchKey = (searchKey + '').trim().toLowerCase();
-
     data = searchKey ? origin.filter((item: ILogicalCluster) =>
       (item.logicalClusterName !== undefined && item.logicalClusterName !== null)
-        && item.logicalClusterName.toLowerCase().includes(searchKey as string)
+      && item.logicalClusterName.toLowerCase().includes(searchKey as string)
       || (item.appId !== undefined && item.appId !== null) && item.appId.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 
@@ -151,11 +179,37 @@ export class LogicalCluster extends SearchAndFilterContainer {
     );
   }
 
+  // -删除逻辑集群
+  public renderDeleteCluster() {
+    return (
+      <Modal
+        title="提示"
+        visible={this.state.deteleCluster}
+        okText="确认删除"
+        cancelText="取消"
+        maskClosable={false}
+        onOk={() => this.handleExpandOk()}
+        onCancel={() => this.handleExpandCancel()}
+      >
+        <div className="cluster-prompt">
+          <span>
+            若逻辑集群上存在Topic，则删除逻辑集群后，用户将无法在Topic管理页查看到该Topic
+          </span>
+        </div>
+        <div className="cluster-explain">
+          <span>
+            说明：删除逻辑集群不会真实删除该逻辑集群上创建的topic
+          </span>
+        </div>
+      </Modal>
+    );
+  }
+
   public render() {
     return (
       <div className="k-row">
         <ul className="k-tab">
-        <li>{this.props.tab}</li>
+          <li>{this.props.tab}</li>
           <li className="k-add" onClick={() => this.addOrEditLogicalCluster()}>
             <i className="k-icon-xinjian didi-theme" />
             <span>新增逻辑集群</span>
@@ -163,6 +217,7 @@ export class LogicalCluster extends SearchAndFilterContainer {
           {this.renderSearch('', '请输入逻辑集群名称或AppId')}
         </ul>
         {this.renderLogicalCluster()}
+        {this.renderDeleteCluster()}
       </div>
     );
   }

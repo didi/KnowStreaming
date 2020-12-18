@@ -33,6 +33,8 @@
     "mobx": "^5.9.4",
     "mobx-react": "^5.4.3",
     "moment": "^2.24.0",
+    "monaco-editor": "^0.20.0",
+    "monaco-editor-webpack-plugin": "^1.9.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "react": "^16.8.4",
     "react-hot-loader": "^4.8.4",
@@ -45,9 +47,13 @@
     "tslint": "^5.13.1",
     "tslint-react": "^3.6.0",
     "typescript": "^3.3.3333",
+    "url-loader": "^4.1.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.2.1",
     "xlsx": "^0.16.1"
+  },
+  "dependencies": {
+    "format-to-json": "^1.0.4"
   }
 }

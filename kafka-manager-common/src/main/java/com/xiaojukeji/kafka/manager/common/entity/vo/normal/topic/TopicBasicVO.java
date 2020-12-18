@@ -3,6 +3,8 @@ package com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+
 /**
  * Topic的基本信息
  * @author zengqiao
@@ -48,6 +50,9 @@ public class TopicBasicVO {
 
     @ApiModelProperty(value = "集群地址")
     private String bootstrapServers;
+
+    @ApiModelProperty(value = "所属region")
+    private List<String> regionNameList;
 
     public Long getClusterId() {
         return clusterId;
@@ -153,6 +158,14 @@ public class TopicBasicVO {
         this.score = score;
     }
 
+    public List<String> getRegionNameList() {
+        return regionNameList;
+    }
+
+    public void setRegionNameList(List<String> regionNameList) {
+        this.regionNameList = regionNameList;
+    }
+
     @Override
     public String toString() {
         return "TopicBasicVO{" +
@@ -169,6 +182,7 @@ public class TopicBasicVO {
                 ", topicCodeC='" + topicCodeC + '\'' +
                 ", description='" + description + '\'' +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
+                ", regionNameList=" + regionNameList +
                 '}';
     }
 }

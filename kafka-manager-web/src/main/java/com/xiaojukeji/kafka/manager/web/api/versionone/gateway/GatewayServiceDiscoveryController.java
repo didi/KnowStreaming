@@ -14,6 +14,8 @@ import com.xiaojukeji.kafka.manager.service.service.gateway.GatewayConfigService
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,9 @@ import java.util.Map;
 @RestController
 @RequestMapping(ApiPrefix.GATEWAY_API_V1_PREFIX)
 public class GatewayServiceDiscoveryController {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(GatewayHeartbeatController.class);
+
     @Autowired
     private GatewayConfigService gatewayConfigService;
 
@@ -38,6 +43,7 @@ public class GatewayServiceDiscoveryController {
     @ResponseBody
     public String getKafkaBootstrapServer(@RequestParam("clusterId") Long clusterId) {
         if (ValidateUtils.isNull(clusterId)) {
+            LOGGER.warn("class=GatewayServiceDiscoveryController||method=getKafkaBootstrapServer||msg=param clusterId is null!");
             return "";
         }
         GatewayConfigDO configDO = gatewayConfigService.getByTypeAndName(
@@ -45,6 +51,7 @@ public class GatewayServiceDiscoveryController {
                 String.valueOf(clusterId)
         );
         if (ValidateUtils.isNull(configDO)) {
+            LOGGER.info("class=GatewayServiceDiscoveryController||method=getKafkaBootstrapServer||msg=configDO is null!");
             return "";
         }
         return configDO.getValue();

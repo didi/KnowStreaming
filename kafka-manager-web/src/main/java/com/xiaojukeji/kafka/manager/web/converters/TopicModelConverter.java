@@ -40,6 +40,7 @@ public class TopicModelConverter {
         if (!ValidateUtils.isNull(clusterDO)) {
             vo.setBootstrapServers(clusterDO.getBootstrapServers());
         }
+        vo.setRegionNameList(dto.getRegionNameList());
         return vo;
     }
 
@@ -104,6 +105,54 @@ public class TopicModelConverter {
         fetchVO.setThrottleTimeMs(metrics.getSpecifiedMetrics("FetchConsumerThrottleTimeMs99thPercentile"));
         fetchVO.setRemoteTimeMs(metrics.getSpecifiedMetrics("FetchConsumerRemoteTimeMs99thPercentile"));
         fetchVO.setTotalTimeMs(metrics.getSpecifiedMetrics("FetchConsumerTotalTimeMs99thPercentile"));
+        return Arrays.asList(produceVO, fetchVO);
+    }
+
+    public static List<TopicRequestTimeDetailVO> convert2TopicRequestTimeDetailVOList(BaseMetrics metrics, String percentile) {
+        if (ValidateUtils.isNull(metrics)) {
+            return new ArrayList<>();
+        }
+        TopicRequestTimeDetailVO produceVO = new TopicRequestTimeDetailVO();
+        produceVO.setRequestTimeType("RequestProduceTime");
+        fillTopicProduceTime(produceVO, metrics, percentile);
+
+        TopicRequestTimeDetailVO fetchVO = new TopicRequestTimeDetailVO();
+        fetchVO.setRequestTimeType("RequestFetchTime");
+        fillTopicFetchTime(fetchVO, metrics, percentile);
+
+        TopicMetrics topicMetrics = (TopicMetrics) metrics;
+        if (!ValidateUtils.isEmptyList(topicMetrics.getBrokerMetricsList())) {
+            List<TopicBrokerRequestTimeVO> brokerProduceTimeList = new ArrayList<>();
+            List<TopicBrokerRequestTimeVO> brokerFetchTimeList = new ArrayList<>();
+            topicMetrics.getBrokerMetricsList().forEach(brokerMetrics -> {
+                TopicBrokerRequestTimeVO topicBrokerProduceReq = new TopicBrokerRequestTimeVO();
+                topicBrokerProduceReq.setClusterId(brokerMetrics.getClusterId());
+                topicBrokerProduceReq.setBrokerId(brokerMetrics.getBrokerId());
+
+                TopicRequestTimeDetailVO brokerProduceVO = new TopicRequestTimeDetailVO();
+                brokerProduceVO.setRequestTimeType("BrokerRequestProduceTime");
+                fillTopicProduceTime(brokerProduceVO, brokerMetrics, percentile);
+
+                topicBrokerProduceReq.setBrokerRequestTime(brokerProduceVO);
+
+                TopicBrokerRequestTimeVO topicBrokerFetchReq = new TopicBrokerRequestTimeVO();
+                topicBrokerFetchReq.setClusterId(brokerMetrics.getClusterId());
+                topicBrokerFetchReq.setBrokerId(brokerMetrics.getBrokerId());
+
+                TopicRequestTimeDetailVO brokerFetchVO = new TopicRequestTimeDetailVO();
+                brokerProduceVO.setRequestTimeType("BrokerRequestFetchTime");
+                fillTopicFetchTime(brokerFetchVO, brokerMetrics, percentile);
+
+                topicBrokerFetchReq.setBrokerRequestTime(brokerFetchVO);
+
+                brokerProduceTimeList.add(topicBrokerProduceReq);
+                brokerFetchTimeList.add(topicBrokerFetchReq);
+            });
+
+            produceVO.setBrokerRequestTimeList(brokerProduceTimeList);
+            fetchVO.setBrokerRequestTimeList(brokerFetchTimeList);
+        }
+
         return Arrays.asList(produceVO, fetchVO);
     }
 
@@ -223,5 +272,25 @@ public class TopicModelConverter {
         TopicBusinessInfoVO topicBusinessInfoVO = new TopicBusinessInfoVO();
         CopyUtils.copyProperties(topicBusinessInfoVO,topicBusinessInfo);
         return topicBusinessInfoVO;
+    }
+
+    private static void fillTopicProduceTime(TopicRequestTimeDetailVO produceVO, BaseMetrics metrics, String thPercentile) {
+        produceVO.setRequestQueueTimeMs(metrics.getSpecifiedMetrics("ProduceRequestQueueTimeMs" + thPercentile));
+        produceVO.setResponseQueueTimeMs(metrics.getSpecifiedMetrics("ProduceResponseQueueTimeMs" + thPercentile));
+        produceVO.setResponseSendTimeMs(metrics.getSpecifiedMetrics("ProduceResponseSendTimeMs" + thPercentile));
+        produceVO.setLocalTimeMs(metrics.getSpecifiedMetrics("ProduceLocalTimeMs" + thPercentile));
+        produceVO.setThrottleTimeMs(metrics.getSpecifiedMetrics("ProduceThrottleTimeMs" + thPercentile));
+        produceVO.setRemoteTimeMs(metrics.getSpecifiedMetrics("ProduceRemoteTimeMs" + thPercentile));
+        produceVO.setTotalTimeMs(metrics.getSpecifiedMetrics("ProduceTotalTimeMs"  + thPercentile));
+    }
+
+    private static void fillTopicFetchTime(TopicRequestTimeDetailVO fetchVO, BaseMetrics metrics, String thPercentile) {
+        fetchVO.setRequestQueueTimeMs(metrics.getSpecifiedMetrics("FetchConsumerRequestQueueTimeMs" + thPercentile));
+        fetchVO.setResponseQueueTimeMs(metrics.getSpecifiedMetrics("FetchConsumerResponseQueueTimeMs" + thPercentile));
+        fetchVO.setResponseSendTimeMs(metrics.getSpecifiedMetrics("FetchConsumerResponseSendTimeMs" + thPercentile));
+        fetchVO.setLocalTimeMs(metrics.getSpecifiedMetrics("FetchConsumerLocalTimeMs" + thPercentile));
+        fetchVO.setThrottleTimeMs(metrics.getSpecifiedMetrics("FetchConsumerThrottleTimeMs" + thPercentile));
+        fetchVO.setRemoteTimeMs(metrics.getSpecifiedMetrics("FetchConsumerRemoteTimeMs" + thPercentile));
+        fetchVO.setTotalTimeMs(metrics.getSpecifiedMetrics("FetchConsumerTotalTimeMs" + thPercentile));
     }
 }

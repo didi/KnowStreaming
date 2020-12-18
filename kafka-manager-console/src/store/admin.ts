@@ -597,7 +597,9 @@ class Admin {
   }
 
   public getTopicsBasicInfo(clusterId: number, topicName: string) {
-    return getTopicsBasicInfo(clusterId, topicName).then(this.setTopicsBasicInfo);
+    return getTopicsBasicInfo(clusterId, topicName).then(data => {
+      return this.setTopicsBasicInfo(data);
+    });
   }
 
   public getTasksKafkaFiles(clusterId?: any) {

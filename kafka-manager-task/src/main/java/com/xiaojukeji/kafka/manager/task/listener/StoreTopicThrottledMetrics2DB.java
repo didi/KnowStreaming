@@ -11,6 +11,7 @@ import com.xiaojukeji.kafka.manager.task.common.TopicThrottledMetricsCollectedEv
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import java.util.*;
  * @date 20/9/24
  */
 @Component("storeTopicThrottledMetrics2DB")
+@ConditionalOnProperty(prefix = "custom.store-metrics-task.didi", name = "topic-throttled-metrics", havingValue = "true", matchIfMissing = true)
 public class StoreTopicThrottledMetrics2DB implements ApplicationListener<TopicThrottledMetricsCollectedEvent> {
     private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 

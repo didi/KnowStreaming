@@ -110,6 +110,8 @@ public class ConsumerServiceImpl implements ConsumerService {
                                                    ConsumerGroupDTO consumeGroupDTO) {
         TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterDO.getId(), topicName);
         if (topicMetadata == null) {
+            logger.warn("class=ConsumerServiceImpl||method=getConsumeDetail||clusterId={}||topicName={}||msg=topicMetadata is null!",
+                    clusterDO.getId(), topicName);
             return null;
         }
 
@@ -120,6 +122,7 @@ public class ConsumerServiceImpl implements ConsumerService {
             consumerGroupDetailDTOList = getConsumerPartitionStateInBroker(clusterDO, topicMetadata, consumeGroupDTO);
         }
         if (consumerGroupDetailDTOList == null) {
+            logger.info("class=ConsumerServiceImpl||method=getConsumeDetail||msg=consumerGroupDetailDTOList is null!");
             return null;
         }
 
@@ -167,7 +170,7 @@ public class ConsumerServiceImpl implements ConsumerService {
                 kafkaConsumer.close();
             }
         }
-        return new ArrayList<>();
+        return resultList;
     }
 
     private List<Result> resetConsumerOffset(ClusterDO cluster, KafkaConsumer<String, String> kafkaConsumer, ConsumerGroupDTO consumerGroupDTO, Map<TopicPartition, Long> offsetMap) {
@@ -184,7 +187,9 @@ public class ConsumerServiceImpl implements ConsumerService {
                 }
             } catch (Exception e) {
                 logger.error("reset failed, clusterId:{} consumerGroup:{} topic-partition:{}.", cluster.getId(), consumerGroupDTO, tp, e);
-                resultList.add(new Result());
+                resultList.add(new Result(
+                        ResultStatus.OPERATION_FAILED.getCode(),
+                        "reset failed..."));
             }
             resultList.add(new Result());
         }

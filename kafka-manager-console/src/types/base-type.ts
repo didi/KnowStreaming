@@ -537,9 +537,10 @@ export interface IUtils {
 
 export interface IXFormWrapper {
   type?: string;
-  title: string;
+  title: string | JSX.Element;
   onSubmit: (result: any) => any;
   onCancel?: () => any;
+  onChange?: (result: any) => any;
   visible: boolean;
   onChangeVisible?: (visible: boolean) => any;
   formMap?: any[];
@@ -552,6 +553,7 @@ export interface IXFormWrapper {
   noform?: boolean;
   nofooter?: boolean;
   isWaitting?: boolean;
+  onSubmitFaild?: (err: any, ref: any, formData: any, formMap: any) => any;
 }
 
 export interface IBaseOrder extends IBase {
@@ -608,9 +610,11 @@ export interface IBasicInfo {
 }
 
 export interface IClusterTopics {
+  regionNameList: any;
   appId: string;
   appName: string;
   byteIn: number;
+  byteOut: number;
   clusterId: number;
   description: string;
   partitionNum: number;
@@ -916,6 +920,7 @@ export interface INewLogical {
   mode: number;
   name: string;
   logicalClusterName?: string;
+  logicalClusterEName?: string;
   regionIdList: number[];
 }
 
@@ -935,6 +940,7 @@ export interface ITaskManage {
   clusterId: number;
   clusterName: string;
   gmtCreate: number;
+  createTime: number;
   operator: string;
   status: number;
   taskId: number;

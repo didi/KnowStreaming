@@ -64,7 +64,7 @@ public class JsonUtils {
                     TopicConnectionDO connectionDO = new TopicConnectionDO();
 
                     String[] appIdDetailArray = appIdDetail.toString().split("#");
-                    if (appIdDetailArray.length == 3) {
+                    if (appIdDetailArray.length >= 3) {
                         connectionDO.setAppId(appIdDetailArray[0]);
                         connectionDO.setIp(appIdDetailArray[1]);
                         connectionDO.setClientVersion(appIdDetailArray[2]);

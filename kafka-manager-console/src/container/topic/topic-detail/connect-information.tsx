@@ -92,8 +92,8 @@ export class ConnectInformation extends SearchAndFilterContainer {
   }
 
   public componentDidMount() {
-    const appId = this.props.baseInfo.appId;
-    topic.getConnectionInfo(this.clusterId, this.topicName, appId);
+    // const appId = this.props.baseInfo.appId;
+    topic.getConnectionInfo(this.clusterId, this.topicName, '');
   }
 
   public render() {

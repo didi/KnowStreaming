@@ -21,21 +21,20 @@ interface IProps {
 
 @observer
 export class OrderList extends SearchAndFilterContainer {
-
   public orderType: string;
-
-  public state = {
+  public state: { [propname: string]: any } = {
     searchKey: '',
     currentTab: '0',
     filterTypeVisible: false,
     filterStatusVisible: false,
+    selectedRows: [],
   };
-
   public currentItem = {} as IBaseOrder;
 
   constructor(props: IProps) {
     super(props);
     this.orderType = props.type;
+    // this.state.b;
   }
 
   public cancelOrder(record: IBaseOrder) {
@@ -73,9 +72,9 @@ export class OrderList extends SearchAndFilterContainer {
       onFilter: (value: string, record: IBaseOrder) => record.status === +value,
       render: (t: number) => (
         <>
-        <span className={t === 1 ? 'success' : (t === 2 ? 'fail' : '')}>
-        {orderStatusMap[t] || ''}
-        </span>
+          <span className={t === 1 ? 'success' : (t === 2 ? 'fail' : '')}>
+            {orderStatusMap[t] || ''}
+          </span>
         </>
       ),
     }, this.renderColumnsFilter('filterStatusVisible'));

@@ -170,7 +170,10 @@ public class MbeanNameUtilV2 {
                 new MbeanV2(
                         "TopicCodeC",
                         JmxAttributeEnum.VALUE_ATTRIBUTE,
-                        "kafka.server:type=ReplicaManager,name=TopicCodeC"
+                        Arrays.asList(
+                                new AbstractMap.SimpleEntry<>(KafkaVersion.VERSION_0_10_3, "kafka.server:type=ReplicaManager,name=TopicCodeC"),
+                                new AbstractMap.SimpleEntry<>(KafkaVersion.VERSION_MAX, "kafka.server:type=AppIdTopicMetrics,name=RecordCompression,appId=")
+                        )
                 ),
                 Arrays.asList(
                         KafkaMetricsCollections.TOPIC_BASIC_PAGE_METRICS

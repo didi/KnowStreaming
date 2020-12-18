@@ -48,6 +48,9 @@ import 'antd/es/notification/style';
 import Tooltip from 'antd/es/tooltip';
 import 'antd/es/tooltip/style';
 
+import Popover from 'antd/es/popover';
+import 'antd/es/popover/style';
+
 import Radio from 'antd/es/radio';
 import 'antd/es/radio';
 import { RadioChangeEvent } from 'antd/es/radio';
@@ -97,6 +100,9 @@ import 'antd/es/time-picker/style';
 import Badge from 'antd/es/badge';
 import 'antd/es/badge/style';
 
+import Progress from 'antd/es/progress';
+import 'antd/es/progress/style';
+
 import { RangePickerValue } from 'antd/es/date-picker/interface';
 
 export {
@@ -136,4 +142,5 @@ export {
   TimePicker,
   RangePickerValue,
   Badge,
+  Popover
 };

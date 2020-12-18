@@ -66,9 +66,6 @@ public class TopicManagerServiceImpl implements TopicManagerService {
     private LogicalClusterMetadataManager logicalClusterMetadataManager;
 
     @Autowired
-    private LogicalClusterService logicalClusterService;
-
-    @Autowired
     private JmxService jmxService;
 
     @Autowired
@@ -76,6 +73,9 @@ public class TopicManagerServiceImpl implements TopicManagerService {
 
     @Autowired
     private ClusterService clusterService;
+
+    @Autowired
+    private RegionService regionService;
 
     @Override
     public List<TopicDO> listAll() {
@@ -288,7 +288,6 @@ public class TopicManagerServiceImpl implements TopicManagerService {
     private List<TopicDTO> getTopics(ClusterDO clusterDO,
                                      Map<String, AppDO> appMap,
                                      Map<String, TopicDO> topicMap) {
-        Boolean needAuth = !ValidateUtils.isBlank(clusterDO.getSecurityProperties());
         List<TopicDTO> dtoList = new ArrayList<>();
         for (String topicName: PhysicalClusterMetadataManager.getTopicNameList(clusterDO.getId())) {
             LogicalClusterDO logicalClusterDO = logicalClusterMetadataManager.getTopicLogicalCluster(
@@ -305,7 +304,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             dto.setLogicalClusterId(logicalClusterDO.getId());
             dto.setLogicalClusterName(logicalClusterDO.getName());
             dto.setTopicName(topicName);
-            dto.setNeedAuth(needAuth);
+            dto.setNeedAuth(Boolean.TRUE);
 
             TopicDO topicDO = topicMap.get(topicName);
             if (ValidateUtils.isNull(topicDO)) {
@@ -371,12 +370,14 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         TopicMetadata topicMetaData = PhysicalClusterMetadataManager.getTopicMetadata(physicalClusterId, topicName);
         if (ValidateUtils.isNull(topicMetaData)) {
             // Topic不存在
+            LOGGER.warn("class=TopicManagerServiceImpl||method=getTopicAuthorizedApps||physicalClusterId={}||topicName={}||msg=topicMetaData is null", physicalClusterId,topicName);
             return new ArrayList<>();
         }
 
         List<AuthorityDO> authorityDOList = authorityService.getAuthorityByTopic(physicalClusterId, topicName);
         if (ValidateUtils.isEmptyList(authorityDOList)) {
             // 无任何权限
+            LOGGER.warn("class=TopicManagerServiceImpl||method=getTopicAuthorizedApps||physicalClusterId={}||topicName={}||msg=authorityDOList is null", physicalClusterId,topicName);
             return new ArrayList<>();
         }
 
@@ -489,12 +490,17 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                 PhysicalClusterMetadataManager.getZKConfig(physicalClusterId),
                 topicName
         );
+        List<RegionDO> regionDOList = regionService.getRegionListByTopicName(physicalClusterId, topicName);
+        List<String> regionNameList = regionDOList.stream().map(RegionDO::getName).collect(Collectors.toList());
+
         TopicDO topicDO = getByTopicName(physicalClusterId, topicName);
         if (ValidateUtils.isNull(topicDO)) {
-            return new Result<>(convert2RdTopicBasic(clusterDO, topicName, null, null, properties));
+            return new Result<>(convert2RdTopicBasic(clusterDO, topicName, null, null, regionNameList, properties));
         }
         AppDO appDO = appService.getByAppId(topicDO.getAppId());
-        return new Result<>(convert2RdTopicBasic(clusterDO, topicName, topicDO, appDO, properties));
+
+
+        return new Result<>(convert2RdTopicBasic(clusterDO, topicName, topicDO, appDO, regionNameList, properties));
     }
 
     @Override
@@ -527,6 +533,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                                               String topicName,
                                               TopicDO topicDO,
                                               AppDO appDO,
+                                              List<String> regionNameList,
                                               Properties properties) {
         RdTopicBasic rdTopicBasic = new RdTopicBasic();
         rdTopicBasic.setClusterId(clusterDO.getId());
@@ -539,6 +546,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         if (!ValidateUtils.isNull(topicDO)) {
             rdTopicBasic.setDescription(topicDO.getDescription());
         }
+        rdTopicBasic.setRegionNameList(regionNameList);
         rdTopicBasic.setProperties(properties);
         rdTopicBasic.setRetentionTime(KafkaZookeeperUtils.getTopicRetentionTime(properties));
         return rdTopicBasic;

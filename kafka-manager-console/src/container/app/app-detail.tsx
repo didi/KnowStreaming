@@ -61,6 +61,7 @@ export class AppDetail extends SearchAndFilterContainer {
         title: '申请时间',
         dataIndex: 'gmtCreate',
         key: 'gmtCreate',
+        sorter: (a: any, b: any) => a.gmtCreate - b.gmtCreate,
         render: (t: number) => moment(t).format(timeFormat),
       },
       statusColumn,
@@ -101,11 +102,11 @@ export class AppDetail extends SearchAndFilterContainer {
       value: baseInfo.principals,
     }];
     const infoCopy: ILabelValue[] = [{
-        label: 'AppID',
-        value: baseInfo.appId,
-      }, {
-        label: '密钥',
-        value: baseInfo.password,
+      label: 'AppID',
+      value: baseInfo.appId,
+    }, {
+      label: '密钥',
+      value: baseInfo.password,
     }];
     return (
       <PageHeader
@@ -118,7 +119,7 @@ export class AppDetail extends SearchAndFilterContainer {
             <Descriptions.Item key={key} label={item.label}>
               <Tooltip placement="bottomLeft" title={item.value}>
                 <span className="overview-bootstrap">
-                <i className="overview-boot">{item.value}</i>
+                  <i className="overview-boot">{item.value}</i>
                 </span>
               </Tooltip>
             </Descriptions.Item>
@@ -136,14 +137,14 @@ export class AppDetail extends SearchAndFilterContainer {
           ))}
         </Descriptions>
         <Descriptions size="small" column={1}>
-            <Descriptions.Item label="应用描述">
-              <Tooltip placement="bottomLeft" title={baseInfo.description}>
-                <span className="overview-bootstrap" style={{width: '600px'}}>
-                  <i className="overview-boot"> {baseInfo.description} </i>
-                </span>
-              </Tooltip>
-            </Descriptions.Item>
-          </Descriptions>
+          <Descriptions.Item label="应用描述">
+            <Tooltip placement="bottomLeft" title={baseInfo.description}>
+              <span className="overview-bootstrap" style={{ width: '600px' }}>
+                <i className="overview-boot"> {baseInfo.description} </i>
+              </span>
+            </Tooltip>
+          </Descriptions.Item>
+        </Descriptions>
       </PageHeader>
     );
   }
@@ -156,7 +157,7 @@ export class AppDetail extends SearchAndFilterContainer {
     data = searchKey ? origin.filter((item: ITopic) =>
       (item.topicName !== undefined && item.topicName !== null) && item.topicName.toLowerCase().includes(searchKey as string)
       || (item.clusterName !== undefined && item.clusterName !== null) && item.clusterName.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 
@@ -183,22 +184,22 @@ export class AppDetail extends SearchAndFilterContainer {
     const { currentTab } = app;
     return (
       <>
-      <div className="app-container">
-        <div className="base-info">
-          {this.renderBaseInfo(app.baseInfo)}
+        <div className="app-container">
+          <div className="base-info">
+            {this.renderBaseInfo(app.baseInfo)}
+          </div>
+          <div className="k-row">
+            <Tabs defaultActiveKey="1" type="card" onChange={(e) => this.onChangeTab(e)}>
+              <TabPane tab="创建的Topic" key="1" />
+              <TabPane tab="有权限Topic" key="2" />
+            </Tabs>
+            <ul className="k-tab">
+              <li>{currentTab === '1' ? '创建的Topic' : '有权限Topic'}</li>
+              {this.renderSearch('', '请输入Topic名称/集群名称')}
+            </ul>
+            {this.renderTable()}
+          </div>
         </div>
-        <div className="k-row">
-          <Tabs defaultActiveKey="1" type="card" onChange={(e) => this.onChangeTab(e)}>
-            <TabPane tab="创建的Topic" key="1" />
-            <TabPane tab="有权限Topic" key="2" />
-          </Tabs>
-          <ul className="k-tab">
-            <li>{currentTab === '1' ? '创建的Topic' : '有权限Topic'}</li>
-            {this.renderSearch('', '请输入Topic名称/集群名称')}
-          </ul>
-          {this.renderTable()}
-        </div>
-      </div>
       </>
     );
   }

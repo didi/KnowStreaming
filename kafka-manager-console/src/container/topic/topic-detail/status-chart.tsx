@@ -45,7 +45,7 @@ export class StatusChart extends React.Component {
         <div className="chart-box-0">
           <div className="chart-title">
             <span className="action-button">历史流量</span>
-            <a href={indexUrl} target="_blank">指标说明</a>
+            <a href={indexUrl.indexUrl} target="_blank">指标说明</a>
           </div>
           <Divider className="chart-divider" />
           <NetWorkFlow
@@ -61,7 +61,7 @@ export class StatusChart extends React.Component {
         <div className="chart-box-0">
           <div className="chart-title">
             <span className="action-button">历史耗时信息</span>
-            <a href={indexUrl} target="_blank">指标说明</a>
+            <a href={indexUrl.indexUrl} target="_blank">指标说明</a>
           </div>
           <Divider className="chart-divider" />
           <NetWorkFlow

@@ -101,6 +101,7 @@ export class ClusterTopic extends SearchAndFilterContainer {
         dataIndex: 'updateTime',
         key: 'updateTime',
         width: '20%',
+        sorter: (a: IClusterTopics, b: IClusterTopics) => b.updateTime - a.updateTime,
         render: (t: number) => moment(t).format(timeFormat),
       },
       {

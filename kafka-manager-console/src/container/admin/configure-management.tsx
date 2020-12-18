@@ -26,11 +26,11 @@ export class ConfigureManagement extends SearchAndFilterContainer {
     searchKey = (searchKey + '').trim().toLowerCase();
 
     data = searchKey ? origin.filter((item: IConfigure) =>
-    ((item.configKey !== undefined && item.configKey !== null) && item.configKey.toLowerCase().includes(searchKey as string))
-    || ((item.configValue !== undefined && item.configValue !== null) && item.configValue.toLowerCase().includes(searchKey as string))
-    || ((item.configDescription !== undefined && item.configDescription !== null) &&
+      ((item.configKey !== undefined && item.configKey !== null) && item.configKey.toLowerCase().includes(searchKey as string))
+      || ((item.configValue !== undefined && item.configValue !== null) && item.configValue.toLowerCase().includes(searchKey as string))
+      || ((item.configDescription !== undefined && item.configDescription !== null) &&
         item.configDescription.toLowerCase().includes(searchKey as string)),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 

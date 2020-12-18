@@ -3,7 +3,7 @@ import './index.less';
 import Url from 'lib/url-parser';
 import { observer } from 'mobx-react';
 import { topic, IRealConsumeDetail, ITopicBaseInfo, IRealTimeTraffic } from 'store/topic';
-import { Table, Tooltip, Icon, PageHeader, Descriptions, Spin } from 'component/antd';
+import { Table, Tooltip, Icon, PageHeader, Descriptions, Spin, Switch } from 'component/antd';
 import { ILabelValue } from 'types/base-type';
 import { copyString, transMSecondToHour } from 'lib/utils';
 import moment from 'moment';
@@ -19,12 +19,14 @@ interface IInfoProps {
 export class BaseInformation extends React.Component<IInfoProps> {
   public clusterId: number;
   public topicName: string;
+  public percentile: string;
 
   constructor(props: any) {
     super(props);
     const url = Url();
     this.clusterId = Number(url.search.clusterId);
     this.topicName = url.search.topic;
+    this.percentile = "75thPercentile";
   }
 
   public updateRealStatus = () => {
@@ -32,7 +34,11 @@ export class BaseInformation extends React.Component<IInfoProps> {
   }
 
   public updateConsumeStatus = () => {
-    topic.getRealConsume(this.clusterId, this.topicName);
+    topic.getRealConsume(this.clusterId, this.topicName, this.percentile);
+  }
+  public onSwitch = (val: boolean) => {
+    this.percentile = val ? '99thPercentile' : "75thPercentile"
+    topic.getRealConsume(this.clusterId, this.topicName, this.percentile);
   }
 
   public fillBaseInfo() {
@@ -63,8 +69,11 @@ export class BaseInformation extends React.Component<IInfoProps> {
         label: '压缩格式',
         value: baseInfo.topicCodeC,
       }, {
-        label: '集群ID',
+        label: '所属物理集群ID',
         value: baseInfo.clusterId,
+      }, {
+        label: '所属region',
+        value: baseInfo.regionNameList && baseInfo.regionNameList.join(','),
       }];
       const infoHide: ILabelValue[] = [{
         label: 'Bootstrap Severs',
@@ -195,7 +204,11 @@ export class BaseInformation extends React.Component<IInfoProps> {
             <div className="traffic-header">
               <span>
                 <span className="action-button">实时耗时</span>
-                <a href={indexUrl} target="_blank">指标说明</a>
+                <a href={indexUrl.indexUrl} target="_blank">指标说明</a>
+              </span>
+              <span className="switch">
+                <span>默认展示75分位数据，点击开启99分位数据</span>
+                <Switch checkedChildren="开启" unCheckedChildren="关闭" onChange={this.onSwitch} />
               </span>
               <span className="k-abs" onClick={this.updateConsumeStatus}>
                 <i className="k-icon-shuaxin didi-theme mr-5" />
@@ -217,7 +230,7 @@ export class BaseInformation extends React.Component<IInfoProps> {
 
   public componentDidMount() {
     topic.getRealTimeTraffic(this.clusterId, this.topicName);
-    topic.getRealConsume(this.clusterId, this.topicName);
+    topic.getRealConsume(this.clusterId, this.topicName, this.percentile);
   }
 
   public render() {

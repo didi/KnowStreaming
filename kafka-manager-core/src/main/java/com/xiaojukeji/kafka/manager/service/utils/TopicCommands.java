@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.service.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
@@ -11,6 +12,8 @@ import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.apache.kafka.common.errors.*;
 import org.apache.kafka.common.security.JaasUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.Option;
 import scala.collection.JavaConversions;
 import scala.collection.Seq;
@@ -22,6 +25,9 @@ import java.util.*;
  * @date 20/4/22
  */
 public class TopicCommands {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TopicCommands.class);
+
+
     public static ResultStatus createTopic(ClusterDO clusterDO,
                                            String topicName,
                                            Integer partitionNum,
@@ -56,16 +62,28 @@ public class TopicCommands {
                     false
             );
         } catch (NullPointerException e) {
+            LOGGER.error("class=TopicCommands||method=createTopic||errMsg={}||clusterDO={}||topicName={}||partitionNum={}||replicaNum={}||brokerIdList={}||config={}",
+                    e.getMessage(), clusterDO, topicName, partitionNum, replicaNum, JSON.toJSONString(brokerIdList), config, e);
             return ResultStatus.TOPIC_OPERATION_PARAM_NULL_POINTER;
         } catch (InvalidPartitionsException e) {
+            LOGGER.error("class=TopicCommands||method=createTopic||errMsg={}||clusterDO={}||topicName={}||partitionNum={}||replicaNum={}||brokerIdList={}||config={}",
+                    e.getMessage(), clusterDO, topicName,partitionNum,replicaNum,JSON.toJSONString(brokerIdList),config, e);
             return ResultStatus.TOPIC_OPERATION_PARTITION_NUM_ILLEGAL;
         } catch (InvalidReplicationFactorException e) {
+            LOGGER.error("class=TopicCommands||method=createTopic||errMsg={}||clusterDO={}||topicName={}||partitionNum={}||replicaNum={}||brokerIdList={}||config={}",
+                    e.getMessage(), clusterDO, topicName,partitionNum,replicaNum,JSON.toJSONString(brokerIdList),config, e);
             return ResultStatus.BROKER_NUM_NOT_ENOUGH;
         } catch (TopicExistsException | ZkNodeExistsException e) {
+            LOGGER.error("class=TopicCommands||method=createTopic||errMsg={}||clusterDO={}||topicName={}||partitionNum={}||replicaNum={}||brokerIdList={}||config={}",
+                    e.getMessage(), clusterDO, topicName,partitionNum,replicaNum,JSON.toJSONString(brokerIdList),config, e);
             return ResultStatus.TOPIC_OPERATION_TOPIC_EXISTED;
         } catch (InvalidTopicException e) {
+            LOGGER.error("class=TopicCommands||method=createTopic||errMsg={}||clusterDO={}||topicName={}||partitionNum={}||replicaNum={}||brokerIdList={}||config={}",
+                    e.getMessage(), clusterDO, topicName,partitionNum,replicaNum,JSON.toJSONString(brokerIdList),config, e);
             return ResultStatus.TOPIC_OPERATION_TOPIC_NAME_ILLEGAL;
         } catch (Throwable t) {
+            LOGGER.error("class=TopicCommands||method=createTopic||errMsg={}||clusterDO={}||topicName={}||partitionNum={}||replicaNum={}||brokerIdList={}||config={}",
+                    t.getMessage(), clusterDO, topicName,partitionNum,replicaNum,JSON.toJSONString(brokerIdList),config, t);
             return ResultStatus.TOPIC_OPERATION_UNKNOWN_ERROR;
         } finally {
             if (zkUtils != null) {
@@ -86,10 +104,13 @@ public class TopicCommands {
             );
             AdminUtils.deleteTopic(zkUtils, topicName);
         } catch (UnknownTopicOrPartitionException e) {
+            LOGGER.error("class=TopicCommands||method=deleteTopic||errMsg={}||clusterDO={}||topicName={}", e.getMessage(), clusterDO, topicName, e);
             return ResultStatus.TOPIC_OPERATION_UNKNOWN_TOPIC_PARTITION;
         } catch (ZkNodeExistsException e) {
+            LOGGER.error("class=TopicCommands||method=deleteTopic||errMsg={}||clusterDO={}||topicName={}", e.getMessage(), clusterDO, topicName, e);
             return ResultStatus.TOPIC_OPERATION_TOPIC_IN_DELETING;
         } catch (Throwable t) {
+            LOGGER.error("class=TopicCommands||method=deleteTopic||errMsg={}||clusterDO={}||topicName={}", t.getMessage(), clusterDO, topicName, t);
             return ResultStatus.TOPIC_OPERATION_UNKNOWN_ERROR;
         } finally {
             if (zkUtils != null) {
@@ -108,13 +129,15 @@ public class TopicCommands {
                     Constant.DEFAULT_SESSION_TIMEOUT_UNIT_MS,
                     JaasUtils.isZkSecurityEnabled()
             );
-
             AdminUtils.changeTopicConfig(zkUtils, topicName, config);
         } catch (AdminOperationException e) {
+            LOGGER.error("class=TopicCommands||method=modifyTopicConfig||errMsg={}||clusterDO={}||topicName={}||config={}", e.getMessage(), clusterDO, topicName,config, e);
             return ResultStatus.TOPIC_OPERATION_UNKNOWN_TOPIC_PARTITION;
         } catch (InvalidConfigurationException e) {
+            LOGGER.error("class=TopicCommands||method=modifyTopicConfig||errMsg={}||clusterDO={}||topicName={}||config={}", e.getMessage(), clusterDO, topicName,config, e);
             return ResultStatus.TOPIC_OPERATION_TOPIC_CONFIG_ILLEGAL;
         } catch (Throwable t) {
+            LOGGER.error("class=TopicCommands||method=modifyTopicConfig||errMsg={}||clusterDO={}||topicName={}||config={}", t.getMessage(), clusterDO, topicName,config, t);
             return ResultStatus.TOPIC_OPERATION_UNKNOWN_ERROR;
         } finally {
             if (zkUtils != null) {
@@ -174,6 +197,8 @@ public class TopicCommands {
                     true
             );
         } catch (Throwable t) {
+            LOGGER.error("class=TopicCommands||method=expandTopic||errMsg={}||clusterDO={}||topicName={}||partitionNum={}||brokerIdList={}"
+                    , t.getMessage(), clusterDO, topicName, partitionNum, JSON.toJSONString(brokerIdList), t);
             return ResultStatus.TOPIC_OPERATION_UNKNOWN_ERROR;
         } finally {
             if (zkUtils != null) {

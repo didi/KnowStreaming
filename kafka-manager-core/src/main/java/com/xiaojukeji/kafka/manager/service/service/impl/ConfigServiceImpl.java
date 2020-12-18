@@ -42,6 +42,7 @@ public class ConfigServiceImpl implements ConfigService {
         } catch (Exception e) {
             LOGGER.error("insert config failed, config:{}.", dto, e);
         }
+        LOGGER.warn("class=ConfigServiceImpl||method=insert||dto={}||msg=insert config fail,{}!", dto,ResultStatus.MYSQL_ERROR.getMessage());
         return ResultStatus.MYSQL_ERROR;
     }
 
@@ -54,10 +55,12 @@ public class ConfigServiceImpl implements ConfigService {
             if (configDao.deleteByKey(configKey) >= 1) {
                 return ResultStatus.SUCCESS;
             }
+            LOGGER.warn("class=ConfigServiceImpl||method=deleteByKey||configKey={}||msg=delete config fail,{}!", configKey,ResultStatus.CONFIG_NOT_EXIST.getMessage());
             return ResultStatus.CONFIG_NOT_EXIST;
         } catch (Exception e) {
             LOGGER.error("delete config failed, configKey:{}.", configKey, e);
         }
+        LOGGER.warn("class=ConfigServiceImpl||method=deleteByKey||configKey={}||msg=delete config fail,{}!", configKey,ResultStatus.MYSQL_ERROR.getMessage());
         return ResultStatus.MYSQL_ERROR;
     }
 
@@ -67,10 +70,12 @@ public class ConfigServiceImpl implements ConfigService {
             if (configDao.updateByKey(convert2ConfigDO(dto)) >= 1) {
                 return ResultStatus.SUCCESS;
             }
+            LOGGER.warn("class=ConfigServiceImpl||method=updateByKey||dto={}||msg=update config fail,{}!", dto,ResultStatus.CONFIG_NOT_EXIST.getMessage());
             return ResultStatus.CONFIG_NOT_EXIST;
         } catch (Exception e) {
             LOGGER.error("update config failed, config:{}.", dto, e);
         }
+        LOGGER.warn("class=ConfigServiceImpl||method=deleteByKey||dto={}||msg=delete config fail,{}!", dto,ResultStatus.MYSQL_ERROR.getMessage());
         return ResultStatus.MYSQL_ERROR;
     }
 
@@ -84,10 +89,15 @@ public class ConfigServiceImpl implements ConfigService {
             if (configDao.updateByKey(configDO) >= 1) {
                 return ResultStatus.SUCCESS;
             }
+            LOGGER.warn("class=ConfigServiceImpl||method=updateByKey||configKey={}||configValue={}||msg=update config fail,{}!"
+                    , configKey,configValue,ResultStatus.CONFIG_NOT_EXIST.getMessage());
             return ResultStatus.CONFIG_NOT_EXIST;
         } catch (Exception e) {
             LOGGER.error("update config failed, configValue:{}.", configValue, e);
         }
+        LOGGER.warn("class=ConfigServiceImpl||method=deleteByKey||configKey={}||configValue={}||msg=delete config fail,{}!"
+                , configKey,configValue,ResultStatus.MYSQL_ERROR.getMessage());
+
         return ResultStatus.MYSQL_ERROR;
     }
 
@@ -159,6 +169,16 @@ public class ConfigServiceImpl implements ConfigService {
         configDO.setConfigValue(dto.getConfigValue());
         configDO.setConfigDescription(dto.getConfigDescription());
         return configDO;
+    }
+
+    @Override
+    public Integer getAutoPassedTopicApplyOrderNumPerTask() {
+        String configKey = TopicCreationConstant.INNER_CREATE_TOPIC_CONFIG_KEY;
+        CreateTopicConfig configValue = this.getByKey(configKey, CreateTopicConfig.class);
+        if (ValidateUtils.isNull(configValue)) {
+            return TopicCreationConstant.DEFAULT_MAX_PASSED_ORDER_NUM_PER_TASK;
+        }
+        return configValue.getMaxPassedOrderNumPerTask();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.web.api.versionone.normal;
 
+import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.common.annotations.ApiLevel;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
 import com.xiaojukeji.kafka.manager.common.constant.ApiLevelContent;
@@ -8,6 +9,7 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.AppTopicDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.AppDTO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.QuotaVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.app.AppTopicAuthorityVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.app.AppTopicVO;
@@ -46,6 +48,9 @@ public class NormalAppController {
     private AppService appService;
 
     @Autowired
+    private AccountService accountService;
+
+    @Autowired
     private QuotaService quotaService;
 
     @Autowired
@@ -71,9 +76,16 @@ public class NormalAppController {
     @RequestMapping(value = "apps/{appId}/basic-info", method = RequestMethod.GET)
     @ResponseBody
     public Result<AppVO> getAppBasicInfo(@PathVariable String appId) {
-        return new Result<>(AppConverter.convert2AppVO(
-                appService.getByAppId(appId))
-        );
+        if (accountService.isAdminOrderHandler(SpringTool.getUserName())) {
+            return new Result<>(AppConverter.convert2AppVO(appService.getByAppId(appId)));
+        }
+
+        AppDO appDO = appService.getAppByUserAndId(appId, SpringTool.getUserName());
+        if (appDO == null) {
+            return Result.buildFrom(ResultStatus.USER_WITHOUT_AUTHORITY);
+        }
+
+        return new Result<>(AppConverter.convert2AppVO(appDO));
     }
 
     @ApiOperation(value = "App修改", notes = "")
