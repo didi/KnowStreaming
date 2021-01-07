@@ -4,12 +4,13 @@
 ![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
-**快速体验 http://117.51.150.133:8080/kafka 账号密码 admin/admin**
+
 --- 
 
 ## 主要功能特性
 
-
+### 快速体验
+- 体验地址 http://117.51.150.133:8080/kafka 账号密码 admin/admin
 ### 集群监控维度
 
 - 多版本集群管控，支持从`0.10.2`到`2.x`版本；
