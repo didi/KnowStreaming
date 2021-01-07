@@ -4,7 +4,7 @@
 ![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
-
+**快速体验 http://117.51.150.133:8080/kafka 账号密码 admin/admin**
 --- 
 
 ## 主要功能特性
