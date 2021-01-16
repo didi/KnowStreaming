@@ -34,7 +34,7 @@
 
 ## kafka-manager架构图
 
-![kafka-manager-arch](./docs/assets/images/common/arch.png)
+![kafka-manager-arch](./docs/assets/images/common/Logi Kafka Manager架构图.png)
 
 
 ## 相关文档
@@ -47,6 +47,7 @@
 ## 钉钉交流群
 
 ![dingding_group](./docs/assets/images/common/dingding_group.jpg)
+  钉钉群ID：32821440
 
 
 ## 项目成员

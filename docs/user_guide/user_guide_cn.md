@@ -622,6 +622,9 @@ Lag：表示该消费客户端是否有堆积；等于 partition offset-consume 
 
 <font size=2>步骤3：</font>填写完成后，点击提交即可提交申请。
 
+备注说明：集群创建后，还需在此基础上创建region、逻辑集群。具体操作可参照 [集群接入手册](https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/add_cluster/add_cluster.md)
+
+
 ![applycluster](./assets/applycluster.png)
 
 #### 申请集群下线 ####
