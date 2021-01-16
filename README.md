@@ -34,7 +34,7 @@
 
 ## kafka-manager架构图
 
-![kafka-manager-arch](./docs/assets/images/common/Logi Kafka Manager架构图.png)
+![kafka-manager-arch](https://img-ys011.didistatic.com/static/dicloudpub/do1_xgDHNDLj2ChKxctSuf72)
 
 
 ## 相关文档
