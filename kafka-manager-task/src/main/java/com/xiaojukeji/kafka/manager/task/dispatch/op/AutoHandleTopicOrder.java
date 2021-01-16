@@ -15,6 +15,7 @@ import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
+import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.task.component.AbstractScheduledTask;
 import com.xiaojukeji.kafka.manager.task.component.CustomScheduled;
@@ -109,12 +110,24 @@ public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
             return false;
         }
 
+        if (PhysicalClusterMetadataManager.isTopicExist(physicalClusterId, dto.getTopicName())) {
+            rejectForRepeatedTopicName(orderDO);
+            return false;
+        }
+
         if (ValidateUtils.isNull(dto.isPhysicalClusterId()) || !dto.isPhysicalClusterId()) {
             return handleApplyTopicOrderByLogicalClusterId(clusterDO, orderDO, dto, createConfig);
         }
 
         // 物理集群ID
         return handleApplyTopicOrderByPhysicalClusterId(clusterDO, orderDO, dto, createConfig);
+    }
+
+    private void rejectForRepeatedTopicName(OrderDO orderDO) {
+        orderDO.setApplicant(Constant.AUTO_HANDLE_USER_NAME);
+        orderDO.setStatus(OrderStatusEnum.REFUSED.getCode());
+        orderDO.setOpinion("驳回：该 Topic 已被别人申请并生效");
+        orderService.updateOrderById(orderDO);
     }
 
     /**

@@ -76,7 +76,7 @@ public class NormalAppController {
     @RequestMapping(value = "apps/{appId}/basic-info", method = RequestMethod.GET)
     @ResponseBody
     public Result<AppVO> getAppBasicInfo(@PathVariable String appId) {
-        if (accountService.isAdminOrderHandler(SpringTool.getUserName())) {
+        if (accountService.isOpOrRd(SpringTool.getUserName())) {
             return new Result<>(AppConverter.convert2AppVO(appService.getByAppId(appId)));
         }
 
@@ -101,7 +101,7 @@ public class NormalAppController {
     @RequestMapping(value = "apps/{appId}/topics", method = RequestMethod.GET)
     @ResponseBody
     public Result<List<AppTopicVO>> getAppTopics(@PathVariable String appId,
-                                                 @RequestParam(value = "mine") Boolean mine) {
+                                                 @RequestParam(value = "mine", required = false) Boolean mine) {
         List<AppTopicDTO> dtoList = appService.getAppTopicDTOList(appId, mine);
 
         List<AppTopicVO> voList = new ArrayList<>();

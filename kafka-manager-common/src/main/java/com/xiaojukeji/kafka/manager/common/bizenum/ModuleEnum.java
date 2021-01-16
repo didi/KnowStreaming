@@ -21,6 +21,8 @@ public enum  ModuleEnum {
 
     PARTITION(5, "分区"),
 
+    GATEWAY_CONFIG(6, "Gateway配置"),
+
     UNKNOWN(-1, "未知")
             ;
     ModuleEnum(int code, String message) {

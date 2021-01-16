@@ -4,7 +4,7 @@ import com.xiaojukeji.kafka.manager.common.bizenum.*;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
-import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupDTO;
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
@@ -144,16 +144,11 @@ public class ThirdPartServiceImpl implements ThirdPartService {
         if (ResultStatus.SUCCESS.getCode() != result.getCode()) {
             return null;
         }
-        ConsumerGroupDTO consumerGroupDTO = new ConsumerGroupDTO(
-                clusterDO.getId(),
-                dto.getConsumerGroup(),
-                new ArrayList<>(),
-                OffsetLocationEnum.getOffsetStoreLocation(dto.getLocation())
-        );
+        ConsumerGroup consumerGroup = new ConsumerGroup(clusterDO.getId(), dto.getConsumerGroup(), OffsetLocationEnum.getOffsetStoreLocation(dto.getLocation()));
         return consumerService.resetConsumerOffset(
                 clusterDO,
                 dto.getTopicName(),
-                consumerGroupDTO,
+                consumerGroup,
                 offsetDTOList
         );
     }

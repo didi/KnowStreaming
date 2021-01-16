@@ -13,6 +13,7 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AuthorityService;
@@ -139,6 +140,9 @@ public class AdminServiceImpl implements AdminService {
 
         // 3. 数据库中删除topic
         topicManagerService.deleteByTopicName(clusterDO.getId(), topicName);
+
+        // 4. 数据库中删除authority
+        authorityService.deleteAuthorityByTopic(clusterDO.getId(), topicName);
         return rs;
     }
 
@@ -191,15 +195,55 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public ResultStatus preferredReplicaElection(ClusterDO clusterDO, Integer brokerId, String operator) {
         BrokerMetadata brokerMetadata = PhysicalClusterMetadataManager.getBrokerMetadata(clusterDO.getId(), brokerId);
-        if (null == brokerMetadata) {
+        if (ValidateUtils.isNull(brokerMetadata)) {
             return ResultStatus.PARAM_ILLEGAL;
         }
+
+        Map<String, List<Integer>> partitionMap = topicService.getTopicPartitionIdMap(clusterDO.getId(), brokerId);
+        if (ValidateUtils.isEmptyMap(partitionMap)) {
+            return ResultStatus.SUCCESS;
+        }
+
+        return preferredReplicaElection(clusterDO, partitionMap, operator);
+    }
+
+    @Override
+    public ResultStatus preferredReplicaElection(ClusterDO clusterDO, String topicName, String operator) {
+        TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterDO.getId(), topicName);
+        if (ValidateUtils.isNull(topicMetadata)) {
+            return ResultStatus.TOPIC_NOT_EXIST;
+        }
+
+        Map<String, List<Integer>> partitionMap = new HashMap<>();
+        partitionMap.put(topicName, new ArrayList<>(topicMetadata.getPartitionMap().getPartitions().keySet()));
+
+        return preferredReplicaElection(clusterDO, partitionMap, operator);
+    }
+
+    @Override
+    public ResultStatus preferredReplicaElection(ClusterDO clusterDO, String topicName, Integer partitionId, String operator) {
+        TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterDO.getId(), topicName);
+        if (ValidateUtils.isNull(topicMetadata)) {
+            return ResultStatus.TOPIC_NOT_EXIST;
+        }
+
+        if (!topicMetadata.getPartitionMap().getPartitions().containsKey(partitionId)) {
+            return ResultStatus.PARTITION_NOT_EXIST;
+        }
+
+        Map<String, List<Integer>> partitionMap = new HashMap<>();
+        partitionMap.put(topicName, Arrays.asList(partitionId));
+
+        return preferredReplicaElection(clusterDO, partitionMap, operator);
+    }
+
+    private ResultStatus preferredReplicaElection(ClusterDO clusterDO, Map<String, List<Integer>> partitionMap, String operator) {
+        if (ValidateUtils.isEmptyMap(partitionMap)) {
+            return ResultStatus.SUCCESS;
+        }
+
         ZkUtils zkUtils = null;
         try {
-            Map<String, List<Integer>> partitionMap = topicService.getTopicPartitionIdMap(clusterDO.getId(), brokerId);
-            if (partitionMap == null || partitionMap.isEmpty()) {
-                return ResultStatus.SUCCESS;
-            }
             String preferredReplicaElectString = convert2preferredReplicaElectString(partitionMap);
 
             zkUtils = ZkUtils.apply(clusterDO.getZookeeper(),

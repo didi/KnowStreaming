@@ -35,4 +35,29 @@ public class GatewayConfigDaoImpl implements GatewayConfigDao {
         params.put("configName", configName);
         return sqlSession.selectOne("GatewayConfigDao.getByConfigTypeAndName", params);
     }
+
+    @Override
+    public List<GatewayConfigDO> list() {
+        return sqlSession.selectList("GatewayConfigDao.list");
+    }
+
+    @Override
+    public int insert(GatewayConfigDO gatewayConfigDO) {
+        return sqlSession.insert("GatewayConfigDao.insert", gatewayConfigDO);
+    }
+
+    @Override
+    public int deleteById(Long id) {
+        return sqlSession.delete("GatewayConfigDao.deleteById", id);
+    }
+
+    @Override
+    public int updateById(GatewayConfigDO gatewayConfigDO) {
+        return sqlSession.update("GatewayConfigDao.updateById", gatewayConfigDO);
+    }
+
+    @Override
+    public GatewayConfigDO getById(Long id) {
+        return sqlSession.selectOne("GatewayConfigDao.getById", id);
+    }
 }

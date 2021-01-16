@@ -89,6 +89,11 @@ public class TopicDaoImpl implements TopicDao {
         return sqlSession.selectOne("TopicDao.getTopic", params);
     }
 
+    @Override
+    public TopicDO removeTopicInCache(Long clusterId, String topicName) {
+        return TOPIC_MAP.getOrDefault(clusterId, new HashMap<>(0)).remove(topicName);
+    }
+
     private void updateTopicCache() {
         Long timestamp = System.currentTimeMillis();
 

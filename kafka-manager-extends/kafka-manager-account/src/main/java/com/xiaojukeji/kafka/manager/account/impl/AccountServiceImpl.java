@@ -227,6 +227,18 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public boolean isOpOrRd(String username) {
+        if (ValidateUtils.isNull(ACCOUNT_ROLE_CACHE)) {
+            flush();
+        }
+        AccountRoleEnum accountRoleEnum = ACCOUNT_ROLE_CACHE.getOrDefault(username, AccountRoleEnum.NORMAL);
+        if (accountRoleEnum.equals(AccountRoleEnum.OP) || accountRoleEnum.equals(AccountRoleEnum.RD)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public List<Account> getAdminOrderHandlerFromCache() {
         if (ValidateUtils.isEmptyList(ADMIN_ORDER_HANDLER_CACHE)) {
             return getOPAccountsFromCache();

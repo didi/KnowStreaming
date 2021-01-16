@@ -2,13 +2,14 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetLocationEnum;
-import com.xiaojukeji.kafka.manager.common.bizenum.SinkMonitorSystemEnum;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumeDetailDTO;
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupSummary;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
-import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.exception.ConfigException;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
@@ -23,6 +24,7 @@ import kafka.admin.AdminClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.protocol.types.SchemaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,70 +46,116 @@ public class ConsumerServiceImpl implements ConsumerService {
     private TopicService topicService;
 
     @Override
-    public List<ConsumerGroupDTO> getConsumerGroupList(Long clusterId) {
-        List<ConsumerGroupDTO> consumerGroupDTOList = new ArrayList<>();
+    public List<ConsumerGroup> getConsumerGroupList(Long clusterId) {
+        List<ConsumerGroup> consumerGroupList = new ArrayList<>();
         for (OffsetLocationEnum location: OffsetLocationEnum.values()) {
-            Map<String, List<String>> consumerGroupAppIdMap = null;
             Set<String> consumerGroupSet = null;
             if (OffsetLocationEnum.ZOOKEEPER.equals(location)) {
                 // 获取ZK中的消费组
-                consumerGroupAppIdMap = ConsumerMetadataCache.getConsumerGroupAppIdListInZk(clusterId);
                 consumerGroupSet = ConsumerMetadataCache.getGroupInZkMap(clusterId);
             } else if (OffsetLocationEnum.BROKER.equals(location)) {
                 // 获取Broker中的消费组
-                consumerGroupAppIdMap = ConsumerMetadataCache.getConsumerGroupAppIdListInBK(clusterId);
                 consumerGroupSet = ConsumerMetadataCache.getGroupInBrokerMap(clusterId);
             }
-            if (consumerGroupSet == null || consumerGroupAppIdMap == null) {
+            if (ValidateUtils.isEmptySet(consumerGroupSet)) {
                 continue;
             }
             for (String consumerGroup : consumerGroupSet) {
-                consumerGroupDTOList.add(new ConsumerGroupDTO(
-                        clusterId,
-                        consumerGroup,
-                        consumerGroupAppIdMap.getOrDefault(consumerGroup, new ArrayList<>()),
-                        location)
-                );            }
+                consumerGroupList.add(new ConsumerGroup(clusterId, consumerGroup, location));
+            }
         }
-        return consumerGroupDTOList;
+        return consumerGroupList;
     }
 
     @Override
-    public List<ConsumerGroupDTO> getConsumerGroupList(Long clusterId, String topicName) {
-        List<ConsumerGroupDTO> consumerGroupDTOList = new ArrayList<>();
+    public List<ConsumerGroup> getConsumerGroupList(Long clusterId, String topicName) {
+        List<ConsumerGroup> consumerGroupList = new ArrayList<>();
 
         for (OffsetLocationEnum location: OffsetLocationEnum.values()) {
-            Map<String, List<String>> consumerGroupAppIdMap = null;
             Set<String> consumerGroupSet = null;
             if (OffsetLocationEnum.ZOOKEEPER.equals(location)) {
                 // 获取ZK中的消费组
-                consumerGroupAppIdMap = ConsumerMetadataCache.getConsumerGroupAppIdListInZk(clusterId);
                 consumerGroupSet = ConsumerMetadataCache.getTopicConsumerGroupInZk(clusterId, topicName);
             } else if (OffsetLocationEnum.BROKER.equals(location)) {
                 // 获取Broker中的消费组
-                consumerGroupAppIdMap = ConsumerMetadataCache.getConsumerGroupAppIdListInBK(clusterId);
                 consumerGroupSet = ConsumerMetadataCache.getTopicConsumerGroupInBroker(clusterId, topicName);
             }
-            if (consumerGroupSet == null || consumerGroupAppIdMap == null) {
+            if (ValidateUtils.isEmptySet(consumerGroupSet)) {
                 continue;
             }
             for (String consumerGroup : consumerGroupSet) {
-                consumerGroupDTOList.add(new ConsumerGroupDTO(
-                        clusterId,
-                        consumerGroup,
-                        consumerGroupAppIdMap.getOrDefault(consumerGroup, new ArrayList<>()),
-                        location
-                        )
-                );
+                consumerGroupList.add(new ConsumerGroup(clusterId, consumerGroup, location));
             }
         }
-        return consumerGroupDTOList;
+        return consumerGroupList;
     }
 
     @Override
-    public List<ConsumeDetailDTO> getConsumeDetail(ClusterDO clusterDO,
-                                                   String topicName,
-                                                   ConsumerGroupDTO consumeGroupDTO) {
+    public List<ConsumerGroupSummary> getConsumerGroupSummaries(Long clusterId, String topicName) {
+        List<ConsumerGroup> consumerGroupList = this.getConsumerGroupList(clusterId, topicName);
+        if (ValidateUtils.isEmptyList(consumerGroupList)) {
+            return Collections.emptyList();
+        }
+
+        List<ConsumerGroupSummary> summaryList = new ArrayList<>();
+        for (ConsumerGroup consumerGroup: consumerGroupList) {
+            ConsumerGroupSummary consumerGroupSummary = null;
+            if (OffsetLocationEnum.ZOOKEEPER.equals(consumerGroup.getOffsetStoreLocation())) {
+                consumerGroupSummary = new ConsumerGroupSummary();
+                consumerGroupSummary.setClusterId(consumerGroup.getClusterId());
+                consumerGroupSummary.setConsumerGroup(consumerGroup.getConsumerGroup());
+                consumerGroupSummary.setOffsetStoreLocation(consumerGroup.getOffsetStoreLocation());
+            } else {
+                consumerGroupSummary = getConsumerGroupSummary(clusterId, topicName, consumerGroup.getConsumerGroup());
+            }
+            summaryList.add(consumerGroupSummary);
+        }
+        return summaryList;
+    }
+
+    private ConsumerGroupSummary getConsumerGroupSummary(Long clusterId, String topicName, String consumerGroup) {
+        ConsumerGroupSummary summary = new ConsumerGroupSummary();
+        summary.setClusterId(clusterId);
+        summary.setConsumerGroup(consumerGroup);
+        summary.setOffsetStoreLocation(OffsetLocationEnum.BROKER);
+        summary.setAppIdList(new ArrayList<>());
+        summary.setState("");
+        try {
+            AdminClient adminClient = KafkaClientPool.getAdminClient(clusterId);
+
+            AdminClient.ConsumerGroupSummary consumerGroupSummary = adminClient.describeConsumerGroup(consumerGroup);
+            if (ValidateUtils.isNull(consumerGroupSummary)) {
+                return summary;
+            }
+            summary.setState(consumerGroupSummary.state());
+
+            java.util.Iterator<scala.collection.immutable.List<AdminClient.ConsumerSummary>> it = JavaConversions.asJavaIterator(consumerGroupSummary.consumers().iterator());
+            while (it.hasNext()) {
+                List<AdminClient.ConsumerSummary> consumerSummaryList = JavaConversions.asJavaList(it.next());
+                for (AdminClient.ConsumerSummary consumerSummary: consumerSummaryList) {
+                    List<TopicPartition> topicPartitionList = JavaConversions.asJavaList(consumerSummary.assignment());
+                    if (ValidateUtils.isEmptyList(topicPartitionList)) {
+                        continue;
+                    }
+                    if (topicPartitionList.stream().anyMatch(elem -> elem.topic().equals(topicName)) && consumerSummary.clientId().contains(".")) {
+                        String [] splitArray = consumerSummary.clientId().split("\\.");
+                        summary.getAppIdList().add(splitArray[0]);
+                    }
+                }
+            }
+        } catch (SchemaException e) {
+            logger.error("class=ConsumerServiceImpl||method=getConsumerGroupSummary||clusterId={}||topicName={}||consumerGroup={}||errMsg={}||schema exception",
+                    clusterId, topicName, consumerGroup, e.getMessage());
+        } catch (Exception e) {
+            logger.error("class=ConsumerServiceImpl||method=getConsumerGroupSummary||clusterId={}||topicName={}||consumerGroup={}||errMsg={}||throws exception",
+                    clusterId, topicName, consumerGroup, e.getMessage());
+        }
+        summary.setAppIdList(new ArrayList<>(new HashSet<>(summary.getAppIdList())));
+        return summary;
+    }
+
+    @Override
+    public List<ConsumeDetailDTO> getConsumeDetail(ClusterDO clusterDO, String topicName, ConsumerGroup consumerGroup) {
         TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterDO.getId(), topicName);
         if (topicMetadata == null) {
             logger.warn("class=ConsumerServiceImpl||method=getConsumeDetail||clusterId={}||topicName={}||msg=topicMetadata is null!",
@@ -116,10 +164,10 @@ public class ConsumerServiceImpl implements ConsumerService {
         }
 
         List<ConsumeDetailDTO> consumerGroupDetailDTOList = null;
-        if (OffsetLocationEnum.ZOOKEEPER.equals(consumeGroupDTO.getOffsetStoreLocation())) {
-            consumerGroupDetailDTOList = getConsumerPartitionStateInZK(clusterDO, topicMetadata, consumeGroupDTO);
-        } else if (OffsetLocationEnum.BROKER.equals(consumeGroupDTO.getOffsetStoreLocation())){
-            consumerGroupDetailDTOList = getConsumerPartitionStateInBroker(clusterDO, topicMetadata, consumeGroupDTO);
+        if (OffsetLocationEnum.ZOOKEEPER.equals(consumerGroup.getOffsetStoreLocation())) {
+            consumerGroupDetailDTOList = getConsumerPartitionStateInZK(clusterDO, topicMetadata, consumerGroup);
+        } else if (OffsetLocationEnum.BROKER.equals(consumerGroup.getOffsetStoreLocation())){
+            consumerGroupDetailDTOList = getConsumerPartitionStateInBroker(clusterDO, topicMetadata, consumerGroup);
         }
         if (consumerGroupDetailDTOList == null) {
             logger.info("class=ConsumerServiceImpl||method=getConsumeDetail||msg=consumerGroupDetailDTOList is null!");
@@ -147,7 +195,7 @@ public class ConsumerServiceImpl implements ConsumerService {
     }
 
     @Override
-    public List<Result> resetConsumerOffset(ClusterDO clusterDO, String topicName, ConsumerGroupDTO consumerGroupDTO, List<PartitionOffsetDTO> partitionOffsetDTOList) {
+    public List<Result> resetConsumerOffset(ClusterDO clusterDO, String topicName, ConsumerGroup consumerGroup, List<PartitionOffsetDTO> partitionOffsetDTOList) {
         Map<TopicPartition, Long> offsetMap = partitionOffsetDTOList.stream().collect(Collectors.toMap(elem -> {return new TopicPartition(topicName, elem.getPartitionId());}, PartitionOffsetDTO::getOffset));
         List<Result> resultList = new ArrayList<>();
 
@@ -155,12 +203,12 @@ public class ConsumerServiceImpl implements ConsumerService {
         KafkaConsumer<String, String> kafkaConsumer = null;
         try {
             Properties properties = KafkaClientPool.createProperties(clusterDO, false);
-            properties.setProperty("group.id", consumerGroupDTO.getConsumerGroup());
+            properties.setProperty("group.id", consumerGroup.getConsumerGroup());
             kafkaConsumer = new KafkaConsumer<>(properties);
             checkAndCorrectPartitionOffset(kafkaConsumer, offsetMap);
-            return resetConsumerOffset(clusterDO, kafkaConsumer, consumerGroupDTO, offsetMap);
+            return resetConsumerOffset(clusterDO, kafkaConsumer, consumerGroup, offsetMap);
         } catch (Exception e) {
-            logger.error("create kafka consumer failed, clusterId:{} topicName:{} consumerGroup:{} partition:{}.", clusterDO.getId(), topicName, consumerGroupDTO, partitionOffsetDTOList, e);
+            logger.error("create kafka consumer failed, clusterId:{} topicName:{} consumerGroup:{} partition:{}.", clusterDO.getId(), topicName, consumerGroup, partitionOffsetDTOList, e);
             resultList.add(new Result(
                     ResultStatus.OPERATION_FAILED.getCode(),
                     "reset failed, create KafkaConsumer or check offset failed"
@@ -173,20 +221,20 @@ public class ConsumerServiceImpl implements ConsumerService {
         return resultList;
     }
 
-    private List<Result> resetConsumerOffset(ClusterDO cluster, KafkaConsumer<String, String> kafkaConsumer, ConsumerGroupDTO consumerGroupDTO, Map<TopicPartition, Long> offsetMap) {
+    private List<Result> resetConsumerOffset(ClusterDO cluster, KafkaConsumer<String, String> kafkaConsumer, ConsumerGroup consumerGroup, Map<TopicPartition, Long> offsetMap) {
         List<Result> resultList = new ArrayList<>();
 
         for(Map.Entry<TopicPartition, Long> entry: offsetMap.entrySet()){
             TopicPartition tp =  entry.getKey();
             Long offset = entry.getValue();
             try {
-                if (consumerGroupDTO.getOffsetStoreLocation().equals(OffsetLocationEnum.ZOOKEEPER)) {
-                    resetConsumerOffsetInZK(cluster, consumerGroupDTO.getConsumerGroup(), tp, offset);
-                } else if (consumerGroupDTO.getOffsetStoreLocation().equals(OffsetLocationEnum.BROKER)) {
+                if (consumerGroup.getOffsetStoreLocation().equals(OffsetLocationEnum.ZOOKEEPER)) {
+                    resetConsumerOffsetInZK(cluster, consumerGroup.getConsumerGroup(), tp, offset);
+                } else if (consumerGroup.getOffsetStoreLocation().equals(OffsetLocationEnum.BROKER)) {
                     resetConsumerOffsetInBroker(kafkaConsumer, tp, offset);
                 }
             } catch (Exception e) {
-                logger.error("reset failed, clusterId:{} consumerGroup:{} topic-partition:{}.", cluster.getId(), consumerGroupDTO, tp, e);
+                logger.error("reset failed, clusterId:{} consumerGroup:{} topic-partition:{}.", cluster.getId(), consumerGroup, tp, e);
                 resultList.add(new Result(
                         ResultStatus.OPERATION_FAILED.getCode(),
                         "reset failed..."));
@@ -232,14 +280,14 @@ public class ConsumerServiceImpl implements ConsumerService {
     @Override
     public Map<Integer, Long> getConsumerOffset(ClusterDO clusterDO,
                                                 String topicName,
-                                                ConsumerGroupDTO consumerGroupDTO) {
-        if (ValidateUtils.isNull(clusterDO) || ValidateUtils.isBlank(topicName) || ValidateUtils.isNull(consumerGroupDTO)) {
+                                                ConsumerGroup consumerGroup) {
+        if (ValidateUtils.isNull(clusterDO) || ValidateUtils.isBlank(topicName) || ValidateUtils.isNull(consumerGroup)) {
             return null;
         }
-        if (OffsetLocationEnum.BROKER.equals(consumerGroupDTO.getOffsetStoreLocation())) {
-            return getConsumerOffsetFromBK(clusterDO, topicName, consumerGroupDTO.getConsumerGroup());
-        } else if (OffsetLocationEnum.ZOOKEEPER.equals(consumerGroupDTO.getOffsetStoreLocation())) {
-            return getConsumerOffsetFromZK(clusterDO.getId(), topicName, consumerGroupDTO.getConsumerGroup());
+        if (OffsetLocationEnum.BROKER.equals(consumerGroup.getOffsetStoreLocation())) {
+            return getConsumerOffsetFromBK(clusterDO, topicName, consumerGroup.getConsumerGroup());
+        } else if (OffsetLocationEnum.ZOOKEEPER.equals(consumerGroup.getOffsetStoreLocation())) {
+            return getConsumerOffsetFromZK(clusterDO.getId(), topicName, consumerGroup.getConsumerGroup());
         }
         return null;
     }
@@ -306,9 +354,9 @@ public class ConsumerServiceImpl implements ConsumerService {
         return consumerIdMap;
     }
 
-    private List<ConsumeDetailDTO> getConsumerPartitionStateInBroker(ClusterDO clusterDO, TopicMetadata topicMetadata, ConsumerGroupDTO consumerGroupDTO) {
-        Map<Integer, String> consumerIdMap = getConsumeIdMap(clusterDO.getId(), topicMetadata.getTopic(), consumerGroupDTO.getConsumerGroup());
-        Map<Integer, String> consumeOffsetMap = getOffsetByGroupAndTopicFromBroker(clusterDO, consumerGroupDTO.getConsumerGroup(), topicMetadata.getTopic());
+    private List<ConsumeDetailDTO> getConsumerPartitionStateInBroker(ClusterDO clusterDO, TopicMetadata topicMetadata, ConsumerGroup consumerGroup) {
+        Map<Integer, String> consumerIdMap = getConsumeIdMap(clusterDO.getId(), topicMetadata.getTopic(), consumerGroup.getConsumerGroup());
+        Map<Integer, String> consumeOffsetMap = getOffsetByGroupAndTopicFromBroker(clusterDO, consumerGroup.getConsumerGroup(), topicMetadata.getTopic());
 
         List<ConsumeDetailDTO> consumeDetailDTOList = new ArrayList<>();
         for (int partitionId : topicMetadata.getPartitionMap().getPartitions().keySet()) {
@@ -318,7 +366,7 @@ public class ConsumerServiceImpl implements ConsumerService {
             try {
                 consumeDetailDTO.setConsumeOffset(StringUtils.isEmpty(consumeOffsetStr)? null: Long.valueOf(consumeOffsetStr));
             } catch (Exception e) {
-                logger.error("illegal consumer offset, clusterId:{} topicName:{} consumerGroup:{} offset:{}.", clusterDO.getId(), topicMetadata.getTopic(), consumerGroupDTO.getConsumerGroup(), consumeOffsetStr, e);
+                logger.error("illegal consumer offset, clusterId:{} topicName:{} consumerGroup:{} offset:{}.", clusterDO.getId(), topicMetadata.getTopic(), consumerGroup.getConsumerGroup(), consumeOffsetStr, e);
             }
             consumeDetailDTO.setConsumerId(consumerIdMap.get(partitionId));
             consumeDetailDTOList.add(consumeDetailDTO);
@@ -326,21 +374,19 @@ public class ConsumerServiceImpl implements ConsumerService {
         return consumeDetailDTOList;
     }
 
-    private List<ConsumeDetailDTO> getConsumerPartitionStateInZK(ClusterDO clusterDO,
-                                                                 TopicMetadata topicMetadata,
-                                                                 ConsumerGroupDTO consumerGroupDTO) {
+    private List<ConsumeDetailDTO> getConsumerPartitionStateInZK(ClusterDO clusterDO, TopicMetadata topicMetadata, ConsumerGroup consumerGroup) {
         ZkConfigImpl zkConfig = PhysicalClusterMetadataManager.getZKConfig(clusterDO.getId());
 
         List<ConsumeDetailDTO> consumeDetailDTOList = new ArrayList<>();
         for (Integer partitionId : topicMetadata.getPartitionMap().getPartitions().keySet()) {
-            String consumeGroupPath = ZkPathUtil.getConsumerGroupOffsetTopicPartitionNode(consumerGroupDTO.getConsumerGroup(), topicMetadata.getTopic(), partitionId);
+            String consumeGroupPath = ZkPathUtil.getConsumerGroupOffsetTopicPartitionNode(consumerGroup.getConsumerGroup(), topicMetadata.getTopic(), partitionId);
             String consumeOffset = null;
             try {
                 consumeOffset = zkConfig.get(consumeGroupPath);
             } catch (ConfigException e) {
                 logger.error("get consumeOffset error for zk path:{}", consumeGroupPath, e);
             }
-            String consumeIdZkPath = ZkPathUtil.getConsumerGroupOwnersTopicPartitionNode(consumerGroupDTO.getConsumerGroup(), topicMetadata.getTopic(), partitionId);
+            String consumeIdZkPath = ZkPathUtil.getConsumerGroupOwnersTopicPartitionNode(consumerGroup.getConsumerGroup(), topicMetadata.getTopic(), partitionId);
             String consumerId = null;
             try {
                 consumerId = zkConfig.get(consumeIdZkPath);
@@ -394,7 +440,7 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Override
     public boolean checkConsumerGroupExist(OffsetLocationEnum offsetLocation, Long clusterId, String topicName, String consumerGroup) {
-        List<ConsumerGroupDTO>  consumerGroupList = getConsumerGroupList(clusterId, topicName).stream()
+        List<ConsumerGroup>  consumerGroupList = getConsumerGroupList(clusterId, topicName).stream()
                 .filter(group -> offsetLocation.location.equals(group.getOffsetStoreLocation().location) && consumerGroup.equals(group.getConsumerGroup()))
                 .collect(Collectors.toList());
         return !ValidateUtils.isEmptyList(consumerGroupList);

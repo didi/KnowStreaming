@@ -72,8 +72,8 @@ public class DidiHealthScoreStrategy extends AbstractHealthScoreStrategy {
                 // 数据获取失败
                 return Constant.INVALID_CODE;
             }
-            if (((Double) failedFetchRequestsPerSecOneMinuteRate) > 0
-                    || ((Double) failedProduceRequestsPerSecOneMinuteRate) > 0) {
+            if (((Double) failedFetchRequestsPerSecOneMinuteRate) > 0.01
+                    || ((Double) failedProduceRequestsPerSecOneMinuteRate) > 0.01) {
                 return HEALTH_SCORE_VERY_BAD;
             }
 

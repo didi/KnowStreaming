@@ -42,6 +42,11 @@ custom:
       topic-throttled-metrics: false
     save-days: 7
 
+# 任务相关的开关
+task:
+  op:
+    sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
+
 account:
   ldap:
 

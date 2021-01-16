@@ -2,8 +2,10 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
+import com.xiaojukeji.kafka.manager.common.zookeeper.ZkPathUtil;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.didi.TopicJmxSwitch;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
@@ -12,6 +14,9 @@ import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author zengqiao
@@ -39,5 +44,30 @@ public class ZookeeperServiceImpl implements ZookeeperService {
             }
         }
         return new Result();
+    }
+
+    @Override
+    public Result<List<Integer>> getControllerPreferredCandidates(Long clusterId) {
+        if (ValidateUtils.isNull(clusterId)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        ZkConfigImpl zkConfig = PhysicalClusterMetadataManager.getZKConfig(clusterId);
+        if (ValidateUtils.isNull(zkConfig)) {
+            return Result.buildFrom(ResultStatus.CONNECT_ZOOKEEPER_FAILED);
+        }
+
+        try {
+            if (!zkConfig.checkPathExists(ZkPathUtil.D_CONTROLLER_CANDIDATES)) {
+                return Result.buildSuc(new ArrayList<>());
+            }
+            List<String> brokerIdList = zkConfig.getChildren(ZkPathUtil.D_CONTROLLER_CANDIDATES);
+            if (ValidateUtils.isEmptyList(brokerIdList)) {
+                return Result.buildSuc(new ArrayList<>());
+            }
+            return Result.buildSuc(ListUtils.string2IntList(ListUtils.strList2String(brokerIdList)));
+        } catch (Exception e) {
+            LOGGER.error("class=ZookeeperServiceImpl||method=getControllerPreferredCandidates||clusterId={}||errMsg={}", clusterId, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.READ_ZOOKEEPER_FAILED);
     }
 }

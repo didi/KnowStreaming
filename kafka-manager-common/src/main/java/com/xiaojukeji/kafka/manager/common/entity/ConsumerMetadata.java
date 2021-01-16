@@ -3,7 +3,6 @@ package com.xiaojukeji.kafka.manager.common.entity;
 import kafka.admin.AdminClient;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author zengqiao
@@ -16,17 +15,12 @@ public class ConsumerMetadata {
 
     private Map<String, AdminClient.ConsumerGroupSummary> consumerGroupSummaryMap = new HashMap<>();
 
-    private Map<String, List<String>> consumerGroupAppMap = new ConcurrentHashMap<>();
-
-
     public ConsumerMetadata(Set<String> consumerGroupSet,
                             Map<String, Set<String>> topicNameConsumerGroupMap,
-                            Map<String, AdminClient.ConsumerGroupSummary> consumerGroupSummaryMap,
-                            Map<String, List<String>> consumerGroupAppMap) {
+                            Map<String, AdminClient.ConsumerGroupSummary> consumerGroupSummaryMap) {
         this.consumerGroupSet = consumerGroupSet;
         this.topicNameConsumerGroupMap = topicNameConsumerGroupMap;
         this.consumerGroupSummaryMap = consumerGroupSummaryMap;
-        this.consumerGroupAppMap = consumerGroupAppMap;
     }
 
     public Set<String> getConsumerGroupSet() {
@@ -39,9 +33,5 @@ public class ConsumerMetadata {
 
     public Map<String, AdminClient.ConsumerGroupSummary> getConsumerGroupSummaryMap() {
         return consumerGroupSummaryMap;
-    }
-
-    public Map<String, List<String>> getConsumerGroupAppMap() {
-        return consumerGroupAppMap;
     }
 }

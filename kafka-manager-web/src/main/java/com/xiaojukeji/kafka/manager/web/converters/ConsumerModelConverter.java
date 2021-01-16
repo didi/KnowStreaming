@@ -1,12 +1,16 @@
 package com.xiaojukeji.kafka.manager.web.converters;
 
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupSummary;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupDetailVO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumeDetailDTO;
-import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupDTO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupSummaryVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupVO;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,18 +45,34 @@ public class ConsumerModelConverter {
         return consumerGroupDetailVOList;
     }
 
-    public static List<ConsumerGroupVO> convert2ConsumerGroupVOList(List<ConsumerGroupDTO> consumeGroupDTOList) {
-        if (consumeGroupDTOList == null || consumeGroupDTOList.isEmpty()) {
-            return new ArrayList<>();
+    public static List<ConsumerGroupVO> convert2ConsumerGroupVOList(List<ConsumerGroup> consumerGroupList) {
+        if (ValidateUtils.isEmptyList(consumerGroupList)) {
+            return Collections.emptyList();
         }
         List<ConsumerGroupVO> consumerGroupVOList = new ArrayList<>();
-        for (ConsumerGroupDTO consumeGroupDTO : consumeGroupDTOList) {
+        for (ConsumerGroup consumerGroup : consumerGroupList) {
             ConsumerGroupVO vo = new ConsumerGroupVO();
-            vo.setConsumerGroup(consumeGroupDTO.getConsumerGroup());
-            vo.setAppIds(ListUtils.strList2String(consumeGroupDTO.getAppIdList()));
-            vo.setLocation(consumeGroupDTO.getOffsetStoreLocation().location);
+            vo.setConsumerGroup(consumerGroup.getConsumerGroup());
+            vo.setAppIds("");
+            vo.setLocation(consumerGroup.getOffsetStoreLocation().location);
             consumerGroupVOList.add(vo);
         }
         return consumerGroupVOList;
+    }
+
+    public static List<ConsumerGroupSummaryVO> convert2ConsumerGroupSummaryVOList(List<ConsumerGroupSummary> summaryList) {
+        if (ValidateUtils.isEmptyList(summaryList)) {
+            return Collections.emptyList();
+        }
+        List<ConsumerGroupSummaryVO> voList = new ArrayList<>();
+        for (ConsumerGroupSummary consumerGroupSummary : summaryList) {
+            ConsumerGroupSummaryVO vo = new ConsumerGroupSummaryVO();
+            vo.setConsumerGroup(consumerGroupSummary.getConsumerGroup());
+            vo.setAppIds(ListUtils.strList2String(consumerGroupSummary.getAppIdList()));
+            vo.setLocation(consumerGroupSummary.getOffsetStoreLocation().location);
+            vo.setState(consumerGroupSummary.getState());
+            voList.add(vo);
+        }
+        return voList;
     }
 }

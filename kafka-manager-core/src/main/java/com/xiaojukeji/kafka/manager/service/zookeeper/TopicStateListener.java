@@ -5,6 +5,8 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata
 import com.xiaojukeji.kafka.manager.common.zookeeper.StateChangeListener;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkPathUtil;
+import com.xiaojukeji.kafka.manager.dao.TopicDao;
+import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.ThreadPool;
 import org.apache.zookeeper.data.Stat;
@@ -28,9 +30,20 @@ public class TopicStateListener implements StateChangeListener {
 
     private ZkConfigImpl zkConfig;
 
+    private TopicDao topicDao;
+
+    private AuthorityDao authorityDao;
+
     public TopicStateListener(Long clusterId, ZkConfigImpl zkConfig) {
         this.clusterId = clusterId;
         this.zkConfig = zkConfig;
+    }
+
+    public TopicStateListener(Long clusterId, ZkConfigImpl zkConfig, TopicDao topicDao, AuthorityDao authorityDao) {
+        this.clusterId = clusterId;
+        this.zkConfig = zkConfig;
+        this.topicDao = topicDao;
+        this.authorityDao = authorityDao;
     }
 
     @Override
@@ -79,6 +92,8 @@ public class TopicStateListener implements StateChangeListener {
     private void processTopicDelete(String topicName) {
         LOGGER.warn("delete topic, clusterId:{} topicName:{}.", clusterId, topicName);
         PhysicalClusterMetadataManager.removeTopicMetadata(clusterId, topicName);
+        topicDao.removeTopicInCache(clusterId, topicName);
+        authorityDao.removeAuthorityInCache(clusterId, topicName);
     }
 
     private void processTopicAdded(String topicName) {

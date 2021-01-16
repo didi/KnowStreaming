@@ -2,6 +2,8 @@ package com.xiaojukeji.kafka.manager.service.service.gateway.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.common.bizenum.gateway.GatewayConfigKeyEnum;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.*;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +24,7 @@ import java.util.Map;
  * @author zengqiao
  * @date 20/7/28
  */
-@Service("gatewayConfigService")
+@Service
 public class GatewayConfigServiceImpl implements GatewayConfigService {
     private final Logger LOGGER = LoggerFactory.getLogger(GatewayConfigServiceImpl.class);
 
@@ -52,7 +55,8 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
                     ? new KafkaBootstrapServerConfig(maxVersion, clusterIdBootstrapServersMap)
                     : new KafkaBootstrapServerConfig(requestVersion, new HashMap<>(0));
         } catch (Exception e) {
-            LOGGER.error("get kafka bootstrap servers config failed, data:{}.", JSON.toJSONString(doList), e);
+            LOGGER.error("class=GatewayConfigServiceImpl||method=getKafkaBootstrapServersConfig||data={}||errMsg={}||msg=get kafka bootstrap servers config failed",
+                    JSON.toJSONString(doList), e.getMessage());
         }
         return null;
     }
@@ -71,7 +75,8 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
 
             return new RequestQueueConfig(configDO.getVersion(), Long.valueOf(configDO.getValue()));
         } catch (Exception e) {
-            LOGGER.error("get request queue config failed, data:{}.", JSON.toJSONString(configDO), e);
+            LOGGER.error("class=GatewayConfigServiceImpl||method=getRequestQueueConfig||data={}||errMsg={}||msg=get request queue config failed",
+                    JSON.toJSONString(configDO), e.getMessage());
         }
         return null;
     }
@@ -90,7 +95,8 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
 
             return new AppRateConfig(configDO.getVersion(), Long.valueOf(configDO.getValue()));
         } catch (Exception e) {
-            LOGGER.error("get app rate config failed, data:{}.", JSON.toJSONString(configDO), e);
+            LOGGER.error("class=GatewayConfigServiceImpl||method=getAppRateConfig||data={}||errMsg={}||msg=get app rate config failed",
+                    JSON.toJSONString(configDO), e.getMessage());
         }
         return null;
     }
@@ -150,6 +156,96 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
             return gatewayConfigDao.getByConfigTypeAndName(configType, configName);
         } catch (Exception e) {
             LOGGER.error("get gateway config failed, configType:{} configName:{}.", configType, configName, e);
+        }
+        return null;
+    }
+
+    @Override
+    public List<GatewayConfigDO> list() {
+        try {
+            return gatewayConfigDao.list();
+        } catch (Exception e) {
+            LOGGER.debug("class=GatewayConfigServiceImpl||method=list||errMsg={}||msg=list failed", e.getMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Result insert(GatewayConfigDO gatewayConfigDO) {
+        try {
+            GatewayConfigKeyEnum configKeyEnum = GatewayConfigKeyEnum.getByConfigType(gatewayConfigDO.getType());
+            if (ValidateUtils.isNull(configKeyEnum)
+                    && ValidateUtils.isBlank(gatewayConfigDO.getName())
+                    && ValidateUtils.isBlank(gatewayConfigDO.getValue())) {
+                // 参数错误
+                return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+            }
+
+            // 获取当前同类配置, 插入之后需要增大这个version
+            List<GatewayConfigDO> gatewayConfigDOList = gatewayConfigDao.getByConfigType(gatewayConfigDO.getType());
+            Long version = 1L;
+            for (GatewayConfigDO elem: gatewayConfigDOList) {
+                if (elem.getVersion() > version) {
+                    version = elem.getVersion() + 1L;
+                }
+            }
+
+            gatewayConfigDO.setVersion(version);
+            if (gatewayConfigDao.insert(gatewayConfigDO) > 0) {
+                return Result.buildSuc();
+            }
+            return Result.buildFrom(ResultStatus.MYSQL_ERROR);
+        } catch (Exception e) {
+            LOGGER.debug("class=GatewayConfigServiceImpl||method=insert||data={}||errMsg={}||msg=insert failed", gatewayConfigDO, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
+    }
+
+    @Override
+    public Result deleteById(Long id) {
+        try {
+            if (gatewayConfigDao.deleteById(id) > 0) {
+                return Result.buildSuc();
+            }
+            return Result.buildFrom(ResultStatus.RESOURCE_NOT_EXIST);
+        } catch (Exception e) {
+            LOGGER.debug("class=GatewayConfigServiceImpl||method=deleteById||id={}||errMsg={}||msg=delete failed", id, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
+    }
+
+    @Override
+    public Result updateById(GatewayConfigDO newGatewayConfigDO) {
+        try {
+            GatewayConfigDO oldGatewayConfigDO = this.getById(newGatewayConfigDO.getId());
+            if (ValidateUtils.isNull(oldGatewayConfigDO)) {
+                return Result.buildFrom(ResultStatus.RESOURCE_NOT_EXIST);
+            }
+            if (!oldGatewayConfigDO.getName().equals(newGatewayConfigDO.getName())
+                    || !oldGatewayConfigDO.getType().equals(newGatewayConfigDO.getType())
+                    || ValidateUtils.isBlank(newGatewayConfigDO.getValue())) {
+                return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+            }
+            newGatewayConfigDO.setVersion(oldGatewayConfigDO.getVersion() + 1);
+            if (gatewayConfigDao.updateById(oldGatewayConfigDO) > 0) {
+                return Result.buildSuc();
+            }
+            return Result.buildFrom(ResultStatus.MYSQL_ERROR);
+        } catch (Exception e) {
+            LOGGER.debug("class=GatewayConfigServiceImpl||method=updateById||data={}||errMsg={}||msg=update failed", newGatewayConfigDO, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
+    }
+
+    @Override
+    public GatewayConfigDO getById(Long id) {
+        if (ValidateUtils.isNull(id)) {
+            return null;
+        }
+        try {
+            return gatewayConfigDao.getById(id);
+        } catch (Exception e) {
+            LOGGER.debug("class=GatewayConfigServiceImpl||method=getById||id={}||errMsg={}||msg=get failed", id, e.getMessage());
         }
         return null;
     }

@@ -45,4 +45,9 @@
     <select id="listAfterTime" parameterType="java.util.Date" resultMap="AuthorityMap">
         SELECT * FROM authority WHERE modify_time >= #{afterTime}
     </select>
+
+    <delete id="deleteByTopic" parameterType="java.util.Map">
+        DELETE FROM authority WHERE cluster_id = #{clusterId} AND topic_name = #{topicName}
+    </delete>
+
 </mapper>

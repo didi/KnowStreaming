@@ -55,7 +55,7 @@ public class FlushZKConsumerGroupMetadata {
                 collectTopicAndConsumerGroupMap(clusterId, new ArrayList<>(consumerGroupSet));
         ConsumerMetadataCache.putConsumerMetadataInZK(
                 clusterId,
-                new ConsumerMetadata(consumerGroupSet, topicNameConsumerGroupMap, new HashMap<>(0), new HashMap<>(0))
+                new ConsumerMetadata(consumerGroupSet, topicNameConsumerGroupMap, new HashMap<>(0))
         );
     }
 

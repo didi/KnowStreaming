@@ -6,10 +6,10 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumeDetailDTO;
-import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupDTO;
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicOffsetResetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupDetailVO;
-import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupVO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupSummaryVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
@@ -55,7 +55,7 @@ public class NormalConsumerController {
     @ApiOperation(value = "查询消费Topic的消费组", notes = "")
     @RequestMapping(value = "{clusterId}/consumers/{topicName}/consumer-groups", method = RequestMethod.GET)
     @ResponseBody
-    public Result<List<ConsumerGroupVO>> getConsumeGroups(
+    public Result<List<ConsumerGroupSummaryVO>> getConsumeGroups(
             @PathVariable Long clusterId,
             @PathVariable String topicName,
             @RequestParam(value = "isPhysicalClusterId", required = false) Boolean isPhysicalClusterId) {
@@ -63,9 +63,9 @@ public class NormalConsumerController {
         if (ValidateUtils.isNull(physicalClusterId)) {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
         }
-        return new Result<>(ConsumerModelConverter.convert2ConsumerGroupVOList(
-                consumerService.getConsumerGroupList(physicalClusterId, topicName))
-        );
+        return new Result<>(ConsumerModelConverter.convert2ConsumerGroupSummaryVOList(
+                consumerService.getConsumerGroupSummaries(physicalClusterId, topicName)
+        ));
     }
 
     @ApiOperation(value = "查询消费组的消费详情", notes = "")
@@ -95,15 +95,10 @@ public class NormalConsumerController {
             return Result.buildFrom(ResultStatus.CG_LOCATION_ILLEGAL);
         }
 
-        ConsumerGroupDTO consumeGroupDTO = new ConsumerGroupDTO(
-                clusterDO.getId(),
-                consumerGroup,
-                new ArrayList<>(),
-                offsetStoreLocation
-        );
+        ConsumerGroup consumeGroup = new ConsumerGroup(clusterDO.getId(), consumerGroup, offsetStoreLocation);
         try {
             List<ConsumeDetailDTO> consumeDetailDTOList =
-                    consumerService.getConsumeDetail(clusterDO, topicName, consumeGroupDTO);
+                    consumerService.getConsumeDetail(clusterDO, topicName, consumeGroup);
             return new Result<>(
                     ConsumerModelConverter.convert2ConsumerGroupDetailVO(
                             topicName,
@@ -113,7 +108,7 @@ public class NormalConsumerController {
                     )
             );
         } catch (Exception e) {
-            LOGGER.error("get consume detail failed, consumerGroup:{}.", consumeGroupDTO, e);
+            LOGGER.error("get consume detail failed, consumerGroup:{}.", consumeGroup, e);
         }
         return Result.buildFrom(ResultStatus.OPERATION_FAILED);
 
@@ -139,16 +134,11 @@ public class NormalConsumerController {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
 
-        ConsumerGroupDTO consumerGroupDTO = new ConsumerGroupDTO(
-                physicalClusterId,
-                dto.getConsumerGroup(),
-                new ArrayList<>(),
-                OffsetLocationEnum.getOffsetStoreLocation(dto.getLocation())
-        );
+        ConsumerGroup consumerGroup = new ConsumerGroup(physicalClusterId, dto.getConsumerGroup(), OffsetLocationEnum.getOffsetStoreLocation(dto.getLocation()));
         List<Result> resultList = consumerService.resetConsumerOffset(
                 clusterDO,
                 dto.getTopicName(),
-                consumerGroupDTO,
+                consumerGroup,
                 offsetDTOList
         );
         for (Result result: resultList) {

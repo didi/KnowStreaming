@@ -13,11 +13,6 @@ public class TopicCreationConstant {
     public static final String LOG_X_CREATE_TOPIC_CONFIG_KEY_NAME = "LOG_X_CREATE_TOPIC_CONFIG";
 
     /**
-     * 治理平台创建Topic配置KEY
-     */
-    public static final String CHORUS_CREATE_TOPIC_CONFIG_KEY_NAME = "CHORUS_CREATE_TOPIC_CONFIG";
-
-    /**
      * 内部创建Topic配置KEY
      */
     public static final String INNER_CREATE_TOPIC_CONFIG_KEY = "INNER_CREATE_TOPIC_CONFIG_KEY";
@@ -29,6 +24,8 @@ public class TopicCreationConstant {
     public static final Integer DEFAULT_RETENTION_TIME_UNIT_HOUR = 24;
 
     public static final String TOPIC_RETENTION_TIME_KEY_NAME = "retention.ms";
+
+    public static final Long DEFAULT_QUOTA = 3 * 1024 * 1024L;
 
     public static Properties createNewProperties(Long retentionTime) {
         Properties properties = new Properties();

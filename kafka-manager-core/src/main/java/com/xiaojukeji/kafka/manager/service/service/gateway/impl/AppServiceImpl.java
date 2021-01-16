@@ -196,8 +196,7 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public List<AppTopicDTO> getAppTopicDTOList(String appId,
-                                                Boolean mine) {
+    public List<AppTopicDTO> getAppTopicDTOList(String appId, Boolean mine) {
         // 查询AppID
         AppDO appDO = appDao.getByAppId(appId);
         if (ValidateUtils.isNull(appDO)) {
@@ -223,13 +222,17 @@ public class AppServiceImpl implements AppService {
             TopicDO topicDO = topicMap
                     .getOrDefault(authorityDO.getClusterId(), new HashMap<>())
                     .get(authorityDO.getTopicName());
+
+            if (ValidateUtils.isNull(topicDO)) {
+                continue;
+            }
+
             if (Boolean.TRUE.equals(mine)
-                    && (ValidateUtils.isNull(topicDO) || !topicDO.getAppId().equals(appId))) {
+                    && !topicDO.getAppId().equals(appId)) {
                 continue;
             }
 
             if (Boolean.FALSE.equals(mine)
-                    && !ValidateUtils.isNull(topicDO)
                     && topicDO.getAppId().equals(appId)) {
                 continue;
             }

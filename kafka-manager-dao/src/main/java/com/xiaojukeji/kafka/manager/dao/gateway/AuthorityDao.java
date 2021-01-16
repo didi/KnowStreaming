@@ -37,4 +37,8 @@ public interface AuthorityDao {
     List<AuthorityDO> listAll();
 
     Map<String, Map<Long, Map<String, AuthorityDO>>> getAllAuthority();
+
+    void removeAuthorityInCache(Long clusterId, String topicName);
+
+    int deleteAuthorityByTopic(Long clusterId, String topicName);
 }

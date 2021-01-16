@@ -13,6 +13,8 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.dao.ControllerDao;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConnectorWrap;
+import com.xiaojukeji.kafka.manager.dao.TopicDao;
+import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import com.xiaojukeji.kafka.manager.service.service.JmxService;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import com.xiaojukeji.kafka.manager.service.zookeeper.*;
@@ -47,6 +49,12 @@ public class PhysicalClusterMetadataManager {
 
     @Autowired
     private ConfigUtils configUtils;
+
+    @Autowired
+    private TopicDao topicDao;
+
+    @Autowired
+    private AuthorityDao authorityDao;
 
     private final static Map<Long, ClusterDO> CLUSTER_MAP = new ConcurrentHashMap<>();
 
@@ -116,7 +124,7 @@ public class PhysicalClusterMetadataManager {
             zkConfig.watchChildren(ZkPathUtil.BROKER_IDS_ROOT, brokerListener);
 
             //增加Topic监控
-            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig);
+            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig, topicDao, authorityDao);
             topicListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_TOPICS_ROOT, topicListener);
 

@@ -29,6 +29,7 @@ import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
+import com.xiaojukeji.kafka.manager.service.strategy.AbstractHealthScoreStrategy;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
 import com.xiaojukeji.kafka.manager.service.utils.MetricsConvertUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -82,6 +83,9 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private RegionService regionService;
+
+    @Autowired
+    private AbstractHealthScoreStrategy healthScoreStrategy;
 
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
@@ -235,7 +239,7 @@ public class TopicServiceImpl implements TopicService {
         basicDTO.setRegionNameList(regionDOList.stream().map(RegionDO::getName).collect(Collectors.toList()));
 
         basicDTO.setTopicCodeC(jmxService.getTopicCodeCValue(clusterId, topicName));
-        basicDTO.setScore(100);
+        basicDTO.setScore(healthScoreStrategy.calTopicHealthScore(clusterId, topicName));
         return basicDTO;
     }
 

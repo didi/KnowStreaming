@@ -8,7 +8,7 @@ import com.xiaojukeji.kafka.manager.common.constant.SystemCodeConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumeDetailDTO;
-import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupDTO;
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
 import com.xiaojukeji.kafka.manager.openapi.common.dto.ConsumeHealthDTO;
 import com.xiaojukeji.kafka.manager.openapi.common.dto.OffsetResetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -152,15 +151,10 @@ public class ThirdPartConsumeController {
             return Result.buildFrom(ResultStatus.CG_LOCATION_ILLEGAL);
         }
 
-        ConsumerGroupDTO consumeGroupDTO = new ConsumerGroupDTO(
-                clusterDO.getId(),
-                consumerGroup,
-                new ArrayList<>(),
-                offsetStoreLocation
-        );
+        ConsumerGroup consumeGroup = new ConsumerGroup(clusterDO.getId(), consumerGroup, offsetStoreLocation);
         try {
             List<ConsumeDetailDTO> consumeDetailDTOList =
-                    consumerService.getConsumeDetail(clusterDO, topicName, consumeGroupDTO);
+                    consumerService.getConsumeDetail(clusterDO, topicName, consumeGroup);
             return new Result<>(
                     ConsumerModelConverter.convert2ConsumerGroupDetailVO(
                             topicName,
@@ -170,7 +164,7 @@ public class ThirdPartConsumeController {
                     )
             );
         } catch (Exception e) {
-            LOGGER.error("get consume detail failed, consumerGroup:{}.", consumeGroupDTO, e);
+            LOGGER.error("get consume detail failed, consumerGroup:{}.", consumeGroup, e);
         }
         return Result.buildFrom(ResultStatus.OPERATION_FAILED);
     }
