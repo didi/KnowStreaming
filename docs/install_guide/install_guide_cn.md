@@ -49,7 +49,7 @@ mvn install
 
 cp kafka-manager-web/src/main/resources/application.yml kafka-manager-web/target/
 cd kafka-manager-web/target/
-nohup java -jar kafka-manager-web-2.0.0-SNAPSHOT.jar --spring.config.location=./application.yml > /dev/null 2>&1 &
+nohup java -jar kafka-manager-web-2.1.0-SNAPSHOT.jar --spring.config.location=./application.yml > /dev/null 2>&1 &
 ```
 
 ## 使用

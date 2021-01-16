@@ -6,7 +6,7 @@
     <groupId>com.xiaojukeji.kafka</groupId>
     <artifactId>kafka-manager</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

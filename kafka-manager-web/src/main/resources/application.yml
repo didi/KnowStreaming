@@ -37,9 +37,9 @@ custom:
       broker-metrics-enabled: true
       topic-metrics-enabled: true
     didi:
-      app-topic-metrics-enabled: true
-      topic-request-time-metrics-enabled: true
-      topic-throttled-metrics: true
+      app-topic-metrics-enabled: false
+      topic-request-time-metrics-enabled: false
+      topic-throttled-metrics: false
     save-days: 7
 
 account:
