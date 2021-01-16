@@ -22,10 +22,13 @@ monitor:
   n9e:
     nid: 2
     user-token: 123456
+    # 夜莺 mon监控服务 地址
     mon:
-      base-url: http://127.0.0.1:8032
-    sink:
       base-url: http://127.0.0.1:8006
+    # 夜莺 transfer上传服务 地址
+    sink:
+      base-url: http://127.0.0.1:8008
+    # 夜莺 rdb资源服务 地址
     rdb:
       base-url: http://127.0.0.1:80
 

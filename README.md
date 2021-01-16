@@ -9,6 +9,8 @@
 
 ## 主要功能特性
 
+### 快速体验
+- 体验地址 http://117.51.146.109:8080 账号密码 admin/admin
 
 ### 集群监控维度
 
@@ -32,7 +34,7 @@
 
 ## kafka-manager架构图
 
-![kafka-manager-arch](./docs/assets/images/common/arch.png)
+![kafka-manager-arch](https://img-ys011.didistatic.com/static/dicloudpub/do1_xgDHNDLj2ChKxctSuf72)
 
 
 ## 相关文档
@@ -45,6 +47,7 @@
 ## 钉钉交流群
 
 ![dingding_group](./docs/assets/images/common/dingding_group.jpg)
+  钉钉群ID：32821440
 
 
 ## 项目成员
