@@ -25,6 +25,10 @@ public enum OrderTypeEnum {
     APPLY_EXPAND_CLUSTER        (05,     "集群扩容", "modifyClusterOrder"),
     APPLY_REDUCE_CLUSTER        (15,     "集群缩容", "modifyClusterOrder"),
 
+    ADD_GATEWAY_CONFIG          (06,     "增加GateWay配置", "addGatewayConfigOrder"),
+    DELETE_GATEWAY_CONFIG       (16,     "删除GateWay配置", "deleteGatewayConfigOrder"),
+    MODIFY_GATEWAY_CONFIG       (26,     "修改GateWay配置", "modifyGatewayConfigOrder"),
+
     ;
 
     private Integer code;

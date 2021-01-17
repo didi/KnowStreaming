@@ -45,4 +45,13 @@ public enum GatewayConfigKeyEnum {
                 ", configName='" + configName + '\'' +
                 '}';
     }
+
+    public static GatewayConfigKeyEnum getByConfigType(String configType) {
+        for (GatewayConfigKeyEnum configKeyEnum: GatewayConfigKeyEnum.values()) {
+            if (configKeyEnum.getConfigType().equals(configType)) {
+                return configKeyEnum;
+            }
+        }
+        return null;
+    }
 }

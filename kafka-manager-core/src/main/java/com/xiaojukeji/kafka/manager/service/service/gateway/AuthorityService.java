@@ -60,4 +60,6 @@ public interface AuthorityService {
     int addAuthorityAndQuota(AuthorityDO authorityDO, TopicQuota quota);
 
     Map<String, Map<Long, Map<String, AuthorityDO>>> getAllAuthority();
+
+    int deleteAuthorityByTopic(Long clusterId, String topicName);
 }

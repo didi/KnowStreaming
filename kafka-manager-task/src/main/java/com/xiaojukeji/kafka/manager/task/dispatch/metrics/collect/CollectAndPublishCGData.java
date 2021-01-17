@@ -2,7 +2,7 @@ package com.xiaojukeji.kafka.manager.task.dispatch.metrics.collect;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
 import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
-import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroupDTO;
+import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.ConsumerMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.events.ConsumerMetricsCollectedEvent;
@@ -105,7 +105,7 @@ public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
     private List<ConsumerMetrics> getTopicConsumerMetrics(ClusterDO clusterDO,
                                                           String topicName,
                                                           long startTimeUnitMs) {
-        List<ConsumerGroupDTO> consumerGroupDTOList = consumerService.getConsumerGroupList(clusterDO.getId(), topicName);
+        List<ConsumerGroup> consumerGroupDTOList = consumerService.getConsumerGroupList(clusterDO.getId(), topicName);
         if (ValidateUtils.isEmptyList(consumerGroupDTOList)) {
             // 重试
             consumerGroupDTOList = consumerService.getConsumerGroupList(clusterDO.getId(), topicName);
@@ -131,7 +131,7 @@ public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
             partitionOffsetMap.put(entry.getKey().partition(), entry.getValue());
         }
 
-        for (ConsumerGroupDTO consumerGroupDTO: consumerGroupDTOList) {
+        for (ConsumerGroup consumerGroupDTO: consumerGroupDTOList) {
             try {
                 ConsumerMetrics consumerMetrics =
                         getTopicConsumerMetrics(clusterDO, topicName, consumerGroupDTO, partitionOffsetMap, startTimeUnitMs);
@@ -150,20 +150,20 @@ public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
 
     private ConsumerMetrics getTopicConsumerMetrics(ClusterDO clusterDO,
                                                     String topicName,
-                                                    ConsumerGroupDTO consumerGroupDTO,
+                                                    ConsumerGroup consumerGroup,
                                                     Map<Integer, Long> partitionOffsetMap,
                                                     long startTimeUnitMs) {
 
         Map<Integer, Long> consumerOffsetMap =
-                consumerService.getConsumerOffset(clusterDO, topicName, consumerGroupDTO);
+                consumerService.getConsumerOffset(clusterDO, topicName, consumerGroup);
         if (ValidateUtils.isEmptyMap(consumerOffsetMap)) {
             return null;
         }
         ConsumerMetrics metrics = new ConsumerMetrics();
         metrics.setClusterId(clusterDO.getId());
         metrics.setTopicName(topicName);
-        metrics.setConsumerGroup(consumerGroupDTO.getConsumerGroup());
-        metrics.setLocation(consumerGroupDTO.getOffsetStoreLocation().location);
+        metrics.setConsumerGroup(consumerGroup.getConsumerGroup());
+        metrics.setLocation(consumerGroup.getOffsetStoreLocation().location);
         metrics.setPartitionOffsetMap(partitionOffsetMap);
         metrics.setConsumeOffsetMap(consumerOffsetMap);
         metrics.setTimestampUnitMs(startTimeUnitMs);

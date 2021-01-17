@@ -54,6 +54,11 @@ custom:
       topic-throttled-metrics: false # 滴滴埋入的指标, 社区AK不存在该指标，因此默认关闭
     save-days: 7 #指标在DB中保持的天数，-1表示永久保存，7表示保存近7天的数据
 
+# 任务相关的开关
+task:
+  op:
+    sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
+
 account: # ldap相关的配置, 社区版本暂时支持不够完善，可以先忽略，欢迎贡献代码对这块做优化
   ldap:
 
@@ -71,7 +76,7 @@ kcm: # 集群升级部署相关的功能，需要配合夜莺及S3进行使用�
 monitor: # 监控告警相关的功能，需要配合夜莺进行使用
   enabled: false # 默认关闭，true就是开启
   n9e:
-    nid: 2 
+    nid: 2
     user-token: 1234567890
     mon:
       # 夜莺 mon监控服务 地址

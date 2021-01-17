@@ -19,4 +19,38 @@
     <select id="getByConfigTypeAndName" parameterType="java.util.Map" resultMap="GatewayConfigMap">
         SELECT * FROM gateway_config WHERE `type`=#{configType} AND `name`=#{configName}
     </select>
+
+    <select id="list" resultMap="GatewayConfigMap">
+        SELECT * FROM gateway_config
+    </select>
+
+    <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.GatewayConfigDO">
+        <![CDATA[
+        INSERT INTO gateway_config
+        (`type`, name, value, version)
+        VALUES
+        (#{type}, #{name}, #{value}, #{version})
+        ]]>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        <![CDATA[
+        DELETE FROM gateway_config WHERE id=#{id}
+        ]]>
+    </delete>
+
+    <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.GatewayConfigDO">
+        <![CDATA[
+        UPDATE gateway_config SET
+            `type`=#{type},
+            `name`=#{name},
+            `value`=#{value},
+            `version`=#{version}
+        WHERE id=#{id}
+        ]]>
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="GatewayConfigMap">
+        SELECT * FROM gateway_config WHERE id=#{id}
+    </select>
 </mapper>

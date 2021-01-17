@@ -1,11 +1,16 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
+import com.xiaojukeji.kafka.manager.common.bizenum.DBStatusEnum;
+import com.xiaojukeji.kafka.manager.common.constant.Constant;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ClusterDetailDTO;
+import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.ControllerPreferredCandidate;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.ClusterNameDTO;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
 import com.xiaojukeji.kafka.manager.dao.ClusterDao;
 import com.xiaojukeji.kafka.manager.dao.ClusterMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.ControllerDao;
@@ -14,6 +19,7 @@ import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager
 import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.service.service.ConsumerService;
 import com.xiaojukeji.kafka.manager.service.service.RegionService;
+import com.xiaojukeji.kafka.manager.service.service.ZookeeperService;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
@@ -56,6 +62,9 @@ public class ClusterServiceImpl implements ClusterService {
 
     @Autowired
     private ConfigUtils configUtils;
+
+    @Autowired
+    private ZookeeperService zookeeperService;
 
     @Override
     public ResultStatus addNew(ClusterDO clusterDO, String operator) {
@@ -262,21 +271,6 @@ public class ClusterServiceImpl implements ClusterService {
         return ResultStatus.SUCCESS;
     }
 
-    @Override
-    public ClusterDO selectSuitableCluster(Long clusterId, String dataCenter) {
-        if (!ValidateUtils.isNullOrLessThanZero(clusterId)) {
-            return getById(clusterId);
-        }
-        if (ValidateUtils.isBlank(dataCenter)) {
-            return null;
-        }
-        List<ClusterDO> clusterDOList = this.listAll();
-        if (ValidateUtils.isEmptyList(clusterDOList)) {
-            return null;
-        }
-        return clusterDOList.get(0);
-    }
-
     private ClusterDetailDTO getClusterDetailDTO(ClusterDO clusterDO, Boolean needDetail) {
         if (ValidateUtils.isNull(clusterDO)) {
             return null;
@@ -299,5 +293,32 @@ public class ClusterServiceImpl implements ClusterService {
         dto.setTopicNum(PhysicalClusterMetadataManager.getTopicNameList(clusterDO.getId()).size());
         dto.setControllerId(PhysicalClusterMetadataManager.getControllerId(clusterDO.getId()));
         return dto;
+    }
+
+    @Override
+    public Result<List<ControllerPreferredCandidate>> getControllerPreferredCandidates(Long clusterId) {
+        Result<List<Integer>> candidateResult = zookeeperService.getControllerPreferredCandidates(clusterId);
+        if (candidateResult.failed()) {
+            return new Result<>(candidateResult.getCode(), candidateResult.getMessage());
+        }
+        if (ValidateUtils.isEmptyList(candidateResult.getData())) {
+            return Result.buildSuc(new ArrayList<>());
+        }
+
+        List<ControllerPreferredCandidate> controllerPreferredCandidateList = new ArrayList<>();
+        for (Integer brokerId: candidateResult.getData()) {
+            ControllerPreferredCandidate controllerPreferredCandidate = new ControllerPreferredCandidate();
+            controllerPreferredCandidate.setBrokerId(brokerId);
+            BrokerMetadata brokerMetadata = PhysicalClusterMetadataManager.getBrokerMetadata(clusterId, brokerId);
+            if (ValidateUtils.isNull(brokerMetadata)) {
+                controllerPreferredCandidate.setStatus(DBStatusEnum.DEAD.getStatus());
+            } else {
+                controllerPreferredCandidate.setHost(brokerMetadata.getHost());
+                controllerPreferredCandidate.setStartTime(brokerMetadata.getTimestamp());
+                controllerPreferredCandidate.setStatus(DBStatusEnum.ALIVE.getStatus());
+            }
+            controllerPreferredCandidateList.add(controllerPreferredCandidate);
+        }
+        return Result.buildSuc(controllerPreferredCandidateList);
     }
 }

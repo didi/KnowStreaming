@@ -192,4 +192,10 @@ public class AuthorityServiceImpl implements AuthorityService {
     public Map<String, Map<Long, Map<String, AuthorityDO>>> getAllAuthority() {
         return authorityDao.getAllAuthority();
     }
+
+    @Override
+    public int deleteAuthorityByTopic(Long clusterId, String topicName) {
+        return authorityDao.deleteAuthorityByTopic(clusterId, topicName);
+    }
+
 }

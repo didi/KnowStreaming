@@ -6,8 +6,6 @@ package com.xiaojukeji.kafka.manager.common.bizenum;
  */
 public enum IDCEnum {
     CN("cn", "国内"),
-    US("us", "美东"),
-    RU("ru", "俄罗斯"),
     ;
 
     private String idc;

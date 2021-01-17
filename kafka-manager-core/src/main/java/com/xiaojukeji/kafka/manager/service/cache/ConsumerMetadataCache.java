@@ -92,20 +92,4 @@ public class ConsumerMetadataCache {
         }
         return consumerMetadata.getTopicNameConsumerGroupMap().getOrDefault(topicName, new HashSet<>());
     }
-
-    public static Map<String, List<String>> getConsumerGroupAppIdListInZk(Long clusterId) {
-        ConsumerMetadata consumerMetadata = CG_METADATA_IN_ZK_MAP.get(clusterId);
-        if(consumerMetadata == null){
-            return new HashMap<>(0);
-        }
-        return consumerMetadata.getConsumerGroupAppMap();
-    }
-
-    public static Map<String, List<String>> getConsumerGroupAppIdListInBK(Long clusterId) {
-        ConsumerMetadata consumerMetadata = CG_METADATA_IN_BK_MAP.get(clusterId);
-        if(consumerMetadata == null){
-            return new HashMap<>(0);
-        }
-        return consumerMetadata.getConsumerGroupAppMap();
-    }
 }

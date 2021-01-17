@@ -7,6 +7,7 @@ import com.xiaojukeji.kafka.manager.notify.notifyer.AbstractNotifyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,6 +22,7 @@ public class OrderPassedNotifyService implements ApplicationListener<OrderPassed
     @Value("${notify.order.detail-url}")
     private String orderDetailUrl;
 
+    @Async
     @Override
     public void onApplicationEvent(OrderPassedEvent orderPassEvent) {
         OrderDO orderDO = orderPassEvent.getOrderDO();

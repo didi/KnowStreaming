@@ -50,8 +50,7 @@ public class FlushBKConsumerGroupMetadata {
     private void flush(Long clusterId) {
         // 获取消费组列表
         Set<String> consumerGroupSet = new HashSet<>();
-        Map<String, List<String>> consumerGroupAppIdMap = new HashMap<>();
-        collectAndSaveConsumerGroup(clusterId, consumerGroupSet, consumerGroupAppIdMap);
+        collectAndSaveConsumerGroup(clusterId, consumerGroupSet);
 
         // 获取消费组summary信息
         Map<String, Set<String>> topicNameConsumerGroupMap = new HashMap<>();
@@ -67,15 +66,12 @@ public class FlushBKConsumerGroupMetadata {
                 new ConsumerMetadata(
                         consumerGroupSet,
                         topicNameConsumerGroupMap,
-                        consumerGroupSummary,
-                        consumerGroupAppIdMap
+                        consumerGroupSummary
                 )
         );
     }
 
-    private void collectAndSaveConsumerGroup(Long clusterId,
-                                             Set<String> consumerGroupSet,
-                                             Map<String, List<String>> consumerGroupAppIdMap) {
+    private void collectAndSaveConsumerGroup(Long clusterId, Set<String> consumerGroupSet) {
         try {
             AdminClient adminClient = KafkaClientPool.getAdminClient(clusterId);
 
@@ -83,20 +79,14 @@ public class FlushBKConsumerGroupMetadata {
             for (scala.collection.immutable.List<kafka.coordinator.GroupOverview> brokerGroup : JavaConversions.asJavaMap(brokerGroupMap).values()) {
                 List<kafka.coordinator.GroupOverview> lists = JavaConversions.asJavaList(brokerGroup);
                 for (kafka.coordinator.GroupOverview groupOverview : lists) {
-
                     String consumerGroup = groupOverview.groupId();
-                    List<String> appIdList = new ArrayList<>();
                     if (consumerGroup != null && consumerGroup.contains("#")) {
                         String[] splitArray = consumerGroup.split("#");
                         consumerGroup = splitArray[splitArray.length - 1];
-                        appIdList = Arrays.asList(splitArray).subList(0, splitArray.length - 1);
                     }
-                    consumerGroupAppIdMap.put(consumerGroup, appIdList);
-
                     consumerGroupSet.add(consumerGroup);
                 }
             }
-            return ;
         } catch (Exception e) {
             LOGGER.error("collect consumerGroup failed, clusterId:{}.", clusterId, e);
         }

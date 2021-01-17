@@ -10,6 +10,7 @@ import com.xiaojukeji.kafka.manager.notify.common.OrderNotifyTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,6 +25,7 @@ public class OrderApplyNotifyService implements ApplicationListener<OrderApplyEv
     @Value("${notify.order.detail-url}")
     private String orderDetailUrl;
 
+    @Async
     @Override
     public void onApplicationEvent(OrderApplyEvent orderApplyEvent) {
         OrderDO orderDO = orderApplyEvent.getOrderDO();

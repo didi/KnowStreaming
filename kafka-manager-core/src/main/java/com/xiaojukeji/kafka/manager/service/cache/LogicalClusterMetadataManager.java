@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.service.cache;
 
+import com.google.common.collect.Sets;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * 逻辑集群元信息
@@ -144,9 +146,16 @@ public class LogicalClusterMetadataManager {
     @Scheduled(cron="0/30 * * * * ?")
     public void flush() {
         List<LogicalClusterDO> logicalClusterDOList = logicalClusterService.listAll();
-        if (ValidateUtils.isEmptyList(logicalClusterDOList)) {
-            return;
+        if (ValidateUtils.isNull(logicalClusterDOList)) {
+            logicalClusterDOList = Collections.EMPTY_LIST;
         }
+        Set<Long> inDbLogicalClusterIds = logicalClusterDOList.stream()
+          .map(LogicalClusterDO::getId)
+          .collect(Collectors.toSet());
+
+        // inCache 和 inDb 取差集，差集结果为已删除的、新增的.
+        Sets.SetView<Long> diffLogicalClusterIds = Sets.difference(LOGICAL_CLUSTER_MAP.keySet(), inDbLogicalClusterIds);
+        diffLogicalClusterIds.forEach(logicalClusterId -> delLogicalClusterInCache(logicalClusterId));
 
         Map<Long, RegionDO> regionMap = new HashMap<>();
         List<RegionDO> regionDOList = regionService.listAll();
@@ -196,5 +205,12 @@ public class LogicalClusterMetadataManager {
             subMap.put(topicName, logicalClusterDO.getId());
         }
         TOPIC_LOGICAL_MAP.put(logicalClusterDO.getClusterId(), subMap);
+    }
+
+    private void delLogicalClusterInCache(Long logicalClusterId) {
+        LOGICAL_CLUSTER_ID_TOPIC_NAME_MAP.remove(logicalClusterId);
+        LOGICAL_CLUSTER_ID_BROKER_ID_MAP.remove(logicalClusterId);
+        LOGICAL_CLUSTER_MAP.remove(logicalClusterId);
+        TOPIC_LOGICAL_MAP.remove(logicalClusterId);
     }
 }

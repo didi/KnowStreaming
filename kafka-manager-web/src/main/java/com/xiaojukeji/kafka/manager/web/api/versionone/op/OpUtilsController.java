@@ -194,15 +194,22 @@ public class OpUtilsController {
         if (ValidateUtils.isNull(clusterDO)) {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
         }
-        String operator = SpringTool.getUserName();
 
         ResultStatus rs = null;
         if (RebalanceDimensionEnum.CLUSTER.getCode().equals(reqObj.getDimension())) {
-            rs = adminService.preferredReplicaElection(clusterDO, operator);
+            // 按照Cluster纬度均衡
+            rs = adminService.preferredReplicaElection(clusterDO, SpringTool.getUserName());
         } else if (RebalanceDimensionEnum.BROKER.getCode().equals(reqObj.getDimension())) {
-            rs = adminService.preferredReplicaElection(clusterDO, reqObj.getBrokerId(), operator);
+            // 按照Broker纬度均衡
+            rs = adminService.preferredReplicaElection(clusterDO, reqObj.getBrokerId(), SpringTool.getUserName());
+        } else if (RebalanceDimensionEnum.TOPIC.getCode().equals(reqObj.getDimension())) {
+            // 按照Topic纬度均衡
+            rs = adminService.preferredReplicaElection(clusterDO, reqObj.getTopicName(), SpringTool.getUserName());
+        } else if (RebalanceDimensionEnum.PARTITION.getCode().equals(reqObj.getDimension())) {
+            // 按照Partition纬度均衡
+            rs = adminService.preferredReplicaElection(clusterDO, reqObj.getTopicName(), reqObj.getPartitionId(), SpringTool.getUserName());
         } else {
-            // TODO: 19/7/8 Topic维度 & Region维度 优先副本选举
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
         return Result.buildFrom(rs);
     }

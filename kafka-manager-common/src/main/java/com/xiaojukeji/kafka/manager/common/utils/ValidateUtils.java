@@ -1,7 +1,5 @@
 package com.xiaojukeji.kafka.manager.common.utils;
 
-import com.xiaojukeji.kafka.manager.common.bizenum.IDCEnum;
-import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
@@ -82,24 +80,5 @@ public class ValidateUtils {
 
     public static boolean isNullOrLessThanZero(Double value) {
         return value == null || value < 0;
-    }
-
-    public static boolean topicNameLegal(String idc, String topicName) {
-        if (ValidateUtils.isNull(idc) || ValidateUtils.isNull(topicName)) {
-            return false;
-        }
-
-        // 校验Topic的长度
-        if (topicName.length() >= TopicCreationConstant.TOPIC_NAME_MAX_LENGTH) {
-            return false;
-        }
-
-        // 校验前缀
-        if (IDCEnum.CN.getIdc().equals(idc) ||
-                (IDCEnum.US.getIdc().equals(idc) && topicName.startsWith(TopicCreationConstant.TOPIC_NAME_PREFIX_US)) ||
-                (IDCEnum.RU.getIdc().equals(idc) && topicName.startsWith(TopicCreationConstant.TOPIC_NAME_PREFIX_RU))) {
-            return true;
-        }
-        return false;
     }
 }

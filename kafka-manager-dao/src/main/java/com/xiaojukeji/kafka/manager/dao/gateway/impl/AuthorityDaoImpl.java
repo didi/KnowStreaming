@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.dao.gateway.impl;
 
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,32 @@ public class AuthorityDaoImpl implements AuthorityDao {
         updateAuthorityCache();
         return AUTHORITY_MAP;
     }
+
+    @Override
+    public void removeAuthorityInCache(Long clusterId, String topicName) {
+        AUTHORITY_MAP.forEach((appId, map) -> {
+            map.forEach((id, subMap) -> {
+                if (id.equals(clusterId)) {
+                    subMap.remove(topicName);
+                    if (subMap.isEmpty()) {
+                        map.remove(id);
+                    }
+                }
+            });
+            if (map.isEmpty()) {
+                AUTHORITY_MAP.remove(appId);
+            }
+        });
+    }
+
+    @Override
+    public int deleteAuthorityByTopic(Long clusterId, String topicName) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("clusterId", clusterId);
+        params.put("topicName", topicName);
+        return sqlSession.delete("AuthorityDao.deleteByTopic", params);
+    }
+
 
     private void updateAuthorityCache() {
         Long timestamp = System.currentTimeMillis();

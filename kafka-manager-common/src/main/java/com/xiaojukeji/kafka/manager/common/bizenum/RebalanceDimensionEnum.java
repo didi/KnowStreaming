@@ -10,6 +10,7 @@ public enum RebalanceDimensionEnum {
     REGION(1, "Region维度"),
     BROKER(2, "Broker维度"),
     TOPIC(3, "Topic维度"),
+    PARTITION(4, "Partition维度"),
     ;
 
     private Integer code;

@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity;
 
 import com.alibaba.fastjson.JSON;
+import com.xiaojukeji.kafka.manager.common.constant.Constant;
 
 import java.io.Serializable;
 
@@ -118,4 +119,9 @@ public class Result<T> implements Serializable {
         result.setData(data);
         return result;
     }
+
+    public boolean failed() {
+        return !Constant.SUCCESS.equals(code);
+    }
+
 }

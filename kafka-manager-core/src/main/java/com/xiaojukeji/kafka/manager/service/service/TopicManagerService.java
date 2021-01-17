@@ -67,6 +67,19 @@ public interface TopicManagerService {
     ResultStatus modifyTopic(Long clusterId, String topicName, String description, String operator);
 
     /**
+     * 修改Topic
+     * @param clusterId 集群ID
+     * @param topicName Topic名称
+     * @param appId 所属应用
+     * @param description 备注
+     * @param operator 操作人
+     * @author zengqiao
+     * @date 20/5/12
+     * @return ResultStatus
+     */
+    ResultStatus modifyTopicByOp(Long clusterId, String topicName, String appId, String description, String operator);
+
+    /**
      * 通过topictopic名称删除
      * @param clusterId 集群id
      * @param topicName topic名称

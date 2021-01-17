@@ -1,7 +1,9 @@
 package com.xiaojukeji.kafka.manager.service.service;
 
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ClusterDetailDTO;
+import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.ControllerPreferredCandidate;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.ClusterNameDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterMetricsDO;
@@ -43,5 +45,10 @@ public interface ClusterService {
 
     ResultStatus deleteById(Long clusterId);
 
-    ClusterDO selectSuitableCluster(Long clusterId, String dataCenter);
+    /**
+     * 获取优先被选举为controller的broker
+     * @param clusterId 集群ID
+     * @return void
+     */
+    Result<List<ControllerPreferredCandidate>> getControllerPreferredCandidates(Long clusterId);
 }

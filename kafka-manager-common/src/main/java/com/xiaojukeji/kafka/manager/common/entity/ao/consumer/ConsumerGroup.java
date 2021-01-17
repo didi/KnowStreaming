@@ -2,30 +2,18 @@ package com.xiaojukeji.kafka.manager.common.entity.ao.consumer;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetLocationEnum;
 
-import java.util.List;
 import java.util.Objects;
 
-/**
- * 消费组信息
- * @author zengqiao
- * @date 19/4/18
- */
-public class ConsumerGroupDTO {
+public class ConsumerGroup {
     private Long clusterId;
 
     private String consumerGroup;
 
-    private List<String> appIdList;
-
     private OffsetLocationEnum offsetStoreLocation;
 
-    public ConsumerGroupDTO(Long clusterId,
-                            String consumerGroup,
-                            List<String> appIdList,
-                            OffsetLocationEnum offsetStoreLocation) {
+    public ConsumerGroup(Long clusterId, String consumerGroup, OffsetLocationEnum offsetStoreLocation) {
         this.clusterId = clusterId;
         this.consumerGroup = consumerGroup;
-        this.appIdList = appIdList;
         this.offsetStoreLocation = offsetStoreLocation;
     }
 
@@ -45,14 +33,6 @@ public class ConsumerGroupDTO {
         this.consumerGroup = consumerGroup;
     }
 
-    public List<String> getAppIdList() {
-        return appIdList;
-    }
-
-    public void setAppIdList(List<String> appIdList) {
-        this.appIdList = appIdList;
-    }
-
     public OffsetLocationEnum getOffsetStoreLocation() {
         return offsetStoreLocation;
     }
@@ -63,10 +43,9 @@ public class ConsumerGroupDTO {
 
     @Override
     public String toString() {
-        return "ConsumerGroupDTO{" +
+        return "ConsumerGroup{" +
                 "clusterId=" + clusterId +
                 ", consumerGroup='" + consumerGroup + '\'' +
-                ", appIdList=" + appIdList +
                 ", offsetStoreLocation=" + offsetStoreLocation +
                 '}';
     }
@@ -79,7 +58,7 @@ public class ConsumerGroupDTO {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ConsumerGroupDTO that = (ConsumerGroupDTO) o;
+        ConsumerGroup that = (ConsumerGroup) o;
         return clusterId.equals(that.clusterId)
                 && consumerGroup.equals(that.consumerGroup)
                 && offsetStoreLocation == that.offsetStoreLocation;

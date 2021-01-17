@@ -1,10 +1,11 @@
 package com.xiaojukeji.kafka.manager.web.api.versionone.rd;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
-import com.xiaojukeji.kafka.manager.common.bizenum.PeakFlowStatusEnum;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.ControllerPreferredCandidate;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.TopicMetadataVO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.rd.cluster.ControllerPreferredCandidateVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.rd.cluster.RdClusterMetricsVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.rd.cluster.ClusterBrokerStatusVO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.BrokerOverviewDTO;
@@ -26,7 +27,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -167,5 +167,16 @@ public class RdClusterController {
     @ResponseBody
     public Result<List<TopicMetadataVO>> getTopicMetadatas(@PathVariable("clusterId") Long clusterId) {
         return new Result<>(ClusterModelConverter.convert2TopicMetadataVOList(clusterId));
+    }
+
+    @ApiOperation(value = "Controller优先候选的Broker", notes = "滴滴内部引擎特性")
+    @RequestMapping(value = "clusters/{clusterId}/controller-preferred-candidates", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<List<ControllerPreferredCandidateVO>> getControllerPreferredCandidates(@PathVariable("clusterId") Long clusterId) {
+        Result<List<ControllerPreferredCandidate>> candidateResult = clusterService.getControllerPreferredCandidates(clusterId);
+        if (candidateResult.failed()) {
+            return new Result(candidateResult.getCode(), candidateResult.getMessage());
+        }
+        return Result.buildSuc(ClusterModelConverter.convert2ControllerPreferredCandidateVOList(candidateResult.getData()));
     }
 }

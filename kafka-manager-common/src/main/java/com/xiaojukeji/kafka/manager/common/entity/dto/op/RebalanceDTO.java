@@ -25,7 +25,10 @@ public class RebalanceDTO {
     @ApiModelProperty(value = "TopicName")
     private String topicName;
 
-    @ApiModelProperty(value = "维度[0: Cluster维度, 1: Region维度, 2:Broker维度, 3:Topic维度]")
+    @ApiModelProperty(value = "分区ID")
+    private Integer partitionId;
+
+    @ApiModelProperty(value = "维度[0: Cluster维度, 1: Region维度, 2:Broker维度, 3:Topic维度, 4:Partition纬度]")
     private Integer dimension;
 
     public Long getClusterId() {
@@ -60,6 +63,14 @@ public class RebalanceDTO {
         this.topicName = topicName;
     }
 
+    public Integer getPartitionId() {
+        return partitionId;
+    }
+
+    public void setPartitionId(Integer partitionId) {
+        this.partitionId = partitionId;
+    }
+
     public Integer getDimension() {
         return dimension;
     }
@@ -68,22 +79,12 @@ public class RebalanceDTO {
         this.dimension = dimension;
     }
 
-    @Override
-    public String toString() {
-        return "RebalanceDTO{" +
-                "clusterId=" + clusterId +
-                ", regionId=" + regionId +
-                ", brokerId=" + brokerId +
-                ", topicName='" + topicName + '\'' +
-                ", dimension=" + dimension +
-                '}';
-    }
-
     public boolean paramLegal() {
         if (ValidateUtils.isNull(clusterId)
-                || RebalanceDimensionEnum.REGION.getCode().equals(dimension) && ValidateUtils.isNull(regionId)
-                || RebalanceDimensionEnum.BROKER.getCode().equals(dimension) && ValidateUtils.isNull(brokerId)
-                || RebalanceDimensionEnum.TOPIC.getCode().equals(dimension) && ValidateUtils.isNull(topicName) ) {
+                || (RebalanceDimensionEnum.REGION.getCode().equals(dimension) && ValidateUtils.isNull(regionId))
+                || (RebalanceDimensionEnum.BROKER.getCode().equals(dimension) && ValidateUtils.isNull(brokerId))
+                || (RebalanceDimensionEnum.TOPIC.getCode().equals(dimension) && ValidateUtils.isNull(topicName))
+                || (RebalanceDimensionEnum.PARTITION.getCode().equals(dimension) && (ValidateUtils.isNull(topicName) || ValidateUtils.isNull(partitionId))) ) {
             return false;
         }
         return true;

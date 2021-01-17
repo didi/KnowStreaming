@@ -1,9 +1,13 @@
 package com.xiaojukeji.kafka.manager.web.converters;
 
+import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.gateway.OrderExtensionAddGatewayConfigDTO;
+import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.gateway.OrderExtensionModifyGatewayConfigDTO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.GatewayConfigDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaAclDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaUserDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.gateway.KafkaAclVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.gateway.KafkaUserVO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.rd.GatewayConfigVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 
 import java.util.ArrayList;
@@ -48,5 +52,42 @@ public class GatewayModelConverter {
             voList.add(vo);
         }
         return voList;
+    }
+
+    public static List<GatewayConfigVO> convert2GatewayConfigVOList(List<GatewayConfigDO> doList) {
+        if (ValidateUtils.isNull(doList)) {
+            return new ArrayList<>();
+        }
+
+        List<GatewayConfigVO> voList = new ArrayList<>();
+        for (GatewayConfigDO configDO: doList) {
+            GatewayConfigVO vo = new GatewayConfigVO();
+            vo.setId(configDO.getId());
+            vo.setType(configDO.getType());
+            vo.setName(configDO.getName());
+            vo.setValue(configDO.getValue());
+            vo.setVersion(configDO.getVersion());
+            vo.setCreateTime(configDO.getCreateTime());
+            vo.setModifyTime(configDO.getModifyTime());
+            voList.add(vo);
+        }
+        return voList;
+    }
+
+    public static GatewayConfigDO convert2GatewayConfigDO(OrderExtensionAddGatewayConfigDTO configDTO) {
+        GatewayConfigDO configDO = new GatewayConfigDO();
+        configDO.setType(configDO.getType());
+        configDO.setName(configDO.getName());
+        configDO.setValue(configDO.getValue());
+        return configDO;
+    }
+
+    public static GatewayConfigDO convert2GatewayConfigDO(OrderExtensionModifyGatewayConfigDTO configDTO) {
+        GatewayConfigDO configDO = new GatewayConfigDO();
+        configDO.setId(configDO.getId());
+        configDO.setType(configDO.getType());
+        configDO.setName(configDO.getName());
+        configDO.setValue(configDO.getValue());
+        return configDO;
     }
 }

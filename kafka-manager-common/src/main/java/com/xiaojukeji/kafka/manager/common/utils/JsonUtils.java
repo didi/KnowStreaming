@@ -9,6 +9,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,7 +53,7 @@ public class JsonUtils {
         return JSON.toJSONString(obj);
     }
 
-    public static List<TopicConnectionDO> parseTopicConnections(Long clusterId, JSONObject jsonObject) {
+    public static List<TopicConnectionDO> parseTopicConnections(Long clusterId, JSONObject jsonObject, long postTime) {
         List<TopicConnectionDO> connectionDOList = new ArrayList<>();
         for (String clientType: jsonObject.keySet()) {
             JSONObject topicObject = jsonObject.getJSONObject(clientType);
@@ -73,6 +74,7 @@ public class JsonUtils {
                     connectionDO.setClusterId(clusterId);
                     connectionDO.setTopicName(topicName);
                     connectionDO.setType(clientType);
+                    connectionDO.setCreateTime(new Date(postTime));
                     connectionDOList.add(connectionDO);
                 }
             }
