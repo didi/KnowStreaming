@@ -59,7 +59,7 @@
 
 ### 5、如何对接夜莺的监控告警功能？
 
-- 参看 [kafka-manager 对接夜莺监控](../dev_guide/Intergration_n9e_monitor.md) 说明。
+- 参看 [kafka-manager 对接夜莺监控](../dev_guide/monitor_system_integrate_with_n9e.md) 说明。
 
 ---
 
