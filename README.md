@@ -43,9 +43,10 @@
 
 
 ## 钉钉交流群
-
-![dingding_group](./docs/assets/images/common/dingding_group.jpg)
-  钉钉群ID：32821440
+  
+ 
+<img src='./docs/assets/images/common/Logi_dingding_group.png' width = "30%" />
+  钉钉群ID：32821440   
 
 
 ## 项目成员
