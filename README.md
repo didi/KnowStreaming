@@ -50,7 +50,7 @@
   钉钉群ID：32821440
   
 ## OCE认证
-OCE是一个认证机制和交流平台，为Logi-KafkaManager生产用户量身打造，我们会为OCE企业提供更好的技术支持，比如专属的技术沙龙、企业一对一的交流机会、专属的答疑群等，如果贵司上了生产，[快来加入吧](http://obsuite.didiyun.com/open/openAuth)
+OCE是一个认证机制和交流平台，为Logi-KafkaManager生产用户量身打造，我们会为OCE企业提供更好的技术支持，比如专属的技术沙龙、企业一对一的交流机会、专属的答疑群等，如果贵司Logi-KafkaManager上了生产，[快来加入吧](http://obsuite.didiyun.com/open/openAuth)
 
 
 ## 项目成员
