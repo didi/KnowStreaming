@@ -19,7 +19,7 @@ data:
         kafka-manager:
           jdbc-url: jdbc:mysql://xxxxx:3306/kafka-manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false
           username: admin
-          password: R8yGdxN#JnPhfLr5 
+          password: admin
           driver-class-name: com.mysql.jdbc.Driver
       main:
         allow-bean-definition-overriding: true
