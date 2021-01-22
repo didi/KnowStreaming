@@ -27,6 +27,9 @@ public class ClusterDTO {
     @ApiModelProperty(value="数据中心")
     private String idc;
 
+    @ApiModelProperty(value="集群模式")
+    private Integer mode;
+
     @ApiModelProperty(value="安全配置参数")
     private String securityProperties;
 
@@ -70,6 +73,14 @@ public class ClusterDTO {
         this.idc = idc;
     }
 
+    public Integer getMode() {
+        return mode;
+    }
+
+    public void setMode(Integer mode) {
+        this.mode = mode;
+    }
+
     public String getSecurityProperties() {
         return securityProperties;
     }
@@ -95,7 +106,7 @@ public class ClusterDTO {
                 || ValidateUtils.isNull(zookeeper)
                 || ValidateUtils.isNull(idc)
                 || ValidateUtils.isNull(bootstrapServers)
-                ) {
+        ) {
             return false;
         }
         return true;

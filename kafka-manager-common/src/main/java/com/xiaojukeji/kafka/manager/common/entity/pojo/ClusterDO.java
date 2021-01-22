@@ -17,6 +17,8 @@ public class ClusterDO implements Comparable<ClusterDO> {
 
     private String securityProperties;
 
+    private Integer mode;
+
     private Integer status;
 
     private Date gmtCreate;
@@ -79,6 +81,14 @@ public class ClusterDO implements Comparable<ClusterDO> {
         this.bootstrapServers = bootstrapServers;
     }
 
+    public Integer getMode() {
+        return mode;
+    }
+
+    public void setMode(Integer mode) {
+        this.mode = mode;
+    }
+
     public String getSecurityProperties() {
         return securityProperties;
     }
@@ -95,6 +105,7 @@ public class ClusterDO implements Comparable<ClusterDO> {
                 ", zookeeper='" + zookeeper + '\'' +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", securityProperties='" + securityProperties + '\'' +
+                ", mode=" + mode +
                 ", status=" + status +
                 ", gmtCreate=" + gmtCreate +
                 ", gmtModify=" + gmtModify +

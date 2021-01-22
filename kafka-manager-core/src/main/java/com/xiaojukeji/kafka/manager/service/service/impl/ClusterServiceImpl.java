@@ -284,6 +284,7 @@ public class ClusterServiceImpl implements ClusterService {
         dto.setIdc(configUtils.getIdc());
         dto.setSecurityProperties(clusterDO.getSecurityProperties());
         dto.setStatus(clusterDO.getStatus());
+        dto.setMode(clusterDO.getMode());
         dto.setGmtCreate(clusterDO.getGmtCreate());
         dto.setGmtModify(clusterDO.getGmtModify());
         if (ValidateUtils.isNull(needDetail) || !needDetail) {

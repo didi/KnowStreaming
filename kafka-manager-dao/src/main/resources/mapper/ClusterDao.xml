@@ -11,6 +11,7 @@
     <result column="cluster_name"         property="clusterName" />
     <result column="zookeeper"            property="zookeeper" />
     <result column="bootstrap_servers"    property="bootstrapServers" />
+    <result column="mode"                 property="mode" />
     <result column="security_properties"  property="securityProperties" />
   </resultMap>
 
@@ -19,18 +20,19 @@
           useGeneratedKeys="true"
           keyProperty="id">
     INSERT INTO cluster (
-      cluster_name, zookeeper, bootstrap_servers, security_properties
+      cluster_name, zookeeper, bootstrap_servers, mode, security_properties
     ) VALUES (
-      #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{securityProperties}
-    )
+               #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{mode}, #{securityProperties}
+             )
   </insert>
 
   <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO">
     UPDATE cluster SET
-      cluster_name=#{clusterName},
-      bootstrap_servers=#{bootstrapServers},
-      security_properties=#{securityProperties},
-      status=#{status}
+                     cluster_name=#{clusterName},
+                     bootstrap_servers=#{bootstrapServers},
+                     mode=#{mode},
+                     security_properties=#{securityProperties},
+                     status=#{status}
     WHERE id = #{id}
   </update>
 
