@@ -1,8 +1,10 @@
-![kafka-manager-logo](docs/assets/images/common/logo_name.png)
+---
+
+![kafka-manager-logo](../assets/images/common/logo_name.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
----
+--- 
 
 # Topic 指标说明
 
@@ -13,7 +15,7 @@
 |-- |---- |---|
 | messagesIn| 条/s   | 每秒发送到kafka的消息条数  |
 | byteIn| B/s               | 每秒发送到kafka的字节数   |
-| byteOut| B/s              | 每秒流出kafka的字节数（所有消费组消费的流量+副本同步的流量） |
+| byteOut| B/s              | 每秒流出kafka的字节数（所有消费组消费的流量，如果是Kafka版本较低，这个还包括副本同步的流量） |
 | byteRejected| B/s         | 每秒被拒绝的字节数    |
 | failedFetchRequest| qps   | 每秒拉取失败的请求数     |
 | failedProduceRequest| qps | 每秒发送失败的请求数    |
@@ -28,7 +30,7 @@
 |-- |---- |---|
 | messagesIn| 条/s   | 近一分钟每秒发送到kafka的消息条数  |
 | byteIn| B/s               | 近一分钟每秒发送到kafka的字节数   |
-| byteOut| B/s              | 近一分钟每秒流出kafka的字节数（所有消费组消费的流量+副本同步的流量） |
+| byteOut| B/s              | 近一分钟每秒流出kafka的字节数（所有消费组消费的流量，如果是Kafka版本较低，副本同步的流量） |
 | byteRejected| B/s         | 近一分钟每秒被拒绝的字节数    |
 | totalProduceRequest| qps  | 近一分钟每秒总共发送的请求数，与messagesIn的区别是一个是发送请求里面可能会有多条消息  |
 
