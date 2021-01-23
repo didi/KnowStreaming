@@ -8,7 +8,7 @@
     <parent>
         <artifactId>kafka-manager</artifactId>
         <groupId>com.xiaojukeji.kafka</groupId>
-        <version>2.1.0-SNAPSHOT</version>
+        <version>${kafka-manager.revision}</version>
     </parent>
 
     <build>
