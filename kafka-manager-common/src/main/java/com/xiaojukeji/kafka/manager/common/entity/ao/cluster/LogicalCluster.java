@@ -9,6 +9,8 @@ public class LogicalCluster {
 
     private String logicalClusterName;
 
+    private String logicalClusterIdentification;
+
     private Integer mode;
 
     private Integer topicNum;
@@ -39,6 +41,14 @@ public class LogicalCluster {
 
     public void setLogicalClusterName(String logicalClusterName) {
         this.logicalClusterName = logicalClusterName;
+    }
+
+    public String getLogicalClusterIdentification() {
+        return logicalClusterIdentification;
+    }
+
+    public void setLogicalClusterIdentification(String logicalClusterIdentification) {
+        this.logicalClusterIdentification = logicalClusterIdentification;
     }
 
     public Integer getMode() {
@@ -81,6 +91,14 @@ public class LogicalCluster {
         this.bootstrapServers = bootstrapServers;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public Long getGmtCreate() {
         return gmtCreate;
     }
@@ -97,19 +115,12 @@ public class LogicalCluster {
         this.gmtModify = gmtModify;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     @Override
     public String toString() {
         return "LogicalCluster{" +
                 "logicalClusterId=" + logicalClusterId +
                 ", logicalClusterName='" + logicalClusterName + '\'' +
+                ", logicalClusterIdentification='" + logicalClusterIdentification + '\'' +
                 ", mode=" + mode +
                 ", topicNum=" + topicNum +
                 ", clusterVersion='" + clusterVersion + '\'' +

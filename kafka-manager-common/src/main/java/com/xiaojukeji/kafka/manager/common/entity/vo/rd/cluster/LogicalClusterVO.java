@@ -18,6 +18,9 @@ public class LogicalClusterVO {
     @ApiModelProperty(value = "逻辑集群名称")
     private String logicalClusterName;
 
+    @ApiModelProperty(value = "逻辑集群标识")
+    private String logicalClusterIdentification;
+
     @ApiModelProperty(value = "物理集群ID")
     private Long physicalClusterId;
 
@@ -53,6 +56,14 @@ public class LogicalClusterVO {
 
     public void setLogicalClusterName(String logicalClusterName) {
         this.logicalClusterName = logicalClusterName;
+    }
+
+    public String getLogicalClusterIdentification() {
+        return logicalClusterIdentification;
+    }
+
+    public void setLogicalClusterIdentification(String logicalClusterIdentification) {
+        this.logicalClusterIdentification = logicalClusterIdentification;
     }
 
     public Long getPhysicalClusterId() {
@@ -116,6 +127,7 @@ public class LogicalClusterVO {
         return "LogicalClusterVO{" +
                 "logicalClusterId=" + logicalClusterId +
                 ", logicalClusterName='" + logicalClusterName + '\'' +
+                ", logicalClusterIdentification='" + logicalClusterIdentification + '\'' +
                 ", physicalClusterId=" + physicalClusterId +
                 ", regionIdList=" + regionIdList +
                 ", mode=" + mode +

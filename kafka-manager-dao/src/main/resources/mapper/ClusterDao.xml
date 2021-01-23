@@ -12,6 +12,7 @@
     <result column="zookeeper"            property="zookeeper" />
     <result column="bootstrap_servers"    property="bootstrapServers" />
     <result column="security_properties"  property="securityProperties" />
+    <result column="jmx_properties"       property="jmxProperties" />
   </resultMap>
 
   <insert id="insert"
@@ -19,9 +20,9 @@
           useGeneratedKeys="true"
           keyProperty="id">
     INSERT INTO cluster (
-      cluster_name, zookeeper, bootstrap_servers, security_properties
+      cluster_name, zookeeper, bootstrap_servers, security_properties, jmx_properties
     ) VALUES (
-      #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{securityProperties}
+      #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{securityProperties}, #{jmxProperties}
     )
   </insert>
 
@@ -30,6 +31,7 @@
       cluster_name=#{clusterName},
       bootstrap_servers=#{bootstrapServers},
       security_properties=#{securityProperties},
+      jmx_properties=#{jmxProperties},
       status=#{status}
     WHERE id = #{id}
   </update>

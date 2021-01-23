@@ -15,6 +15,9 @@ public class LogicClusterVO {
     @ApiModelProperty(value="逻辑集群名称")
     private String clusterName;
 
+    @ApiModelProperty(value="逻辑标识")
+    private String clusterIdentification;
+
     @ApiModelProperty(value="逻辑集群类型, 0:共享集群, 1:独享集群, 2:独立集群")
     private Integer mode;
 
@@ -23,9 +26,6 @@ public class LogicClusterVO {
 
     @ApiModelProperty(value="集群版本")
     private String clusterVersion;
-
-    @ApiModelProperty(value="物理集群ID")
-    private Long physicalClusterId;
 
     @ApiModelProperty(value="集群服务地址")
     private String bootstrapServers;
@@ -55,6 +55,22 @@ public class LogicClusterVO {
         this.clusterName = clusterName;
     }
 
+    public String getClusterIdentification() {
+        return clusterIdentification;
+    }
+
+    public void setClusterIdentification(String clusterIdentification) {
+        this.clusterIdentification = clusterIdentification;
+    }
+
+    public Integer getMode() {
+        return mode;
+    }
+
+    public void setMode(Integer mode) {
+        this.mode = mode;
+    }
+
     public Integer getTopicNum() {
         return topicNum;
     }
@@ -71,20 +87,20 @@ public class LogicClusterVO {
         this.clusterVersion = clusterVersion;
     }
 
-    public Long getPhysicalClusterId() {
-        return physicalClusterId;
-    }
-
-    public void setPhysicalClusterId(Long physicalClusterId) {
-        this.physicalClusterId = physicalClusterId;
-    }
-
     public String getBootstrapServers() {
         return bootstrapServers;
     }
 
     public void setBootstrapServers(String bootstrapServers) {
         this.bootstrapServers = bootstrapServers;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Long getGmtCreate() {
@@ -103,32 +119,15 @@ public class LogicClusterVO {
         this.gmtModify = gmtModify;
     }
 
-    public Integer getMode() {
-        return mode;
-    }
-
-    public void setMode(Integer mode) {
-        this.mode = mode;
-    }
-
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     @Override
     public String toString() {
         return "LogicClusterVO{" +
                 "clusterId=" + clusterId +
                 ", clusterName='" + clusterName + '\'' +
+                ", clusterIdentification='" + clusterIdentification + '\'' +
                 ", mode=" + mode +
                 ", topicNum=" + topicNum +
                 ", clusterVersion='" + clusterVersion + '\'' +
-                ", physicalClusterId=" + physicalClusterId +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", description='" + description + '\'' +
                 ", gmtCreate=" + gmtCreate +

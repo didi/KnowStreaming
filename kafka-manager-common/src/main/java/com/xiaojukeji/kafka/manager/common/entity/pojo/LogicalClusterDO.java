@@ -11,6 +11,8 @@ public class LogicalClusterDO {
 
     private String name;
 
+    private String identification;
+
     private Integer mode;
 
     private String appId;
@@ -39,6 +41,14 @@ public class LogicalClusterDO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getIdentification() {
+        return identification;
+    }
+
+    public void setIdentification(String identification) {
+        this.identification = identification;
     }
 
     public Integer getMode() {
@@ -102,6 +112,7 @@ public class LogicalClusterDO {
         return "LogicalClusterDO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", identification='" + identification + '\'' +
                 ", mode=" + mode +
                 ", appId='" + appId + '\'' +
                 ", clusterId=" + clusterId +

@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.service.zookeeper;
 
+import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConfig;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
 import com.xiaojukeji.kafka.manager.common.zookeeper.StateChangeListener;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
@@ -22,12 +23,12 @@ public class BrokerStateListener implements StateChangeListener {
 
     private ZkConfigImpl zkConfig;
 
-    private Integer jmxMaxConn;
+    private JmxConfig jmxConfig;
 
-    public BrokerStateListener(Long clusterId, ZkConfigImpl zkConfig, Integer jmxMaxConn) {
+    public BrokerStateListener(Long clusterId, ZkConfigImpl zkConfig, JmxConfig jmxConfig) {
         this.clusterId = clusterId;
         this.zkConfig = zkConfig;
-        this.jmxMaxConn = jmxMaxConn;
+        this.jmxConfig = jmxConfig;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class BrokerStateListener implements StateChangeListener {
             }
             brokerMetadata.setClusterId(clusterId);
             brokerMetadata.setBrokerId(brokerId);
-            PhysicalClusterMetadataManager.putBrokerMetadata(clusterId, brokerId, brokerMetadata, jmxMaxConn);
+            PhysicalClusterMetadataManager.putBrokerMetadata(clusterId, brokerId, brokerMetadata, jmxConfig);
         } catch (Exception e) {
             LOGGER.error("add broker failed, clusterId:{} brokerMetadata:{}.", clusterId, brokerMetadata, e);
         }

@@ -53,6 +53,13 @@ public class JsonUtils {
         return JSON.toJSONString(obj);
     }
 
+    public static <T> T stringToObj(String src, Class<T> clazz) {
+        if (ValidateUtils.isBlank(src)) {
+            return null;
+        }
+        return JSON.parseObject(src, clazz);
+    }
+
     public static List<TopicConnectionDO> parseTopicConnections(Long clusterId, JSONObject jsonObject, long postTime) {
         List<TopicConnectionDO> connectionDOList = new ArrayList<>();
         for (String clientType: jsonObject.keySet()) {

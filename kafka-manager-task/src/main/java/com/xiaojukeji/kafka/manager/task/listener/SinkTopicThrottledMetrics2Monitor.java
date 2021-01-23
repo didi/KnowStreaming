@@ -57,7 +57,7 @@ public class SinkTopicThrottledMetrics2Monitor implements ApplicationListener<To
                 continue;
             }
 
-            MetricSinkPoint point = recordTopicThrottled(startTime, logicalClusterDO.getName(), elem);
+            MetricSinkPoint point = recordTopicThrottled(startTime, logicalClusterDO.getIdentification(), elem);
             if (ValidateUtils.isNull(point)) {
                 continue;
             }
