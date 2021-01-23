@@ -42,7 +42,7 @@ task:
 
 配置键：`SYNC_TOPIC_2_DB_CONFIG_KEY`
 
-配置值：
+配置值(JSON数组)：
 - clusterId：需要进行定时同步的集群ID
 - defaultAppId：该集群无主的Topic将挂在哪个应用下面
 - addAuthority：是否需要加上权限, 默认是false。因为考虑到这个挂载只是临时的，我们不希望用户使用这个App，同时后续可能移交给真正的所属的应用，因此默认是不加上权限。
