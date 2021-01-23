@@ -57,7 +57,7 @@ OCE是一个认证机制和交流平台，为Logi-KafkaManager生产用户量身
 
 ### 内部核心人员
 
-`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`
+`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`
 
 
 ### 外部贡献者
