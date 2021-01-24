@@ -29,7 +29,7 @@
 主要用途是进行大集群的管理 & 集群细节的屏蔽。
 
 - 逻辑集群：通过逻辑集群概念，将集群Broker按业务进行归类，方便管理；
-- Region：通过引入Region，同时Topic按Region纬度创建，减少Broker间的连接；
+- Region：通过引入Region，同时Topic按Region维度创建，减少Broker间的连接；
 
 ---
 
