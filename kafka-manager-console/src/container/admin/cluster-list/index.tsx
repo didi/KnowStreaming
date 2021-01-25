@@ -58,7 +58,7 @@ export class ClusterList extends SearchAndFilterContainer {
             message: '请输入zookeeper地址',
           }],
           attrs: {
-            placeholder: '请输入zookeeper地址，例如：192.168.0.1:2181,192.168.0.2/logi-kafka',
+            placeholder: '请输入zookeeper地址，例如：192.168.0.1:2181,192.168.0.2:2181/logi-kafka',
             rows: 2,
             disabled: item ? true : false,
           },
