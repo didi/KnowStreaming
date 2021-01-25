@@ -29,7 +29,7 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
         rules: [{
           required: isDisabled ? false : true,
           message: '应用名称只支持中文、字母、数字、下划线、短划线，长度限制在3-64字符',
-          pattern: /[\u4e00-\u9fa5_a-zA-Z0-9_-]{3,64}/,
+          pattern: /[\u4e00-\u9fa5_a-zA-Z0-9_-]{3,64}$/,
         }],
         attrs: { disabled: isDisabled },
       }, {

@@ -96,7 +96,8 @@ class Alarm {
   @action.bound
   public setMonitorType(data: IMonitorMetricType) {
     this.monitorTypeList = data.metricNames || [];
-    this.monitorType = this.monitorTypeList[0].metricName;
+    // this.monitorType = this.monitorTypeList[0].metricName;
+    this.monitorType = '';
   }
 
   @action.bound

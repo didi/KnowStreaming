@@ -78,7 +78,7 @@ export class MyCluster extends SearchAndFilterContainer {
           rules: [
             {
               required: true,
-              pattern: /^.{5,}.$/,
+              pattern: /^.{4,}.$/,
               message: '请输入至少5个字符',
             },
           ],
@@ -160,7 +160,7 @@ export class MyCluster extends SearchAndFilterContainer {
 
     data = searchKey ? origin.filter((item: IClusterData) =>
       (item.clusterName !== undefined && item.clusterName !== null) && item.clusterName.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 

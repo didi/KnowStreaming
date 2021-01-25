@@ -29,7 +29,7 @@ export const showCpacityModal = (item: IClusterData) => {
         key: 'description',
         label: '申请原因',
         type: 'text_area',
-        rules: [{ required: true, pattern: /^.{5,}.$/, message: '请输入至少5个字符' }],
+        rules: [{ required: true, pattern: /^.{4,}.$/, message: '请输入至少5个字符' }],
         attrs: {
           placeholder: '请输入至少5个字符',
         },
@@ -44,12 +44,12 @@ export const showCpacityModal = (item: IClusterData) => {
         type: value.type,
         applicant: users.currentUser.username,
         description: value.description,
-        extensions: JSON.stringify({clusterId: item.clusterId}),
+        extensions: JSON.stringify({ clusterId: item.clusterId }),
       };
       cluster.applyCpacity(cpacityParams).then(data => {
         notification.success({
           message: `申请${value.type === 5 ? '扩容' : '缩容'}成功`,
-         });
+        });
         window.location.href = `${urlPrefix}/user/order-detail/?orderId=${data.id}&region=${region.currentRegion}`;
       });
     },
