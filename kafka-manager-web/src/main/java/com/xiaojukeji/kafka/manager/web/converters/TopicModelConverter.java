@@ -22,9 +22,9 @@ import java.util.List;
  * @date 2017/6/1.
  */
 public class TopicModelConverter {
-    public static TopicBasicVO convert2TopicBasicVO(TopicBasicDTO dto, ClusterDO clusterDO) {
+    public static TopicBasicVO convert2TopicBasicVO(TopicBasicDTO dto, ClusterDO clusterDO, Long logicalClusterId) {
         TopicBasicVO vo = new TopicBasicVO();
-        vo.setClusterId(dto.getClusterId());
+        vo.setClusterId(logicalClusterId);
         vo.setAppId(dto.getAppId());
         vo.setAppName(dto.getAppName());
         vo.setPartitionNum(dto.getPartitionNum());

@@ -69,6 +69,19 @@ public class LogicalClusterMetadataManager {
         return LOGICAL_CLUSTER_ID_BROKER_ID_MAP.getOrDefault(logicClusterId, new HashSet<>());
     }
 
+    public Long getTopicLogicalClusterId(Long physicalClusterId, String topicName) {
+        if (!LOADED.get()) {
+            flush();
+        }
+
+        Map<String, Long> logicalClusterIdMap = TOPIC_LOGICAL_MAP.get(physicalClusterId);
+        if (ValidateUtils.isNull(logicalClusterIdMap)) {
+            return null;
+        }
+
+        return logicalClusterIdMap.get(topicName);
+    }
+
     public LogicalClusterDO getTopicLogicalCluster(Long physicalClusterId, String topicName) {
         if (!LOADED.get()) {
             flush();

@@ -50,7 +50,10 @@ class CustomForm extends React.Component<IXFormProps> {
           notification.success({ message: '扩分成功' });
           this.props.form.resetFields();
           admin.getClusterTopics(this.props.clusterId);
-        });
+        }).catch(err => {
+          notification.error({ message: '扩分成功' });
+
+        })
       }
     });
   }
@@ -93,7 +96,7 @@ class CustomForm extends React.Component<IXFormProps> {
           {/* 运维管控-topic信息-扩分区操作 */}
           <Form.Item label="所属region" >
             {getFieldDecorator('regionNameList', {
-              initialValue: admin.topicsBasic ? admin.topicsBasic.regionNameList : '',
+              initialValue: admin.topicsBasic && admin.topicsBasic.regionNameList.length > 0 ? admin.topicsBasic.regionNameList.join(',') : ' ',
               rules: [{ required: true, message: '请输入所属region' }],
             })(<Input disabled={true} />)}
           </Form.Item>

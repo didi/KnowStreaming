@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.monitor.common.entry.*;
 import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.*;
+import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.bizenum.CategoryEnum;
 
 import java.util.*;
 
@@ -44,7 +45,7 @@ public class N9eConverter {
         if (!ValidateUtils.isNull(strategy.getId())) {
             n9eStrategy.setId(strategy.getId().intValue());
         }
-        n9eStrategy.setCategory(1);
+        n9eStrategy.setCategory(CategoryEnum.DEVICE_INDEPENDENT.getCode());
         n9eStrategy.setName(strategy.getName());
         n9eStrategy.setNid(monitorN9eNid);
         n9eStrategy.setExcl_nid(new ArrayList<>());
@@ -77,7 +78,13 @@ public class N9eConverter {
         n9eStrategy.setRecovery_notify(0);
 
         StrategyAction strategyAction = strategy.getStrategyActionList().get(0);
-        n9eStrategy.setConverge(ListUtils.string2IntList(strategyAction.getConverge()));
+
+        //  单位转换, 夜莺的单位是秒, KM前端的单位是分钟
+        List<Integer> convergeList = ListUtils.string2IntList(strategyAction.getConverge());
+        if (!ValidateUtils.isEmptyList(convergeList)) {
+            convergeList.set(0, convergeList.get(0) *  60);
+        }
+        n9eStrategy.setConverge(convergeList);
 
         List<Integer> notifyGroups = new ArrayList<>();
         for (String name: ListUtils.string2StrList(strategyAction.getNotifyGroup())) {
@@ -167,7 +174,13 @@ public class N9eConverter {
         }
         strategyAction.setNotifyGroup(ListUtils.strList2String(notifyGroups));
 
-        strategyAction.setConverge(ListUtils.intList2String(n9eStrategy.getConverge()));
+        //  单位转换, 夜莺的单位是秒, KM前端的单位是分钟
+        List<Integer> convergeList = n9eStrategy.getConverge();
+        if (!ValidateUtils.isEmptyList(convergeList)) {
+            convergeList.set(0, convergeList.get(0) / 60);
+        }
+        strategyAction.setConverge(ListUtils.intList2String(convergeList));
+
         strategyAction.setCallback(n9eStrategy.getCallback());
         strategy.setStrategyActionList(Arrays.asList(strategyAction));
 

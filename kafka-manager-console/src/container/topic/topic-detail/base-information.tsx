@@ -69,7 +69,7 @@ export class BaseInformation extends React.Component<IInfoProps> {
         label: '压缩格式',
         value: baseInfo.topicCodeC,
       }, {
-        label: '所属物理集群ID',
+        label: '集群ID',
         value: baseInfo.clusterId,
       }, {
         label: '所属region',

@@ -203,6 +203,7 @@ public class ClusterServiceImpl implements ClusterService {
                     zk.close();
                 }
             } catch (Throwable t) {
+                return false;
             }
         }
         return true;

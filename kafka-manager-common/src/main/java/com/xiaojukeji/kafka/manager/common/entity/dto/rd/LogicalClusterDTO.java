@@ -21,6 +21,9 @@ public class LogicalClusterDTO {
     @ApiModelProperty(value = "名称")
     private String name;
 
+    @ApiModelProperty(value = "集群标识, 用于告警的上报")
+    private String identification;
+
     @ApiModelProperty(value = "集群模式")
     private Integer mode;
 
@@ -50,6 +53,14 @@ public class LogicalClusterDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getIdentification() {
+        return identification;
+    }
+
+    public void setIdentification(String identification) {
+        this.identification = identification;
     }
 
     public Integer getMode() {
@@ -97,6 +108,7 @@ public class LogicalClusterDTO {
         return "LogicalClusterDTO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", identification='" + identification + '\'' +
                 ", mode=" + mode +
                 ", clusterId=" + clusterId +
                 ", regionIdList=" + regionIdList +
@@ -117,6 +129,7 @@ public class LogicalClusterDTO {
         }
         appId = ValidateUtils.isNull(appId)? "": appId;
         description = ValidateUtils.isNull(description)? "": description;
+        identification = ValidateUtils.isNull(identification)? name: identification;
         return true;
     }
 }

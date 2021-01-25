@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Select, Input, InputNumber, Form, Switch, Checkbox, DatePicker, Radio, Upload, Button, Icon, Tooltip } from 'component/antd';
 import Monacoeditor from 'component/editor/monacoEditor';
 import { searchProps } from 'constants/table';
+import { version } from 'store/version';
 import './index.less';
 
 const TextArea = Input.TextArea;
@@ -189,7 +190,7 @@ class XForm extends React.Component<IXFormProps> {
       case FormItemType.upload:
         return (
           <Upload beforeUpload={(file: any) => false} {...item.attrs}>
-            <Button><Icon type="upload" />上传</Button>
+            <Button><Icon type="upload" />上传</Button>{version.fileSuffix && <span style={{ color: '#fb3939', padding: '0 0 0 10px' }}>{`请上传${version.fileSuffix}文件`}</span>}
           </Upload>
         );
     }

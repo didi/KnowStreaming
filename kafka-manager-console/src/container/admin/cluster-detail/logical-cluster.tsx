@@ -40,15 +40,15 @@ export class LogicalCluster extends SearchAndFilterContainer {
         key: 'logicalClusterId',
       },
       {
-        title: '逻辑集群中文名称',
+        title: '逻辑集群名称',
         dataIndex: 'logicalClusterName',
         key: 'logicalClusterName',
         width: '150px'
       },
       {
-        title: '逻辑集群英文名称',
-        dataIndex: 'logicalClusterName',
-        key: 'logicalClusterName1',
+        title: '逻辑集群标识',
+        dataIndex: 'logicalClusterIdentification',
+        key: 'logicalClusterIdentification',
         width: '150px'
       },
       {
