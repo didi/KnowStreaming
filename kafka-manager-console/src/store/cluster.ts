@@ -21,7 +21,7 @@ class Cluster {
   public selectData: IClusterData[] = [{
     value: -1,
     label: '所有集群',
-    } as IClusterData,
+  } as IClusterData,
   ];
 
   @observable
@@ -31,7 +31,7 @@ class Cluster {
   public selectAllData: IClusterData[] = [{
     value: -1,
     label: '所有集群',
-    } as IClusterData,
+  } as IClusterData,
   ];
 
   @observable
@@ -59,7 +59,7 @@ class Cluster {
   public clusterMetrics: IClusterMetrics[] = [];
 
   @observable
-  public type: IOptionType = 'byteIn/byteOut' ;
+  public type: IOptionType = 'byteIn/byteOut';
 
   @observable
   public clusterTopics: IClusterTopics[] = [];
@@ -130,11 +130,11 @@ class Cluster {
   public setClusterCombos(data: IConfigInfo[]) {
     this.clusterComboList = data || [];
     this.clusterComboList = this.clusterComboList.map(item => {
-     return {
-       ...item,
-       label: item.message,
-       value: item.code,
-     };
+      return {
+        ...item,
+        label: item.message,
+        value: item.code,
+      };
     });
   }
 
@@ -148,7 +148,7 @@ class Cluster {
         value: item.code,
       };
     });
-    this.clusterMode = (this.clusterModes && this.clusterModes.filter(ele => ele.code !== 0) ) || []; // 去除 0 共享集群
+    this.clusterMode = (this.clusterModes && this.clusterModes.filter(ele => ele.code !== 0)) || []; // 去除 0 共享集群
   }
 
   @action.bound
@@ -158,7 +158,7 @@ class Cluster {
 
   @action.bound
   public setClusterDetailRealTime(data: IClusterReal) {
-    this.clusterRealData =  data;
+    this.clusterRealData = data;
     this.setRealLoading(false);
   }
 
@@ -192,9 +192,9 @@ class Cluster {
   @action.bound
   public setClusterDetailThrottles(data: IThrottles[]) {
     this.clustersThrottles = data ? data.map((item, index) => {
-        item.key = index;
-        return item;
-      }) : [];
+      item.key = index;
+      return item;
+    }) : [];
   }
 
   @action.bound

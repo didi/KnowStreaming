@@ -85,7 +85,6 @@ export const applyQuotaQuery = (item: ITopic) => {
 };
 
 export const applyTopicQuotaQuery = async (item: ITopic) => {
-  console.log(item)
   await app.getTopicAppQuota(item.clusterId, item.topicName);
   await showTopicApplyQuatoModal(item);
 };
@@ -142,7 +141,7 @@ export const getAllTopicColumns = (urlPrefix: string) => {
           <Tooltip placement="bottomLeft" title={record.topicName} >
             <a
               // tslint:disable-next-line:max-line-length
-              href={`${urlPrefix}/topic/topic-detail?clusterId=${record.clusterId}&topic=${record.topicName}&region=${region.currentRegion}&needAuth=${record.needAuth}&clusterName=${record.clusterName}`}
+              href={`${urlPrefix}/topic/topic-detail?clusterId=${record.clusterId}&topic=${record.topicName}&region=${region.currentRegion}&needAuth=${record.needAuth}`}
             >{text}</a>
           </Tooltip>);
       },
