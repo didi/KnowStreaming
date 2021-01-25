@@ -64,7 +64,7 @@ public class SinkConsumerMetrics2Monitor implements ApplicationListener<Consumer
                 continue;
             }
 
-            metricSinkPoints.addAll(recordConsumer(elem.getTimestampUnitMs() / 1000, logicalClusterDO.getName(), elem));
+            metricSinkPoints.addAll(recordConsumer(elem.getTimestampUnitMs() / 1000, logicalClusterDO.getIdentification(), elem));
             if (metricSinkPoints.size() > MonitorSinkConstant.MONITOR_SYSTEM_SINK_THRESHOLD) {
                 abstractMonitor.sinkMetrics(metricSinkPoints);
                 metricSinkPoints.clear();

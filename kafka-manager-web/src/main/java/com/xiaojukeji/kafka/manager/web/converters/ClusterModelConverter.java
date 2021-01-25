@@ -55,6 +55,7 @@ public class ClusterModelConverter {
         CopyUtils.copyProperties(vo, logicalCluster);
         vo.setClusterId(logicalCluster.getLogicalClusterId());
         vo.setClusterName(logicalCluster.getLogicalClusterName());
+        vo.setClusterIdentification(logicalCluster.getLogicalClusterIdentification());
         return vo;
     }
 
@@ -78,9 +79,8 @@ public class ClusterModelConverter {
         ClusterDO clusterDO = new ClusterDO();
         CopyUtils.copyProperties(clusterDO, reqObj);
         clusterDO.setId(reqObj.getClusterId());
-        clusterDO.setSecurityProperties(
-                ValidateUtils.isNull(clusterDO.getSecurityProperties())? "": clusterDO.getSecurityProperties()
-        );
+        clusterDO.setSecurityProperties(ValidateUtils.isNull(reqObj.getSecurityProperties())? "": reqObj.getSecurityProperties());
+        clusterDO.setJmxProperties(ValidateUtils.isNull(reqObj.getJmxProperties())? "": reqObj.getJmxProperties());
         return clusterDO;
     }
 

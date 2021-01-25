@@ -166,7 +166,7 @@ public class OpUtilsController {
         if (!ResultStatus.SUCCESS.equals(rs)) {
             return Result.buildFrom(rs);
         }
-        topicManagerService.modifyTopic(dto.getClusterId(), dto.getTopicName(), dto.getDescription(), operator);
+        topicManagerService.modifyTopicByOp(dto.getClusterId(), dto.getTopicName(), dto.getAppId(), dto.getDescription(), operator);
         return new Result();
     }
 

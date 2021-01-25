@@ -38,7 +38,7 @@ export class ClusterConsumer extends SearchAndFilterContainer {
     key: 'operation',
     width: '10%',
     render: (t: string, item: IOffset) => {
-      return (<a onClick={() => this.getConsumeDetails(item)}>详情</a>);
+      return (<a onClick={() => this.getConsumeDetails(item)}>消费详情</a>);
     },
   }];
   private xFormModal: IXFormWrapper;
@@ -110,7 +110,7 @@ export class ClusterConsumer extends SearchAndFilterContainer {
           />
         </div>
         <Modal
-          title="消费的Topic"
+          title="消费详情"
           visible={this.state.detailsVisible}
           onOk={() => this.handleDetailsOk()}
           onCancel={() => this.handleDetailsCancel()}

@@ -79,7 +79,7 @@ export class MyBill extends React.Component {
   }
 
   public renderTableList() {
-    const userUrl=`${urlPrefix}/user/bill-detail`
+    const userUrl = `${urlPrefix}/user/bill-detail`
     return (
       <Table
         rowKey="key"
@@ -89,11 +89,11 @@ export class MyBill extends React.Component {
       />
     );
   }
-  
+
   public renderChart() {
     return (
       <div className="chart-box">
-        <BarChartComponet ref={(ref) => this.chart = ref } getChartData={this.getData.bind(this, null)} />
+        <BarChartComponet ref={(ref) => this.chart = ref} getChartData={this.getData.bind(this, null)} />
       </div>
     );
   }
@@ -131,7 +131,7 @@ export class MyBill extends React.Component {
       <>
         <div className="container">
           <Tabs defaultActiveKey="1" type="card">
-            <TabPane 
+            <TabPane
               tab={<>
                 <span>账单趋势</span>&nbsp;
                 <a
@@ -141,7 +141,7 @@ export class MyBill extends React.Component {
                 >
                   <Icon type="question-circle" />
                 </a>
-              </>} 
+              </>}
               key="1"
             >
               {this.renderDatePick()}

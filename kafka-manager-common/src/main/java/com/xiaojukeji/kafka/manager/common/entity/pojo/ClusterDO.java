@@ -17,6 +17,8 @@ public class ClusterDO implements Comparable<ClusterDO> {
 
     private String securityProperties;
 
+    private String jmxProperties;
+
     private Integer status;
 
     private Date gmtCreate;
@@ -29,30 +31,6 @@ public class ClusterDO implements Comparable<ClusterDO> {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Date getGmtCreate() {
-        return gmtCreate;
-    }
-
-    public void setGmtCreate(Date gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
-
-    public Date getGmtModify() {
-        return gmtModify;
-    }
-
-    public void setGmtModify(Date gmtModify) {
-        this.gmtModify = gmtModify;
     }
 
     public String getClusterName() {
@@ -87,6 +65,38 @@ public class ClusterDO implements Comparable<ClusterDO> {
         this.securityProperties = securityProperties;
     }
 
+    public String getJmxProperties() {
+        return jmxProperties;
+    }
+
+    public void setJmxProperties(String jmxProperties) {
+        this.jmxProperties = jmxProperties;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Date getGmtCreate() {
+        return gmtCreate;
+    }
+
+    public void setGmtCreate(Date gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public Date getGmtModify() {
+        return gmtModify;
+    }
+
+    public void setGmtModify(Date gmtModify) {
+        this.gmtModify = gmtModify;
+    }
+
     @Override
     public String toString() {
         return "ClusterDO{" +
@@ -95,6 +105,7 @@ public class ClusterDO implements Comparable<ClusterDO> {
                 ", zookeeper='" + zookeeper + '\'' +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", securityProperties='" + securityProperties + '\'' +
+                ", jmxProperties='" + jmxProperties + '\'' +
                 ", status=" + status +
                 ", gmtCreate=" + gmtCreate +
                 ", gmtModify=" + gmtModify +

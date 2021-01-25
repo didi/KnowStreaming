@@ -13,14 +13,14 @@ const { confirm } = Modal;
 export const getClusterColumns = (urlPrefix: string) => {
   return [
     {
-      title: '逻辑集群ID',
+      title: '集群ID',
       dataIndex: 'clusterId',
       key: 'clusterId',
       width: '9%',
       sorter: (a: IClusterData, b: IClusterData) => b.clusterId - a.clusterId,
     },
     {
-      title: '逻辑集群中文名称',
+      title: '集群名称',
       dataIndex: 'clusterName',
       key: 'clusterName',
       width: '13%',
@@ -37,24 +37,24 @@ export const getClusterColumns = (urlPrefix: string) => {
         </Tooltip>
       ),
     },
-    {
-      title: '逻辑集群英文名称',
-      dataIndex: 'clusterName',
-      key: 'clusterName',
-      width: '13%',
-      onCell: () => ({
-        style: {
-          maxWidth: 120,
-          ...cellStyle,
-        },
-      }),
-      sorter: (a: IClusterData, b: IClusterData) => a.clusterName.charCodeAt(0) - b.clusterName.charCodeAt(0),
-      render: (text: string, record: IClusterData) => (
-        <Tooltip placement="bottomLeft" title={text} >
-          <a href={`${urlPrefix}/cluster/cluster-detail?clusterId=${record.clusterId}`}> {text} </a>
-        </Tooltip>
-      ),
-    },
+    // {
+    //   title: '逻辑集群英文名称',
+    //   dataIndex: 'clusterName',
+    //   key: 'clusterName',
+    //   width: '13%',
+    //   onCell: () => ({
+    //     style: {
+    //       maxWidth: 120,
+    //       ...cellStyle,
+    //     },
+    //   }),
+    //   sorter: (a: IClusterData, b: IClusterData) => a.clusterName.charCodeAt(0) - b.clusterName.charCodeAt(0),
+    //   render: (text: string, record: IClusterData) => (
+    //     <Tooltip placement="bottomLeft" title={text} >
+    //       <a href={`${urlPrefix}/cluster/cluster-detail?clusterId=${record.clusterId}`}> {text} </a>
+    //     </Tooltip>
+    //   ),
+    // },
     {
       title: 'Topic数量',
       dataIndex: 'topicNum',

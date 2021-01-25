@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './index.less';
 import { wrapper, region } from 'store';
-import { Tabs, PageHeader, Button, notification, Drawer, message, Icon } from 'antd';
+import { Tabs, PageHeader, Button, notification, Drawer, message, Icon, Spin } from 'antd';
 import { observer } from 'mobx-react';
 import { BaseInformation } from './base-information';
 import { StatusChart } from './status-chart';
@@ -44,6 +44,7 @@ export class TopicDetail extends React.Component<any> {
     drawerVisible: false,
     infoVisible: false,
     infoTopicList: [] as IInfoData[],
+    isExecutionBtn: false
   };
   private $formRef: any;
 
@@ -54,7 +55,7 @@ export class TopicDetail extends React.Component<any> {
     const url = Url();
     this.clusterId = Number(url.search.clusterId);
     this.needAuth = url.search.needAuth;
-    this.clusterName = url.search.clusterName;
+    this.clusterName = decodeURI(decodeURI(url.search.clusterName));
     this.topicName = url.search.topic;
     const isPhysical = Url().search.hasOwnProperty('isPhysicalClusterId');
     this.isPhysicalTrue = isPhysical ? '&isPhysicalClusterId=true' : '';
@@ -197,7 +198,9 @@ export class TopicDetail extends React.Component<any> {
             formData={formData}
             formMap={formMap}
           />
-          <Button type="primary" onClick={this.drawerSubmit} className="sample-button">采样</Button>
+          <Button type="primary" onClick={this.drawerSubmit} className="sample-button" disabled={this.state.isExecutionBtn}>
+            {this.state.isExecutionBtn ? (<span>采样中<Spin indicator={this.antIcon} size="small" /></span>) : '采 样'}
+          </Button>
           {infoVisible ? this.renderInfo() : null}
         </Drawer>
       </>
@@ -243,7 +246,11 @@ export class TopicDetail extends React.Component<any> {
     );
   }
 
+  // 执行加载图标
+  public antIcon = <Icon type="loading" style={{ fontSize: 12, color: '#cccccc', marginLeft: '5px' }} spin />
+
   public drawerSubmit = (value: any) => {
+    this.setState({ isExecutionBtn: true })
     this.$formRef.validateFields((error: Error, result: any) => {
       if (error) {
         return;
@@ -253,9 +260,12 @@ export class TopicDetail extends React.Component<any> {
         this.setState({
           infoTopicList: data,
           infoVisible: true,
+          isExecutionBtn: false
         });
         message.success('采样成功');
-      });
+      }).catch(err => {
+        this.setState({ isExecutionBtn: false })
+      })
     });
   }
 
@@ -315,6 +325,7 @@ export class TopicDetail extends React.Component<any> {
   public componentDidMount() {
     topic.getTopicBasicInfo(this.clusterId, this.topicName);
     topic.getTopicBusiness(this.clusterId, this.topicName);
+    app.getAppList();
   }
 
   public render() {
@@ -326,7 +337,6 @@ export class TopicDetail extends React.Component<any> {
       topicName: this.topicName,
       clusterName: this.clusterName
     } as ITopic;
-    app.getAppList();
 
     return (
       <>
@@ -342,9 +352,9 @@ export class TopicDetail extends React.Component<any> {
                     {this.needAuth == "true" && <Button key="0" type="primary" onClick={() => showAllPermissionModal(topicRecord)} >申请权限</Button>}
                     <Button key="1" type="primary" onClick={() => applyTopicQuotaQuery(topicRecord)} >申请配额</Button>
                     <Button key="2" type="primary" onClick={() => applyExpandModal(topicRecord)} >申请分区</Button>
-                    <Button key="3" type="primary" onClick={() => this.props.history.push(`/alarm/add`)} >新建告警规则</Button>
-                    <Button key="4" type="primary" onClick={this.showDrawer.bind(this)} >采样</Button>
-                    {showEditBtn && <Button key="5" onClick={() => this.compileDetails()} type="primary">编辑</Button>}
+                    <Button key="3" type="primary" onClick={() => this.props.history.push(`/alarm/add`)} >新建告警</Button>
+                    <Button key="4" type="primary" onClick={this.showDrawer.bind(this)} >数据采样</Button>
+                    {/* {showEditBtn && <Button key="5" onClick={() => this.compileDetails()} type="primary">编辑</Button>} */}
                   </>
                 }
               />

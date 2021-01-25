@@ -127,7 +127,7 @@ class DataMigrationFormTable extends React.Component<IFormTableProps> {
       key: 'retentionTime', // originalRetentionTime
       width: '132px',
       sorter: (a: IRenderData, b: IRenderData) => b.retentionTime - a.retentionTime,
-      render: (time: any) =>  transMSecondToHour(time),
+      render: (time: any) => transMSecondToHour(time),
     }, {
       title: 'BrokerID',
       dataIndex: 'brokerIdList',
@@ -254,7 +254,7 @@ class DataMigrationFormTable extends React.Component<IFormTableProps> {
             dataSource={this.props.data}
             columns={columns}
             pagination={false}
-            scroll={{y: 520}}
+            scroll={{ y: 520 }}
             className="migration-table"
           />
         </EditableContext.Provider>
@@ -316,7 +316,7 @@ export class InfoForm extends React.Component<IFormTableProps> {
         <Form.Item label="迁移说明" key={2} className="form-item">
           {getFieldDecorator('description', {
             initialValue: '',
-            rules: [{ required: true, message: '请输入至少5个字符', pattern: /^.{5,}.$/ }],
+            rules: [{ required: true, message: '请输入至少5个字符', pattern: /^.{4,}.$/ }],
           })(
             <Input.TextArea rows={5} placeholder="请输入至少5个字符" />,
           )}

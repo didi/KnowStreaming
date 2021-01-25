@@ -21,6 +21,7 @@ public class LogicalClusterModelConverter {
         LogicalClusterVO vo = new LogicalClusterVO();
         vo.setLogicalClusterId(logicalClusterDO.getId());
         vo.setLogicalClusterName(logicalClusterDO.getName());
+        vo.setLogicalClusterIdentification(logicalClusterDO.getIdentification());
         vo.setPhysicalClusterId(logicalClusterDO.getClusterId());
         vo.setMode(logicalClusterDO.getMode());
         vo.setRegionIdList(ListUtils.string2LongList(logicalClusterDO.getRegionList()));
@@ -45,6 +46,7 @@ public class LogicalClusterModelConverter {
     public static LogicalClusterDO convert2LogicalClusterDO(LogicalClusterDTO dto) {
         LogicalClusterDO logicalClusterDO = new LogicalClusterDO();
         logicalClusterDO.setName(dto.getName());
+        logicalClusterDO.setIdentification(dto.getIdentification());
         logicalClusterDO.setClusterId(dto.getClusterId());
         logicalClusterDO.setRegionList(ListUtils.longList2String(dto.getRegionIdList()));
         logicalClusterDO.setMode(dto.getMode());
