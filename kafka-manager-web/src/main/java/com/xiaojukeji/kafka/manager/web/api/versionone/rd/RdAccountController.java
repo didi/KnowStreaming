@@ -35,7 +35,7 @@ public class RdAccountController {
     @RequestMapping(value = "accounts", method = RequestMethod.POST)
     @ResponseBody
     public Result addAccount(@RequestBody AccountDTO dto) {
-        if (!dto.legal() || ValidateUtils.isNull(dto.getPassword())) {
+        if (!dto.legal() || ValidateUtils.isBlank(dto.getPassword())) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
         ResultStatus rs = accountService.createAccount(AccountConverter.convert2AccountDO(dto));

@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.account.component.sso;
 import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.account.component.AbstractSingleSignOn;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.LoginDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
 import com.xiaojukeji.kafka.manager.common.utils.EncryptUtil;
@@ -23,18 +24,21 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
     private AccountService accountService;
 
     @Override
-    public String loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
+    public Result<String> loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
         if (ValidateUtils.isBlank(dto.getUsername()) || ValidateUtils.isNull(dto.getPassword())) {
             return null;
         }
-        AccountDO accountDO = accountService.getAccountDO(dto.getUsername());
-        if (ValidateUtils.isNull(accountDO)) {
-            return null;
+        Result<AccountDO> accountResult = accountService.getAccountDO(dto.getUsername());
+        if (ValidateUtils.isNull(accountResult) || accountResult.failed()) {
+            return new Result<>(accountResult.getCode(), accountResult.getMessage());
         }
-        if (!accountDO.getPassword().equals(EncryptUtil.md5(dto.getPassword()))) {
-            return null;
+        if (ValidateUtils.isNull(accountResult.getData())) {
+            return Result.buildFailure("username illegal");
         }
-        return dto.getUsername();
+        if (!accountResult.getData().getPassword().equals(EncryptUtil.md5(dto.getPassword()))) {
+            return Result.buildFailure("password illegal");
+        }
+        return Result.buildSuc(accountResult.getData().getUsername());
     }
 
     @Override
