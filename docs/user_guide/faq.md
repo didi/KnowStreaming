@@ -15,6 +15,8 @@
 - 4、页面流量信息等无数据？
 - 5、如何对接夜莺的监控告警功能？
 - 6、如何使用`MySQL 8`？
+- 7、`Jmx`连接失败如何解决？
+
 
 ---
 
@@ -29,7 +31,7 @@
 主要用途是进行大集群的管理 & 集群细节的屏蔽。
 
 - 逻辑集群：通过逻辑集群概念，将集群Broker按业务进行归类，方便管理；
-- Region：通过引入Region，同时Topic按Region维度创建，减少Broker间的连接；
+- Region：通过引入Region，同时Topic按Region纬度创建，减少Broker间的连接；
 
 ---
 
@@ -43,7 +45,7 @@
 
 - 1、检查`Broker JMX`是否正确开启。
 
-如若还未开启，具体可百度一下看如何开启。
+如若还未开启，具体可百度一下看如何开启，或者参看：[Jmx连接配置&问题解决说明文档](../dev_guide/connect_jmx_failed.md)
 
 ![helpcenter](./assets/faq/jmx_check.jpg)
 
@@ -66,3 +68,9 @@
 ### 6、如何使用`MySQL 8`？
 
 - 参看 [kafka-manager 使用`MySQL 8`](../dev_guide/use_mysql_8.md) 说明。
+
+---
+
+### 7、`Jmx`连接失败如何解决？
+
+- 参看 [Jmx连接配置&问题解决](../dev_guide/connect_jmx_failed.md) 说明。
