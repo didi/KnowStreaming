@@ -23,7 +23,7 @@ public class Local extends AbstractStorageService {
 
     @Override
     public Result<String> download(String fileName, String fileMd5) {
-        return Result.buildFrom(ResultStatus.DOWNLOAD_FILE_FAIL);
+        return Result.buildFrom(ResultStatus.STORAGE_DOWNLOAD_FILE_FAILED);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.DBStatusEnum;
-import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ClusterDetailDTO;
@@ -72,7 +71,7 @@ public class ClusterServiceImpl implements ClusterService {
             return ResultStatus.PARAM_ILLEGAL;
         }
         if (!isZookeeperLegal(clusterDO.getZookeeper())) {
-            return ResultStatus.CONNECT_ZOOKEEPER_FAILED;
+            return ResultStatus.ZOOKEEPER_CONNECT_FAILED;
         }
         try {
             if (clusterDao.insert(clusterDO) <= 0) {
@@ -102,7 +101,7 @@ public class ClusterServiceImpl implements ClusterService {
 
         if (!originClusterDO.getZookeeper().equals(clusterDO.getZookeeper())) {
             // 不允许修改zk地址
-            return ResultStatus.CHANGE_ZOOKEEPER_FORBIDEN;
+            return ResultStatus.CHANGE_ZOOKEEPER_FORBIDDEN;
         }
         clusterDO.setStatus(originClusterDO.getStatus());
         return updateById(clusterDO);

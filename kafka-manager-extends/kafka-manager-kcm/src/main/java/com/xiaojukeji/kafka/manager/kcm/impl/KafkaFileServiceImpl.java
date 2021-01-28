@@ -52,7 +52,7 @@ public class KafkaFileServiceImpl implements KafkaFileService {
                     kafkaFileDTO.getUploadFile())
                     ) {
                 kafkaFileDao.deleteById(kafkaFileDO.getId());
-                return ResultStatus.UPLOAD_FILE_FAIL;
+                return ResultStatus.STORAGE_UPLOAD_FILE_FAILED;
             }
             return ResultStatus.SUCCESS;
         } catch (DuplicateKeyException e) {
@@ -113,7 +113,7 @@ public class KafkaFileServiceImpl implements KafkaFileService {
             if (kafkaFileDao.updateById(kafkaFileDO) <= 0) {
                 return ResultStatus.MYSQL_ERROR;
             }
-            return ResultStatus.UPLOAD_FILE_FAIL;
+            return ResultStatus.STORAGE_UPLOAD_FILE_FAILED;
         } catch (Exception e) {
             LOGGER.error("rollback modify kafka file failed, kafkaFileDTO:{}.", kafkaFileDTO, e);
         }
@@ -169,7 +169,7 @@ public class KafkaFileServiceImpl implements KafkaFileService {
             return Result.buildFrom(ResultStatus.RESOURCE_NOT_EXIST);
         }
         if (KafkaFileEnum.PACKAGE.getCode().equals(kafkaFileDO.getFileType())) {
-            return Result.buildFrom(ResultStatus.FILE_TYPE_NOT_SUPPORT);
+            return Result.buildFrom(ResultStatus.STORAGE_FILE_TYPE_NOT_SUPPORT);
         }
 
         return storageService.download(kafkaFileDO.getFileName(), kafkaFileDO.getFileMd5());
