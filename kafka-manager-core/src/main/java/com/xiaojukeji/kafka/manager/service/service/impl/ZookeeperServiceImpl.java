@@ -53,7 +53,7 @@ public class ZookeeperServiceImpl implements ZookeeperService {
         }
         ZkConfigImpl zkConfig = PhysicalClusterMetadataManager.getZKConfig(clusterId);
         if (ValidateUtils.isNull(zkConfig)) {
-            return Result.buildFrom(ResultStatus.CONNECT_ZOOKEEPER_FAILED);
+            return Result.buildFrom(ResultStatus.ZOOKEEPER_CONNECT_FAILED);
         }
 
         try {
@@ -68,6 +68,6 @@ public class ZookeeperServiceImpl implements ZookeeperService {
         } catch (Exception e) {
             LOGGER.error("class=ZookeeperServiceImpl||method=getControllerPreferredCandidates||clusterId={}||errMsg={}", clusterId, e.getMessage());
         }
-        return Result.buildFrom(ResultStatus.READ_ZOOKEEPER_FAILED);
+        return Result.buildFrom(ResultStatus.ZOOKEEPER_READ_FAILED);
     }
 }
