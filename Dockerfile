@@ -37,5 +37,8 @@ ENV JAVA_OPTS="-verbose:gc  \
 
 EXPOSE 8080  9999
 
-ENTRYPOINT ["sh","-c","java     -jar  $JAVA_AGENT  $JAVA_HEAP_OPTS  $JAVA_OPTS /tmp/app.jar --spring.config.location=/km/application.yml"]
+ENTRYPOINT ["sh","-c","java     -jar    $JAVA_HEAP_OPTS  $JAVA_OPTS /tmp/app.jar --spring.config.location=/km/application.yml"]
+
+## 默认不带Prometheus JMX监控，需要可以自行取消以下注释并注释上面一行默认Entrypoint 命令。
+## ENTRYPOINT ["sh","-c","java     -jar  $JAVA_AGENT  $JAVA_HEAP_OPTS  $JAVA_OPTS /tmp/app.jar --spring.config.location=/km/application.yml"]
 
