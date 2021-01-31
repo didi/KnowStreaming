@@ -22,7 +22,6 @@ RUN apk add --no-cache --virtual .build-deps \
 ENV AGENT_HOME /opt/agent/
 
 WORKDIR /tmp
-COPY ./docker-depends/agent    $AGENT_HOME
 COPY ./docker-depends/config.yaml    $AGENT_HOME
 COPY ./docker-depends/jmx_prometheus_javaagent-0.14.0.jar $AGENT_HOME
 
