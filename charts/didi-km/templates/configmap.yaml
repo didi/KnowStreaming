@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: km-cm
+data:
+  application.yml: |
+    server:
+      port: 8080
+      tomcat:
+        accept-count: 1000
+        max-connections: 10000
+        max-threads: 800
+        min-spare-threads: 100
+
+    spring:
+      application:
+        name: kafkamanager
+      datasource:
+        kafka-manager:
+          jdbc-url: jdbc:mysql://xxxxx:3306/kafka-manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false
+          username: admin
+          password: admin
+          driver-class-name: com.mysql.jdbc.Driver
+      main:
+        allow-bean-definition-overriding: true
+
+      profiles:
+        active: dev
+      servlet:
+        multipart:
+          max-file-size: 100MB
+          max-request-size: 100MB
+
+    logging:
+      config: classpath:logback-spring.xml
+
+    custom:
+      idc: cn
+      jmx:
+        max-conn: 20
+      store-metrics-task:
+        community:
+          broker-metrics-enabled: true
+          topic-metrics-enabled: true
+        didi:
+          app-topic-metrics-enabled: false
+          topic-request-time-metrics-enabled: false
+          topic-throttled-metrics: false
+        save-days: 7
+
+    # 任务相关的开关
+    task:
+      op:
+        sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
+
+    account:
+      ldap:
+
+    kcm:
+      enabled: false
+      storage:
+        base-url: http://127.0.0.1
+      n9e:
+        base-url: http://127.0.0.1:8004
+        user-token: 12345678
+        timeout: 300
+        account: root
+        script-file: kcm_script.sh
+
+    monitor:
+      enabled: false
+      n9e:
+        nid: 2
+        user-token: 1234567890
+        mon:
+          base-url: http://127.0.0.1:8032
+        sink:
+          base-url: http://127.0.0.1:8006
+        rdb:
+          base-url: http://127.0.0.1:80
+
+    notify:
+      kafka:
+        cluster-id: 95
+        topic-name: didi-kafka-notify
+      order:
+        detail-url: http://127.0.0.1
+     
