@@ -4,17 +4,18 @@ import com.xiaojukeji.kafka.manager.common.bizenum.KafkaFileEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.KafkaFileDTO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaFileDO;
 import com.xiaojukeji.kafka.manager.common.utils.CopyUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.KafkaFileDao;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaFileDO;
-import com.xiaojukeji.kafka.manager.kcm.component.storage.AbstractStorageService;
 import com.xiaojukeji.kafka.manager.kcm.KafkaFileService;
+import com.xiaojukeji.kafka.manager.kcm.component.storage.AbstractStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +164,7 @@ public class KafkaFileServiceImpl implements KafkaFileService {
     }
 
     @Override
-    public Result<String> downloadKafkaConfigFile(Long fileId) {
+    public Result<MultipartFile> downloadKafkaFile(Long fileId) {
         KafkaFileDO kafkaFileDO = kafkaFileDao.getById(fileId);
         if (ValidateUtils.isNull(kafkaFileDO)) {
             return Result.buildFrom(ResultStatus.RESOURCE_NOT_EXIST);

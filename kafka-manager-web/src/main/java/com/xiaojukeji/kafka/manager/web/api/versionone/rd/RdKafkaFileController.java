@@ -1,23 +1,30 @@
 package com.xiaojukeji.kafka.manager.web.api.versionone.rd;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaFileEnum;
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.KafkaFileDTO;
-import com.xiaojukeji.kafka.manager.common.entity.vo.rd.KafkaFileVO;
-import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
-import com.xiaojukeji.kafka.manager.kcm.component.storage.common.StorageEnum;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaFileDO;
-import com.xiaojukeji.kafka.manager.service.service.ClusterService;
-import com.xiaojukeji.kafka.manager.kcm.KafkaFileService;
+import com.xiaojukeji.kafka.manager.common.entity.vo.rd.KafkaFileVO;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
-import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.kcm.KafkaFileService;
+import com.xiaojukeji.kafka.manager.kcm.component.storage.common.StorageEnum;
+import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.web.converters.KafkaFileConverter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +37,8 @@ import java.util.Map;
 @RestController
 @RequestMapping(ApiPrefix.API_V1_RD_PREFIX)
 public class RdKafkaFileController {
+    private final static Logger LOGGER = LoggerFactory.getLogger(RdKafkaFileController.class);
+
     @Autowired
     private ClusterService clusterService;
 
@@ -71,9 +80,33 @@ public class RdKafkaFileController {
         return new Result<>(KafkaFileConverter.convertKafkaFileVOList(kafkaFileDOList, clusterService));
     }
 
-    @ApiOperation(value = "文件预览", notes = "")
+    @Deprecated
+    @ApiOperation(value = "文件下载", notes = "")
     @RequestMapping(value = "kafka-files/{fileId}/config-files", method = RequestMethod.GET)
-    public Result<String> previewKafkaFile(@PathVariable("fileId") Long fileId) {
-        return kafkaFileService.downloadKafkaConfigFile(fileId);
+    public Result downloadKafkaFile(@PathVariable("fileId") Long fileId, HttpServletResponse response) {
+        Result<MultipartFile> multipartFileResult = kafkaFileService.downloadKafkaFile(fileId);
+
+        if (multipartFileResult.failed() || ValidateUtils.isNull(multipartFileResult.getData())) {
+            return multipartFileResult;
+        }
+
+        InputStream is = null;
+        try {
+            response.setContentType(multipartFileResult.getData().getContentType());
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(multipartFileResult.getData().getOriginalFilename(), "UTF-8"));
+            is = multipartFileResult.getData().getInputStream();
+            IOUtils.copy(is, response.getOutputStream());
+        } catch (Exception e) {
+            LOGGER.error("class=RdKafkaFileController||method=downloadKafkaFile||fileId={}||errMsg={}||msg=modify response failed", fileId, e.getMessage());
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (Exception e) {
+            }
+        }
+        return Result.buildSuc();
     }
 }
