@@ -15,7 +15,7 @@
 - 应用（App）：作为Kafka中的账户，使用AppID+password作为身份标识
 - 集群：可使用平台提供的共享集群，也可为某一应用申请单独的集群
 - Topic：可申请创建Topic或申请其他Topic的生产/消费权限。进行生产/消费时通过Topic+AppID进行身份鉴权  
-![production_consumption_flow](../assets/resource_apply/production_consumption_flow.png)
+![production_consumption_flow](assets/resource_apply/production_consumption_flow.png)
 
 ## 应用申请
 应用（App）作为Kafka中的账户，使用AppID+password作为身份标识。对Topic进行生产/消费时通过Topic+AppID进行身份鉴权。
