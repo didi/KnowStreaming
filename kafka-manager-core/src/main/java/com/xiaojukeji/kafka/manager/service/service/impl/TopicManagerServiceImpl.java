@@ -50,6 +50,8 @@ import java.util.stream.Collectors;
 public class TopicManagerServiceImpl implements TopicManagerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopicManagerServiceImpl.class);
 
+    private static final String CONSUMER_OFFSETS_TOPIC = "__consumer_offsets";
+
     @Autowired
     private TopicDao topicDao;
 
@@ -275,6 +277,8 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         }
         Map<Long, Map<String, TopicDO>> topicMap = new HashMap<>(appList.size());
         for (TopicDO topicDO: topicList) {
+            if (topicDO.getTopicName().equals(CONSUMER_OFFSETS_TOPIC))
+                continue;
             Map<String, TopicDO> subTopicMap = topicMap.getOrDefault(topicDO.getClusterId(), new HashMap<>());
             subTopicMap.put(topicDO.getTopicName(), topicDO);
             topicMap.put(topicDO.getClusterId(), subTopicMap);
