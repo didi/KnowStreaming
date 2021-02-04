@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
+import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
@@ -275,11 +276,13 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         }
         Map<Long, Map<String, TopicDO>> topicMap = new HashMap<>(appList.size());
         for (TopicDO topicDO: topicList) {
-            if (topicDO.getTopicName().equals(KafkaConstant.COORDINATOR_TOPIC_NAME)) {
+            String topicName = topicDO.getTopicName();
+            if (topicName.equals(KafkaConstant.COORDINATOR_TOPIC_NAME) ||
+                    topicName.equals(KafkaConstant.TRANSACTION_TOPIC_NAME)) {
                 continue;
             }
             Map<String, TopicDO> subTopicMap = topicMap.getOrDefault(topicDO.getClusterId(), new HashMap<>());
-            subTopicMap.put(topicDO.getTopicName(), topicDO);
+            subTopicMap.put(topicName, topicDO);
             topicMap.put(topicDO.getClusterId(), subTopicMap);
         }
 
@@ -304,6 +307,11 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                 continue;
             }
 
+            TopicDO topicDO = topicMap.get(topicName);
+            if (ValidateUtils.isNull(topicDO)) {
+                continue;
+            }
+
             TopicDTO dto = new TopicDTO();
             dtoList.add(dto);
 
@@ -311,11 +319,6 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             dto.setLogicalClusterName(logicalClusterDO.getName());
             dto.setTopicName(topicName);
             dto.setNeedAuth(Boolean.TRUE);
-
-            TopicDO topicDO = topicMap.get(topicName);
-            if (ValidateUtils.isNull(topicDO)) {
-                continue;
-            }
             dto.setDescription(topicDO.getDescription());
             dto.setAppId(topicDO.getAppId());
 
