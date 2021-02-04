@@ -276,13 +276,8 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         }
         Map<Long, Map<String, TopicDO>> topicMap = new HashMap<>(appList.size());
         for (TopicDO topicDO: topicList) {
-            String topicName = topicDO.getTopicName();
-            if (topicName.equals(KafkaConstant.COORDINATOR_TOPIC_NAME) ||
-                    topicName.equals(KafkaConstant.TRANSACTION_TOPIC_NAME)) {
-                continue;
-            }
             Map<String, TopicDO> subTopicMap = topicMap.getOrDefault(topicDO.getClusterId(), new HashMap<>());
-            subTopicMap.put(topicName, topicDO);
+            subTopicMap.put(topicDO.getTopicName(), topicDO);
             topicMap.put(topicDO.getClusterId(), subTopicMap);
         }
 
@@ -299,14 +294,15 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                                      Map<String, TopicDO> topicMap) {
         List<TopicDTO> dtoList = new ArrayList<>();
         for (String topicName: PhysicalClusterMetadataManager.getTopicNameList(clusterDO.getId())) {
+            if (topicName.equals(KafkaConstant.COORDINATOR_TOPIC_NAME) || topicName.equals(KafkaConstant.TRANSACTION_TOPIC_NAME)) {
+                continue;
+            }
+
             LogicalClusterDO logicalClusterDO = logicalClusterMetadataManager.getTopicLogicalCluster(
                     clusterDO.getId(),
                     topicName
             );
-
-            TopicDO topicDO = topicMap.get(topicName);
-
-            if (ValidateUtils.isNull(topicDO) || ValidateUtils.isNull(logicalClusterDO)) {
+            if (ValidateUtils.isNull(logicalClusterDO)) {
                 continue;
             }
 
@@ -317,6 +313,11 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             dto.setLogicalClusterName(logicalClusterDO.getName());
             dto.setTopicName(topicName);
             dto.setNeedAuth(Boolean.TRUE);
+
+            TopicDO topicDO = topicMap.get(topicName);
+            if (ValidateUtils.isNull(topicDO)) {
+                continue;
+            }
             dto.setDescription(topicDO.getDescription());
             dto.setAppId(topicDO.getAppId());
 
