@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
+import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
@@ -293,6 +294,10 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                                      Map<String, TopicDO> topicMap) {
         List<TopicDTO> dtoList = new ArrayList<>();
         for (String topicName: PhysicalClusterMetadataManager.getTopicNameList(clusterDO.getId())) {
+            if (topicName.equals(KafkaConstant.COORDINATOR_TOPIC_NAME) || topicName.equals(KafkaConstant.TRANSACTION_TOPIC_NAME)) {
+                continue;
+            }
+
             LogicalClusterDO logicalClusterDO = logicalClusterMetadataManager.getTopicLogicalCluster(
                     clusterDO.getId(),
                     topicName
