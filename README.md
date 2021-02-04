@@ -53,10 +53,19 @@
 
 ## 2 相关文档
 
+### 2.1 产品文档
 - [滴滴Logi-KafkaManager 安装手册](docs/install_guide/install_guide_cn.md)
 - [滴滴Logi-KafkaManager 接入集群](docs/user_guide/add_cluster/add_cluster.md)
 - [滴滴Logi-KafkaManager 用户使用手册](docs/user_guide/user_guide_cn.md)
 - [滴滴Logi-KafkaManager FAQ](docs/user_guide/faq.md)
+
+### 2.2 社区文章
+- [滴滴云官网产品介绍](https://www.didiyun.com/production/logi-KafkaManager.html)
+- [7年沉淀之作--滴滴Logi日志服务套件](https://mp.weixin.qq.com/s/-KQp-Qo3WKEOc9wIR2iFnw)
+- [滴滴Logi-KafkaManager 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
+- [滴滴Logi-KafkaManager 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
+- [滴滴Logi-KafkaManager 系列视频教程](https://mp.weixin.qq.com/s/9X7gH0tptHPtfjPPSdGO8g)
+- [kafka实践（十五）：滴滴开源Kafka管控平台 Logi-KafkaManager研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
 
 ## 3 滴滴Logi开源用户钉钉交流群
 
