@@ -303,12 +303,10 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                     clusterDO.getId(),
                     topicName
             );
-            if (ValidateUtils.isNull(logicalClusterDO)) {
-                continue;
-            }
 
             TopicDO topicDO = topicMap.get(topicName);
-            if (ValidateUtils.isNull(topicDO)) {
+
+            if (ValidateUtils.isNull(topicDO) || ValidateUtils.isNull(logicalClusterDO)) {
                 continue;
             }
 
