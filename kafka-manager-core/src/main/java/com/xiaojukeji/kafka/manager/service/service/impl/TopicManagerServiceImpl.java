@@ -1,6 +1,8 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
@@ -80,6 +82,9 @@ public class TopicManagerServiceImpl implements TopicManagerService {
 
     @Autowired
     private RegionService regionService;
+
+    @Autowired
+    private OperateRecordService operateRecordService;
 
     @Override
     public List<TopicDO> listAll() {
@@ -341,6 +346,12 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             if (ValidateUtils.isNull(topicDO)) {
                 return ResultStatus.TOPIC_NOT_EXIST;
             }
+
+            Map<String, Object> content = new HashMap<>(2);
+            content.put("clusterId", clusterId);
+            content.put("topicName", topicName);
+            recordOperation(content, topicName, operator);
+
             topicDO.setDescription(description);
             if (topicDao.updateByName(topicDO) > 0) {
                 return ResultStatus.SUCCESS;
@@ -363,6 +374,12 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             if (ValidateUtils.isNull(appDO)) {
                 return ResultStatus.APP_NOT_EXIST;
             }
+
+            Map<String, Object> content = new HashMap<>(4);
+            content.put("clusterId", clusterId);
+            content.put("topicName", topicName);
+            content.put("appId", appId);
+            recordOperation(content, topicName, operator);
 
             TopicDO topicDO = topicDao.getByTopicName(clusterId, topicName);
             if (ValidateUtils.isNull(topicDO)) {
@@ -392,6 +409,16 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                     clusterId, topicName, description, operator, e);
         }
         return ResultStatus.MYSQL_ERROR;
+    }
+
+    private void recordOperation(Map<String, Object> content, String topicName, String operator) {
+        OperateRecordDO operateRecordDO = new OperateRecordDO();
+        operateRecordDO.setModuleId(ModuleEnum.TOPIC.getCode());
+        operateRecordDO.setOperateId(OperateEnum.EDIT.getCode());
+        operateRecordDO.setResource(topicName);
+        operateRecordDO.setContent(JsonUtils.toJSONString(content));
+        operateRecordDO.setOperator(operator);
+        operateRecordService.insert(operateRecordDO);
     }
 
     @Override
