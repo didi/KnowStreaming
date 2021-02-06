@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
@@ -417,7 +416,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         operateRecordDO.setModuleId(ModuleEnum.TOPIC.getCode());
         operateRecordDO.setOperateId(OperateEnum.EDIT.getCode());
         operateRecordDO.setResource(topicName);
-        operateRecordDO.setContent(JSONObject.toJSONString(content));
+        operateRecordDO.setContent(JsonUtils.toJSONString(content));
         operateRecordDO.setOperator(operator);
         operateRecordService.insert(operateRecordDO);
     }
