@@ -87,6 +87,6 @@ public class ApplyAppOrder extends AbstractAppOrder {
         appDO.setDescription(orderDO.getDescription());
         appDO.generateAppIdAndPassword(orderDO.getId(), configUtils.getIdc());
         appDO.setType(0);
-        return appService.addApp(appDO);
+        return appService.addApp(appDO, userName);
     }
 }
