@@ -17,11 +17,7 @@ import com.xiaojukeji.kafka.manager.dao.ClusterMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.ControllerDao;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
-import com.xiaojukeji.kafka.manager.service.service.ClusterService;
-import com.xiaojukeji.kafka.manager.service.service.ConsumerService;
-import com.xiaojukeji.kafka.manager.service.service.RegionService;
-import com.xiaojukeji.kafka.manager.service.service.ZookeeperService;
-import com.xiaojukeji.kafka.manager.service.utils.ChangeTrackingUtils;
+import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
@@ -69,7 +65,7 @@ public class ClusterServiceImpl implements ClusterService {
     private ZookeeperService zookeeperService;
 
     @Autowired
-    private ChangeTrackingUtils changeTrackingUtils;
+    private OperateRecordService operateRecordService;
 
     @Override
     public ResultStatus addNew(ClusterDO clusterDO, String operator) {
@@ -84,7 +80,8 @@ public class ClusterServiceImpl implements ClusterService {
             content.put("zk address", clusterDO.getZookeeper());
             content.put("bootstrap servers", clusterDO.getBootstrapServers());
             content.put("security properties", clusterDO.getSecurityProperties());
-            changeTrackingUtils.saveOperateRecord(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.ADD, content);
+            content.put("jmx properties", clusterDO.getJmxProperties());
+            operateRecordService.insert(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.ADD, content);
             if (clusterDao.insert(clusterDO) <= 0) {
                 LOGGER.error("add new cluster failed, clusterDO:{}.", clusterDO);
                 return ResultStatus.MYSQL_ERROR;
@@ -118,7 +115,8 @@ public class ClusterServiceImpl implements ClusterService {
         Map<String, String> content = new HashMap<>();
         content.put("cluster id", clusterDO.getId().toString());
         content.put("security properties", clusterDO.getSecurityProperties());
-        changeTrackingUtils.saveOperateRecord(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.EDIT, content);
+        content.put("jmx properties", clusterDO.getJmxProperties());
+        operateRecordService.insert(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.EDIT, content);
         return updateById(clusterDO);
     }
 
@@ -277,7 +275,7 @@ public class ClusterServiceImpl implements ClusterService {
         try {
             Map<String, String> content = new HashMap<>();
             content.put("cluster id", clusterId.toString());
-            changeTrackingUtils.saveOperateRecord(operator, ModuleEnum.CLUSTER, getClusterName(clusterId).getPhysicalClusterName(), OperateEnum.DELETE, content);
+            operateRecordService.insert(operator, ModuleEnum.CLUSTER, getClusterName(clusterId).getPhysicalClusterName(), OperateEnum.DELETE, content);
             if (clusterDao.deleteById(clusterId) <= 0) {
                 LOGGER.error("delete cluster failed, clusterId:{}.", clusterId);
                 return ResultStatus.MYSQL_ERROR;
