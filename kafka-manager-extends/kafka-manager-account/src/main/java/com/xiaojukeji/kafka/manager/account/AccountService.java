@@ -33,7 +33,7 @@ public interface AccountService {
      * @param username 用户名
      * @return
      */
-    ResultStatus deleteByName(String username);
+    ResultStatus deleteByName(String username, String operator);
 
     /**
      * 更新账号
