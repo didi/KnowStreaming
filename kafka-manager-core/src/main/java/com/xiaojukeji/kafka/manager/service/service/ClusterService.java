@@ -43,7 +43,7 @@ public interface ClusterService {
 
     ClusterNameDTO getClusterName(Long logicClusterId);
 
-    ResultStatus deleteById(Long clusterId);
+    ResultStatus deleteById(Long clusterId, String operator);
 
     /**
      * 获取优先被选举为controller的broker

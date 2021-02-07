@@ -43,7 +43,7 @@ public class OpClusterController {
     @RequestMapping(value = "clusters", method = RequestMethod.DELETE)
     @ResponseBody
     public Result delete(@RequestParam(value = "clusterId") Long clusterId) {
-        return Result.buildFrom(clusterService.deleteById(clusterId));
+        return Result.buildFrom(clusterService.deleteById(clusterId, SpringTool.getUserName()));
     }
 
     @ApiOperation(value = "修改集群信息")

@@ -1,6 +1,8 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.DBStatusEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ClusterDetailDTO;
@@ -19,6 +21,7 @@ import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.service.service.ConsumerService;
 import com.xiaojukeji.kafka.manager.service.service.RegionService;
 import com.xiaojukeji.kafka.manager.service.service.ZookeeperService;
+import com.xiaojukeji.kafka.manager.service.utils.ChangeTrackingUtils;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
@@ -65,6 +68,9 @@ public class ClusterServiceImpl implements ClusterService {
     @Autowired
     private ZookeeperService zookeeperService;
 
+    @Autowired
+    private ChangeTrackingUtils changeTrackingUtils;
+
     @Override
     public ResultStatus addNew(ClusterDO clusterDO, String operator) {
         if (ValidateUtils.isNull(clusterDO) || ValidateUtils.isNull(operator)) {
@@ -74,6 +80,11 @@ public class ClusterServiceImpl implements ClusterService {
             return ResultStatus.ZOOKEEPER_CONNECT_FAILED;
         }
         try {
+            Map<String, String> content = new HashMap<>();
+            content.put("zk address", clusterDO.getZookeeper());
+            content.put("bootstrap servers", clusterDO.getBootstrapServers());
+            content.put("security properties", clusterDO.getSecurityProperties());
+            changeTrackingUtils.saveOperateRecord(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.ADD, content);
             if (clusterDao.insert(clusterDO) <= 0) {
                 LOGGER.error("add new cluster failed, clusterDO:{}.", clusterDO);
                 return ResultStatus.MYSQL_ERROR;
@@ -104,6 +115,10 @@ public class ClusterServiceImpl implements ClusterService {
             return ResultStatus.CHANGE_ZOOKEEPER_FORBIDDEN;
         }
         clusterDO.setStatus(originClusterDO.getStatus());
+        Map<String, String> content = new HashMap<>();
+        content.put("cluster id", clusterDO.getId().toString());
+        content.put("security properties", clusterDO.getSecurityProperties());
+        changeTrackingUtils.saveOperateRecord(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.EDIT, content);
         return updateById(clusterDO);
     }
 
@@ -254,12 +269,15 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     @Override
-    public ResultStatus deleteById(Long clusterId) {
+    public ResultStatus deleteById(Long clusterId, String operator) {
         List<RegionDO> regionDOList = regionService.getByClusterId(clusterId);
         if (!ValidateUtils.isEmptyList(regionDOList)) {
             return ResultStatus.OPERATION_FORBIDDEN;
         }
         try {
+            Map<String, String> content = new HashMap<>();
+            content.put("cluster id", clusterId.toString());
+            changeTrackingUtils.saveOperateRecord(operator, ModuleEnum.CLUSTER, getClusterName(clusterId).getPhysicalClusterName(), OperateEnum.DELETE, content);
             if (clusterDao.deleteById(clusterId) <= 0) {
                 LOGGER.error("delete cluster failed, clusterId:{}.", clusterId);
                 return ResultStatus.MYSQL_ERROR;
