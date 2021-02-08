@@ -30,7 +30,7 @@
     </properties>
 
     <modules>
-        <!--<module>kafka-manager-console</module>-->
+        <module>kafka-manager-console</module>
         <module>kafka-manager-common</module>
         <module>kafka-manager-dao</module>
         <module>kafka-manager-core</module>
