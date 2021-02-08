@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { wrapper, region } from 'store';
 import './index.less';
-import { topic, IConsumerGroups, IConsumeDetails } from 'store/topic';
+import { topic, IConsumerGroups, IConsumeDetails,IConsumerGroupDetailVO } from 'store/topic';
 import { observer } from 'mobx-react';
 import { SearchAndFilterContainer } from 'container/search-filter';
 import Url from 'lib/url-parser';
@@ -143,7 +143,7 @@ export class GroupID extends SearchAndFilterContainer {
       dataIndex: 'partitionId',
       key: 'partitionId',
       width: '10%',
-      sorter: (a: IConsumeDetails, b: IConsumeDetails) => +b.partitionId - +a.partitionId,
+      sorter: (a: IConsumerGroupDetailVO, b: IConsumerGroupDetailVO) => +b.partitionId - +a.partitionId,
     }, {
       title: 'Consumer ID',
       dataIndex: 'clientId',
@@ -161,19 +161,19 @@ export class GroupID extends SearchAndFilterContainer {
       dataIndex: 'consumeOffset',
       key: 'consumeOffset',
       width: '20%',
-      sorter: (a: IConsumeDetails, b: IConsumeDetails) => +b.consumeOffset - +a.consumeOffset,
+      sorter: (a: IConsumerGroupDetailVO, b: IConsumerGroupDetailVO) => +b.consumeOffset - +a.consumeOffset,
     }, {
       title: 'Partition Offset',
       dataIndex: 'partitionOffset',
       key: 'partitionOffset',
       width: '20%',
-      sorter: (a: IConsumeDetails, b: IConsumeDetails) => +b.partitionOffset - +a.partitionOffset,
+      sorter: (a: IConsumerGroupDetailVO, b: IConsumerGroupDetailVO) => +b.partitionOffset - +a.partitionOffset,
     }, {
       title: 'Lag',
       dataIndex: 'lag',
       key: 'lag',
       width: '10%',
-      sorter: (a: IConsumeDetails, b: IConsumeDetails) => +b.lag - +a.lag,
+      sorter: (a: IConsumerGroupDetailVO, b: IConsumerGroupDetailVO) => +b.lag - +a.lag,
     }];
     return (
       <>
