@@ -155,7 +155,7 @@ export class GroupID extends SearchAndFilterContainer {
           ...cellStyle,
         },
       }),
-      render: (t: IConsumeDetails) => <Tooltip placement="bottomLeft" title={t}> {t} </Tooltip>,
+      render: (t: IConsumerGroupDetailVO) => <Tooltip placement="bottomLeft" title={t}> {t} </Tooltip>,
     }, {
       title: 'Consume Offset',
       dataIndex: 'consumeOffset',
