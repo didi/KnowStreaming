@@ -180,6 +180,7 @@ export class GroupID extends SearchAndFilterContainer {
         <div className="details-box">
           <b>{consumerGroup}</b>
           <div>
+            <div style={{ display: 'inline-block', marginRight: '20px' }}>Total Lag: {topic.totalLag}</div>
             <Button onClick={this.backToPage}>返回</Button>
             <Button onClick={this.updateDetailsStatus}>刷新</Button>
             <Button onClick={() => this.showResetOffset()}>重置Offset</Button>

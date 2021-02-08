@@ -8,6 +8,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumeDetailDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicOffsetResetDTO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupDerailTotalVo;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupDetailVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGroupSummaryVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
@@ -72,7 +73,7 @@ public class NormalConsumerController {
     @RequestMapping(value = "{clusterId}/consumers/{consumerGroup}/topics/{topicName}/consume-details",
             method = RequestMethod.GET)
     @ResponseBody
-    public Result<List<ConsumerGroupDetailVO>> getConsumeDetail(
+    public Result<ConsumerGroupDerailTotalVo> getConsumeDetail(
             @PathVariable Long clusterId,
             @PathVariable String consumerGroup,
             @PathVariable String topicName,
@@ -99,13 +100,20 @@ public class NormalConsumerController {
         try {
             List<ConsumeDetailDTO> consumeDetailDTOList =
                     consumerService.getConsumeDetail(clusterDO, topicName, consumeGroup);
+            Long totalLag = 0L;
+            for (ConsumeDetailDTO dto:consumeDetailDTOList) {
+                totalLag += dto.getOffset()-dto.getConsumeOffset();
+            }
+            ConsumerGroupDerailTotalVo consumerGroupDerailTotalVo = new ConsumerGroupDerailTotalVo();
+            consumerGroupDerailTotalVo.setConsumerGroupDetailVOs(ConsumerModelConverter.convert2ConsumerGroupDetailVO(
+                    topicName,
+                    consumerGroup,
+                    location,
+                    consumeDetailDTOList
+            ));
+            consumerGroupDerailTotalVo.setTotalLag(totalLag);
             return new Result<>(
-                    ConsumerModelConverter.convert2ConsumerGroupDetailVO(
-                            topicName,
-                            consumerGroup,
-                            location,
-                            consumeDetailDTOList
-                    )
+                    consumerGroupDerailTotalVo
             );
         } catch (Exception e) {
             LOGGER.error("get consume detail failed, consumerGroup:{}.", consumeGroup, e);

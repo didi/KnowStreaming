@@ -85,7 +85,7 @@ export interface IConsumerGroups {
   key?: number;
 }
 
-export interface IConsumeDetails {
+export interface IConsumerGroupDetailVO{
   clientId: string;
   clusterId: number;
   consumeOffset: number;
@@ -97,6 +97,11 @@ export interface IConsumeDetails {
   topicName: string;
   consumerId: number;
   key?: number;
+}
+export interface IConsumeDetails {
+  consumerGroupDetailVOs:IConsumerGroupDetailVO[]
+
+  totalLag: number
 }
 
 export interface IPartitionsInfo {
@@ -191,7 +196,10 @@ class Topic {
   public filterGroups: IConsumerGroups[] = [];
 
   @observable
-  public consumeDetails: IConsumeDetails[] = [];
+  public consumeDetails: IConsumerGroupDetailVO[] = [];
+
+  @observable
+  public totalLag: number;
 
   @observable
   public partitionsInfo: IPartitionsInfo[] = [];
@@ -353,11 +361,12 @@ class Topic {
   }
 
   @action.bound
-  public setConsumeDetails(data: IConsumeDetails[]) {
-    this.consumeDetails = data ? data.map((item, index) => {
+  public setConsumeDetails(data: IConsumeDetails) {
+    this.consumeDetails = data.consumerGroupDetailVOs ? data.consumerGroupDetailVOs.map((item, index) => {
       item.key = index;
       return item;
     }) : [];
+    this.totalLag = data.totalLag;
   }
 
   @action.bound
