@@ -4,7 +4,7 @@ cd $workspace
 
 ## constant
 OUTPUT_DIR=./output
-KM_VERSION=2.2.0
+KM_VERSION=2.3.0
 APP_NAME=kafka-manager
 APP_DIR=${APP_NAME}-${KM_VERSION}
 
