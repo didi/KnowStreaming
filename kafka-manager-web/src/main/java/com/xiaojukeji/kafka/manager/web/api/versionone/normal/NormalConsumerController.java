@@ -102,7 +102,10 @@ public class NormalConsumerController {
                     consumerService.getConsumeDetail(clusterDO, topicName, consumeGroup);
             Long totalLag = 0L;
             for (ConsumeDetailDTO dto:consumeDetailDTOList) {
-                totalLag += dto.getOffset()-dto.getConsumeOffset();
+                //过滤掉空消费
+                if (dto.getConsumeOffset() != null) {
+                    totalLag += dto.getOffset()-dto.getConsumeOffset();
+                }
             }
             ConsumerGroupDerailTotalVo consumerGroupDerailTotalVo = new ConsumerGroupDerailTotalVo();
             consumerGroupDerailTotalVo.setConsumerGroupDetailVOs(ConsumerModelConverter.convert2ConsumerGroupDetailVO(
