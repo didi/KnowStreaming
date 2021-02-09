@@ -12,8 +12,8 @@ spring:
   datasource:
     kafka-manager:
       jdbc-url: jdbc:mysql://127.0.0.1:3306/logi_kafka_manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8
-      username: admin
-      password: admin
+      username: root
+      password: root
       driver-class-name: com.mysql.jdbc.Driver
   main:
     allow-bean-definition-overriding: true
@@ -79,3 +79,15 @@ notify:
     topic-name: didi-kafka-notify
   order:
     detail-url: http://127.0.0.1
+
+ldap:
+  enabled: false
+  url: ldap://127.0.0.1:389/
+  basedn: dc=tsign,dc=cn
+  factory: com.sun.jndi.ldap.LdapCtxFactory
+  security:
+    authentication: simple
+    principal: cn=admin,dc=tsign,dc=cn
+    credentials: admin
+  auth-user-registration-role: normal
+  auth-user-registration: true

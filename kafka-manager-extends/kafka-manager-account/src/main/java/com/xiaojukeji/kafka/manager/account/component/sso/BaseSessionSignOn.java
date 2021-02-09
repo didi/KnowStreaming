@@ -2,12 +2,15 @@ package com.xiaojukeji.kafka.manager.account.component.sso;
 
 import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.account.component.AbstractSingleSignOn;
+import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.LoginDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
 import com.xiaojukeji.kafka.manager.common.utils.EncryptUtil;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.common.utils.ldap.LDAPAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,12 +25,49 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private LDAPAuthentication ldapAuthentication;
+
+    //是否开启ldap验证
+    @Value(value = "${ldap.enabled}")
+    private boolean ldapEnabled;
+
+    //ldap自动注册的默认角色。请注意：它通常来说都是低权限角色
+    @Value(value = "${ldap.auth-user-registration-role}")
+    private String authUserRegistrationRole;
+
+    //ldap自动注册是否开启
+    @Value(value = "${ldap.auth-user-registration}")
+    private boolean authUserRegistration;
+
     @Override
     public String loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
         if (ValidateUtils.isBlank(dto.getUsername()) || ValidateUtils.isNull(dto.getPassword())) {
             return null;
         }
+
         AccountDO accountDO = accountService.getAccountDO(dto.getUsername());
+
+        //modifier limin
+        //判断是否激活了LDAP验证。若激活并且数据库无此用户则自动注册
+        if(ldapEnabled){
+            //验证账密
+            if(!ldapAuthentication.authenricate(dto.getUsername(),dto.getPassword())){
+                return null;
+            }
+
+            if(authUserRegistration){
+                //自动注册
+                accountDO = new AccountDO();
+                accountDO.setUsername(dto.getUsername());
+                accountDO.setRole(AccountRoleEnum.getUserRoleEnum(authUserRegistrationRole).getRole());
+                accountDO.setPassword(EncryptUtil.md5(dto.getPassword()));
+                accountService.createAccount(accountDO);
+                return dto.getUsername();
+            }
+
+        }
+
         if (ValidateUtils.isNull(accountDO)) {
             return null;
         }
