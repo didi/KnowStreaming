@@ -31,7 +31,6 @@ import java.util.Map;
 @RestController
 @RequestMapping(ApiPrefix.GATEWAY_API_V1_PREFIX)
 public class GatewayServiceDiscoveryController {
-
     private final static Logger LOGGER = LoggerFactory.getLogger(GatewayHeartbeatController.class);
 
     @Autowired
@@ -65,7 +64,7 @@ public class GatewayServiceDiscoveryController {
         KafkaBootstrapServerConfig config =
                 gatewayConfigService.getKafkaBootstrapServersConfig(Long.MIN_VALUE);
         if (ValidateUtils.isNull(config) || ValidateUtils.isNull(config.getClusterIdBootstrapServersMap())) {
-            return Result.buildFailure("call init kafka bootstrap servers failed");
+            return Result.buildGatewayFailure("call init kafka bootstrap servers failed");
         }
         if (ValidateUtils.isEmptyMap(config.getClusterIdBootstrapServersMap())) {
             return Result.buildSuc();
@@ -81,7 +80,7 @@ public class GatewayServiceDiscoveryController {
         KafkaBootstrapServerConfig config =
                 gatewayConfigService.getKafkaBootstrapServersConfig(versionNumber);
         if (ValidateUtils.isNull(config) || ValidateUtils.isNull(config.getClusterIdBootstrapServersMap())) {
-            return Result.buildFailure("call update kafka bootstrap servers failed");
+            return Result.buildGatewayFailure("call update kafka bootstrap servers failed");
         }
         if (ValidateUtils.isEmptyMap(config.getClusterIdBootstrapServersMap())) {
             return Result.buildSuc();
@@ -99,7 +98,7 @@ public class GatewayServiceDiscoveryController {
     public Result<String> getMaxRequestNum(@RequestParam("versionNumber") long versionNumber) {
         RequestQueueConfig config = gatewayConfigService.getRequestQueueConfig(versionNumber);
         if (ValidateUtils.isNull(config)) {
-            return Result.buildFailure("call get request queue size config failed");
+            return Result.buildGatewayFailure("call get request queue size config failed");
         }
         if (ValidateUtils.isNull(config.getMaxRequestQueueSize())) {
             return Result.buildSuc();
@@ -119,7 +118,7 @@ public class GatewayServiceDiscoveryController {
     public Result<String> getAppIdRate(@RequestParam("versionNumber") long versionNumber) {
         AppRateConfig config = gatewayConfigService.getAppRateConfig(versionNumber);
         if (ValidateUtils.isNull(config)) {
-            return Result.buildFailure("call get app rate config failed");
+            return Result.buildGatewayFailure("call get app rate config failed");
         }
         if (ValidateUtils.isNull(config.getAppRateLimit())) {
             return Result.buildSuc();
@@ -139,7 +138,7 @@ public class GatewayServiceDiscoveryController {
     public Result getIpRate(@RequestParam("versionNumber") long versionNumber) {
         IpRateConfig config = gatewayConfigService.getIpRateConfig(versionNumber);
         if (ValidateUtils.isNull(config)) {
-            return Result.buildFailure("call get ip rate config failed");
+            return Result.buildGatewayFailure("call get ip rate config failed");
         }
         if (ValidateUtils.isNull(config.getIpRateLimit())) {
             return Result.buildSuc();
@@ -160,7 +159,7 @@ public class GatewayServiceDiscoveryController {
         SpRateConfig config =
                 gatewayConfigService.getSpRateConfig(versionNumber);
         if (ValidateUtils.isNull(config) || ValidateUtils.isNull(config.getSpRateMap())) {
-            return Result.buildFailure("call update kafka bootstrap servers failed");
+            return Result.buildGatewayFailure("call update kafka bootstrap servers failed");
         }
         if (ValidateUtils.isEmptyMap(config.getSpRateMap())) {
             return Result.buildSuc();

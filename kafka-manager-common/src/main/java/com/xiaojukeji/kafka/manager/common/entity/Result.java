@@ -97,9 +97,17 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public static <T> Result<T> buildFailure(String message) {
+    public static <T> Result<T> buildGatewayFailure(String message) {
         Result<T> result = new Result<T>();
         result.setCode(ResultStatus.GATEWAY_INVALID_REQUEST.getCode());
+        result.setMessage(message);
+        result.setData(null);
+        return result;
+    }
+
+    public static <T> Result<T> buildFailure(String message) {
+        Result<T> result = new Result<T>();
+        result.setCode(ResultStatus.FAIL.getCode());
         result.setMessage(message);
         result.setData(null);
         return result;
