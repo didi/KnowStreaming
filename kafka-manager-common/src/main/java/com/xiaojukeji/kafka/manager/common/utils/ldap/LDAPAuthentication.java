@@ -56,15 +56,14 @@ public class LDAPAuthentication {
         return null;
     }
 
-    private String getUserDN(String account) {
-        String userDN = null;
-        LdapContext ctx = getConnect();
+    private String getUserDN(String account,LdapContext ctx) {
+        String userDN = "";
         try {
             SearchControls constraints = new SearchControls();
             constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
             NamingEnumeration<SearchResult> en = ctx.search("", "account=" + account, constraints);
             if (en == null || !en.hasMoreElements()) {
-                return null;
+                return "";
             }
             // maybe more than one element
             while (en.hasMoreElements()) {
@@ -93,7 +92,7 @@ public class LDAPAuthentication {
         LdapContext ctx = getConnect();
 
         boolean valide = false;
-        String userDN = getUserDN(account);
+        String userDN = getUserDN(account,ctx);
         try {
             assert ctx != null;
             ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, userDN);
