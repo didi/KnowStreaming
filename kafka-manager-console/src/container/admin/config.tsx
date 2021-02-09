@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { IUser, IUploadFile, IConfigure, IMetaData, IBrokersPartitions } from 'types/base-type';
+import { IUser, IUploadFile, IConfigure, IConfigGateway, IMetaData } from 'types/base-type';
 import { users } from 'store/users';
 import { version } from 'store/version';
-import { showApplyModal, showModifyModal, showConfigureModal } from 'container/modal/admin';
+import { showApplyModal, showApplyModalModifyPassword, showModifyModal, showConfigureModal, showConfigGatewayModal } from 'container/modal/admin';
 import { Popconfirm, Tooltip } from 'component/antd';
 import { admin } from 'store/admin';
 import { cellStyle } from 'constants/table';
@@ -27,6 +27,7 @@ export const getUserColumns = () => {
         return (
           <span className="table-operation">
             <a onClick={() => showApplyModal(record)}>编辑</a>
+            <a onClick={() => showApplyModalModifyPassword(record)}>修改密码</a>
             <Popconfirm
               title="确定删除？"
               onConfirm={() => users.deleteUser(record.username)}
@@ -172,6 +173,87 @@ export const getConfigureColumns = () => {
             <Popconfirm
               title="确定删除？"
               onConfirm={() => admin.deleteConfigure(record.configKey)}
+              cancelText="取消"
+              okText="确认"
+            >
+              <a>删除</a>
+            </Popconfirm>
+          </span>);
+      },
+    },
+  ];
+  return columns;
+};
+
+// 网关配置
+export const getConfigColumns = () => {
+  const columns = [
+    {
+      title: '配置类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: '25%',
+      ellipsis: true,
+      sorter: (a: IConfigGateway, b: IConfigGateway) => a.type.charCodeAt(0) - b.type.charCodeAt(0),
+    },
+    {
+      title: '配置键',
+      dataIndex: 'name',
+      key: 'name',
+      width: '15%',
+      ellipsis: true,
+      sorter: (a: IConfigGateway, b: IConfigGateway) => a.name.charCodeAt(0) - b.name.charCodeAt(0),
+    },
+    {
+      title: '配置值',
+      dataIndex: 'value',
+      key: 'value',
+      width: '20%',
+      ellipsis: true,
+      sorter: (a: IConfigGateway, b: IConfigGateway) => a.value.charCodeAt(0) - b.value.charCodeAt(0),
+      render: (t: string) => {
+        return t.substr(0, 1) === '{' && t.substr(0, -1) === '}' ? JSON.stringify(JSON.parse(t), null, 4) : t;
+      },
+    },
+    {
+      title: '修改时间',
+      dataIndex: 'modifyTime',
+      key: 'modifyTime',
+      width: '15%',
+      sorter: (a: IConfigGateway, b: IConfigGateway) => b.modifyTime - a.modifyTime,
+      render: (t: number) => moment(t).format(timeFormat),
+    },
+    {
+      title: '版本号',
+      dataIndex: 'version',
+      key: 'version',
+      width: '10%',
+      ellipsis: true,
+      sorter: (a: IConfigGateway, b: IConfigGateway) => b.version.charCodeAt(0) - a.version.charCodeAt(0),
+    },
+    {
+      title: '描述信息',
+      dataIndex: 'description',
+      key: 'description',
+      width: '20%',
+      ellipsis: true,
+      onCell: () => ({
+        style: {
+          maxWidth: 180,
+          ...cellStyle,
+        },
+      }),
+    },
+    {
+      title: '操作',
+      width: '10%',
+      render: (text: string, record: IConfigGateway) => {
+        return (
+          <span className="table-operation">
+            <a onClick={() => showConfigGatewayModal(record)}>编辑</a>
+            <Popconfirm
+              title="确定删除？"
+              onConfirm={() => admin.deleteConfigGateway({ id: record.id })}
               cancelText="取消"
               okText="确认"
             >

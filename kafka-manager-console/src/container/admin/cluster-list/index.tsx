@@ -12,6 +12,7 @@ import { urlPrefix } from 'constants/left-menu';
 import { indexUrl } from 'constants/strategy'
 import { region } from 'store';
 import './index.less';
+import Monacoeditor from 'component/editor/monacoEditor';
 import { getAdminClusterColumns } from '../config';
 
 const { confirm } = Modal;
@@ -132,6 +133,25 @@ export class ClusterList extends SearchAndFilterContainer {
   "security.protocol": "SASL_PLAINTEXT", 
   "sasl.mechanism": "PLAIN", 
   "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\\"xxxxxx\\" password=\\"xxxxxx\\";"
+}`,
+            rows: 8,
+          },
+        },
+        {
+          key: 'jmxProperties',
+          label: 'JMX认证',
+          type: 'text_area',
+          rules: [{
+            required: false,
+            message: '请输入JMX认证',
+          }],
+          attrs: {
+            placeholder: `请输入JMX认证，例如：
+{
+"maxConn": 10, #KM对单台Broker对最大连接数
+"username": "xxxxx", #用户名
+"password": "xxxxx", #密码
+"openSSL": true, #开启SSL，true表示开启SSL，false表示关闭
 }`,
             rows: 8,
           },

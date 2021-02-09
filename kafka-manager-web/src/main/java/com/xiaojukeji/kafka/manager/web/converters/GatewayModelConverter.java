@@ -67,6 +67,7 @@ public class GatewayModelConverter {
             vo.setName(configDO.getName());
             vo.setValue(configDO.getValue());
             vo.setVersion(configDO.getVersion());
+            vo.setDescription(configDO.getDescription());
             vo.setCreateTime(configDO.getCreateTime());
             vo.setModifyTime(configDO.getModifyTime());
             voList.add(vo);
@@ -76,18 +77,20 @@ public class GatewayModelConverter {
 
     public static GatewayConfigDO convert2GatewayConfigDO(OrderExtensionAddGatewayConfigDTO configDTO) {
         GatewayConfigDO configDO = new GatewayConfigDO();
-        configDO.setType(configDO.getType());
-        configDO.setName(configDO.getName());
-        configDO.setValue(configDO.getValue());
+        configDO.setType(configDTO.getType());
+        configDO.setName(configDTO.getName());
+        configDO.setValue(configDTO.getValue());
+        configDO.setDescription(ValidateUtils.isNull(configDTO.getDescription())? "": configDTO.getDescription());
         return configDO;
     }
 
     public static GatewayConfigDO convert2GatewayConfigDO(OrderExtensionModifyGatewayConfigDTO configDTO) {
         GatewayConfigDO configDO = new GatewayConfigDO();
-        configDO.setId(configDO.getId());
-        configDO.setType(configDO.getType());
-        configDO.setName(configDO.getName());
-        configDO.setValue(configDO.getValue());
+        configDO.setId(configDTO.getId());
+        configDO.setType(configDTO.getType());
+        configDO.setName(configDTO.getName());
+        configDO.setValue(configDTO.getValue());
+        configDO.setDescription(ValidateUtils.isNull(configDTO.getDescription())? "": configDTO.getDescription());
         return configDO;
     }
 }

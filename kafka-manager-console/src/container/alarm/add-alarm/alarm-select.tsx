@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { alarm } from 'store/alarm';
 import { IMonitorGroups } from 'types/base-type';
-import { getValueFromLocalStorage, setValueToLocalStorage } from 'lib/local-storage';
+import { getValueFromLocalStorage, setValueToLocalStorage, deleteValueFromLocalStorage } from 'lib/local-storage';
 import { VirtualScrollSelect } from '../../../component/virtual-scroll-select';
 
 interface IAlarmSelectProps {
@@ -34,6 +34,10 @@ export class AlarmSelect extends React.Component<IAlarmSelectProps> {
 
     // tslint:disable-next-line:no-unused-expression
     onChange && onChange(params);
+  }
+
+  public componentWillUnmount() {
+    deleteValueFromLocalStorage('monitorGroups');
   }
 
   public render() {

@@ -1,8 +1,11 @@
 package com.xiaojukeji.kafka.manager.kcm.component.agent.n9e;
 
-import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaFileEnum;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.kcm.common.Constant;
+import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskActionEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskTypeEnum;
+import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskLog;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.CreationTaskData;
 import com.xiaojukeji.kafka.manager.common.utils.HttpUtils;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
@@ -11,20 +14,17 @@ import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskStateEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskSubStateEnum;
 import com.xiaojukeji.kafka.manager.kcm.component.agent.AbstractAgent;
+import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.N9eCreationTask;
 import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.N9eResult;
-import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.N9eTaskResultDTO;
-import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.N9eTaskStatusEnum;
-import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.N9eTaskStdoutDTO;
+import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.N9eTaskResult;
+import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.N9eTaskStdoutLog;
+import com.xiaojukeji.kafka.manager.kcm.component.agent.n9e.entry.bizenum.N9eTaskStatusEnum;
 import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,16 +54,6 @@ public class N9e extends AbstractAgent {
 
     private String      script;
 
-    /**
-     * 并发度，顺序执行
-     */
-    private static final Integer BATCH = 1;
-
-    /**
-     * 失败的容忍度为0
-     */
-    private static final Integer TOLERANCE = 0;
-
     private static final String CREATE_TASK_URI = "/api/job-ce/tasks";
 
     private static final String ACTION_TASK_URI = "/api/job-ce/task/{taskId}/action";
@@ -82,143 +72,134 @@ public class N9e extends AbstractAgent {
     }
 
     @Override
-    public Long createTask(CreationTaskData creationTaskData) {
-        Map<String, Object> param = buildCreateTaskParam(creationTaskData);
+    public Result<Long> createTask(CreationTaskData creationTaskData) {
+        String content = JsonUtils.toJSONString(buildCreateTaskParam(creationTaskData));
 
         String response = null;
         try {
-            response = HttpUtils.postForString(
-                    baseUrl + CREATE_TASK_URI,
-                    JsonUtils.toJSONString(param),
-                    buildHeader()
-            );
-            N9eResult zr = JSON.parseObject(response, N9eResult.class);
-            if (!ValidateUtils.isBlank(zr.getErr())) {
-                LOGGER.warn("class=N9e||method=createTask||param={}||errMsg={}||msg=call create task fail", JsonUtils.toJSONString(param),zr.getErr());
-                return null;
+            response = HttpUtils.postForString(baseUrl + CREATE_TASK_URI, content, buildHeader());
+            N9eResult nr = JsonUtils.stringToObj(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(nr.getErr())) {
+                LOGGER.error("class=N9e||method=createTask||param={}||response={}||msg=call create task failed", content, response);
+                return Result.buildFailure(nr.getErr());
             }
-            return Long.valueOf(zr.getDat().toString());
+            return Result.buildSuc(Long.valueOf(nr.getDat().toString()));
         } catch (Exception e) {
-            LOGGER.error("create task failed, req:{}.", creationTaskData, e);
+            LOGGER.error("class=N9e||method=createTask||param={}||response={}||errMsg={}||msg=call create task failed", content, response, e.getMessage());
         }
-        return null;
+        return Result.buildFailure("create n9e task failed");
     }
 
     @Override
-    public Boolean actionTask(Long taskId, String action) {
+    public boolean actionTask(Long taskId, ClusterTaskActionEnum actionEnum) {
         Map<String, Object> param = new HashMap<>(1);
-        param.put("action", action);
+        param.put("action", actionEnum.getAction());
 
         String response = null;
         try {
-            response = HttpUtils.putForString(
-                    baseUrl + ACTION_TASK_URI.replace("{taskId}", taskId.toString()),
-                    JSON.toJSONString(param),
-                    buildHeader()
-            );
-            N9eResult zr = JSON.parseObject(response, N9eResult.class);
-            if (ValidateUtils.isBlank(zr.getErr())) {
+            response = HttpUtils.putForString(baseUrl + ACTION_TASK_URI.replace("{taskId}", String.valueOf(taskId)), JsonUtils.toJSONString(param), buildHeader());
+            N9eResult nr = JsonUtils.stringToObj(response, N9eResult.class);
+            if (ValidateUtils.isBlank(nr.getErr())) {
                 return true;
             }
-            LOGGER.warn("class=N9e||method=actionTask||param={}||errMsg={}||msg=call action task fail", JSON.toJSONString(param),zr.getErr());
+
+            LOGGER.error("class=N9e||method=actionTask||param={}||response={}||msg=call action task fail", JsonUtils.toJSONString(param), response);
             return false;
         } catch (Exception e) {
-            LOGGER.error("action task failed, taskId:{}, action:{}.", taskId, action, e);
+            LOGGER.error("class=N9e||method=actionTask||param={}||response={}||errMsg={}||msg=call action task fail", JsonUtils.toJSONString(param), response, e.getMessage());
         }
         return false;
     }
 
     @Override
-    public Boolean actionHostTask(Long taskId, String action, String hostname) {
-        Map<String, Object> param = new HashMap<>(2);
-        param.put("action", action);
-        param.put("hostname", hostname);
+    public boolean actionHostTask(Long taskId, ClusterTaskActionEnum actionEnum, String hostname) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("action", actionEnum.getAction());
+        params.put("hostname", hostname);
 
         String response = null;
         try {
-            response = HttpUtils.putForString(
-                    baseUrl + ACTION_HOST_TASK_URI.replace("{taskId}", taskId.toString()),
-                    JSON.toJSONString(param),
-                    buildHeader()
-            );
-            N9eResult zr = JSON.parseObject(response, N9eResult.class);
-            if (ValidateUtils.isBlank(zr.getErr())) {
+            response = HttpUtils.putForString(baseUrl + ACTION_HOST_TASK_URI.replace("{taskId}", String.valueOf(taskId)), JsonUtils.toJSONString(params), buildHeader());
+            N9eResult nr = JsonUtils.stringToObj(response, N9eResult.class);
+            if (ValidateUtils.isBlank(nr.getErr())) {
                 return true;
             }
-            LOGGER.warn("class=N9e||method=actionHostTask||param={}||errMsg={}||msg=call action host task fail", JSON.toJSONString(param),zr.getErr());
+
+            LOGGER.error("class=N9e||method=actionHostTask||params={}||response={}||msg=call action host task fail", JsonUtils.toJSONString(params), response);
             return false;
         } catch (Exception e) {
-            LOGGER.error("action task failed, taskId:{} action:{} hostname:{}.", taskId, action, hostname, e);
+            LOGGER.error("class=N9e||method=actionHostTask||params={}||response={}||errMsg={}||msg=call action host task fail", JsonUtils.toJSONString(params), response, e.getMessage());
         }
         return false;
     }
 
     @Override
-    public ClusterTaskStateEnum getTaskState(Long agentTaskId) {
+    public Result<ClusterTaskStateEnum> getTaskExecuteState(Long taskId) {
         String response = null;
         try {
             // 获取任务的state
-            response = HttpUtils.get(
-                    baseUrl + TASK_STATE_URI.replace("{taskId}", agentTaskId.toString()), null
-            );
-            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
-            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
-                LOGGER.error("get response result failed, agentTaskId:{} response:{}.", agentTaskId, response);
-                return null;
+            response = HttpUtils.get(baseUrl + TASK_STATE_URI.replace("{taskId}", String.valueOf(taskId)), null);
+            N9eResult nr = JsonUtils.stringToObj(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(nr.getErr())) {
+                return Result.buildFailure(nr.getErr());
             }
-            String state = JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), String.class);
+
+            String state = JsonUtils.stringToObj(JsonUtils.toJSONString(nr.getDat()), String.class);
+
             N9eTaskStatusEnum n9eTaskStatusEnum = N9eTaskStatusEnum.getByMessage(state);
             if (ValidateUtils.isNull(n9eTaskStatusEnum)) {
-                LOGGER.error("get task status failed, agentTaskId:{} state:{}.", agentTaskId, state);
-                return null;
+                LOGGER.error("class=N9e||method=getTaskExecuteState||taskId={}||response={}||msg=get task state failed", taskId, response);
+                return Result.buildFailure("unknown state, state:" + state);
             }
-            return n9eTaskStatusEnum.getStatus();
+            return Result.buildSuc(n9eTaskStatusEnum.getStatus());
         } catch (Exception e) {
-            LOGGER.error("get task status failed, agentTaskId:{} response:{}.", agentTaskId, response, e);
+            LOGGER.error("class=N9e||method=getTaskExecuteState||taskId={}||response={}||errMsg={}||msg=get task state failed", taskId, response, e.getMessage());
         }
-        return null;
+        return Result.buildFailure("get task state failed");
     }
 
     @Override
-    public Map<String, ClusterTaskSubStateEnum> getTaskResult(Long agentTaskId) {
+    public Result<Map<String, ClusterTaskSubStateEnum>> getTaskResult(Long taskId) {
         String response = null;
         try {
             // 获取子任务的state
-            response = HttpUtils.get(baseUrl + TASK_SUB_STATE_URI.replace("{taskId}", agentTaskId.toString()), null);
-            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
+            response = HttpUtils.get(baseUrl + TASK_SUB_STATE_URI.replace("{taskId}", String.valueOf(taskId)), null);
+            N9eResult nr = JsonUtils.stringToObj(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(nr.getErr())) {
+                LOGGER.error("class=N9e||method=getTaskResult||taskId={}||response={}||msg=get task result failed", taskId, response);
+                return Result.buildFailure(nr.getErr());
+            }
 
-            N9eTaskResultDTO n9eTaskResultDTO =
-                    JSON.parseObject(JSON.toJSONString(n9eResult.getDat()), N9eTaskResultDTO.class);
-            return n9eTaskResultDTO.convert2HostnameStatusMap();
+            return Result.buildSuc(JsonUtils.stringToObj(JsonUtils.toJSONString(nr.getDat()), N9eTaskResult.class).convert2HostnameStatusMap());
         } catch (Exception e) {
-            LOGGER.error("get task result failed, agentTaskId:{} response:{}.", agentTaskId, response, e);
+            LOGGER.error("class=N9e||method=getTaskResult||taskId={}||response={}||errMsg={}||msg=get task result failed", taskId, response, e.getMessage());
         }
-        return null;
+        return Result.buildFailure("get task result failed");
     }
 
     @Override
-    public String getTaskLog(Long agentTaskId, String hostname) {
+    public Result<ClusterTaskLog> getTaskLog(Long taskId, String hostname) {
+        Map<String, String> params = new HashMap<>(1);
+        params.put("hostname", hostname);
+
         String response = null;
         try {
-            Map<String, String> params = new HashMap<>(1);
-            params.put("hostname", hostname);
+            response = HttpUtils.get(baseUrl + TASK_STD_LOG_URI.replace("{taskId}", String.valueOf(taskId)), params);
+            N9eResult nr = JsonUtils.stringToObj(response, N9eResult.class);
+            if (!ValidateUtils.isBlank(nr.getErr())) {
+                LOGGER.error("class=N9e||method=getTaskLog||taskId={}||response={}||msg=get task log failed", taskId, response);
+                return Result.buildFailure(nr.getErr());
+            }
 
-            response = HttpUtils.get(baseUrl + TASK_STD_LOG_URI.replace("{taskId}", agentTaskId.toString()), params);
-            N9eResult n9eResult = JSON.parseObject(response, N9eResult.class);
-            if (!ValidateUtils.isBlank(n9eResult.getErr())) {
-                LOGGER.error("get task log failed, agentTaskId:{} response:{}.", agentTaskId, response);
-                return null;
-            }
-            List<N9eTaskStdoutDTO> dtoList =
-                    JSON.parseArray(JSON.toJSONString(n9eResult.getDat()), N9eTaskStdoutDTO.class);
+            List<N9eTaskStdoutLog> dtoList = JsonUtils.stringToArrObj(JsonUtils.toJSONString(nr.getDat()), N9eTaskStdoutLog.class);
             if (ValidateUtils.isEmptyList(dtoList)) {
-                return "";
+                return Result.buildSuc(new ClusterTaskLog(""));
             }
-            return dtoList.get(0).getStdout();
+            return Result.buildSuc(new ClusterTaskLog(dtoList.get(0).getStdout()));
         } catch (Exception e) {
-            LOGGER.error("get task log failed, agentTaskId:{}.", agentTaskId, e);
+            LOGGER.error("class=N9e||method=getTaskLog||taskId={}||response={}||errMsg={}||msg=get task log failed", taskId, response, e.getMessage());
         }
-        return null;
+        return Result.buildFailure("get task log failed");
     }
 
     private Map<String, String> buildHeader() {
@@ -228,7 +209,7 @@ public class N9e extends AbstractAgent {
         return headers;
     }
 
-    private Map<String, Object> buildCreateTaskParam(CreationTaskData creationTaskData) {
+    private N9eCreationTask buildCreateTaskParam(CreationTaskData creationTaskData) {
         StringBuilder sb = new StringBuilder();
         sb.append(creationTaskData.getUuid()).append(",,");
         sb.append(creationTaskData.getClusterId()).append(",,");
@@ -240,46 +221,17 @@ public class N9e extends AbstractAgent {
         sb.append(creationTaskData.getServerPropertiesMd5()).append(",,");
         sb.append(creationTaskData.getServerPropertiesUrl());
 
-        Map<String, Object> params = new HashMap<>(10);
-        params.put("title", String.format("集群ID=%d-升级部署", creationTaskData.getClusterId()));
-        params.put("batch", BATCH);
-        params.put("tolerance", TOLERANCE);
-        params.put("timeout", timeout);
-        params.put("pause", ListUtils.strList2String(creationTaskData.getPauseList()));
-        params.put("script", this.script);
-        params.put("args", sb.toString());
-        params.put("account", account);
-        params.put("action", "pause");
-        params.put("hosts", creationTaskData.getHostList());
-        return params;
-    }
-
-    private static String readScriptInJarFile(String fileName) {
-        InputStream inputStream = N9e.class.getClassLoader().getResourceAsStream(fileName);
-        if (inputStream == null) {
-            LOGGER.error("read kcm script failed, filename:{}", fileName);
-            return "";
-        }
-
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = null;
-            StringBuilder stringBuilder = new StringBuilder("");
-
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append("\n");
-            }
-            return stringBuilder.toString();
-        } catch (IOException e) {
-            LOGGER.error("read kcm script failed, filename:{}", fileName, e);
-            return "";
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                LOGGER.error("close reading kcm script failed, filename:{}", fileName, e);
-            }
-        }
+        N9eCreationTask n9eCreationTask = new N9eCreationTask();
+        n9eCreationTask.setTitle(Constant.TASK_TITLE_PREFIX + "-集群ID:" + creationTaskData.getClusterId());
+        n9eCreationTask.setBatch(Constant.AGENT_TASK_BATCH);
+        n9eCreationTask.setTolerance(Constant.AGENT_TASK_TOLERANCE);
+        n9eCreationTask.setTimeout(this.timeout);
+        n9eCreationTask.setPause(ListUtils.strList2String(creationTaskData.getPauseList()));
+        n9eCreationTask.setScript(this.script);
+        n9eCreationTask.setArgs(sb.toString());
+        n9eCreationTask.setAccount(this.account);
+        n9eCreationTask.setAction(ClusterTaskActionEnum.PAUSE.getAction());
+        n9eCreationTask.setHosts(creationTaskData.getHostList());
+        return n9eCreationTask;
     }
 }

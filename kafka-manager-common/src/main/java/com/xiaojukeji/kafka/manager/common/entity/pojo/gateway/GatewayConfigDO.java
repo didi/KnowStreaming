@@ -17,6 +17,8 @@ public class GatewayConfigDO {
 
     private Long version;
 
+    private String description;
+
     private Date createTime;
 
     private Date modifyTime;
@@ -61,6 +63,14 @@ public class GatewayConfigDO {
         this.version = version;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -85,6 +95,7 @@ public class GatewayConfigDO {
                 ", name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 ", version=" + version +
+                ", description='" + description + '\'' +
                 ", createTime=" + createTime +
                 ", modifyTime=" + modifyTime +
                 '}';

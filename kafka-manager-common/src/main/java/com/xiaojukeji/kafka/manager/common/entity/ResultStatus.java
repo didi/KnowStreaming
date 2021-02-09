@@ -12,6 +12,8 @@ public enum ResultStatus {
 
     SUCCESS(Constant.SUCCESS, "success"),
 
+    FAIL(1, "操作失败"),
+
     /**
      * 操作错误[1000, 2000)
      * ------------------------------------------------------------------------------------------
@@ -91,6 +93,8 @@ public enum ResultStatus {
 
     ZOOKEEPER_CONNECT_FAILED(8020, "zookeeper connect failed"),
     ZOOKEEPER_READ_FAILED(8021, "zookeeper read failed"),
+    ZOOKEEPER_WRITE_FAILED(8022, "zookeeper write failed"),
+    ZOOKEEPER_DELETE_FAILED(8023, "zookeeper delete failed"),
 
     // 调用集群任务里面的agent失败
     CALL_CLUSTER_TASK_AGENT_FAILED(8030, " call cluster task agent failed"),

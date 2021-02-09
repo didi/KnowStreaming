@@ -32,9 +32,9 @@ export class ClusterDetail extends React.Component {
   }
 
   public render() {
-     let content = {} as IMetaData;
-     content = admin.basicInfo ? admin.basicInfo : content;
-     return (
+    let content = {} as IMetaData;
+    content = admin.basicInfo ? admin.basicInfo : content;
+    return (
       <>
         <PageHeader
           className="detail topic-detail-header"
@@ -46,7 +46,7 @@ export class ClusterDetail extends React.Component {
             <ClusterOverview basicInfo={content} />
           </TabPane>
           <TabPane tab="Topic信息" key="2">
-            <ClusterTopic tab={'Topic信息'}/>
+            <ClusterTopic tab={'Topic信息'} />
           </TabPane>
           <TabPane tab="Broker信息" key="3">
             <ClusterBroker tab={'Broker信息'} basicInfo={content} />
@@ -60,11 +60,11 @@ export class ClusterDetail extends React.Component {
           <TabPane tab="逻辑集群信息" key="6">
             <LogicalCluster tab={'逻辑集群信息'} basicInfo={content} />
           </TabPane>
-          <TabPane tab="Controller变更历史" key="7">
+          <TabPane tab="Controller信息" key="7">
             <ClusterController tab={'Controller变更历史'} />
           </TabPane>
-          <TabPane tab="限流信息"  key="8">
-            <CurrentLimiting tab={'限流信息'}/>
+          <TabPane tab="限流信息" key="8">
+            <CurrentLimiting tab={'限流信息'} />
           </TabPane>
         </Tabs>
       </>

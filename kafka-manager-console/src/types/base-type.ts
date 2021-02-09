@@ -190,6 +190,7 @@ export interface IUser {
   chineseName?: string;
   department?: string;
   key?: number;
+  confirmPassword?:string
 }
 
 export interface IOffset {
@@ -486,6 +487,17 @@ export interface IConfigure {
   key?: number;
 }
 
+export interface IConfigGateway {
+  id: number;
+  key?: number;
+  modifyTime: number;
+  name: string;
+  value: string;
+  version: string;
+  type: string;
+  description: string;
+}
+
 export interface IEepand {
   brokerIdList: number[];
   clusterId: number;
@@ -650,8 +662,10 @@ export interface IBrokerData {
 export interface IController {
   brokerId: number;
   host: string;
-  timestamp: number;
-  version: number;
+  timestamp?: number;
+  version?: number;
+  startTime?: number;
+  status?: number;
   key?: number;
 }
 

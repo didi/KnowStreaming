@@ -44,7 +44,7 @@ public class TopicCommands {
             );
 
             // 生成分配策略
-            scala.collection.Map<Object, scala.collection.Seq<Object>> replicaAssignment =
+            scala.collection.Map<Object, Seq<Object>> replicaAssignment =
                     AdminUtils.assignReplicasToBrokers(
                             convert2BrokerMetadataSeq(brokerIdList),
                             partitionNum,
@@ -177,7 +177,7 @@ public class TopicCommands {
                     )
             );
 
-            Map<TopicAndPartition, scala.collection.Seq<Object>> existingAssignJavaMap =
+            Map<TopicAndPartition, Seq<Object>> existingAssignJavaMap =
                     JavaConversions.asJavaMap(existingAssignScalaMap);
             // 新增分区的分配策略和旧的分配策略合并
             Map<Object, Seq<Object>> targetMap = new HashMap<>();

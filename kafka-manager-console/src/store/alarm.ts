@@ -181,6 +181,7 @@ class Alarm {
   public modifyMonitorStrategy(params: IRequestParams) {
     return modifyMonitorStrategy(params).then(() => {
       message.success('操作成功');
+      window.location.href = `${urlPrefix}/alarm`;
     }).finally(() => this.setLoading(false));
   }
 

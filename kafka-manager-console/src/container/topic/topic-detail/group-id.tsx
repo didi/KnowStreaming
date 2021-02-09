@@ -138,7 +138,7 @@ export class GroupID extends SearchAndFilterContainer {
 
   public renderConsumerDetails() {
     const consumerGroup = this.consumerGroup;
-    const columns = [{
+    const columns: any = [{
       title: 'Partition ID',
       dataIndex: 'partitionId',
       key: 'partitionId',
@@ -179,7 +179,8 @@ export class GroupID extends SearchAndFilterContainer {
       <>
         <div className="details-box">
           <b>{consumerGroup}</b>
-          <div>
+          <div style={{ display: 'flex' }}>
+            {this.renderSearch('', '请输入Consumer ID')}
             <Button onClick={this.backToPage}>返回</Button>
             <Button onClick={this.updateDetailsStatus}>刷新</Button>
             <Button onClick={() => this.showResetOffset()}>重置Offset</Button>
@@ -187,7 +188,7 @@ export class GroupID extends SearchAndFilterContainer {
         </div>
         <Table
           columns={columns}
-          dataSource={topic.consumeDetails}
+          dataSource={this.getDetailData(topic.consumeDetails)}
           rowKey="key"
           pagination={pagination}
         />
@@ -214,7 +215,12 @@ export class GroupID extends SearchAndFilterContainer {
       dataIndex: 'location',
       key: 'location',
       width: '34%',
-    },
+    }, {
+      title: '状态',
+      dataIndex: 'state',
+      key: 'state',
+      width: '34%',
+    }
     ];
     return (
       <>
@@ -236,7 +242,17 @@ export class GroupID extends SearchAndFilterContainer {
 
     data = searchKey ? origin.filter((item: IConsumerGroups) =>
       (item.consumerGroup !== undefined && item.consumerGroup !== null) && item.consumerGroup.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
+    return data;
+  }
+
+  public getDetailData<T extends IConsumeDetails>(origin: T[]) {
+    let data: T[] = origin;
+    let { searchKey } = this.state;
+    searchKey = (searchKey + '').trim().toLowerCase();
+    data = searchKey ? origin.filter((item: IConsumeDetails) =>
+      (item.clientId !== undefined && item.clientId !== null) && item.clientId.toLowerCase().includes(searchKey as string),
+    ) : origin;
     return data;
   }
 

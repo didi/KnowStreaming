@@ -23,6 +23,9 @@ public class OrderExtensionModifyGatewayConfigDTO {
     @ApiModelProperty(value = "值")
     private String value;
 
+    @ApiModelProperty(value = "描述说明")
+    private String description;
+
     public Long getId() {
         return id;
     }
@@ -55,6 +58,14 @@ public class OrderExtensionModifyGatewayConfigDTO {
         this.value = value;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "OrderExtensionModifyGatewayConfigDTO{" +
@@ -62,6 +73,7 @@ public class OrderExtensionModifyGatewayConfigDTO {
                 ", type='" + type + '\'' +
                 ", name='" + name + '\'' +
                 ", value='" + value + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 
