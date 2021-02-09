@@ -101,7 +101,9 @@ export class ConnectInformation extends SearchAndFilterContainer {
       <>
         <div className="k-row" >
           <ul className="k-tab">
-            <li>连接信息</li>
+            <li>
+              连接信息 <span style={{ color: '#a7a8a9', fontSize: '12px', padding: '0 15px' }}>展示近20分钟的连接信息</span>
+            </li>
             {this.renderSearch('', '请输入连接信息', 'searchKey')}
           </ul>
           {this.renderConnectionInfo(this.getData(topic.connectionInfo))}

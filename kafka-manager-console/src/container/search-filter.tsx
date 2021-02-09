@@ -126,7 +126,7 @@ export class SearchAndFilterContainer extends React.Component<any, ISearchAndFil
     );
   }
 
-  public renderSearch(text?: string, placeholder?: string, keyName: string = 'searchKey') {
+  public renderSearch(text?: string, placeholder?: string, keyName: string = 'searchKey',) {
     const value = this.state[keyName] as string;
     return (
       <li className="render-box">

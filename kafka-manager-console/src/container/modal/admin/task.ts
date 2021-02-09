@@ -158,26 +158,26 @@ export const createMigrationTasks = () => {
       },
       {
         key: 'originalRetentionTime',
-        label: '原本保存时间',
+        label: '原Topic保存时间',
         rules: [{
           required: true,
-          message: '请输入原本保存时间',
+          message: '请输入原Topic保存时间',
         }],
         attrs: {
           disabled: true,
-          placeholder: '请输入原本保存时间',
+          placeholder: '请输入原Topic保存时间',
           suffix: '小时',
         },
       },
       {
         key: 'reassignRetentionTime',
-        label: '迁移保存时间',
+        label: '迁移后Topic保存时间',
         rules: [{
           required: true,
-          message: '请输入迁移保存时间',
+          message: '请输入迁移后Topic保存时间',
         }],
         attrs: {
-          placeholder: '请输入迁移保存时间',
+          placeholder: '请输入迁移后Topic保存时间',
           suffix: '小时',
         },
       },

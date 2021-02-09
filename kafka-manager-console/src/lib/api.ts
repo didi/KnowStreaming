@@ -1,5 +1,5 @@
 import fetch, { formFetch } from './fetch';
-import { IUploadFile, IUser, IQuotaModelItem, ILimitsItem, ITopic, IOrderParams, ISample, IMigration, IExecute, IEepand, IUtils, ITopicMetriceParams, IRegister, IEditTopic, IExpand, IDeleteTopic, INewRegions, INewLogical, IRebalance, INewBulidEnums, ITrigger, IApprovalOrder, IMonitorSilences, IConfigure, IBatchApproval } from 'types/base-type';
+import { IUploadFile, IUser, IQuotaModelItem, ILimitsItem, ITopic, IOrderParams, ISample, IMigration, IExecute, IEepand, IUtils, ITopicMetriceParams, IRegister, IEditTopic, IExpand, IDeleteTopic, INewRegions, INewLogical, IRebalance, INewBulidEnums, ITrigger, IApprovalOrder, IMonitorSilences, IConfigure, IConfigGateway, IBatchApproval } from 'types/base-type';
 import { IRequestParams } from 'types/alarm';
 import { apiCache } from 'lib/api-cache';
 
@@ -442,6 +442,34 @@ export const deleteConfigure = (configKey: string) => {
   });
 };
 
+export const getGatewayList = () => {
+  return fetch(`/rd/gateway-configs`);
+};
+
+export const getGatewayType = () => {
+  return fetch(`/op/gateway-configs/type-enums`);
+};
+
+export const addNewConfigGateway = (params: IConfigGateway) => {
+  return fetch(`/op/gateway-configs`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+
+export const editConfigGateway = (params: IConfigGateway) => {
+  return fetch(`/op/gateway-configs`, {
+    method: 'PUT',
+    body: JSON.stringify(params),
+  });
+};
+export const deleteConfigGateway = (params: IConfigure) => {
+  return fetch(`/op/gateway-configs`, {
+    method: 'DELETE',
+    body: JSON.stringify(params),
+  });
+};
+
 export const getDataCenter = () => {
   return fetch(`/normal/configs/idc`);
 };
@@ -530,6 +558,23 @@ export const getControllerHistory = (clusterId: number) => {
   return fetch(`/rd/clusters/${clusterId}/controller-history`);
 };
 
+export const getCandidateController = (clusterId: number) => {
+  return fetch(`/rd/clusters/${clusterId}/controller-preferred-candidates`);
+};
+
+export const addCandidateController = (params:any) => {
+  return  fetch(`/op/cluster-controller/preferred-candidates`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+
+export const deleteCandidateCancel = (params:any)=>{
+  return  fetch(`/op/cluster-controller/preferred-candidates`, {
+    method: 'DELETE',
+    body: JSON.stringify(params),
+  });
+}
 /**
  * 运维管控 broker
  */
