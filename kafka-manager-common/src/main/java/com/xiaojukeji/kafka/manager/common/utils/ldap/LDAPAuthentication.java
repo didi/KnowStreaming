@@ -92,9 +92,10 @@ public class LDAPAuthentication {
         LdapContext ctx = getConnect();
 
         boolean valide = false;
-        String userDN = getUserDN(account,ctx);
+
         try {
-            assert ctx != null;
+            String userDN = getUserDN(account,ctx);
+
             ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, userDN);
             ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             ctx.reconnect(null);
@@ -103,6 +104,14 @@ public class LDAPAuthentication {
             System.out.println(e.toString());
         } catch (NamingException e) {
             e.printStackTrace();
+        }finally {
+            if(ctx!=null) {
+                try {
+                    ctx.close();
+                } catch (NamingException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return valide;

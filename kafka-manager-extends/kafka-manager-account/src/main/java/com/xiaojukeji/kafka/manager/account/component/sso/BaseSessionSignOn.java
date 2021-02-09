@@ -56,7 +56,7 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
                 return null;
             }
 
-            if(authUserRegistration){
+            if(accountDO==null && authUserRegistration){
                 //自动注册
                 accountDO = new AccountDO();
                 accountDO.setUsername(dto.getUsername());
@@ -65,6 +65,8 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
                 accountService.createAccount(accountDO);
                 return dto.getUsername();
             }
+
+            return dto.getUsername();
 
         }
 
