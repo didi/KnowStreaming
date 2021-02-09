@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { notification } from 'component/antd';
-import { IUploadFile, IConfigure } from 'types/base-type';
+import { notification, Select } from 'component/antd';
+import { IUploadFile, IConfigure, IConfigGateway } from 'types/base-type';
 import { version } from 'store/version';
 import { admin } from 'store/admin';
 import { wrapper } from 'store';
@@ -97,8 +97,8 @@ const updateFormModal = (type: number) => {
     formMap[2].attrs = {
       accept: version.fileSuffix,
     },
-    // tslint:disable-next-line:no-unused-expression
-    wrapper.ref && wrapper.ref.updateFormMap$(formMap, wrapper.xFormWrapper.formData, true);
+      // tslint:disable-next-line:no-unused-expression
+      wrapper.ref && wrapper.ref.updateFormMap$(formMap, wrapper.xFormWrapper.formData, true);
   }
 };
 
@@ -157,8 +157,8 @@ export const showModifyModal = (record: IUploadFile) => {
 
 export const showConfigureModal = async (record?: IConfigure) => {
   if (record) {
-    const result:any = await format2json(record.configValue);
-    record.configValue = result.result;
+    const result: any = await format2json(record.configValue);
+    record.configValue = result.result || record.configValue;
   }
   const xFormModal = {
     formMap: [
@@ -193,10 +193,69 @@ export const showConfigureModal = async (record?: IConfigure) => {
         return admin.editConfigure(value).then(data => {
           notification.success({ message: '编辑配置成功' });
         });
+      } else {
+        return admin.addNewConfigure(value).then(data => {
+          notification.success({ message: '新建配置成功' });
+        });
       }
-      return admin.addNewConfigure(value).then(data => {
-        notification.success({ message: '新建配置成功' });
-      });
+    },
+  };
+  wrapper.open(xFormModal);
+};
+
+export const showConfigGatewayModal = async (record?: IConfigGateway) => {
+  const xFormModal = {
+    formMap: [
+      {
+        key: 'type',
+        label: '配置类型',
+        rules: [{ required: true, message: '请选择配置类型' }],
+        type: "select",
+        options: admin.gatewayType.map((item: any, index: number) => ({
+          key: index,
+          label: item.configName,
+          value: item.configType,
+        })),
+        attrs: {
+          disabled: record ? true : false,
+        }
+      }, {
+        key: 'name',
+        label: '配置键',
+        rules: [{ required: true, message: '请输入配置键' }],
+        attrs: {
+          disabled: record ? true : false,
+        },
+      }, {
+        key: 'value',
+        label: '配置值',
+        type: 'text_area',
+        rules: [{
+          required: true,
+          message: '请输入配置值',
+        }],
+      }, {
+        key: 'description',
+        label: '描述',
+        type: 'text_area',
+        rules: [{ required: true, message: '请输入备注' }],
+      },
+    ],
+    formData: record || {},
+    visible: true,
+    isWaitting: true,
+    title: `${record ? '编辑配置' : '新建配置'}`,
+    onSubmit: async (parmas: IConfigGateway) => {
+      if (record) {
+        parmas.id = record.id;
+        return admin.editConfigGateway(parmas).then(data => {
+          notification.success({ message: '编辑配置成功' });
+        });
+      } else {
+        return admin.addNewConfigGateway(parmas).then(data => {
+          notification.success({ message: '新建配置成功' });
+        });
+      }
     },
   };
   wrapper.open(xFormModal);

@@ -117,12 +117,12 @@ class DataMigrationFormTable extends React.Component<IFormTableProps> {
       key: 'maxThrottle',
       editable: true,
     }, {
-      title: '迁移保存时间(h)',
+      title: '迁移后Topic保存时间(h)',
       dataIndex: 'reassignRetentionTime',
       key: 'reassignRetentionTime',
       editable: true,
     }, {
-      title: '原本保存时间(h)',
+      title: '原Topic保存时间(h)',
       dataIndex: 'retentionTime',
       key: 'retentionTime', // originalRetentionTime
       width: '132px',

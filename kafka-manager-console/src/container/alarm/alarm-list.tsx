@@ -9,6 +9,7 @@ import { pagination } from 'constants/table';
 import { urlPrefix } from 'constants/left-menu';
 import { alarm } from 'store/alarm';
 import 'styles/table-filter.less';
+import { Link } from 'react-router-dom';
 
 @observer
 export class AlarmList extends SearchAndFilterContainer {
@@ -24,7 +25,7 @@ export class AlarmList extends SearchAndFilterContainer {
     if (app.active !== '-1' || searchKey !== '') {
       data = origin.filter(d =>
         ((d.name !== undefined && d.name !== null) && d.name.toLowerCase().includes(searchKey as string)
-        || ((d.operator !== undefined && d.operator !== null) && d.operator.toLowerCase().includes(searchKey as string)))
+          || ((d.operator !== undefined && d.operator !== null) && d.operator.toLowerCase().includes(searchKey as string)))
         && (app.active === '-1' || d.appId === (app.active + '')),
       );
     } else {
@@ -55,9 +56,7 @@ export class AlarmList extends SearchAndFilterContainer {
         {this.renderSearch('名称：', '请输入告警规则或者操作人')}
         <li className="right-btn-1">
           <Button type="primary">
-            <a href={`${urlPrefix}/alarm/add`}>
-              新增规则
-            </a>
+            <Link to={`/alarm/add`}>新增规则</Link>
           </Button>
         </li>
       </>
@@ -67,6 +66,9 @@ export class AlarmList extends SearchAndFilterContainer {
   public componentDidMount() {
     if (!alarm.monitorStrategies.length) {
       alarm.getMonitorStrategies();
+    }
+    if (!app.data.length) {
+      app.getAppList();
     }
   }
 

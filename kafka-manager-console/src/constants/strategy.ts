@@ -67,7 +67,7 @@ export const timeMonthStr = 'YYYY/MM';
 // tslint:disable-next-line:max-line-length
 
 export const indexUrl ={
-  indexUrl:'https://github.com/didi/kafka-manager',
+  indexUrl:'https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/kafka_metrics_desc.md', // 指标说明
   cagUrl:'https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/add_cluster/add_cluster.md', // 集群接入指南 Cluster access Guide
 } 
 
