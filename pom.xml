@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <kafka-manager.revision>2.2.0-SNAPSHOT</kafka-manager.revision>
+        <kafka-manager.revision>2.3.0-SNAPSHOT</kafka-manager.revision>
         <swagger2.version>2.7.0</swagger2.version>
         <swagger.version>1.5.13</swagger.version>
 
@@ -222,6 +222,12 @@
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-recipes</artifactId>
                 <version>2.10.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>7.1.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

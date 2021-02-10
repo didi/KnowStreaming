@@ -94,6 +94,9 @@ import 'antd/es/divider/style';
 import Upload from 'antd/es/upload';
 import 'antd/es/upload/style';
 
+import Transfer from 'antd/es/transfer';
+import 'antd/es/transfer/style';
+
 import TimePicker from 'antd/es/time-picker';
 import 'antd/es/time-picker/style';
 
@@ -142,5 +145,6 @@ export {
   TimePicker,
   RangePickerValue,
   Badge,
-  Popover
+  Popover,
+  Transfer
 };

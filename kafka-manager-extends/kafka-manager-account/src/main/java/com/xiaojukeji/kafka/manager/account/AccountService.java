@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.account;
 
 import com.xiaojukeji.kafka.manager.account.common.EnterpriseStaff;
 import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
@@ -25,14 +26,14 @@ public interface AccountService {
      * @param username 用户名
      * @return
      */
-    AccountDO getAccountDO(String username);
+    Result<AccountDO> getAccountDO(String username);
 
     /**
      * 删除用户
      * @param username 用户名
      * @return
      */
-    ResultStatus deleteByName(String username);
+    ResultStatus deleteByName(String username, String operator);
 
     /**
      * 更新账号

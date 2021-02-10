@@ -60,6 +60,13 @@ public class JsonUtils {
         return JSON.parseObject(src, clazz);
     }
 
+    public static <T> List<T> stringToArrObj(String src, Class<T> clazz) {
+        if (ValidateUtils.isBlank(src)) {
+            return null;
+        }
+        return JSON.parseArray(src, clazz);
+    }
+
     public static List<TopicConnectionDO> parseTopicConnections(Long clusterId, JSONObject jsonObject, long postTime) {
         List<TopicConnectionDO> connectionDOList = new ArrayList<>();
         for (String clientType: jsonObject.keySet()) {

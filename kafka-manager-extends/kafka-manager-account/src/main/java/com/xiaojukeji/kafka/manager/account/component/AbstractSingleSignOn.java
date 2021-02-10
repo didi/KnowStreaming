@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.account.component;
 
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.LoginDTO;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +19,7 @@ public abstract class AbstractSingleSignOn {
 
     protected static final String HEADER_REDIRECT_KEY = "location";
 
-    public abstract String loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto);
+    public abstract Result<String> loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto);
 
     public abstract void logout(HttpServletRequest request, HttpServletResponse response, Boolean needJump2LoginPage);
 

@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.account.component.AbstractSingleSignOn;
 import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.LoginDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
 import com.xiaojukeji.kafka.manager.common.utils.EncryptUtil;
@@ -41,42 +42,44 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
     private boolean authUserRegistration;
 
     @Override
-    public String loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
+    public Result<String> loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
         if (ValidateUtils.isBlank(dto.getUsername()) || ValidateUtils.isNull(dto.getPassword())) {
             return null;
         }
 
-        AccountDO accountDO = accountService.getAccountDO(dto.getUsername());
+        Result<AccountDO> accountResult = accountService.getAccountDO(dto.getUsername());
 
         //modifier limin
         //判断是否激活了LDAP验证。若激活并且数据库无此用户则自动注册
         if(ldapEnabled){
-            //验证账密
+            //去LDAP验证账密
             if(!ldapAuthentication.authenricate(dto.getUsername(),dto.getPassword())){
                 return null;
             }
 
-            if(accountDO==null && authUserRegistration){
+            if(ValidateUtils.isNull(accountResult) && authUserRegistration){
                 //自动注册
-                accountDO = new AccountDO();
+                AccountDO accountDO = new AccountDO();
                 accountDO.setUsername(dto.getUsername());
                 accountDO.setRole(AccountRoleEnum.getUserRoleEnum(authUserRegistrationRole).getRole());
                 accountDO.setPassword(EncryptUtil.md5(dto.getPassword()));
                 accountService.createAccount(accountDO);
-                return dto.getUsername();
             }
 
-            return dto.getUsername();
+            return Result.buildSuc(dto.getUsername());
 
         }
-
-        if (ValidateUtils.isNull(accountDO)) {
-            return null;
+        
+        if (ValidateUtils.isNull(accountResult) || accountResult.failed()) {
+            return new Result<>(accountResult.getCode(), accountResult.getMessage());
         }
-        if (!accountDO.getPassword().equals(EncryptUtil.md5(dto.getPassword()))) {
-            return null;
+        if (ValidateUtils.isNull(accountResult.getData())) {
+            return Result.buildFailure("username illegal");
         }
-        return dto.getUsername();
+        if (!accountResult.getData().getPassword().equals(EncryptUtil.md5(dto.getPassword()))) {
+            return Result.buildFailure("password illegal");
+        }
+        return Result.buildSuc(accountResult.getData().getUsername());
     }
 
     @Override

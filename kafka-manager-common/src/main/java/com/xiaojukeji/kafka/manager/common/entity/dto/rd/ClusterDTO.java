@@ -102,12 +102,11 @@ public class ClusterDTO {
                 '}';
     }
 
-    public Boolean legal() {
+    public boolean legal() {
         if (ValidateUtils.isNull(clusterName)
                 || ValidateUtils.isNull(zookeeper)
                 || ValidateUtils.isNull(idc)
-                || ValidateUtils.isNull(bootstrapServers)
-                ) {
+                || ValidateUtils.isNull(bootstrapServers)) {
             return false;
         }
         return true;

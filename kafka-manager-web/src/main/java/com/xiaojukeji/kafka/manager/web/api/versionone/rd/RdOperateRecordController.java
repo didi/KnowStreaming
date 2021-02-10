@@ -24,14 +24,13 @@ import java.util.List;
 @RestController
 @RequestMapping(ApiPrefix.API_V1_RD_PREFIX)
 public class RdOperateRecordController {
-
     private static final int MAX_RECORD_COUNT = 200;
 
     @Autowired
     private OperateRecordService operateRecordService;
 
     @ApiOperation(value = "查询操作记录", notes = "")
-    @RequestMapping(value = "operate-record", method = RequestMethod.POST)
+    @PostMapping(value = "operate-record")
     @ResponseBody
     public Result<List<OperateRecordVO>> geOperateRecords(@RequestBody OperateRecordDTO dto) {
         if (ValidateUtils.isNull(dto) || !dto.legal()) {

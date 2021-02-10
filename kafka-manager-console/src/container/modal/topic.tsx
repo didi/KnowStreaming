@@ -88,7 +88,7 @@ export const applyTopic = () => {
     ],
     formData: {},
     visible: true,
-    title: '申请Topic',
+    title: <div><span>申请Topic</span><a className='applicationDocument' href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/resource_apply.md" target='_blank'>资源申请文档</a></div>,
     okText: '确认',
     // customRenderElement: <span className="tips">集群资源充足时，预计1分钟自动审批通过</span>,
     isWaitting: true,

@@ -23,6 +23,8 @@ public class ClusterDetailDTO {
 
     private String securityProperties;
 
+    private String jmxProperties;
+
     private Integer status;
 
     private Date gmtCreate;
@@ -103,6 +105,14 @@ public class ClusterDetailDTO {
         this.securityProperties = securityProperties;
     }
 
+    public String getJmxProperties() {
+        return jmxProperties;
+    }
+
+    public void setJmxProperties(String jmxProperties) {
+        this.jmxProperties = jmxProperties;
+    }
+
     public Integer getStatus() {
         return status;
     }
@@ -176,8 +186,9 @@ public class ClusterDetailDTO {
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", kafkaVersion='" + kafkaVersion + '\'' +
                 ", idc='" + idc + '\'' +
-                ", mode='" + mode + '\'' +
+                ", mode=" + mode +
                 ", securityProperties='" + securityProperties + '\'' +
+                ", jmxProperties='" + jmxProperties + '\'' +
                 ", status=" + status +
                 ", gmtCreate=" + gmtCreate +
                 ", gmtModify=" + gmtModify +

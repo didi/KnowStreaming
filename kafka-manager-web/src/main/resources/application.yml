@@ -11,9 +11,10 @@ spring:
     name: kafkamanager
   datasource:
     kafka-manager:
-      jdbc-url: jdbc:mysql://127.0.0.1:3306/logi_kafka_manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8
-      username: root
-      password: root
+
+      jdbc-url: jdbc:mysql://127.0.0.1:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+      username: admin
+      password: admin
       driver-class-name: com.mysql.jdbc.Driver
   main:
     allow-bean-definition-overriding: true
@@ -31,7 +32,7 @@ logging:
 custom:
   idc: cn
   jmx:
-    max-conn: 10
+    max-conn: 10 # 2.3版本配置不在这个地方生效
   store-metrics-task:
     community:
       broker-metrics-enabled: true
@@ -52,8 +53,11 @@ account:
 
 kcm:
   enabled: false
-  storage:
-    base-url: http://127.0.0.1
+  s3:
+    endpoint: s3.didiyunapi.com
+    access-key: 1234567890
+    secret-key: 0987654321
+    bucket: logi-kafka
   n9e:
     base-url: http://127.0.0.1:8004
     user-token: 12345678

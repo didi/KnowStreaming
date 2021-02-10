@@ -12,7 +12,7 @@ import java.util.Map;
  * @author zengqiao
  * @date 20/9/7
  */
-public class N9eTaskResultDTO {
+public class N9eTaskResult {
     private List<String> waiting;
 
     private List<String> running;

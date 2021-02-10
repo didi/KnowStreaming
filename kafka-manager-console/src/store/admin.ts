@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx';
-import { INewBulidEnums, ILabelValue, IClusterReal, IOptionType, IClusterMetrics, IClusterTopics, IKafkaFiles, IMetaData, IConfigure, IBrokerData, IOffset, IController, IBrokersBasicInfo, IBrokersStatus, IBrokersTopics, IBrokersPartitions, IBrokersAnalysis, IAnalysisTopicVO, IBrokersMetadata, IBrokersRegions, IThrottles, ILogicalCluster, INewRegions, INewLogical, ITaskManage, IPartitionsLocation, ITaskType, ITasksEnums, ITasksMetaData, ITaskStatusDetails, IKafkaRoles, IEnumsMap, IStaffSummary, IBill, IBillDetail } from 'types/base-type';
+import { INewBulidEnums, ILabelValue, IClusterReal, IOptionType, IClusterMetrics, IClusterTopics, IKafkaFiles, IMetaData, IConfigure, IConfigGateway, IBrokerData, IOffset, IController, IBrokersBasicInfo, IBrokersStatus, IBrokersTopics, IBrokersPartitions, IBrokersAnalysis, IAnalysisTopicVO, IBrokersMetadata, IBrokersRegions, IThrottles, ILogicalCluster, INewRegions, INewLogical, ITaskManage, IPartitionsLocation, ITaskType, ITasksEnums, ITasksMetaData, ITaskStatusDetails, IKafkaRoles, IEnumsMap, IStaffSummary, IBill, IBillDetail } from 'types/base-type';
 import {
   deleteCluster,
   getBasicInfo,
@@ -12,7 +12,12 @@ import {
   getConfigure,
   addNewConfigure,
   editConfigure,
+  addNewConfigGateway,
   deleteConfigure,
+  getGatewayList,
+  getGatewayType,
+  editConfigGateway,
+  deleteConfigGateway,
   getDataCenter,
   getClusterBroker,
   getClusterConsumer,
@@ -49,6 +54,9 @@ import {
   getStaffSummary,
   getBillStaffSummary,
   getBillStaffDetail,
+  getCandidateController,
+  addCandidateController,
+  deleteCandidateCancel
   } from 'lib/api';
 import { getControlMetricOption, getClusterMetricOption } from 'lib/line-charts-config';
 
@@ -59,6 +67,7 @@ import { transBToMB } from 'lib/utils';
 
 import moment from 'moment';
 import { timestore } from './time';
+import { message } from 'component/antd';
 
 class Admin {
   @observable
@@ -96,6 +105,12 @@ class Admin {
 
   @observable
   public configureList: IConfigure[] = [];
+
+  @observable
+  public configGatewayList: IConfigGateway[] = [];
+
+  @observable
+  public gatewayType: [];
 
   @observable
   public dataCenterList: string[] = [];
@@ -143,6 +158,12 @@ class Admin {
   public controllerHistory: IController[] = [];
 
   @observable
+  public controllerCandidate: IController[] = [];
+
+   @observable
+  public filtercontrollerCandidate: string = '';
+  
+  @observable
   public brokersPartitions: IBrokersPartitions[] = [];
 
   @observable
@@ -152,7 +173,7 @@ class Admin {
   public brokersAnalysisTopic: IAnalysisTopicVO[] = [];
 
   @observable
-  public brokersMetadata: IBrokersMetadata[] = [];
+  public brokersMetadata: IBrokersMetadata[] | any = [];
 
   @observable
   public brokersRegions: IBrokersRegions[] = [];
@@ -206,10 +227,10 @@ class Admin {
   public kafkaRoles: IKafkaRoles[];
 
   @observable
-  public controlType: IOptionType = 'byteIn/byteOut' ;
+  public controlType: IOptionType = 'byteIn/byteOut';
 
   @observable
-  public type: IOptionType = 'byteIn/byteOut' ;
+  public type: IOptionType = 'byteIn/byteOut';
 
   @observable
   public currentClusterId = null as number;
@@ -241,7 +262,7 @@ class Admin {
 
   @action.bound
   public setClusterRealTime(data: IClusterReal) {
-    this.clusterRealData =  data;
+    this.clusterRealData = data;
     this.getRealClusterLoading(false);
   }
 
@@ -284,7 +305,7 @@ class Admin {
       return {
         ...item,
         label: item.fileName,
-        value: item.fileName  + ',' + item.fileMd5,
+        value: item.fileName + ',' + item.fileMd5,
       };
     }));
   }
@@ -304,6 +325,20 @@ class Admin {
       item.key = index;
       return item;
     }) : [];
+  }
+
+  @action.bound
+  public setConfigGatewayList(data: IConfigGateway[]) {
+    this.configGatewayList = data ? data.map((item, index) => {
+      item.key = index;
+      return item;
+    }) : [];
+  }
+
+  @action.bound
+  public setConfigGatewayType(data: any) {
+    this.setLoading(false);
+    this.gatewayType = data || [];
   }
 
   @action.bound
@@ -336,6 +371,17 @@ class Admin {
   }
 
   @action.bound
+  public setCandidateController(data: IController[]) {
+    this.controllerCandidate = data ? data.map((item, index) => {
+      item.key = index;
+      return item;
+    }) : [];
+    this.filtercontrollerCandidate = data?data.map((item,index)=>{
+      return item.brokerId
+    }).join(','):''
+  }
+
+  @action.bound
   public setBrokersBasicInfo(data: IBrokersBasicInfo) {
     this.brokersBasicInfo = data;
   }
@@ -356,10 +402,10 @@ class Admin {
     this.replicaStatus = data.brokerReplicaStatusList.slice(1);
 
     this.bytesInStatus.forEach((item, index) => {
-      this.peakValueList.push({ name: peakValueMap[index], value: item});
+      this.peakValueList.push({ name: peakValueMap[index], value: item });
     });
     this.replicaStatus.forEach((item, index) => {
-      this.copyValueList.push({name: copyValueMap[index], value: item});
+      this.copyValueList.push({ name: copyValueMap[index], value: item });
     });
   }
 
@@ -415,16 +461,16 @@ class Admin {
   }
 
   @action.bound
-  public setBrokersMetadata(data: IBrokersMetadata[]) {
-    this.brokersMetadata = data ? data.map((item, index) => {
-        item.key = index;
-        return {
-          ...item,
-          text: `${item.host} （BrokerID：${item.brokerId}）`,
-          label: item.host,
-          value: item.brokerId,
-        };
-      }) : [];
+  public setBrokersMetadata(data: IBrokersMetadata[]|any) {
+    this.brokersMetadata = data ? data.map((item:any, index:any) => {
+      item.key = index;
+      return {
+        ...item,
+        text: `${item.host} （BrokerID：${item.brokerId}）`,
+        label: item.host,
+        value: item.brokerId,
+      };
+    }) : [];
   }
 
   @action.bound
@@ -461,9 +507,9 @@ class Admin {
   @action.bound
   public setLogicalClusters(data: ILogicalCluster[]) {
     this.logicalClusters = data ? data.map((item, index) => {
-        item.key = index;
-        return item;
-      }) : [];
+      item.key = index;
+      return item;
+    }) : [];
   }
 
   @action.bound
@@ -474,25 +520,25 @@ class Admin {
   @action.bound
   public setClustersThrottles(data: IThrottles[]) {
     this.clustersThrottles = data ? data.map((item, index) => {
-        item.key = index;
-        return item;
-      }) : [];
+      item.key = index;
+      return item;
+    }) : [];
   }
 
   @action.bound
   public setPartitionsLocation(data: IPartitionsLocation[]) {
     this.partitionsLocation = data ? data.map((item, index) => {
-        item.key = index;
-        return item;
-      }) : [];
+      item.key = index;
+      return item;
+    }) : [];
   }
 
   @action.bound
   public setTaskManagement(data: ITaskManage[]) {
     this.taskManagement = data ? data.map((item, index) => {
-        item.key = index;
-        return item;
-      }) : [];
+      item.key = index;
+      return item;
+    }) : [];
   }
 
   @action.bound
@@ -568,7 +614,7 @@ class Admin {
     return deleteCluster(clusterId).then(() => this.getMetaData(true));
   }
 
-  public getPeakFlowChartData(value: ILabelValue[], map: string []) {
+  public getPeakFlowChartData(value: ILabelValue[], map: string[]) {
     return getPieChartOption(value, map);
   }
 
@@ -627,6 +673,30 @@ class Admin {
     deleteConfigure(configKey).then(() => this.getConfigure());
   }
 
+  public getGatewayList() {
+    getGatewayList().then(this.setConfigGatewayList);
+  }
+
+  public getGatewayType() {
+    this.setLoading(true);
+    getGatewayType().then(this.setConfigGatewayType);
+  }
+
+  public addNewConfigGateway(params: IConfigGateway) {
+    return addNewConfigGateway(params).then(() => this.getGatewayList());
+  }
+
+  public editConfigGateway(params: IConfigGateway) {
+    return editConfigGateway(params).then(() => this.getGatewayList());
+  }
+
+  public deleteConfigGateway(params: any) {
+    deleteConfigGateway(params).then(() => {
+      // message.success('删除成功')
+      this.getGatewayList()
+    });
+  }
+
   public getDataCenter() {
     getDataCenter().then(this.setDataCenter);
   }
@@ -641,6 +711,20 @@ class Admin {
 
   public getControllerHistory(clusterId: number) {
     return getControllerHistory(clusterId).then(this.setControllerHistory);
+  }
+
+  public getCandidateController(clusterId: number) {
+    return getCandidateController(clusterId).then(data=>{
+      return this.setCandidateController(data)
+    });
+  }
+
+  public addCandidateController(clusterId: number, brokerIdList: any) {
+    return addCandidateController({clusterId, brokerIdList}).then(()=>this.getCandidateController(clusterId));
+  }
+
+  public deleteCandidateCancel(clusterId: number, brokerIdList: any){
+    return deleteCandidateCancel({clusterId, brokerIdList}).then(()=>this.getCandidateController(clusterId));
   }
 
   public getBrokersBasicInfo(clusterId: number, brokerId: number) {

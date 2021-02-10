@@ -53,7 +53,7 @@ public class ZookeeperServiceImpl implements ZookeeperService {
         }
         ZkConfigImpl zkConfig = PhysicalClusterMetadataManager.getZKConfig(clusterId);
         if (ValidateUtils.isNull(zkConfig)) {
-            return Result.buildFrom(ResultStatus.CONNECT_ZOOKEEPER_FAILED);
+            return Result.buildFrom(ResultStatus.ZOOKEEPER_CONNECT_FAILED);
         }
 
         try {
@@ -68,6 +68,60 @@ public class ZookeeperServiceImpl implements ZookeeperService {
         } catch (Exception e) {
             LOGGER.error("class=ZookeeperServiceImpl||method=getControllerPreferredCandidates||clusterId={}||errMsg={}", clusterId, e.getMessage());
         }
-        return Result.buildFrom(ResultStatus.READ_ZOOKEEPER_FAILED);
+        return Result.buildFrom(ResultStatus.ZOOKEEPER_READ_FAILED);
+    }
+
+    @Override
+    public Result addControllerPreferredCandidate(Long clusterId, Integer brokerId) {
+        if (ValidateUtils.isNull(clusterId)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        ZkConfigImpl zkConfig = PhysicalClusterMetadataManager.getZKConfig(clusterId);
+        if (ValidateUtils.isNull(zkConfig)) {
+            return Result.buildFrom(ResultStatus.ZOOKEEPER_CONNECT_FAILED);
+        }
+
+        try {
+            if (zkConfig.checkPathExists(ZkPathUtil.getControllerCandidatePath(brokerId))) {
+                // 节点已经存在, 则直接忽略
+                return Result.buildSuc();
+            }
+
+            if (!zkConfig.checkPathExists(ZkPathUtil.D_CONFIG_EXTENSION_ROOT_NODE)) {
+                zkConfig.setOrCreatePersistentNodeStat(ZkPathUtil.D_CONFIG_EXTENSION_ROOT_NODE, "");
+            }
+
+            if (!zkConfig.checkPathExists(ZkPathUtil.D_CONTROLLER_CANDIDATES)) {
+                zkConfig.setOrCreatePersistentNodeStat(ZkPathUtil.D_CONTROLLER_CANDIDATES, "");
+            }
+
+            zkConfig.setOrCreatePersistentNodeStat(ZkPathUtil.getControllerCandidatePath(brokerId), "");
+            return Result.buildSuc();
+        } catch (Exception e) {
+            LOGGER.error("class=ZookeeperServiceImpl||method=addControllerPreferredCandidate||clusterId={}||brokerId={}||errMsg={}||", clusterId, brokerId, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.ZOOKEEPER_WRITE_FAILED);
+    }
+
+    @Override
+    public Result deleteControllerPreferredCandidate(Long clusterId, Integer brokerId) {
+        if (ValidateUtils.isNull(clusterId)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        ZkConfigImpl zkConfig = PhysicalClusterMetadataManager.getZKConfig(clusterId);
+        if (ValidateUtils.isNull(zkConfig)) {
+            return Result.buildFrom(ResultStatus.ZOOKEEPER_CONNECT_FAILED);
+        }
+
+        try {
+            if (!zkConfig.checkPathExists(ZkPathUtil.getControllerCandidatePath(brokerId))) {
+                return Result.buildSuc();
+            }
+            zkConfig.delete(ZkPathUtil.getControllerCandidatePath(brokerId));
+            return Result.buildSuc();
+        } catch (Exception e) {
+            LOGGER.error("class=ZookeeperServiceImpl||method=deleteControllerPreferredCandidate||clusterId={}||brokerId={}||errMsg={}||", clusterId, brokerId, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.ZOOKEEPER_DELETE_FAILED);
     }
 }

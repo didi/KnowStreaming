@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "didi-km.fullname" . }}-test-connection"
+  labels:
+    {{- include "didi-km.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "didi-km.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
