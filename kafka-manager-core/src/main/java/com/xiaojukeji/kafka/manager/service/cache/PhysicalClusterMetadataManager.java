@@ -4,21 +4,23 @@ import com.xiaojukeji.kafka.manager.common.bizenum.KafkaBrokerRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.entity.KafkaVersion;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConfig;
-import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
-import com.xiaojukeji.kafka.manager.common.zookeeper.znode.ControllerData;
-import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
-import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
-import com.xiaojukeji.kafka.manager.dao.ControllerDao;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConnectorWrap;
-import com.xiaojukeji.kafka.manager.service.service.JmxService;
-import com.xiaojukeji.kafka.manager.service.zookeeper.*;
-import com.xiaojukeji.kafka.manager.service.service.ClusterService;
+import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkPathUtil;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.ControllerData;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
+import com.xiaojukeji.kafka.manager.dao.ControllerDao;
+import com.xiaojukeji.kafka.manager.service.service.ClusterService;
+import com.xiaojukeji.kafka.manager.service.service.JmxService;
+import com.xiaojukeji.kafka.manager.service.zookeeper.BrokerStateListener;
+import com.xiaojukeji.kafka.manager.service.zookeeper.ControllerStateListener;
+import com.xiaojukeji.kafka.manager.service.zookeeper.TopicStateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,8 +162,12 @@ public class PhysicalClusterMetadataManager {
         CLUSTER_MAP.remove(clusterId);
     }
 
-    public Set<Long> getClusterIdSet() {
-        return CLUSTER_MAP.keySet();
+    public static Map<Long, ClusterDO> getClusterMap() {
+        return CLUSTER_MAP;
+    }
+
+    public static void updateClusterMap(ClusterDO clusterDO) {
+        CLUSTER_MAP.put(clusterDO.getId(), clusterDO);
     }
 
     public static ClusterDO getClusterFromCache(Long clusterId) {

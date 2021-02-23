@@ -1,8 +1,8 @@
 package com.xiaojukeji.kafka.manager.service.cache;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.factory.KafkaConsumerFactory;
 import kafka.admin.AdminClient;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -103,6 +103,21 @@ public class KafkaClientPool {
         }
     }
 
+    public static void closeKafkaConsumerPool(Long clusterId) {
+        lock.lock();
+        try {
+            GenericObjectPool<KafkaConsumer> objectPool = KAFKA_CONSUMER_POOL.remove(clusterId);
+            if (objectPool == null) {
+                return;
+            }
+            objectPool.close();
+        } catch (Exception e) {
+            LOGGER.error("close kafka consumer pool failed, clusterId:{}.", clusterId, e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public static KafkaConsumer borrowKafkaConsumerClient(ClusterDO clusterDO) {
         if (ValidateUtils.isNull(clusterDO)) {
             return null;
@@ -132,7 +147,11 @@ public class KafkaClientPool {
         if (ValidateUtils.isNull(objectPool)) {
             return;
         }
-        objectPool.returnObject(kafkaConsumer);
+        try {
+            objectPool.returnObject(kafkaConsumer);
+        } catch (Exception e) {
+            LOGGER.error("return kafka consumer client failed, clusterId:{}", physicalClusterId, e);
+        }
     }
 
     public static AdminClient getAdminClient(Long clusterId) {
