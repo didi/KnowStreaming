@@ -1,5 +1,7 @@
 package com.xiaojukeji.kafka.manager.kcm.common.entry.ao;
 
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+
 import java.util.List;
 
 /**
@@ -119,7 +121,7 @@ public class CreationTaskData {
 
     @Override
     public String toString() {
-        return "CreationTaskDTO{" +
+        return "CreationTaskData{" +
                 "uuid='" + uuid + '\'' +
                 ", clusterId=" + clusterId +
                 ", hostList=" + hostList +

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +164,7 @@ public class KafkaFileServiceImpl implements KafkaFileService {
     }
 
     @Override
-    public Result<String> downloadKafkaConfigFile(Long fileId) {
+    public Result<MultipartFile> downloadKafkaFile(Long fileId) {
         KafkaFileDO kafkaFileDO = kafkaFileDao.getById(fileId);
         if (ValidateUtils.isNull(kafkaFileDO)) {
             return Result.buildFrom(ResultStatus.RESOURCE_NOT_EXIST);

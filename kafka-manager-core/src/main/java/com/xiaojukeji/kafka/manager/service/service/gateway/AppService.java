@@ -17,7 +17,7 @@ public interface AppService {
      * @param appDO appDO
      * @return int
      */
-    ResultStatus addApp(AppDO appDO);
+    ResultStatus addApp(AppDO appDO, String operator);
 
     /**
      * 删除数据

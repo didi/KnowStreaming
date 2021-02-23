@@ -77,7 +77,7 @@ export const getControlMetricOption = (type: IOptionType, data: IClusterMetrics[
       name = '条';
       data.map(item => {
         item.messagesInPerSec = item.messagesInPerSec !== null ? Number(item.messagesInPerSec.toFixed(2)) : null;
-       });
+      });
       break;
     case 'brokerNum':
     case 'topicNum':
@@ -224,7 +224,7 @@ export const getClusterMetricOption = (type: IOptionType, record: IClusterMetric
       name = '条';
       data.map(item => {
         item.messagesInPerSec = item.messagesInPerSec !== null ? Number(item.messagesInPerSec.toFixed(2)) : null;
-       });
+      });
       break;
     default:
       const { name: unitName, data: xData } = dealFlowData(metricTypeMap[type], data);
@@ -248,8 +248,8 @@ export const getClusterMetricOption = (type: IOptionType, record: IClusterMetric
           const unitSeries = item.data[item.seriesName] !== null ? Number(item.data[item.seriesName]) : null;
           // tslint:disable-next-line:max-line-length
           result += '<span style="display:inline-block;margin-right:0px;border-radius:10px;width:9px;height:9px;background-color:' + item.color + '"></span>';
-          if ( (item.data.produceThrottled && item.seriesName === 'appIdBytesInPerSec')
-            || (item.data.consumeThrottled && item.seriesName === 'appIdBytesOutPerSec') ) {
+          if ((item.data.produceThrottled && item.seriesName === 'appIdBytesInPerSec')
+            || (item.data.consumeThrottled && item.seriesName === 'appIdBytesOutPerSec')) {
             return result += item.seriesName + ': ' + unitSeries + '（被限流）' + '<br>';
           }
           return result += item.seriesName + ': ' + unitSeries + '<br>';
@@ -317,7 +317,7 @@ export const getMonitorMetricOption = (seriesName: string, data: IMetricPoint[])
             if (ele.name === item.seriesName) {
               // tslint:disable-next-line:max-line-length
               result += '<span style="display:inline-block;margin-right:0px;border-radius:10px;width:9px;height:9px;background-color:' + item.color + '"></span>';
-              return result += item.seriesName + ': ' + (item.data.value === null ?  '' : item.data.value.toFixed(2)) + '<br>';
+              return result += item.seriesName + ': ' + (item.data.value === null ? '' : item.data.value.toFixed(2)) + '<br>';
             }
           });
         });

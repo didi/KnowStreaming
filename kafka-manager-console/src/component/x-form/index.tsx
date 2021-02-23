@@ -130,6 +130,8 @@ class XForm extends React.Component<IXFormProps> {
                 this.renderFormItem(formItem),
               )}
               {formItem.renderExtraElement ? formItem.renderExtraElement() : null}
+              {/* 添加保存时间提示文案 */}
+              {formItem.attrs?.prompttype ? <span style={{ color: "#cccccc", fontSize: '12px', lineHeight: '20px', display: 'block' }}>{formItem.attrs.prompttype}</span> : null}
             </Form.Item>
           );
         })}

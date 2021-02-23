@@ -26,6 +26,9 @@ public class GatewayConfigVO {
     @ApiModelProperty(value="版本")
     private Long version;
 
+    @ApiModelProperty(value="描述说明")
+    private String description;
+
     @ApiModelProperty(value="创建时间")
     private Date createTime;
 
@@ -72,6 +75,14 @@ public class GatewayConfigVO {
         this.version = version;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -96,6 +107,7 @@ public class GatewayConfigVO {
                 ", name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 ", version=" + version +
+                ", description='" + description + '\'' +
                 ", createTime=" + createTime +
                 ", modifyTime=" + modifyTime +
                 '}';

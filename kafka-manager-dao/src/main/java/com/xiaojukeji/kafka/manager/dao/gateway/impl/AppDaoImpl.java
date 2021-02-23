@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.dao.gateway.impl;
 
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.dao.gateway.AppDao;
+import com.xiaojukeji.kafka.manager.task.Constant;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -21,16 +22,11 @@ public class AppDaoImpl implements AppDao {
     /**
      * APP最近的一次更新时间, 更新之后的缓存
      */
-    private static Long APP_CACHE_LATEST_UPDATE_TIME = 0L;
+    private static volatile long APP_CACHE_LATEST_UPDATE_TIME = Constant.START_TIMESTAMP;
     private static final Map<String, AppDO> APP_MAP = new ConcurrentHashMap<>();
 
     @Override
     public int insert(AppDO appDO) {
-        return sqlSession.insert("AppDao.insert", appDO);
-    }
-
-    @Override
-    public int insertIgnoreGatewayDB(AppDO appDO) {
         return sqlSession.insert("AppDao.insert", appDO);
     }
 
@@ -66,7 +62,12 @@ public class AppDaoImpl implements AppDao {
     }
 
     private void updateTopicCache() {
-        Long timestamp = System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
+
+        if (timestamp + 1000 <= APP_CACHE_LATEST_UPDATE_TIME) {
+            // 近一秒内的请求不走db
+            return;
+        }
 
         Date afterTime = new Date(APP_CACHE_LATEST_UPDATE_TIME);
         List<AppDO> doList = sqlSession.selectList("AppDao.listAfterTime", afterTime);
@@ -76,19 +77,22 @@ public class AppDaoImpl implements AppDao {
     /**
      * 更新APP缓存
      */
-    synchronized private void updateTopicCache(List<AppDO> doList, Long timestamp) {
+    private synchronized void updateTopicCache(List<AppDO> doList, long timestamp) {
         if (doList == null || doList.isEmpty() || APP_CACHE_LATEST_UPDATE_TIME >= timestamp) {
             // 本次无数据更新, 或者本次更新过时 时, 忽略本次更新
             return;
         }
+        if (APP_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
+            APP_MAP.clear();
+        }
+
         for (AppDO elem: doList) {
             APP_MAP.put(elem.getAppId(), elem);
         }
         APP_CACHE_LATEST_UPDATE_TIME = timestamp;
     }
 
-    @Override
-    public List<AppDO> listNewAll() {
-        return sqlSession.selectList("AppDao.listNewAll");
+    public static void resetCache() {
+        APP_CACHE_LATEST_UPDATE_TIME = Constant.START_TIMESTAMP;
     }
 }

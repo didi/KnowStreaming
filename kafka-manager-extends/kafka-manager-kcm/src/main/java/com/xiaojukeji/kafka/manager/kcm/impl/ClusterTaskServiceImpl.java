@@ -6,6 +6,7 @@ import com.xiaojukeji.kafka.manager.kcm.ClusterTaskService;
 import com.xiaojukeji.kafka.manager.kcm.common.Converters;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskActionEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ClusterTaskConstant;
+import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskLog;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskSubStatus;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskStateEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskSubStateEnum;
@@ -34,7 +35,7 @@ import java.util.*;
  */
 @Service("clusterTaskService")
 public class ClusterTaskServiceImpl implements ClusterTaskService {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ClusterTaskServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTaskServiceImpl.class);
 
     @Autowired
     private AbstractAgent abstractAgent;
@@ -63,13 +64,13 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
         }
 
         // 创建任务
-        Long agentTaskId = abstractAgent.createTask(dtoResult.getData());
-        if (ValidateUtils.isNull(agentTaskId)) {
+        Result<Long> createResult = abstractAgent.createTask(dtoResult.getData());
+        if (ValidateUtils.isNull(createResult) || createResult.failed()) {
             return Result.buildFrom(ResultStatus.CALL_CLUSTER_TASK_AGENT_FAILED);
         }
 
         try {
-            if (clusterTaskDao.insert(Converters.convert2ClusterTaskDO(agentTaskId, dtoResult.getData(), operator)) > 0) {
+            if (clusterTaskDao.insert(Converters.convert2ClusterTaskDO(createResult.getData(), dtoResult.getData(), operator)) > 0) {
                 return Result.buildFrom(ResultStatus.SUCCESS);
             }
         } catch (Exception e) {
@@ -87,45 +88,44 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
         Long agentTaskId = getActiveAgentTaskId(clusterTaskDO);
         Boolean rollback = inRollback(clusterTaskDO);
 
-        ClusterTaskStateEnum stateEnum = abstractAgent.getTaskState(agentTaskId);
-        if (ClusterTaskActionEnum.START.getMessage().equals(action)
-                && ClusterTaskStateEnum.BLOCKED.equals(stateEnum)) {
+        Result<ClusterTaskStateEnum> stateEnumResult = abstractAgent.getTaskExecuteState(agentTaskId);
+        if (ValidateUtils.isNull(stateEnumResult) || stateEnumResult.failed()) {
+            return ResultStatus.CALL_CLUSTER_TASK_AGENT_FAILED;
+        }
+
+        if (ClusterTaskActionEnum.START.getAction().equals(action) && ClusterTaskStateEnum.BLOCKED.equals(stateEnumResult.getData())) {
             // 暂停状态, 可以执行开始
-            return actionTaskExceptRollbackAction(agentTaskId, action, "");
+            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.START, "");
         }
-        if (ClusterTaskActionEnum.PAUSE.getMessage().equals(action)
-                && ClusterTaskStateEnum.RUNNING.equals(stateEnum)) {
+        if (ClusterTaskActionEnum.PAUSE.getAction().equals(action) && ClusterTaskStateEnum.RUNNING.equals(stateEnumResult.getData())) {
             // 运行状态, 可以执行暂停
-            return actionTaskExceptRollbackAction(agentTaskId, action, "");
+            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.PAUSE, "");
         }
-        if (ClusterTaskActionEnum.IGNORE.getMessage().equals(action)
-                || ClusterTaskActionEnum.CANCEL.getMessage().equals(action)) {
+        if (ClusterTaskActionEnum.IGNORE.getAction().equals(action)) {
             // 忽略 & 取消随时都可以操作
-            return actionTaskExceptRollbackAction(agentTaskId, action, hostname);
+            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.IGNORE, hostname);
         }
-        if ((!ClusterTaskStateEnum.FINISHED.equals(stateEnum) || !rollback)
-                && ClusterTaskActionEnum.ROLLBACK.getMessage().equals(action)) {
+        if (ClusterTaskActionEnum.CANCEL.getAction().equals(action)) {
+            // 忽略 & 取消随时都可以操作
+            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.CANCEL, hostname);
+        }
+        if ((!ClusterTaskStateEnum.FINISHED.equals(stateEnumResult.getData()) || !rollback)
+                && ClusterTaskActionEnum.ROLLBACK.getAction().equals(action)) {
             // 暂未操作完时可以回滚, 回滚所有操作过的机器到上一个版本
             return actionTaskRollback(clusterTaskDO);
         }
         return ResultStatus.OPERATION_FAILED;
     }
 
-    private ResultStatus actionTaskExceptRollbackAction(Long agentId, String action, String hostname) {
+    private ResultStatus actionTaskExceptRollbackAction(Long agentId, ClusterTaskActionEnum actionEnum, String hostname) {
         if (!ValidateUtils.isBlank(hostname)) {
-            return actionHostTaskExceptRollbackAction(agentId, action, hostname);
+            return actionHostTaskExceptRollbackAction(agentId, actionEnum, hostname);
         }
-        if (abstractAgent.actionTask(agentId, action)) {
-            return ResultStatus.SUCCESS;
-        }
-        return ResultStatus.OPERATION_FAILED;
+        return abstractAgent.actionTask(agentId, actionEnum)? ResultStatus.SUCCESS: ResultStatus.OPERATION_FAILED;
     }
 
-    private ResultStatus actionHostTaskExceptRollbackAction(Long agentId, String action, String hostname) {
-        if (abstractAgent.actionHostTask(agentId, action, hostname)) {
-            return ResultStatus.SUCCESS;
-        }
-        return ResultStatus.OPERATION_FAILED;
+    private ResultStatus actionHostTaskExceptRollbackAction(Long agentId, ClusterTaskActionEnum actionEnum, String hostname) {
+        return abstractAgent.actionHostTask(agentId, actionEnum, hostname)? ResultStatus.SUCCESS: ResultStatus.OPERATION_FAILED;
     }
 
     private ResultStatus actionTaskRollback(ClusterTaskDO clusterTaskDO) {
@@ -133,9 +133,9 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
             return ResultStatus.OPERATION_FORBIDDEN;
         }
 
-        Map<String, ClusterTaskSubStateEnum> subStatusEnumMap =
+        Result<Map<String, ClusterTaskSubStateEnum>> subStatusEnumMapResult =
                 abstractAgent.getTaskResult(clusterTaskDO.getAgentTaskId());
-        if (ValidateUtils.isNull(subStatusEnumMap)) {
+        if (ValidateUtils.isNull(subStatusEnumMapResult) || subStatusEnumMapResult.failed()) {
             return ResultStatus.CALL_CLUSTER_TASK_AGENT_FAILED;
         }
 
@@ -143,7 +143,7 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
         List<String> rollbackHostList = new ArrayList<>();
         List<String> rollbackPauseHostList = new ArrayList<>();
         for (String host: ListUtils.string2StrList(clusterTaskDO.getHostList())) {
-            ClusterTaskSubStateEnum subStateEnum = subStatusEnumMap.get(host);
+            ClusterTaskSubStateEnum subStateEnum = subStatusEnumMapResult.getData().get(host);
             if (ValidateUtils.isNull(subStateEnum)) {
                 // 机器对应的任务查询失败
                 return ResultStatus.OPERATION_FAILED;
@@ -166,17 +166,17 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
         clusterTaskDO.setRollbackPauseHostList(ListUtils.strList2String(rollbackPauseHostList));
 
         // 创建任务
-        Long agentTaskId = abstractAgent.createTask(Converters.convert2CreationTaskData(clusterTaskDO));
-        if (ValidateUtils.isNull(agentTaskId)) {
+        Result<Long> createResult = abstractAgent.createTask(Converters.convert2CreationTaskData(clusterTaskDO));
+        if (ValidateUtils.isNull(createResult) || createResult.failed()) {
             return ResultStatus.CALL_CLUSTER_TASK_AGENT_FAILED;
         }
 
         try {
-            clusterTaskDO.setAgentRollbackTaskId(agentTaskId);
+            clusterTaskDO.setAgentRollbackTaskId(createResult.getData());
             if (clusterTaskDao.updateRollback(clusterTaskDO) <= 0) {
                 return ResultStatus.MYSQL_ERROR;
             }
-            abstractAgent.actionTask(clusterTaskDO.getAgentTaskId(), ClusterTaskActionEnum.CANCEL.getMessage());
+            abstractAgent.actionTask(clusterTaskDO.getAgentTaskId(), ClusterTaskActionEnum.CANCEL);
             return ResultStatus.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("create cluster task failed, clusterTaskDO:{}.", clusterTaskDO, e);
@@ -191,11 +191,11 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
             return Result.buildFrom(ResultStatus.TASK_NOT_EXIST);
         }
 
-        String stdoutLog = abstractAgent.getTaskLog(getActiveAgentTaskId(clusterTaskDO, hostname), hostname);
-        if (ValidateUtils.isNull(stdoutLog)) {
+        Result<ClusterTaskLog> stdoutLogResult = abstractAgent.getTaskLog(getActiveAgentTaskId(clusterTaskDO, hostname), hostname);
+        if (ValidateUtils.isNull(stdoutLogResult) || stdoutLogResult.failed()) {
             return Result.buildFrom(ResultStatus.CALL_CLUSTER_TASK_AGENT_FAILED);
         }
-        return new Result<>(stdoutLog);
+        return new Result<>(stdoutLogResult.getData().getStdout());
     }
 
     @Override
@@ -205,24 +205,33 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
             return Result.buildFrom(ResultStatus.TASK_NOT_EXIST);
         }
 
+        Result<ClusterTaskStateEnum> statusEnumResult = abstractAgent.getTaskExecuteState(getActiveAgentTaskId(clusterTaskDO));
+        if (ValidateUtils.isNull(statusEnumResult) || statusEnumResult.failed()) {
+            return new Result<>(statusEnumResult.getCode(), statusEnumResult.getMessage());
+        }
+
         return new Result<>(new ClusterTaskStatus(
                 clusterTaskDO.getId(),
                 clusterTaskDO.getClusterId(),
                 inRollback(clusterTaskDO),
-                abstractAgent.getTaskState(getActiveAgentTaskId(clusterTaskDO)),
+                statusEnumResult.getData(),
                 getTaskSubStatus(clusterTaskDO)
         ));
     }
 
     @Override
     public ClusterTaskStateEnum getTaskState(Long agentTaskId) {
-        return abstractAgent.getTaskState(agentTaskId);
+        Result<ClusterTaskStateEnum> statusEnumResult = abstractAgent.getTaskExecuteState(agentTaskId);
+        if (ValidateUtils.isNull(statusEnumResult) || statusEnumResult.failed()) {
+            return null;
+        }
+        return statusEnumResult.getData();
     }
 
     private List<ClusterTaskSubStatus> getTaskSubStatus(ClusterTaskDO clusterTaskDO) {
         Map<String, ClusterTaskSubStateEnum> statusMap = this.getClusterTaskSubState(clusterTaskDO);
         if (ValidateUtils.isNull(statusMap)) {
-            return null;
+            return Collections.emptyList();
         }
         List<String> pauseList = ListUtils.string2StrList(clusterTaskDO.getPauseHostList());
 
@@ -242,20 +251,22 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
     }
 
     private Map<String, ClusterTaskSubStateEnum> getClusterTaskSubState(ClusterTaskDO clusterTaskDO) {
-        Map<String, ClusterTaskSubStateEnum> statusMap = abstractAgent.getTaskResult(clusterTaskDO.getAgentTaskId());
-        if (ValidateUtils.isNull(statusMap)) {
+        Result<Map<String, ClusterTaskSubStateEnum>> statusMapResult = abstractAgent.getTaskResult(clusterTaskDO.getAgentTaskId());
+        if (ValidateUtils.isNull(statusMapResult) || statusMapResult.failed()) {
             return null;
         }
+        Map<String, ClusterTaskSubStateEnum> statusMap = statusMapResult.getData();
         if (!inRollback(clusterTaskDO)) {
             return statusMap;
         }
 
-        Map<String, ClusterTaskSubStateEnum> rollbackStatusMap =
+        Result<Map<String, ClusterTaskSubStateEnum>> rollbackStatusMapResult =
                 abstractAgent.getTaskResult(clusterTaskDO.getAgentRollbackTaskId());
-        if (ValidateUtils.isNull(rollbackStatusMap)) {
+        if (ValidateUtils.isNull(rollbackStatusMapResult) || rollbackStatusMapResult.failed()) {
             return null;
         }
-        statusMap.putAll(rollbackStatusMap);
+
+        statusMap.putAll(rollbackStatusMapResult.getData());
         return statusMap;
     }
 
@@ -276,7 +287,7 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
         } catch (Exception e) {
             LOGGER.error("get all cluster task failed.");
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -302,9 +313,6 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
     }
 
     private boolean inRollback(ClusterTaskDO clusterTaskDO) {
-        if (ClusterTaskConstant.INVALID_AGENT_TASK_ID.equals(clusterTaskDO.getAgentRollbackTaskId())) {
-            return false;
-        }
-        return true;
+        return !ClusterTaskConstant.INVALID_AGENT_TASK_ID.equals(clusterTaskDO.getAgentRollbackTaskId());
     }
 }

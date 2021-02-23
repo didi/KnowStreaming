@@ -10,7 +10,7 @@
 # FAQ 
 
 - 0、Github图裂问题解决
-- 1、Topic申请时没有可选择的集群？
+- 1、Topic申请、新建监控告警等操作时没有可选择的集群？
 - 2、逻辑集群 & Region的用途？
 - 3、登录失败？
 - 4、页面流量信息等无数据？
@@ -37,9 +37,13 @@
 
 ---
 
-### 1、Topic申请时没有可选择的集群？
+### 1、Topic申请、新建监控告警等操作时没有可选择的集群？
 
-- 参看 [kafka-manager 接入集群](docs/user_guide/add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
+缺少逻辑集群导致的，在Topic管理、监控告警、集群管理这三个Tab下面都是普通用户视角，普通用户看到的集群都是逻辑集群，因此在这三个Tab下进行操作时，都需要有逻辑集群。
+
+逻辑集群的创建参看：
+
+- [kafka-manager 接入集群](docs/user_guide/add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
 
 ---
 

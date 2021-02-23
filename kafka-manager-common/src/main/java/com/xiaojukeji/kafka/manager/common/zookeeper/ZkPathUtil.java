@@ -33,7 +33,9 @@ public class ZkPathUtil {
 
     private static final String      D_METRICS_CONFIG_ROOT_NODE         = CONFIG_ROOT_NODE + ZOOKEEPER_SEPARATOR + "KafkaExMetrics";
 
-    public static final String       D_CONTROLLER_CANDIDATES            = CONFIG_ROOT_NODE + ZOOKEEPER_SEPARATOR +  "extension/candidates";
+    public static final String       D_CONFIG_EXTENSION_ROOT_NODE       = CONFIG_ROOT_NODE + ZOOKEEPER_SEPARATOR +  "extension";
+
+    public static final String       D_CONTROLLER_CANDIDATES            = D_CONFIG_EXTENSION_ROOT_NODE  + ZOOKEEPER_SEPARATOR + "candidates";
 
     public static String getBrokerIdNodePath(Integer brokerId) {
         return BROKER_IDS_ROOT + ZOOKEEPER_SEPARATOR + String.valueOf(brokerId);
@@ -111,6 +113,10 @@ public class ZkPathUtil {
     }
 
     public static String getKafkaExtraMetricsPath(Integer brokerId) {
-        return D_METRICS_CONFIG_ROOT_NODE + ZOOKEEPER_SEPARATOR + String.valueOf(brokerId);
+        return D_METRICS_CONFIG_ROOT_NODE + ZOOKEEPER_SEPARATOR + brokerId;
+    }
+
+    public static String getControllerCandidatePath(Integer brokerId) {
+        return D_CONTROLLER_CANDIDATES + ZOOKEEPER_SEPARATOR + brokerId;
     }
 }

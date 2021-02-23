@@ -47,4 +47,13 @@ public enum AccountRoleEnum {
         }
         return AccountRoleEnum.UNKNOWN;
     }
+
+    public static AccountRoleEnum getUserRoleEnum(String roleName) {
+        for (AccountRoleEnum elem: AccountRoleEnum.values()) {
+            if (elem.message.equalsIgnoreCase(roleName)) {
+                return elem;
+            }
+        }
+        return AccountRoleEnum.UNKNOWN;
+    }
 }

@@ -28,7 +28,7 @@ public class ExpiredTopicVO {
     @ApiModelProperty(value = "负责人")
     private String principals;
 
-    @ApiModelProperty(value = "状态, -1:可下线, 0:过期待通知, 1+:已通知待反馈")
+    @ApiModelProperty(value = "状态, -1:已通知可下线, 0:过期待通知, 1+:已通知待反馈")
     private Integer status;
 
     public Long getClusterId() {

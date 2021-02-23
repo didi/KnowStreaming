@@ -75,8 +75,8 @@ export const showApprovalModal = (info: IOrderInfo, status: number, from?: strin
     // }],
     rules: [{
       required: true,
-      message: '请输入大于12小于999的整数',
-      pattern: /^([1-9]{1}[0-9]{2})$|^([2-9]{1}[0-9]{1})$|^(1[2-9]{1})$/,
+      message: '请输入大于0小于10000的整数',
+      pattern: /^\+?[1-9]\d{0,3}(\.\d*)?$/,
     }],
   }, {
     key: 'species',

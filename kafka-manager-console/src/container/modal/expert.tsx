@@ -20,14 +20,14 @@ export interface IRenderData {
 }
 
 export const migrationModal = (renderData: IRenderData[]) => {
- const xFormWrapper = {
+  const xFormWrapper = {
     type: 'drawer',
     visible: true,
     width: 1000,
     title: '新建迁移任务',
-    customRenderElement: <WrappedDataMigrationFormTable data={renderData}/>,
+    customRenderElement: <WrappedDataMigrationFormTable data={renderData} />,
     nofooter: true,
     noform: true,
   };
- wrapper.open(xFormWrapper as IXFormWrapper);
+  wrapper.open(xFormWrapper as IXFormWrapper);
 };
