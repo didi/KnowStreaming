@@ -205,21 +205,31 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     private boolean isZookeeperLegal(String zookeeper) {
+        boolean status = false;
+
         ZooKeeper zk = null;
         try {
             zk = new ZooKeeper(zookeeper, 1000, null);
-        } catch (Throwable t) {
-            return false;
+            for (int i = 0; i < 15; ++i) {
+                if (zk.getState().isConnected()) {
+                    // 只有状态是connected的时候，才表示地址是合法的
+                    status = true;
+                    break;
+                }
+                Thread.sleep(1000);
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterServiceImpl||method=isZookeeperLegal||zookeeper={}||msg=zk address illegal||errMsg={}", zookeeper, e.getMessage());
         } finally {
             try {
                 if (zk != null) {
                     zk.close();
                 }
             } catch (Exception e) {
-                return false;
+                LOGGER.error("class=ClusterServiceImpl||method=isZookeeperLegal||zookeeper={}||msg=close zk  client failed||errMsg={}", zookeeper, e.getMessage());
             }
         }
-        return true;
+        return status;
     }
 
     @Override
