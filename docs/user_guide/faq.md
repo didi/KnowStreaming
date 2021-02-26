@@ -18,6 +18,7 @@
 - 6、如何使用`MySQL 8`？
 - 7、`Jmx`连接失败如何解决？
 - 8、`topic biz data not exist`错误及处理方式
+- 9、进程启动后，如何查看API文档
 
 ---
 
@@ -109,3 +110,7 @@
 可以在`运维管控->集群列表->Topic信息`下面，编辑申请权限的Topic，为Topic选择一个应用即可。
 
 以上仅仅只是针对单个Topic的场景，如果你有非常多的Topic需要进行初始化的，那么此时可以在配置管理中增加一个配置，来定时的对无主的Topic进行同步，具体见：[动态配置管理 - 1、Topic定时同步任务](../dev_guide/dynamic_config_manager.md)
+
+### 9、进程启动后，如何查看API文档
+
+- 滴滴Logi-KafkaManager采用Swagger-API工具记录API文档。Swagger-API地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-ui.html#/) 
