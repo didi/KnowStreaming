@@ -57,7 +57,7 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
                 return null;
             }
 
-            if(ValidateUtils.isNull(accountResult) && authUserRegistration){
+            if((ValidateUtils.isNull(accountResult) || ValidateUtils.isNull(accountResult.getData())) && authUserRegistration){
                 //自动注册
                 AccountDO accountDO = new AccountDO();
                 accountDO.setUsername(dto.getUsername());
