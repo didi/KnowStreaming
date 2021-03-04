@@ -65,6 +65,11 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public boolean checkLogin(HttpServletRequest request, HttpServletResponse response) {
         String uri = request.getRequestURI();
+        if (uri.contains("..")) {
+            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal||uri={}", uri);
+            return false;
+        }
+
         if (!(uri.contains(ApiPrefix.API_V1_NORMAL_PREFIX)
                 || uri.contains(ApiPrefix.API_V1_RD_PREFIX)
                 || uri.contains(ApiPrefix.API_V1_OP_PREFIX))) {
