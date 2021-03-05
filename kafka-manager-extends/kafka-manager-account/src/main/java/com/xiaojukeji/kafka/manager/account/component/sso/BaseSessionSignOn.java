@@ -44,7 +44,7 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
     @Override
     public Result<String> loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
         if (ValidateUtils.isBlank(dto.getUsername()) || ValidateUtils.isNull(dto.getPassword())) {
-            return null;
+            return Result.buildFailure("Missing parameters");
         }
 
         Result<AccountDO> accountResult = accountService.getAccountDO(dto.getUsername());
@@ -54,7 +54,7 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
         if(ldapEnabled){
             //去LDAP验证账密
             if(!ldapAuthentication.authenricate(dto.getUsername(),dto.getPassword())){
-                return null;
+                return Result.buildFailure("LDAP authentication failed");
             }
 
             if((ValidateUtils.isNull(accountResult) || ValidateUtils.isNull(accountResult.getData())) && authUserRegistration){

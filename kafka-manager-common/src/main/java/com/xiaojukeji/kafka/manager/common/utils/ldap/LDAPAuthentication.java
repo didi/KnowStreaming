@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.common.utils.ldap;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,9 @@ public class LDAPAuthentication {
 
     @Value(value = "${ldap.factory}")
     private String ldapFactory;
+
+    @Value(value = "${ldap.filter}")
+    private String ldapfilter;
 
     @Value(value = "${ldap.auth-user-registration-role}")
     private String authUserRegistrationRole;
@@ -61,7 +65,9 @@ public class LDAPAuthentication {
         try {
             SearchControls constraints = new SearchControls();
             constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            NamingEnumeration<SearchResult> en = ctx.search("", "account=" + account, constraints);
+            String filter = "(&(objectClass=*)("+ldapfilter+"=" + account + "))";
+
+            NamingEnumeration<SearchResult> en = ctx.search("", filter, constraints);
             if (en == null || !en.hasMoreElements()) {
                 return "";
             }
@@ -95,6 +101,11 @@ public class LDAPAuthentication {
 
         try {
             String userDN = getUserDN(account,ctx);
+
+            if(StringUtils.isEmpty(userDN)){
+                return    valide;
+            }
+
 
             ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, userDN);
             ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
