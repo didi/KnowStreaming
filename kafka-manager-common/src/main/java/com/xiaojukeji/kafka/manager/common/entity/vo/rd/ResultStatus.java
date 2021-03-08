@@ -75,6 +75,7 @@ public enum ResultStatus {
     TOPIC_BIZ_DATA_NOT_EXIST(7115, "topic biz data not exist, please sync topic to db"),
     LDAP_AUTHENTICATION_FAILED(7116, "LDAP authentication failed"),
 
+
     // 资源已存在
     RESOURCE_ALREADY_EXISTED(7200, "资源已经存在"),
     TOPIC_ALREADY_EXIST(7201, "topic already existed"),

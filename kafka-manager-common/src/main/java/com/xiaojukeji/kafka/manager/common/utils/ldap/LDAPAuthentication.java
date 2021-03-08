@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.common.utils.ldap;
 
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -101,12 +102,9 @@ public class LDAPAuthentication {
 
         try {
             String userDN = getUserDN(account,ctx);
-
-            if(StringUtils.isEmpty(userDN)){
+            if(ValidateUtils.isBlank(userDN)){
                 return    valide;
             }
-
-
             ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, userDN);
             ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             ctx.reconnect(null);

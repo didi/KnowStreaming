@@ -89,6 +89,7 @@ ldap:
   url: ldap://127.0.0.1:389/
   basedn: dc=tsign,dc=cn
   factory: com.sun.jndi.ldap.LdapCtxFactory
+  filter: sAMAccountName
   security:
     authentication: simple
     principal: cn=admin,dc=tsign,dc=cn
