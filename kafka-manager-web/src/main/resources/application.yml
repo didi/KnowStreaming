@@ -11,7 +11,6 @@ spring:
     name: kafkamanager
   datasource:
     kafka-manager:
-
       jdbc-url: jdbc:mysql://127.0.0.1:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
       username: admin
       password: admin
@@ -50,6 +49,15 @@ task:
 
 account:
   ldap:
+    enabled: false
+    url: ldap://127.0.0.1:389/
+    basedn: dc=tsign,dc=cn
+    factory: com.sun.jndi.ldap.LdapCtxFactory
+    filter: sAMAccountName
+    security:
+      authentication: simple
+      principal: cn=admin,dc=tsign,dc=cn
+      credentials: admin
 
 kcm:
   enabled: false
@@ -83,16 +91,3 @@ notify:
     topic-name: didi-kafka-notify
   order:
     detail-url: http://127.0.0.1
-
-ldap:
-  enabled: false
-  url: ldap://127.0.0.1:389/
-  basedn: dc=tsign,dc=cn
-  factory: com.sun.jndi.ldap.LdapCtxFactory
-  filter: sAMAccountName
-  security:
-    authentication: simple
-    principal: cn=admin,dc=tsign,dc=cn
-    credentials: admin
-  auth-user-registration-role: normal
-  auth-user-registration: true
