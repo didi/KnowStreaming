@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.common.utils.ldap;
 
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

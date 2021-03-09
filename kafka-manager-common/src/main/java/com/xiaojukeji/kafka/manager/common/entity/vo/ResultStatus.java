@@ -73,7 +73,6 @@ public enum ResultStatus {
     QUOTA_NOT_EXIST(7113, "quota not exist, please check clusterId, topicName and appId"),
     CONSUMER_GROUP_NOT_EXIST(7114, "consumerGroup not exist"),
     TOPIC_BIZ_DATA_NOT_EXIST(7115, "topic biz data not exist, please sync topic to db"),
-    LDAP_AUTHENTICATION_FAILED(7116, "LDAP authentication failed"),
 
 
     // 资源已存在
