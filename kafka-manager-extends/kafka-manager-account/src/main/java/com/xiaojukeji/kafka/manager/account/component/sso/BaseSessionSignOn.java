@@ -5,6 +5,7 @@ import com.xiaojukeji.kafka.manager.account.component.AbstractSingleSignOn;
 import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.LoginDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
 import com.xiaojukeji.kafka.manager.common.utils.EncryptUtil;
@@ -44,7 +45,7 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
     @Override
     public Result<String> loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
         if (ValidateUtils.isBlank(dto.getUsername()) || ValidateUtils.isNull(dto.getPassword())) {
-            return null;
+            return Result.buildFailure("Missing parameters");
         }
 
         Result<AccountDO> accountResult = accountService.getAccountDO(dto.getUsername());
@@ -54,7 +55,7 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
         if(ldapEnabled){
             //去LDAP验证账密
             if(!ldapAuthentication.authenricate(dto.getUsername(),dto.getPassword())){
-                return null;
+                return Result.buildFrom(ResultStatus.LDAP_AUTHENTICATION_FAILED);
             }
 
             if((ValidateUtils.isNull(accountResult) || ValidateUtils.isNull(accountResult.getData())) && authUserRegistration){
