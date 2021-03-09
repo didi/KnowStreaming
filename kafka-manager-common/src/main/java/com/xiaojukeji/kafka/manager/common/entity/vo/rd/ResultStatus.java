@@ -106,7 +106,6 @@ public enum ResultStatus {
     STORAGE_UPLOAD_FILE_FAILED(8050, "upload file failed"),
     STORAGE_FILE_TYPE_NOT_SUPPORT(8051, "File type not support"),
     STORAGE_DOWNLOAD_FILE_FAILED(8052, "download file failed"),
-    LDAP_AUTHENTICATION_FAILED(8053, "LDAP authentication failed"),
 
     ;
 

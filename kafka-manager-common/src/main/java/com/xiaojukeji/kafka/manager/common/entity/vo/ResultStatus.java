@@ -74,6 +74,7 @@ public enum ResultStatus {
     CONSUMER_GROUP_NOT_EXIST(7114, "consumerGroup not exist"),
     TOPIC_BIZ_DATA_NOT_EXIST(7115, "topic biz data not exist, please sync topic to db"),
 
+
     // 资源已存在
     RESOURCE_ALREADY_EXISTED(7200, "资源已经存在"),
     TOPIC_ALREADY_EXIST(7201, "topic already existed"),
@@ -106,7 +107,6 @@ public enum ResultStatus {
     STORAGE_UPLOAD_FILE_FAILED(8050, "upload file failed"),
     STORAGE_FILE_TYPE_NOT_SUPPORT(8051, "File type not support"),
     STORAGE_DOWNLOAD_FILE_FAILED(8052, "download file failed"),
-    LDAP_AUTHENTICATION_FAILED(8053, "LDAP authentication failed"),
 
     ;
 
