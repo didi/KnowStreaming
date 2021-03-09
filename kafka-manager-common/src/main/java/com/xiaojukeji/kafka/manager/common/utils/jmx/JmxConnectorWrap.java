@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.common.utils.jmx;
 
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,8 +8,14 @@ import javax.management.*;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnectorServer;
+import javax.naming.Context;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,13 +35,19 @@ public class JmxConnectorWrap {
 
     private AtomicInteger atomicInteger;
 
-    public JmxConnectorWrap(String host, int port, int maxConn) {
+    private JmxConfig jmxConfig;
+
+    public JmxConnectorWrap(String host, int port, JmxConfig jmxConfig) {
         this.host = host;
         this.port = port;
-        if (maxConn <= 0) {
-            maxConn = 1;
+        this.jmxConfig = jmxConfig;
+        if (ValidateUtils.isNull(this.jmxConfig)) {
+            this.jmxConfig = new JmxConfig();
         }
-        this.atomicInteger = new AtomicInteger(maxConn);
+        if (ValidateUtils.isNullOrLessThanZero(this.jmxConfig.getMaxConn())) {
+            this.jmxConfig.setMaxConn(1);
+        }
+        this.atomicInteger = new AtomicInteger(this.jmxConfig.getMaxConn());
     }
 
     public boolean checkJmxConnectionAndInitIfNeed() {
@@ -64,8 +77,18 @@ public class JmxConnectorWrap {
         }
         String jmxUrl = String.format("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", host, port);
         try {
-            JMXServiceURL url = new JMXServiceURL(jmxUrl);
-            jmxConnector = JMXConnectorFactory.connect(url, null);
+            Map<String, Object> environment = new HashMap<String, Object>();
+            if (!ValidateUtils.isBlank(this.jmxConfig.getUsername()) && !ValidateUtils.isBlank(this.jmxConfig.getPassword())) {
+                environment.put(JMXConnector.CREDENTIALS, Arrays.asList(this.jmxConfig.getUsername(), this.jmxConfig.getPassword()));
+            }
+            if (jmxConfig.isOpenSSL() != null && this.jmxConfig.isOpenSSL()) {
+                environment.put(Context.SECURITY_PROTOCOL, "ssl");
+                SslRMIClientSocketFactory clientSocketFactory = new SslRMIClientSocketFactory();
+                environment.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, clientSocketFactory);
+                environment.put("com.sun.jndi.rmi.factory.socket", clientSocketFactory);
+            }
+
+            jmxConnector = JMXConnectorFactory.connect(new JMXServiceURL(jmxUrl), environment);
             LOGGER.info("JMX connect success, host:{} port:{}.", host, port);
             return true;
         } catch (MalformedURLException e) {

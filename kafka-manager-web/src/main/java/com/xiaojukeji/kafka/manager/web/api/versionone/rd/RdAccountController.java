@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.web.api.versionone.rd;
 
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.AccountVO;
+import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.web.converters.AccountConverter;
@@ -35,7 +36,7 @@ public class RdAccountController {
     @RequestMapping(value = "accounts", method = RequestMethod.POST)
     @ResponseBody
     public Result addAccount(@RequestBody AccountDTO dto) {
-        if (!dto.legal() || ValidateUtils.isNull(dto.getPassword())) {
+        if (!dto.legal() || ValidateUtils.isBlank(dto.getPassword())) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
         ResultStatus rs = accountService.createAccount(AccountConverter.convert2AccountDO(dto));
@@ -46,7 +47,7 @@ public class RdAccountController {
     @RequestMapping(value = "accounts", method = RequestMethod.DELETE)
     @ResponseBody
     public Result deleteAccount(@RequestParam("username") String username) {
-        ResultStatus rs = accountService.deleteByName(username);
+        ResultStatus rs = accountService.deleteByName(username, SpringTool.getUserName());
         return Result.buildFrom(rs);
     }
 

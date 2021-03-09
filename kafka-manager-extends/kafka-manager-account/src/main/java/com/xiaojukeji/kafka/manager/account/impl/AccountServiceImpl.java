@@ -6,7 +6,10 @@ import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.account.common.EnterpriseStaff;
 import com.xiaojukeji.kafka.manager.account.component.AbstractEnterpriseStaffService;
 import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
@@ -14,6 +17,7 @@ import com.xiaojukeji.kafka.manager.common.utils.EncryptUtil;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.AccountDao;
 import com.xiaojukeji.kafka.manager.service.service.ConfigService;
+import com.xiaojukeji.kafka.manager.service.service.OperateRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +50,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AbstractEnterpriseStaffService enterpriseStaffService;
+
+    @Autowired
+    private OperateRecordService operateRecordService;
 
     /**
      * 用户组织信息
@@ -81,9 +88,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public ResultStatus deleteByName(String username) {
+    public ResultStatus deleteByName(String username, String operator) {
         try {
             if (accountDao.deleteByName(username) > 0) {
+                Map<String, String> content = new HashMap<>();
+                content.put("username", username);
+                operateRecordService.insert(operator, ModuleEnum.AUTHORITY, username, OperateEnum.DELETE, content);
                 return ResultStatus.SUCCESS;
             }
         } catch (Exception e) {
@@ -101,7 +111,7 @@ public class AccountServiceImpl implements AccountService {
                 return ResultStatus.ACCOUNT_NOT_EXIST;
             }
 
-            if (!ValidateUtils.isNull(accountDO.getPassword())) {
+            if (!ValidateUtils.isBlank(accountDO.getPassword())) {
                 accountDO.setPassword(EncryptUtil.md5(accountDO.getPassword()));
             } else {
                 accountDO.setPassword(oldAccountDO.getPassword());
@@ -117,8 +127,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountDO getAccountDO(String username) {
-        return accountDao.getByName(username);
+    public Result<AccountDO> getAccountDO(String username) {
+        try {
+            return Result.buildSuc(accountDao.getByName(username));
+        } catch (Exception e) {
+            LOGGER.warn("class=AccountServiceImpl||method=getAccountDO||username={}||errMsg={}||msg=get account fail", username, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
     }
 
     @Override

@@ -60,10 +60,8 @@ public class AppServiceImpl implements AppService {
     @Autowired
     private OperateRecordService operateRecordService;
 
-
-
     @Override
-    public ResultStatus addApp(AppDO appDO) {
+    public ResultStatus addApp(AppDO appDO, String operator) {
         try {
             if (appDao.insert(appDO) < 1) {
                 LOGGER.warn("class=AppServiceImpl||method=addApp||AppDO={}||msg=add fail,{}",appDO,ResultStatus.MYSQL_ERROR.getMessage());
@@ -75,6 +73,15 @@ public class AppServiceImpl implements AppService {
             kafkaUserDO.setOperation(OperationStatusEnum.CREATE.getCode());
             kafkaUserDO.setUserType(0);
             kafkaUserDao.insert(kafkaUserDO);
+
+            Map<String, String> content = new HashMap<>();
+            content.put("appId", appDO.getAppId());
+            content.put("name", appDO.getName());
+            content.put("applicant", appDO.getApplicant());
+            content.put("password", appDO.getPassword());
+            content.put("principals", appDO.getPrincipals());
+            content.put("description", appDO.getDescription());
+            operateRecordService.insert(operator, ModuleEnum.APP, appDO.getName(), OperateEnum.ADD, content);
         } catch (DuplicateKeyException e) {
             LOGGER.error("class=AppServiceImpl||method=addApp||errMsg={}||appDO={}|", e.getMessage(), appDO, e);
             return ResultStatus.RESOURCE_ALREADY_EXISTED;
@@ -141,6 +148,12 @@ public class AppServiceImpl implements AppService {
             appDO.setDescription(dto.getDescription());
 
             if (appDao.updateById(appDO) > 0) {
+                Map<String, String> content = new HashMap<>();
+                content.put("appId", appDO.getAppId());
+                content.put("name", appDO.getName());
+                content.put("principals", appDO.getPrincipals());
+                content.put("description", appDO.getDescription());
+                operateRecordService.insert(operator, ModuleEnum.APP, appDO.getName(), OperateEnum.EDIT, content);
                 return ResultStatus.SUCCESS;
             }
         } catch (DuplicateKeyException e) {

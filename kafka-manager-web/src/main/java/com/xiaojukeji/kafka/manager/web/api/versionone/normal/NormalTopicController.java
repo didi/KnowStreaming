@@ -69,7 +69,8 @@ public class NormalTopicController {
         }
         return new Result<>(TopicModelConverter.convert2TopicBasicVO(
                 topicService.getTopicBasicDTO(physicalClusterId, topicName),
-                clusterService.getById(physicalClusterId)
+                clusterService.getById(physicalClusterId),
+                logicalClusterMetadataManager.getTopicLogicalClusterId(physicalClusterId, topicName)
         ));
     }
 

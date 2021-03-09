@@ -29,7 +29,7 @@ export class UserManagement extends SearchAndFilterContainer {
     searchKey = (searchKey + '').trim().toLowerCase();
 
     data = searchKey ? origin.filter((item: IUser) =>
-      (item.username !== undefined && item.username !== null) && item.username.toLowerCase().includes(searchKey as string)) : origin ;
+      (item.username !== undefined && item.username !== null) && item.username.toLowerCase().includes(searchKey as string)) : origin;
     return data;
   }
 

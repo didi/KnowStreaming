@@ -6,7 +6,7 @@
     <groupId>com.xiaojukeji.kafka</groupId>
     <artifactId>kafka-manager</artifactId>
     <packaging>pom</packaging>
-    <version>2.1.0-SNAPSHOT</version>
+    <version>${kafka-manager.revision}</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -16,11 +16,10 @@
     </parent>
 
     <properties>
-        <kafka-manager.revision>2.0.0-SNAPSHOT</kafka-manager.revision>
+        <kafka-manager.revision>2.3.0-SNAPSHOT</kafka-manager.revision>
         <swagger2.version>2.7.0</swagger2.version>
         <swagger.version>1.5.13</swagger.version>
 
-        <!-- maven properties -->
         <maven.test.skip>true</maven.test.skip>
         <downloadSources>true</downloadSources>
         <java_source_version>1.8</java_source_version>
@@ -223,6 +222,12 @@
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-recipes</artifactId>
                 <version>2.10.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>7.1.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

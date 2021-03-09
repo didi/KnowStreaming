@@ -31,11 +31,11 @@ export class ClusterOverview extends React.Component<IOverview> {
     const content = this.props.basicInfo as IBasicInfo;
     const clusterContent = [{
       value: content.clusterName,
-      label: '集群中文名称',
+      label: '集群名称',
     },
     {
-      value: content.clusterName,
-      label: '集群英文名称',
+      value: content.clusterIdentification,
+      label: '集群标识',
     },
     {
       value: clusterTypeMap[content.mode],
@@ -44,8 +44,8 @@ export class ClusterOverview extends React.Component<IOverview> {
       value: moment(content.gmtCreate).format(timeFormat),
       label: '接入时间',
     }, {
-      value: content.physicalClusterId,
-      label: '物理集群ID',
+      value: content.clusterId,
+      label: '集群ID',
     }];
     const clusterInfo = [{
       value: content.clusterVersion,

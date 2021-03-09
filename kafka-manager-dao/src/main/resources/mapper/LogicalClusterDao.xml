@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="LogicalClusterDao">
-    <resultMap id="LogicalClusterMap" type="com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO">
-        <id column="id"               property="id" />
-        <result column="gmt_create"   property="gmtCreate" />
-        <result column="gmt_modify"   property="gmtModify" />
+    <resultMap id="LogicalClusterMap"   type="com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO">
+        <id column="id"                 property="id" />
+        <result column="gmt_create"     property="gmtCreate" />
+        <result column="gmt_modify"     property="gmtModify" />
 
-        <result column="name"         property="name" />
-        <result column="app_id"       property="appId" />
-        <result column="cluster_id"   property="clusterId" />
-        <result column="region_list"  property="regionList" />
-        <result column="mode"         property="mode" />
-        <result column="description"  property="description" />
+        <result column="name"           property="name" />
+        <result column="identification" property="identification" />
+        <result column="app_id"         property="appId" />
+        <result column="cluster_id"     property="clusterId" />
+        <result column="region_list"    property="regionList" />
+        <result column="mode"           property="mode" />
+        <result column="description"    property="description" />
     </resultMap>
 
     <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO">
         INSERT INTO logical_cluster
-          (name, app_id, cluster_id, region_list, mode, description)
+          (name, identification, app_id, cluster_id, region_list, mode, description)
         VALUES
-          (#{name}, #{appId}, #{clusterId}, #{regionList}, #{mode}, #{description})
+          (#{name}, #{identification}, #{appId}, #{clusterId}, #{regionList}, #{mode}, #{description})
     </insert>
 
     <delete id="deleteById" parameterType="java.lang.Long">
@@ -27,7 +28,8 @@
 
     <update id="updateById" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO">
         UPDATE logical_cluster SET
-            <!-- name=#{name}, 不允许修改 name, 会影响到上报的数据 -->
+            name=#{name},
+            <!-- identification=#{identification}, 不允许修改 identification, 会影响到上报的数据 -->
             cluster_id=#{clusterId},
             region_list=#{regionList},
             description=#{description},

@@ -19,6 +19,7 @@ export interface IStrategyFilter {
   tkey: string;
   topt: string;
   tval: string[];
+  clusterIdentification?: string;
 }
 export interface IRequestParams {
   appId: string;

@@ -40,8 +40,7 @@ public class NormalAccountController {
     public Result<List<AccountSummaryVO>> searchOnJobStaffByKeyWord(@RequestParam("keyWord") String keyWord) {
         List<EnterpriseStaff> staffList = accountService.searchAccountByPrefix(keyWord);
         if (ValidateUtils.isEmptyList(staffList)) {
-            LOGGER.info("class=NormalAccountController||method=searchOnJobStaffByKeyWord||keyWord={}||msg=staffList is empty!"
-                    ,keyWord);
+            LOGGER.info("class=NormalAccountController||method=searchOnJobStaffByKeyWord||keyWord={}||msg=staffList is empty!", keyWord);
             return new Result<>();
         }
         List<AccountSummaryVO> voList = new ArrayList<>();

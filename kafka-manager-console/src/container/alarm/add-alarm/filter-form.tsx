@@ -11,6 +11,7 @@ import { filterKeys } from 'constants/strategy';
 import { VirtualScrollSelect } from 'component/virtual-scroll-select';
 import { IsNotNaN } from 'lib/utils';
 import { searchProps } from 'constants/table';
+import { toJS } from 'mobx';
 
 interface IDynamicProps {
   form?: any;
@@ -33,6 +34,7 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
   public monitorType: string = null;
   public clusterId: number = null;
   public clusterName: string = null;
+  public clusterIdentification: string | number = null;
   public topicName: string = null;
   public consumerGroup: string = null;
   public location: string = null;
@@ -45,16 +47,18 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
     this.props.form.validateFields((err: Error, values: any) => {
       if (!err) {
         monitorType = values.monitorType;
-        const index = cluster.clusterData.findIndex(item => item.clusterId === values.cluster);
+        const index = cluster.clusterData.findIndex(item => item.clusterIdentification === values.cluster);
         if (index > -1) {
+          values.clusterIdentification = cluster.clusterData[index].clusterIdentification;
           values.clusterName = cluster.clusterData[index].clusterName;
         }
         for (const key of Object.keys(values)) {
           if (filterKeys.indexOf(key) > -1) { // 只有这几种值可以设置
             filterList.push({
-              tkey: key === 'clusterName' ? 'cluster' : key, // 传参需要将clusterName转成cluster
+              tkey: key === 'clusterName' ? 'cluster' : key, // clusterIdentification
               topt: '=',
               tval: [values[key]],
+              clusterIdentification: values.clusterIdentification
             });
           }
         }
@@ -74,13 +78,13 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
 
   public resetFormValue(
     monitorType: string = null,
-    clusterId: number = null,
+    clusterIdentification: any = null,
     topicName: string = null,
     consumerGroup: string = null,
     location: string = null) {
     const { setFieldsValue } = this.props.form;
     setFieldsValue({
-      cluster: clusterId,
+      cluster: clusterIdentification,
       topic: topicName,
       consumerGroup,
       location,
@@ -88,18 +92,18 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
     });
   }
 
-  public getClusterId = (clusterName: string) => {
+  public getClusterId = async (clusterIdentification: any) => {
     let clusterId = null;
-    const index = cluster.clusterData.findIndex(item => item.clusterName === clusterName);
+    const index = cluster.clusterData.findIndex(item => item.clusterIdentification === clusterIdentification);
     if (index > -1) {
       clusterId = cluster.clusterData[index].clusterId;
     }
     if (clusterId) {
-      cluster.getClusterMetaTopics(clusterId);
+      await cluster.getClusterMetaTopics(clusterId);
       this.clusterId = clusterId;
       return this.clusterId;
-    }
-    return this.clusterId = clusterName as any;
+    };
+    return this.clusterId = clusterId as any;
   }
 
   public async initFormValue(monitorRule: IRequestParams) {
@@ -108,17 +112,19 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
     const topicFilter = strategyFilterList.filter(item => item.tkey === 'topic')[0];
     const consumerFilter = strategyFilterList.filter(item => item.tkey === 'consumerGroup')[0];
 
-    const clusterName = clusterFilter ? clusterFilter.tval[0] : null;
+    const clusterIdentification = clusterFilter ? clusterFilter.tval[0] : null;
     const topic = topicFilter ? topicFilter.tval[0] : null;
     const consumerGroup = consumerFilter ? consumerFilter.tval[0] : null;
     const location: string = null;
     const monitorType = monitorRule.strategyExpressionList[0].metric;
     alarm.changeMonitorStrategyType(monitorType);
-
-    await this.getClusterId(clusterName);
+    //增加clusterIdentification替代原来的clusterName
+    this.clusterIdentification = clusterIdentification;
+    await this.getClusterId(this.clusterIdentification);
+    //
     await this.handleSelectChange(topic, 'topic');
     await this.handleSelectChange(consumerGroup, 'consumerGroup');
-    this.resetFormValue(monitorType, this.clusterId, topic, consumerGroup, location);
+    this.resetFormValue(monitorType, this.clusterIdentification, topic, consumerGroup, location);
   }
 
   public clearFormData() {
@@ -130,11 +136,12 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
     this.resetFormValue();
   }
 
-  public async handleClusterChange(e: number) {
-    this.clusterId = e;
+  public async handleClusterChange(e: any) {
+    this.clusterIdentification = e;
     this.topicName = null;
     topic.setLoading(true);
-    await cluster.getClusterMetaTopics(e);
+    const clusterId = await this.getClusterId(e);
+    await cluster.getClusterMetaTopics(clusterId);
     this.resetFormValue(this.monitorType, e, null, this.consumerGroup, this.location);
     topic.setLoading(false);
   }
@@ -170,7 +177,7 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
     }
     this.consumerGroup = null;
     this.location = null;
-    this.resetFormValue(this.monitorType, this.clusterId, this.topicName);
+    this.resetFormValue(this.monitorType, this.clusterIdentification, this.topicName);
     topic.setLoading(false);
   }
 
@@ -213,17 +220,24 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
       },
       rules: [{ required: true, message: '请选择监控指标' }],
     } as IVritualScrollSelect;
+    const clusterData = toJS(cluster.clusterData);
+    const options = clusterData?.length ? clusterData.map(item => {
+      return {
+        label: `${item.clusterName}${item.description ? '（' + item.description + '）' : ''}`,
+        value: item.clusterIdentification
+      }
+    }) : null;
 
     const clusterItem = {
       label: '集群',
-      options: cluster.clusterData,
-      defaultValue: this.clusterId,
+      options,
+      defaultValue: this.clusterIdentification,
       rules: [{ required: true, message: '请选择集群' }],
       attrs: {
         placeholder: '请选择集群',
-        className: 'middle-size',
+        className: 'large-size',
         disabled: this.isDetailPage,
-        onChange: (e: number) => this.handleClusterChange(e),
+        onChange: (e: any) => this.handleClusterChange(e),
       },
       key: 'cluster',
     } as unknown as IVritualScrollSelect;
@@ -241,7 +255,7 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
       }),
       attrs: {
         placeholder: '请选择Topic',
-        className: 'middle-size',
+        className: 'large-size',
         disabled: this.isDetailPage,
         onChange: (e: string) => this.handleSelectChange(e, 'topic'),
       },
@@ -329,7 +343,7 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
             key={v.value || v.key || index}
             value={v.value}
           >
-            {v.label.length > 25 ? <Tooltip placement="bottomLeft" title={v.label}>
+            {v.label?.length > 25 ? <Tooltip placement="bottomLeft" title={v.label}>
               {v.label}
             </Tooltip> : v.label}
           </Select.Option>

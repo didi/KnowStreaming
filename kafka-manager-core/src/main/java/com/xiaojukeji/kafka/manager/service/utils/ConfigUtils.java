@@ -13,9 +13,6 @@ public class ConfigUtils {
     @Value(value = "${custom.idc}")
     private String idc;
 
-    @Value("${custom.jmx.max-conn}")
-    private Integer jmxMaxConn;
-
     @Value(value = "${spring.profiles.active}")
     private String kafkaManagerEnv;
 
@@ -28,14 +25,6 @@ public class ConfigUtils {
 
     public void setIdc(String idc) {
         this.idc = idc;
-    }
-
-    public Integer getJmxMaxConn() {
-        return jmxMaxConn;
-    }
-
-    public void setJmxMaxConn(Integer jmxMaxConn) {
-        this.jmxMaxConn = jmxMaxConn;
     }
 
     public String getKafkaManagerEnv() {

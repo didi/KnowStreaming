@@ -96,7 +96,8 @@ class Alarm {
   @action.bound
   public setMonitorType(data: IMonitorMetricType) {
     this.monitorTypeList = data.metricNames || [];
-    this.monitorType = this.monitorTypeList[0].metricName;
+    // this.monitorType = this.monitorTypeList[0].metricName;
+    this.monitorType = '';
   }
 
   @action.bound
@@ -180,6 +181,7 @@ class Alarm {
   public modifyMonitorStrategy(params: IRequestParams) {
     return modifyMonitorStrategy(params).then(() => {
       message.success('操作成功');
+      window.location.href = `${urlPrefix}/alarm`;
     }).finally(() => this.setLoading(false));
   }
 

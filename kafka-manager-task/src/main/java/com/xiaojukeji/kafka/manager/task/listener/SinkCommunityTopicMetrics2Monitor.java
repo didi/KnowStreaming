@@ -73,7 +73,7 @@ public class SinkCommunityTopicMetrics2Monitor extends AbstractScheduledTask<Clu
                 continue;
             }
 
-            metricSinkPoints.addAll(recordTopics(now, logicalClusterDO.getName(), metrics));
+            metricSinkPoints.addAll(recordTopics(now, logicalClusterDO.getIdentification(), metrics));
             if (metricSinkPoints.size() > MonitorSinkConstant.MONITOR_SYSTEM_SINK_THRESHOLD) {
                 abstractMonitor.sinkMetrics(metricSinkPoints);
                 metricSinkPoints.clear();

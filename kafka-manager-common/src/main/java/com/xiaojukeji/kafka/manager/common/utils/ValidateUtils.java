@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.common.utils;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +12,20 @@ import java.util.Set;
  * @date 20/4/16
  */
 public class ValidateUtils {
+    /**
+     * 任意一个为空, 则返回true
+     */
+    public static boolean anyNull(Object... objects) {
+        return Arrays.stream(objects).anyMatch(ValidateUtils::isNull);
+    }
+
+    /**
+     * 是空字符串或者空
+     */
+    public static boolean anyBlank(String... strings) {
+        return Arrays.stream(strings).anyMatch(StringUtils::isBlank);
+    }
+
     /**
      * 为空
      */

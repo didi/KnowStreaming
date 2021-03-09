@@ -129,7 +129,7 @@ public class ConsumerServiceImpl implements ConsumerService {
             }
             summary.setState(consumerGroupSummary.state());
 
-            java.util.Iterator<scala.collection.immutable.List<AdminClient.ConsumerSummary>> it = JavaConversions.asJavaIterator(consumerGroupSummary.consumers().iterator());
+            Iterator<scala.collection.immutable.List<AdminClient.ConsumerSummary>> it = JavaConversions.asJavaIterator(consumerGroupSummary.consumers().iterator());
             while (it.hasNext()) {
                 List<AdminClient.ConsumerSummary> consumerSummaryList = JavaConversions.asJavaList(it.next());
                 for (AdminClient.ConsumerSummary consumerSummary: consumerSummaryList) {

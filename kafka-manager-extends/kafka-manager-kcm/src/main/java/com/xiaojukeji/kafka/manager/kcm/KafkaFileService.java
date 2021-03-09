@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.KafkaFileDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaFileDO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public interface KafkaFileService {
 
     KafkaFileDO getFileByFileName(String fileName);
 
-    Result<String> downloadKafkaConfigFile(Long fileId);
+    Result<MultipartFile> downloadKafkaFile(Long fileId);
 
     String getDownloadBaseUrl();
 }

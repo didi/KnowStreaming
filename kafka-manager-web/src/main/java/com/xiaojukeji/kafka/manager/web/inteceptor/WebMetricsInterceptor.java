@@ -119,7 +119,7 @@ public class WebMetricsInterceptor {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String uri = attributes.getRequest().getRequestURI();
         if (uri.contains(ApiPrefix.GATEWAY_API_V1_PREFIX)) {
-            return Result.buildFailure("api limited");
+            return Result.buildGatewayFailure("api limited");
         }
         return new Result<>(ResultStatus.OPERATION_FORBIDDEN);
     }

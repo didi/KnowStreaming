@@ -32,8 +32,11 @@ public class ClusterBaseVO {
     @ApiModelProperty(value="集群类型")
     private Integer mode;
 
-    @ApiModelProperty(value="安全配置参数")
+    @ApiModelProperty(value="Kafka安全配置")
     private String securityProperties;
+
+    @ApiModelProperty(value="Jmx配置")
+    private String jmxProperties;
 
     @ApiModelProperty(value="1:监控中, 0:暂停监控")
     private Integer status;
@@ -108,6 +111,14 @@ public class ClusterBaseVO {
         this.securityProperties = securityProperties;
     }
 
+    public String getJmxProperties() {
+        return jmxProperties;
+    }
+
+    public void setJmxProperties(String jmxProperties) {
+        this.jmxProperties = jmxProperties;
+    }
+
     public Integer getStatus() {
         return status;
     }
@@ -141,8 +152,9 @@ public class ClusterBaseVO {
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", kafkaVersion='" + kafkaVersion + '\'' +
                 ", idc='" + idc + '\'' +
-                ", mode='" + mode + '\'' +
+                ", mode=" + mode +
                 ", securityProperties='" + securityProperties + '\'' +
+                ", jmxProperties='" + jmxProperties + '\'' +
                 ", status=" + status +
                 ", gmtCreate=" + gmtCreate +
                 ", gmtModify=" + gmtModify +

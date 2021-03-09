@@ -41,7 +41,14 @@ public class BaseEnterpriseStaffService extends AbstractEnterpriseStaffService {
     @Override
     public List<EnterpriseStaff> searchEnterpriseStaffByKeyWord(String keyWord) {
         try {
-            List<AccountDO> doList = accountDao.searchByNamePrefix(keyWord);
+            List<AccountDO> doList = null;
+            if (ValidateUtils.isBlank(keyWord)) {
+                // 当用户没有任何输入的时候, 返回全部的用户
+                doList = accountDao.list();
+            } else {
+                doList = accountDao.searchByNamePrefix(keyWord);
+            }
+
             if (ValidateUtils.isEmptyList(doList)) {
                 return new ArrayList<>();
             }

@@ -23,6 +23,7 @@ export interface IBtn {
 }
 
 export interface IClusterData {
+  clusterIdentification: any;
   clusterId: number;
   mode: number;
   clusterName: string;
@@ -189,6 +190,7 @@ export interface IUser {
   chineseName?: string;
   department?: string;
   key?: number;
+  confirmPassword?:string
 }
 
 export interface IOffset {
@@ -485,6 +487,17 @@ export interface IConfigure {
   key?: number;
 }
 
+export interface IConfigGateway {
+  id: number;
+  key?: number;
+  modifyTime: number;
+  name: string;
+  value: string;
+  version: string;
+  type: string;
+  description: string;
+}
+
 export interface IEepand {
   brokerIdList: number[];
   clusterId: number;
@@ -598,10 +611,12 @@ export interface IClusterReal {
 }
 
 export interface IBasicInfo {
+  clusterIdentification: any;
   bootstrapServers: string;
   clusterId: number;
   mode: number;
   clusterName: string;
+  clusterNameCn: string;
   clusterVersion: string;
   gmtCreate: number;
   gmtModify: number;
@@ -647,8 +662,10 @@ export interface IBrokerData {
 export interface IController {
   brokerId: number;
   host: string;
-  timestamp: number;
-  version: number;
+  timestamp?: number;
+  version?: number;
+  startTime?: number;
+  status?: number;
   key?: number;
 }
 
@@ -920,8 +937,9 @@ export interface INewLogical {
   mode: number;
   name: string;
   logicalClusterName?: string;
-  logicalClusterEName?: string;
+  logicalClusterNameCn?: string;
   regionIdList: number[];
+  logicalClusterIdentification?:string
 }
 
 export interface IPartitionsLocation {

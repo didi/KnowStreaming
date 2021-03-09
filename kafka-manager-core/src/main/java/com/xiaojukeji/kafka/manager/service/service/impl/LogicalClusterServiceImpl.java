@@ -113,6 +113,7 @@ public class LogicalClusterServiceImpl implements LogicalClusterService {
         LogicalCluster logicalCluster = new LogicalCluster();
         logicalCluster.setLogicalClusterId(logicalClusterDO.getId());
         logicalCluster.setLogicalClusterName(logicalClusterDO.getName());
+        logicalCluster.setLogicalClusterIdentification(logicalClusterDO.getIdentification());
         logicalCluster.setClusterVersion(
                 physicalClusterMetadataManager.getKafkaVersion(
                         logicalClusterDO.getClusterId(),

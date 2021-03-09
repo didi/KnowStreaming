@@ -22,7 +22,7 @@ export const applyTopic = () => {
     formMap: [
       {
         key: 'clusterId',
-        label: '所属逻辑集群：',
+        label: '所属集群：',
         type: 'select',
         options: cluster.clusterData,
         rules: [{ required: true, message: '请选择' }],
@@ -75,7 +75,7 @@ export const applyTopic = () => {
         key: 'description',
         label: '申请原因',
         type: 'text_area',
-        rules: [{ required: true, pattern: /^.{5,}.$/s, message: '请输入至少5个字符' }],
+        rules: [{ required: true, pattern: /^.{4,}.$/s, message: '请输入至少5个字符' }],
         attrs: {
           placeholder: `概要描述Topic的数据源, Topic数据的生产者/消费者, Topic的申请原因及备注信息等。（最多100个字）
 例如:
@@ -88,7 +88,7 @@ export const applyTopic = () => {
     ],
     formData: {},
     visible: true,
-    title: '申请Topic',
+    title: <div><span>申请Topic</span><a className='applicationDocument' href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/resource_apply.md" target='_blank'>资源申请文档</a></div>,
     okText: '确认',
     // customRenderElement: <span className="tips">集群资源充足时，预计1分钟自动审批通过</span>,
     isWaitting: true,
@@ -180,13 +180,14 @@ export const showApplyQuatoModal = (item: ITopic | IAppsIdInfo, record: IQuotaQu
   const isConsume = item.access === 0 || item.access === 2;
   const xFormModal = {
     formMap: [
+      // {
+      //   key: 'clusterName',
+      //   label: '逻辑集群名称',
+      //   rules: [{ required: true, message: '' }],
+      //   attrs: { disabled: true },
+      //   invisible: !item.hasOwnProperty('clusterName'),
+      // }, 
       {
-        key: 'clusterName',
-        label: '逻辑集群名称',
-        rules: [{ required: true, message: '' }],
-        attrs: { disabled: true },
-        invisible: !item.hasOwnProperty('clusterName'),
-      }, {
         key: 'topicName',
         label: 'Topic名称',
         rules: [{ required: true, message: '' }],
@@ -225,7 +226,7 @@ export const showApplyQuatoModal = (item: ITopic | IAppsIdInfo, record: IQuotaQu
         key: 'description',
         label: '申请原因',
         type: 'text_area',
-        rules: [{ required: true, pattern: /^.{5,}.$/, message: quotaRemarks }],
+        rules: [{ required: true, pattern: /^.{4,}.$/, message: quotaRemarks }],
         attrs: {
           placeholder: quotaRemarks,
         },
@@ -292,13 +293,15 @@ const updateFormModal = (appId: string) => {
 export const showTopicApplyQuatoModal = (item: ITopic) => {
   const xFormModal = {
     formMap: [
+      // {
+      //   key: 'clusterName',
+      //   label: '逻辑集群名称',
+      //   rules: [{ required: true, message: '' }],
+      //   attrs: { disabled: true },
+      //   defaultValue: item.clusterName,
+      //   // invisible: !item.hasOwnProperty('clusterName'),
+      // }, 
       {
-        key: 'clusterName',
-        label: '逻辑集群名称',
-        rules: [{ required: true, message: '' }],
-        attrs: { disabled: true },
-        // invisible: !item.hasOwnProperty('clusterName'),
-      }, {
         key: 'topicName',
         label: 'Topic名称',
         rules: [{ required: true, message: '' }],
@@ -530,7 +533,7 @@ const showAllPermission = (appId: string, item: ITopic, access: number) => {
         rules: [{
           required: true,
           validator: (rule: any, value: string, callback: any) => {
-            const regexp = /^.{5,}.$/;
+            const regexp = /^.{4,}.$/;
             value = value.trim();
             if (!regexp.test(value)) {
               callback('请输入至少5个字符');
@@ -629,7 +632,7 @@ export const showPermissionModal = (item: ITopic) => {
         rules: [{
           required: true,
           validator: (rule: any, value: string, callback: any) => {
-            const regexp = /^.{5,}.$/;
+            const regexp = /^.{4,}.$/;
             value = value.trim();
             if (!regexp.test(value)) {
               callback('请输入至少5个字符');
@@ -678,7 +681,7 @@ export const showTopicEditModal = (item: ITopic) => {
         key: 'description',
         label: '备注',
         type: 'text_area',
-        rules: [{ required: false }, { pattern: /^.{5,}.$/, message: '请输入至少5个字符' }],
+        rules: [{ required: false }, { pattern: /^.{4,}.$/, message: '请输入至少5个字符' }],
       },
     ],
     formData: {

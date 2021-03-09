@@ -4,22 +4,23 @@ import com.xiaojukeji.kafka.manager.common.bizenum.KafkaBrokerRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.entity.KafkaVersion;
-import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
+import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
-import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
-import com.xiaojukeji.kafka.manager.common.zookeeper.znode.ControllerData;
-import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
-import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
-import com.xiaojukeji.kafka.manager.dao.ControllerDao;
+import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConfig;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConnectorWrap;
-import com.xiaojukeji.kafka.manager.dao.TopicDao;
-import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
-import com.xiaojukeji.kafka.manager.service.service.JmxService;
-import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
-import com.xiaojukeji.kafka.manager.service.zookeeper.*;
-import com.xiaojukeji.kafka.manager.service.service.ClusterService;
+import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkPathUtil;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.ControllerData;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
+import com.xiaojukeji.kafka.manager.dao.ControllerDao;
+import com.xiaojukeji.kafka.manager.service.service.ClusterService;
+import com.xiaojukeji.kafka.manager.service.service.JmxService;
+import com.xiaojukeji.kafka.manager.service.zookeeper.BrokerStateListener;
+import com.xiaojukeji.kafka.manager.service.zookeeper.ControllerStateListener;
+import com.xiaojukeji.kafka.manager.service.zookeeper.TopicStateListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,15 +47,6 @@ public class PhysicalClusterMetadataManager {
 
     @Autowired
     private ClusterService clusterService;
-
-    @Autowired
-    private ConfigUtils configUtils;
-
-    @Autowired
-    private TopicDao topicDao;
-
-    @Autowired
-    private AuthorityDao authorityDao;
 
     private final static Map<Long, ClusterDO> CLUSTER_MAP = new ConcurrentHashMap<>();
 
@@ -118,13 +110,20 @@ public class PhysicalClusterMetadataManager {
                 return;
             }
 
+            JmxConfig jmxConfig = null;
+            try {
+                jmxConfig = JsonUtils.stringToObj(clusterDO.getJmxProperties(), JmxConfig.class);
+            } catch (Exception e) {
+                LOGGER.error("class=PhysicalClusterMetadataManager||method=addNew||clusterDO={}||msg=parse jmx properties failed", JsonUtils.toJSONString(clusterDO));
+            }
+
             //增加Broker监控
-            BrokerStateListener brokerListener = new BrokerStateListener(clusterDO.getId(), zkConfig, configUtils.getJmxMaxConn());
+            BrokerStateListener brokerListener = new BrokerStateListener(clusterDO.getId(), zkConfig, jmxConfig);
             brokerListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_IDS_ROOT, brokerListener);
 
             //增加Topic监控
-            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig, topicDao, authorityDao);
+            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig);
             topicListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_TOPICS_ROOT, topicListener);
 
@@ -163,8 +162,12 @@ public class PhysicalClusterMetadataManager {
         CLUSTER_MAP.remove(clusterId);
     }
 
-    public Set<Long> getClusterIdSet() {
-        return CLUSTER_MAP.keySet();
+    public static Map<Long, ClusterDO> getClusterMap() {
+        return CLUSTER_MAP;
+    }
+
+    public static void updateClusterMap(ClusterDO clusterDO) {
+        CLUSTER_MAP.put(clusterDO.getId(), clusterDO);
     }
 
     public static ClusterDO getClusterFromCache(Long clusterId) {
@@ -280,7 +283,7 @@ public class PhysicalClusterMetadataManager {
 
     //---------------------------Broker元信息相关--------------
 
-    public static void putBrokerMetadata(Long clusterId, Integer brokerId, BrokerMetadata brokerMetadata, Integer jmxMaxConn) {
+    public static void putBrokerMetadata(Long clusterId, Integer brokerId, BrokerMetadata brokerMetadata, JmxConfig jmxConfig) {
         Map<Integer, BrokerMetadata> metadataMap = BROKER_METADATA_MAP.get(clusterId);
         if (metadataMap == null) {
             return;
@@ -288,7 +291,7 @@ public class PhysicalClusterMetadataManager {
         metadataMap.put(brokerId, brokerMetadata);
 
         Map<Integer, JmxConnectorWrap> jmxMap = JMX_CONNECTOR_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());
-        jmxMap.put(brokerId, new JmxConnectorWrap(brokerMetadata.getHost(), brokerMetadata.getJmxPort(), jmxMaxConn));
+        jmxMap.put(brokerId, new JmxConnectorWrap(brokerMetadata.getHost(), brokerMetadata.getJmxPort(), jmxConfig));
         JMX_CONNECTOR_MAP.put(clusterId, jmxMap);
 
         Map<Integer, KafkaVersion> versionMap = KAFKA_VERSION_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());

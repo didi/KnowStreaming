@@ -78,7 +78,7 @@ export class MyCluster extends SearchAndFilterContainer {
           rules: [
             {
               required: true,
-              pattern: /^.{5,}.$/,
+              pattern: /^.{4,}.$/,
               message: '请输入至少5个字符',
             },
           ],
@@ -91,7 +91,7 @@ export class MyCluster extends SearchAndFilterContainer {
       ],
       formData: {},
       visible: true,
-      title: '申请集群',
+      title: <div><span>申请集群</span><a className='applicationDocument' href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/resource_apply.md" target='_blank'>资源申请文档</a></div>,
       okText: '确认',
       onSubmit: (value: any) => {
         value.idc = region.currentRegion;
@@ -160,7 +160,7 @@ export class MyCluster extends SearchAndFilterContainer {
 
     data = searchKey ? origin.filter((item: IClusterData) =>
       (item.clusterName !== undefined && item.clusterName !== null) && item.clusterName.toLowerCase().includes(searchKey as string),
-    ) : origin ;
+    ) : origin;
     return data;
   }
 
