@@ -7,7 +7,7 @@
 
 --- 
 
-# FAQ 
+# FAQ
 
 - 0、Github图裂问题解决
 - 1、Topic申请、新建监控告警等操作时没有可选择的集群？
@@ -19,6 +19,9 @@
 - 7、`Jmx`连接失败如何解决？
 - 8、`topic biz data not exist`错误及处理方式
 - 9、进程启动后，如何查看API文档
+- 10、如何创建告警组？
+- 11、连接信息、耗时信息为什么没有数据？
+- 12、逻辑集群申请审批通过之后为什么看不到逻辑集群？
 
 ---
 
@@ -113,4 +116,21 @@
 
 ### 9、进程启动后，如何查看API文档
 
-- 滴滴Logi-KafkaManager采用Swagger-API工具记录API文档。Swagger-API地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-ui.html#/) 
+- 滴滴Logi-KafkaManager采用Swagger-API工具记录API文档。Swagger-API地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-ui.html#/)
+
+
+### 10、如何创建告警组？
+
+这块需要配合监控系统进行使用，现在默认已经实现了夜莺的对接，当然也可以对接自己内部的监控系统，不过需要实现一些接口。
+
+具体的文档可见：[监控功能对接夜莺](../dev_guide/monitor_system_integrate_with_n9e.md)、[监控功能对接其他系统](../dev_guide/monitor_system_integrate_with_self.md)
+
+### 11、连接信息、耗时信息为什么没有数据？
+
+这块需要结合滴滴内部的kafka-gateway一同使用才会有数据，滴滴kafka-gateway暂未开源。
+
+### 12、逻辑集群申请审批通过之后为什么看不到逻辑集群？
+
+逻辑集群的申请与审批仅仅只是一个工单流程，并不会去实际创建逻辑集群，逻辑集群的创建还需要手动去创建。
+
+具体的操作可见：[kafka-manager 接入集群](add_cluster/add_cluster.md)。
