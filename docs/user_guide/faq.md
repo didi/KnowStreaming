@@ -44,7 +44,7 @@
 
 逻辑集群的创建参看：
 
-- [kafka-manager 接入集群](docs/user_guide/add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
+- [kafka-manager 接入集群](add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
 
 ---
 
