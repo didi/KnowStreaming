@@ -58,6 +58,8 @@ account:
       authentication: simple
       principal: cn=admin,dc=tsign,dc=cn
       credentials: admin
+    auth-user-registration: true
+    auth-user-registration-role: normal
 
 kcm:
   enabled: false

@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.account.component.sso;
 
 import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.account.component.AbstractSingleSignOn;
+import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
@@ -33,6 +34,14 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
     @Value(value = "${account.ldap.enabled:}")
     private Boolean accountLdapEnabled;
 
+    //ldap自动注册的默认角色。请注意：它通常来说都是低权限角色
+    @Value(value = "${account.ldap.auth-user-registration-role:}")
+    private String authUserRegistrationRole;
+
+    //ldap自动注册是否开启
+    @Value(value = "${account.ldap.auth-user-registration:}")
+    private boolean authUserRegistration;
+
     @Override
     public Result<String> loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {
         if (ValidateUtils.isBlank(dto.getUsername()) || ValidateUtils.isNull(dto.getPassword())) {
@@ -47,6 +56,16 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
             if(!ldapAuthentication.authenticate(dto.getUsername(),dto.getPassword())){
                 return Result.buildFrom(ResultStatus.LDAP_AUTHENTICATION_FAILED);
             }
+
+            if((ValidateUtils.isNull(accountResult) || ValidateUtils.isNull(accountResult.getData())) && authUserRegistration){
+                //自动注册
+                AccountDO accountDO = new AccountDO();
+                accountDO.setUsername(dto.getUsername());
+                accountDO.setRole(AccountRoleEnum.getUserRoleEnum(authUserRegistrationRole).getRole());
+                accountDO.setPassword(dto.getPassword());
+                accountService.createAccount(accountDO);
+            }
+
             return Result.buildSuc(dto.getUsername());
         }
 
