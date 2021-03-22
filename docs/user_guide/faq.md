@@ -9,7 +9,7 @@
 
 # FAQ 
 
-- 0、Github图裂问题解决
+- 0、支持哪些Kafka版本？
 - 1、Topic申请、新建监控告警等操作时没有可选择的集群？
 - 2、逻辑集群 & Region的用途？
 - 3、登录失败？
@@ -17,24 +17,15 @@
 - 5、如何对接夜莺的监控告警功能？
 - 6、如何使用`MySQL 8`？
 - 7、`Jmx`连接失败如何解决？
-- 8、`topic biz data not exist`错误及处理方式
-- 9、进程启动后，如何查看API文档
+- 8、`topic biz data not exist`错误及处理方式？
+- 9、进程启动后，如何查看API文档？
+- 10、集群申请审批通过之后，为什么还是看不到集群？
 
 ---
 
-### 0、Github图裂问题解决
+### 0、支持哪些Kafka版本？
 
-可以在本地机器`ping github.com`这个地址，获取到`github.com`地址的IP地址。
-
-然后将IP绑定到`/etc/hosts`文件中。
-
-例如
-
-```shell
-# 在 /etc/hosts文件中增加如下信息
-
-140.82.113.3 github.com
-```
+基本上只要所使用的Kafka还依赖于Zookeeper，那么该版本的主要功能基本上应该就是支持的。
 
 ---
 
@@ -111,6 +102,18 @@
 
 以上仅仅只是针对单个Topic的场景，如果你有非常多的Topic需要进行初始化的，那么此时可以在配置管理中增加一个配置，来定时的对无主的Topic进行同步，具体见：[动态配置管理 - 1、Topic定时同步任务](../dev_guide/dynamic_config_manager.md)
 
+---
+
 ### 9、进程启动后，如何查看API文档
 
 - 滴滴Logi-KafkaManager采用Swagger-API工具记录API文档。Swagger-API地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-ui.html#/) 
+
+---
+
+### 10、集群申请审批通过之后，为什么还是看不到集群？
+
+集群申请，审批通过，那块的通过只是将工单的状态修改为通过。实际集群的分配搭建等，还需要运维去手动操作。
+
+Logi-KM整体设计上，用户侧看到的是逻辑集群，管控侧看到的是物理集群，因此这里的手动操作，是需要创建一个逻辑集群。
+
+逻辑集群的创建，具体可以看README里面的用户文档。
