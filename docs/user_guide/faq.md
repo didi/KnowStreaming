@@ -7,7 +7,7 @@
 
 --- 
 
-# FAQ 
+# FAQ
 
 - 0、支持哪些Kafka版本？
 - 1、Topic申请、新建监控告警等操作时没有可选择的集群？
@@ -17,9 +17,11 @@
 - 5、如何对接夜莺的监控告警功能？
 - 6、如何使用`MySQL 8`？
 - 7、`Jmx`连接失败如何解决？
-- 8、`topic biz data not exist`错误及处理方式？
-- 9、进程启动后，如何查看API文档？
-- 10、集群申请审批通过之后，为什么还是看不到集群？
+- 8、`topic biz data not exist`错误及处理方式
+- 9、进程启动后，如何查看API文档
+- 10、如何创建告警组？
+- 11、连接信息、耗时信息为什么没有数据？
+- 12、逻辑集群申请审批通过之后为什么看不到逻辑集群？
 
 ---
 
@@ -35,7 +37,7 @@
 
 逻辑集群的创建参看：
 
-- [kafka-manager 接入集群](docs/user_guide/add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
+- [kafka-manager 接入集群](add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
 
 ---
 
@@ -106,14 +108,21 @@
 
 ### 9、进程启动后，如何查看API文档
 
-- 滴滴Logi-KafkaManager采用Swagger-API工具记录API文档。Swagger-API地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-ui.html#/) 
+- 滴滴Logi-KafkaManager采用Swagger-API工具记录API文档。Swagger-API地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-ui.html#/)
 
----
 
-### 10、集群申请审批通过之后，为什么还是看不到集群？
+### 10、如何创建告警组？
 
-集群申请，审批通过，那块的通过只是将工单的状态修改为通过。实际集群的分配搭建等，还需要运维去手动操作。
+这块需要配合监控系统进行使用，现在默认已经实现了夜莺的对接，当然也可以对接自己内部的监控系统，不过需要实现一些接口。
 
-Logi-KM整体设计上，用户侧看到的是逻辑集群，管控侧看到的是物理集群，因此这里的手动操作，是需要创建一个逻辑集群。
+具体的文档可见：[监控功能对接夜莺](../dev_guide/monitor_system_integrate_with_n9e.md)、[监控功能对接其他系统](../dev_guide/monitor_system_integrate_with_self.md)
 
-逻辑集群的创建，具体可以看README里面的用户文档。
+### 11、连接信息、耗时信息为什么没有数据？
+
+这块需要结合滴滴内部的kafka-gateway一同使用才会有数据，滴滴kafka-gateway暂未开源。
+
+### 12、逻辑集群申请审批通过之后为什么看不到逻辑集群？
+
+逻辑集群的申请与审批仅仅只是一个工单流程，并不会去实际创建逻辑集群，逻辑集群的创建还需要手动去创建。
+
+具体的操作可见：[kafka-manager 接入集群](add_cluster/add_cluster.md)。

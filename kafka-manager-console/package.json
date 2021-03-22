@@ -1,6 +1,6 @@
 {
-  "name": "mobx-ts-example",
-  "version": "1.0.0",
+  "name": "logi-kafka",
+  "version": "2.3.1",
   "description": "",
   "scripts": {
     "start": "webpack-dev-server",
@@ -21,7 +21,7 @@
     "@types/spark-md5": "^3.0.2",
     "antd": "^3.26.15",
     "clean-webpack-plugin": "^3.0.0",
-    "clipboard": "^2.0.6",
+    "clipboard": "2.0.6",
     "cross-env": "^7.0.2",
     "css-loader": "^2.1.0",
     "echarts": "^4.5.0",
