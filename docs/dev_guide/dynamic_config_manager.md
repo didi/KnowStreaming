@@ -9,6 +9,13 @@
 
 # 动态配置管理
 
+## 0、目录
+
+- 1、Topic定时同步任务
+- 2、专家服务——Topic分区热点
+- 3、专家服务——Topic分区不足
+
+
 ## 1、Topic定时同步任务
 
 ### 1.1、配置的用途
@@ -63,3 +70,53 @@ task:
 ]
 ```
 
+---
+
+## 2、专家服务——Topic分区热点
+
+在`Region`所圈定的Broker范围内，某个Topic的Leader数在这些圈定的Broker上分布不均衡时，我们认为该Topic是存在热点的Topic。
+
+备注：单纯的查看Leader数的分布，确实存在一定的局限性，这块欢迎贡献更多的热点定义于代码。
+
+
+Topic分区热点相关的动态配置(页面在运维管控->平台管理->配置管理)：
+
+配置Key：
+```
+REGION_HOT_TOPIC_CONFIG
+```
+
+配置Value：
+```json
+{
+  "maxDisPartitionNum": 2,  # Region内Broker间的leader数差距超过2时，则认为是存在热点的Topic
+  "minTopicBytesInUnitB": 1048576,  # 流量低于该值的Topic不做统计
+  "ignoreClusterIdList": [  # 忽略的集群
+    50
+  ]
+}
+```
+
+---
+
+## 3、专家服务——Topic分区不足
+
+总流量除以分区数，超过指定值时，则我们认为存在Topic分区不足。
+
+Topic分区不足相关的动态配置(页面在运维管控->平台管理->配置管理)：
+
+配置Key：
+```
+TOPIC_INSUFFICIENT_PARTITION_CONFIG
+```
+
+配置Value：
+```json
+{
+  "maxBytesInPerPartitionUnitB": 3145728,  # 单分区流量超过该值, 则认为分区不去
+  "minTopicBytesInUnitB": 1048576,  # 流量低于该值的Topic不做统计
+  "ignoreClusterIdList": [  # 忽略的集群
+    50
+  ]
+}
+```
