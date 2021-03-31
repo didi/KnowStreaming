@@ -64,11 +64,13 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public boolean checkLogin(HttpServletRequest request, HttpServletResponse response) {
-        String uri = request.getRequestURI().replace("//", "/");
-        if (uri.contains("/../") || uri.contains("/./")) {
-            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal, contains /../ or /./||uri={}", uri);
+        String uri = request.getRequestURI();
+        if (uri.contains("./") || uri.contains("///")) {
+            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal, contains ../ or ./ or ///||uri={}", uri);
+            singleSignOn.setRedirectToLoginPage(response);
             return false;
         }
+        uri = uri.replaceAll("//", "/");
 
         if (uri.startsWith(ApiPrefix.API_V1_SSO_PREFIX)
                 || uri.startsWith(ApiPrefix.API_V1_THIRD_PART_PREFIX)
