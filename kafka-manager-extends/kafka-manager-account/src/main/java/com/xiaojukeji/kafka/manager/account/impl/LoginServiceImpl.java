@@ -65,8 +65,8 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public boolean checkLogin(HttpServletRequest request, HttpServletResponse response) {
         String uri = request.getRequestURI();
-        if (uri.contains("./") || uri.contains("///")) {
-            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal, contains ../ or ./ or ///||uri={}", uri);
+        if (uri.contains("..") || uri.contains("./") || uri.contains("///")) {
+            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal, contains .. or ./ or ///||uri={}", uri);
             singleSignOn.setRedirectToLoginPage(response);
             return false;
         }
