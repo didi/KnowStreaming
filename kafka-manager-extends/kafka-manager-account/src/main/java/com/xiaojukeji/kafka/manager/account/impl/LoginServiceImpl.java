@@ -72,7 +72,8 @@ public class LoginServiceImpl implements LoginService {
         }
         uri = uri.replaceAll("//", "/");
 
-        if (uri.startsWith(ApiPrefix.API_V1_SSO_PREFIX)
+        if (uri.equals(ApiPrefix.API_V1_SSO_LOGIN)
+                || uri.equals(ApiPrefix.API_V1_SSO_LOGOUT)
                 || uri.startsWith(ApiPrefix.API_V1_THIRD_PART_PREFIX)
                 || uri.startsWith(ApiPrefix.GATEWAY_API_V1_PREFIX)) {
             // 白名单接口直接true
