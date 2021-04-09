@@ -9,7 +9,6 @@ import com.xiaojukeji.kafka.manager.common.entity.vo.common.AccountSummaryVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
-import com.xiaojukeji.kafka.manager.web.api.versionone.gateway.GatewayHeartbeatController;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;

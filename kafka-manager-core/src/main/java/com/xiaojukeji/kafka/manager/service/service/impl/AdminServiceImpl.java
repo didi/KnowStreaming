@@ -340,10 +340,6 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public ResultStatus modifyTopicConfig(ClusterDO clusterDO, String topicName, Properties properties, String operator) {
         ResultStatus rs = TopicCommands.modifyTopicConfig(clusterDO, topicName, properties);
-        if (!ResultStatus.SUCCESS.equals(rs)) {
-            return rs;
-        }
-
         return rs;
     }
 }
