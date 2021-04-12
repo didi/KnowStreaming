@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.service.service;
 
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
-import com.xiaojukeji.kafka.manager.common.entity.dto.rd.RegionDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO;
 
 import java.util.List;
