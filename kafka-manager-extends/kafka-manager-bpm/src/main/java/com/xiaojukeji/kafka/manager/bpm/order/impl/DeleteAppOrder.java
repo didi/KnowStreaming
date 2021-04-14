@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author zhongyuankai
@@ -94,7 +95,11 @@ public class DeleteAppOrder extends AbstractAppOrder {
         }
         // 判断app是否对topic有权限
         List<AuthorityDO> authorityList = authorityService.getAuthority(orderAppExtension.getAppId());
-        if (!ValidateUtils.isEmptyList(authorityList)) {
+        // 过滤权限列表中access=0的
+        List<AuthorityDO> newAuthorityList = authorityList.stream()
+                .filter(authorityDO -> authorityDO.getAccess() != 0)
+                .collect(Collectors.toList());
+        if (!ValidateUtils.isEmptyList(newAuthorityList)) {
             return ResultStatus.OPERATION_FORBIDDEN;
         }
         if (appService.deleteApp(appDO, userName) > 0) {
