@@ -84,7 +84,7 @@ public class LoginServiceImpl implements LoginService {
             return false;
         }
 
-        boolean status = checkAuthority(request, accountService.getAccountRoleFromCache(username));
+        boolean status = checkAuthority(classRequestMappingValue, accountService.getAccountRoleFromCache(username));
         if (status) {
             HttpSession session = request.getSession();
             session.setAttribute(LoginConstant.SESSION_USERNAME_KEY, username);
@@ -94,19 +94,18 @@ public class LoginServiceImpl implements LoginService {
         return false;
     }
 
-    private boolean checkAuthority(HttpServletRequest request, AccountRoleEnum accountRoleEnum) {
-        String uri = request.getRequestURI();
-        if (uri.contains(ApiPrefix.API_V1_NORMAL_PREFIX)) {
+    private boolean checkAuthority(String classRequestMappingValue, AccountRoleEnum accountRoleEnum) {
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_NORMAL_PREFIX)) {
             // normal 接口都可以访问
             return true;
         }
 
-        if (uri.contains(ApiPrefix.API_V1_RD_PREFIX) ) {
-            // RD 接口 OP 或者 RD 可以访问
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_RD_PREFIX) ) {
+            // RD 接口, OP 或者 RD 可以访问
             return AccountRoleEnum.RD.equals(accountRoleEnum) || AccountRoleEnum.OP.equals(accountRoleEnum);
         }
 
-        if (uri.contains(ApiPrefix.API_V1_OP_PREFIX)) {
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_OP_PREFIX)) {
             // OP 接口只有 OP 可以访问
             return AccountRoleEnum.OP.equals(accountRoleEnum);
         }
