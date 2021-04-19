@@ -25,6 +25,9 @@ public enum ResultStatus {
     CHANGE_ZOOKEEPER_FORBIDDEN(1405, "change zookeeper forbidden"),
 
 
+    APP_OFFLINE_FORBIDDEN(1406, "先下线topic，才能下线应用～"),
+
+
     TOPIC_OPERATION_PARAM_NULL_POINTER(1450, "参数错误"),
     TOPIC_OPERATION_PARTITION_NUM_ILLEGAL(1451, "分区数错误"),
     TOPIC_OPERATION_BROKER_NUM_NOT_ENOUGH(1452, "Broker数不足错误"),

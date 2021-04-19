@@ -95,7 +95,7 @@ public class DeleteAppOrder extends AbstractAppOrder {
         // 判断app是否对topic有权限
         List<AuthorityDO> authorityList = authorityService.getAuthority(orderAppExtension.getAppId());
         if (!ValidateUtils.isEmptyList(authorityList)) {
-            return ResultStatus.OPERATION_FORBIDDEN;
+            return ResultStatus.APP_OFFLINE_FORBIDDEN;
         }
         if (appService.deleteApp(appDO, userName) > 0) {
             return ResultStatus.SUCCESS;
