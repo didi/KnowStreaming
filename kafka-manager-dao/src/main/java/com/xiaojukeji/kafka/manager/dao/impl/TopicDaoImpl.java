@@ -92,7 +92,7 @@ public class TopicDaoImpl implements TopicDao {
     }
 
     private void updateTopicCache() {
-        Long timestamp = System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
 
         if (timestamp + 1000 <= TOPIC_CACHE_LATEST_UPDATE_TIME) {
             // 近一秒内的请求不走db
@@ -108,12 +108,13 @@ public class TopicDaoImpl implements TopicDao {
      * 更新Topic缓存
      */
     private synchronized void updateTopicCache(List<TopicDO> doList, Long timestamp) {
+        if (TOPIC_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
+            TOPIC_MAP.clear();
+        }
+
         if (doList == null || doList.isEmpty() || TOPIC_CACHE_LATEST_UPDATE_TIME >= timestamp) {
             // 本次无数据更新, 或者本次更新过时 时, 忽略本次更新
             return;
-        }
-        if (TOPIC_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
-            TOPIC_MAP.clear();
         }
 
         for (TopicDO elem: doList) {
