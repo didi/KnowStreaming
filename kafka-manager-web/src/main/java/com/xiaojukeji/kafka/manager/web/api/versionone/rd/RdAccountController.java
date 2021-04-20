@@ -1,15 +1,15 @@
 package com.xiaojukeji.kafka.manager.web.api.versionone.rd;
 
+import com.xiaojukeji.kafka.manager.account.AccountService;
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.dto.rd.AccountDTO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.AccountVO;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
-import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.web.converters.AccountConverter;
-import com.xiaojukeji.kafka.manager.common.entity.dto.rd.AccountDTO;
-import com.xiaojukeji.kafka.manager.common.entity.Result;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO;
-import com.xiaojukeji.kafka.manager.account.AccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -47,6 +47,11 @@ public class RdAccountController {
     @RequestMapping(value = "accounts", method = RequestMethod.DELETE)
     @ResponseBody
     public Result deleteAccount(@RequestParam("username") String username) {
+        // 禁止用户删除自己,防止误操作导致用户无法登录
+        String operationUser = SpringTool.getUserName();
+        if (operationUser.equals(username)) {
+            return Result.buildFrom(ResultStatus.OPERATION_FORBIDDEN);
+        }
         ResultStatus rs = accountService.deleteByName(username, SpringTool.getUserName());
         return Result.buildFrom(rs);
     }
