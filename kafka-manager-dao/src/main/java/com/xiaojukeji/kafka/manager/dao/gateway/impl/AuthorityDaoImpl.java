@@ -93,7 +93,7 @@ public class AuthorityDaoImpl implements AuthorityDao {
 
 
     private void updateAuthorityCache() {
-        Long timestamp = System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
 
         if (timestamp + 1000 <= AUTHORITY_CACHE_LATEST_UPDATE_TIME) {
             // 近一秒内的请求不走db
@@ -109,12 +109,13 @@ public class AuthorityDaoImpl implements AuthorityDao {
      * 更新Topic缓存
      */
     private synchronized void updateAuthorityCache(List<AuthorityDO> doList, Long timestamp) {
+        if (AUTHORITY_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
+            AUTHORITY_MAP.clear();
+        }
+
         if (doList == null || doList.isEmpty() || AUTHORITY_CACHE_LATEST_UPDATE_TIME >= timestamp) {
             // 本次无数据更新, 或者本次更新过时 时, 忽略本次更新
             return;
-        }
-        if (AUTHORITY_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
-            AUTHORITY_MAP.clear();
         }
 
         for (AuthorityDO elem: doList) {

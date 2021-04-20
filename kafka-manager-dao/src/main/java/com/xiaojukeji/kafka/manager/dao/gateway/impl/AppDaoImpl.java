@@ -78,12 +78,13 @@ public class AppDaoImpl implements AppDao {
      * 更新APP缓存
      */
     private synchronized void updateTopicCache(List<AppDO> doList, long timestamp) {
+        if (APP_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
+            APP_MAP.clear();
+        }
+
         if (doList == null || doList.isEmpty() || APP_CACHE_LATEST_UPDATE_TIME >= timestamp) {
             // 本次无数据更新, 或者本次更新过时 时, 忽略本次更新
             return;
-        }
-        if (APP_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
-            APP_MAP.clear();
         }
 
         for (AppDO elem: doList) {
