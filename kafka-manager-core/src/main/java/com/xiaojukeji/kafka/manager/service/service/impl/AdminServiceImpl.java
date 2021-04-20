@@ -143,6 +143,9 @@ public class AdminServiceImpl implements AdminService {
 
         // 4. 数据库中删除authority
         authorityService.deleteAuthorityByTopic(clusterDO.getId(), topicName);
+
+        // 5. 本地内存元信息中删除topic
+        PhysicalClusterMetadataManager.removeTopicMetadata(clusterDO.getId(), topicName);
         return rs;
     }
 
