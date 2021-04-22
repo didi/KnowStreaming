@@ -96,6 +96,14 @@ public class TopicManagerServiceImpl implements TopicManagerService {
     }
 
     @Override
+    public List<TopicDO> getByClusterIdFromCache(Long clusterId) {
+        if (clusterId == null) {
+            return new ArrayList<>();
+        }
+        return topicDao.getByClusterIdFromCache(clusterId);
+    }
+
+    @Override
     public List<TopicDO> getByClusterId(Long clusterId) {
         if (clusterId == null) {
             return new ArrayList<>();
