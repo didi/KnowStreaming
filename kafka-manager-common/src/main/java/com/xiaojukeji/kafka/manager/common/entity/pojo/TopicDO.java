@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.pojo;
 
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicCreationDTO;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 
 import java.util.Date;
 
@@ -95,6 +96,7 @@ public class TopicDO {
         topicDO.setClusterId(dto.getClusterId());
         topicDO.setTopicName(dto.getTopicName());
         topicDO.setDescription(dto.getDescription());
+        topicDO.setPeakBytesIn(ValidateUtils.isNull(dto.getPeakBytesIn())  ? -1L : dto.getPeakBytesIn());
         return topicDO;
     }
 }
