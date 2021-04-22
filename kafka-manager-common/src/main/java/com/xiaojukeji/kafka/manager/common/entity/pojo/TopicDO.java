@@ -95,6 +95,7 @@ public class TopicDO {
         topicDO.setClusterId(dto.getClusterId());
         topicDO.setTopicName(dto.getTopicName());
         topicDO.setDescription(dto.getDescription());
+        topicDO.setPeakBytesIn(dto.getPeakBytesIn() == null ? -1L : dto.getPeakBytesIn());
         return topicDO;
     }
 }
