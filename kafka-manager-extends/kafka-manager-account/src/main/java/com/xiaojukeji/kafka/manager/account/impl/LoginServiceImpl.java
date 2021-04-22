@@ -63,16 +63,16 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public boolean checkLogin(HttpServletRequest request, HttpServletResponse response) {
-        String uri = request.getRequestURI().replace("//", "/");
-        if (uri.contains("/../") || uri.contains("/./")) {
-            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal, contains /../ or /./||uri={}", uri);
+    public boolean checkLogin(HttpServletRequest request, HttpServletResponse response, String classRequestMappingValue) {
+        if (ValidateUtils.isNull(classRequestMappingValue)) {
+            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal||uri={}", request.getRequestURI());
+            singleSignOn.setRedirectToLoginPage(response);
             return false;
         }
 
-        if (uri.startsWith(ApiPrefix.API_V1_SSO_PREFIX)
-                || uri.startsWith(ApiPrefix.API_V1_THIRD_PART_PREFIX)
-                || uri.startsWith(ApiPrefix.GATEWAY_API_V1_PREFIX)) {
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_SSO_PREFIX)
+                || classRequestMappingValue.equals(ApiPrefix.API_V1_THIRD_PART_PREFIX)
+                || classRequestMappingValue.equals(ApiPrefix.GATEWAY_API_V1_PREFIX)) {
             // 白名单接口直接true
             return true;
         }

@@ -16,5 +16,5 @@ public interface LoginService {
 
     void logout(HttpServletRequest request, HttpServletResponse response, Boolean needJump2LoginPage);
 
-    boolean checkLogin(HttpServletRequest request, HttpServletResponse response);
+    boolean checkLogin(HttpServletRequest request, HttpServletResponse response, String classRequestMappingValue);
 }
