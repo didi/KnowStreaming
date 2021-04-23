@@ -3,11 +3,11 @@ import { SearchAndFilterContainer } from 'container/search-filter';
 import { Table, Button, Spin } from 'component/antd';
 import { admin } from 'store/admin';
 import { observer } from 'mobx-react';
-import { IConfigure } from 'types/base-type';
+import { IConfigure, IConfigGateway } from 'types/base-type';
 import { users } from 'store/users';
 import { pagination } from 'constants/table';
-import { getConfigureColumns } from './config';
-import { showConfigureModal } from 'container/modal/admin';
+import { getConfigureColumns, getConfigColumns } from './config';
+import { showConfigureModal, showConfigGatewayModal } from 'container/modal/admin';
 
 @observer
 export class ConfigureManagement extends SearchAndFilterContainer {
@@ -17,7 +17,12 @@ export class ConfigureManagement extends SearchAndFilterContainer {
   };
 
   public componentDidMount() {
-    admin.getConfigure();
+    if (this.props.isShow) {
+      admin.getGatewayList();
+      admin.getGatewayType();
+    } else {
+      admin.getConfigure();
+    }
   }
 
   public getData<T extends IConfigure>(origin: T[]) {
@@ -34,15 +39,34 @@ export class ConfigureManagement extends SearchAndFilterContainer {
     return data;
   }
 
+  public getGatewayData<T extends IConfigGateway>(origin: T[]) {
+    let data: T[] = origin;
+    let { searchKey } = this.state;
+    searchKey = (searchKey + '').trim().toLowerCase();
+
+    data = searchKey ? origin.filter((item: IConfigGateway) =>
+      ((item.name !== undefined && item.name !== null) && item.name.toLowerCase().includes(searchKey as string))
+      || ((item.value !== undefined && item.value !== null) && item.value.toLowerCase().includes(searchKey as string))
+      || ((item.description !== undefined && item.description !== null) &&
+        item.description.toLowerCase().includes(searchKey as string)),
+    ) : origin;
+    return data;
+  }
+
   public renderTable() {
     return (
       <Spin spinning={users.loading}>
-        <Table
+        {this.props.isShow ? <Table
+          rowKey="key"
+          columns={getConfigColumns()}
+          dataSource={this.getGatewayData(admin.configGatewayList)}
+          pagination={pagination}
+        /> : <Table
           rowKey="key"
           columns={getConfigureColumns()}
           dataSource={this.getData(admin.configureList)}
           pagination={pagination}
-        />
+        />}
       </Spin>
 
     );
@@ -53,7 +77,7 @@ export class ConfigureManagement extends SearchAndFilterContainer {
       <ul>
         {this.renderSearch('', '请输入配置键、值或描述')}
         <li className="right-btn-1">
-          <Button type="primary" onClick={() => showConfigureModal()}>增加配置</Button>
+          <Button type="primary" onClick={() => this.props.isShow ? showConfigGatewayModal() : showConfigureModal()}>增加配置</Button>
         </li>
       </ul>
     );

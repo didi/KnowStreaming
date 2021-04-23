@@ -9,7 +9,6 @@ import com.xiaojukeji.kafka.manager.common.entity.vo.common.AccountSummaryVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
-import com.xiaojukeji.kafka.manager.web.api.versionone.gateway.GatewayHeartbeatController;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -40,8 +39,7 @@ public class NormalAccountController {
     public Result<List<AccountSummaryVO>> searchOnJobStaffByKeyWord(@RequestParam("keyWord") String keyWord) {
         List<EnterpriseStaff> staffList = accountService.searchAccountByPrefix(keyWord);
         if (ValidateUtils.isEmptyList(staffList)) {
-            LOGGER.info("class=NormalAccountController||method=searchOnJobStaffByKeyWord||keyWord={}||msg=staffList is empty!"
-                    ,keyWord);
+            LOGGER.info("class=NormalAccountController||method=searchOnJobStaffByKeyWord||keyWord={}||msg=staffList is empty!", keyWord);
             return new Result<>();
         }
         List<AccountSummaryVO> voList = new ArrayList<>();

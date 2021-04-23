@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, Table, Button, notification, message, Tooltip, Icon, Popconfirm, Alert } from 'component/antd';
+import { Modal, Table, Button, notification, message, Tooltip, Icon, Popconfirm, Alert, Popover } from 'component/antd';
 import { wrapper } from 'store';
 import { observer } from 'mobx-react';
 import { IXFormWrapper, IMetaData, IRegister } from 'types/base-type';
@@ -12,6 +12,7 @@ import { urlPrefix } from 'constants/left-menu';
 import { indexUrl } from 'constants/strategy'
 import { region } from 'store';
 import './index.less';
+import Monacoeditor from 'component/editor/monacoEditor';
 import { getAdminClusterColumns } from '../config';
 
 const { confirm } = Modal;
@@ -58,7 +59,7 @@ export class ClusterList extends SearchAndFilterContainer {
             message: '请输入zookeeper地址',
           }],
           attrs: {
-            placeholder: '请输入zookeeper地址',
+            placeholder: '请输入zookeeper地址，例如：192.168.0.1:2181,192.168.0.2:2181/logi-kafka',
             rows: 2,
             disabled: item ? true : false,
           },
@@ -72,7 +73,7 @@ export class ClusterList extends SearchAndFilterContainer {
             message: '请输入bootstrapServers',
           }],
           attrs: {
-            placeholder: '请输入bootstrapServers',
+            placeholder: '请输入bootstrapServers，例如：192.168.1.1:9092,192.168.1.2:9092',
             rows: 2,
             disabled: item ? true : false,
           },
@@ -131,7 +132,26 @@ export class ClusterList extends SearchAndFilterContainer {
 { 
   "security.protocol": "SASL_PLAINTEXT", 
   "sasl.mechanism": "PLAIN", 
-  "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"xxxxxx\" password=\"xxxxxx\";"
+  "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\\"xxxxxx\\" password=\\"xxxxxx\\";"
+}`,
+            rows: 8,
+          },
+        },
+        {
+          key: 'jmxProperties',
+          label: 'JMX认证',
+          type: 'text_area',
+          rules: [{
+            required: false,
+            message: '请输入JMX认证',
+          }],
+          attrs: {
+            placeholder: `请输入JMX认证，例如：
+{
+"maxConn": 10, #KM对单台Broker对最大连接数
+"username": "xxxxx", #用户名
+"password": "xxxxx", #密码
+"openSSL": true, #开启SSL，true表示开启SSL，false表示关闭
 }`,
             rows: 8,
           },
@@ -271,11 +291,13 @@ export class ClusterList extends SearchAndFilterContainer {
             cancelText="取消"
             okText="确认"
           >
-            <a
-              className="action-button"
-            >
-              {item.status === 1 ? '暂停监控' : '开始监控'}
-            </a>
+            <Tooltip title="暂停监控将无法正常监控指标信息，建议开启监控">
+              <a
+                className="action-button"
+              >
+                {item.status === 1 ? '暂停监控' : '开始监控'}
+              </a>
+            </Tooltip>
           </Popconfirm>
           <a onClick={this.showMonitor.bind(this, item)}>
             删除

@@ -29,7 +29,7 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
         rules: [{
           required: isDisabled ? false : true,
           message: '应用名称只支持中文、字母、数字、下划线、短划线，长度限制在3-64字符',
-          pattern: /[\u4e00-\u9fa5_a-zA-Z0-9_-]{3,64}/,
+          pattern: /[\u4e00-\u9fa5_a-zA-Z0-9_-]{3,64}$/,
         }],
         attrs: { disabled: isDisabled },
       }, {
@@ -85,7 +85,7 @@ export const showEditModal = (record?: IAppItem, from?: string, isDisabled?: boo
     ],
     formData: record,
     visible: true,
-    title: isDisabled ? '详情' : record ? '编辑' : <div><span>应用申请</span><a className='applicationDocument' href="###" target='_blank'>应用申请文档</a></div>,
+    title: isDisabled ? '详情' : record ? '编辑' : <div><span>应用申请</span><a className='applicationDocument' href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/resource_apply.md" target='_blank'>资源申请文档</a></div>,
     // customRenderElement: isDisabled ? '' : record ? '' : <span className="tips">集群资源充足时，预计1分钟自动审批通过</span>,
     isWaitting: true,
     onSubmit: (value: IAppItem) => {

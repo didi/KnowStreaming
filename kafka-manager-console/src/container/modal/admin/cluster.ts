@@ -23,13 +23,22 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
       {
         key: 'appId',
         label: '应用ID',
+        type: 'select',
+        options: app.adminAppData.map(item => {
+          return {
+            label: item.appId,
+            value: item.appId,
+          };
+        }),
         rules: [{
           required: true,
-          message: '请输入应用ID',
+          // message: '请输入应用ID',
+          // message: '请输入应用ID，应用名称只支持字母、数字、下划线、短划线，长度限制在3-64字符',
+          // pattern: /[_a-zA-Z0-9_-]{3,64}$/,
         }],
         attrs: {
           placeholder: '请输入应用ID',
-          disabled: true,
+          // disabled: true,
         },
       },
       {
@@ -52,6 +61,7 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
         attrs: {
           placeholder: '请输入保存时间',
           suffix: '小时',
+          prompttype:'修改保存时间，预计一分钟左右生效!'
         },
       },
       {
@@ -104,7 +114,7 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
   }
   const updateFormModal = (isShow: boolean) => {
     const formMap = wrapper.xFormWrapper.formMap;
-    isShow ? formMap.splice(2, 0,
+    isShow ? formMap.splice(3, 0,
       {
         key: 'appId',
         label: '所属应用',
@@ -119,7 +129,7 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
         attrs: {
           placeholder: '请选择所属应用',
         },
-      }) : formMap.splice(2, 1);
+      }) : formMap.splice(3, 1);
     const formData = wrapper.xFormWrapper.formData;
     wrapper.ref && wrapper.ref.updateFormMap$(formMap, formData || {});
   };
@@ -129,30 +139,30 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
     formMap: [
       {
         key: 'logicalClusterName',
-        label: '逻辑集群中文名称',
+        label: '逻辑集群名称',
         // defaultValue:'',
-        rules: [{ 
-          required: true, 
-          message: '请输入逻辑集群中文名称，支持中文、字母、数字、下划线(_)和短划线(-)组成，长度在3-128字符之间', // 不能以下划线（_）和短划线(-)开头和结尾
+        rules: [{
+          required: true,
+          message: '请输入逻辑集群名称，支持中文、字母、数字、下划线(_)和短划线(-)组成，长度在3-128字符之间', // 不能以下划线（_）和短划线(-)开头和结尾
           pattern: /^[a-zA-Z0-9_\-\u4e00-\u9fa5]{3,128}$/g, //(?!(_|\-))(?!.*?(_|\-)$)
         }],
         attrs: {
           // disabled: record ? true : false,
-          placeholder:'请输入逻辑集群中文名称'
+          placeholder: '请输入逻辑集群名称'
         },
       },
       {
-        key: 'logicalClusterName1',
-        label: '逻辑集群英文名称',
+        key: 'logicalClusterIdentification',
+        label: '逻辑集群标识',
         // defaultValue:'',
-        rules: [{ 
-          required: true, 
-          message: '请输入逻辑集群英文名称，支持字母、数字、下划线(_)和短划线(-)组成，长度在3-128字符之间', //不能以下划线（_）和短划线(-)开头和结尾
-          pattern:/^[a-zA-Z0-9_\-]{3,128}$/g, //(?!(_|\-))(?!.*?(_|\-)$)
+        rules: [{
+          required: true,
+          message: '请输入逻辑集群标识，支持字母、数字、下划线(_)和短划线(-)组成，长度在3-128字符之间', //不能以下划线（_）和短划线(-)开头和结尾
+          pattern: /^[a-zA-Z0-9_\-]{3,128}$/g, //(?!(_|\-))(?!.*?(_|\-)$)
         }],
         attrs: {
           disabled: record ? true : false,
-          placeholder:'请输入逻辑集群英文名称，创建后无法修改'
+          placeholder: '请输入逻辑集标识，创建后无法修改'
         },
       },
       {
@@ -233,7 +243,7 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
         id: record ? record.logicalClusterId : '',
         mode: value.mode,
         name: value.logicalClusterName,
-        englishName:value.logicalClusterEName, // 存储逻辑集群英文名称
+        identification: value.logicalClusterIdentification,
         regionIdList: value.regionIdList,
       } as INewLogical;
       if (record) {
@@ -246,7 +256,25 @@ export const showLogicalClusterOpModal = (clusterId: number, record?: ILogicalCl
       });
     },
   };
-
+  if (record && record.mode != 0) {
+    isShow = true;
+    let formMap: any = xFormModal.formMap
+    formMap.splice(3, 0, {
+      key: 'appId',
+      label: '所属应用',
+      rules: [{ required: true, message: '请选择所属应用' }],
+      type: 'select',
+      options: app.adminAppData.map(item => {
+        return {
+          label: item.name,
+          value: item.appId,
+        };
+      }),
+      attrs: {
+        placeholder: '请选择所属应用',
+      },
+    })
+  }
   wrapper.open(xFormModal);
 };
 

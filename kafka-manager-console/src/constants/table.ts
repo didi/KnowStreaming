@@ -19,7 +19,7 @@ export const cellStyle = {
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textOverflow: 'ellipsis',
-  cursor: 'pointer',
+  // cursor: 'pointer',
 };
 
 export const searchProps = {

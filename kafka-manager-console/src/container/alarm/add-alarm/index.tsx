@@ -12,7 +12,6 @@ import { alarm } from 'store/alarm';
 import { app } from 'store/app';
 import Url from 'lib/url-parser';
 import { IStrategyExpression, IRequestParams } from 'types/alarm';
-
 @observer
 export class AddAlarm extends SearchAndFilterContainer {
   public isDetailPage = window.location.pathname.includes('/alarm-detail'); // 判断是否为详情
@@ -90,8 +89,8 @@ export class AddAlarm extends SearchAndFilterContainer {
     const filterObj = this.typeForm.getFormData().filterObj;
     // tslint:disable-next-line:max-line-length
     if (!actionValue || !timeValue || !typeValue || !strategyList.length || !filterObj || !filterObj.filterList.length) {
-       message.error('请正确填写必填项');
-       return null;
+      message.error('请正确填写必填项');
+      return null;
     }
 
     if (filterObj.monitorType === 'online-kafka-topic-throttled') {
@@ -101,13 +100,17 @@ export class AddAlarm extends SearchAndFilterContainer {
         tval: [typeValue.app],
       });
     }
+    this.id && filterObj.filterList.forEach((item: any) => {
+      if (item.tkey === 'cluster') {
+        item.tval = [item.clusterIdentification]
+      }
+    })
     strategyList = strategyList.map((row: IStrategyExpression) => {
       return {
         ...row,
         metric: filterObj.monitorType,
       };
     });
-
     return {
       appId: typeValue.app,
       name: typeValue.alarmName,
@@ -129,7 +132,7 @@ export class AddAlarm extends SearchAndFilterContainer {
   public renderAlarmStrategy() {
     return (
       <div className="config-wrapper">
-        <span className="span-tag">报警策略</span>
+        <span className="span-tag" data-set={alarm.monitorType}>报警策略</span>
         <div className="info-wrapper">
           <WrappedDynamicSetStrategy wrappedComponentRef={(form: any) => this.strategyForm = form} />
         </div>
@@ -139,9 +142,9 @@ export class AddAlarm extends SearchAndFilterContainer {
 
   public renderTimeForm() {
     return (
-     <>
-      <WrappedTimeForm wrappedComponentRef={(form: any) => this.timeForm = form} />
-     </>
+      <>
+        <WrappedTimeForm wrappedComponentRef={(form: any) => this.timeForm = form} />
+      </>
     );
   }
 
@@ -164,7 +167,7 @@ export class AddAlarm extends SearchAndFilterContainer {
           {this.renderAlarmStrategy()}
           {this.renderTimeForm()}
           <ActionForm ref={(actionForm) => this.actionForm = actionForm} />
-          </div>
+        </div>
       </Spin>
     );
   }

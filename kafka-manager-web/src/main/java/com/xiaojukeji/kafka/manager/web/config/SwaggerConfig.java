@@ -39,10 +39,10 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Kafka云平台-接口文档")
-                .description("欢迎使用滴滴出行开源kafka-manager")
+                .title("Logi-KafkaManager 接口文档")
+                .description("欢迎使用滴滴Logi-KafkaManager")
                 .contact("huangyiminghappy@163.com")
-                .version("2.0")
+                .version("2.2.0")
                 .build();
     }
 

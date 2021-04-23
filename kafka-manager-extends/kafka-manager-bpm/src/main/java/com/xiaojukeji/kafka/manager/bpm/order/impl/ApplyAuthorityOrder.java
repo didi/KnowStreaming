@@ -95,7 +95,7 @@ public class ApplyAuthorityOrder extends AbstractAuthorityOrder {
         }
         TopicDO topicDO = topicManagerService.getByTopicName(physicalClusterId, orderExtensionDTO.getTopicName());
         if (ValidateUtils.isNull(topicDO)) {
-            return ResultStatus.TOPIC_NOT_EXIST;
+            return ResultStatus.TOPIC_BIZ_DATA_NOT_EXIST;
         }
         AppDO appDO = appService.getByAppId(topicDO.getAppId());
         if (!appDO.getPrincipals().contains(userName)) {

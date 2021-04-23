@@ -16,8 +16,6 @@ public interface AppDao {
      */
     int insert(AppDO appDO);
 
-    int insertIgnoreGatewayDB(AppDO appDO);
-
     /**
      * 删除appId
      * @param appName App名称
@@ -60,6 +58,4 @@ public interface AppDao {
      * @return int
      */
     int updateById(AppDO appDO);
-
-    List<AppDO> listNewAll();
 }

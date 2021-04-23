@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.web.api.versionone.rd;
 
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.GatewayConfigDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.rd.GatewayConfigVO;
@@ -15,12 +16,13 @@ import java.util.List;
 
 @Api(tags = "RD-Gateway配置相关接口(REST)")
 @RestController
+@RequestMapping(ApiPrefix.API_V1_RD_PREFIX)
 public class RdGatewayConfigController {
     @Autowired
     private GatewayConfigService gatewayConfigService;
 
     @ApiOperation(value = "Gateway相关配置信息", notes = "")
-    @RequestMapping(value = "gateway-configs", method = RequestMethod.GET)
+    @GetMapping(value = "gateway-configs")
     @ResponseBody
     public Result<List<GatewayConfigVO>> getGatewayConfigs() {
         List<GatewayConfigDO> doList = gatewayConfigService.list();

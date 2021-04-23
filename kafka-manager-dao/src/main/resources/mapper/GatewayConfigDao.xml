@@ -8,6 +8,7 @@
         <result column="name"           property="name" />
         <result column="value"          property="value" />
         <result column="version"        property="version" />
+        <result column="description"    property="description" />
         <result column="create_time"    property="createTime" />
         <result column="modify_time"    property="modifyTime" />
     </resultMap>
@@ -27,9 +28,9 @@
     <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.GatewayConfigDO">
         <![CDATA[
         INSERT INTO gateway_config
-        (`type`, name, value, version)
+        (`type`, name, value, version, description)
         VALUES
-        (#{type}, #{name}, #{value}, #{version})
+        (#{type}, #{name}, #{value}, #{version}, #{description})
         ]]>
     </insert>
 
@@ -45,7 +46,8 @@
             `type`=#{type},
             `name`=#{name},
             `value`=#{value},
-            `version`=#{version}
+            `version`=#{version},
+            `description`=#{description}
         WHERE id=#{id}
         ]]>
     </update>

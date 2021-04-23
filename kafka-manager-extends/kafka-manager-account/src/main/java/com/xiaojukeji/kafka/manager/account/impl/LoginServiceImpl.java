@@ -6,6 +6,7 @@ import com.xiaojukeji.kafka.manager.account.LoginService;
 import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.LoginDTO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
@@ -34,15 +35,15 @@ public class LoginServiceImpl implements LoginService {
     private AbstractSingleSignOn singleSignOn;
 
     @Override
-    public Account login(HttpServletRequest request, HttpServletResponse response, LoginDTO loginDTO) {
-        String username = singleSignOn.loginAndGetLdap(request, response, loginDTO);
-        if (ValidateUtils.isBlank(username)) {
+    public Result<Account> login(HttpServletRequest request, HttpServletResponse response, LoginDTO loginDTO) {
+        Result<String> userResult = singleSignOn.loginAndGetLdap(request, response, loginDTO);
+        if (ValidateUtils.isNull(userResult) || userResult.failed()) {
             logout(request, response, false);
-            return null;
+            return new Result<>(userResult.getCode(), userResult.getMessage());
         }
-        Account account = accountService.getAccountFromCache(username);
+        Account account = accountService.getAccountFromCache(userResult.getData());
         initLoginContext(request, response, account);
-        return account;
+        return Result.buildSuc(account);
     }
 
     private void initLoginContext(HttpServletRequest request, HttpServletResponse response, Account account) {
@@ -62,12 +63,17 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public boolean checkLogin(HttpServletRequest request, HttpServletResponse response) {
-        String uri = request.getRequestURI();
-        if (!(uri.contains(ApiPrefix.API_V1_NORMAL_PREFIX)
-                || uri.contains(ApiPrefix.API_V1_RD_PREFIX)
-                || uri.contains(ApiPrefix.API_V1_OP_PREFIX))) {
-            // 白名单接口, 直接忽略登录
+    public boolean checkLogin(HttpServletRequest request, HttpServletResponse response, String classRequestMappingValue) {
+        if (ValidateUtils.isNull(classRequestMappingValue)) {
+            LOGGER.error("class=LoginServiceImpl||method=checkLogin||msg=uri illegal||uri={}", request.getRequestURI());
+            singleSignOn.setRedirectToLoginPage(response);
+            return false;
+        }
+
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_SSO_PREFIX)
+                || classRequestMappingValue.equals(ApiPrefix.API_V1_THIRD_PART_PREFIX)
+                || classRequestMappingValue.equals(ApiPrefix.GATEWAY_API_V1_PREFIX)) {
+            // 白名单接口直接true
             return true;
         }
 
@@ -78,7 +84,7 @@ public class LoginServiceImpl implements LoginService {
             return false;
         }
 
-        boolean status = checkAuthority(request, accountService.getAccountRoleFromCache(username));
+        boolean status = checkAuthority(classRequestMappingValue, accountService.getAccountRoleFromCache(username));
         if (status) {
             HttpSession session = request.getSession();
             session.setAttribute(LoginConstant.SESSION_USERNAME_KEY, username);
@@ -88,19 +94,18 @@ public class LoginServiceImpl implements LoginService {
         return false;
     }
 
-    private boolean checkAuthority(HttpServletRequest request, AccountRoleEnum accountRoleEnum) {
-        String uri = request.getRequestURI();
-        if (uri.contains(ApiPrefix.API_V1_NORMAL_PREFIX)) {
+    private boolean checkAuthority(String classRequestMappingValue, AccountRoleEnum accountRoleEnum) {
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_NORMAL_PREFIX)) {
             // normal 接口都可以访问
             return true;
         }
 
-        if (uri.contains(ApiPrefix.API_V1_RD_PREFIX) ) {
-            // RD 接口 OP 或者 RD 可以访问
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_RD_PREFIX) ) {
+            // RD 接口, OP 或者 RD 可以访问
             return AccountRoleEnum.RD.equals(accountRoleEnum) || AccountRoleEnum.OP.equals(accountRoleEnum);
         }
 
-        if (uri.contains(ApiPrefix.API_V1_OP_PREFIX)) {
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_OP_PREFIX)) {
             // OP 接口只有 OP 可以访问
             return AccountRoleEnum.OP.equals(accountRoleEnum);
         }

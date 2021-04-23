@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Select, Input, InputNumber, Form, Switch, Checkbox, DatePicker, Radio, Upload, Button, Icon, Tooltip } from 'component/antd';
 import Monacoeditor from 'component/editor/monacoEditor';
 import { searchProps } from 'constants/table';
+import { version } from 'store/version';
 import './index.less';
 
 const TextArea = Input.TextArea;
@@ -129,6 +130,8 @@ class XForm extends React.Component<IXFormProps> {
                 this.renderFormItem(formItem),
               )}
               {formItem.renderExtraElement ? formItem.renderExtraElement() : null}
+              {/* 添加保存时间提示文案 */}
+              {formItem.attrs?.prompttype ? <span style={{ color: "#cccccc", fontSize: '12px', lineHeight: '20px', display: 'block' }}>{formItem.attrs.prompttype}</span> : null}
             </Form.Item>
           );
         })}
@@ -189,7 +192,7 @@ class XForm extends React.Component<IXFormProps> {
       case FormItemType.upload:
         return (
           <Upload beforeUpload={(file: any) => false} {...item.attrs}>
-            <Button><Icon type="upload" />上传</Button>
+            <Button><Icon type="upload" />上传</Button>{version.fileSuffix && <span style={{ color: '#fb3939', padding: '0 0 0 10px' }}>{`请上传${version.fileSuffix}文件`}</span>}
           </Upload>
         );
     }

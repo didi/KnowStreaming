@@ -159,7 +159,6 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
 
   public handleDeleteRegion = (record: IBrokersRegions) => {
     const filterRegion = admin.logicalClusters.filter(item => item.regionIdList.includes(record.id));
-
     if (!filterRegion) {
       return;
     }
@@ -335,6 +334,7 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
           {this.renderSearch('', '请输入Region名称／broker ID')}
         </ul>
         {this.renderRegion()}
+        {this.renderDeleteRegionModal()}
       </div >
     );
   }

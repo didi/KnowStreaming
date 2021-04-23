@@ -27,8 +27,11 @@ public class ClusterDTO {
     @ApiModelProperty(value="数据中心")
     private String idc;
 
-    @ApiModelProperty(value="安全配置参数")
+    @ApiModelProperty(value="Kafka安全配置")
     private String securityProperties;
+
+    @ApiModelProperty(value="Jmx配置")
+    private String jmxProperties;
 
     public Long getClusterId() {
         return clusterId;
@@ -78,6 +81,14 @@ public class ClusterDTO {
         this.securityProperties = securityProperties;
     }
 
+    public String getJmxProperties() {
+        return jmxProperties;
+    }
+
+    public void setJmxProperties(String jmxProperties) {
+        this.jmxProperties = jmxProperties;
+    }
+
     @Override
     public String toString() {
         return "ClusterDTO{" +
@@ -87,15 +98,15 @@ public class ClusterDTO {
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", idc='" + idc + '\'' +
                 ", securityProperties='" + securityProperties + '\'' +
+                ", jmxProperties='" + jmxProperties + '\'' +
                 '}';
     }
 
-    public Boolean legal() {
+    public boolean legal() {
         if (ValidateUtils.isNull(clusterName)
                 || ValidateUtils.isNull(zookeeper)
                 || ValidateUtils.isNull(idc)
-                || ValidateUtils.isNull(bootstrapServers)
-                ) {
+                || ValidateUtils.isNull(bootstrapServers)) {
             return false;
         }
         return true;

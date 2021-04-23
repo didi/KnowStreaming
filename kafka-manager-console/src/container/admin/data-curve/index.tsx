@@ -6,6 +6,7 @@ import { curveKeys, CURVE_KEY_MAP, PERIOD_RADIO_MAP, PERIOD_RADIO } from './conf
 import moment = require('moment');
 import { observer } from 'mobx-react';
 import { timeStampStr } from 'constants/strategy';
+import { adminMonitor } from 'store/admin-monitor';
 
 @observer
 export class DataCurveFilter extends React.Component {
@@ -21,6 +22,7 @@ export class DataCurveFilter extends React.Component {
   }
 
   public refreshAll = () => {
+    adminMonitor.setRequestId(null);
     Object.keys(curveKeys).forEach((c: curveKeys) => {
       const { typeInfo, curveInfo: option } = CURVE_KEY_MAP.get(c);
       const { parser } = typeInfo;
@@ -32,7 +34,7 @@ export class DataCurveFilter extends React.Component {
     return (
       <>
         <Radio.Group onChange={this.radioChange} defaultValue={curveInfo.periodKey}>
-        {PERIOD_RADIO.map(p => <Radio.Button key={p.key} value={p.key}>{p.label}</Radio.Button>)}
+          {PERIOD_RADIO.map(p => <Radio.Button key={p.key} value={p.key}>{p.label}</Radio.Button>)}
         </Radio.Group>
         <DatePicker.RangePicker
           format={timeStampStr}

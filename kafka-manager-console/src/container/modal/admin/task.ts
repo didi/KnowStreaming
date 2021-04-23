@@ -158,26 +158,26 @@ export const createMigrationTasks = () => {
       },
       {
         key: 'originalRetentionTime',
-        label: '原本保存时间',
+        label: '原Topic保存时间',
         rules: [{
           required: true,
-          message: '请输入原本保存时间',
+          message: '请输入原Topic保存时间',
         }],
         attrs: {
           disabled: true,
-          placeholder: '请输入原本保存时间',
+          placeholder: '请输入原Topic保存时间',
           suffix: '小时',
         },
       },
       {
         key: 'reassignRetentionTime',
-        label: '迁移保存时间',
+        label: '迁移后Topic保存时间',
         rules: [{
           required: true,
-          message: '请输入迁移保存时间',
+          message: '请输入迁移后Topic保存时间',
         }],
         attrs: {
-          placeholder: '请输入迁移保存时间',
+          placeholder: '请输入迁移后Topic保存时间',
           suffix: '小时',
         },
       },
@@ -186,10 +186,10 @@ export const createMigrationTasks = () => {
         label: '初始限流',
         rules: [{
           required: true,
-          message: '请输入初始限流',
+          message: '请输入初始限流，并按照：“限流上限>初始限流>限流下限”的大小顺序',
         }],
         attrs: {
-          placeholder: '请输入初始限流',
+          placeholder: '请输入初始限流，并按照：“限流上限>初始限流>限流下限”的大小顺序',
           suffix: 'MB/s',
         },
       },
@@ -198,10 +198,10 @@ export const createMigrationTasks = () => {
         label: '限流上限',
         rules: [{
           required: true,
-          message: '请输入限流上限',
+          message: '请输入限流上限，并按照：“限流上限>初始限流>限流下限”的大小顺序',
         }],
         attrs: {
-          placeholder: '请输入限流上限',
+          placeholder: '请输入限流上限，并按照：“限流上限>初始限流>限流下限”的大小顺序',
           suffix: 'MB/s',
         },
       },
@@ -210,10 +210,10 @@ export const createMigrationTasks = () => {
         label: '限流下限',
         rules: [{
           required: true,
-          message: '请输入限流下限',
+          message: '请输入限流下限，并按照：“限流上限>初始限流>限流下限”的大小顺序',
         }],
         attrs: {
-          placeholder: '请输入限流下限',
+          placeholder: '请输入限流下限，并按照：“限流上限>初始限流>限流下限”的大小顺序',
           suffix: 'MB/s',
         },
       },
@@ -224,7 +224,7 @@ export const createMigrationTasks = () => {
         rules: [{
           required: false,
           message: '请输入至少5个字符',
-          pattern: /^.{5,}.$/,
+          pattern: /^.{4,}.$/,
         }],
         attrs: {
           placeholder: '请输入备注',

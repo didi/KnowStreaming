@@ -5,6 +5,7 @@ import { IStringMap } from 'types/base-type';
 import { IRequestParams } from 'types/alarm';
 import { IFormSelect, IFormItem, FormItemType } from 'component/x-form';
 import { searchProps } from 'constants/table';
+import { alarm } from 'store/alarm';
 
 interface IDynamicProps {
   form: any;
@@ -27,6 +28,7 @@ class DynamicSetStrategy extends React.Component<IDynamicProps> {
   public crudList = [] as ICRUDItem[];
   public state = {
     shouldUpdate: false,
+    monitorType: alarm.monitorType
   };
 
   public componentDidMount() {
@@ -130,7 +132,7 @@ class DynamicSetStrategy extends React.Component<IDynamicProps> {
 
           if (lineValue.func === 'happen' && paramsArray.length > 1 && paramsArray[0] < paramsArray[1]) {
             strategyList = []; // 清空赋值
-            return message.error('周期值应大于次数') ;
+            return message.error('周期值应大于次数');
           }
 
           lineValue.params = paramsArray.join(',');
@@ -292,8 +294,39 @@ class DynamicSetStrategy extends React.Component<IDynamicProps> {
     }
     return element;
   }
-
-  public renderFormList(row: ICRUDItem) {
+  public unit(monitorType: string) {
+    let element = null;
+    switch (monitorType) {
+      case 'online-kafka-topic-msgIn':
+        element = "条/秒"
+        break;
+      case 'online-kafka-topic-bytesIn':
+        element = "字节/秒"
+        break;
+      case 'online-kafka-topic-bytesRejected':
+        element = "字节/秒"
+        break;
+      case 'online-kafka-topic-produce-throttled':
+        element = "1表示被限流"
+        break;
+      case 'online-kafka-topic-fetch-throttled':
+        element = "1表示被限流"
+        break;
+      case 'online-kafka-consumer-maxLag':
+        element = "条"
+        break;
+      case 'online-kafka-consumer-lag':
+        element = "条"
+        break;
+      case 'online-kafka-consumer-maxDelayTime':
+        element = "秒"
+        break;
+    }
+    return (
+      <span>{element}</span>
+    )
+  }
+  public renderFormList(row: ICRUDItem, monitorType: string) {
     const key = row.id;
     const funcType = row.func;
 
@@ -309,6 +342,7 @@ class DynamicSetStrategy extends React.Component<IDynamicProps> {
           key: key + '-func',
         } as IFormSelect)}
         {this.getFuncItem(row)}
+        {row.func !== 'c_avg_rate_abs' && row.func !== 'pdiff' ? this.unit(monitorType) : null}
       </div>
     );
   }
@@ -340,8 +374,8 @@ class DynamicSetStrategy extends React.Component<IDynamicProps> {
       <Form>
         {crudList.map((row, index) => {
           return (
-            <div key={index}>
-              {this.renderFormList(row)}
+            <div key={`${index}-${this.state.monitorType}`}>
+              {this.renderFormList(row, alarm.monitorType)}
               {
                 crudList.length > 1 ? (
                   <Icon

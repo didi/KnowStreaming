@@ -30,7 +30,7 @@ export class MineTopic extends SearchAndFilterContainer {
     if (cluster.active !== -1 || app.active !== '-1' || searchKey !== '') {
       data = origin.filter(d =>
         ((d.topicName !== undefined && d.topicName !== null) && d.topicName.toLowerCase().includes(searchKey as string)
-        || ((d.appName !== undefined && d.appName !== null) && d.appName.toLowerCase().includes(searchKey as string)))
+          || ((d.appName !== undefined && d.appName !== null) && d.appName.toLowerCase().includes(searchKey as string)))
         && (cluster.active === -1 || d.clusterId === cluster.active)
         && (app.active === '-1' || d.appId === (app.active + '')),
       );
@@ -152,18 +152,18 @@ export class MineTopic extends SearchAndFilterContainer {
   public render() {
     return (
       <>
-      <div className="min-width">
-        <Tabs activeKey={location.hash.substr(1) || '1'} type="card" onChange={(key) => this.handleTabKey(key)}>
-          <TabPane tab="有效Topic" key="1" >
-            {this.renderOperationPanel(1)}
-            {this.renderMyTopicTable(this.getData(topic.mytopicData))}
-          </TabPane>
-          <TabPane tab="已过期Topic" key="2">
-            {this.renderOperationPanel(2)}
-            {this.renderDeprecatedTopicTable(this.getData(topic.expireData))}
-          </TabPane>
-        </Tabs>
-      </div>
+        <div className="min-width">
+          <Tabs activeKey={location.hash.substr(1) || '1'} type="card" onChange={(key) => this.handleTabKey(key)}>
+            <TabPane tab="有效Topic" key="1" >
+              {this.renderOperationPanel(1)}
+              {this.renderMyTopicTable(this.getData(topic.mytopicData))}
+            </TabPane>
+            <TabPane tab="已过期Topic" key="2">
+              {this.renderOperationPanel(2)}
+              {this.renderDeprecatedTopicTable(this.getData(topic.expireData))}
+            </TabPane>
+          </Tabs>
+        </div>
       </>
     );
   }

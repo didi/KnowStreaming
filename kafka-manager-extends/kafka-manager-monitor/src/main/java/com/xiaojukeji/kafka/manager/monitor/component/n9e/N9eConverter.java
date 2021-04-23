@@ -4,6 +4,9 @@ import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.monitor.common.entry.*;
 import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.*;
+import com.xiaojukeji.kafka.manager.monitor.component.n9e.entry.bizenum.CategoryEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -12,6 +15,8 @@ import java.util.*;
  * @date 20/8/26
  */
 public class N9eConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(N9eConverter.class);
+
     public static List<N9eMetricSinkPoint> convert2N9eMetricSinkPointList(String nid, List<MetricSinkPoint> pointList) {
         if (pointList == null || pointList.isEmpty()) {
             return new ArrayList<>();
@@ -44,7 +49,7 @@ public class N9eConverter {
         if (!ValidateUtils.isNull(strategy.getId())) {
             n9eStrategy.setId(strategy.getId().intValue());
         }
-        n9eStrategy.setCategory(1);
+        n9eStrategy.setCategory(CategoryEnum.DEVICE_INDEPENDENT.getCode());
         n9eStrategy.setName(strategy.getName());
         n9eStrategy.setNid(monitorN9eNid);
         n9eStrategy.setExcl_nid(new ArrayList<>());
@@ -77,7 +82,13 @@ public class N9eConverter {
         n9eStrategy.setRecovery_notify(0);
 
         StrategyAction strategyAction = strategy.getStrategyActionList().get(0);
-        n9eStrategy.setConverge(ListUtils.string2IntList(strategyAction.getConverge()));
+
+        //  单位转换, 夜莺的单位是秒, KM前端的单位是分钟
+        List<Integer> convergeList = ListUtils.string2IntList(strategyAction.getConverge());
+        if (!ValidateUtils.isEmptyList(convergeList)) {
+            convergeList.set(0, convergeList.get(0) *  60);
+        }
+        n9eStrategy.setConverge(convergeList);
 
         List<Integer> notifyGroups = new ArrayList<>();
         for (String name: ListUtils.string2StrList(strategyAction.getNotifyGroup())) {
@@ -91,8 +102,8 @@ public class N9eConverter {
 
         n9eStrategy.setNotify_user(new ArrayList<>());
         n9eStrategy.setCallback(strategyAction.getCallback());
-        n9eStrategy.setEnable_stime("00:00");
-        n9eStrategy.setEnable_etime("23:59");
+        n9eStrategy.setEnable_stime(String.format("%02d:00", ListUtils.string2IntList(strategy.getPeriodHoursOfDay()).stream().distinct().min((e1, e2) -> e1.compareTo(e2)).get()));
+        n9eStrategy.setEnable_etime(String.format("%02d:59", ListUtils.string2IntList(strategy.getPeriodHoursOfDay()).stream().distinct().max((e1, e2) -> e1.compareTo(e2)).get()));
         n9eStrategy.setEnable_days_of_week(ListUtils.string2IntList(strategy.getPeriodDaysOfWeek()));
 
         n9eStrategy.setNeed_upgrade(0);
@@ -113,6 +124,15 @@ public class N9eConverter {
         return strategyList;
     }
 
+    private static Integer getEnableHour(String enableTime) {
+        try {
+            return Integer.valueOf(enableTime.split(":")[0]);
+        } catch (Exception e) {
+            LOGGER.warn("class=N9eConverter||method=getEnableHour||enableTime={}||errMsg={}", enableTime, e.getMessage());
+        }
+        return null;
+    }
+
     public static Strategy convert2Strategy(N9eStrategy n9eStrategy, Map<String, NotifyGroup> notifyGroupMap) {
         if (n9eStrategy == null) {
             return null;
@@ -130,7 +150,16 @@ public class N9eConverter {
         strategy.setId(n9eStrategy.getId().longValue());
         strategy.setName(n9eStrategy.getName());
         strategy.setPriority(n9eStrategy.getPriority());
-        strategy.setPeriodHoursOfDay("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23");
+
+        List<Integer> hourList = new ArrayList<>();
+        Integer startHour = N9eConverter.getEnableHour(n9eStrategy.getEnable_stime());
+        Integer endHour = N9eConverter.getEnableHour(n9eStrategy.getEnable_etime());
+        if (!(ValidateUtils.isNullOrLessThanZero(startHour) || ValidateUtils.isNullOrLessThanZero(endHour) || endHour < startHour)) {
+            for (Integer hour = startHour; hour <= endHour; ++hour) {
+                hourList.add(hour);
+            }
+        }
+        strategy.setPeriodHoursOfDay(ListUtils.intList2String(hourList));
         strategy.setPeriodDaysOfWeek(ListUtils.intList2String(n9eStrategy.getEnable_days_of_week()));
 
         List<StrategyExpression> strategyExpressionList = new ArrayList<>();
@@ -167,7 +196,13 @@ public class N9eConverter {
         }
         strategyAction.setNotifyGroup(ListUtils.strList2String(notifyGroups));
 
-        strategyAction.setConverge(ListUtils.intList2String(n9eStrategy.getConverge()));
+        //  单位转换, 夜莺的单位是秒, KM前端的单位是分钟
+        List<Integer> convergeList = n9eStrategy.getConverge();
+        if (!ValidateUtils.isEmptyList(convergeList)) {
+            convergeList.set(0, convergeList.get(0) / 60);
+        }
+        strategyAction.setConverge(ListUtils.intList2String(convergeList));
+
         strategyAction.setCallback(n9eStrategy.getCallback());
         strategy.setStrategyActionList(Arrays.asList(strategyAction));
 

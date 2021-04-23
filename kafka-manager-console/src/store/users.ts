@@ -19,6 +19,9 @@ export class Users {
   @observable
   public staff: IStaff[] = [];
 
+  @observable
+  public newPassWord: any = null;
+
   @action.bound
   public setAccount(data: IUser) {
     setCookie([{ key: 'role', value: `${data.role}`, time: 1 }]);
@@ -40,6 +43,11 @@ export class Users {
   @action.bound
   public setLoading(value: boolean) {
     this.loading = value;
+  }
+
+  @action.bound
+  public setNewPassWord(value: boolean) {
+    this.newPassWord = value;
   }
 
   public getAccount() {

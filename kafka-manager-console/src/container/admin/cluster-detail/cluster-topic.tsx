@@ -2,7 +2,7 @@ import * as React from 'react';
 import Url from 'lib/url-parser';
 import { region } from 'store';
 import { admin } from 'store/admin';
-import { topic } from 'store/topic';
+import { app } from 'store/app';
 import { Table, notification, Tooltip, Popconfirm } from 'antd';
 import { pagination, cellStyle } from 'constants/table';
 import { observer } from 'mobx-react';
@@ -56,8 +56,6 @@ export class ClusterTopic extends SearchAndFilterContainer {
   public expandPartition(item: IClusterTopics) {
     //   getTopicBasicInfo
     admin.getTopicsBasicInfo(item.clusterId, item.topicName).then(data => {
-      console.log(admin.topicsBasic);
-      console.log(admin.basicInfo);
       this.clusterTopicsFrom = item;
       this.setState({
         expandVisible: true,
@@ -114,6 +112,7 @@ export class ClusterTopic extends SearchAndFilterContainer {
 
   public componentDidMount() {
     admin.getClusterTopics(this.clusterId);
+    app.getAdminAppList()
   }
 
   public renderClusterTopicList() {

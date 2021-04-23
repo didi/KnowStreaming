@@ -1,3 +1,8 @@
+-- create database
+CREATE DATABASE logi_kafka_manager;
+
+USE logi_kafka_manager;
+
 --
 -- Table structure for table `account`
 --
@@ -104,7 +109,8 @@ CREATE TABLE `cluster` (
   `zookeeper` varchar(512) NOT NULL DEFAULT '' COMMENT 'zk地址',
   `bootstrap_servers` varchar(512) NOT NULL DEFAULT '' COMMENT 'server地址',
   `kafka_version` varchar(32) NOT NULL DEFAULT '' COMMENT 'kafka版本',
-  `security_properties` text COMMENT '安全认证参数',
+  `security_properties` text COMMENT 'Kafka安全认证参数',
+  `jmx_properties` text COMMENT 'JMX配置',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT ' 监控标记, 0表示未监控, 1表示监控中',
   `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -197,7 +203,8 @@ CREATE TABLE `gateway_config` (
   `type` varchar(128) NOT NULL DEFAULT '' COMMENT '配置类型',
   `name` varchar(128) NOT NULL DEFAULT '' COMMENT '配置名称',
   `value` text COMMENT '配置值',
-  `version` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '版本信息',
+  `version` bigint(20) unsigned NOT NULL DEFAULT '1' COMMENT '版本信息',
+  `description` text COMMENT '描述信息',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
@@ -302,20 +309,22 @@ INSERT INTO kafka_user(app_id, password, user_type, operation) VALUES ('dkm_admi
 -- Table structure for table `logical_cluster`
 --
 
--- DROP TABLE IF EXISTS `logical_cluster`;
 CREATE TABLE `logical_cluster` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `name` varchar(192) NOT NULL DEFAULT '' COMMENT '逻辑集群名称',
-  `mode` int(16) NOT NULL DEFAULT '0' COMMENT '逻辑集群类型, 0:共享集群, 1:独享集群, 2:独立集群',
-  `app_id` varchar(64) NOT NULL DEFAULT '' COMMENT '所属应用',
-  `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群id',
-  `region_list` varchar(256) NOT NULL DEFAULT '' COMMENT 'regionid列表',
-  `description` text COMMENT '备注说明',
-  `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='逻辑集群信息表';
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `name` varchar(192) NOT NULL DEFAULT '' COMMENT '逻辑集群名称',
+    `identification` varchar(192) NOT NULL DEFAULT '' COMMENT '逻辑集群标识',
+    `mode` int(16) NOT NULL DEFAULT '0' COMMENT '逻辑集群类型, 0:共享集群, 1:独享集群, 2:独立集群',
+    `app_id` varchar(64) NOT NULL DEFAULT '' COMMENT '所属应用',
+    `cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群id',
+    `region_list` varchar(256) NOT NULL DEFAULT '' COMMENT 'regionid列表',
+    `description` text COMMENT '备注说明',
+    `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_name` (`name`),
+    UNIQUE KEY `uniq_identification` (`identification`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='逻辑集群信息表';
+
 
 --
 -- Table structure for table `monitor_rule`

@@ -7,7 +7,6 @@ import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
-import com.xiaojukeji.kafka.manager.openapi.common.vo.ThirdPartBrokerOverviewVO;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.BrokerService;
 import io.swagger.annotations.Api;

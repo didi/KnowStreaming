@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.pojo;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author zengqiao
@@ -17,6 +18,8 @@ public class ClusterDO implements Comparable<ClusterDO> {
 
     private String securityProperties;
 
+    private String jmxProperties;
+
     private Integer status;
 
     private Date gmtCreate;
@@ -29,30 +32,6 @@ public class ClusterDO implements Comparable<ClusterDO> {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Date getGmtCreate() {
-        return gmtCreate;
-    }
-
-    public void setGmtCreate(Date gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
-
-    public Date getGmtModify() {
-        return gmtModify;
-    }
-
-    public void setGmtModify(Date gmtModify) {
-        this.gmtModify = gmtModify;
     }
 
     public String getClusterName() {
@@ -87,6 +66,38 @@ public class ClusterDO implements Comparable<ClusterDO> {
         this.securityProperties = securityProperties;
     }
 
+    public String getJmxProperties() {
+        return jmxProperties;
+    }
+
+    public void setJmxProperties(String jmxProperties) {
+        this.jmxProperties = jmxProperties;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Date getGmtCreate() {
+        return gmtCreate;
+    }
+
+    public void setGmtCreate(Date gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public Date getGmtModify() {
+        return gmtModify;
+    }
+
+    public void setGmtModify(Date gmtModify) {
+        this.gmtModify = gmtModify;
+    }
+
     @Override
     public String toString() {
         return "ClusterDO{" +
@@ -95,6 +106,7 @@ public class ClusterDO implements Comparable<ClusterDO> {
                 ", zookeeper='" + zookeeper + '\'' +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", securityProperties='" + securityProperties + '\'' +
+                ", jmxProperties='" + jmxProperties + '\'' +
                 ", status=" + status +
                 ", gmtCreate=" + gmtCreate +
                 ", gmtModify=" + gmtModify +
@@ -104,5 +116,23 @@ public class ClusterDO implements Comparable<ClusterDO> {
     @Override
     public int compareTo(ClusterDO clusterDO) {
         return this.id.compareTo(clusterDO.id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ClusterDO clusterDO = (ClusterDO) o;
+        return Objects.equals(id, clusterDO.id)
+                && Objects.equals(clusterName, clusterDO.clusterName)
+                && Objects.equals(zookeeper, clusterDO.zookeeper)
+                && Objects.equals(bootstrapServers, clusterDO.bootstrapServers)
+                && Objects.equals(securityProperties, clusterDO.securityProperties)
+                && Objects.equals(jmxProperties, clusterDO.jmxProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, clusterName, zookeeper, bootstrapServers, securityProperties, jmxProperties);
     }
 }

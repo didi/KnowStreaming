@@ -95,23 +95,23 @@ export class BillInformation extends SearchAndFilterContainer {
   }
 
   public render() {
-    return(
+    return (
       <>
-      <div className="k-row" >
-        <ul className="k-tab">
-          <li>账单信息&nbsp;
+        <div className="k-row" >
+          <ul className="k-tab">
+            <li>账单信息&nbsp;
             <a
-              // tslint:disable-next-line:max-line-length
-              href="https://github.com/didi/kafka-manager"
-              target="_blank"
-            >
-              <Icon type="question-circle" />
-            </a>
-          </li>
-          {this.renderDatePick()}
-        </ul>
-        {this.renderChart()}
-      </div>
+                // tslint:disable-next-line:max-line-length
+                href="https://github.com/didi/kafka-manager"
+                target="_blank"
+              >
+                <Icon type="question-circle" />
+              </a>
+            </li>
+            {this.renderDatePick()}
+          </ul>
+          {this.renderChart()}
+        </div>
       </>
     );
   }

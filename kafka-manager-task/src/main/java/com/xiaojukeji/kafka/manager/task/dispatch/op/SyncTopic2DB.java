@@ -125,7 +125,7 @@ public class SyncTopic2DB extends AbstractScheduledTask<EmptyEntry> {
 
             if (ValidateUtils.isNull(syncTopic2DBConfig.isAddAuthority()) || !syncTopic2DBConfig.isAddAuthority()) {
                 // 不增加权限信息, 则直接忽略
-                return;
+                continue;
             }
 
             // TODO 当前添加 Topic 和 添加 Authority 是非事务的, 中间出现异常之后, 会导致数据错误, 后续还需要优化一下

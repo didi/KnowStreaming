@@ -26,4 +26,20 @@ public interface ZookeeperService {
      * @return 操作结果
      */
     Result<List<Integer>> getControllerPreferredCandidates(Long clusterId);
+
+    /**
+     * 增加优先被选举为controller的broker
+     * @param clusterId 集群ID
+     * @param brokerId brokerId
+     * @return
+     */
+    Result addControllerPreferredCandidate(Long clusterId, Integer brokerId);
+
+    /**
+     * 减少优先被选举为controller的broker
+     * @param clusterId 集群ID
+     * @param brokerId brokerId
+     * @return
+     */
+    Result deleteControllerPreferredCandidate(Long clusterId, Integer brokerId);
 }

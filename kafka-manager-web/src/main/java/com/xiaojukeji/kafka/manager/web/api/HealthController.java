@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.web.api;
 
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,9 +15,9 @@ import springfox.documentation.annotations.ApiIgnore;
  * @date 20/6/18
  */
 @ApiIgnore
-@Api(description = "web应用探活接口(REST)")
+@Api(tags = "web应用探活接口(REST)")
 @RestController
-@RequestMapping("api/")
+@RequestMapping(ApiPrefix.API_V1_THIRD_PART_PREFIX)
 public class HealthController {
 
     @ApiIgnore

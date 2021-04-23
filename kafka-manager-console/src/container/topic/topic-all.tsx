@@ -60,7 +60,7 @@ export class AllTopic extends SearchAndFilterContainer {
     if (cluster.allActive !== -1 || searchKey !== '') {
       data = origin.filter(d =>
         ((d.topicName !== undefined && d.topicName !== null) && d.topicName.toLowerCase().includes(searchKey as string)
-        || ((d.appPrincipals !== undefined && d.appPrincipals !== null) && d.appPrincipals.toLowerCase().includes(searchKey as string)))
+          || ((d.appPrincipals !== undefined && d.appPrincipals !== null) && d.appPrincipals.toLowerCase().includes(searchKey as string)))
         && (cluster.allActive === -1 || d.clusterId === cluster.allActive),
       );
     } else {

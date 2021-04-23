@@ -50,23 +50,23 @@ export class TypeForm extends React.Component {
 
     return (
       <>
-      <div className="config-wrapper">
-        <span className="span-tag">基本信息</span>
-        <div className="alarm-x-form type-form">
-          <XFormComponent
-            ref={form => this.$form = form}
-            formData={formData}
-            formMap={xTypeFormMap}
-            layout="inline"
-          />
-        </div>
-      </div >
-      <div className="config-wrapper">
-        <span className="span-tag">选择指标</span>
-        <div className="alarm-x-form type-form">
-          <WrappedDynamicSetFilter wrappedComponentRef={(form: any) => this.filterForm = form} />
-        </div>
-      </div >
+        <div className="config-wrapper">
+          <span className="span-tag">基本信息</span>
+          <div className="alarm-x-form type-form">
+            <XFormComponent
+              ref={form => this.$form = form}
+              formData={formData}
+              formMap={xTypeFormMap}
+              layout="inline"
+            />
+          </div>
+        </div >
+        <div className="config-wrapper">
+          <span className="span-tag">选择指标</span>
+          <div className="alarm-x-form type-form">
+            <WrappedDynamicSetFilter wrappedComponentRef={(form: any) => this.filterForm = form} />
+          </div>
+        </div >
       </>
     );
   }
