@@ -33,7 +33,7 @@ public class BrokerOverviewVO {
     @ApiModelProperty(value = "分区数")
     private Integer partitionCount;
 
-    @ApiModelProperty(value = "已同步副本数")
+    @ApiModelProperty(value = "失效副本分区的个数")
     private Integer underReplicatedPartitions;
 
     @ApiModelProperty(value = "未同步")
