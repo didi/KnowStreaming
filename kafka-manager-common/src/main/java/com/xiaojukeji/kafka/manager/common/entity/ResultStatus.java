@@ -12,6 +12,8 @@ public enum ResultStatus {
 
     SUCCESS(Constant.SUCCESS, "success"),
 
+    FAIL(1, "操作失败"),
+
     /**
      * 操作错误[1000, 2000)
      * ------------------------------------------------------------------------------------------
@@ -21,6 +23,9 @@ public enum ResultStatus {
     API_CALL_EXCEED_LIMIT(1403, "api call exceed limit"),
     USER_WITHOUT_AUTHORITY(1404, "user without authority"),
     CHANGE_ZOOKEEPER_FORBIDDEN(1405, "change zookeeper forbidden"),
+
+
+    APP_OFFLINE_FORBIDDEN(1406, "先下线topic，才能下线应用～"),
 
 
     TOPIC_OPERATION_PARAM_NULL_POINTER(1450, "参数错误"),
@@ -91,6 +96,8 @@ public enum ResultStatus {
 
     ZOOKEEPER_CONNECT_FAILED(8020, "zookeeper connect failed"),
     ZOOKEEPER_READ_FAILED(8021, "zookeeper read failed"),
+    ZOOKEEPER_WRITE_FAILED(8022, "zookeeper write failed"),
+    ZOOKEEPER_DELETE_FAILED(8023, "zookeeper delete failed"),
 
     // 调用集群任务里面的agent失败
     CALL_CLUSTER_TASK_AGENT_FAILED(8030, " call cluster task agent failed"),
@@ -102,6 +109,7 @@ public enum ResultStatus {
     STORAGE_UPLOAD_FILE_FAILED(8050, "upload file failed"),
     STORAGE_FILE_TYPE_NOT_SUPPORT(8051, "File type not support"),
     STORAGE_DOWNLOAD_FILE_FAILED(8052, "download file failed"),
+    LDAP_AUTHENTICATION_FAILED(8053, "ldap authentication failed"),
 
     ;
 

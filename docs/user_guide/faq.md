@@ -7,9 +7,9 @@
 
 --- 
 
-# FAQ 
+# FAQ
 
-- 0、Github图裂问题解决
+- 0、支持哪些Kafka版本？
 - 1、Topic申请、新建监控告警等操作时没有可选择的集群？
 - 2、逻辑集群 & Region的用途？
 - 3、登录失败？
@@ -18,22 +18,16 @@
 - 6、如何使用`MySQL 8`？
 - 7、`Jmx`连接失败如何解决？
 - 8、`topic biz data not exist`错误及处理方式
+- 9、进程启动后，如何查看API文档
+- 10、如何创建告警组？
+- 11、连接信息、耗时信息为什么没有数据？
+- 12、逻辑集群申请审批通过之后为什么看不到逻辑集群？
 
 ---
 
-### 0、Github图裂问题解决
+### 0、支持哪些Kafka版本？
 
-可以在本地机器`ping github.com`这个地址，获取到`github.com`地址的IP地址。
-
-然后将IP绑定到`/etc/hosts`文件中。
-
-例如
-
-```shell
-# 在 /etc/hosts文件中增加如下信息
-
-140.82.113.3 github.com
-```
+基本上只要所使用的Kafka还依赖于Zookeeper，那么该版本的主要功能基本上应该就是支持的。
 
 ---
 
@@ -43,7 +37,7 @@
 
 逻辑集群的创建参看：
 
-- [kafka-manager 接入集群](docs/user_guide/add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
+- [kafka-manager 接入集群](add_cluster/add_cluster.md) 手册，这里的Region和逻辑集群都必须添加。
 
 ---
 
@@ -76,7 +70,7 @@
 
 - 3、数据库时区问题。
 
-检查MySQL的topic表，查看是否有数据，如果有数据，那么再检查设置的时区是否正确。
+检查MySQL的topic_metrics表，查看是否有数据，如果有数据，那么再检查设置的时区是否正确。
 
 ---
 
@@ -109,3 +103,26 @@
 可以在`运维管控->集群列表->Topic信息`下面，编辑申请权限的Topic，为Topic选择一个应用即可。
 
 以上仅仅只是针对单个Topic的场景，如果你有非常多的Topic需要进行初始化的，那么此时可以在配置管理中增加一个配置，来定时的对无主的Topic进行同步，具体见：[动态配置管理 - 1、Topic定时同步任务](../dev_guide/dynamic_config_manager.md)
+
+---
+
+### 9、进程启动后，如何查看API文档
+
+- 滴滴Logi-KafkaManager采用Swagger-API工具记录API文档。Swagger-API地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-ui.html#/)
+
+
+### 10、如何创建告警组？
+
+这块需要配合监控系统进行使用，现在默认已经实现了夜莺的对接，当然也可以对接自己内部的监控系统，不过需要实现一些接口。
+
+具体的文档可见：[监控功能对接夜莺](../dev_guide/monitor_system_integrate_with_n9e.md)、[监控功能对接其他系统](../dev_guide/monitor_system_integrate_with_self.md)
+
+### 11、连接信息、耗时信息为什么没有数据？
+
+这块需要结合滴滴内部的kafka-gateway一同使用才会有数据，滴滴kafka-gateway暂未开源。
+
+### 12、逻辑集群申请审批通过之后为什么看不到逻辑集群？
+
+逻辑集群的申请与审批仅仅只是一个工单流程，并不会去实际创建逻辑集群，逻辑集群的创建还需要手动去创建。
+
+具体的操作可见：[kafka-manager 接入集群](add_cluster/add_cluster.md)。

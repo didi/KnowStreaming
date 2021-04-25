@@ -50,7 +50,7 @@ public class GatewayHeartbeatController {
             doList = JsonUtils.parseTopicConnections(clusterId, jsonObject, System.currentTimeMillis());
         } catch (Exception e) {
             LOGGER.error("class=GatewayHeartbeatController||method=receiveTopicConnections||clusterId={}||brokerId={}||msg=parse data failed||exception={}", clusterId, brokerId, e.getMessage());
-            return Result.buildFailure("fail");
+            return Result.buildGatewayFailure("fail");
         }
 
         topicConnectionService.batchAdd(doList);

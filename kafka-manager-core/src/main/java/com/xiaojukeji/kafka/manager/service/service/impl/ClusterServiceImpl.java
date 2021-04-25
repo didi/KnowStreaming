@@ -111,12 +111,13 @@ public class ClusterServiceImpl implements ClusterService {
             // 不允许修改zk地址
             return ResultStatus.CHANGE_ZOOKEEPER_FORBIDDEN;
         }
-        clusterDO.setStatus(originClusterDO.getStatus());
         Map<String, String> content = new HashMap<>();
         content.put("cluster id", clusterDO.getId().toString());
         content.put("security properties", clusterDO.getSecurityProperties());
         content.put("jmx properties", clusterDO.getJmxProperties());
         operateRecordService.insert(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.EDIT, content);
+
+        clusterDO.setStatus(originClusterDO.getStatus());
         return updateById(clusterDO);
     }
 
@@ -204,21 +205,31 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     private boolean isZookeeperLegal(String zookeeper) {
+        boolean status = false;
+
         ZooKeeper zk = null;
         try {
             zk = new ZooKeeper(zookeeper, 1000, null);
-        } catch (Throwable t) {
-            return false;
+            for (int i = 0; i < 15; ++i) {
+                if (zk.getState().isConnected()) {
+                    // 只有状态是connected的时候，才表示地址是合法的
+                    status = true;
+                    break;
+                }
+                Thread.sleep(1000);
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterServiceImpl||method=isZookeeperLegal||zookeeper={}||msg=zk address illegal||errMsg={}", zookeeper, e.getMessage());
         } finally {
             try {
                 if (zk != null) {
                     zk.close();
                 }
-            } catch (Throwable t) {
-                return false;
+            } catch (Exception e) {
+                LOGGER.error("class=ClusterServiceImpl||method=isZookeeperLegal||zookeeper={}||msg=close zk  client failed||errMsg={}", zookeeper, e.getMessage());
             }
         }
-        return true;
+        return status;
     }
 
     @Override
@@ -275,7 +286,7 @@ public class ClusterServiceImpl implements ClusterService {
         try {
             Map<String, String> content = new HashMap<>();
             content.put("cluster id", clusterId.toString());
-            operateRecordService.insert(operator, ModuleEnum.CLUSTER, getClusterName(clusterId).getPhysicalClusterName(), OperateEnum.DELETE, content);
+            operateRecordService.insert(operator, ModuleEnum.CLUSTER, String.valueOf(clusterId), OperateEnum.DELETE, content);
             if (clusterDao.deleteById(clusterId) <= 0) {
                 LOGGER.error("delete cluster failed, clusterId:{}.", clusterId);
                 return ResultStatus.MYSQL_ERROR;
@@ -289,8 +300,9 @@ public class ClusterServiceImpl implements ClusterService {
 
     private ClusterDetailDTO getClusterDetailDTO(ClusterDO clusterDO, Boolean needDetail) {
         if (ValidateUtils.isNull(clusterDO)) {
-            return null;
+            return new ClusterDetailDTO();
         }
+
         ClusterDetailDTO dto = new ClusterDetailDTO();
         dto.setClusterId(clusterDO.getId());
         dto.setClusterName(clusterDO.getClusterName());
@@ -299,6 +311,7 @@ public class ClusterServiceImpl implements ClusterService {
         dto.setKafkaVersion(physicalClusterMetadataManager.getKafkaVersionFromCache(clusterDO.getId()));
         dto.setIdc(configUtils.getIdc());
         dto.setSecurityProperties(clusterDO.getSecurityProperties());
+        dto.setJmxProperties(clusterDO.getJmxProperties());
         dto.setStatus(clusterDO.getStatus());
         dto.setGmtCreate(clusterDO.getGmtCreate());
         dto.setGmtModify(clusterDO.getGmtModify());
@@ -336,5 +349,40 @@ public class ClusterServiceImpl implements ClusterService {
             controllerPreferredCandidateList.add(controllerPreferredCandidate);
         }
         return Result.buildSuc(controllerPreferredCandidateList);
+    }
+
+    @Override
+    public Result addControllerPreferredCandidates(Long clusterId, List<Integer> brokerIdList) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isEmptyList(brokerIdList)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+
+        // 增加的BrokerId需要判断是否存活
+        for (Integer brokerId: brokerIdList) {
+            if (!PhysicalClusterMetadataManager.isBrokerAlive(clusterId, brokerId)) {
+                return Result.buildFrom(ResultStatus.BROKER_NOT_EXIST);
+            }
+
+            Result result =  zookeeperService.addControllerPreferredCandidate(clusterId, brokerId);
+            if (result.failed()) {
+                return result;
+            }
+        }
+        return Result.buildSuc();
+    }
+
+    @Override
+    public Result deleteControllerPreferredCandidates(Long clusterId, List<Integer> brokerIdList) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isEmptyList(brokerIdList)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+
+        for (Integer brokerId: brokerIdList) {
+            Result result = zookeeperService.deleteControllerPreferredCandidate(clusterId, brokerId);
+            if (result.failed()) {
+                return result;
+            }
+        }
+        return Result.buildSuc();
     }
 }

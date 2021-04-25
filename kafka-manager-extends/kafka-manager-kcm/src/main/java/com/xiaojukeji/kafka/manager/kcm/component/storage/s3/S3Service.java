@@ -54,7 +54,7 @@ public class S3Service extends AbstractStorageService {
         InputStream inputStream = null;
         try {
             if (!createBucketIfNotExist()) {
-               return false;
+                return false;
             }
 
             inputStream = uploadFile.getInputStream();
@@ -95,7 +95,10 @@ public class S3Service extends AbstractStorageService {
 
     @Override
     public String getDownloadBaseUrl() {
-        return this.endpoint + "/" + this.bucket;
+        if (this.endpoint.startsWith("http://")) {
+            return this.endpoint + "/" + this.bucket;
+        }
+        return "http://" + this.endpoint + "/" + this.bucket;
     }
 
     private boolean createBucketIfNotExist() {

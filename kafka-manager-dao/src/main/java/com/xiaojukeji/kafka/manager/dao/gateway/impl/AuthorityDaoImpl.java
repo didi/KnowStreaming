@@ -1,8 +1,8 @@
 package com.xiaojukeji.kafka.manager.dao.gateway.impl;
 
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
-import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
+import com.xiaojukeji.kafka.manager.task.Constant;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -23,16 +23,12 @@ public class AuthorityDaoImpl implements AuthorityDao {
      * Authority最近的一次更新时间, 更新之后的缓存
      * <AppID, <clusterId, <TopicName, AuthorityDO>>>
      */
-    private static Long AUTHORITY_CACHE_LATEST_UPDATE_TIME = 0L;
+    private static volatile long AUTHORITY_CACHE_LATEST_UPDATE_TIME = Constant.START_TIMESTAMP;
+
     private static final Map<String, Map<Long, Map<String, AuthorityDO>>> AUTHORITY_MAP = new ConcurrentHashMap<>();
 
     @Override
     public int insert(AuthorityDO authorityDO) {
-        return sqlSession.insert("AuthorityDao.replace", authorityDO);
-    }
-
-    @Override
-    public int replaceIgnoreGatewayDB(AuthorityDO authorityDO) {
         return sqlSession.insert("AuthorityDao.replace", authorityDO);
     }
 
@@ -62,8 +58,8 @@ public class AuthorityDaoImpl implements AuthorityDao {
         }
 
         List<AuthorityDO> authorityDOList = new ArrayList<>();
-        for (Long clusterId: doMap.keySet()) {
-            authorityDOList.addAll(doMap.get(clusterId).values());
+        for (Map.Entry<Long, Map<String, AuthorityDO>> entry: doMap.entrySet()) {
+            authorityDOList.addAll(entry.getValue().values());
         }
         return authorityDOList;
     }
@@ -88,23 +84,6 @@ public class AuthorityDaoImpl implements AuthorityDao {
     }
 
     @Override
-    public void removeAuthorityInCache(Long clusterId, String topicName) {
-        AUTHORITY_MAP.forEach((appId, map) -> {
-            map.forEach((id, subMap) -> {
-                if (id.equals(clusterId)) {
-                    subMap.remove(topicName);
-                    if (subMap.isEmpty()) {
-                        map.remove(id);
-                    }
-                }
-            });
-            if (map.isEmpty()) {
-                AUTHORITY_MAP.remove(appId);
-            }
-        });
-    }
-
-    @Override
     public int deleteAuthorityByTopic(Long clusterId, String topicName) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("clusterId", clusterId);
@@ -114,7 +93,12 @@ public class AuthorityDaoImpl implements AuthorityDao {
 
 
     private void updateAuthorityCache() {
-        Long timestamp = System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
+
+        if (timestamp + 1000 <= AUTHORITY_CACHE_LATEST_UPDATE_TIME) {
+            // 近一秒内的请求不走db
+            return;
+        }
 
         Date afterTime = new Date(AUTHORITY_CACHE_LATEST_UPDATE_TIME);
         List<AuthorityDO> doList = sqlSession.selectList("AuthorityDao.listAfterTime", afterTime);
@@ -124,11 +108,16 @@ public class AuthorityDaoImpl implements AuthorityDao {
     /**
      * 更新Topic缓存
      */
-    synchronized private void updateAuthorityCache(List<AuthorityDO> doList, Long timestamp) {
+    private synchronized void updateAuthorityCache(List<AuthorityDO> doList, Long timestamp) {
+        if (AUTHORITY_CACHE_LATEST_UPDATE_TIME == Constant.START_TIMESTAMP) {
+            AUTHORITY_MAP.clear();
+        }
+
         if (doList == null || doList.isEmpty() || AUTHORITY_CACHE_LATEST_UPDATE_TIME >= timestamp) {
             // 本次无数据更新, 或者本次更新过时 时, 忽略本次更新
             return;
         }
+
         for (AuthorityDO elem: doList) {
             Map<Long, Map<String, AuthorityDO>> doMap =
                     AUTHORITY_MAP.getOrDefault(elem.getAppId(), new ConcurrentHashMap<>());
@@ -138,5 +127,9 @@ public class AuthorityDaoImpl implements AuthorityDao {
             AUTHORITY_MAP.put(elem.getAppId(), doMap);
         }
         AUTHORITY_CACHE_LATEST_UPDATE_TIME = timestamp;
+    }
+
+    public static void resetCache() {
+        AUTHORITY_CACHE_LATEST_UPDATE_TIME = Constant.START_TIMESTAMP;
     }
 }

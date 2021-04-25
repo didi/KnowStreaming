@@ -221,13 +221,24 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
             if (ValidateUtils.isNull(oldGatewayConfigDO)) {
                 return Result.buildFrom(ResultStatus.RESOURCE_NOT_EXIST);
             }
+
             if (!oldGatewayConfigDO.getName().equals(newGatewayConfigDO.getName())
                     || !oldGatewayConfigDO.getType().equals(newGatewayConfigDO.getType())
                     || ValidateUtils.isBlank(newGatewayConfigDO.getValue())) {
                 return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
             }
-            newGatewayConfigDO.setVersion(oldGatewayConfigDO.getVersion() + 1);
-            if (gatewayConfigDao.updateById(oldGatewayConfigDO) > 0) {
+
+            // 获取当前同类配置, 插入之后需要增大这个version
+            List<GatewayConfigDO> gatewayConfigDOList = gatewayConfigDao.getByConfigType(newGatewayConfigDO.getType());
+            Long version = 1L;
+            for (GatewayConfigDO elem: gatewayConfigDOList) {
+                if (elem.getVersion() > version) {
+                    version = elem.getVersion() + 1L;
+                }
+            }
+
+            newGatewayConfigDO.setVersion(version);
+            if (gatewayConfigDao.updateById(newGatewayConfigDO) > 0) {
                 return Result.buildSuc();
             }
             return Result.buildFrom(ResultStatus.MYSQL_ERROR);

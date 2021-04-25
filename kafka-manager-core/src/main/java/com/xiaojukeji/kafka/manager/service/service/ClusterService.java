@@ -51,4 +51,20 @@ public interface ClusterService {
      * @return void
      */
     Result<List<ControllerPreferredCandidate>> getControllerPreferredCandidates(Long clusterId);
+
+    /**
+     * 增加优先被选举为controller的broker
+     * @param clusterId 集群ID
+     * @param brokerIdList brokerId列表
+     * @return
+     */
+    Result addControllerPreferredCandidates(Long clusterId, List<Integer> brokerIdList);
+
+    /**
+     * 减少优先被选举为controller的broker
+     * @param clusterId 集群ID
+     * @param brokerIdList brokerId列表
+     * @return
+     */
+    Result deleteControllerPreferredCandidates(Long clusterId, List<Integer> brokerIdList);
 }

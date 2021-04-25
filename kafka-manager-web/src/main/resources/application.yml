@@ -14,7 +14,7 @@ spring:
       jdbc-url: jdbc:mysql://127.0.0.1:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
       username: admin
       password: admin
-      driver-class-name: com.mysql.jdbc.Driver
+      driver-class-name: com.mysql.cj.jdbc.Driver
   main:
     allow-bean-definition-overriding: true
 
@@ -31,7 +31,7 @@ logging:
 custom:
   idc: cn
   jmx:
-    max-conn: 10
+    max-conn: 10 # 2.3版本配置不在这个地方生效
   store-metrics-task:
     community:
       broker-metrics-enabled: true
@@ -49,11 +49,22 @@ task:
 
 account:
   ldap:
+    enabled: false
+    url: ldap://127.0.0.1:389/
+    basedn: dc=tsign,dc=cn
+    factory: com.sun.jndi.ldap.LdapCtxFactory
+    filter: sAMAccountName
+    security:
+      authentication: simple
+      principal: cn=admin,dc=tsign,dc=cn
+      credentials: admin
+    auth-user-registration: true
+    auth-user-registration-role: normal
 
 kcm:
   enabled: false
   s3:
-    endpoint: 127.0.0.1
+    endpoint: s3.didiyunapi.com
     access-key: 1234567890
     secret-key: 0987654321
     bucket: logi-kafka

@@ -22,6 +22,8 @@ import java.util.Map;
 public interface TopicManagerService {
     List<TopicDO> listAll();
 
+    List<TopicDO> getByClusterIdFromCache(Long clusterId);
+
     List<TopicDO> getByClusterId(Long clusterId);
 
     TopicDO getByTopicName(Long clusterId, String topicName);

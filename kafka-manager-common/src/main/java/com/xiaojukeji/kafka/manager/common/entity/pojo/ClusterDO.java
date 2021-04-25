@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.pojo;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author zengqiao
@@ -115,5 +116,23 @@ public class ClusterDO implements Comparable<ClusterDO> {
     @Override
     public int compareTo(ClusterDO clusterDO) {
         return this.id.compareTo(clusterDO.id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ClusterDO clusterDO = (ClusterDO) o;
+        return Objects.equals(id, clusterDO.id)
+                && Objects.equals(clusterName, clusterDO.clusterName)
+                && Objects.equals(zookeeper, clusterDO.zookeeper)
+                && Objects.equals(bootstrapServers, clusterDO.bootstrapServers)
+                && Objects.equals(securityProperties, clusterDO.securityProperties)
+                && Objects.equals(jmxProperties, clusterDO.jmxProperties);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, clusterName, zookeeper, bootstrapServers, securityProperties, jmxProperties);
     }
 }

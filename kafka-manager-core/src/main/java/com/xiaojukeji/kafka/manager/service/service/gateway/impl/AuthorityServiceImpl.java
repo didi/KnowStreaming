@@ -1,16 +1,17 @@
 package com.xiaojukeji.kafka.manager.service.service.gateway.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperationStatusEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaAclDO;
-import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
-import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
-import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import com.xiaojukeji.kafka.manager.dao.gateway.KafkaAclDao;
 import com.xiaojukeji.kafka.manager.service.service.OperateRecordService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AuthorityService;
@@ -20,10 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zhongyuankai
@@ -120,7 +119,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             operateRecordDO.setModuleId(ModuleEnum.AUTHORITY.getCode());
             operateRecordDO.setOperateId(OperateEnum.DELETE.getCode());
             operateRecordDO.setResource(topicName);
-            operateRecordDO.setContent(JSONObject.toJSONString(content));
+            operateRecordDO.setContent(JsonUtils.toJSONString(content));
             operateRecordDO.setOperator(operator);
             operateRecordService.insert(operateRecordDO);
         } catch (Exception e) {
@@ -150,7 +149,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         } catch (Exception e) {
             LOGGER.error("get authority failed, clusterId:{} topicName:{}.", clusterId, topicName, e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -164,7 +163,11 @@ public class AuthorityServiceImpl implements AuthorityService {
         if (ValidateUtils.isEmptyList(doList)) {
             return new ArrayList<>();
         }
-        return doList;
+
+        // 去除掉权限列表中无权限的数据
+        return doList.stream()
+                .filter(authorityDO -> !TopicAuthorityEnum.DENY.getCode().equals(authorityDO.getAccess()))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -67,11 +67,16 @@
 - [滴滴Logi-KafkaManager 系列视频教程](https://mp.weixin.qq.com/s/9X7gH0tptHPtfjPPSdGO8g)
 - [kafka实践（十五）：滴滴开源Kafka管控平台 Logi-KafkaManager研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
 
-## 3 滴滴Logi开源用户钉钉交流群
+## 3 滴滴Logi开源用户交流群
+
+
+![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
+微信加群：关注公众号 Obsuite(官方公众号) 回复 "Logi加群"  
 
 ![dingding_group](./docs/assets/images/common/dingding_group.jpg)  
-  钉钉群ID：32821440
-  
+钉钉群ID：32821440
+
+
 ## 4 OCE认证
 OCE是一个认证机制和交流平台，为滴滴Logi-KafkaManager生产用户量身打造，我们会为OCE企业提供更好的技术支持，比如专属的技术沙龙、企业一对一的交流机会、专属的答疑群等，如果贵司Logi-KafkaManager上了生产，[快来加入吧](http://obsuite.didiyun.com/open/openAuth)
 
