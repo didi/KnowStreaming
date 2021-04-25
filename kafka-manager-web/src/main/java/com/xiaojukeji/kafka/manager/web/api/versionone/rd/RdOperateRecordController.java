@@ -36,7 +36,7 @@ public class RdOperateRecordController {
         if (ValidateUtils.isNull(dto) || !dto.legal()) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
-        List<OperateRecordVO> voList = OperateRecordModelConverter.convert2OperateRecordVOList(operateRecordService.queryByCondt(dto));
+        List<OperateRecordVO> voList = OperateRecordModelConverter.convert2OperateRecordVOList(operateRecordService.queryByCondition(dto));
         if (voList.size() > MAX_RECORD_COUNT) {
             voList = voList.subList(0, MAX_RECORD_COUNT);
         }

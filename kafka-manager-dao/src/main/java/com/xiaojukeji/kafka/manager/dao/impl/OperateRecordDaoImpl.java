@@ -30,13 +30,13 @@ public class OperateRecordDaoImpl implements OperateRecordDao {
     }
 
     @Override
-    public List<OperateRecordDO> queryByCondt(Integer moduleId, Integer operateId, String operator, Date startTime, Date endTime) {
+    public List<OperateRecordDO> queryByCondition(Integer moduleId, Integer operateId, String operator, Date startTime, Date endTime) {
         Map<String, Object> params = new HashMap<>(5);
         params.put("moduleId", moduleId);
         params.put("operateId", operateId);
         params.put("operator", operator);
         params.put("startTime", startTime);
         params.put("endTime", endTime);
-        return sqlSession.selectList("OperateRecordDao.queryByCondt", params);
+        return sqlSession.selectList("OperateRecordDao.queryByCondition", params);
     }
 }
