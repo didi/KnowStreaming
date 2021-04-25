@@ -399,8 +399,8 @@ export const updateAllTopicFormModal = () => {
   const formMap = wrapper.xFormWrapper.formMap;
   if (topic.authorities) {
     const { consume, send, checkStatus } = judgeAccessStatus(topic.authorities.access);
-    formMap[3].defaultValue = checkStatus;
-    formMap[3].options = [{
+    formMap[2].defaultValue = checkStatus;
+    formMap[2].options = [{
       label: `消费权限${consume ? '（已拥有）' : ''}`,
       value: '1',
       disabled: consume,
@@ -409,7 +409,7 @@ export const updateAllTopicFormModal = () => {
       value: '2',
       disabled: send,
     }];
-    formMap[3].rules = [{
+    formMap[2].rules = [{
       required: true,
       validator: (rule: any, value: any, callback: any) => getPowerValidator(rule, value, callback, checkStatus, 'allTopic'),
     }];
@@ -476,7 +476,6 @@ export const showAllPermissionModal = (item: ITopic) => {
 
 const showAllPermission = (appId: string, item: ITopic, access: number) => {
   const { consume, send, checkStatus } = judgeAccessStatus(access);
-
   const xFormModal = {
     formMap: [
       {
@@ -486,16 +485,6 @@ const showAllPermission = (appId: string, item: ITopic, access: number) => {
         rules: [{ required: true, message: '请输入Topic名称' }],
         attrs: {
           placeholder: '请输入Topic名称',
-          disabled: true,
-        },
-      },
-      {
-        key: 'clusterName',
-        label: '集群名称',
-        defaultValue: item.clusterName,
-        rules: [{ required: true, message: '请输入集群名称' }],
-        attrs: {
-          placeholder: '请输入集群名称',
           disabled: true,
         },
       },
@@ -526,6 +515,26 @@ const showAllPermission = (appId: string, item: ITopic, access: number) => {
           validator: (rule: any, value: any, callback: any) => getPowerValidator(rule, value, callback, checkStatus, 'allTopic'),
         }],
       },
+      // {
+      //   key: 'clusterName',
+      //   label: '集群名称',
+      //   defaultValue: item.clusterName,
+      //   rules: [{ required: true, message: '请输入集群名称' }],
+      //   attrs: {
+      //     placeholder: '请输入集群名称',
+      //     disabled: true,
+      //   },
+      // },
+      // {
+      //   key: 'clusterName',
+      //   label: '集群名称',
+      //   defaultValue: item.clusterName,
+      //   rules: [{ required: true, message: '请输入集群名称' }],
+      //   attrs: {
+      //     placeholder: '请输入集群名称',
+      //     disabled: true,
+      //   },
+      // },
       {
         key: 'description',
         label: '申请原因',
@@ -587,16 +596,16 @@ export const showPermissionModal = (item: ITopic) => {
           disabled: true,
         },
       },
-      {
-        key: 'clusterName',
-        label: '集群名称',
-        defaultValue: item.clusterName,
-        rules: [{ required: true, message: '请输入集群名称' }],
-        attrs: {
-          placeholder: '请输入集群名称',
-          disabled: true,
-        },
-      },
+      // {
+      //   key: 'clusterName',
+      //   label: '集群名称',
+      //   defaultValue: item.clusterName,
+      //   rules: [{ required: true, message: '请输入集群名称' }],
+      //   attrs: {
+      //     placeholder: '请输入集群名称',
+      //     disabled: true,
+      //   },
+      // },
       {
         key: 'appName',
         label: '绑定应用',

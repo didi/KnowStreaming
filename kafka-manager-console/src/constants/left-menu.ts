@@ -59,6 +59,10 @@ export const adminMenu = [{
   href: `/admin/bill`,
   i: 'k-icon-renwuliebiao',
   title: '用户账单',
+},{
+  href: `/admin/operation-record`,
+  i: 'k-icon-operationrecord',
+  title: '操作记录',
 }] as ILeftMenu[];
 
 export const expertMenu = [{

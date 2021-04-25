@@ -133,6 +133,12 @@ export class OrderDetail extends React.Component {
         width: '20%',
         render: (t: string) => <span>{t === 'consumer' ? '消费' : '生产'}</span>,
       },
+      // {
+      //   title: '客户端语言',
+      //   dataIndex: 'language',
+      //   key: 'language',
+      //   width: '20%',
+      // },
     ];
     return (
       <>

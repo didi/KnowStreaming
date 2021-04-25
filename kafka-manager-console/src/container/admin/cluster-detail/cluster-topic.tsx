@@ -172,7 +172,7 @@ export class ClusterTopic extends SearchAndFilterContainer {
         key: 'appName',
         // width: '10%',
         render: (val: string, record: IClusterTopics) => (
-          <Tooltip placement="bottomLeft" title={record.appId} >
+          <Tooltip placement="bottomLeft" title={val} >
             {val}
           </Tooltip>
         ),

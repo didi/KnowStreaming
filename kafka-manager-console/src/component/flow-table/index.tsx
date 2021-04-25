@@ -68,8 +68,8 @@ export class StatusGraghCom<T extends IFlowInfo> extends React.Component {
   public render() {
     const statusData = this.getData();
     const loading = this.getLoading();
-    if (!statusData) return null;
     const data: any[] = [];
+    if (!statusData) return <Table columns={flowColumns} dataSource={data} />;
     Object.keys(statusData).map((key) => {
       if (statusData[key]) {
         const v = key === 'byteIn' || key === 'byteOut' ? statusData[key].map(i => i && (i / 1024).toFixed(2)) :
@@ -85,7 +85,7 @@ export class StatusGraghCom<T extends IFlowInfo> extends React.Component {
       }
     });
     return (
-      <Table columns={flowColumns} dataSource={data} pagination={false} loading={loading}/>
+      <Table columns={flowColumns} dataSource={data} pagination={false} loading={loading} />
     );
   }
 }

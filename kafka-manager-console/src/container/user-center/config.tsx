@@ -30,7 +30,7 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
     value: orderInfo.detail.principals,
   }];
 
-  const clusterTypelist: ILabelValue[] = [ {
+  const clusterTypelist: ILabelValue[] = [{
     label: '物理集群名称',
     value: orderInfo.detail.physicalClusterName,
   }, {
@@ -80,23 +80,25 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
   phyAuthOfflineList.splice(3, 0, ...clusterTypelist);
 
   const clusterInfoList: ILabelValue[] = [{
-      label: '流入流量',
-      value: `${transBToMB(orderInfo.detail.bytesIn)} MB/s`,
-    }, {
-      label: '数据中心',
-      value: orderInfo.detail.idc,
-    }, {
-      label: '集群类型',
-      value: clusterTypeMap[orderInfo.detail.mode],
-    }, {
-      label: '应用ID',
-      value: orderInfo.detail.appId,
-    },
+    label: '流入流量',
+    value: `${transBToMB(orderInfo.detail.bytesIn)} MB/s`,
+  },
+  // {
+  //   label: '数据中心',
+  //   value: orderInfo.detail.idc,
+  // },
+  {
+    label: '集群类型',
+    value: clusterTypeMap[orderInfo.detail.mode],
+  }, {
+    label: '应用ID',
+    value: orderInfo.detail.appId,
+  },
   ];
 
   const clusterOfflineList: ILabelValue[] = expansionList;
   const phyClusterOfflineList: ILabelValue[] = clusterTypelist;
-  const maxAvgBytesIn =  orderInfo.detail.maxAvgBytesInList && orderInfo.detail.maxAvgBytesInList.map(item => {
+  const maxAvgBytesIn = orderInfo.detail.maxAvgBytesInList && orderInfo.detail.maxAvgBytesInList.map(item => {
     const val = `${transBToMB(item)} MB/s`;
     return val;
   });
@@ -125,18 +127,18 @@ export const getInfoRenderItem = (orderInfo: IOrderInfo, result: boolean) => {
   phyQuotaInfoList.splice(3, 0, ...clusterTypelist);
 
   const partitionList: ILabelValue[] = expansionList.concat([{
-      label: 'Topic名称',
-      value: orderInfo.detail.topicName,
-    }, {
-      label: '申请分区数',
-      value: orderInfo.detail.needIncrPartitionNum,
-    }, {
-      label: '当前流入流量',
-      value: `${transBToMB(orderInfo.detail.bytesIn)} MB/s`,
-    }, {
-      label: '近三天峰值流入流量',
-      value: maxAvgBytesIn && maxAvgBytesIn.join('、'),
-    },
+    label: 'Topic名称',
+    value: orderInfo.detail.topicName,
+  }, {
+    label: '申请分区数',
+    value: orderInfo.detail.needIncrPartitionNum,
+  }, {
+    label: '当前流入流量',
+    value: `${transBToMB(orderInfo.detail.bytesIn)} MB/s`,
+  }, {
+    label: '近三天峰值流入流量',
+    value: maxAvgBytesIn && maxAvgBytesIn.join('、'),
+  },
   ]);
 
   const phyPartitionList: ILabelValue[] = partitionList.filter(i => !cluster.includes(i.label));

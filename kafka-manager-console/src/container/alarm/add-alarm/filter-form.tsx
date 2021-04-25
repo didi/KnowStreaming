@@ -149,9 +149,9 @@ export class DynamicSetFilter extends React.Component<IDynamicProps> {
   public handleSelectChange = (e: string, type: 'topic' | 'consumerGroup' | 'location') => {
     switch (type) {
       case 'topic':
-        if (!this.clusterId) {
-          return message.info('请选择集群');
-        }
+        // if (!this.clusterId) {
+        //   return message.info('请选择集群');
+        // }
         this.topicName = e;
         const type = this.dealMonitorType();
         if (['kafka-consumer-maxLag', 'kafka-consumer-maxDelayTime', 'kafka-consumer-lag'].indexOf(type) > -1) {

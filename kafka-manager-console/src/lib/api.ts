@@ -418,6 +418,13 @@ export const getMetaData = (needDetail: boolean = true) => {
   return fetch(`/rd/clusters/basic-info?need-detail=${needDetail}`);
 };
 
+export const getOperationRecordData = (params: any) => {
+  return fetch(`/rd/operate-record`,{
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+
 export const getConfigure = () => {
   return fetch(`/rd/configs`);
 };

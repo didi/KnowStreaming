@@ -28,8 +28,8 @@ const updateInputModal = (status?: string) => {
   formMap[4].invisible = status === 'region';
   formMap[5].invisible = status !== 'region';
 
-  formMap[4].rules = [{required: status !== 'region'}];
-  formMap[5].rules = [{required: status === 'region'}];
+  formMap[4].rules = [{ required: status !== 'region' }];
+  formMap[5].rules = [{ required: status === 'region' }];
   // tslint:disable-next-line:no-unused-expression
   wrapper.ref && wrapper.ref.updateFormMap$(formMap, wrapper.xFormWrapper.formData);
 };
@@ -103,7 +103,7 @@ export const createMigrationTasks = () => {
           label: 'Region',
           value: 'region',
         }, {
-          label: 'Borker',
+          label: 'Broker',
           value: 'broker',
         }],
         rules: [{
@@ -141,7 +141,7 @@ export const createMigrationTasks = () => {
           placeholder: '请选择目标Region',
         },
       },
-      
+
       {
         key: 'beginTime',
         label: '计划开始时间',
