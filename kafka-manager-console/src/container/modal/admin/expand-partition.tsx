@@ -111,11 +111,11 @@ class CustomForm extends React.Component<IXFormProps> {
             })(<Input placeholder="请输入分区数" />)}
           </Form.Item>
           <Form.Item label="类型">
-            {/* <Form.Item label={this.state.checked ? 'Region类型' : 'Borker类型'} > */}
+            {/* <Form.Item label={this.state.checked ? 'Region类型' : 'Broker类型'} > */}
             {/* <Switch onChange={(checked) => this.onSwitchChange(checked)} /> */}
             <Radio.Group value={this.state.checked ? 'region' : 'broker'} onChange={(e) => { this.onSwitchChange(e.target.value === 'region' ? true : false); }}>
               <Radio.Button value="region">Region类型</Radio.Button>
-              <Radio.Button value="broker">Borker类型</Radio.Button>
+              <Radio.Button value="broker">Broker类型</Radio.Button>
             </Radio.Group>
           </Form.Item>
           <Form.Item label="brokerIdList" style={{ display: this.state.checked ? 'none' : '' }}>

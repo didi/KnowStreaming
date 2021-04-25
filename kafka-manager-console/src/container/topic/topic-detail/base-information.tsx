@@ -129,16 +129,17 @@ export class BaseInformation extends React.Component<IInfoProps> {
   }
 
   public realTimeTraffic() {
-    const realTraffic = topic.realTraffic;
-    if (realTraffic) {
-      return (
-        <>
-          <Spin spinning={topic.realLoading}>
-            {renderTrafficTable(this.updateRealStatus, StatusGragh)}
-          </Spin>
-        </>
-      );
-    }
+    // const realTraffic = topic.realTraffic;
+
+    // if (realTraffic) {
+    return (
+      <>
+        <Spin spinning={topic.realLoading}>
+          {renderTrafficTable(this.updateRealStatus, StatusGragh)}
+        </Spin>
+      </>
+    );
+    // }
   }
 
   public realTimeConsume() {

@@ -32,6 +32,12 @@ class CustomModal {
   }
 
   @action.bound
+  public showOfflineAppNewModal(value: any) {
+    this.modalId = 'offlineAppNewModal';
+    this.params = value;
+  }
+
+  @action.bound
   public showOrderOpResult() {
     this.modalId = 'orderOpResult';
   }

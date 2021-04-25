@@ -29,16 +29,16 @@ export class MyCluster extends SearchAndFilterContainer {
   public applyCluster() {
     const xFormModal = {
       formMap: [
-        {
-          key: 'idc',
-          label: '数据中心',
-          defaultValue: region.regionName,
-          rules: [{ required: true, message: '请输入数据中心' }],
-          attrs: {
-            placeholder: '请输入数据中心',
-            disabled: true,
-          },
-        },
+        // {
+        //   key: 'idc',
+        //   label: '数据中心',
+        //   defaultValue: region.regionName,
+        //   rules: [{ required: true, message: '请输入数据中心' }],
+        //   attrs: {
+        //     placeholder: '请输入数据中心',
+        //     disabled: true,
+        //   },
+        // },
         {
           key: 'appId',
           label: '所属应用',
@@ -91,7 +91,7 @@ export class MyCluster extends SearchAndFilterContainer {
       ],
       formData: {},
       visible: true,
-      title: '申请集群',
+      title: <div><span>申请集群</span><a className='applicationDocument' href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/resource_apply.md" target='_blank'>资源申请文档</a></div>,
       okText: '确认',
       onSubmit: (value: any) => {
         value.idc = region.currentRegion;

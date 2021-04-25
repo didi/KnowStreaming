@@ -4,6 +4,7 @@ import { message, Icon, notification, Modal, Table, Tooltip } from 'component/an
 import { IApprovalOrder, IBaseOrder, IOrderInfo } from 'types/base-type';
 import { admin } from 'store/admin';
 import { modal } from 'store/modal';
+import { cluster } from 'store/cluster';
 import { cellStyle } from 'constants/table';
 import * as React from 'react';
 
@@ -37,6 +38,12 @@ const renderModalTilte = (type: number, status: number) => {
 export const showApprovalModal = (info: IOrderInfo, status: number, from?: string) => {
   const { id, type } = info;
   const formMap = [{
+    key: 'clusterId',
+    label: '所属集群',
+    type: 'input_number',
+    defaultValue: info.detail.logicalClusterName,
+    attrs: { disabled: true },
+  }, {
     key: 'partitionNum',
     label: '分区数',
     type: 'input_number',
@@ -75,8 +82,8 @@ export const showApprovalModal = (info: IOrderInfo, status: number, from?: strin
     // }],
     rules: [{
       required: true,
-      message: '请输入大于12小于999的整数',
-      pattern: /^([1-9]{1}[0-9]{2})$|^([2-9]{1}[0-9]{1})$|^(1[2-9]{1})$/,
+      message: '请输入大于0小于10000的整数',
+      pattern: /^\+?[1-9]\d{0,3}(\.\d*)?$/,
     }],
   }, {
     key: 'species',
@@ -87,7 +94,7 @@ export const showApprovalModal = (info: IOrderInfo, status: number, from?: strin
       label: 'Region',
       value: 'region',
     }, {
-      label: 'Borker',
+      label: 'Broker',
       value: 'broker',
     }],
     rules: [{ required: false, message: '请选择类型' }],

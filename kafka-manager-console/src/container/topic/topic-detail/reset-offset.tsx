@@ -71,32 +71,32 @@ class ResetOffset extends React.Component<any> {
     const { getFieldDecorator } = this.props.form;
     const { typeValue, offsetValue } = this.state;
     return (
-    <>
-        <Alert message="重置之前一定要关闭消费客户端！！！" type="warning" showIcon={true} />
-        <Alert message="重置之前一定要关闭消费客户端！！！" type="warning" showIcon={true} />
-        <Alert message="重置之前一定要关闭消费客户端！！！" type="warning" showIcon={true} className="mb-30"/>
+      <>
+        <Alert message="重置消费偏移前,请先关闭客户端,否则会重置失败 ！！！" type="warning" showIcon={true} />
+        <Alert message="关闭客户端后,请等待一分钟之后再重置消费偏移 ！！！" type="warning" showIcon={true} />
+        {/* <Alert message="重置之前一定要关闭消费客户端！！！" type="warning" showIcon={true} className="mb-30" /> */}
         <div className="o-container">
           <Form labelAlign="left" onSubmit={this.handleSubmit} >
-          <Radio.Group onChange={this.onChangeType} value={typeValue}>
+            <Radio.Group onChange={this.onChangeType} value={typeValue}>
               <Radio value="time"><span className="title-con">重置到指定时间</span></Radio>
               <Row>
                 <Col span={26}>
                   <Form.Item label="" >
-                  <Radio.Group
-                    onChange={this.onChangeOffset}
-                    value={offsetValue}
-                    disabled={typeValue === 'partition'}
-                    defaultValue="offset"
-                    className="mr-10"
-                  >
-                    <Radio.Button value="offset">最新offset</Radio.Button>
-                    <Radio.Button value="custom">自定义</Radio.Button>
-                  </Radio.Group>
+                    <Radio.Group
+                      onChange={this.onChangeOffset}
+                      value={offsetValue}
+                      disabled={typeValue === 'partition'}
+                      defaultValue="offset"
+                      className="mr-10"
+                    >
+                      <Radio.Button value="offset">最新offset</Radio.Button>
+                      <Radio.Button value="custom">自定义</Radio.Button>
+                    </Radio.Group>
                     {typeValue === 'time' && offsetValue === 'custom' &&
                       getFieldDecorator('timestamp', {
                         rules: [{ required: false, message: '' }],
                         initialValue: moment(),
-                        })(
+                      })(
                         <DatePicker
                           showTime={true}
                           format={timeMinute}
@@ -109,7 +109,7 @@ class ResetOffset extends React.Component<any> {
                 </Col>
               </Row>
               <Radio value="partition"><span className="title-con">重置指定分区及偏移</span></Radio>
-          </Radio.Group>
+            </Radio.Group>
             <Row>
               <Form.Item>
                 <Row>

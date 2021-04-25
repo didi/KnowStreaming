@@ -3,7 +3,7 @@ import CommonRoutePage from './common';
 import urlParser from 'lib/url-parser';
 import urlQuery from 'store/url-query';
 import { AppDetail } from 'container/app';
-import { AdminAppList, ClusterList, ClusterDetail, BrokerDetail, UserManagement, VersionManagement, OperationManagement, OperationDetail, BillManagement, ConfigureManagement, IndividualBill, MigrationDetail, BillDetail } from 'container/admin';
+import { AdminAppList, ClusterList, ClusterDetail, BrokerDetail, UserManagement, VersionManagement, OperationManagement, OperationDetail, BillManagement, ConfigureManagement, IndividualBill, MigrationDetail, BillDetail, OperationRecord } from 'container/admin';
 import { PlatformManagement } from 'container/admin/platform-management';
 
 export default class Home extends React.Component<any> {
@@ -52,7 +52,11 @@ export default class Home extends React.Component<any> {
     path: '/admin/migration-detail',
     exact: true,
     component: MigrationDetail,
-  }];
+  }, {
+    path: '/admin/operation-record',
+    exact: true,
+    component: OperationRecord,
+  },];
 
   constructor(props: any) {
     super(props);
@@ -66,7 +70,7 @@ export default class Home extends React.Component<any> {
 
   public render() {
     return (
-      <CommonRoutePage pageRoute={this.pageRoute}  mode="admin" active="admin"/>
+      <CommonRoutePage pageRoute={this.pageRoute} mode="admin" active="admin" />
     );
   }
 }

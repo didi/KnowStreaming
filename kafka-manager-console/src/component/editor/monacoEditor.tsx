@@ -21,24 +21,12 @@ class Monacoeditor extends React.Component<IEditorProps> {
   public state = {
     placeholder: '',
   };
-  // public arr = '{"clusterId":95,"startId":37397856,"step":100,"topicName":"kmo_topic_metrics_tempory_zq"}';
-  // public Ars(a: string) {
-  //   const obj = JSON.parse(a);
-  //   const newobj: any = {};
-  //   for (const item in obj) {
-  //     if (typeof obj[item] === 'object') {
-  //       this.Ars(obj[item]);
-  //     } else {
-  //       newobj[item] = obj[item];
-  //     }
-  //   }
-  //   return JSON.stringify(newobj);
-  // }
+
   public async componentDidMount() {
     const { value, onChange } = this.props;
     const format: any = await format2json(value);
     this.editor = monaco.editor.create(this.ref, {
-      value: format.result,
+      value: format.result || value,
       language: 'json',
       lineNumbers: 'off',
       scrollBeyondLastLine: false,
@@ -48,7 +36,7 @@ class Monacoeditor extends React.Component<IEditorProps> {
       minimap: {
         enabled: false,
       },
-      // automaticLayout: true, // 自动布局
+      automaticLayout: true, // 自动布局
       glyphMargin: true, // 字形边缘 {},[]
       // useTabStops: false,
       // formatOnPaste: true,

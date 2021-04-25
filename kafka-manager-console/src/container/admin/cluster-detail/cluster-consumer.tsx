@@ -100,7 +100,7 @@ export class ClusterConsumer extends SearchAndFilterContainer {
         <div className="k-row">
           <ul className="k-tab">
             <li>{this.props.tab}</li>
-            {this.renderSearch()}
+            {this.renderSearch('', '请输入消费组名称')}
           </ul>
           <Table
             columns={this.columns}

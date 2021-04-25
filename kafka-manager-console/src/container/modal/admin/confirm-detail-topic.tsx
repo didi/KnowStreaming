@@ -35,7 +35,6 @@ class CustomForm extends React.Component<IXFormProps> {
     this.props.form.validateFields((err: any, values: any) => {
       const deleteData = this.props.formData;
       if (!err) {
-        // console.log('values', values);
         if (values.topicName !== this.props.formData.topicName) {
           notification.error({ message: 'topic名称不正确，请重新输入' });
         } else {
@@ -77,7 +76,6 @@ class CustomForm extends React.Component<IXFormProps> {
   }
 
   public render() {
-    // console.log('props', this.props);
     const { formData = {} as any, visible } = this.props;
     const { getFieldDecorator } = this.props.form;
     let metadata = [] as IBrokersMetadata[];
