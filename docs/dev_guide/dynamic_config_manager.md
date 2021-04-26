@@ -120,3 +120,23 @@ TOPIC_INSUFFICIENT_PARTITION_CONFIG
   ]
 }
 ```
+## 4、专家服务——Topic资源治理
+
+判定规则描述你们完善一下！！！
+
+Topic分区不足相关的动态配置(页面在运维管控->平台管理->配置管理)：
+
+配置Key：
+```
+EXPIRED_TOPIC_CONFIG
+```
+
+配置Value：
+```json
+{
+  "minExpiredDay": 30,  #过期时间大于此值才显示
+  "ignoreClusterIdList": [  # 忽略的集群
+    50
+  ]
+}
+```
