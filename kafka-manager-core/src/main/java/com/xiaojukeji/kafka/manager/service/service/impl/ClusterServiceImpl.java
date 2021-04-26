@@ -82,6 +82,7 @@ public class ClusterServiceImpl implements ClusterService {
             content.put("security properties", clusterDO.getSecurityProperties());
             content.put("jmx properties", clusterDO.getJmxProperties());
             operateRecordService.insert(operator, ModuleEnum.CLUSTER, clusterDO.getClusterName(), OperateEnum.ADD, content);
+
             if (clusterDao.insert(clusterDO) <= 0) {
                 LOGGER.error("add new cluster failed, clusterDO:{}.", clusterDO);
                 return ResultStatus.MYSQL_ERROR;

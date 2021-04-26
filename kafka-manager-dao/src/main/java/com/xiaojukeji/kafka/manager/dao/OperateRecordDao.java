@@ -14,5 +14,5 @@ public interface OperateRecordDao {
 
     int insert(OperateRecordDO operateRecordDO);
 
-    List<OperateRecordDO> queryByCondt(Integer moduleId, Integer operateId, String operator, Date startTime, Date endTime);
+    List<OperateRecordDO> queryByCondition(Integer moduleId, Integer operateId, String operator, Date startTime, Date endTime);
 }

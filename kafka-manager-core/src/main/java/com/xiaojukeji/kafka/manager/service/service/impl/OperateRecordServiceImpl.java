@@ -41,8 +41,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     }
 
     @Override
-    public List<OperateRecordDO> queryByCondt(OperateRecordDTO dto) {
-        return operateRecordDao.queryByCondt(
+    public List<OperateRecordDO> queryByCondition(OperateRecordDTO dto) {
+        return operateRecordDao.queryByCondition(
                 dto.getModuleId(),
                 dto.getOperateId(),
                 dto.getOperator(),

@@ -40,6 +40,9 @@ public class TopicCreationDTO extends ClusterTopicDTO {
     @ApiModelProperty(value = "Topic属性列表")
     private Properties properties;
 
+    @ApiModelProperty(value = "最大写入字节数")
+    private Long peakBytesIn;
+
     public String getAppId() {
         return appId;
     }
@@ -102,6 +105,14 @@ public class TopicCreationDTO extends ClusterTopicDTO {
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public Long getPeakBytesIn() {
+        return peakBytesIn;
+    }
+
+    public void setPeakBytesIn(Long peakBytesIn) {
+        this.peakBytesIn = peakBytesIn;
     }
 
     @Override

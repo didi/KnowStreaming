@@ -1,8 +1,5 @@
 package com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
 /**
@@ -18,12 +15,11 @@ import java.util.List;
  *      "host":null,
  *      "timestamp":"1546632983233",
  *      "port":-1,
- *      "version":4
+ *      "version":4,
+ *      "rack": "CY"
  * }
  */
 public class BrokerMetadata implements Cloneable {
-    private final static Logger LOGGER = LoggerFactory.getLogger(TopicMetadata.class);
-
     private long clusterId;
 
     private int brokerId;
@@ -42,6 +38,8 @@ public class BrokerMetadata implements Cloneable {
     private String version;
 
     private long timestamp;
+
+    private String rack;
 
     public long getClusterId() {
         return clusterId;
@@ -107,14 +105,12 @@ public class BrokerMetadata implements Cloneable {
         this.timestamp = timestamp;
     }
 
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException var3) {
-            LOGGER.error("clone BrokerMetadata failed.", var3);
-        }
-        return null;
+    public String getRack() {
+        return rack;
+    }
+
+    public void setRack(String rack) {
+        this.rack = rack;
     }
 
     @Override
@@ -128,6 +124,7 @@ public class BrokerMetadata implements Cloneable {
                 ", jmxPort=" + jmx_port +
                 ", version='" + version + '\'' +
                 ", timestamp=" + timestamp +
+                ", rack='" + rack + '\'' +
                 '}';
     }
 }

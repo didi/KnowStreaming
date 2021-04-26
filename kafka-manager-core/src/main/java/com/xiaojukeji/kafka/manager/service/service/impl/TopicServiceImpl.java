@@ -381,7 +381,7 @@ public class TopicServiceImpl implements TopicService {
             return new ArrayList<>();
         }
 
-        List<TopicDO> topicDOList = topicManagerService.getByClusterId(clusterId);
+        List<TopicDO> topicDOList = topicManagerService.getByClusterIdFromCache(clusterId);
         if (ValidateUtils.isNull(topicDOList)) {
             topicDOList = new ArrayList<>();
         }

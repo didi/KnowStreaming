@@ -11,3 +11,5 @@ export * from './operation-management/migration-detail';
 export * from './configure-management';
 export * from './individual-bill';
 export * from './bill-detail';
+export * from './operation-record';
+

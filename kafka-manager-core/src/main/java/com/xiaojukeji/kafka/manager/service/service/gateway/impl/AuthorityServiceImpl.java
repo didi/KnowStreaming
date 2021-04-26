@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.service.service.gateway.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperationStatusEnum;
@@ -10,6 +9,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaAclDO;
+import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import com.xiaojukeji.kafka.manager.dao.gateway.KafkaAclDao;
@@ -119,7 +119,7 @@ public class AuthorityServiceImpl implements AuthorityService {
             operateRecordDO.setModuleId(ModuleEnum.AUTHORITY.getCode());
             operateRecordDO.setOperateId(OperateEnum.DELETE.getCode());
             operateRecordDO.setResource(topicName);
-            operateRecordDO.setContent(JSONObject.toJSONString(content));
+            operateRecordDO.setContent(JsonUtils.toJSONString(content));
             operateRecordDO.setOperator(operator);
             operateRecordService.insert(operateRecordDO);
         } catch (Exception e) {
@@ -149,7 +149,7 @@ public class AuthorityServiceImpl implements AuthorityService {
         } catch (Exception e) {
             LOGGER.error("get authority failed, clusterId:{} topicName:{}.", clusterId, topicName, e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -162,14 +162,12 @@ public class AuthorityServiceImpl implements AuthorityService {
         }
         if (ValidateUtils.isEmptyList(doList)) {
             return new ArrayList<>();
-        } else {
-            assert doList != null;
-            // 过滤权限列表中access=0的
-            List<AuthorityDO> newList = doList.stream()
-                    .filter(authorityDO -> !TopicAuthorityEnum.DENY.getCode().equals(authorityDO.getAccess()))
-                    .collect(Collectors.toList());
-            return newList;
         }
+
+        // 去除掉权限列表中无权限的数据
+        return doList.stream()
+                .filter(authorityDO -> !TopicAuthorityEnum.DENY.getCode().equals(authorityDO.getAccess()))
+                .collect(Collectors.toList());
     }
 
     @Override

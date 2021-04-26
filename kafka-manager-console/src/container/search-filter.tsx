@@ -194,7 +194,7 @@ export class SearchAndFilterContainer extends React.Component<any, ISearchAndFil
     );
   }
 
-  public renderColumnsFilter = (type: string) => {
+  public renderColumnsFilter = (type: string, params?: any) => {
     return {
       filterIcon: this.renderFilterIcon.bind(null, type),
       filterDropdownVisible: this.state[type] as boolean,
