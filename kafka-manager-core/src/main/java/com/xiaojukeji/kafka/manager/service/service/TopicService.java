@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.*;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
@@ -105,4 +106,9 @@ public interface TopicService {
     List<TopicBrokerDTO> getTopicBrokerList(Long clusterId, String topicName);
 
     Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(Long physicalClusterId, String topicName, Long latestTime);
+
+    /**
+     * 创建topic
+     */
+    Result addTopic(TopicAddDTO dto);
 }

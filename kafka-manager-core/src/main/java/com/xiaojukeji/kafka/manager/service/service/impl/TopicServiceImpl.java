@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
@@ -20,6 +21,7 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.PartitionMap;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.dao.TopicAppMetricsDao;
+import com.xiaojukeji.kafka.manager.dao.TopicDao;
 import com.xiaojukeji.kafka.manager.dao.TopicMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicRequestMetricsDao;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
@@ -86,6 +88,9 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private AbstractHealthScoreStrategy healthScoreStrategy;
+
+    @Autowired
+    private TopicDao topicDao;
 
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
@@ -822,6 +827,26 @@ public class TopicServiceImpl implements TopicService {
                     ,physicalClusterId, topicName, latestTime);
         }
         return new Result<>(TopicOffsetChangedEnum.UNKNOWN);
+    }
+
+    @Override
+    public Result addTopic(TopicAddDTO dto) {
+        TopicDO topicDO = topicManagerService.getByTopicName(dto.getClusterId(), dto.getTopicName());
+        if (!ValidateUtils.isNull(topicDO)) {
+            // 该topic已存在
+            return Result.buildFrom(ResultStatus.TOPIC_ALREADY_EXIST);
+        }
+        TopicDO topic = new TopicDO();
+        topic.setAppId(dto.getAppId());
+        topic.setClusterId(dto.getClusterId());
+        topic.setDescription(dto.getDescription());
+        topic.setTopicName(dto.getTopicName());
+        topic.setPeakBytesIn(dto.getPeakBytesIn() * 1024 * 1024);
+        int insert = topicDao.insert(topic);
+        if (insert > 0) {
+            return Result.buildFrom(ResultStatus.SUCCESS);
+        }
+        return Result.buildFrom(ResultStatus.FAIL);
     }
 
     private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,
