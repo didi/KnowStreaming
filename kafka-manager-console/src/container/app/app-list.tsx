@@ -52,8 +52,7 @@ export class CommonAppList extends SearchAndFilterContainer {
           },
         }),
         render: (text: string, record: IAppItem) => {
-          return (
-            <Tooltip placement="bottomLeft" title={record.name}>{text}</Tooltip>);
+          return (<Tooltip placement="bottomLeft" title={record.name}>{text}</Tooltip>);
         },
       },
       {
@@ -103,7 +102,7 @@ export class CommonAppList extends SearchAndFilterContainer {
   }
 
   public getOnlineConnect(record: IAppItem) {
-    modal.showOfflineAppModal(record.appId);
+    modal.showOfflineAppNewModal(record.appId);
   }
 
   public getData<T extends IAppItem>(origin: T[]) {
@@ -114,7 +113,7 @@ export class CommonAppList extends SearchAndFilterContainer {
     data = searchKey ? origin.filter((item: IAppItem) =>
       ((item.name !== undefined && item.name !== null) && item.name.toLowerCase().includes(searchKey as string)) ||
       ((item.principals !== undefined && item.principals !== null) && item.principals.toLowerCase().includes(searchKey as string)) ||
-      ((item.appId !== undefined && item.appId !== null) && item.appId.toLowerCase().includes(searchKey as string)) ) : origin;
+      ((item.appId !== undefined && item.appId !== null) && item.appId.toLowerCase().includes(searchKey as string))) : origin;
 
     return data;
   }

@@ -314,8 +314,7 @@ export class ExclusiveCluster extends SearchAndFilterContainer {
       >
         <div className="region-prompt">
           <span>
-            由于该Region已被逻辑集群【 {this.state.logicalClusterName} 】使用
-            请先解除Region与逻辑集群的关系
+            该Region已被逻辑集群【 {this.state.logicalClusterName} 】使用，请先解除Region与逻辑集群的关系
           </span>
         </div>
       </Modal>

@@ -17,5 +17,5 @@ public interface OperateRecordService {
 
     int insert(String operator, ModuleEnum module, String resourceName, OperateEnum operate, Map<String, String> content);
 
-    List<OperateRecordDO> queryByCondt(OperateRecordDTO dto);
+    List<OperateRecordDO> queryByCondition(OperateRecordDTO dto);
 }

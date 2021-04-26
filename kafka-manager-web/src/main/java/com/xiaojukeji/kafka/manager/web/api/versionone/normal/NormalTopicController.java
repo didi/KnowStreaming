@@ -11,11 +11,13 @@ import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.RealTimeMetricsVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.TopicBusinessInfoVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.*;
+import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaBillDO;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxAttributeEnum;
+import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicStatisticMetricsVO;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
@@ -337,6 +339,25 @@ public class NormalTopicController {
         return new Result<>(TopicModelConverter.convert2TopicMineAppVOList(
                 topicManagerService.getTopicMineApps(physicalClusterId, topicName, SpringTool.getUserName()))
         );
+    }
+
+    @ApiOperation(value = "Topic流量统计信息", notes = "")
+    @RequestMapping(value = "{clusterId}/topics/{topicName}/statistic-metrics", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<TopicStatisticMetricsVO> getTopicStatisticMetrics(@PathVariable Long clusterId,
+                                                                    @PathVariable String topicName,
+                                                                    @RequestParam(value = "isPhysicalClusterId", required = false) Boolean isPhysicalClusterId,
+                                                                    @RequestParam("latest-day") Integer latestDay) {
+        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(clusterId, isPhysicalClusterId);
+        if (ValidateUtils.isNull(physicalClusterId)) {
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+
+        Double maxAvgBytesIn = topicManagerService.getTopicMaxAvgBytesIn(physicalClusterId, topicName, new Date(DateUtils.getDayStarTime(-1 * latestDay)), new Date(), 1);
+        if (ValidateUtils.isNull(maxAvgBytesIn)) {
+            return Result.buildFrom(ResultStatus.MYSQL_ERROR);
+        }
+        return new Result<>(new TopicStatisticMetricsVO(maxAvgBytesIn));
     }
 
 }

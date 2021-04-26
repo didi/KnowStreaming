@@ -9,6 +9,7 @@ import {
   getTopicsBasicInfo,
   getTasksKafkaFiles,
   getMetaData,
+  getOperationRecordData,
   getConfigure,
   addNewConfigure,
   editConfigure,
@@ -102,6 +103,14 @@ class Admin {
 
   @observable
   public metaList: IMetaData[] = [];
+
+  @observable
+  public oRList: any[] = [];
+
+  @observable
+  public oRparams:any={
+    moduleId:0
+  };
 
   @observable
   public configureList: IConfigure[] = [];
@@ -314,6 +323,15 @@ class Admin {
   public setMetaList(data: IMetaData[]) {
     this.setLoading(false);
     this.metaList = data ? data.map((item, index) => {
+      item.key = index;
+      return item;
+    }) : [];
+  }
+
+  @action.bound
+  public setOperationRecordList(data:any){
+    this.setLoading(false);
+    this.oRList = data ? data.map((item:any, index: any) => {
       item.key = index;
       return item;
     }) : [];
@@ -655,6 +673,12 @@ class Admin {
   public getMetaData(needDetail: boolean) {
     this.setLoading(true);
     getMetaData(needDetail).then(this.setMetaList);
+  }
+
+  public getOperationRecordData(params: any) {
+    this.setLoading(true);
+    this.oRparams = params
+    getOperationRecordData(params).then(this.setOperationRecordList);
   }
 
   public getConfigure() {

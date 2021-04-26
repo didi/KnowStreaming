@@ -190,7 +190,7 @@ export interface IUser {
   chineseName?: string;
   department?: string;
   key?: number;
-  confirmPassword?:string
+  confirmPassword?: string
 }
 
 export interface IOffset {
@@ -939,7 +939,7 @@ export interface INewLogical {
   logicalClusterName?: string;
   logicalClusterNameCn?: string;
   regionIdList: number[];
-  logicalClusterIdentification?:string
+  logicalClusterIdentification?: string
 }
 
 export interface IPartitionsLocation {

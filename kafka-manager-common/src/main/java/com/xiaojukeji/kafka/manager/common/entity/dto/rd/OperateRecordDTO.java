@@ -81,11 +81,6 @@ public class OperateRecordDTO {
     }
 
     public boolean legal() {
-        if (!ModuleEnum.validate(moduleId) ||
-                (!ValidateUtils.isNull(operateId) && OperateEnum.validate(operateId))
-            ) {
-            return false;
-        }
-        return true;
+        return !ValidateUtils.isNull(moduleId) && ModuleEnum.validate(moduleId) && OperateEnum.validate(operateId);
     }
 }
