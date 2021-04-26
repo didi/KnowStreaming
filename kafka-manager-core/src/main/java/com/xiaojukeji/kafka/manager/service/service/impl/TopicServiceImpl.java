@@ -14,6 +14,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConstant;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
@@ -25,6 +26,7 @@ import com.xiaojukeji.kafka.manager.dao.TopicDao;
 import com.xiaojukeji.kafka.manager.dao.TopicMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicRequestMetricsDao;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
+import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaClientPool;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
@@ -43,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -91,6 +94,9 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private TopicDao topicDao;
+
+    @Autowired
+    private AuthorityDao authorityDao;
 
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
@@ -829,6 +835,7 @@ public class TopicServiceImpl implements TopicService {
         return new Result<>(TopicOffsetChangedEnum.UNKNOWN);
     }
 
+    @Transactional
     @Override
     public Result addTopic(TopicAddDTO dto) {
         TopicDO topicDO = topicManagerService.getByTopicName(dto.getClusterId(), dto.getTopicName());
@@ -836,6 +843,14 @@ public class TopicServiceImpl implements TopicService {
             // 该topic已存在
             return Result.buildFrom(ResultStatus.TOPIC_ALREADY_EXIST);
         }
+        // 给创建topic的用户该topic权限
+        AuthorityDO authorityDO = new AuthorityDO();
+        authorityDO.setAppId(dto.getAppId());
+        authorityDO.setClusterId(dto.getClusterId());
+        authorityDO.setTopicName(dto.getTopicName());
+        authorityDO.setAccess(3);
+        authorityDao.insert(authorityDO);
+        // 记录该topic
         TopicDO topic = new TopicDO();
         topic.setAppId(dto.getAppId());
         topic.setClusterId(dto.getClusterId());
