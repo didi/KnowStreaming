@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.op;
 
-import com.alibaba.fastjson.JSON;
 import com.xiaojukeji.kafka.manager.bpm.OrderService;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderStatusEnum;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderTypeEnum;
@@ -11,6 +10,7 @@ import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.config.CreateTopicElemConfig;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.OrderExtensionApplyTopicDTO;
+import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
@@ -23,6 +23,7 @@ import com.xiaojukeji.kafka.manager.task.component.EmptyEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import java.util.Properties;
  */
 @Component
 @CustomScheduled(name = "autoHandleTopicOrder", cron = "0 0/1 * * * ?", threadNum = 1)
+@ConditionalOnProperty(prefix = "task.op.order-auto-exec", name = "topic-enabled", havingValue = "true", matchIfMissing = false)
 public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
@@ -72,11 +74,8 @@ public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
 
         Integer maxPassedOrderNumPerTask = configService.getAutoPassedTopicApplyOrderNumPerTask();
         for (OrderDO orderDO: doList) {
-            if (!OrderTypeEnum.APPLY_TOPIC.getCode().equals(orderDO.getType())) {
-                continue;
-            }
             try {
-                if (!handleApplyTopicOrder(orderDO)) {
+                if (!OrderTypeEnum.APPLY_TOPIC.getCode().equals(orderDO.getType()) && !handleApplyTopicOrder(orderDO)) {
                     continue;
                 }
                 maxPassedOrderNumPerTask -= 1;
@@ -91,7 +90,7 @@ public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
     }
 
     private boolean handleApplyTopicOrder(OrderDO orderDO) {
-        OrderExtensionApplyTopicDTO dto = JSON.parseObject(orderDO.getExtensions(), OrderExtensionApplyTopicDTO.class);
+        OrderExtensionApplyTopicDTO dto = JsonUtils.stringToObj(orderDO.getExtensions(), OrderExtensionApplyTopicDTO.class);
         Long physicalClusterId =
                 logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId(), dto.isPhysicalClusterId());
 
