@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
  */
 @Api(tags = "开放接口-OP相关接口(REST)")
 @RestController
-@RequestMapping(ApiPrefix.API_V1_THIRD_PART_PREFIX)
-public class ThirdPartOpController {
+@RequestMapping(ApiPrefix.API_V1_THIRD_PART_OP_PREFIX)
+public class ThirdPartOpUtilController {
 
     @Autowired
     private AdminService adminService;
