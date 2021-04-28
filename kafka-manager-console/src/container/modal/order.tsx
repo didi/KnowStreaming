@@ -10,8 +10,8 @@ import * as React from 'react';
 
 const updateInputModal = (status: string, type: number) => {
   const formMap = wrapper.xFormWrapper.formMap;
-  const region = type === 0 ? 5 : 3;
-  const broker = type === 0 ? 6 : 4;
+  const region = type === 0 ? 6 : 3;
+  const broker = type === 0 ? 7 : 4;
   formMap[region].invisible = status === 'region';
   formMap[broker].invisible = status !== 'region';
 
