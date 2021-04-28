@@ -111,4 +111,9 @@ public interface TopicService {
      * 创建topic
      */
     Result addTopic(TopicAddDTO dto);
+
+    /**
+     * 删除topic
+     */
+    Result deleteTopic(Long clusterId, String topicName);
 }

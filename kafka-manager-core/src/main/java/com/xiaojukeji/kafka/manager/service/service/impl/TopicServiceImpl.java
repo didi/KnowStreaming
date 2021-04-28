@@ -874,7 +874,21 @@ public class TopicServiceImpl implements TopicService {
       return Result.buildFrom(rs);
     }
 
-  private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,
+    @Override
+    public Result deleteTopic(Long clusterId, String topicName) {
+        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(clusterId);
+        if (ValidateUtils.isNull(physicalClusterId)) {
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
+        if (ValidateUtils.isNull(clusterDO)) {
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+        ResultStatus rs = adminService.deleteTopic(clusterDO, topicName, SpringTool.getUserName());
+        return Result.buildFrom(rs);
+    }
+
+    private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,
                                                                    String topicName,
                                                                    Map<TopicPartition, Long> endOffsetMap) {
         if (ValidateUtils.isNull(clusterDO)

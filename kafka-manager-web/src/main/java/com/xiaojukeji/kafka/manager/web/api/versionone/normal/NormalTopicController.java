@@ -350,4 +350,14 @@ public class NormalTopicController {
         return topicService.addTopic(dto);
     }
 
+    @ApiOperation(value = "删除topic",notes = "删除topic")
+    @RequestMapping(value = {"{clusterId}/topics/{topicName}/delete"},method = RequestMethod.DELETE)
+    @ResponseBody
+    public Result deleteTopic(@PathVariable Long clusterId,
+                              @PathVariable String topicName) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isNull(topicName)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.deleteTopic(clusterId,topicName);
+    }
 }
