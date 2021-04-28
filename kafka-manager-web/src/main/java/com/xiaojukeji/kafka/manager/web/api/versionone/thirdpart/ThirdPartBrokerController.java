@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Api(tags = "开放接口-Broker相关接口(REST)")
 @RestController
 @RequestMapping(ApiPrefix.API_V1_THIRD_PART_OP_PREFIX)
-public class ThirdPartOpBrokerController {
+public class ThirdPartBrokerController {
     @Autowired
     private BrokerService brokerService;
 
