@@ -7,6 +7,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.*;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicBrokerDTO;
@@ -116,4 +117,9 @@ public interface TopicService {
      * 删除topic
      */
     Result deleteTopic(Long clusterId, String topicName);
+
+    /**
+     * 配额调整
+     */
+    Result addTopicQuota(TopicQuotaDTO dto);
 }
