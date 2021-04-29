@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-util</artifactId>
-                <version>9.2.24.v20180105</version>
+                <version>9.4.39.v20210325</version>
             </dependency>
 
             <dependency>
