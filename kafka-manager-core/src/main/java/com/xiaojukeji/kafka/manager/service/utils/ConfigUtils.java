@@ -17,7 +17,7 @@ public class ConfigUtils {
     private String kafkaManagerEnv;
 
     @Value(value = "${custom.store-metrics-task.save-days}")
-    private Integer maxMetricsSaveDays;
+    private Long maxMetricsSaveDays;
 
     public String getIdc() {
         return idc;
@@ -35,11 +35,11 @@ public class ConfigUtils {
         this.kafkaManagerEnv = kafkaManagerEnv;
     }
 
-    public Integer getMaxMetricsSaveDays() {
+    public Long getMaxMetricsSaveDays() {
         return maxMetricsSaveDays;
     }
 
-    public void setMaxMetricsSaveDays(Integer maxMetricsSaveDays) {
+    public void setMaxMetricsSaveDays(Long maxMetricsSaveDays) {
         this.maxMetricsSaveDays = maxMetricsSaveDays;
     }
 }
