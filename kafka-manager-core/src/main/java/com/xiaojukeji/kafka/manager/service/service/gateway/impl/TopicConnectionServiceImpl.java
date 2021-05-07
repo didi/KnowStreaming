@@ -26,21 +26,27 @@ public class TopicConnectionServiceImpl implements TopicConnectionService {
     @Autowired
     private TopicConnectionDao topicConnectionDao;
 
+    private int splitInterval = 50;
+
     @Override
     public void batchAdd(List<TopicConnectionDO> doList) {
         if (ValidateUtils.isEmptyList(doList)) {
             return;
         }
+        int allSize = doList.size();
+        int successSize = 0;
 
-        int count = 0;
-        for (TopicConnectionDO connectionDO: doList) {
-            try {
-                count += topicConnectionDao.replace(connectionDO);
-            } catch (Exception e) {
-                LOGGER.error("class=TopicConnectionServiceImpl||method=batchAdd||connectionDO={}||errMsg={}", connectionDO, e.getMessage());
-            }
+        int part = doList.size() / splitInterval;
+        for (int i = 0; i < part; ++i) {
+            List<TopicConnectionDO> subList = doList.subList(0, splitInterval);
+            successSize += topicConnectionDao.batchReplace(subList);
+            doList.subList(0, splitInterval).clear();
         }
-        LOGGER.info("class=TopicConnectionServiceImpl||method=batchAdd||allSize={}||successSize={}", doList.size(), count);
+        if (!ValidateUtils.isEmptyList(doList)) {
+            successSize += topicConnectionDao.batchReplace(doList);
+        }
+        LOGGER.info("class=TopicConnectionServiceImpl||method=batchAdd||allSize={}||successSize={}", allSize, successSize);
+
     }
 
     @Override

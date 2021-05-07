@@ -13,8 +13,6 @@ import java.util.List;
 public interface TopicConnectionDao {
     int batchReplace(List<TopicConnectionDO> doList);
 
-    int replace(TopicConnectionDO topicConnectionDO);
-
     List<TopicConnectionDO> getByTopicName(Long clusterId, String topicName, Date startTime, Date endTime);
 
     List<TopicConnectionDO> getByAppId(String appId, Date startTime, Date endTime);
