@@ -13,7 +13,7 @@
         <result property="createTime"       column="create_time"/>
     </resultMap>
 
-    <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO">
+    <insert id="batchReplace" parameterType="java.util.List">
         REPLACE INTO topic_connections (
             cluster_id,
             topic_name,
@@ -22,16 +22,19 @@
             ip,
             client_version,
             create_time
-          )
-        VALUES (
-            #{clusterId},
-            #{topicName},
-            #{type},
-            #{appId},
-            #{ip},
-            #{clientVersion},
-            #{createTime}
-          )
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.clusterId},
+            #{item.topicName},
+            #{item.type},
+            #{item.appId},
+            #{item.ip},
+            #{item.clientVersion},
+            #{item.createTime}
+            )
+        </foreach>
     </insert>
 
     <select id="getByTopicName" parameterType="java.util.Map" resultMap="TopicConnectionMap">
