@@ -117,6 +117,9 @@
 
 具体的文档可见：[监控功能对接夜莺](../dev_guide/monitor_system_integrate_with_n9e.md)、[监控功能对接其他系统](../dev_guide/monitor_system_integrate_with_self.md)
 
+那么在夜莺中，如何创建告警组呢？
+需要前往夜莺平台-用户资源中心-团队管理中新建团队。新建过团队之后再次回到Logi-KM中刷新页面就可以在该下拉框中选择告警接收组了。
+
 ### 11、连接信息、耗时信息、磁盘信息为什么没有数据？
 
 这块需要结合滴滴内部的kafka-gateway一同使用才会有数据，滴滴kafka-gateway暂未开源。
