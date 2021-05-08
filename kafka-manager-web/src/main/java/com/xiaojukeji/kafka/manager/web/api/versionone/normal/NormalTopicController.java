@@ -8,6 +8,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicPartitionDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.RealTimeMetricsVO;
@@ -350,6 +351,17 @@ public class NormalTopicController {
         }
         return topicService.addTopic(dto);
     }
+
+    @ApiOperation(value = "扩分区",notes = "扩分区")
+    @RequestMapping(value = "{/topics/expand}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result expandTopic(@RequestBody TopicExpandDTO dto) {
+        if (ValidateUtils.isNull(dto)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.expandTopic(dto);
+    }
+
 
     @ApiOperation(value = "删除topic",notes = "删除topic")
     @RequestMapping(value = {"{clusterId}/topics/{topicName}/delete"},method = RequestMethod.DELETE)

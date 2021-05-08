@@ -6,6 +6,7 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
@@ -911,7 +912,29 @@ public class TopicServiceImpl implements TopicService {
       return Result.buildFrom(ResultStatus.FAIL);
   }
 
-  private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,
+    @Override
+    public Result expandTopic(TopicExpandDTO dto) {
+        // 校验非空
+        if (!dto.paramLegal()) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        //获取物理集群id
+        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId());
+        if (ValidateUtils.isNull(physicalClusterId)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        //获取集群信息
+        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
+        if (ValidateUtils.isNull(clusterDO)) {
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+        //扩分区
+        ResultStatus resultStatus = adminService.expandPartitions(clusterDO, dto.getTopicName(), dto.getPartitionNum(),
+            dto.getRegionId(), dto.getBrokerIds(), SpringTool.getUserName());
+        return Result.buildFrom(resultStatus);
+    }
+
+    private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,
                                                                    String topicName,
                                                                    Map<TopicPartition, Long> endOffsetMap) {
         if (ValidateUtils.isNull(clusterDO)
