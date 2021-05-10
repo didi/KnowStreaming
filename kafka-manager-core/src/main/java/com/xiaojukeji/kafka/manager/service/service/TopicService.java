@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.*;
+import com.xiaojukeji.kafka.manager.common.entity.dto.TopicAuthorityDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
@@ -128,4 +129,9 @@ public interface TopicService {
      * 扩分区
      */
     Result expandTopic(TopicExpandDTO dto);
+
+    /**
+     * 权限调整
+     */
+    Result addAuthorityAdd(TopicAuthorityDTO dto);
 }

@@ -5,6 +5,7 @@ import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
+import com.xiaojukeji.kafka.manager.common.entity.dto.TopicAuthorityDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
@@ -18,6 +19,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConstant;
@@ -29,6 +31,7 @@ import com.xiaojukeji.kafka.manager.dao.TopicAppMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicRequestMetricsDao;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
+import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaClientPool;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
@@ -99,6 +102,9 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private QuotaService quotaService;
+
+    @Autowired
+    private AuthorityDao authorityDao;
 
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
@@ -909,7 +915,7 @@ public class TopicServiceImpl implements TopicService {
       if (result > 0) {
           return Result.buildFrom(ResultStatus.SUCCESS);
       }
-      return Result.buildFrom(ResultStatus.FAIL);
+      return Result.buildFrom(ResultStatus.MYSQL_ERROR);
   }
 
     @Override
@@ -932,6 +938,43 @@ public class TopicServiceImpl implements TopicService {
         ResultStatus resultStatus = adminService.expandPartitions(clusterDO, dto.getTopicName(), dto.getPartitionNum(),
             dto.getRegionId(), dto.getBrokerIds(), SpringTool.getUserName());
         return Result.buildFrom(resultStatus);
+    }
+
+    @Override
+    public Result addAuthorityAdd(TopicAuthorityDTO dto) {
+        //查询该用户拥有的应用
+        List<AppDO> appDOs = appService.getByPrincipal(SpringTool.getUserName());
+        if (ValidateUtils.isEmptyList(appDOs)) {
+            //该用户无应用，需要先申请应用
+            return Result.buildFrom(ResultStatus.APP_NOT_EXIST);
+        }
+        List<Long> appIds = appDOs.stream().map(AppDO::getId).collect(Collectors.toList());
+        if (!appIds.contains(dto.getAccess())) {
+            //入参中的appId，该用户未拥有
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        //获取物理集群id
+        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId());
+        if (ValidateUtils.isNull(physicalClusterId)) {
+            //集群不存在
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+        //获取集群信息
+        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
+        if (ValidateUtils.isNull(clusterDO)) {
+            //集群不存在
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+        //构建authorityDo
+        AuthorityDO authorityDO = new AuthorityDO();
+        authorityDO.setClusterId(physicalClusterId);
+        authorityDO.setAppId(dto.getAppId());
+        authorityDO.setTopicName(dto.getTopicName());
+        authorityDO.setAccess(dto.getAccess());
+        if (authorityDao.insert(authorityDO) > 0) {
+            return Result.buildFrom(ResultStatus.SUCCESS);
+        }
+        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
     }
 
     private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,

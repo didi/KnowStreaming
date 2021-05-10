@@ -6,6 +6,7 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicPartitionDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.TopicAuthorityDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
@@ -382,5 +383,15 @@ public class NormalTopicController {
           return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
         return topicService.addTopicQuota(dto);
+    }
+
+    @ApiOperation(value = "权限调整",notes = "权限调整")
+    @RequestMapping(value = "{topics/authority/add}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result addAuthorityAdd(@RequestBody TopicAuthorityDTO dto) {
+        if (ValidateUtils.isNull(dto)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.addAuthorityAdd(dto);
     }
 }
