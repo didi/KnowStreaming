@@ -6,7 +6,11 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicPartitionDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.TopicAuthorityDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.RealTimeMetricsVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.TopicBusinessInfoVO;
@@ -360,4 +364,54 @@ public class NormalTopicController {
         return new Result<>(new TopicStatisticMetricsVO(maxAvgBytesIn));
     }
 
+    @ApiOperation(value = "创建topic",notes = "创建topic")
+    @RequestMapping(value = {"/topics/add"},method = RequestMethod.POST)
+    @ResponseBody
+    public Result addTopic(@RequestBody TopicAddDTO dto) {
+        if (ValidateUtils.isNull(dto)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.addTopic(dto);
+    }
+
+    @ApiOperation(value = "扩分区",notes = "扩分区")
+    @RequestMapping(value = "{/topics/expand}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result expandTopic(@RequestBody TopicExpandDTO dto) {
+        if (ValidateUtils.isNull(dto)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.expandTopic(dto);
+    }
+
+    @ApiOperation(value = "删除topic",notes = "删除topic")
+    @RequestMapping(value = {"{clusterId}/topics/{topicName}/delete"},method = RequestMethod.DELETE)
+    @ResponseBody
+    public Result deleteTopic(@PathVariable Long clusterId,
+                              @PathVariable String topicName) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isNull(topicName)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.deleteTopic(clusterId,topicName);
+    }
+
+    @ApiOperation(value = "配额调整",notes = "配额调整")
+    @RequestMapping(value = "{topics/quota/add}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result addTopicQuota(@RequestBody TopicQuotaDTO dto) {
+        if (ValidateUtils.isNull(dto)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.addTopicQuota(dto);
+    }
+
+    @ApiOperation(value = "权限调整",notes = "权限调整")
+    @RequestMapping(value = "{topics/authority/add}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result addAuthorityAdd(@RequestBody TopicAuthorityDTO dto) {
+        if (ValidateUtils.isNull(dto)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return topicService.addAuthorityAdd(dto);
+    }
 }
