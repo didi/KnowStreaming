@@ -133,15 +133,15 @@ export class GovernanceTopic extends SearchAndFilterContainer {
         width: '30%',
         sorter: (a: IResource, b: IResource) => a.topicName.charCodeAt(0) - b.topicName.charCodeAt(0),
         render: (text: string, item: IResource) =>
-          (
-            <Tooltip placement="bottomLeft" title={text}>
-              <a
-                // tslint:disable-next-line:max-line-length
-                href={`${this.urlPrefix}/topic/topic-detail?clusterId=${item.clusterId}&topic=${item.topicName}&isPhysicalClusterId=true&region=${region.currentRegion}`}
-              >
-                {text}
-              </a>
-            </Tooltip>),
+        (
+          <Tooltip placement="bottomLeft" title={text}>
+            <a
+              // tslint:disable-next-line:max-line-length
+              href={`${this.urlPrefix}/topic/topic-detail?clusterId=${item.clusterId}&topic=${item.topicName}&isPhysicalClusterId=true&region=${region.currentRegion}`}
+            >
+              {text}
+            </a>
+          </Tooltip>),
       },
       {
         title: '所在集群',
@@ -215,7 +215,7 @@ export class GovernanceTopic extends SearchAndFilterContainer {
 
     return (
       <>
-      {this.pendingTopic(this.getData(expert.resourceData))}
+        {this.pendingTopic(this.getData(expert.resourceData))}
       </>
     );
   }

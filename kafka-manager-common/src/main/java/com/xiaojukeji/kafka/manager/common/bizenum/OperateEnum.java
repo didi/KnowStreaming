@@ -46,7 +46,7 @@ public enum  OperateEnum {
 
     public static boolean validate(Integer code) {
         if (code == null) {
-            return false;
+            return true;
         }
         for (OperateEnum state : OperateEnum.values()) {
             if (state.getCode() == code) {

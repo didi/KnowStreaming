@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { modal } from 'store/modal';
 import { ConnectTopicList } from '../modal/connect-topic-list';
 import { ConnectAppList } from '../modal/offline-app-modal';
+import { ConnectAppNewList } from '../modal/offline-app-modal-new';
 import { CancelTopicPermission } from 'container/modal/cancel-topic-permission';
 import { OfflineClusterModal } from 'container/modal/offline-cluster-modal';
 import { RenderOrderOpResult } from 'container/modal/order';
@@ -22,6 +23,7 @@ export default class AllCustomModalInOne extends React.Component {
 
 const modalMap = {
   offlineTopicModal: <ConnectTopicList />,
+  offlineAppNewModal: <ConnectAppNewList />,
   offlineAppModal: <ConnectAppList />,
   cancelTopicPermission: <CancelTopicPermission />,
   offlineClusterModal: <OfflineClusterModal />,

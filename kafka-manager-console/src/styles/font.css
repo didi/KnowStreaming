@@ -6,6 +6,16 @@
   url('//at.alicdn.com/t/font_1251424_q66z80q0hio.ttf?t=1577526422376') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+ */
   url('//at.alicdn.com/t/font_1251424_q66z80q0hio.svg?t=1577526422376#kafka-manager') format('svg'); /* iOS 4.1- */
 }
+@font-face {
+  font-family: 'kafka-manager';
+  /* project id 2406313 */
+  src: url('//at.alicdn.com/t/font_2406313_rbsze6uqtta.eot');
+  src: url('//at.alicdn.com/t/font_2406313_rbsze6uqtta.eot?#iefix') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_2406313_rbsze6uqtta.woff2') format('woff2'),
+    url('//at.alicdn.com/t/font_2406313_rbsze6uqtta.woff') format('woff'),
+    url('//at.alicdn.com/t/font_2406313_rbsze6uqtta.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_2406313_rbsze6uqtta.svg#iconfont') format('svg');
+}
 
 .kafka-manager {
   font-family: "kafka-manager" !important;
@@ -14,6 +24,15 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* .kafka-manager-record {
+  font-family: "kafka-manager" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+} */
+
 
 .k-icon-fuwurenwuguanli:before {
   content: "\e660";
@@ -45,6 +64,10 @@
 
 .k-icon-renwuliebiao:before {
   content: "\e634";
+}
+
+.k-icon-operationrecord:before {
+  content: "\e772";
 }
 
 .k-icon-menu2:before {

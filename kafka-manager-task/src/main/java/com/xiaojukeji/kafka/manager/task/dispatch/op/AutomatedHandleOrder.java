@@ -20,6 +20,7 @@ import com.xiaojukeji.kafka.manager.task.component.EmptyEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -31,6 +32,7 @@ import java.util.*;
  */
 @Component
 @CustomScheduled(name = "automatedHandleOrder", cron = "0 0/1 * * * ?", threadNum = 1)
+@ConditionalOnProperty(prefix = "task.op.order-auto-exec", name = "app-enabled", havingValue = "true", matchIfMissing = false)
 public class AutomatedHandleOrder extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
@@ -51,6 +53,7 @@ public class AutomatedHandleOrder extends AbstractScheduledTask<EmptyEntry> {
     public void processTask(EmptyEntry entryEntry) {
         List<OrderDO> waitDealOrderList = orderService.getWaitDealOrder();
         if (ValidateUtils.isEmptyList(waitDealOrderList)) {
+            LOGGER.info("class=AutomatedHandleOrder||method=processTask||msg=waiting deal order is empty");
             return;
         }
 
@@ -65,17 +68,18 @@ public class AutomatedHandleOrder extends AbstractScheduledTask<EmptyEntry> {
     }
 
     private void handleAppApplyOrder(List<OrderDO> waitDealOrderList, List<OrderDO> passedOrderList) {
-        LOGGER.info("start handle app apply order.");
+        LOGGER.info("class=AutomatedHandleOrder||method=processTask||msg=start handle app apply order");
         if (ValidateUtils.isEmptyList(waitDealOrderList)) {
             return;
         }
+
         Integer maxNum = Constant.HANDLE_APP_APPLY_MAX_NUM_DEFAULT;
         ConfigDO configDO = configService.getByKey(Constant.HANDLE_APP_APPLY_MAX_NUM);
         if (!ValidateUtils.isNull(configDO)) {
             try {
                 maxNum = Integer.parseInt(configDO.getConfigValue());
             } catch (Exception e) {
-                LOGGER.error("", e);
+                LOGGER.error("class=AutomatedHandleOrder||method=processTask||configDO={}||msg=config value illegal", configDO, e);
             }
         }
         int handleNum = Math.min(maxNum - passedOrderList.size(), waitDealOrderList.size());
@@ -97,7 +101,7 @@ public class AutomatedHandleOrder extends AbstractScheduledTask<EmptyEntry> {
                     applyAppOrder.updateOrder(orderDO, baseDTO, Constant.AUTO_HANDLE_USER_NAME);
                 }
             } catch (Exception e) {
-                LOGGER.error("", e);
+                LOGGER.error("class=AutomatedHandleOrder||method=processTask||orderDO={}||msg=auto handle app order failed", orderDO, e);
             }
         }
     }

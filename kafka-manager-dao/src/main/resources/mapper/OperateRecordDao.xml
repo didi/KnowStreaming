@@ -21,7 +21,7 @@
     )
   </insert>
 
-  <select id="queryByCondt" parameterType="java.util.Map" resultMap="OperateRecordMap">
+  <select id="queryByCondition" parameterType="java.util.Map" resultMap="OperateRecordMap">
     select *
     from operate_record
     where

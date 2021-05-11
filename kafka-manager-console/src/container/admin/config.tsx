@@ -28,14 +28,16 @@ export const getUserColumns = () => {
           <span className="table-operation">
             <a onClick={() => showApplyModal(record)}>编辑</a>
             <a onClick={() => showApplyModalModifyPassword(record)}>修改密码</a>
-            <Popconfirm
-              title="确定删除？"
-              onConfirm={() => users.deleteUser(record.username)}
-              cancelText="取消"
-              okText="确认"
-            >
-              <a>删除</a>
-            </Popconfirm>
+            {record.username == users.currentUser.username ? "" :
+                <Popconfirm
+                  title="确定删除？"
+                  onConfirm={() => users.deleteUser(record.username)}
+                  cancelText="取消"
+                  okText="确认"
+                >
+                  <a>删除</a>
+                </Popconfirm>
+            }
           </span>);
       },
     },

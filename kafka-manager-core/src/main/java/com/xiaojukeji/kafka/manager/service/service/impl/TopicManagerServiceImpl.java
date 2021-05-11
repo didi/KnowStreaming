@@ -96,6 +96,14 @@ public class TopicManagerServiceImpl implements TopicManagerService {
     }
 
     @Override
+    public List<TopicDO> getByClusterIdFromCache(Long clusterId) {
+        if (clusterId == null) {
+            return new ArrayList<>();
+        }
+        return topicDao.getByClusterIdFromCache(clusterId);
+    }
+
+    @Override
     public List<TopicDO> getByClusterId(Long clusterId) {
         if (clusterId == null) {
             return new ArrayList<>();
@@ -139,12 +147,14 @@ public class TopicManagerServiceImpl implements TopicManagerService {
     }
 
     @Override
-    public Double getTopicMaxAvgBytesIn(Long clusterId,
-                                                    String topicName,
-                                                    Date startTime,
-                                                    Date endTime,
-                                                    Integer maxAvgDay) {
-        return topicStatisticsDao.getTopicMaxAvgBytesIn(clusterId, topicName, startTime, endTime, maxAvgDay);
+    public Double getTopicMaxAvgBytesIn(Long clusterId, String topicName, Date startTime, Date endTime, Integer maxAvgDay) {
+        try {
+            return topicStatisticsDao.getTopicMaxAvgBytesIn(clusterId, topicName, startTime, endTime, maxAvgDay);
+        } catch (Exception e) {
+            LOGGER.error("class=TopicManagerServiceImpl||method=getTopicMaxAvgBytesIn||clusterId={}||topicName={}||startTime={}||endTime={}||maxAvgDay={}||errMsg={}",
+                    clusterId, topicName, startTime, endTime, maxAvgDay, e.getMessage());
+        }
+        return null;
     }
 
     @Override

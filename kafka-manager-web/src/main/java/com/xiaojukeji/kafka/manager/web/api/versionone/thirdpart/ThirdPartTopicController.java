@@ -13,8 +13,6 @@ import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicAuthorize
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicRequestTimeDetailVO;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.openapi.common.vo.TopicOffsetChangedVO;
-import com.xiaojukeji.kafka.manager.openapi.common.vo.TopicStatisticMetricsVO;
-import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
@@ -30,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -67,27 +64,6 @@ public class ThirdPartTopicController {
         vo.setTopicName(topicMetadata.getTopic());
         vo.setPartitionNum(topicMetadata.getPartitionNum());
         return new Result<>(vo);
-    }
-
-    @ApiOperation(value = "Topic流量统计信息", notes = "")
-    @RequestMapping(value = "{physicalClusterId}/topics/{topicName}/statistic-metrics", method = RequestMethod.GET)
-    @ResponseBody
-    public Result<TopicStatisticMetricsVO> getTopicStatisticMetrics(@PathVariable Long physicalClusterId,
-                                                                    @PathVariable String topicName,
-                                                                    @RequestParam("latest-day") Integer latestDay) {
-        try {
-            return new Result<>(new TopicStatisticMetricsVO(topicManagerService.getTopicMaxAvgBytesIn(
-                    physicalClusterId,
-                    topicName,
-                    new Date(DateUtils.getDayStarTime(-1 * latestDay)),
-                    new Date(),
-                    1
-            )));
-        } catch (Exception e) {
-            LOGGER.error("get topic statistic metrics failed, clusterId:{} topicName:{} latestDay:{}."
-                    , physicalClusterId, topicName, latestDay, e);
-        }
-        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
     }
 
     @ApiOperation(value = "Topic是否有流量", notes = "")

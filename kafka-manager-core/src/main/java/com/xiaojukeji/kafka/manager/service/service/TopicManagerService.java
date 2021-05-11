@@ -22,6 +22,8 @@ import java.util.Map;
 public interface TopicManagerService {
     List<TopicDO> listAll();
 
+    List<TopicDO> getByClusterIdFromCache(Long clusterId);
+
     List<TopicDO> getByClusterId(Long clusterId);
 
     TopicDO getByTopicName(Long clusterId, String topicName);
@@ -30,6 +32,15 @@ public interface TopicManagerService {
 
     Map<String, List<Double>> getTopicMaxAvgBytesIn(Long clusterId, Integer latestDay, Double minMaxAvgBytesIn);
 
+    /**
+     * 获取指定时间范围内Topic的峰值均值流量
+     * @param clusterId 集群ID
+     * @param topicName Topic名称
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param maxAvgDay 最大几天的均值
+     * @return
+     */
     Double getTopicMaxAvgBytesIn(Long clusterId, String topicName, Date startTime, Date endTime, Integer maxAvgDay);
 
     TopicStatisticsDO getByTopicAndDay(Long clusterId, String topicName, String gmtDay);

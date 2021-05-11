@@ -1,4 +1,4 @@
-package com.xiaojukeji.kafka.manager.openapi.common.vo;
+package com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,6 @@ public class TopicStatisticMetricsVO {
 
     public TopicStatisticMetricsVO(Double peakBytesIn) {
         this.peakBytesIn = peakBytesIn;
-
     }
 
     public Double getPeakBytesIn() {

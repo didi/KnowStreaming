@@ -15,6 +15,8 @@ public interface TopicDao {
 
     TopicDO getByTopicName(Long clusterId, String topicName);
 
+    List<TopicDO> getByClusterIdFromCache(Long clusterId);
+
     List<TopicDO> getByClusterId(Long clusterId);
 
     List<TopicDO> getByAppId(String appId);

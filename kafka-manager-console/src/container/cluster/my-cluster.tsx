@@ -29,16 +29,16 @@ export class MyCluster extends SearchAndFilterContainer {
   public applyCluster() {
     const xFormModal = {
       formMap: [
-        {
-          key: 'idc',
-          label: '数据中心',
-          defaultValue: region.regionName,
-          rules: [{ required: true, message: '请输入数据中心' }],
-          attrs: {
-            placeholder: '请输入数据中心',
-            disabled: true,
-          },
-        },
+        // {
+        //   key: 'idc',
+        //   label: '数据中心',
+        //   defaultValue: region.regionName,
+        //   rules: [{ required: true, message: '请输入数据中心' }],
+        //   attrs: {
+        //     placeholder: '请输入数据中心',
+        //     disabled: true,
+        //   },
+        // },
         {
           key: 'appId',
           label: '所属应用',

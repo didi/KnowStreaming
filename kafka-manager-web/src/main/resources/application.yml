@@ -11,9 +11,9 @@ spring:
     name: kafkamanager
   datasource:
     kafka-manager:
-      jdbc-url: jdbc:mysql://127.0.0.1:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
-      username: admin
-      password: admin
+      jdbc-url: jdbc:mysql://localhost:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+      username: root
+      password: 123456
       driver-class-name: com.mysql.cj.jdbc.Driver
   main:
     allow-bean-definition-overriding: true
@@ -46,6 +46,9 @@ custom:
 task:
   op:
     sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
+    order-auto-exec:          # 工单自动化审批线程的开关
+      topic-enabled: false      # Topic工单自动化审批开关, false:关闭自动化审批, true:开启
+      app-enabled: false        # App工单自动化审批开关, false:关闭自动化审批, true:开启
 
 account:
   ldap:

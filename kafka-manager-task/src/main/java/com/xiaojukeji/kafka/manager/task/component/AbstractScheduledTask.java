@@ -148,10 +148,12 @@ public abstract class AbstractScheduledTask<E extends Comparable> implements Sch
         }
         Collections.sort(allTaskList);
 
-        List<HeartbeatDO> hostList = heartbeatDao.selectActiveHosts(
-                new Date(now - ScheduledTaskConstant.HEARTBEAT_TIME)
-        );
+        List<HeartbeatDO> hostList = heartbeatDao.selectActiveHosts(new Date(now - ScheduledTaskConstant.HEARTBEAT_TIME));
         if (ValidateUtils.isEmptyList(hostList)) {
+            // 当前无机器注册，导致周期任务(Topic指标存DB等任务)不可被触发执行。
+            // 大概率原因可能是：DB的时区不对，注册的时间错误导致查询不出来。
+            // 如果是单台方式部署的Logi-KM，那么也可能是服务新上线，或者是服务不正常导致的。
+            LOGGER.error("customScheduled task running, but without registrant, and so scheduled tasks can't execute, scheduledName:{}.", scheduledName);
             return Lists.newArrayList();
         }
 
@@ -163,8 +165,10 @@ public abstract class AbstractScheduledTask<E extends Comparable> implements Sch
             idx++;
         }
         if (idx == hostList.size()) {
-            // 当前机器未注册
-            LOGGER.error("customScheduled task running, registers not conclude, scheduledName:{}.", scheduledName);
+            // 当前机器未注册, 原因可能是：
+            // 1、当前服务新上线，确实暂未注册到DB中。
+            // 2、当前服务异常，比如进行FGC等，导致注册任务停止了。
+            LOGGER.warn("customScheduled task running, registrants not conclude present machine, scheduledName:{}.", scheduledName);
             return Lists.newArrayList();
         }
 

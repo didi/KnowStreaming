@@ -66,6 +66,7 @@
 - [滴滴Logi-KafkaManager 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
 - [滴滴Logi-KafkaManager 系列视频教程](https://mp.weixin.qq.com/s/9X7gH0tptHPtfjPPSdGO8g)
 - [kafka实践（十五）：滴滴开源Kafka管控平台 Logi-KafkaManager研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
+- [kafka的灵魂伴侣Logi-KafkaManager系列文章专栏 --石臻](https://blog.csdn.net/u010634066/category_10977588.html)
 
 ## 3 滴滴Logi开源用户交流群
 

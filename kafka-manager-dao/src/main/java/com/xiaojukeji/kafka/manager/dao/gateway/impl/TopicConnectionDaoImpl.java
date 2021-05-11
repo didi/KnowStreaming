@@ -27,29 +27,12 @@ public class TopicConnectionDaoImpl implements TopicConnectionDao {
 
     @Override
     public int batchReplace(List<TopicConnectionDO> doList) {
-        int count = 0;
-        for (TopicConnectionDO elem: doList) {
-            try {
-                count += sqlSession.insert("TopicConnectionDao.replace", elem);
-            } catch (DeadlockLoserDataAccessException e1) {
-
-            } catch (Exception e) {
-                LOGGER.error("add topic connection info, clusterId:{} topicName:{}."
-                        , elem.getClusterId(), elem.getTopicName(), e);
-            }
-        }
-        return count;
-    }
-
-    @Override
-    public int replace(TopicConnectionDO topicConnectionDO) {
         try {
-            return sqlSession.insert("TopicConnectionDao.replace", topicConnectionDO);
+            return sqlSession.insert("TopicConnectionDao.batchReplace", doList);
         } catch (DeadlockLoserDataAccessException e1) {
             return 0;
         } catch (Exception e) {
-            LOGGER.error("add topic connection info, clusterId:{} topicName:{}."
-                    , topicConnectionDO.getClusterId(), topicConnectionDO.getTopicName(), e);
+            LOGGER.error("add topic connections info failed", e);
         }
         return 0;
     }

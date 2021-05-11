@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <kafka-manager.revision>2.3.1-SNAPSHOT</kafka-manager.revision>
+        <kafka-manager.revision>2.4.0-SNAPSHOT</kafka-manager.revision>
         <swagger2.version>2.7.0</swagger2.version>
         <swagger.version>1.5.13</swagger.version>
 
@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-util</artifactId>
-                <version>9.2.24.v20180105</version>
+                <version>9.4.39.v20210325</version>
             </dependency>
 
             <dependency>
@@ -215,7 +215,7 @@
             <dependency>
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
-                <version>1.9.3</version>
+                <version>1.9.4</version>
             </dependency>
 
             <dependency>

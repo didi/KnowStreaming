@@ -62,9 +62,14 @@ public class TopicDaoImpl implements TopicDao {
     }
 
     @Override
-    public List<TopicDO> getByClusterId(Long clusterId) {
+    public List<TopicDO> getByClusterIdFromCache(Long clusterId) {
         updateTopicCache();
         return new ArrayList<>(TOPIC_MAP.getOrDefault(clusterId, Collections.emptyMap()).values());
+    }
+
+    @Override
+    public List<TopicDO> getByClusterId(Long clusterId) {
+        return sqlSession.selectList("TopicDao.getByClusterId", clusterId);
     }
 
     @Override

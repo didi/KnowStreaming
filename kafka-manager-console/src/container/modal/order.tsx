@@ -4,13 +4,14 @@ import { message, Icon, notification, Modal, Table, Tooltip } from 'component/an
 import { IApprovalOrder, IBaseOrder, IOrderInfo } from 'types/base-type';
 import { admin } from 'store/admin';
 import { modal } from 'store/modal';
+import { cluster } from 'store/cluster';
 import { cellStyle } from 'constants/table';
 import * as React from 'react';
 
 const updateInputModal = (status: string, type: number) => {
   const formMap = wrapper.xFormWrapper.formMap;
-  const region = type === 0 ? 5 : 3;
-  const broker = type === 0 ? 6 : 4;
+  const region = type === 0 ? 6 : 3;
+  const broker = type === 0 ? 7 : 4;
   formMap[region].invisible = status === 'region';
   formMap[broker].invisible = status !== 'region';
 
@@ -37,6 +38,12 @@ const renderModalTilte = (type: number, status: number) => {
 export const showApprovalModal = (info: IOrderInfo, status: number, from?: string) => {
   const { id, type } = info;
   const formMap = [{
+    key: 'clusterId',
+    label: '所属集群',
+    type: 'input_number',
+    defaultValue: info.detail.logicalClusterName,
+    attrs: { disabled: true },
+  }, {
     key: 'partitionNum',
     label: '分区数',
     type: 'input_number',
@@ -87,7 +94,7 @@ export const showApprovalModal = (info: IOrderInfo, status: number, from?: strin
       label: 'Region',
       value: 'region',
     }, {
-      label: 'Borker',
+      label: 'Broker',
       value: 'broker',
     }],
     rules: [{ required: false, message: '请选择类型' }],

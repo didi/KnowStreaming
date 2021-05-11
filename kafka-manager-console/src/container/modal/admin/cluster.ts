@@ -22,11 +22,11 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
       },
       {
         key: 'appId',
-        label: '应用ID',
+        label: '应用名称',
         type: 'select',
         options: app.adminAppData.map(item => {
           return {
-            label: item.appId,
+            label: item.name,
             value: item.appId,
           };
         }),
@@ -61,7 +61,7 @@ export const showEditClusterTopic = (item: IClusterTopics) => {
         attrs: {
           placeholder: '请输入保存时间',
           suffix: '小时',
-          prompttype:'修改保存时间，预计一分钟左右生效!'
+          prompttype: '修改保存时间，预计一分钟左右生效!'
         },
       },
       {
