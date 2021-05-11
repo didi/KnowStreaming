@@ -6,9 +6,7 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicPartitionDTO;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.RealTimeMetricsVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.TopicBusinessInfoVO;
@@ -339,26 +337,6 @@ public class NormalTopicController {
         return new Result<>(TopicModelConverter.convert2TopicMineAppVOList(
             topicManagerService.getTopicMineApps(physicalClusterId, topicName, SpringTool.getUserName()))
         );
-    }
-
-    @ApiOperation(value = "创建topic",notes = "创建topic")
-    @RequestMapping(value = {"/topics/add"},method = RequestMethod.POST)
-    @ResponseBody
-    public Result addTopic(@RequestBody TopicAddDTO dto) {
-        if (ValidateUtils.isNull(dto)) {
-            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-        }
-        return topicService.addTopic(dto);
-    }
-
-    @ApiOperation(value = "扩分区",notes = "扩分区")
-    @RequestMapping(value = "{/topics/expand}",method = RequestMethod.POST)
-    @ResponseBody
-    public Result expandTopic(@RequestBody TopicExpandDTO dto) {
-        if (ValidateUtils.isNull(dto)) {
-            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-        }
-        return topicService.expandTopic(dto);
     }
 
 }
