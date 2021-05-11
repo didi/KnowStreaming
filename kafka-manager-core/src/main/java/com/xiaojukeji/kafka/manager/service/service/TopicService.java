@@ -4,11 +4,8 @@ import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.*;
-import com.xiaojukeji.kafka.manager.common.entity.dto.TopicAuthorityDTO;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO;
@@ -111,27 +108,8 @@ public interface TopicService {
     Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(Long physicalClusterId, String topicName, Long latestTime);
 
     /**
-     * 创建topic
-     */
-    Result addTopic(TopicAddDTO dto);
-
-    /**
-     * 删除topic
-     */
-    Result deleteTopic(Long clusterId, String topicName);
-
-    /**
      * 配额调整
      */
     Result addTopicQuota(TopicQuotaDTO dto);
 
-    /**
-     * 扩分区
-     */
-    Result expandTopic(TopicExpandDTO dto);
-
-    /**
-     * 权限调整
-     */
-    Result addAuthorityAdd(TopicAuthorityDTO dto);
 }

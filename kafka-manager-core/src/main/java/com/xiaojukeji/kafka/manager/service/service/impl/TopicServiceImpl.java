@@ -1,13 +1,9 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
-import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
-import com.xiaojukeji.kafka.manager.common.entity.dto.TopicAuthorityDTO;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicAddDTO;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicExpandDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
@@ -19,8 +15,6 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
-import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConstant;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
@@ -843,59 +837,6 @@ public class TopicServiceImpl implements TopicService {
         return new Result<>(TopicOffsetChangedEnum.UNKNOWN);
     }
 
-    @Override
-    public Result addTopic(TopicAddDTO dto) {
-      //获取物理集群id
-      Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId());
-      if (ValidateUtils.isNull(physicalClusterId)) {
-        return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-      }
-      //获取集群信息
-      ClusterDO clusterDO = clusterService.getById(physicalClusterId);
-      if (ValidateUtils.isNull(clusterDO)) {
-        return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-      }
-      //判断topic是否存在
-      TopicDO topic = topicManagerService.getByTopicName(physicalClusterId, dto.getTopicName());
-      if (!ValidateUtils.isNull(topic)) {
-        return Result.buildFrom(ResultStatus.TOPIC_ALREADY_EXIST);
-      }
-      //构建topicDo
-      TopicDO topicDO = new TopicDO();
-      topicDO.setAppId(dto.getAppId());
-      topicDO.setClusterId(dto.getClusterId());
-      topicDO.setTopicName(dto.getTopicName());
-      topicDO.setDescription(dto.getDescription());
-      //构建properties
-      Properties properties = dto.getProperties();
-      if (ValidateUtils.isNull(properties)) {
-        properties = new Properties();
-      }
-      properties.put(KafkaConstant.RETENTION_MS_KEY, String.valueOf(dto.getRetentionTime()));
-      //创建topic
-      ResultStatus rs = adminService.createTopic(clusterDO, topicDO, dto.getPartitionNum(),
-          dto.getReplicaNum(), dto.getRegionId(), dto.getBrokerIdList(), properties, SpringTool.getUserName(),
-          SpringTool.getUserName());
-      return Result.buildFrom(rs);
-    }
-
-    @Override
-    public Result deleteTopic(Long clusterId, String topicName) {
-        //获得物理集群id
-        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(clusterId);
-        if (ValidateUtils.isNull(physicalClusterId)) {
-            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-        }
-        //获取集群信息
-        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
-        if (ValidateUtils.isNull(clusterDO)) {
-            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-        }
-        //删除topic
-        ResultStatus rs = adminService.deleteTopic(clusterDO, topicName, SpringTool.getUserName());
-        return Result.buildFrom(rs);
-    }
-
   @Override
   public Result addTopicQuota(TopicQuotaDTO dto) {
       //获取物理集群id
@@ -917,65 +858,6 @@ public class TopicServiceImpl implements TopicService {
       }
       return Result.buildFrom(ResultStatus.MYSQL_ERROR);
   }
-
-    @Override
-    public Result expandTopic(TopicExpandDTO dto) {
-        // 校验非空
-        if (!dto.paramLegal()) {
-            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-        }
-        //获取物理集群id
-        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId());
-        if (ValidateUtils.isNull(physicalClusterId)) {
-            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-        }
-        //获取集群信息
-        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
-        if (ValidateUtils.isNull(clusterDO)) {
-            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-        }
-        //扩分区
-        ResultStatus resultStatus = adminService.expandPartitions(clusterDO, dto.getTopicName(), dto.getPartitionNum(),
-            dto.getRegionId(), dto.getBrokerIds(), SpringTool.getUserName());
-        return Result.buildFrom(resultStatus);
-    }
-
-    @Override
-    public Result addAuthorityAdd(TopicAuthorityDTO dto) {
-        //查询该用户拥有的应用
-        List<AppDO> appDOs = appService.getByPrincipal(SpringTool.getUserName());
-        if (ValidateUtils.isEmptyList(appDOs)) {
-            //该用户无应用，需要先申请应用
-            return Result.buildFrom(ResultStatus.APP_NOT_EXIST);
-        }
-        List<Long> appIds = appDOs.stream().map(AppDO::getId).collect(Collectors.toList());
-        if (!appIds.contains(dto.getAccess())) {
-            //入参中的appId，该用户未拥有
-            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-        }
-        //获取物理集群id
-        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId());
-        if (ValidateUtils.isNull(physicalClusterId)) {
-            //集群不存在
-            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-        }
-        //获取集群信息
-        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
-        if (ValidateUtils.isNull(clusterDO)) {
-            //集群不存在
-            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-        }
-        //构建authorityDo
-        AuthorityDO authorityDO = new AuthorityDO();
-        authorityDO.setClusterId(physicalClusterId);
-        authorityDO.setAppId(dto.getAppId());
-        authorityDO.setTopicName(dto.getTopicName());
-        authorityDO.setAccess(dto.getAccess());
-        if (authorityDao.insert(authorityDO) > 0) {
-            return Result.buildFrom(ResultStatus.SUCCESS);
-        }
-        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
-    }
 
     private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,
                                                                    String topicName,
