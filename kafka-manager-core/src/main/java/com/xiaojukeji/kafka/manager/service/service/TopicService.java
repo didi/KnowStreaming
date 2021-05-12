@@ -6,7 +6,6 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.*;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicBrokerDTO;
@@ -106,10 +105,5 @@ public interface TopicService {
     List<TopicBrokerDTO> getTopicBrokerList(Long clusterId, String topicName);
 
     Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(Long physicalClusterId, String topicName, Long latestTime);
-
-    /**
-     * 配额调整
-     */
-    Result addTopicQuota(TopicQuotaDTO dto);
 
 }

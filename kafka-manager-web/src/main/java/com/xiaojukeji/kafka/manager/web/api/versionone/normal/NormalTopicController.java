@@ -7,7 +7,6 @@ import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicPartitionDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.RealTimeMetricsVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.TopicBusinessInfoVO;
@@ -359,16 +358,6 @@ public class NormalTopicController {
             return Result.buildFrom(ResultStatus.MYSQL_ERROR);
         }
         return new Result<>(new TopicStatisticMetricsVO(maxAvgBytesIn));
-    }
-
-    @ApiOperation(value = "配额调整",notes = "配额调整")
-    @RequestMapping(value = "{topics/quota/add}",method = RequestMethod.POST)
-    @ResponseBody
-    public Result addTopicQuota(@RequestBody TopicQuotaDTO dto) {
-        if (ValidateUtils.isNull(dto)) {
-            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
-        }
-        return topicService.addTopicQuota(dto);
     }
 
 }

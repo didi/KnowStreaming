@@ -3,8 +3,6 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
-import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
-import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
@@ -25,14 +23,12 @@ import com.xiaojukeji.kafka.manager.dao.TopicAppMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicRequestMetricsDao;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
-import com.xiaojukeji.kafka.manager.dao.gateway.AuthorityDao;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaClientPool;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
-import com.xiaojukeji.kafka.manager.service.service.gateway.QuotaService;
 import com.xiaojukeji.kafka.manager.service.strategy.AbstractHealthScoreStrategy;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
 import com.xiaojukeji.kafka.manager.service.utils.MetricsConvertUtils;
@@ -90,15 +86,6 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private AbstractHealthScoreStrategy healthScoreStrategy;
-
-    @Autowired
-    private AdminService adminService;
-
-    @Autowired
-    private QuotaService quotaService;
-
-    @Autowired
-    private AuthorityDao authorityDao;
 
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
@@ -836,28 +823,6 @@ public class TopicServiceImpl implements TopicService {
         }
         return new Result<>(TopicOffsetChangedEnum.UNKNOWN);
     }
-
-  @Override
-  public Result addTopicQuota(TopicQuotaDTO dto) {
-      //获取物理集群id
-      Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId());
-      if (ValidateUtils.isNull(physicalClusterId)) {
-          return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-      }
-      //构建配额
-      TopicQuota topicQuota = new TopicQuota();
-      topicQuota.setClusterId(physicalClusterId);
-      topicQuota.setAppId(dto.getAppId());
-      topicQuota.setTopicName(dto.getTopicName());
-      topicQuota.setProduceQuota(dto.getProduceQuota());
-      topicQuota.setConsumeQuota(dto.getConsumeQuota());
-      //配额调整
-      int result = quotaService.addTopicQuota(topicQuota);
-      if (result > 0) {
-          return Result.buildFrom(ResultStatus.SUCCESS);
-      }
-      return Result.buildFrom(ResultStatus.MYSQL_ERROR);
-  }
 
     private Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(ClusterDO clusterDO,
                                                                    String topicName,

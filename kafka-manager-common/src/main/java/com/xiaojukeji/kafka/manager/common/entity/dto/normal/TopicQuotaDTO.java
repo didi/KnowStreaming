@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.dto.normal;
 
 import com.xiaojukeji.kafka.manager.common.entity.dto.ClusterTopicDTO;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -38,5 +39,14 @@ public class TopicQuotaDTO extends ClusterTopicDTO {
 
   public void setConsumeQuota(Long consumeQuota) {
     this.consumeQuota = consumeQuota;
+  }
+
+  public boolean paramLegal() {
+    if (ValidateUtils.isNull(clusterId)
+          || ValidateUtils.isNull(topicName)
+          || ValidateUtils.isNull(appId)) {
+      return false;
+    }
+    return true;
   }
 }
