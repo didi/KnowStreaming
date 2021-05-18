@@ -91,7 +91,7 @@ public class BrokerServiceImpl implements BrokerService {
         for (BrokerDO brokerDO : brokerDOList) {
             PeakFlowStatusEnum peakFlowStatus = getPeakFlowStatus(brokerDO.getMaxAvgBytesIn(), peakFlow);
             peakFlowStatusMap.put(
-                    peakFlowStatus.code,
+                    peakFlowStatus.getCode(),
                     peakFlowStatusMap.getOrDefault(peakFlowStatus.getCode(), 0) + 1
             );
         }

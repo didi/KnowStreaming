@@ -26,16 +26,8 @@ public enum GatewayConfigKeyEnum {
         return configType;
     }
 
-    public void setConfigType(String configType) {
-        this.configType = configType;
-    }
-
     public String getConfigName() {
         return configName;
-    }
-
-    public void setConfigName(String configName) {
-        this.configName = configName;
     }
 
     @Override

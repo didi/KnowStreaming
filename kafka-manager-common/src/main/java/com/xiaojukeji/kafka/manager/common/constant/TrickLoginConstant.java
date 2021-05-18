@@ -18,4 +18,7 @@ public class TrickLoginConstant {
      */
     public static final String TRICK_LOGIN_SWITCH_ON = "on";
     public static final String TRICK_LOGIN_SWITCH_OFF = "off";
+
+    private TrickLoginConstant() {
+    }
 }

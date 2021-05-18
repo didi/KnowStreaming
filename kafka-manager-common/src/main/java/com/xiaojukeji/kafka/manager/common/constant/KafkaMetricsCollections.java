@@ -39,4 +39,7 @@ public class KafkaMetricsCollections {
      * Broker信息
      */
     public static final int BROKER_VERSION = 400;
+
+    private KafkaMetricsCollections() {
+    }
 }
