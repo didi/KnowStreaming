@@ -21,6 +21,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
+import com.xiaojukeji.kafka.manager.service.service.gateway.QuotaService;
 import com.xiaojukeji.kafka.manager.web.converters.AuthorityConverter;
 import com.xiaojukeji.kafka.manager.web.converters.CommonModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.ConsumerModelConverter;
@@ -55,6 +56,9 @@ public class ThirdPartTopicController {
 
     @Autowired
     private TopicManagerService topicManagerService;
+
+    @Autowired
+    private QuotaService quotaService;
 
     @ApiOperation(value = "Topic元信息", notes = "LogX调用")
     @RequestMapping(value = "clusters/{clusterId}/topics/{topicName}/metadata", method = RequestMethod.GET)
@@ -139,18 +143,18 @@ public class ThirdPartTopicController {
     }
 
     @ApiOperation(value = "配额调整",notes = "配额调整")
-    @RequestMapping(value = "{topics/quota/add}",method = RequestMethod.POST)
+    @RequestMapping(value = "{topics/quota}",method = RequestMethod.POST)
     @ResponseBody
     public Result addTopicQuota(@RequestBody TopicQuotaDTO dto) {
         // 非空校验
         if (ValidateUtils.isNull(dto) || !dto.paramLegal()) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
-        return Result.buildFrom(topicManagerService.addTopicQuota(TopicQuota.buildFrom(dto)));
+        return Result.buildFrom(quotaService.addTopicQuotaByAuthority(TopicQuota.buildFrom(dto)));
     }
 
     @ApiOperation(value = "权限调整",notes = "权限调整")
-    @RequestMapping(value = "{topics/authority/add}",method = RequestMethod.POST)
+    @RequestMapping(value = "{topics/authority}",method = RequestMethod.POST)
     @ResponseBody
     public Result addAuthority(@RequestBody TopicAuthorityDTO dto) {
         //非空校验

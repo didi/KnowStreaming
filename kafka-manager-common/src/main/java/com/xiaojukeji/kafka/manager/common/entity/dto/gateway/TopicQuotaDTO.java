@@ -11,10 +11,10 @@ public class TopicQuotaDTO extends ClusterTopicDTO {
   @ApiModelProperty(value = "appId")
   private String appId;
 
-  @ApiModelProperty(value = "发送数据速率")
+  @ApiModelProperty(value = "发送数据速率B/s")
   private Long produceQuota;
 
-  @ApiModelProperty(value = "消费数据速率")
+  @ApiModelProperty(value = "消费数据速率B/s")
   private Long consumeQuota;
 
   public String getAppId() {
@@ -42,9 +42,9 @@ public class TopicQuotaDTO extends ClusterTopicDTO {
   }
 
   public boolean paramLegal() {
-    if (ValidateUtils.isNull(clusterId)
-          || ValidateUtils.isNull(topicName)
-          || ValidateUtils.isNull(appId)) {
+    if (ValidateUtils.isNullOrLessThanZero(clusterId)
+          || ValidateUtils.isBlank(topicName)
+          || ValidateUtils.isBlank(appId)) {
       return false;
     }
     return true;

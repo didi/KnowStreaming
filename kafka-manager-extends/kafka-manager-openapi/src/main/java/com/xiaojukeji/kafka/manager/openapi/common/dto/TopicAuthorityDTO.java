@@ -32,10 +32,10 @@ public class TopicAuthorityDTO extends ClusterTopicDTO {
 
   @Override
   public boolean paramLegal() {
-    if (ValidateUtils.isNull(clusterId)
-          || ValidateUtils.isNull(topicName)
-          || ValidateUtils.isNull(appId)
-          || ValidateUtils.isNull(access)) {
+    if (ValidateUtils.isNullOrLessThanZero(clusterId)
+          || ValidateUtils.isBlank(topicName)
+          || ValidateUtils.isBlank(appId)
+          || ValidateUtils.isNullOrLessThanZero(access)) {
       return false;
     }
     return true;
