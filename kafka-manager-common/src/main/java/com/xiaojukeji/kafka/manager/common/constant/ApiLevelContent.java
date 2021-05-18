@@ -12,4 +12,7 @@ public class ApiLevelContent {
     public static final int LEVEL_NORMAL_3 = 3;
 
     public static final int LEVEL_DEFAULT_4 = 4;
+
+    private ApiLevelContent() {
+    }
 }

@@ -28,4 +28,7 @@ public class ApiPrefix {
 
     // gateway
     public static final String GATEWAY_API_V1_PREFIX = "/gateway" + API_V1_PREFIX;
+
+    private ApiPrefix() {
+    }
 }

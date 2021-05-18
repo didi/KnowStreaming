@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.account.impl;
 import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.account.component.AbstractSingleSignOn;
 import com.xiaojukeji.kafka.manager.account.LoginService;
+import com.xiaojukeji.kafka.manager.account.component.login.trick.TrickLoginService;
 import com.xiaojukeji.kafka.manager.common.bizenum.AccountRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
@@ -30,6 +31,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private TrickLoginService trickLoginService;
 
     @Autowired
     private AbstractSingleSignOn singleSignOn;
@@ -80,7 +84,7 @@ public class LoginServiceImpl implements LoginService {
             return true;
         }
 
-        String username = singleSignOn.checkLoginAndGetLdap(request);
+        String username = trickLoginService.isTrickLoginOn(request)? trickLoginService.checkTrickLogin(request): singleSignOn.checkLoginAndGetLdap(request);
         if (ValidateUtils.isBlank(username)) {
             // 未登录, 则返回false, 同时重定向到登录页面
             singleSignOn.setRedirectToLoginPage(response);

@@ -16,4 +16,7 @@ public class KafkaConstant {
     public static final String CLIENT_VERSION_NAME_UNKNOWN = "unknown";
 
     public static final String RETENTION_MS_KEY = "retention.ms";
+
+    private KafkaConstant() {
+    }
 }

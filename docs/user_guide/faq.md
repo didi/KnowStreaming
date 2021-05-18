@@ -27,6 +27,7 @@
 - 15、APP(应用)如何被使用起来？
 - 16、为什么下线应用提示operation forbidden？
 - 17、删除Topic成功，为什么过一会儿之后又出现了？
+- 18、如何在不登录的情况下，调用一些需要登录的接口？
 
 ---
 
@@ -195,3 +196,7 @@ for (int i= 0; i < 100000; ++i) {
     producer.send(new ProducerRecord<String, String>("logi_km" + i,"hello logi_km"));
 }
 ```
+
+### 18、如何在不登录的情况下，调用一些需要登录的接口？
+
+具体见：[登录绕过](./call_api_bypass_login.md)

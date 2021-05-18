@@ -29,4 +29,12 @@ public enum TopicExpiredStatusEnum {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "TopicExpiredStatusEnum{" +
+                "status=" + status +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

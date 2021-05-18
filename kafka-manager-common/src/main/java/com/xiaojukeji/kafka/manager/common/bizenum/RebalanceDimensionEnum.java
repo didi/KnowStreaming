@@ -29,4 +29,12 @@ public enum RebalanceDimensionEnum {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "RebalanceDimensionEnum{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

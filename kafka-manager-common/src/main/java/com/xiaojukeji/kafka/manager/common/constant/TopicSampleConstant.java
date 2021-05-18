@@ -16,4 +16,7 @@ public class TopicSampleConstant {
     public static final Integer MAX_TIMEOUT_UNIT_MS = 10000;
     public static final Integer POLL_TIME_OUT_UNIT_MS = 2000;
     public static final Integer MAX_DATA_LENGTH_UNIT_BYTE = 2048;
+
+    private TopicSampleConstant() {
+    }
 }
