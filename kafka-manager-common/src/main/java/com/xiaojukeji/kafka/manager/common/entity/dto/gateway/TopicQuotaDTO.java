@@ -1,4 +1,4 @@
-package com.xiaojukeji.kafka.manager.common.entity.dto.normal;
+package com.xiaojukeji.kafka.manager.common.entity.dto.gateway;
 
 import com.xiaojukeji.kafka.manager.common.entity.dto.ClusterTopicDTO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
