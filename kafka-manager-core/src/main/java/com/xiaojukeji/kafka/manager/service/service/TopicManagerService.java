@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.service.service;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.RdTopicBasic;
+import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicAppData;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicBusinessInfo;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicDTO;
@@ -122,5 +123,12 @@ public interface TopicManagerService {
     List<TopicStatisticsDO> getTopicStatistic(Long clusterId, String topicName, Date startTime, Date endTime);
 
     TopicBusinessInfo getTopicBusinessInfo(Long physicalClusterId, String topicName);
+
+    /**
+     * topic配额调整
+     * @param topicQuota topic配额
+     * @return
+     */
+    ResultStatus addTopicQuota(TopicQuota topicQuota);
 }
 

@@ -17,11 +17,9 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata
 import com.xiaojukeji.kafka.manager.openapi.common.vo.TopicOffsetChangedVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
-import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
-import com.xiaojukeji.kafka.manager.service.service.gateway.QuotaService;
 import com.xiaojukeji.kafka.manager.web.converters.CommonModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.ConsumerModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.TopicModelConverter;
@@ -55,12 +53,6 @@ public class ThirdPartTopicController {
 
     @Autowired
     private TopicManagerService topicManagerService;
-
-    @Autowired
-    private QuotaService quotaService;
-
-    @Autowired
-    private LogicalClusterMetadataManager logicalClusterMetadataManager;
 
     @ApiOperation(value = "Topic元信息", notes = "LogX调用")
     @RequestMapping(value = "clusters/{clusterId}/topics/{topicName}/metadata", method = RequestMethod.GET)
@@ -148,21 +140,11 @@ public class ThirdPartTopicController {
     @RequestMapping(value = "{topics/quota/add}",method = RequestMethod.POST)
     @ResponseBody
     public Result addTopicQuota(@RequestBody TopicQuotaDTO dto) {
-        //非空校验
+        // 非空校验
         if (ValidateUtils.isNull(dto) || !dto.paramLegal()) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
-        //获取物理集群id
-        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(dto.getClusterId());
-        if (ValidateUtils.isNull(physicalClusterId)) {
-            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
-        }
-        dto.setClusterId(physicalClusterId);
-        // 添加配额
-        if (quotaService.addTopicQuota(TopicQuota.buildFrom(dto)) > 0) {
-            return Result.buildFrom(ResultStatus.SUCCESS);
-        }
-        return Result.buildFrom(ResultStatus.MYSQL_ERROR);
+        return Result.buildFrom(topicManagerService.addTopicQuota(TopicQuota.buildFrom(dto)));
     }
 
 }

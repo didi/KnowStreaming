@@ -10,6 +10,7 @@ import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.RdTopicBasic;
+import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.MineTopicSummary;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicAppData;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicBusinessInfo;
@@ -34,6 +35,7 @@ import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AuthorityService;
+import com.xiaojukeji.kafka.manager.service.service.gateway.QuotaService;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +87,9 @@ public class TopicManagerServiceImpl implements TopicManagerService {
 
     @Autowired
     private OperateRecordService operateRecordService;
+
+    @Autowired
+    private QuotaService quotaService;
 
     @Override
     public List<TopicDO> listAll() {
@@ -616,6 +621,36 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         topicBusinessInfo.setAppName(appDO.getName());
         topicBusinessInfo.setPrincipals(appDO.getPrincipals());
         return topicBusinessInfo;
+    }
+
+    @Override
+    public ResultStatus addTopicQuota(TopicQuota topicQuota) {
+        // 获取物理集群id
+        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(topicQuota.getClusterId());
+        if (ValidateUtils.isNull(physicalClusterId)) {
+            return ResultStatus.CLUSTER_NOT_EXIST;
+        }
+        // 权限判断(access 0:无权限, 1:读, 2:写, 3:读写，4:可管理)
+        AuthorityDO authority = authorityService.getAuthority(physicalClusterId,
+            topicQuota.getTopicName(), topicQuota.getAppId());
+        if (ValidateUtils.isNull(authority) || authority.getAccess() == TopicAuthorityEnum.DENY.getCode()) {
+            return ResultStatus.USER_WITHOUT_AUTHORITY;
+        }
+        if (authority.getAccess() == TopicAuthorityEnum.READ.getCode()) {
+            // 可以消费
+            topicQuota.setProduceQuota(null);
+        }
+        if (authority.getAccess() == TopicAuthorityEnum.WRITE.getCode()) {
+            // 可以生产
+            topicQuota.setConsumeQuota(null);
+        }
+        // 设置物理集群id
+        topicQuota.setClusterId(physicalClusterId);
+        // 添加配额
+        if (quotaService.addTopicQuota(topicQuota) > 0) {
+            return ResultStatus.SUCCESS;
+        }
+        return ResultStatus.MYSQL_ERROR;
     }
 
     private RdTopicBasic convert2RdTopicBasic(ClusterDO clusterDO,
