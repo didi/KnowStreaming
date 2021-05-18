@@ -20,6 +20,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
 import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.NumberUtils;
+import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.config.TopicQuotaData;
@@ -616,6 +617,38 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         topicBusinessInfo.setAppName(appDO.getName());
         topicBusinessInfo.setPrincipals(appDO.getPrincipals());
         return topicBusinessInfo;
+    }
+
+    @Override
+    public ResultStatus addAuthority(AuthorityDO authorityDO) {
+        // 查询该用户拥有的应用
+        List<AppDO> appDOs = appService.getByPrincipal(SpringTool.getUserName());
+        if (ValidateUtils.isEmptyList(appDOs)) {
+            // 该用户无应用，需要先申请应用
+            return ResultStatus.APP_NOT_EXIST;
+        }
+        List<Long> appIds = appDOs.stream().map(AppDO::getId).collect(Collectors.toList());
+        if (!appIds.contains(authorityDO.getAppId())) {
+            // 入参中的appId，该用户未拥有
+            return ResultStatus.APP_NOT_EXIST;
+        }
+        // 获取物理集群id
+        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(authorityDO.getClusterId());
+        if (ValidateUtils.isNull(physicalClusterId)) {
+            // 集群不存在
+            return ResultStatus.CLUSTER_NOT_EXIST;
+        }
+        TopicDO topic = getByTopicName(physicalClusterId, authorityDO.getTopicName());
+        if (ValidateUtils.isNull(topic)) {
+            // topic不存在
+            return ResultStatus.TOPIC_NOT_EXIST;
+        }
+        // 设置物理集群id
+        authorityDO.setClusterId(physicalClusterId);
+        if (authorityService.addAuthority(authorityDO) > 0) {
+            return ResultStatus.SUCCESS;
+        }
+        return ResultStatus.MYSQL_ERROR;
     }
 
     private RdTopicBasic convert2RdTopicBasic(ClusterDO clusterDO,

@@ -337,7 +337,7 @@ public class NormalTopicController {
         }
 
         return new Result<>(TopicModelConverter.convert2TopicMineAppVOList(
-                topicManagerService.getTopicMineApps(physicalClusterId, topicName, SpringTool.getUserName()))
+            topicManagerService.getTopicMineApps(physicalClusterId, topicName, SpringTool.getUserName()))
         );
     }
 

@@ -5,6 +5,8 @@ import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
+import com.xiaojukeji.kafka.manager.common.entity.dto.gateway.TopicQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.RealTimeMetricsVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.TopicMetadataVO;
@@ -12,12 +14,15 @@ import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGro
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicAuthorizedAppVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicRequestTimeDetailVO;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
+import com.xiaojukeji.kafka.manager.openapi.common.dto.TopicAuthorityDTO;
 import com.xiaojukeji.kafka.manager.openapi.common.vo.TopicOffsetChangedVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
+import com.xiaojukeji.kafka.manager.service.service.gateway.QuotaService;
+import com.xiaojukeji.kafka.manager.web.converters.AuthorityConverter;
 import com.xiaojukeji.kafka.manager.web.converters.CommonModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.ConsumerModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.TopicModelConverter;
@@ -51,6 +56,9 @@ public class ThirdPartTopicController {
 
     @Autowired
     private TopicManagerService topicManagerService;
+
+    @Autowired
+    private QuotaService quotaService;
 
     @ApiOperation(value = "Topic元信息", notes = "LogX调用")
     @RequestMapping(value = "clusters/{clusterId}/topics/{topicName}/metadata", method = RequestMethod.GET)
@@ -132,5 +140,27 @@ public class ThirdPartTopicController {
         return new Result<>(TopicModelConverter.convert2TopicAuthorizedAppVOList(
                 topicManagerService.getTopicAuthorizedApps(physicalClusterId, topicName))
         );
+    }
+
+    @ApiOperation(value = "配额调整",notes = "配额调整")
+    @RequestMapping(value = "{topics/quota}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result addTopicQuota(@RequestBody TopicQuotaDTO dto) {
+        // 非空校验
+        if (ValidateUtils.isNull(dto) || !dto.paramLegal()) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return Result.buildFrom(quotaService.addTopicQuotaByAuthority(TopicQuota.buildFrom(dto)));
+    }
+
+    @ApiOperation(value = "权限调整",notes = "权限调整")
+    @RequestMapping(value = "{topics/authority}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result addAuthority(@RequestBody TopicAuthorityDTO dto) {
+        //非空校验
+        if (ValidateUtils.isNull(dto) || !dto.paramLegal()) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return Result.buildFrom(topicManagerService.addAuthority(AuthorityConverter.convert2AuthorityDO(dto)));
     }
 }
