@@ -119,4 +119,7 @@ public class ZkPathUtil {
     public static String getControllerCandidatePath(Integer brokerId) {
         return D_CONTROLLER_CANDIDATES + ZOOKEEPER_SEPARATOR + brokerId;
     }
+
+    private ZkPathUtil() {
+    }
 }

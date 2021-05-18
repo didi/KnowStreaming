@@ -33,4 +33,12 @@ public enum TopicAuthorityEnum {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "TopicAuthorityEnum{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

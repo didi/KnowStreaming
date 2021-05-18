@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 单点登录抽象类
+ * 登录抽象类
  * @author zengqiao
  * @date 20/8/20
  */

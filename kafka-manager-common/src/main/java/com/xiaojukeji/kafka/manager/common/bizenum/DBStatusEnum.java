@@ -19,7 +19,10 @@ public enum DBStatusEnum {
         return status;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    @Override
+    public String toString() {
+        return "DBStatusEnum{" +
+                "status=" + status +
+                '}';
     }
 }
