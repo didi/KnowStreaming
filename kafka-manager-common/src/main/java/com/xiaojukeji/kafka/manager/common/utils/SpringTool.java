@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.common.utils;
 
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.LoginConstant;
+import com.xiaojukeji.kafka.manager.common.constant.TrickLoginConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -53,13 +54,6 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
         return getApplicationContext().getBeansOfType(type);
     }
 
-//    /**
-//     * 从静态变量applicationContext中去的Bean，自动转型为所复制对象的类型
-//     */
-//    public static <T> T getBean(Class<T> requiredType) {
-//        return (T) applicationContext.getBean(requiredType);
-//    }
-
     /**
      * 清除SpringContextHolder中的ApplicationContext为Null
      */
@@ -87,10 +81,18 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
     }
 
     public static String getUserName(){
-        HttpServletRequest request =
-                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        HttpSession session = request.getSession();
-        String username = (String) session.getAttribute(LoginConstant.SESSION_USERNAME_KEY);
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        String username = null;
+        if (TrickLoginConstant.TRICK_LOGIN_SWITCH_ON.equals(request.getHeader(TrickLoginConstant.TRICK_LOGIN_SWITCH))) {
+            // trick登录方式的获取用户
+            username = request.getHeader(TrickLoginConstant.TRICK_LOGIN_USER);
+        } else {
+            // 走页面登录方式登录的获取用户
+            HttpSession session = request.getSession();
+            username = (String) session.getAttribute(LoginConstant.SESSION_USERNAME_KEY);
+        }
+
         if (ValidateUtils.isNull(username)) {
             return Constant.DEFAULT_USER_NAME;
         }
