@@ -6,4 +6,7 @@ package com.xiaojukeji.kafka.manager.common.constant;
  */
 public class SystemCodeConstant {
     public static final String KAFKA_MANAGER = "kafka-manager";
+
+    private SystemCodeConstant() {
+    }
 }

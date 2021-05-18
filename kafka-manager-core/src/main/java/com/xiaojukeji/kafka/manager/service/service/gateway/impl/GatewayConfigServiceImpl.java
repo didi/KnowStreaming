@@ -86,8 +86,8 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
         GatewayConfigDO configDO = null;
         try {
             configDO = gatewayConfigDao.getByConfigTypeAndName(
-                    GatewayConfigKeyEnum.SD_APP_ID_RATE.getConfigType(),
-                    GatewayConfigKeyEnum.SD_APP_ID_RATE.getConfigName()
+                    GatewayConfigKeyEnum.SD_APP_RATE.getConfigType(),
+                    GatewayConfigKeyEnum.SD_APP_RATE.getConfigName()
             );
             if (ValidateUtils.isNull(configDO) || configDO.getVersion() <= requestVersion) {
                 return new AppRateConfig(Long.MIN_VALUE, null);

@@ -18,4 +18,11 @@ public enum OffsetResetTypeEnum {
     public Integer getCode() {
         return code;
     }
+
+    @Override
+    public String toString() {
+        return "OffsetResetTypeEnum{" +
+                "code=" + code +
+                '}';
+    }
 }

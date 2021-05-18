@@ -10,4 +10,7 @@ public class LogConstant {
     public static final String API_METRICS_LOGGER = "API_METRICS_LOGGER";
 
     public static final String SCHEDULED_TASK_LOGGER = "SCHEDULED_TASK_LOGGER";
+
+    private LogConstant() {
+    }
 }

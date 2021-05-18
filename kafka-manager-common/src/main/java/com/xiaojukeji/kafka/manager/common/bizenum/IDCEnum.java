@@ -21,16 +21,8 @@ public enum IDCEnum {
         return idc;
     }
 
-    public void setIdc(String idc) {
-        this.idc = idc;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override

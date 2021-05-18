@@ -30,4 +30,7 @@ public class ConfigConstant {
     public static final String BROKER_CAPACITY_LIMIT_CONFIG_KEY = "BROKER_CAPACITY_LIMIT_CONFIG";
 
     public static final String KAFKA_CLUSTER_DO_CONFIG_KEY = "KAFKA_CLUSTER_DO_CONFIG";
+
+    private ConfigConstant() {
+    }
 }

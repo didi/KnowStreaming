@@ -15,9 +15,9 @@ public enum PeakFlowStatusEnum {
 
     ;
 
-    public Integer code;
+    private Integer code;
 
-    public String message;
+    private String message;
 
     PeakFlowStatusEnum(Integer code, String message) {
         this.code = code;
@@ -28,16 +28,8 @@ public enum PeakFlowStatusEnum {
         return code;
     }
 
-    public void setCode(Integer code) {
-        this.code = code;
-    }
-
     public String getMessage() {
         return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     @Override
