@@ -11,6 +11,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.topic.MineTopicSummary;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicExpiredDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicStatisticsDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
 
 import java.util.Date;
 import java.util.List;
@@ -130,5 +131,12 @@ public interface TopicManagerService {
      * @return
      */
     ResultStatus addTopicQuota(TopicQuota topicQuota);
+
+    /**
+     * topic权限调整
+     * @param authorityDO topic权限
+     * @return
+     */
+    ResultStatus addAuthority(AuthorityDO authorityDO);
 }
 

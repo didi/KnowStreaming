@@ -11,7 +11,7 @@ public class TopicAuthorityDTO extends ClusterTopicDTO {
   @ApiModelProperty(value = "appId")
   private String appId;
 
-  @ApiModelProperty(value = "0:无权限, 1:读, 2:写, 3:读写")
+  @ApiModelProperty(value = "0:无权限, 1:读, 2:写, 3:读写, 4:可管理")
   private Integer access;
 
   public String getAppId() {

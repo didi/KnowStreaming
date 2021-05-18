@@ -14,12 +14,14 @@ import com.xiaojukeji.kafka.manager.common.entity.vo.normal.consumer.ConsumerGro
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicAuthorizedAppVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicRequestTimeDetailVO;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
+import com.xiaojukeji.kafka.manager.openapi.common.dto.TopicAuthorityDTO;
 import com.xiaojukeji.kafka.manager.openapi.common.vo.TopicOffsetChangedVO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
+import com.xiaojukeji.kafka.manager.web.converters.AuthorityConverter;
 import com.xiaojukeji.kafka.manager.web.converters.CommonModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.ConsumerModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.TopicModelConverter;
@@ -147,4 +149,14 @@ public class ThirdPartTopicController {
         return Result.buildFrom(topicManagerService.addTopicQuota(TopicQuota.buildFrom(dto)));
     }
 
+    @ApiOperation(value = "权限调整",notes = "权限调整")
+    @RequestMapping(value = "{topics/authority/add}",method = RequestMethod.POST)
+    @ResponseBody
+    public Result addAuthority(@RequestBody TopicAuthorityDTO dto) {
+        //非空校验
+        if (ValidateUtils.isNull(dto) || !dto.paramLegal()) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        return Result.buildFrom(topicManagerService.addAuthority(AuthorityConverter.convert2AuthorityDO(dto)));
+    }
 }
