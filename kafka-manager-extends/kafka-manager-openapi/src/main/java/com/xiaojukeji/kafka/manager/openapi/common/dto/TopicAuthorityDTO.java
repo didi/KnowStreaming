@@ -7,37 +7,33 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "权限调整")
 public class TopicAuthorityDTO extends ClusterTopicDTO {
+    @ApiModelProperty(value = "appId")
+    private String appId;
 
-  @ApiModelProperty(value = "appId")
-  private String appId;
+    @ApiModelProperty(value = "0:无权限, 1:读, 2:写, 3:读写, 4:可管理")
+    private Integer access;
 
-  @ApiModelProperty(value = "0:无权限, 1:读, 2:写, 3:读写, 4:可管理")
-  private Integer access;
-
-  public String getAppId() {
-    return appId;
-  }
-
-  public void setAppId(String appId) {
-    this.appId = appId;
-  }
-
-  public Integer getAccess() {
-    return access;
-  }
-
-  public void setAccess(Integer access) {
-    this.access = access;
-  }
-
-  @Override
-  public boolean paramLegal() {
-    if (ValidateUtils.isNullOrLessThanZero(clusterId)
-          || ValidateUtils.isBlank(topicName)
-          || ValidateUtils.isBlank(appId)
-          || ValidateUtils.isNullOrLessThanZero(access)) {
-      return false;
+    public String getAppId() {
+      return appId;
     }
-    return true;
-  }
+
+    public void setAppId(String appId) {
+      this.appId = appId;
+    }
+
+    public Integer getAccess() {
+      return access;
+    }
+
+    public void setAccess(Integer access) {
+      this.access = access;
+    }
+
+    @Override
+    public boolean paramLegal() {
+        return !ValidateUtils.isNullOrLessThanZero(clusterId)
+                && !ValidateUtils.isBlank(topicName)
+                && !ValidateUtils.isBlank(appId)
+                && !ValidateUtils.isNullOrLessThanZero(access);
+    }
 }
