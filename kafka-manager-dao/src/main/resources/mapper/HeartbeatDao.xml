@@ -11,7 +11,7 @@
     </resultMap>
 
     <insert id="replace" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.HeartbeatDO">
-      REPLACE heartbeat (ip, hostname) VALUES (#{ip}, #{hostname})
+      REPLACE heartbeat (ip, hostname, modify_time) VALUES (#{ip}, #{hostname}, #{modifyTime})
     </insert>
 
     <select id="selectActiveHosts" parameterType="java.util.Date" resultMap="HeartbeatMap">
