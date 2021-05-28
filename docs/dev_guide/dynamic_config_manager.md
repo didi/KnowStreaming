@@ -14,6 +14,8 @@
 - 1、Topic定时同步任务
 - 2、专家服务——Topic分区热点
 - 3、专家服务——Topic分区不足
+- 4、专家服务——Topic资源治理
+- 5、账单配置
 
 
 ## 1、Topic定时同步任务
@@ -138,5 +140,29 @@ EXPIRED_TOPIC_CONFIG
   "ignoreClusterIdList": [  # 忽略的集群
     50
   ]
+}
+```
+
+## 5、账单配置
+
+Logi-KafkaManager除了作为Kafka运维管控平台之外，实际上还会有一些资源定价相关的功能。
+
+当前定价方式：当月Topic的maxAvgDay天的峰值的均值流量作为Topic的使用额度。使用的额度 * 单价 * 溢价(预留buffer) 就等于当月的费用。
+详细的计算逻辑见：com.xiaojukeji.kafka.manager.task.dispatch.biz.CalKafkaTopicBill; 和 com.xiaojukeji.kafka.manager.task.dispatch.biz.CalTopicStatistics;
+
+这块在计算Topic的费用的配置如下所示：
+
+配置Key：
+```
+KAFKA_TOPIC_BILL_CONFIG
+```
+
+配置Value：
+
+```json
+{ 
+  "maxAvgDay": 10, # 使用额度的计算规则
+  "quotaRatio": 1.5, # 溢价率
+  "priseUnitMB": 100 # 单价，即单MB/s流量多少钱
 }
 ```
