@@ -54,7 +54,7 @@ export class AlarmSelect extends React.Component<IAlarmSelectProps> {
         <a
           className="icon-color"
           target="_blank"
-          href="https://github.com/didi/kafka-manager"
+          href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/faq.md"
         >
           新增规则组？
         </a>
