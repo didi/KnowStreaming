@@ -26,7 +26,7 @@
         <java_target_version>1.8</java_target_version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file_encoding>UTF-8</file_encoding>
-        <tomcat.version>8.5.37</tomcat.version>
+        <tomcat.version>8.5.66</tomcat.version>
     </properties>
 
     <modules>
