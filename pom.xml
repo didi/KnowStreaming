@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <kafka-manager.revision>2.4.0-SNAPSHOT</kafka-manager.revision>
+        <kafka-manager.revision>2.4.2-SNAPSHOT</kafka-manager.revision>
         <swagger2.version>2.7.0</swagger2.version>
         <swagger.version>1.5.13</swagger.version>
 
