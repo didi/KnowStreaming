@@ -9,10 +9,10 @@ public class ReassignCmbTopicVO {
   private String topicName;
 
   @ApiModelProperty(value = "byteIn(B/s)")
-  private Long byteIn;
+  private Double byteIn;
 
   @ApiModelProperty(value = "近三天峰值流量(B/s)")
-  private List<Long> peakFlow;
+  private List<Double> peakFlow;
 
   @ApiModelProperty(value = "分区ID")
   private List<Integer> partitionIdList;
@@ -46,19 +46,19 @@ public class ReassignCmbTopicVO {
     this.topicName = topicName;
   }
 
-  public Long getByteIn() {
+  public Double getByteIn() {
     return byteIn;
   }
 
-  public void setByteIn(Long byteIn) {
+  public void setByteIn(Double byteIn) {
     this.byteIn = byteIn;
   }
 
-  public List<Long> getPeakFlow() {
+  public List<Double> getPeakFlow() {
     return peakFlow;
   }
 
-  public void setPeakFlow(List<Long> peakFlow) {
+  public void setPeakFlow(List<Double> peakFlow) {
     this.peakFlow = peakFlow;
   }
 

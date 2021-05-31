@@ -9,6 +9,7 @@ import com.xiaojukeji.kafka.manager.common.entity.dto.op.reassign.ReassignCmbTas
 import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassignCmbTaskVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassignCmbTopicProcessVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassignCmbVO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassigncmbMerticsVO;
 import com.xiaojukeji.kafka.manager.service.service.ReassignService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,10 +50,11 @@ public class OpReassignCmbController {
   }
 
   @ApiOperation(value = "Topic指标信息", notes = "")
-  @RequestMapping(value = {"cmb/reassign-tasks/metrics"}, method = RequestMethod.POST)
+  @RequestMapping(value = {"cmb/reassign-tasks/metrics"}, method = RequestMethod.GET)
   @ResponseBody
-  public Result<List<String>> getReassignTopicMetrics() {
-    //todo 暂时不知道去哪里取值，取那些值
+  public Result<List<ReassigncmbMerticsVO>> getReassignTopicMetrics(
+      @RequestParam Long clusterId,
+      @RequestParam String topicName) {
     return null;
   }
 
