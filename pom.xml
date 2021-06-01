@@ -27,10 +27,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file_encoding>UTF-8</file_encoding>
         <tomcat.version>8.5.66</tomcat.version>
+        <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
+
     </properties>
 
     <modules>
+<!--
         <module>kafka-manager-console</module>
+-->
         <module>kafka-manager-common</module>
         <module>kafka-manager-dao</module>
         <module>kafka-manager-core</module>
@@ -42,6 +46,7 @@
         <module>kafka-manager-extends/kafka-manager-openapi</module>
         <module>kafka-manager-task</module>
         <module>kafka-manager-web</module>
+        <module>distribution</module>
     </modules>
 
     <dependencyManagement>
@@ -231,4 +236,16 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
