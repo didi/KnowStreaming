@@ -8,14 +8,20 @@ public class ReassignCmbTaskVO {
   @ApiModelProperty(value = "集群ID")
   private Long clusterId;
 
-  @ApiModelProperty(value = "迁移任务名称")
+  @ApiModelProperty(value = "任务ID")
+  private Long taskId;
+
+  @ApiModelProperty(value = "任务名称")
   private String taskName;
 
-  @ApiModelProperty(value = "迁移方式(1:region，2:broker)")
-  private Integer reassginWay;
+  @ApiModelProperty(value = "迁移方式(true:region，false:broker)")
+  private Boolean reassginWay;
 
   @ApiModelProperty(value = "目标RegionID")
   private Long regionId;
+
+  @ApiModelProperty(value = "目标Region名称")
+  private String regionName;
 
   @ApiModelProperty(value = "目标BrokerID列表")
   private List<Integer> brokerIdList;
@@ -25,6 +31,24 @@ public class ReassignCmbTaskVO {
 
   @ApiModelProperty(value = "计划开始时间")
   private Long beginTime;
+
+  @ApiModelProperty(value = "实际开始时间")
+  private Long actualBeginTime;
+
+  @ApiModelProperty(value = "状态")
+  private Integer status;
+
+  @ApiModelProperty(value = "任务完成时间")
+  private Long endTime;
+
+  @ApiModelProperty(value = "创建人")
+  private String creator;
+
+  @ApiModelProperty(value = "任务创建时间")
+  private Long gmtCreate;
+
+  @ApiModelProperty(value = "任务最后更新时间")
+  private Long gmtModify;
 
   @ApiModelProperty(value = "描述")
   private String description;
@@ -40,6 +64,14 @@ public class ReassignCmbTaskVO {
     this.clusterId = clusterId;
   }
 
+  public Long getTaskId() {
+    return taskId;
+  }
+
+  public void setTaskId(Long taskId) {
+    this.taskId = taskId;
+  }
+
   public String getTaskName() {
     return taskName;
   }
@@ -48,11 +80,11 @@ public class ReassignCmbTaskVO {
     this.taskName = taskName;
   }
 
-  public Integer getReassginWay() {
+  public Boolean getReassginWay() {
     return reassginWay;
   }
 
-  public void setReassginWay(Integer reassginWay) {
+  public void setReassginWay(Boolean reassginWay) {
     this.reassginWay = reassginWay;
   }
 
@@ -62,6 +94,14 @@ public class ReassignCmbTaskVO {
 
   public void setRegionId(Long regionId) {
     this.regionId = regionId;
+  }
+
+  public String getRegionName() {
+    return regionName;
+  }
+
+  public void setRegionName(String regionName) {
+    this.regionName = regionName;
   }
 
   public List<Integer> getBrokerIdList() {
@@ -86,6 +126,54 @@ public class ReassignCmbTaskVO {
 
   public void setBeginTime(Long beginTime) {
     this.beginTime = beginTime;
+  }
+
+  public Long getActualBeginTime() {
+    return actualBeginTime;
+  }
+
+  public void setActualBeginTime(Long actualBeginTime) {
+    this.actualBeginTime = actualBeginTime;
+  }
+
+  public Integer getStatus() {
+    return status;
+  }
+
+  public void setStatus(Integer status) {
+    this.status = status;
+  }
+
+  public Long getEndTime() {
+    return endTime;
+  }
+
+  public void setEndTime(Long endTime) {
+    this.endTime = endTime;
+  }
+
+  public String getCreator() {
+    return creator;
+  }
+
+  public void setCreator(String creator) {
+    this.creator = creator;
+  }
+
+  public Long getGmtCreate() {
+    return gmtCreate;
+  }
+
+  public void setGmtCreate(Long gmtCreate) {
+    this.gmtCreate = gmtCreate;
+  }
+
+  public Long getGmtModify() {
+    return gmtModify;
+  }
+
+  public void setGmtModify(Long gmtModify) {
+    this.gmtModify = gmtModify;
   }
 
   public String getDescription() {

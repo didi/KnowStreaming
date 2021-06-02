@@ -2,23 +2,15 @@ package com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.List;
-
 public class ReassignCmbTopicVO {
   @ApiModelProperty(value = "Topic名称")
   private String topicName;
 
-  @ApiModelProperty(value = "byteIn(B/s)")
-  private Double byteIn;
+  @ApiModelProperty(value = "完成迁移分区数")
+  private Integer completedPartitionNum;
 
-  @ApiModelProperty(value = "近三天峰值流量(B/s)")
-  private List<Double> peakFlow;
-
-  @ApiModelProperty(value = "分区ID")
-  private List<Integer> partitionIdList;
-
-  @ApiModelProperty(value = "消费延迟")
-  private String cosumeDelay;
+  @ApiModelProperty(value = "总的分区数")
+  private Integer totalPartitionNum;
 
   @ApiModelProperty(value = "原本的保存时间(ms)")
   private Long originalRetentionTime;
@@ -29,11 +21,14 @@ public class ReassignCmbTopicVO {
   @ApiModelProperty(value = "maxlogsize(B)")
   private Long maxLogSize;
 
-  @ApiModelProperty(value = "完成迁移分区数")
-  private Integer completedPartitionNum;
+  @ApiModelProperty(value = "子任务状态")
+  private Integer subStatus;
 
-  @ApiModelProperty(value = "总的分区数")
-  private Integer totalPartitionNum;
+  @ApiModelProperty(value = "byteIn(B/s)")
+  private Double byteIn;
+
+  @ApiModelProperty(value = "迁移流量")
+  private Double reassignFlow;
 
   @ApiModelProperty(value = "预计剩余时长(ms)")
   private Long remainTime;
@@ -46,36 +41,20 @@ public class ReassignCmbTopicVO {
     this.topicName = topicName;
   }
 
-  public Double getByteIn() {
-    return byteIn;
+  public Integer getCompletedPartitionNum() {
+    return completedPartitionNum;
   }
 
-  public void setByteIn(Double byteIn) {
-    this.byteIn = byteIn;
+  public void setCompletedPartitionNum(Integer completedPartitionNum) {
+    this.completedPartitionNum = completedPartitionNum;
   }
 
-  public List<Double> getPeakFlow() {
-    return peakFlow;
+  public Integer getTotalPartitionNum() {
+    return totalPartitionNum;
   }
 
-  public void setPeakFlow(List<Double> peakFlow) {
-    this.peakFlow = peakFlow;
-  }
-
-  public List<Integer> getPartitionIdList() {
-    return partitionIdList;
-  }
-
-  public void setPartitionIdList(List<Integer> partitionIdList) {
-    this.partitionIdList = partitionIdList;
-  }
-
-  public String getCosumeDelay() {
-    return cosumeDelay;
-  }
-
-  public void setCosumeDelay(String cosumeDelay) {
-    this.cosumeDelay = cosumeDelay;
+  public void setTotalPartitionNum(Integer totalPartitionNum) {
+    this.totalPartitionNum = totalPartitionNum;
   }
 
   public Long getOriginalRetentionTime() {
@@ -102,20 +81,28 @@ public class ReassignCmbTopicVO {
     this.maxLogSize = maxLogSize;
   }
 
-  public Integer getCompletedPartitionNum() {
-    return completedPartitionNum;
+  public Integer getSubStatus() {
+    return subStatus;
   }
 
-  public void setCompletedPartitionNum(Integer completedPartitionNum) {
-    this.completedPartitionNum = completedPartitionNum;
+  public void setSubStatus(Integer subStatus) {
+    this.subStatus = subStatus;
   }
 
-  public Integer getTotalPartitionNum() {
-    return totalPartitionNum;
+  public Double getByteIn() {
+    return byteIn;
   }
 
-  public void setTotalPartitionNum(Integer totalPartitionNum) {
-    this.totalPartitionNum = totalPartitionNum;
+  public void setByteIn(Double byteIn) {
+    this.byteIn = byteIn;
+  }
+
+  public Double getReassignFlow() {
+    return reassignFlow;
+  }
+
+  public void setReassignFlow(Double reassignFlow) {
+    this.reassignFlow = reassignFlow;
   }
 
   public Long getRemainTime() {

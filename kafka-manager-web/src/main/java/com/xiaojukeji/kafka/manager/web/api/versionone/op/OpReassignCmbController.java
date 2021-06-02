@@ -10,7 +10,7 @@ import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassignCmbTask
 import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassignCmbTopicProcessVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassignCmbVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.op.reassign.ReassigncmbMerticsVO;
-import com.xiaojukeji.kafka.manager.service.service.ReassignService;
+import com.xiaojukeji.kafka.manager.service.service.ReassignCmbService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import java.util.List;
 
 
 /**
- * 招行Topic迁移相关接口
+ * Topic迁移相关接口
  */
 @Api(tags = "OP-Cmb-Topic迁移相关接口")
 @RestController
@@ -33,50 +33,50 @@ import java.util.List;
 public class OpReassignCmbController {
 
   @Autowired
-  private ReassignService reassignService;
+  private ReassignCmbService reassignCmbService;
 
   @ApiOperation(value = "迁移任务列表", notes = "")
   @RequestMapping(value = {"cmb/reassign-tasks/condition"}, method = RequestMethod.POST)
   @ResponseBody
   public PaginationResult<ReassignCmbVO> getReassignTasksByCondition(@RequestBody ReassignCmbDTO dto){
-    return null;
+    return reassignCmbService.getReassignTasksByCondition(dto);
   }
 
   @ApiOperation(value = "创建迁移任务", notes = "")
   @RequestMapping(value = {"cmb/reassign-tasks"}, method = RequestMethod.POST)
   @ResponseBody
   public Result createReassignTask(@RequestBody ReassignCmbTaskDTO dto) {
-    return null;
+    return reassignCmbService.createReassignTask(dto);
   }
 
   @ApiOperation(value = "Topic指标信息", notes = "")
   @RequestMapping(value = {"cmb/reassign-tasks/metrics"}, method = RequestMethod.GET)
   @ResponseBody
-  public Result<List<ReassigncmbMerticsVO>> getReassignTopicMetrics(
+  public Result<ReassigncmbMerticsVO> getReassignTopicMetrics(
       @RequestParam Long clusterId,
       @RequestParam String topicName) {
-    return null;
+    return reassignCmbService.getReassignTopicMetrics(clusterId, topicName);
   }
 
   @ApiOperation(value = "编辑迁移任务", notes = "")
   @RequestMapping(value = {"cmb/reassign-tasks"}, method = RequestMethod.PUT)
   @ResponseBody
   public Result modifyReassignTask(@RequestBody ReassignCmbTaskDTO dto) {
-    return null;
+    return reassignCmbService.modifyReassignTask(dto);
   }
 
   @ApiOperation(value = "执行|取消迁移任务", notes = "")
   @RequestMapping(value = {"cmb/operate/reassign-tasks"}, method = RequestMethod.POST)
   @ResponseBody
   public Result executeReassignTask(@RequestBody ReassignCmbExecDTO dto) {
-    return null;
+    return reassignCmbService.executeReassignTask(dto);
   }
 
   @ApiOperation(value = "查询迁移任务详情", notes = "")
   @RequestMapping(value = {"cmb/reassign-tasks"}, method = RequestMethod.GET)
   @ResponseBody
   public Result<ReassignCmbTaskVO> getReassignTasksByTaskId(@RequestParam Long taskId) {
-    return null;
+    return reassignCmbService.getReassignTasksByTaskId(taskId);
   }
 
   @ApiOperation(value = "查询迁移topic进度", notes = "")
@@ -85,7 +85,7 @@ public class OpReassignCmbController {
   public Result<List<ReassignCmbTopicProcessVO>> getReassignTopicProcess(
       @RequestParam Long clusterId,
       @RequestParam String topicName) {
-    return null;
+    return reassignCmbService.getReassignTopicProcess(clusterId, topicName);
   }
 
 }

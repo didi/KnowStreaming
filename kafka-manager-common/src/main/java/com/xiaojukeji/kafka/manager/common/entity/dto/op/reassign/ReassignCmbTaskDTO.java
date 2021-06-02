@@ -7,6 +7,9 @@ import java.util.List;
 
 @ApiModel(description = "创建迁移任务")
 public class ReassignCmbTaskDTO {
+  @ApiModelProperty(value = "任务ID")
+  private Long taskId;
+
   @ApiModelProperty(value = "集群ID")
   private Long clusterId;
 
@@ -33,6 +36,14 @@ public class ReassignCmbTaskDTO {
 
   @ApiModelProperty(value = "Topic信息列表")
   private List<ReassignCmbTopicDTO> topicList;
+
+  public Long getTaskId() {
+    return taskId;
+  }
+
+  public void setTaskId(Long taskId) {
+    this.taskId = taskId;
+  }
 
   public Long getClusterId() {
     return clusterId;
