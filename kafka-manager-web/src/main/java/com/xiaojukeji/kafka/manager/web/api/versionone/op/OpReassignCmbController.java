@@ -39,7 +39,9 @@ public class OpReassignCmbController {
   @RequestMapping(value = {"cmb/reassign-tasks/condition"}, method = RequestMethod.POST)
   @ResponseBody
   public PaginationResult<ReassignCmbVO> getReassignTasksByCondition(@RequestBody ReassignCmbDTO dto){
-    return reassignCmbService.getReassignTasksByCondition(dto);
+    return new PaginationResult<>(
+        reassignCmbService.getReassignTasksByCondition(dto),
+        dto.getPageNo(),dto.getPageSize(),reassignCmbService.getTotal());
   }
 
   @ApiOperation(value = "创建迁移任务", notes = "")

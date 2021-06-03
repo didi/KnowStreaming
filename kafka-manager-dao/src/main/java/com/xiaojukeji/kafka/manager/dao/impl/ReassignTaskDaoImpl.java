@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * migrate topic task dao
@@ -61,4 +62,9 @@ public class ReassignTaskDaoImpl implements ReassignTaskDao {
             updateById(elem);
         }
     }
+
+  @Override
+  public List<ReassignTaskDO> getReassignTasksByCondition(Map<String, Object> params) {
+    return sqlSession.selectList("ReassignTaskDao.getReassignTasksByCondition",params);
+  }
 }

@@ -90,4 +90,24 @@
           status=#{status}
         WHERE id=#{id}
     </update>
+
+
+    <select id="getReassignTasksByCondition" parameterType="java.util.Map" resultMap="ReassignTaskDOMap">
+        SELECT * FROM reassign_task
+        WHERE 1=1
+        <if test="logicClusterIds != null and logicClusterIds.size() > 0">
+            and cluster_id in
+            <foreach collection="logicClusterIds" item="cluster" open="(" separator="," close=")">
+                #{cluster}
+            </foreach>
+        </if>
+        <if test="taskStatuss != null and taskStatuss.size() > 0">
+            and `status` in
+            <foreach collection="taskStatuss" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        ORDER BY ${field} ${sort}
+        LIMIT #{startIndex},#{pageSize}
+    </select>
 </mapper>

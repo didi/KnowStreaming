@@ -1,11 +1,12 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetLocationEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TaskStatusReassignEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicReassignActionEnum;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
-import com.xiaojukeji.kafka.manager.common.entity.PaginationResult;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionAttributeDTO;
@@ -33,6 +34,7 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.ReassignmentElemData;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.dao.ReassignTaskDao;
+import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.service.service.ConsumerService;
@@ -81,9 +83,46 @@ public class ReassignCmbServiceImpl implements ReassignCmbService {
   @Autowired
   private TopicManagerService topicManagerService;
 
+  @Autowired
+  private LogicalClusterMetadataManager logicalClusterMetadataManager;
+
   @Override
-  public PaginationResult<ReassignCmbVO> getReassignTasksByCondition(ReassignCmbDTO dto) {
-    return null;
+  public List<ReassignCmbVO> getReassignTasksByCondition(ReassignCmbDTO dto) {
+    // 逻辑集群id非空，则获取物理集群id
+    if (!ValidateUtils.isEmptyList(dto.getLogicClusterIds())) {
+      Set<Long> clusters = Sets.newHashSet();
+      dto.getLogicClusterIds().forEach(logicCluster -> {
+        clusters.add(logicalClusterMetadataManager.getPhysicalClusterId(logicCluster));
+      });
+      dto.setLogicClusterIds(new ArrayList<>(clusters));
+    }
+    Map<String,Object> params = Maps.newHashMap();
+    params.put("logicClusterIds",dto.getLogicClusterIds());
+    params.put("taskStatuss",dto.getTaskStatuss());
+    params.put("field",dto.getField());
+    params.put("sort",dto.getSort());
+    params.put("startIndex",(dto.getPageNo() - 1) * dto.getPageSize());
+    params.put("pageSize",dto.getPageSize());
+    List<ReassignTaskDO> doList = reassignTaskDao.getReassignTasksByCondition(params);
+    List<ReassignCmbVO> voList = Lists.newArrayList();
+    doList.forEach(elem -> {
+      ReassignCmbVO vo = new ReassignCmbVO();
+      ClusterDO clusterDO = clusterService.getById(elem.getClusterId());
+      if (ValidateUtils.isNull(clusterDO)) {
+        vo.setLogicClusterId(elem.getClusterId());
+        vo.setLogicClusterName(clusterDO.getClusterName());
+      }
+      vo.setStatus(elem.getStatus());
+      vo.setGmtModify(elem.getGmtModify().getTime());
+      vo.setExecuteTime(0L);
+      vo.setDescription(elem.getDescription());
+      vo.setCreator(elem.getOperator());
+      vo.setBeginTime(elem.getBeginTime().getTime());
+      vo.setTaskName("");
+      vo.setTaskId(elem.getTaskId());
+      voList.add(vo);
+    });
+    return voList;
   }
 
   @Override
@@ -133,22 +172,24 @@ public class ReassignCmbServiceImpl implements ReassignCmbService {
 
     // maxlogsize
     TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterId, topicName);
-    List<PartitionState> partitionStateList = KafkaZookeeperUtils.getTopicPartitionState(
-        PhysicalClusterMetadataManager.getZKConfig(clusterId),
-        topicName,
-        new ArrayList<>(topicMetadata.getPartitionMap().getPartitions().keySet())
-    );
-    Map<Integer, PartitionAttributeDTO> partitionMap = new HashMap<>();
-    try {
-      partitionMap = jmxService.getPartitionAttribute(clusterId, topicName, partitionStateList);
-    } catch (Exception e) {
-      LOGGER.error("get topic partition failed, clusterId:{}, topicName:{}.", clusterId, topicName, e);
-    }
-    for (PartitionState partitionState : partitionStateList) {
-      PartitionAttributeDTO partitionAttributeDTO =
-          partitionMap.getOrDefault(partitionState.getPartitionId(), null);
-      if (!ValidateUtils.isNull(partitionAttributeDTO)) {
-        vo.setMaxLogSize(partitionAttributeDTO.getLogSize());
+    if (!ValidateUtils.isNull(topicMetadata)) {
+      List<PartitionState> partitionStateList = KafkaZookeeperUtils.getTopicPartitionState(
+          PhysicalClusterMetadataManager.getZKConfig(clusterId),
+          topicName,
+          new ArrayList<>(topicMetadata.getPartitionMap().getPartitions().keySet())
+      );
+      Map<Integer, PartitionAttributeDTO> partitionMap = new HashMap<>();
+      try {
+        partitionMap = jmxService.getPartitionAttribute(clusterId, topicName, partitionStateList);
+      } catch (Exception e) {
+        LOGGER.error("get topic partition failed, clusterId:{}, topicName:{}.", clusterId, topicName, e);
+      }
+      for (PartitionState partitionState : partitionStateList) {
+        PartitionAttributeDTO partitionAttributeDTO =
+            partitionMap.getOrDefault(partitionState.getPartitionId(), null);
+        if (!ValidateUtils.isNull(partitionAttributeDTO)) {
+          vo.setMaxLogSize(partitionAttributeDTO.getLogSize());
+        }
       }
     }
 
@@ -343,23 +384,24 @@ public class ReassignCmbServiceImpl implements ReassignCmbService {
 
       reaVO.setMaxLogSize(0L);
       TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(reassignTaskDO.getClusterId(), reassignTaskDO.getTopicName());
-      List<PartitionState> partitionStateList = KafkaZookeeperUtils.getTopicPartitionState(
-          PhysicalClusterMetadataManager.getZKConfig(reassignTaskDO.getClusterId()),
-          reassignTaskDO.getTopicName(),
-          new ArrayList<>(topicMetadata.getPartitionMap().getPartitions().keySet())
-      );
-      Map<Integer, PartitionAttributeDTO> partitionMap = new HashMap<>();
-      try {
-        partitionMap = jmxService.getPartitionAttribute(reassignTaskDO.getClusterId(), reassignTaskDO.getTopicName(), partitionStateList);
-      } catch (Exception e) {
-        LOGGER.error("get topic partition failed, clusterId:{}, topicName:{}.", reassignTaskDO.getClusterId(), reassignTaskDO.getTopicName(), e);
-      }
-
-      for (PartitionState partitionState : partitionStateList) {
-        PartitionAttributeDTO partitionAttributeDTO =
-            partitionMap.getOrDefault(partitionState.getPartitionId(), null);
-        if (!ValidateUtils.isNull(partitionAttributeDTO)) {
-          reaVO.setMaxLogSize(partitionAttributeDTO.getLogSize());
+      if (!ValidateUtils.isNull(topicMetadata)) {
+        List<PartitionState> partitionStateList = KafkaZookeeperUtils.getTopicPartitionState(
+            PhysicalClusterMetadataManager.getZKConfig(reassignTaskDO.getClusterId()),
+            reassignTaskDO.getTopicName(),
+            new ArrayList<>(topicMetadata.getPartitionMap().getPartitions().keySet())
+        );
+        Map<Integer, PartitionAttributeDTO> partitionMap = new HashMap<>();
+        try {
+          partitionMap = jmxService.getPartitionAttribute(reassignTaskDO.getClusterId(), reassignTaskDO.getTopicName(), partitionStateList);
+        } catch (Exception e) {
+          LOGGER.error("get topic partition failed, clusterId:{}, topicName:{}.", reassignTaskDO.getClusterId(), reassignTaskDO.getTopicName(), e);
+        }
+        for (PartitionState partitionState : partitionStateList) {
+          PartitionAttributeDTO partitionAttributeDTO =
+              partitionMap.getOrDefault(partitionState.getPartitionId(), null);
+          if (!ValidateUtils.isNull(partitionAttributeDTO)) {
+            reaVO.setMaxLogSize(partitionAttributeDTO.getLogSize());
+          }
         }
       }
 
@@ -378,42 +420,48 @@ public class ReassignCmbServiceImpl implements ReassignCmbService {
   public Result<List<ReassignCmbTopicProcessVO>> getReassignTopicProcess(Long clusterId, String topicName) {
     // topic元信息
     TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterId, topicName);
-    List<PartitionState> partitionStateList = KafkaZookeeperUtils.getTopicPartitionState(
-        PhysicalClusterMetadataManager.getZKConfig(clusterId),
-        topicName,
-        new ArrayList<>(topicMetadata.getPartitionMap().getPartitions().keySet())
-    );
-    Map<Integer, PartitionAttributeDTO> partitionMap = new HashMap<>();
-    try {
-      partitionMap = jmxService.getPartitionAttribute(clusterId, topicName, partitionStateList);
-    } catch (Exception e) {
-      LOGGER.error("get topic partition failed, clusterId:{}, topicName:{}.", clusterId, topicName, e);
-    }
-    // <partitionId, brokerList>
-    Map<Integer, List<Integer>> partitionBrokerMap = PhysicalClusterMetadataManager
-        .getTopicMetadata(clusterId, topicName).getPartitionMap().getPartitions();
     List<ReassignCmbTopicProcessVO> voList = Lists.newArrayList();
-    for (PartitionState partitionState : partitionStateList) {
-      ReassignCmbTopicProcessVO vo = new ReassignCmbTopicProcessVO();
-      vo.setPartitionId(partitionState.getPartitionId());
-      PartitionAttributeDTO partitionAttributeDTO =
-          partitionMap.getOrDefault(partitionState.getPartitionId(), null);
-      if (!ValidateUtils.isNull(partitionAttributeDTO)) {
-        vo.setLogSize(partitionAttributeDTO.getLogSize());
+    if (!ValidateUtils.isNull(topicMetadata)) {
+        List<PartitionState> partitionStateList = KafkaZookeeperUtils.getTopicPartitionState(
+            PhysicalClusterMetadataManager.getZKConfig(clusterId),
+            topicName,
+            new ArrayList<>(topicMetadata.getPartitionMap().getPartitions().keySet())
+        );
+        Map<Integer, PartitionAttributeDTO> partitionMap = new HashMap<>();
+        try {
+          partitionMap = jmxService.getPartitionAttribute(clusterId, topicName, partitionStateList);
+        } catch (Exception e) {
+          LOGGER.error("get topic partition failed, clusterId:{}, topicName:{}.", clusterId, topicName, e);
+        }
+        // <partitionId, brokerList>
+        Map<Integer, List<Integer>> partitionBrokerMap = PhysicalClusterMetadataManager
+            .getTopicMetadata(clusterId, topicName).getPartitionMap().getPartitions();
+        for (PartitionState partitionState : partitionStateList) {
+          ReassignCmbTopicProcessVO vo = new ReassignCmbTopicProcessVO();
+          vo.setPartitionId(partitionState.getPartitionId());
+          PartitionAttributeDTO partitionAttributeDTO =
+              partitionMap.getOrDefault(partitionState.getPartitionId(), null);
+          if (!ValidateUtils.isNull(partitionAttributeDTO)) {
+            vo.setLogSize(partitionAttributeDTO.getLogSize());
+          }
+          vo.setSrcBrokerIdList(partitionBrokerMap.get(partitionState.getPartitionId()));
+        // 目标BrokerId
+        vo.setDestBrokerIdList(null);
+        // 已完成logsize
+        vo.setCompleteLogSize(0L);
+        // 状态
+        vo.setStatus(0);
+        // 进度
+        vo.setReassignProcess(null);
+        voList.add(vo);
       }
-      vo.setSrcBrokerIdList(partitionBrokerMap.get(partitionState.getPartitionId()));
 
-      // 目标BrokerId
-      vo.setDestBrokerIdList(null);
-      // 已完成logsize
-      vo.setCompleteLogSize(0L);
-      // 状态
-      vo.setStatus(0);
-      // 进度
-      vo.setReassignProcess(null);
-
-      voList.add(vo);
     }
     return Result.buildSuc(voList);
+  }
+
+  @Override
+  public long getTotal() {
+    return reassignTaskDao.listAll().size();
   }
 }
