@@ -79,7 +79,8 @@ public class JmxConnectorWrap {
         try {
             Map<String, Object> environment = new HashMap<String, Object>();
             if (!ValidateUtils.isBlank(this.jmxConfig.getUsername()) && !ValidateUtils.isBlank(this.jmxConfig.getPassword())) {
-                environment.put(JMXConnector.CREDENTIALS, Arrays.asList(this.jmxConfig.getUsername(), this.jmxConfig.getPassword()));
+                // fixed by riyuetianmu
+                environment.put(JMXConnector.CREDENTIALS, new String[]{this.jmxConfig.getUsername(), this.jmxConfig.getPassword()});
             }
             if (jmxConfig.isOpenSSL() != null && this.jmxConfig.isOpenSSL()) {
                 environment.put(Context.SECURITY_PROTOCOL, "ssl");
