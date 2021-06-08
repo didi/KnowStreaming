@@ -84,11 +84,11 @@ monitor:
     nid: 2
     user-token: 1234567890
     mon:
-      base-url: http://127.0.0.1:8032
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
     sink:
-      base-url: http://127.0.0.1:8006
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
     rdb:
-      base-url: http://127.0.0.1:80
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
 
 notify:
   kafka:
