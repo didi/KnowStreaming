@@ -1,7 +1,17 @@
+{{- define "datasource.mysql" -}}
+{{- if .Values.mysql.enabled }}
+    {{- printf "%s-mysql" (include "didi-km.fullname" .) -}}
+{{- else -}}
+    {{- printf "%s" .Values.externalDatabase.host -}}
+{{- end -}}
+{{- end -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: km-cm
+  name: {{ include "didi-km.fullname" . }}-configs
+  labels:
+    {{- include "didi-km.labels" . | nindent 4 }}
 data:
   application.yml: |
     server:
@@ -17,9 +27,9 @@ data:
         name: kafkamanager
       datasource:
         kafka-manager:
-          jdbc-url: jdbc:mysql://xxxxx:3306/kafka-manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false
-          username: admin
-          password: admin
+          jdbc-url: jdbc:mysql://{{ include "datasource.mysql" . }}:3306/{{ .Values.mysql.auth.database }}?characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false
+          username: {{ .Values.mysql.auth.username }}
+          password: {{ .Values.mysql.auth.password }}
           driver-class-name: com.mysql.jdbc.Driver
       main:
         allow-bean-definition-overriding: true

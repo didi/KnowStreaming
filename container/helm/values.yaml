@@ -5,13 +5,14 @@
 replicaCount: 1
 
 image:
-  repository: docker.io/yangvipguang/km
+  repository: docker.io/fengxsong/logi-kafka-manager
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v18"
+  tag: "2.4.2"
 
 imagePullSecrets: []
 nameOverride: ""
+# fullnameOverride must set same as release name
 fullnameOverride: "km"
 
 serviceAccount:
@@ -77,3 +78,16 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# more configurations are set with configmap in file template/configmap.yaml
+externalDatabase:
+  host: ""
+mysql:
+  # if enabled is set to false, then you should manually specified externalDatabase.host
+  enabled: true
+  architecture: standalone
+  auth:
+    rootPassword: "s3cretR00t"
+    database: "logi_kafka_manager"
+    username: "logi_kafka_manager"
+    password: "n0tp@55w0rd"

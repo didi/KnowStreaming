@@ -1,6 +1,6 @@
 apiVersion: v2
 name: didi-km
-description: A Helm chart for Kubernetes
+description: Logi-KafkaManager
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -21,4 +21,9 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "1.16.0"
+appVersion: "2.4.2"
+dependencies:
+  - condition: mysql.enabled
+    name: mysql
+    repository: https://charts.bitnami.com/bitnami
+    version: 8.x.x
