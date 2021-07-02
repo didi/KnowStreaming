@@ -223,6 +223,7 @@ public class TopicServiceImpl implements TopicService {
         basicDTO.setCreateTime(topicMetadata.getCreateTime());
         basicDTO.setModifyTime(topicMetadata.getModifyTime());
         basicDTO.setRetentionTime(PhysicalClusterMetadataManager.getTopicRetentionTime(clusterId, topicName));
+        basicDTO.setRetentionBytes(PhysicalClusterMetadataManager.getTopicRetentionBytes(clusterId, topicName));
 
         TopicDO topicDO = topicManagerService.getByTopicName(clusterId, topicName);
         if (!ValidateUtils.isNull(topicDO)) {
