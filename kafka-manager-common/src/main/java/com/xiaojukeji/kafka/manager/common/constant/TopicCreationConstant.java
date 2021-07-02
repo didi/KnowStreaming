@@ -25,6 +25,8 @@ public class TopicCreationConstant {
 
     public static final String TOPIC_RETENTION_TIME_KEY_NAME = "retention.ms";
 
+    public static final String TOPIC_RETENTION_BYTES_KEY_NAME = "retention.bytes";
+
     public static final Long DEFAULT_QUOTA = 3 * 1024 * 1024L;
 
     public static Properties createNewProperties(Long retentionTime) {

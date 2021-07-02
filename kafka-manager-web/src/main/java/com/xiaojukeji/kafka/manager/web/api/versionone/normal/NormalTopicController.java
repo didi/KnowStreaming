@@ -61,10 +61,7 @@ public class NormalTopicController {
     @ApiOperation(value = "Topic基本信息", notes = "")
     @RequestMapping(value = "{clusterId}/topics/{topicName}/basic-info", method = RequestMethod.GET)
     @ResponseBody
-    public Result<TopicBasicVO> getTopicBasic(
-            @PathVariable Long clusterId,
-            @PathVariable String topicName,
-            @RequestParam(value = "isPhysicalClusterId", required = false) Boolean isPhysicalClusterId) {
+    public Result<TopicBasicVO> getTopicBasic(@PathVariable Long clusterId, @PathVariable String topicName, @RequestParam(value = "isPhysicalClusterId", required = false) Boolean isPhysicalClusterId) {
         Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(clusterId, isPhysicalClusterId);
         if (ValidateUtils.isNull(physicalClusterId)) {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);

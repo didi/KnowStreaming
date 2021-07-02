@@ -37,6 +37,8 @@ public class TopicBasicDTO {
 
     private Long retentionTime;
 
+    private Long retentionBytes;
+
     public Long getClusterId() {
         return clusterId;
     }
@@ -157,6 +159,14 @@ public class TopicBasicDTO {
         this.retentionTime = retentionTime;
     }
 
+    public Long getRetentionBytes() {
+        return retentionBytes;
+    }
+
+    public void setRetentionBytes(Long retentionBytes) {
+        this.retentionBytes = retentionBytes;
+    }
+
     @Override
     public String toString() {
         return "TopicBasicDTO{" +
@@ -166,7 +176,7 @@ public class TopicBasicDTO {
                 ", principals='" + principals + '\'' +
                 ", topicName='" + topicName + '\'' +
                 ", description='" + description + '\'' +
-                ", regionNameList='" + regionNameList + '\'' +
+                ", regionNameList=" + regionNameList +
                 ", score=" + score +
                 ", topicCodeC='" + topicCodeC + '\'' +
                 ", partitionNum=" + partitionNum +
@@ -175,6 +185,7 @@ public class TopicBasicDTO {
                 ", modifyTime=" + modifyTime +
                 ", createTime=" + createTime +
                 ", retentionTime=" + retentionTime +
+                ", retentionBytes=" + retentionBytes +
                 '}';
     }
 }

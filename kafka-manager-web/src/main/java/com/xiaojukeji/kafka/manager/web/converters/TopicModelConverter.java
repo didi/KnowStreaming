@@ -31,6 +31,7 @@ public class TopicModelConverter {
         vo.setReplicaNum(dto.getReplicaNum());
         vo.setPrincipals(dto.getPrincipals());
         vo.setRetentionTime(dto.getRetentionTime());
+        vo.setRetentionBytes(dto.getRetentionBytes());
         vo.setCreateTime(dto.getCreateTime());
         vo.setModifyTime(dto.getModifyTime());
         vo.setScore(dto.getScore());
