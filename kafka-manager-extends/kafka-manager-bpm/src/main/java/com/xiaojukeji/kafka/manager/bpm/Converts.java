@@ -19,7 +19,6 @@ public class Converts {
         orderDO.setApprover("");
         orderDO.setOpinion("");
         orderDO.setExtensions(orderDTO.getExtensions());
-        orderDO.setType(orderDTO.getType());
         return orderDO;
     }
 }
