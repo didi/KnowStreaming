@@ -89,20 +89,18 @@ public class ReassignModelConverter {
         }
 
         ReassignTaskVO vo = new ReassignTaskVO();
+        vo.setTaskName(String.format("%s 数据迁移任务", DateUtils.getFormattedDate(taskId)));
         vo.setTaskId(taskId);
         vo.setTotalTopicNum(doList.size());
         vo.setBeginTime(0L);
         vo.setEndTime(0L);
 
         Integer completedTopicNum = 0;
-        StringBuilder clusterAndTopicName = new StringBuilder();
         Set<Integer> statusSet = new HashSet<>();
         for (ReassignTaskDO elem: doList) {
             vo.setGmtCreate(elem.getGmtCreate().getTime());
             vo.setOperator(elem.getOperator());
             vo.setDescription(elem.getDescription());
-            // There is only one `ReassignTaskDO` in the `doList`
-            clusterAndTopicName.append("-").append(elem.getClusterId()).append("-").append(elem.getTopicName());
             if (TaskStatusReassignEnum.isFinished(elem.getStatus())) {
                 completedTopicNum += 1;
                 statusSet.add(elem.getStatus());
@@ -115,7 +113,6 @@ public class ReassignModelConverter {
             // 任务计划开始时间
             vo.setBeginTime(elem.getBeginTime().getTime());
         }
-        vo.setTaskName(String.format("%s 数据迁移任务%s", DateUtils.getFormattedDate(taskId), clusterAndTopicName.toString()));
 
         // 任务整体状态
         if (statusSet.contains(TaskStatusReassignEnum.RUNNING.getCode())) {
