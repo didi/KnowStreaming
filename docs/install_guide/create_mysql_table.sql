@@ -210,11 +210,11 @@ CREATE TABLE `gateway_config` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_type_name` (`type`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='gateway配置';
-INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_QUEUE_SIZE', 'SERVICE_DISCOVERY_QUEUE_SIZE', 100000000, 1);
-INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_APPID_RATE', 'SERVICE_DISCOVERY_APPID_RATE', 100000000, 1);
-INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_IP_RATE', 'SERVICE_DISCOVERY_IP_RATE', 100000000, 1);
-INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_SP_RATE', 'app_01234567', 100000000, 1);
-INSERT INTO gateway_config(type, name, value, `version`) values('SERVICE_DISCOVERY_SP_RATE', '192.168.0.1', 100000000, 1);
+INSERT INTO gateway_config(type, name, value, `version`, `description`) values('SD_QUEUE_SIZE', 'SD_QUEUE_SIZE', 100000000, 1, '任意集群队列大小');
+INSERT INTO gateway_config(type, name, value, `version`, `description`) values('SD_APP_RATE', 'SD_APP_RATE', 100000000, 1, '任意一个App限速');
+INSERT INTO gateway_config(type, name, value, `version`, `description`) values('SD_IP_RATE', 'SD_IP_RATE', 100000000, 1, '任意一个IP限速');
+INSERT INTO gateway_config(type, name, value, `version`, `description`) values('SD_SP_RATE', 'app_01234567', 100000000, 1, '指定App限速');
+INSERT INTO gateway_config(type, name, value, `version`, `description`) values('SD_SP_RATE', '192.168.0.1', 100000000, 1, '指定IP限速');
 
 --
 -- Table structure for table `heartbeat`

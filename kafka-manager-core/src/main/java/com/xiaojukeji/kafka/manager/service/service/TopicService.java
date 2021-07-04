@@ -105,4 +105,5 @@ public interface TopicService {
     List<TopicBrokerDTO> getTopicBrokerList(Long clusterId, String topicName);
 
     Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(Long physicalClusterId, String topicName, Long latestTime);
+
 }

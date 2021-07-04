@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 /**
  * @author limeng
  * @date 20/8/10
@@ -30,6 +32,7 @@ public class Heartbeat {
             HeartbeatDO heartbeatDO = new HeartbeatDO();
             heartbeatDO.setIp(NetUtils.localIp());
             heartbeatDO.setHostname(NetUtils.localHostname());
+            heartbeatDO.setModifyTime(new Date());
             heartbeatDao.replace(heartbeatDO);
         } catch (Exception e) {
             LOGGER.error("flush heartbeat failed.", e);

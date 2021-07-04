@@ -1,11 +1,13 @@
-package com.xiaojukeji.kafka.manager.web.api.versionone.thirdpart;
+package com.xiaojukeji.kafka.manager.web.api.versionone.op;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.RebalanceDimensionEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TaskStatusEnum;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.RebalanceDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.service.service.AdminService;
@@ -16,22 +18,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
+ * Leader操作[选举|切换]相关接口
  * @author zengqiao
- * @date 20/9/23
+ * @date 21/5/18
  */
-@Api(tags = "开放接口-OP相关接口(REST)")
+@Api(tags = "OP-Leader操作相关接口(REST)")
 @RestController
-@RequestMapping(ApiPrefix.API_V1_THIRD_PART_OP_PREFIX)
-public class ThirdPartOpUtilController {
-
+@RequestMapping(ApiPrefix.API_V1_OP_PREFIX)
+public class OpLeaderController {
     @Autowired
     private AdminService adminService;
 
     @Autowired
     private ClusterService clusterService;
 
+    @ApiOperation(value = "优先副本选举状态")
+    @RequestMapping(value = {"leaders/preferred-replica-election-status", "utils/rebalance-status"}, method = RequestMethod.GET)
+    @ResponseBody
+    public Result preferredReplicaElectStatus(@RequestParam("clusterId") Long clusterId) {
+        ClusterDO clusterDO = clusterService.getById(clusterId);
+        if (ValidateUtils.isNull(clusterDO)) {
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+
+        TaskStatusEnum statusEnum = adminService.preferredReplicaElectionStatus(clusterDO);
+        return new Result<>(JsonUtils.toJson(statusEnum));
+    }
+
     @ApiOperation(value = "优先副本选举")
-    @RequestMapping(value = "op/rebalance", method = RequestMethod.POST)
+    @RequestMapping(value = {"leaders/preferred-replica-election", "utils/rebalance"}, method = RequestMethod.POST)
     @ResponseBody
     public Result preferredReplicaElect(@RequestBody RebalanceDTO reqObj) {
         if (!reqObj.paramLegal()) {

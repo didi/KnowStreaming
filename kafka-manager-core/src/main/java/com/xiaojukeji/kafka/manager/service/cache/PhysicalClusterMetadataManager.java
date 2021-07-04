@@ -3,10 +3,12 @@ package com.xiaojukeji.kafka.manager.service.cache;
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaBrokerRoleEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
+import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.KafkaVersion;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
+import com.xiaojukeji.kafka.manager.common.utils.NumberUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConfig;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConnectorWrap;
@@ -56,7 +58,7 @@ public class PhysicalClusterMetadataManager {
 
     private final static Map<Long, Map<String, TopicMetadata>> TOPIC_METADATA_MAP = new ConcurrentHashMap<>();
 
-    private final static Map<Long, Map<String, Long>> TOPIC_RETENTION_TIME_MAP = new ConcurrentHashMap<>();
+    private final static Map<Long, Map<String, Properties>> TOPIC_PROPERTIES_MAP = new ConcurrentHashMap<>();
 
     private final static Map<Long, Map<Integer, BrokerMetadata>> BROKER_METADATA_MAP = new ConcurrentHashMap<>();
 
@@ -95,7 +97,7 @@ public class PhysicalClusterMetadataManager {
 
             // 初始化topic-map
             TOPIC_METADATA_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
-            TOPIC_RETENTION_TIME_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
+            TOPIC_PROPERTIES_MAP.put(clusterDO.getId(), new ConcurrentHashMap<>());
 
             // 初始化cluster-map
             CLUSTER_MAP.put(clusterDO.getId(), clusterDO);
@@ -158,7 +160,7 @@ public class PhysicalClusterMetadataManager {
         KAFKA_VERSION_MAP.remove(clusterId);
 
         TOPIC_METADATA_MAP.remove(clusterId);
-        TOPIC_RETENTION_TIME_MAP.remove(clusterId);
+        TOPIC_PROPERTIES_MAP.remove(clusterId);
         CLUSTER_MAP.remove(clusterId);
     }
 
@@ -262,24 +264,45 @@ public class PhysicalClusterMetadataManager {
 
     //---------------------------配置相关元信息--------------
 
-    public static void putTopicRetentionTime(Long clusterId, String topicName, Long retentionTime) {
-        Map<String, Long> timeMap = TOPIC_RETENTION_TIME_MAP.get(clusterId);
-        if (timeMap == null) {
+    public static void putTopicProperties(Long clusterId, String topicName, Properties properties) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isBlank(topicName) || ValidateUtils.isNull(properties)) {
             return;
         }
-        timeMap.put(topicName, retentionTime);
+
+        Map<String, Properties> propertiesMap = TOPIC_PROPERTIES_MAP.get(clusterId);
+        if (ValidateUtils.isNull(propertiesMap)) {
+            return;
+        }
+        propertiesMap.put(topicName, properties);
     }
 
     public static Long getTopicRetentionTime(Long clusterId, String topicName) {
-        Map<String, Long> timeMap = TOPIC_RETENTION_TIME_MAP.get(clusterId);
-        if (timeMap == null) {
+        Map<String, Properties> propertiesMap = TOPIC_PROPERTIES_MAP.get(clusterId);
+        if (ValidateUtils.isNull(propertiesMap)) {
             return null;
         }
-        return timeMap.get(topicName);
+
+        Properties properties = propertiesMap.get(topicName);
+        if (ValidateUtils.isNull(properties)) {
+            return null;
+        }
+
+        return NumberUtils.string2Long(properties.getProperty(TopicCreationConstant.TOPIC_RETENTION_TIME_KEY_NAME));
     }
 
+    public static Long getTopicRetentionBytes(Long clusterId, String topicName) {
+        Map<String, Properties> propertiesMap = TOPIC_PROPERTIES_MAP.get(clusterId);
+        if (ValidateUtils.isNull(propertiesMap)) {
+            return null;
+        }
 
+        Properties properties = propertiesMap.get(topicName);
+        if (ValidateUtils.isNull(properties)) {
+            return null;
+        }
 
+        return NumberUtils.string2Long(properties.getProperty(TopicCreationConstant.TOPIC_RETENTION_BYTES_KEY_NAME));
+    }
 
     //---------------------------Broker元信息相关--------------
 

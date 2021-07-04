@@ -43,16 +43,8 @@ public enum TaskStatusEnum {
         return code;
     }
 
-    public void setCode(Integer code) {
-        this.code = code;
-    }
-
     public String getMessage() {
         return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     @Override
@@ -64,9 +56,6 @@ public enum TaskStatusEnum {
     }
 
     public static Boolean isFinished(Integer code) {
-        if (code >= FINISHED.getCode()) {
-            return true;
-        }
-        return false;
+        return code >= FINISHED.getCode();
     }
 }

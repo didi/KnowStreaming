@@ -1,5 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.ao.gateway;
 
+import com.xiaojukeji.kafka.manager.common.entity.dto.gateway.TopicQuotaDTO;
+
 /**
  * @author zhongyuankai
  * @date 2020/4/27
@@ -65,4 +67,15 @@ public class TopicQuota {
                 ", consumeQuota=" + consumeQuota +
                 '}';
     }
+
+    public static TopicQuota buildFrom(TopicQuotaDTO dto) {
+        TopicQuota topicQuota = new TopicQuota();
+        topicQuota.setAppId(dto.getAppId());
+        topicQuota.setClusterId(dto.getClusterId());
+        topicQuota.setTopicName(dto.getTopicName());
+        topicQuota.setProduceQuota(dto.getProduceQuota());
+        topicQuota.setConsumeQuota(dto.getConsumeQuota());
+        return topicQuota;
+    }
+
 }

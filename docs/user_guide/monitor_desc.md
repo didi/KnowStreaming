@@ -4,10 +4,15 @@
 
 ---
 
+## 报警策略-监控指标说明
+
+| 指标 | 含义 |备注  |
+| --- | --- | --- |
+| online-kafka-consumer-lag | 消费时，按照分区的维度进行监控lag数  | lag表示有多少数据没有被消费，因为按照分区的维度监控，所以告警时一般会有分区信息 |
+| online-kafka-consumer-maxLag | 消费时，按照整个Topic的维度，监控Topic所有的分区里面的那个最大的lag | 比如每个分区的lag分别是3、5、7，那么maxLag的值就是max(3,5,7)=7 |
+| online-kafka-consumer-maxDelayTime | 消费时，按照Topic维度监控预计的消费延迟  | 这块是按照lag和messagesIn之间的关系计算出来的，可能会有误差 |
 
 ## 报警策略-报警函数介绍
-
-
 
 | 类别 | 函数 | 含义 |函数文案 |备注  |
 | --- | --- | --- | --- | --- |

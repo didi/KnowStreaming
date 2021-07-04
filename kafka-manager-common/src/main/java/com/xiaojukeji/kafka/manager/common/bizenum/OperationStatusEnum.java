@@ -27,4 +27,12 @@ public enum OperationStatusEnum {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "OperationStatusEnum{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

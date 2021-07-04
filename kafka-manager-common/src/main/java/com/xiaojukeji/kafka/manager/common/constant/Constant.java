@@ -45,4 +45,7 @@ public class Constant {
     public static final Integer DEFAULT_MAX_CAL_TOPIC_EXPIRED_DAY = 90;
 
     public static final Integer INVALID_CODE = -1;
+
+    private Constant() {
+    }
 }

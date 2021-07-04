@@ -45,11 +45,6 @@ public enum TaskStatusReassignEnum {
     }
 
     public static Boolean isFinished(Integer code) {
-        if (SUCCEED.getCode().equals(code)
-                || FAILED.getCode().equals(code)
-                || CANCELED.getCode().equals(code)) {
-            return true;
-        }
-        return false;
+        return SUCCEED.getCode().equals(code) || FAILED.getCode().equals(code) || CANCELED.getCode().equals(code);
     }
 }

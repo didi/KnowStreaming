@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.service.service.gateway;
 
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 
 /**
@@ -34,4 +35,11 @@ public interface QuotaService {
     TopicQuota getQuotaFromZk(Long clusterId, String topicName, String appId);
 
     Boolean modifyProduceQuota(Long clusterId, String topicName, String appId, Long produceQuota);
+
+    /**
+     * topic配额调整
+     * @param topicQuota topic配额
+     * @return
+     */
+    ResultStatus addTopicQuotaByAuthority(TopicQuota topicQuota);
 }
