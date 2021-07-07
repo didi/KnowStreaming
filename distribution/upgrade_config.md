@@ -4,7 +4,6 @@
 > 当您从一个很低的版本升级时候,应该依次执行中间有过变更的sql脚本
 
 
-![kafka-manager-logo](../../assets/images/common/logo_name.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
