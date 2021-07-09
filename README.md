@@ -1,7 +1,7 @@
 
 ---
 
-![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
+![logi_logo](https://user-images.githubusercontent.com/71620349/125017036-ec617380-e0a4-11eb-99d3-02c2511cc63d.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
