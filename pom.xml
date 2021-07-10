@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <logikm.revision>2.4.3-SNAPSHOT</logikm.revision>
+        <logikm.revision>2.5.0-SNAPSHOT</logikm.revision>
         <swagger2.version>2.7.0</swagger2.version>
         <swagger.version>1.5.13</swagger.version>
 

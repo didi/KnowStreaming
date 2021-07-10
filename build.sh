@@ -4,7 +4,7 @@ cd $workspace
 
 ## constant
 OUTPUT_DIR=./output
-KM_VERSION=2.4.3
+KM_VERSION=2.5.0
 APP_NAME=logikm
 APP_DIR=${APP_NAME}-${KM_VERSION}
 
