@@ -4,12 +4,12 @@ cd $workspace
 
 ## constant
 OUTPUT_DIR=./output
-KM_VERSION=2.4.2
-APP_NAME=kafka-manager
+KM_VERSION=2.4.3
+APP_NAME=logikm
 APP_DIR=${APP_NAME}-${KM_VERSION}
 
 MYSQL_TABLE_SQL_FILE=./docs/install_guide/create_mysql_table.sql
-CONFIG_FILE=./kafka-manager-web/src/main/resources/application.yml
+CONFIG_FILE=./logikm-rest/src/main/resources/application.yml
 
 ## function
 function build() {
@@ -37,7 +37,7 @@ function make_output() {
           cp -rf ${CONFIG_FILE} ${OUTPUT_DIR}/${APP_DIR} &&                # 拷贝 application.yml   至output目录
 
           # 拷贝程序包到output路径
-          cp kafka-manager-web/target/kafka-manager-web-${KM_VERSION}-SNAPSHOT.jar ${OUTPUT_DIR}/${APP_DIR}/${APP_NAME}.jar
+          cp logikm-rest/target/logikm-rest-${KM_VERSION}-SNAPSHOT.jar ${OUTPUT_DIR}/${APP_DIR}/${APP_NAME}.jar
           echo -e "make output ok."
     ) || { echo -e "make output error"; exit 2; } # 填充output目录失败后, 退出码为 非0
 }

@@ -105,9 +105,7 @@ node_modules/*
 workspace.xml
 /output/*
 .gitversion
-node_modules/*
 out/*
 dist/
 dist/*
-kafka-manager-web/src/main/resources/templates/
-.DS_Store
+logikm-rest/src/main/resources/templates/

@@ -1,7 +1,7 @@
 -- create database
-CREATE DATABASE logi_kafka_manager;
+CREATE DATABASE logikm;
 
-USE logi_kafka_manager;
+USE logikm;
 
 --
 -- Table structure for table `account`
@@ -58,7 +58,7 @@ CREATE TABLE `authority` (
   `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_app_id_cluster_id_topic_name` (`app_id`,`cluster_id`,`topic_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限信息(kafka-manager)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限信息(LogIKM)';
 
 --
 -- Table structure for table `broker`

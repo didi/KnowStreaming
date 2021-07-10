@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.xiaojukeji.kafka</groupId>
-    <artifactId>kafka-manager</artifactId>
+    <artifactId>logikm</artifactId>
     <packaging>pom</packaging>
-    <version>${kafka-manager.revision}</version>
+    <version>${logikm.revision}</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <kafka-manager.revision>2.4.2-SNAPSHOT</kafka-manager.revision>
+        <logikm.revision>2.4.3-SNAPSHOT</logikm.revision>
         <swagger2.version>2.7.0</swagger2.version>
         <swagger.version>1.5.13</swagger.version>
 
@@ -30,18 +30,18 @@
     </properties>
 
     <modules>
-        <module>kafka-manager-console</module>
-        <module>kafka-manager-common</module>
-        <module>kafka-manager-dao</module>
-        <module>kafka-manager-core</module>
-        <module>kafka-manager-extends/kafka-manager-kcm</module>
-        <module>kafka-manager-extends/kafka-manager-account</module>
-        <module>kafka-manager-extends/kafka-manager-monitor</module>
-        <module>kafka-manager-extends/kafka-manager-notify</module>
-        <module>kafka-manager-extends/kafka-manager-bpm</module>
-        <module>kafka-manager-extends/kafka-manager-openapi</module>
-        <module>kafka-manager-task</module>
-        <module>kafka-manager-web</module>
+        <module>logikm-console</module>
+        <module>logikm-common</module>
+        <module>logikm-persistence</module>
+        <module>logikm-core</module>
+        <module>logikm-extends/logikm-kcm</module>
+        <module>logikm-extends/logikm-account</module>
+        <module>logikm-extends/logikm-monitor</module>
+        <module>logikm-extends/logikm-notify</module>
+        <module>logikm-extends/logikm-bpm</module>
+        <module>logikm-extends/logikm-openapi</module>
+        <module>logikm-task</module>
+        <module>logikm-rest</module>
     </modules>
 
     <dependencyManagement>
