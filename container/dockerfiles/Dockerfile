@@ -16,10 +16,10 @@ ENV JAVA_OPTS="-verbose:gc  \
     -XX:MaxMetaspaceSize=256M  -XX:+DisableExplicitGC -XX:+UseStringDeduplication \
     -XX:+UseG1GC  -XX:+HeapDumpOnOutOfMemoryError   -XX:-UseContainerSupport" 
 
-RUN wget https://github.com/didi/Logi-KafkaManager/releases/download/v${VERSION}/kafka-manager-${VERSION}.tar.gz && \
-    tar xvf kafka-manager-${VERSION}.tar.gz && \
-    mv kafka-manager-${VERSION}/kafka-manager.jar /opt/app.jar && \
-    rm -rf kafka-manager-${VERSION}*
+RUN wget https://github.com/didi/Logi-KafkaManager/releases/download/v${VERSION}/logikm-${VERSION}.tar.gz && \
+    tar xvf logikm-${VERSION}.tar.gz && \
+    mv logikm-${VERSION}/logikm.jar /opt/app.jar && \
+    rm -rf logikm-${VERSION}*
 
 EXPOSE 8080  9999
 

@@ -1,7 +1,7 @@
 
 ---
 
-![kafka-manager-logo](../assets/images/common/logo_name.png)
+![logikm_logo](https://user-images.githubusercontent.com/71620349/125024570-9e07a100-e0b3-11eb-8ebc-22e73e056771.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
@@ -20,9 +20,9 @@ server:
 
 spring:
   application:
-    name: kafkamanager
+    name: LogiKM
   datasource:
-    kafka-manager: # 数据库连接配置
+    logikm: # 数据库连接配置
       jdbc-url: jdbc:mysql://127.0.0.1:3306/kafka_manager?characterEncoding=UTF-8&serverTimezone=GMT%2B8  #数据库的地址
       username: admin # 用户名
       password: admin # 密码

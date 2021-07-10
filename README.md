@@ -1,24 +1,23 @@
 
----
-
 ![logikm_logo](https://user-images.githubusercontent.com/71620349/125024570-9e07a100-e0b3-11eb-8ebc-22e73e056771.png)
+
+---
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
-
-
-阅读本README文档，您可以了解到滴滴Logi-KafkaManager的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。<br>若滴滴Logi-KafkaManager已在贵司的生产环境进行使用，并想要获得官方更好地支持和指导，可以通过[`OCE认证`](http://obsuite.didiyun.com/open/openAuth)，加入官方交流平台。
+阅读本README文档，您可以了解到滴滴LogiKM的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。
 
 
 ## 1 产品简介
-滴滴Logi-KafkaManager脱胎于滴滴内部多年的Kafka运营实践经验，是面向Kafka用户、Kafka运维人员打造的共享多租户Kafka云平台。专注于Kafka运维管控、监控告警、资源治理等核心场景，经历过大规模集群、海量大数据的考验。内部满意度高达90%的同时，还与多家知名企业达成商业化合作。
+
+滴滴LogiKM脱胎于滴滴内部多年的Kafka运营实践经验，是面向Kafka用户、Kafka运维人员打造的共享多租户Kafka云平台。专注于Kafka运维管控、监控告警、资源治理等核心场景，经历过大规模集群、海量大数据的考验。内部满意度高达90%的同时，还与多家知名企业达成商业化合作。
 
 ### 1.1 快速体验地址
 
 - 体验地址 http://117.51.150.133:8080  账号密码 admin/admin
 
 ### 1.2 体验地图
-相比较于同类产品的用户视角单一（大多为管理员视角），滴滴Logi-KafkaManager建立了基于分角色、多场景视角的体验地图。分别是：**用户体验地图、运维体验地图、运营体验地图**
+相比较于同类产品的用户视角单一（大多为管理员视角），滴滴LogiKM建立了基于分角色、多场景视角的体验地图。分别是：**用户体验地图、运维体验地图、运营体验地图**
 
 #### 1.2.1 用户体验地图
 - 平台租户申请&nbsp;&nbsp;：申请应用（App）作为Kafka中的用户名，并用 AppID+password作为身份验证
@@ -47,27 +46,27 @@
 - 专&nbsp;业&nbsp;的&nbsp;资&nbsp;源&nbsp;治&nbsp;理&nbsp;&nbsp;：基于滴滴内部多年运营实践，沉淀资源治理方法，建立健康分体系。针对Topic分区热点、分区不足等高频常见问题，实现资源治理专家化
 - 友&nbsp;好&nbsp;的&nbsp;运&nbsp;维&nbsp;生&nbsp;态&nbsp;&nbsp;：与滴滴夜莺监控告警系统打通，集成监控告警、集群部署、集群升级等能力。形成运维生态，凝练专家服务，使运维更高效
 
-### 1.4 滴滴Logi-KafkaManager架构图
+### 1.4 滴滴LogiKM架构图
 
-![kafka-manager-arch](https://img-ys011.didistatic.com/static/dicloudpub/do1_xgDHNDLj2ChKxctSuf72)
+![logikm-arch](https://img-ys011.didistatic.com/static/dicloudpub/do1_xgDHNDLj2ChKxctSuf72)
 
 
 ## 2 相关文档
 
 ### 2.1 产品文档
-- [滴滴Logi-KafkaManager 安装手册](docs/install_guide/install_guide_cn.md)
-- [滴滴Logi-KafkaManager 接入集群](docs/user_guide/add_cluster/add_cluster.md)
-- [滴滴Logi-KafkaManager 用户使用手册](docs/user_guide/user_guide_cn.md)
-- [滴滴Logi-KafkaManager FAQ](docs/user_guide/faq.md)
+- [滴滴LogiKM 安装手册](docs/install_guide/install_guide_cn.md)
+- [滴滴LogiKM 接入集群](docs/user_guide/add_cluster/add_cluster.md)
+- [滴滴LogiKM 用户使用手册](docs/user_guide/user_guide_cn.md)
+- [滴滴LogiKM FAQ](docs/user_guide/faq.md)
 
 ### 2.2 社区文章
 - [滴滴云官网产品介绍](https://www.didiyun.com/production/logi-KafkaManager.html)
 - [7年沉淀之作--滴滴Logi日志服务套件](https://mp.weixin.qq.com/s/-KQp-Qo3WKEOc9wIR2iFnw)
-- [滴滴Logi-KafkaManager 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
-- [滴滴Logi-KafkaManager 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
-- [滴滴Logi-KafkaManager 系列视频教程](https://mp.weixin.qq.com/s/9X7gH0tptHPtfjPPSdGO8g)
-- [kafka实践（十五）：滴滴开源Kafka管控平台 Logi-KafkaManager研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
-- [kafka的灵魂伴侣Logi-KafkaManager系列文章专栏 --石臻](https://blog.csdn.net/u010634066/category_10977588.html)
+- [滴滴LogiKM 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
+- [滴滴LogiKM 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
+- [滴滴LogiKM 系列视频教程](https://mp.weixin.qq.com/s/9X7gH0tptHPtfjPPSdGO8g)
+- [kafka实践（十五）：滴滴开源Kafka管控平台 LogiKM研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
+- [kafka的灵魂伴侣LogiKM系列文章专栏 --石臻](https://blog.csdn.net/u010634066/category_10977588.html)
 
 ## 3 滴滴Logi开源用户交流群
 
@@ -75,22 +74,18 @@
 ![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
 微信加群：关注公众号 云原生可观测性 回复 "Logi加群"
 
-## 4 OCE认证
-OCE是一个认证机制和交流平台，为滴滴Logi-KafkaManager生产用户量身打造，我们会为OCE企业提供更好的技术支持，比如专属的技术沙龙、企业一对一的交流机会、专属的答疑群等，如果贵司Logi-KafkaManager上了生产，[快来加入吧](http://obsuite.didiyun.com/open/openAuth)
+## 4 项目成员
 
-
-## 5 项目成员
-
-### 5.1 内部核心人员
+### 4.1 内部核心人员
 
 `iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`
 
 
-### 5.2 外部贡献者
+### 4.2 外部贡献者
 
 `fangjunyu`、`zhoutaiyang`
 
 
-## 6 协议
+## 5 协议
 
-`kafka-manager`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
+`LogiKM`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)

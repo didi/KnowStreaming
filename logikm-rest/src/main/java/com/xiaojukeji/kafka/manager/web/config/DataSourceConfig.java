@@ -21,7 +21,7 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfig {
     @Bean(name = "dataSource")
-    @ConfigurationProperties(prefix = "spring.datasource.logikm")
+    @ConfigurationProperties(prefix = "spring.datasource.kafka-manager")
     @Primary
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();

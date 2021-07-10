@@ -1,11 +1,20 @@
 
 ---
 
-![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
+![logikm_logo](https://user-images.githubusercontent.com/71620349/125024570-9e07a100-e0b3-11eb-8ebc-22e73e056771.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
 --- 
+
+## v2.5.0
+
+版本上线时间：2021-07-10
+
+### 体验优化
+- 更改产品名为LogiKM
+- 更新产品图标
+
 
 ## v2.4.1+
 
@@ -16,7 +25,7 @@
 - 增加接口调用可绕过登录的功能(v2.4.1)
 
 ### 体验优化
-- tomcat 版本提升至8.5.66(v2.4.2)
+- Tomcat 版本提升至8.5.66(v2.4.2)
 - op接口优化，拆分util接口为topic、leader两类接口(v2.4.1)
 - 简化Gateway配置的Key长度(v2.4.1)
 

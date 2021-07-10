@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: docker.io/fengxsong/logi-kafka-manager
+  repository: docker.io/fengxsong/logikm
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "v2.4.2"

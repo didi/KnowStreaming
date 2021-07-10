@@ -24,7 +24,7 @@ data:
 
     spring:
       application:
-        name: kafkamanager
+        name: logikm
       datasource:
         kafka-manager:
           jdbc-url: jdbc:mysql://{{ include "datasource.mysql" . }}:3306/{{ .Values.mysql.auth.database }}?characterEncoding=UTF-8&serverTimezone=GMT%2B8&useSSL=false
