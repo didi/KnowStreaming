@@ -34,10 +34,10 @@ custom:
     max-conn: 10 # 2.3版本配置不在这个地方生效
   store-metrics-task:
     community:
-      broker-metrics-enabled: true
+      broker-metrics-enabled: true # 社区部分broker metrics信息收集开关, 关闭之后metrics信息将不会进行收集及写DB
       topic-metrics-enabled: true
     didi:
-      app-topic-metrics-enabled: false
+      app-topic-metrics-enabled: false # 滴滴埋入的指标, 社区AK不存在该指标，因此默认关闭
       topic-request-time-metrics-enabled: false
       topic-throttled-metrics: false
     save-days: 7
@@ -64,30 +64,33 @@ account:
     auth-user-registration: true
     auth-user-registration-role: normal
 
-kcm:
-  enabled: false
+kcm: # 集群升级部署相关的功能，需要配合夜莺及S3进行使用，这块我们后续专门补充一个文档细化一下，牵扯到kcm_script.sh脚本的修改
+  enabled: false # 默认关闭
   s3:
     endpoint: s3.didiyunapi.com
     access-key: 1234567890
     secret-key: 0987654321
     bucket: logi-kafka
   n9e:
-    base-url: http://127.0.0.1:8004
-    user-token: 12345678
-    timeout: 300
-    account: root
-    script-file: kcm_script.sh
+    base-url: http://127.0.0.1:8004 # 夜莺任务中心的地址
+    user-token: 12345678 # 夜莺用户的token
+    timeout: 300 # 集群任务的超时时间，单位秒
+    account: root # 集群任务使用的账号
+    script-file: kcm_script.sh # 集群任务的脚本
 
-monitor:
+monitor: # 监控告警相关的功能，需要配合夜莺进行使用
   enabled: false
   n9e:
     nid: 2
     user-token: 1234567890
     mon:
+      # 夜莺 mon监控服务 地址
       base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
     sink:
+      # 夜莺 transfer上传服务 地址
       base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
     rdb:
+      # 夜莺 rdb资源服务 地址
       base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
 
 notify:
