@@ -1,7 +1,7 @@
 package com.xiaojukeji.kafka.manager.service.cache;
 
-import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.factory.KafkaConsumerFactory;
 import kafka.admin.AdminClient;
@@ -26,18 +26,21 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 19/12/24
  */
 public class KafkaClientPool {
-    private final static Logger LOGGER = LoggerFactory.getLogger(KafkaClientPool.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaClientPool.class);
 
     /**
      * AdminClient
      */
-    private static Map<Long, AdminClient> AdminClientMap = new ConcurrentHashMap<>();
+    private static final Map<Long, AdminClient> ADMIN_CLIENT_MAP = new ConcurrentHashMap<>();
 
-    private static Map<Long, KafkaProducer<String, String>> KAFKA_PRODUCER_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, KafkaProducer<String, String>> KAFKA_PRODUCER_MAP = new ConcurrentHashMap<>();
 
-    private static Map<Long, GenericObjectPool<KafkaConsumer>> KAFKA_CONSUMER_POOL = new ConcurrentHashMap<>();
+    private static final Map<Long, GenericObjectPool<KafkaConsumer<String, String>>> KAFKA_CONSUMER_POOL = new ConcurrentHashMap<>();
 
     private static ReentrantLock lock = new ReentrantLock();
+
+    private KafkaClientPool() {
+    }
 
     private static void initKafkaProducerMap(Long clusterId) {
         ClusterDO clusterDO = PhysicalClusterMetadataManager.getClusterFromCache(clusterId);
@@ -55,7 +58,7 @@ public class KafkaClientPool {
             properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "lz4");
             properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "10");
             properties.setProperty(ProducerConfig.RETRIES_CONFIG, "3");
-            KAFKA_PRODUCER_MAP.put(clusterId, new KafkaProducer<String, String>(properties));
+            KAFKA_PRODUCER_MAP.put(clusterId, new KafkaProducer<>(properties));
         } catch (Exception e) {
             LOGGER.error("create kafka producer failed, clusterDO:{}.", clusterDO, e);
         } finally {
@@ -77,25 +80,22 @@ public class KafkaClientPool {
         if (ValidateUtils.isNull(kafkaProducer)) {
             return false;
         }
-        kafkaProducer.send(new ProducerRecord<String, String>(topicName, data));
+        kafkaProducer.send(new ProducerRecord<>(topicName, data));
         return true;
     }
 
     private static void initKafkaConsumerPool(ClusterDO clusterDO) {
         lock.lock();
         try {
-            GenericObjectPool<KafkaConsumer> objectPool = KAFKA_CONSUMER_POOL.get(clusterDO.getId());
+            GenericObjectPool<KafkaConsumer<String, String>> objectPool = KAFKA_CONSUMER_POOL.get(clusterDO.getId());
             if (objectPool != null) {
                 return;
             }
-            GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+            GenericObjectPoolConfig<KafkaConsumer<String, String>> config = new GenericObjectPoolConfig<>();
             config.setMaxIdle(24);
             config.setMinIdle(24);
             config.setMaxTotal(24);
-            KAFKA_CONSUMER_POOL.put(
-                    clusterDO.getId(),
-                    new GenericObjectPool<KafkaConsumer>(new KafkaConsumerFactory(clusterDO), config)
-            );
+            KAFKA_CONSUMER_POOL.put(clusterDO.getId(), new GenericObjectPool<>(new KafkaConsumerFactory(clusterDO), config));
         } catch (Exception e) {
             LOGGER.error("create kafka consumer pool failed, clusterDO:{}.", clusterDO, e);
         } finally {
@@ -106,7 +106,7 @@ public class KafkaClientPool {
     public static void closeKafkaConsumerPool(Long clusterId) {
         lock.lock();
         try {
-            GenericObjectPool<KafkaConsumer> objectPool = KAFKA_CONSUMER_POOL.remove(clusterId);
+            GenericObjectPool<KafkaConsumer<String, String>> objectPool = KAFKA_CONSUMER_POOL.remove(clusterId);
             if (objectPool == null) {
                 return;
             }
@@ -118,11 +118,11 @@ public class KafkaClientPool {
         }
     }
 
-    public static KafkaConsumer borrowKafkaConsumerClient(ClusterDO clusterDO) {
+    public static KafkaConsumer<String, String> borrowKafkaConsumerClient(ClusterDO clusterDO) {
         if (ValidateUtils.isNull(clusterDO)) {
             return null;
         }
-        GenericObjectPool<KafkaConsumer> objectPool = KAFKA_CONSUMER_POOL.get(clusterDO.getId());
+        GenericObjectPool<KafkaConsumer<String, String>> objectPool = KAFKA_CONSUMER_POOL.get(clusterDO.getId());
         if (ValidateUtils.isNull(objectPool)) {
             initKafkaConsumerPool(clusterDO);
             objectPool = KAFKA_CONSUMER_POOL.get(clusterDO.getId());
@@ -139,11 +139,11 @@ public class KafkaClientPool {
         return null;
     }
 
-    public static void returnKafkaConsumerClient(Long physicalClusterId, KafkaConsumer kafkaConsumer) {
+    public static void returnKafkaConsumerClient(Long physicalClusterId, KafkaConsumer<String, String> kafkaConsumer) {
         if (ValidateUtils.isNull(physicalClusterId) || ValidateUtils.isNull(kafkaConsumer)) {
             return;
         }
-        GenericObjectPool<KafkaConsumer> objectPool = KAFKA_CONSUMER_POOL.get(physicalClusterId);
+        GenericObjectPool<KafkaConsumer<String, String>> objectPool = KAFKA_CONSUMER_POOL.get(physicalClusterId);
         if (ValidateUtils.isNull(objectPool)) {
             return;
         }
@@ -155,7 +155,7 @@ public class KafkaClientPool {
     }
 
     public static AdminClient getAdminClient(Long clusterId) {
-        AdminClient adminClient = AdminClientMap.get(clusterId);
+        AdminClient adminClient = ADMIN_CLIENT_MAP.get(clusterId);
         if (adminClient != null) {
             return adminClient;
         }
@@ -166,26 +166,26 @@ public class KafkaClientPool {
         Properties properties = createProperties(clusterDO, false);
         lock.lock();
         try {
-            adminClient = AdminClientMap.get(clusterId);
+            adminClient = ADMIN_CLIENT_MAP.get(clusterId);
             if (adminClient != null) {
                 return adminClient;
             }
-            AdminClientMap.put(clusterId, AdminClient.create(properties));
+            ADMIN_CLIENT_MAP.put(clusterId, AdminClient.create(properties));
         } catch (Exception e) {
             LOGGER.error("create kafka admin client failed, clusterId:{}.", clusterId, e);
         } finally {
             lock.unlock();
         }
-        return AdminClientMap.get(clusterId);
+        return ADMIN_CLIENT_MAP.get(clusterId);
     }
 
     public static void closeAdminClient(ClusterDO cluster) {
-        if (AdminClientMap.containsKey(cluster.getId())) {
-            AdminClientMap.get(cluster.getId()).close();
+        if (ADMIN_CLIENT_MAP.containsKey(cluster.getId())) {
+            ADMIN_CLIENT_MAP.get(cluster.getId()).close();
         }
     }
 
-    public static Properties createProperties(ClusterDO clusterDO, Boolean serialize) {
+    public static Properties createProperties(ClusterDO clusterDO, boolean serialize) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, clusterDO.getBootstrapServers());
         if (serialize) {
@@ -198,8 +198,7 @@ public class KafkaClientPool {
         if (ValidateUtils.isBlank(clusterDO.getSecurityProperties())) {
             return properties;
         }
-        Properties securityProperties = JSONObject.parseObject(clusterDO.getSecurityProperties(), Properties.class);
-        properties.putAll(securityProperties);
+        properties.putAll(JsonUtils.stringToObj(clusterDO.getSecurityProperties(), Properties.class));
         return properties;
     }
 }
