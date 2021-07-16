@@ -100,7 +100,7 @@ export class AddAlarm extends SearchAndFilterContainer {
         tval: [typeValue.app],
       });
     }
-    this.id && filterObj.filterList.forEach((item: any) => {
+    filterObj.filterList.forEach((item: any) => {
       if (item.tkey === 'cluster') {
         item.tval = [item.clusterIdentification]
       }
