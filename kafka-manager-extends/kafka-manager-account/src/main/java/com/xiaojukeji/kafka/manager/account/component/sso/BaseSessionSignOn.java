@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * @author zengqiao
@@ -52,15 +53,17 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
 
         //判断是否激活了LDAP验证, 若激活则也可使用ldap进行认证
         if(!ValidateUtils.isNull(accountLdapEnabled) && accountLdapEnabled){
-            //基于LDAP的登陆用户忽略大小写账户，统一做大写处理
-            dto.setUsername(dto.getUsername().toUpperCase());
             //去LDAP验证账密
-            if(!ldapAuthentication.authenticate(dto.getUsername(),dto.getPassword())){
+            Map<String, Object> ldapAttrsInfo;
+            ldapAttrsInfo = ldapAuthentication.authenticate(dto.getUsername(),dto.getPassword());
+            if(ValidateUtils.isNull(ldapAttrsInfo)){
                 return Result.buildFrom(ResultStatus.LDAP_AUTHENTICATION_FAILED);
             }
 
             if((ValidateUtils.isNull(accountResult) || ValidateUtils.isNull(accountResult.getData())) && authUserRegistration){
                 //自动注册
+                //使用Ldap:sAMAccountName替换用户输入的值
+                dto.setUsername(ldapAttrsInfo.get("sAMAccountName").toString());
                 AccountDO accountDO = new AccountDO();
                 accountDO.setUsername(dto.getUsername());
                 accountDO.setRole(AccountRoleEnum.getUserRoleEnum(authUserRegistrationRole).getRole());
