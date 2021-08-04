@@ -52,6 +52,8 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
 
         //判断是否激活了LDAP验证, 若激活则也可使用ldap进行认证
         if(!ValidateUtils.isNull(accountLdapEnabled) && accountLdapEnabled){
+            //基于LDAP的登陆用户忽略大小写账户，统一做大写处理
+            dto.setUsername(dto.getUsername().toUpperCase());
             //去LDAP验证账密
             if(!ldapAuthentication.authenticate(dto.getUsername(),dto.getPassword())){
                 return Result.buildFrom(ResultStatus.LDAP_AUTHENTICATION_FAILED);
