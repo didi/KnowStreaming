@@ -68,6 +68,9 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
                 accountDO.setUsername(dto.getUsername());
                 accountDO.setRole(AccountRoleEnum.getUserRoleEnum(authUserRegistrationRole).getRole());
                 accountDO.setPassword(dto.getPassword());
+                accountDO.setDisplayName(ldapAttrsInfo.get("displayName").toString());
+                accountDO.setDepartment(ldapAttrsInfo.get("department").toString());
+                accountDO.setMail(ldapAttrsInfo.get("mail").toString());
                 accountService.createAccount(accountDO);
             }
 

@@ -16,6 +16,9 @@ CREATE TABLE `account` (
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '0标识使用中，-1标识已废弃',
   `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `department` varchar(128) DEFAULT '' COMMENT '部门名',
+  `display_name` varchar(128) DEFAULT '' COMMENT '用户姓名',
+  `mail` varchar(128) DEFAULT '' COMMENT '邮箱',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='账号表';
