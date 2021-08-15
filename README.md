@@ -73,7 +73,7 @@
 
 
 ![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
-微信加群：关注公众号 云原生可观测性 回复 "Logi加群"
+微信加群：添加mike_zhangliang的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
 
 
 ## 4 项目成员
