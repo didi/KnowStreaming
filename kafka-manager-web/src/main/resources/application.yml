@@ -9,6 +9,8 @@ server:
 spring:
   application:
     name: kafkamanager
+  profiles:
+    active: dev
   datasource:
     kafka-manager:
       jdbc-url: jdbc:mysql://localhost:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
