@@ -42,6 +42,10 @@ spec:
             protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: configs
+            mountPath: /tmp/application.yml
+            subPath:  application.yml
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -54,3 +58,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: configs
+        configMap:
+          name: {{ include "didi-km.fullname" . }}-configs

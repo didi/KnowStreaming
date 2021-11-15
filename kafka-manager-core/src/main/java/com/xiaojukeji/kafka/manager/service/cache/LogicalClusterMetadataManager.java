@@ -160,7 +160,7 @@ public class LogicalClusterMetadataManager {
     public void flush() {
         List<LogicalClusterDO> logicalClusterDOList = logicalClusterService.listAll();
         if (ValidateUtils.isNull(logicalClusterDOList)) {
-            logicalClusterDOList = Collections.EMPTY_LIST;
+            logicalClusterDOList = Collections.emptyList();
         }
         Set<Long> inDbLogicalClusterIds = logicalClusterDOList.stream()
           .map(LogicalClusterDO::getId)
