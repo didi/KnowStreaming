@@ -1,7 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.utils.factory;
 
-import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -16,7 +16,7 @@ import java.util.Properties;
  * @author zengqiao
  * @date 20/8/24
  */
-public class KafkaConsumerFactory extends BasePooledObjectFactory<KafkaConsumer> {
+public class KafkaConsumerFactory extends BasePooledObjectFactory<KafkaConsumer<String, String>> {
     private ClusterDO clusterDO;
 
     public KafkaConsumerFactory(ClusterDO clusterDO) {
@@ -25,17 +25,17 @@ public class KafkaConsumerFactory extends BasePooledObjectFactory<KafkaConsumer>
 
     @Override
     public KafkaConsumer create() {
-        return new KafkaConsumer(createKafkaConsumerProperties(clusterDO));
+        return new KafkaConsumer<String, String>(createKafkaConsumerProperties(clusterDO));
     }
 
     @Override
-    public PooledObject<KafkaConsumer> wrap(KafkaConsumer obj) {
-        return new DefaultPooledObject<KafkaConsumer>(obj);
+    public PooledObject<KafkaConsumer<String, String>> wrap(KafkaConsumer<String, String> obj) {
+        return new DefaultPooledObject<>(obj);
     }
 
     @Override
-    public void destroyObject(final PooledObject<KafkaConsumer> p) throws Exception  {
-        KafkaConsumer kafkaConsumer = p.getObject();
+    public void destroyObject(final PooledObject<KafkaConsumer<String, String>> p) throws Exception  {
+        KafkaConsumer<String, String> kafkaConsumer = p.getObject();
         if (ValidateUtils.isNull(kafkaConsumer)) {
             return;
         }
@@ -57,7 +57,7 @@ public class KafkaConsumerFactory extends BasePooledObjectFactory<KafkaConsumer>
         if (ValidateUtils.isBlank(clusterDO.getSecurityProperties())) {
             return properties;
         }
-        properties.putAll(JSONObject.parseObject(clusterDO.getSecurityProperties(), Properties.class));
+        properties.putAll(JsonUtils.stringToObj(clusterDO.getSecurityProperties(), Properties.class));
         return properties;
     }
 }

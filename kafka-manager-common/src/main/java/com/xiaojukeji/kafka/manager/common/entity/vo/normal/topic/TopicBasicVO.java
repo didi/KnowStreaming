@@ -33,6 +33,9 @@ public class TopicBasicVO {
     @ApiModelProperty(value = "存储时间(ms)")
     private Long retentionTime;
 
+    @ApiModelProperty(value = "单分区数据保存大小(Byte)")
+    private Long retentionBytes;
+
     @ApiModelProperty(value = "创建时间")
     private Long createTime;
 
@@ -62,12 +65,20 @@ public class TopicBasicVO {
         this.clusterId = clusterId;
     }
 
-    public String getTopicCodeC() {
-        return topicCodeC;
+    public String getAppId() {
+        return appId;
     }
 
-    public void setTopicCodeC(String topicCodeC) {
-        this.topicCodeC = topicCodeC;
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public Integer getPartitionNum() {
@@ -86,52 +97,12 @@ public class TopicBasicVO {
         this.replicaNum = replicaNum;
     }
 
-    public Long getModifyTime() {
-        return modifyTime;
-    }
-
-    public void setModifyTime(Long modifyTime) {
-        this.modifyTime = modifyTime;
-    }
-
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
     public String getPrincipals() {
         return principals;
     }
 
     public void setPrincipals(String principals) {
         this.principals = principals;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    public void setBootstrapServers(String bootstrapServers) {
-        this.bootstrapServers = bootstrapServers;
-    }
-
-    public String getAppId() {
-        return appId;
-    }
-
-    public String getBootstrapServers() {
-        return bootstrapServers;
     }
 
     public Long getRetentionTime() {
@@ -142,12 +113,28 @@ public class TopicBasicVO {
         this.retentionTime = retentionTime;
     }
 
-    public String getAppName() {
-        return appName;
+    public Long getRetentionBytes() {
+        return retentionBytes;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
+    public void setRetentionBytes(Long retentionBytes) {
+        this.retentionBytes = retentionBytes;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
+    public Long getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(Long modifyTime) {
+        this.modifyTime = modifyTime;
     }
 
     public Integer getScore() {
@@ -156,6 +143,30 @@ public class TopicBasicVO {
 
     public void setScore(Integer score) {
         this.score = score;
+    }
+
+    public String getTopicCodeC() {
+        return topicCodeC;
+    }
+
+    public void setTopicCodeC(String topicCodeC) {
+        this.topicCodeC = topicCodeC;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getBootstrapServers() {
+        return bootstrapServers;
+    }
+
+    public void setBootstrapServers(String bootstrapServers) {
+        this.bootstrapServers = bootstrapServers;
     }
 
     public List<String> getRegionNameList() {
@@ -176,6 +187,7 @@ public class TopicBasicVO {
                 ", replicaNum=" + replicaNum +
                 ", principals='" + principals + '\'' +
                 ", retentionTime=" + retentionTime +
+                ", retentionBytes=" + retentionBytes +
                 ", createTime=" + createTime +
                 ", modifyTime=" + modifyTime +
                 ", score=" + score +

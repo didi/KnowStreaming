@@ -1,13 +1,13 @@
 
 ---
 
-![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
+![logikm_logo](https://user-images.githubusercontent.com/71620349/125024570-9e07a100-e0b3-11eb-8ebc-22e73e056771.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
 
 
-阅读本README文档，您可以了解到滴滴Logi-KafkaManager的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。<br>若滴滴Logi-KafkaManager已在贵司的生产环境进行使用，并想要获得官方更好地支持和指导，可以通过[`OCE认证`](http://obsuite.didiyun.com/open/openAuth)，加入官方交流平台。
+阅读本README文档，您可以了解到滴滴Logi-KafkaManager的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。
 
 
 ## 1 产品简介
@@ -73,15 +73,17 @@
 
 
 ![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
-微信加群：关注公众号 Obsuite(官方公众号) 回复 "Logi加群"  
+微信加群：添加mike_zhangliang的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
 
-![dingding_group](./docs/assets/images/common/dingding_group.jpg)  
-钉钉群ID：32821440
+## 4 知识星球
 
+![image](https://user-images.githubusercontent.com/51046167/140718512-5ab1b336-5c48-46c0-90bd-44b5c7e168c8.png)
 
-## 4 OCE认证
-OCE是一个认证机制和交流平台，为滴滴Logi-KafkaManager生产用户量身打造，我们会为OCE企业提供更好的技术支持，比如专属的技术沙龙、企业一对一的交流机会、专属的答疑群等，如果贵司Logi-KafkaManager上了生产，[快来加入吧](http://obsuite.didiyun.com/open/openAuth)
-
+✅知识星球首个【Kafka中文社区】，内测期免费加入～https://z.didi.cn/5gSF9  
+有问必答~！  
+互动有礼~！  
+1100+群友一起共建国内最专业的【Kafka中文社区】  
+PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况哦～！如使用版本、操作步骤、报错/警告信息等，方便嘉宾们快速解答～
 
 ## 5 项目成员
 
@@ -97,4 +99,4 @@ OCE是一个认证机制和交流平台，为滴滴Logi-KafkaManager生产用户
 
 ## 6 协议
 
-`kafka-manager`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
+`LogiKM`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)

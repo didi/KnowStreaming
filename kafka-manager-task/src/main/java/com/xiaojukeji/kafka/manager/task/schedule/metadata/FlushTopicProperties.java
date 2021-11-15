@@ -14,13 +14,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author zengqiao
  * @date 20/7/23
  */
 @Component
-public class FlushTopicRetentionTime {
+public class FlushTopicProperties {
     private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
     @Autowired
@@ -33,7 +34,7 @@ public class FlushTopicRetentionTime {
             try {
                 flush(clusterDO);
             } catch (Exception e) {
-                LOGGER.error("flush topic retention time failed, clusterId:{}.", clusterDO.getId(), e);
+                LOGGER.error("flush topic properties failed, clusterId:{}.", clusterDO.getId(), e);
             }
         }
     }
@@ -41,22 +42,20 @@ public class FlushTopicRetentionTime {
     private void flush(ClusterDO clusterDO) {
         ZkConfigImpl zkConfig = PhysicalClusterMetadataManager.getZKConfig(clusterDO.getId());
         if (ValidateUtils.isNull(zkConfig)) {
-            LOGGER.error("flush topic retention time, get zk config failed, clusterId:{}.", clusterDO.getId());
+            LOGGER.error("flush topic properties, get zk config failed, clusterId:{}.", clusterDO.getId());
             return;
         }
 
         for (String topicName: PhysicalClusterMetadataManager.getTopicNameList(clusterDO.getId())) {
             try {
-                Long retentionTime = KafkaZookeeperUtils.getTopicRetentionTime(zkConfig, topicName);
-                if (retentionTime == null) {
-                    LOGGER.warn("get topic retentionTime failed, clusterId:{} topicName:{}.",
-                            clusterDO.getId(), topicName);
+                Properties properties = KafkaZookeeperUtils.getTopicProperties(zkConfig, topicName);
+                if (ValidateUtils.isNull(properties)) {
+                    LOGGER.warn("get topic properties failed, clusterId:{} topicName:{}.", clusterDO.getId(), topicName);
                     continue;
                 }
-                PhysicalClusterMetadataManager.putTopicRetentionTime(clusterDO.getId(), topicName, retentionTime);
+                PhysicalClusterMetadataManager.putTopicProperties(clusterDO.getId(), topicName, properties);
             } catch (Exception e) {
-                LOGGER.error("get topic retentionTime failed, clusterId:{} topicName:{}.",
-                        clusterDO.getId(), topicName, e);
+                LOGGER.error("get topic properties failed, clusterId:{} topicName:{}.", clusterDO.getId(), topicName, e);
             }
         }
     }
