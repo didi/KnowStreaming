@@ -41,7 +41,8 @@ public class OrderConverter {
         }
         OrderVO orderVO = new OrderVO();
         CopyUtils.copyProperties(orderVO, orderDO);
-        orderVO.setGmtTime(orderDO.getGmtCreate());
+        orderVO.setGmtCreate(orderDO.getGmtCreate());
+        orderVO.setGmtHandle(orderDO.getGmtHandle());
         return orderVO;
     }
 
