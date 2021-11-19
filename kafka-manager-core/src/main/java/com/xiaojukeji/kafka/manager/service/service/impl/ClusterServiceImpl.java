@@ -19,6 +19,8 @@ import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,7 +212,7 @@ public class ClusterServiceImpl implements ClusterService {
 
         ZooKeeper zk = null;
         try {
-            zk = new ZooKeeper(zookeeper, 1000, null);
+            zk = new ZooKeeper(zookeeper, 1000, watchedEvent -> LOGGER.info(" receive event : " + watchedEvent.getType().name()));
             for (int i = 0; i < 15; ++i) {
                 if (zk.getState().isConnected()) {
                     // 只有状态是connected的时候，才表示地址是合法的
