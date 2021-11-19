@@ -36,6 +36,9 @@ public class TopicMineVO {
     @ApiModelProperty(value = "状态, 0:无权限, 1:可消费 2:可发送 3:可消费发送 4:可管理")
     private Integer access;
 
+    @ApiModelProperty(value = "备注")
+    private String description;
+
     public Long getClusterId() {
         return clusterId;
     }
@@ -106,6 +109,14 @@ public class TopicMineVO {
 
     public void setAccess(Integer access) {
         this.access = access;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
