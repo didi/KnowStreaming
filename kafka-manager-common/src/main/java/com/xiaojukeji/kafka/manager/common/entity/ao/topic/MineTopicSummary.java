@@ -25,6 +25,8 @@ public class MineTopicSummary {
 
     private Integer access;
 
+    private String description;
+
     public Long getLogicalClusterId() {
         return logicalClusterId;
     }
@@ -103,6 +105,14 @@ public class MineTopicSummary {
 
     public void setAccess(Integer access) {
         this.access = access;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
