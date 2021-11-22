@@ -44,6 +44,9 @@ public class AdminServiceImpl implements AdminService {
     private TopicManagerService topicManagerService;
 
     @Autowired
+    private TopicExpiredService topicExpiredService;
+
+    @Autowired
     private TopicService topicService;
 
     @Autowired
@@ -143,6 +146,7 @@ public class AdminServiceImpl implements AdminService {
 
         // 3. 数据库中删除topic
         topicManagerService.deleteByTopicName(clusterDO.getId(), topicName);
+        topicExpiredService.deleteByTopicName(clusterDO.getId(), topicName);
 
         // 4. 数据库中删除authority
         authorityService.deleteAuthorityByTopic(clusterDO.getId(), topicName);

@@ -75,4 +75,14 @@ public class TopicExpiredServiceImpl implements TopicExpiredService {
         }
         return ResultStatus.MYSQL_ERROR;
     }
+
+    @Override
+    public int deleteByTopicName(Long clusterId, String topicName) {
+        try {
+            return topicExpiredDao.deleteByName(clusterId, topicName);
+        } catch (Exception e) {
+            LOGGER.error("delete topic failed, clusterId:{} topicName:{}", clusterId, topicName, e);
+        }
+        return 0;
+    }
 }
