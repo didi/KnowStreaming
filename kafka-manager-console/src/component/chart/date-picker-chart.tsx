@@ -60,6 +60,22 @@ export class ChartWithDatePicker extends React.Component<IChartProps> {
   public changeChartOptions(options: any) {
     const noData = options.series.length ? false : true;
     this.setState({ noData });
+    options.tooltip.formatter = (params: any) => {
+      var res =
+        "<div style='margin-bottom:5px;padding:0 12px;width:100%;height:24px;line-height:24px;border-radius:3px;'><p>" +
+        params[0].data.time +
+        " </p></div>";
+      for (var i = 0; i < params.length; i++) {
+        res += `<div key=${params[i].seriesName} style="color: #fff;padding:0 12px;line-height: 24px">
+                  <span style="display:inline-block;margin-right:5px;border-radius:50%;width:10px;height:10px;background-color:${[
+            params[i].color,
+          ]};"></span>
+                  ${params[i].seriesName}
+                  ${params[i].data[params[i].seriesName]}
+                </div>`;
+      }
+      return res;
+    }
     this.chart.setOption(options, true);
   }
 
@@ -79,7 +95,7 @@ export class ChartWithDatePicker extends React.Component<IChartProps> {
   public render() {
     const { customerNode } = this.props;
     return (
-      <div className="status-box" style={{minWidth: '930px'}}>
+      <div className="status-box" style={{ minWidth: '930px' }}>
         <div className="status-graph">
           <div className="k-toolbar">
             {customerNode}

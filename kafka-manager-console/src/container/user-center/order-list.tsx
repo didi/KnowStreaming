@@ -115,11 +115,19 @@ export class OrderList extends SearchAndFilterContainer {
       status,
       {
         title: '申请时间',
-        dataIndex: 'gmtTime',
-        key: 'gmtTime',
-        sorter: (a: IBaseOrder, b: IBaseOrder) => b.gmtTime - a.gmtTime,
+        dataIndex: 'gmtCreate',
+        key: 'gmtCreate',
+        sorter: (a: IBaseOrder, b: IBaseOrder) => b.gmtCreate - a.gmtCreate,
         render: (t: number) => moment(t).format(timeFormat),
-      }, {
+      },
+      {
+        title: '审批时间',
+        dataIndex: 'gmtHandle',
+        key: 'gmtHandle',
+        sorter: (a: IBaseOrder, b: IBaseOrder) => b.gmtHandle - a.gmtHandle,
+        render: (t: number) => moment(t).format(timeFormat),
+      },
+      {
         title: '操作',
         key: 'operation',
         dataIndex: 'operation',
