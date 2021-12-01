@@ -27,8 +27,11 @@ public class OrderVO {
     @ApiModelProperty(value = "工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消")
     private Integer status;
 
-    @ApiModelProperty(value = "申请/审核时间")
-    private Date gmtTime;
+    @ApiModelProperty(value = "申请时间")
+    private Date gmtCreate;
+
+    @ApiModelProperty(value = "审核时间")
+    private Date gmtHandle;
 
     public Long getId() {
         return id;
@@ -70,12 +73,20 @@ public class OrderVO {
         this.status = status;
     }
 
-    public Date getGmtTime() {
-        return gmtTime;
+    public Date getGmtCreate() {
+        return gmtCreate;
     }
 
-    public void setGmtTime(Date gmtTime) {
-        this.gmtTime = gmtTime;
+    public void setGmtCreate(Date gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public Date getGmtHandle() {
+        return gmtHandle;
+    }
+
+    public void setGmtHandle(Date gmtHandle) {
+        this.gmtHandle = gmtHandle;
     }
 
     public String getApplicant() {
@@ -95,7 +106,7 @@ public class OrderVO {
                 ", applicant='" + applicant + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", gmtTime=" + gmtTime +
+                ", gmtTime=" + gmtCreate +
                 '}';
     }
 }

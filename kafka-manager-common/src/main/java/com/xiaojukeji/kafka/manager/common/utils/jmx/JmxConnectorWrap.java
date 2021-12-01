@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.common.utils.jmx;
 
+import com.xiaojukeji.kafka.manager.common.utils.BackoffUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,18 +147,16 @@ public class JmxConnectorWrap {
         long now = System.currentTimeMillis();
         while (true) {
             try {
-                if (System.currentTimeMillis() - now > 60000) {
-                    break;
-                }
                 int num = atomicInteger.get();
                 if (num <= 0) {
-                    Thread.sleep(2);
-                    continue;
+                    BackoffUtils.backoff(2);
                 }
-                if (atomicInteger.compareAndSet(num, num - 1)) {
+
+                if (atomicInteger.compareAndSet(num, num - 1) || System.currentTimeMillis() - now > 6000) {
                     break;
                 }
             } catch (Exception e) {
+                // ignore
             }
         }
     }

@@ -19,7 +19,7 @@
         <springframework.boot.version>2.1.1.RELEASE</springframework.boot.version>
         <spring-version>5.1.3.RELEASE</spring-version>
         <failOnMissingWebXml>false</failOnMissingWebXml>
-        <tomcat.version>8.5.66</tomcat.version>
+        <tomcat.version>8.5.72</tomcat.version>
     </properties>
 
     <dependencies>
@@ -109,8 +109,10 @@
     </dependencies>
 
     <build>
+        <finalName>kafka-manager</finalName>
         <plugins>
             <plugin>
+
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${springframework.boot.version}</version>
@@ -121,6 +123,7 @@
                         </goals>
                     </execution>
                 </executions>
+
             </plugin>
         </plugins>
     </build>
