@@ -1,15 +1,16 @@
 package com.xiaojukeji.kafka.manager.web.converters;
 
-import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderResult;
+import com.xiaojukeji.kafka.manager.bpm.common.OrderStatusEnum;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.BaseOrderDetailData;
+import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.common.AccountVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.order.OrderResultVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.order.OrderVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.order.detail.OrderDetailBaseVO;
 import com.xiaojukeji.kafka.manager.common.utils.CopyUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,8 +42,9 @@ public class OrderConverter {
         }
         OrderVO orderVO = new OrderVO();
         CopyUtils.copyProperties(orderVO, orderDO);
-        orderVO.setGmtCreate(orderDO.getGmtCreate());
-        orderVO.setGmtHandle(orderDO.getGmtHandle());
+        if (OrderStatusEnum.WAIT_DEAL.getCode().equals(orderDO.getStatus())) {
+            orderVO.setGmtHandle(null);
+        }
         return orderVO;
     }
 
