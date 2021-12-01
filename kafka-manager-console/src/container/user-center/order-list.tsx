@@ -118,14 +118,14 @@ export class OrderList extends SearchAndFilterContainer {
         dataIndex: 'gmtCreate',
         key: 'gmtCreate',
         sorter: (a: IBaseOrder, b: IBaseOrder) => b.gmtCreate - a.gmtCreate,
-        render: (t: number) => moment(t).format(timeFormat),
+        render: (t: number) => t ? moment(t).format(timeFormat) : '-',
       },
       {
         title: '审批时间',
         dataIndex: 'gmtHandle',
         key: 'gmtHandle',
         sorter: (a: IBaseOrder, b: IBaseOrder) => b.gmtHandle - a.gmtHandle,
-        render: (t: number) => moment(t).format(timeFormat),
+        render: (t: number) => t ? moment(t).format(timeFormat) : '-',
       },
       {
         title: '操作',
