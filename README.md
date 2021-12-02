@@ -72,20 +72,30 @@
 
 
 ![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
-微信加群：关注公众号 云原生可观测性 回复 "Logi加群"
+微信加群：添加mike_zhangliang的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
 
-## 4 项目成员
+## 4 知识星球
 
-### 4.1 内部核心人员
+![image](https://user-images.githubusercontent.com/51046167/140718512-5ab1b336-5c48-46c0-90bd-44b5c7e168c8.png)
+
+✅知识星球首个【Kafka中文社区】，内测期免费加入～https://z.didi.cn/5gSF9  
+有问必答~！  
+互动有礼~！  
+1600+群友一起共建国内最专业的【Kafka中文社区】  
+PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况哦～！如使用版本、操作步骤、报错/警告信息等，方便嘉宾们快速解答～
+
+## 5 项目成员
+
+### 5.1 内部核心人员
 
 `iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`
 
 
-### 4.2 外部贡献者
+### 5.2 外部贡献者
 
 `fangjunyu`、`zhoutaiyang`
 
 
-## 5 协议
+## 6 协议
 
 `LogiKM`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)

@@ -26,11 +26,13 @@
         <java_target_version>1.8</java_target_version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file_encoding>UTF-8</file_encoding>
-        <tomcat.version>8.5.66</tomcat.version>
+        <tomcat.version>8.5.72</tomcat.version>
+        <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
+
     </properties>
 
     <modules>
-        <module>logikm-console</module>
+<!--        <module>logikm-console</module>-->
         <module>logikm-common</module>
         <module>logikm-persistence</module>
         <module>logikm-core</module>
@@ -42,6 +44,7 @@
         <module>logikm-extends/logikm-openapi</module>
         <module>logikm-task</module>
         <module>logikm-rest</module>
+        <module>distribution</module>
     </modules>
 
     <dependencyManagement>
@@ -231,4 +234,16 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -1,6 +1,6 @@
 {
-  "name": "LogiKM",
-  "version": "2.4.3",
+  "name": "logi-kafka",
+  "version": "2.5.0",
   "description": "",
   "scripts": {
     "start": "webpack-dev-server",
