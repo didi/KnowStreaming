@@ -17,4 +17,6 @@ public interface TopicExpiredDao {
     int replace(TopicExpiredDO expiredDO);
 
     TopicExpiredDO getByTopic(Long clusterId, String topicName);
+
+    int deleteByName(Long clusterId, String topicName);
 }

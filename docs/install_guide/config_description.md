@@ -58,6 +58,9 @@ custom:
 task:
   op:
     sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
+    order-auto-exec:          # 工单自动化审批线程的开关
+      topic-enabled: false      # Topic工单自动化审批开关, false:关闭自动化审批, true:开启
+      app-enabled: false        # App工单自动化审批开关, false:关闭自动化审批, true:开启
 
 account: # ldap相关的配置, 社区版本暂时支持不够完善，可以先忽略，欢迎贡献代码对这块做优化
   ldap:

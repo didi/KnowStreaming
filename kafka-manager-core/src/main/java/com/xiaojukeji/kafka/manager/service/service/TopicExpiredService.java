@@ -13,4 +13,12 @@ public interface TopicExpiredService {
     List<TopicExpiredData> getExpiredTopicDataList(String username);
 
     ResultStatus retainExpiredTopic(Long physicalClusterId, String topicName, Integer retainDays);
+
+    /**
+     * 通过topictopic名称删除
+     * @param clusterId 集群id
+     * @param topicName topic名称
+     * @return int
+     */
+    int deleteByTopicName(Long clusterId, String topicName);
 }

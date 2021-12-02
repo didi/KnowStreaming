@@ -50,4 +50,12 @@ public class TopicExpiredDaoImpl implements TopicExpiredDao {
         params.put("topicName", topicName);
         return sqlSession.selectOne("TopicExpiredDao.getByTopic", params);
     }
+
+    @Override
+    public int deleteByName(Long clusterId, String topicName) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("clusterId", clusterId);
+        params.put("topicName", topicName);
+        return sqlSession.delete("TopicExpiredDao.deleteByName", params);
+    }
 }

@@ -29,6 +29,7 @@ public class TopicMineConverter {
             vo.setClusterName(data.getLogicalClusterName());
             vo.setBytesIn(data.getBytesIn());
             vo.setBytesOut(data.getBytesOut());
+            vo.setDescription(data.getDescription());
             voList.add(vo);
         }
         return voList;
