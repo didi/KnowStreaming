@@ -7,4 +7,5 @@ import com.xiaojukeji.kafka.manager.service.config.BaseTest;
  * @Date 2021/12/6
  */
 public class ConfigServiceTest extends BaseTest {
+
 }
