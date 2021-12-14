@@ -134,11 +134,11 @@ public class RegionServiceImpl implements RegionService {
 
 
     @Override
-    public ResultStatus updateRegion(Long clusterId, String newBrokerList) {
-        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isExistBlank(newBrokerList)) {
+    public ResultStatus updateRegion(Long regionId, String newBrokerList) {
+        if (ValidateUtils.isNull(regionId) || ValidateUtils.isExistBlank(newBrokerList)) {
             return ResultStatus.PARAM_ILLEGAL;
         }
-        RegionDO regionDO = getById(clusterId);
+        RegionDO regionDO = getById(regionId);
         if (ValidateUtils.isNull(regionDO)) {
             return ResultStatus.CLUSTER_NOT_EXIST;
         }

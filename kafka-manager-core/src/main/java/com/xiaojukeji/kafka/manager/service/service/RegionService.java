@@ -54,12 +54,12 @@ public interface RegionService {
     Map<Integer, RegionDO> convert2BrokerIdRegionMap(List<RegionDO> regionDOList);
 
     /**
-     * 更新逻辑集群容量
-     * @param clusterId 集群id
+     * 根据RegionId更新Region
+     * @param regionId region的id
      * @param newBrokerList 新的broker列表
      * @return ResultStatus
      */
-    ResultStatus updateRegion(Long clusterId, String newBrokerList);
+    ResultStatus updateRegion(Long regionId, String newBrokerList);
 
     /**
      * 获取空闲的region的broker列表
