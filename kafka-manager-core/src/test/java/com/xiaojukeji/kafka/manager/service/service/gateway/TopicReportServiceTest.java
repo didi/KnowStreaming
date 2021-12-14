@@ -40,8 +40,15 @@ public class TopicReportServiceTest extends BaseTest {
     public void getNeedReportTopicTest(TopicReportDO topicReportDO) {
         // 数据库中插入数据
         int replace = topicReportDao.replace(topicReportDO);
+
         List<TopicReportDO> result = topicReportService.getNeedReportTopic(1L);
         Assert.assertEquals(result.size(), 1);
         Assert.assertEquals(result.get(0).toString(), topicReportDO.toString());
+    }
+
+    @Test(dataProvider = "provideTopicReportDO")
+    public void replaceTest(TopicReportDO topicReportDO) {
+        int replace = topicReportDao.replace(topicReportDO);
+        Assert.assertEquals(replace, 2);
     }
 }
