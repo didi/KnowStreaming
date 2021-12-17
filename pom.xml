@@ -27,12 +27,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file_encoding>UTF-8</file_encoding>
         <tomcat.version>8.5.72</tomcat.version>
+        <log4j2.version>2.16.0</log4j2.version>
         <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
-
     </properties>
 
     <modules>
-        <module>kafka-manager-console</module>
+<!--        <module>kafka-manager-console</module>-->
         <module>kafka-manager-common</module>
         <module>kafka-manager-dao</module>
         <module>kafka-manager-core</module>
