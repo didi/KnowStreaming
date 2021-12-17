@@ -114,7 +114,7 @@ public class DidiHealthScoreStrategy extends AbstractHealthScoreStrategy {
             return Constant.INVALID_CODE;
         }
 
-        List<Integer> brokerIdList = new ArrayList<>(metadata.getBrokerIdSet().size());
+        List<Integer> brokerIdList = new ArrayList<>(metadata.getBrokerIdSet());
 
         FutureTask<Integer>[] taskList = new FutureTask[brokerIdList.size()];
         for (int i = 0; i < brokerIdList.size(); ++i) {
