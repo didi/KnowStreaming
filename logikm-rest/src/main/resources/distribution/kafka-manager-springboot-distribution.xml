@@ -34,7 +34,7 @@
 <!--
         <include>*release*.jar</include>
 -->
-        <include>kafka-manager-web*.jar</include>
+        <include>logikm-rest*.jar</include>
 
        </includes>
       <excludes>

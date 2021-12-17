@@ -109,7 +109,7 @@
     </dependencies>
 
     <build>
-        <finalName>kafka-manager</finalName>
+        <finalName>logikm</finalName>
         <plugins>
             <plugin>
 

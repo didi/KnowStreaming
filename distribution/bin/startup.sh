@@ -31,7 +31,7 @@ fi
 
 
 
-export WEB_SERVER="kafka-manager"
+export WEB_SERVER="logikm"
 export JAVA_HOME
 export JAVA="$JAVA_HOME/bin/java"
 export BASE_DIR=`cd $(dirname $0)/..; pwd`

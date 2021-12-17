@@ -5,9 +5,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <artifactId>kafka-manager</artifactId>
+        <artifactId>logikm</artifactId>
         <groupId>com.xiaojukeji.kafka</groupId>
-        <version>${kafka-manager.revision}</version>
+        <version>${logikm.revision}</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -19,20 +19,20 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>kafka-manager-web</artifactId>
-            <version>${kafka-manager.revision}</version>
+            <artifactId>logikm-rest</artifactId>
+            <version>${logikm.revision}</version>
         </dependency>
     </dependencies>
 
     <profiles>
 
         <profile>
-            <id>release-kafka-manager</id>
+            <id>release-logikm</id>
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
-                    <artifactId>kafka-manager-web</artifactId>
-                    <version>${kafka-manager.revision}</version>
+                    <artifactId>logikm-rest</artifactId>
+                    <version>${logikm.revision}</version>
                 </dependency>
             </dependencies>
             <build>
@@ -57,7 +57,7 @@
                         </executions>
                     </plugin>
                 </plugins>
-                <finalName>kafka-manager</finalName>
+                <finalName>logikm</finalName>
             </build>
         </profile>
     </profiles>
