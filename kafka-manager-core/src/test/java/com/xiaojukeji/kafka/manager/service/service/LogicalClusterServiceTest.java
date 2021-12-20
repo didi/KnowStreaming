@@ -93,14 +93,27 @@ public class LogicalClusterServiceTest extends BaseTest {
         return appDO;
     }
 
-    @Test(description = "创建逻辑集群时参数错误")
-    public void createLogicalCluster2paramIllegalTest() {
+    @Test(description = "测试创建逻辑集群")
+    public void createLogicalCluster() {
+        // 创建逻辑集群时参数错误
+        createLogicalCluster2paramIllegalTest();
+        // 创建逻辑集群时,region已使用
+        createLogicalCluster2existRegionAlreadyInUseTest();
+        // 创建逻辑集群时,物理集群不存在
+        createLogicalCluster2PhysicalClusterNotExistTest();
+        // 创建逻辑集群时,不存在region已使用
+        createLogicalCluster2NotexistRegionAlreadyInUseTest();
+        // 创建逻辑集群成功
+        createLogicalCluster2SuccessTest();
+    }
+
+    private void createLogicalCluster2paramIllegalTest() {
         ResultStatus result = logicalClusterService.createLogicalCluster(null);
         Assert.assertEquals(result.getCode(), ResultStatus.PARAM_ILLEGAL.getCode());
     }
 
-    @Test(dataProvider = "provideLogicalClusterDO", description = "创建逻辑集群时,region已使用")
-    public void createLogicalCluster2existRegionAlreadyInUseTest(LogicalClusterDO logicalClusterDO) {
+    private void createLogicalCluster2existRegionAlreadyInUseTest() {
+        LogicalClusterDO logicalClusterDO = getLogicalClusterDO();
         // 物理集群Id为null
         logicalClusterDO.setClusterId(null);
         ResultStatus result1 = logicalClusterService.createLogicalCluster(logicalClusterDO);
@@ -118,8 +131,8 @@ public class LogicalClusterServiceTest extends BaseTest {
         Assert.assertEquals(result3.getCode(), ResultStatus.RESOURCE_ALREADY_USED.getCode());
     }
 
-    @Test(dataProvider = "provideLogicalClusterDO", description = "创建逻辑集群时,物理集群不存在")
-    public void createLogicalCluster2PhysicalClusterNotExistTest(LogicalClusterDO logicalClusterDO) {
+    private void createLogicalCluster2PhysicalClusterNotExistTest() {
+        LogicalClusterDO logicalClusterDO = getLogicalClusterDO();
         Mockito.when(logicalClusterDao.insert(Mockito.any())).thenReturn(1);
         // 不存在该物理集群情况
         logicalClusterDO.setClusterId(100L);
@@ -128,8 +141,8 @@ public class LogicalClusterServiceTest extends BaseTest {
         Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    @Test(dataProvider = "provideLogicalClusterDO", description = "创建逻辑集群时,不存在region已使用")
-    public void createLogicalCluster2NotexistRegionAlreadyInUseTest(LogicalClusterDO logicalClusterDO) {
+    private void createLogicalCluster2NotexistRegionAlreadyInUseTest() {
+        LogicalClusterDO logicalClusterDO = getLogicalClusterDO();
         Mockito.when(logicalClusterDao.insert(Mockito.any())).thenReturn(1);
         // region没有存在使用
         ResultStatus result2 = logicalClusterService.createLogicalCluster(logicalClusterDO);
@@ -137,16 +150,17 @@ public class LogicalClusterServiceTest extends BaseTest {
         Assert.assertEquals(result2.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    @Test(dataProvider = "provideLogicalClusterDO", description = "创建逻辑集群时,不存在region已使用")
-    public void createLogicalCluster2DuplicateKeyTest(LogicalClusterDO logicalClusterDO) {
+    @Test(description = "创建逻辑集群时,不存在region已使用(键重复)")
+    private void createLogicalCluster2DuplicateKeyTest() {
+        LogicalClusterDO logicalClusterDO = getLogicalClusterDO();
         Mockito.when(logicalClusterDao.insert(Mockito.any())).thenThrow(DuplicateKeyException.class);
         logicalClusterDO.setRegionList("100");
         ResultStatus result3 = logicalClusterService.createLogicalCluster(logicalClusterDO);
         Assert.assertEquals(result3.getCode(), ResultStatus.RESOURCE_ALREADY_EXISTED.getCode());
     }
 
-    @Test(dataProvider = "provideLogicalClusterDO", description = "创建逻辑集群成功")
-    public void createLogicalCluster2SuccessTest(LogicalClusterDO logicalClusterDO) {
+    private void createLogicalCluster2SuccessTest() {
+        LogicalClusterDO logicalClusterDO = getLogicalClusterDO();
         Mockito.when(logicalClusterDao.insert(Mockito.any())).thenReturn(1);
 
         ResultStatus result3 = logicalClusterService.createLogicalCluster(logicalClusterDO);
