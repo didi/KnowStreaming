@@ -419,6 +419,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             authorityDO.setTopicName(topicName);
             authorityDO.setAccess(TopicAuthorityEnum.READ_WRITE.getCode());
             authorityService.addAuthority(authorityDO);
+            return ResultStatus.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("modify topic failed, clusterId:{} topicName:{} description:{} operator:{} ",
                     clusterId, topicName, description, operator, e);
