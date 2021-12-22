@@ -28,7 +28,7 @@ public class ZookeeperServiceImpl implements ZookeeperService {
 
     @Override
     public Result openTopicJmx(Long clusterId, String topicName, TopicJmxSwitch jmxSwitch) {
-        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isNull(topicName) || ValidateUtils.isNull(jmxSwitch)) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isNull(topicName)) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
 

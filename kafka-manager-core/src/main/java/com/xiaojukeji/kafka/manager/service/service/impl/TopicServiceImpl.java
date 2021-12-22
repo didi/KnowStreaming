@@ -247,11 +247,11 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public List<TopicPartitionDTO> getTopicPartitionDTO(ClusterDO clusterDO, String topicName, Boolean needDetail) {
         if (ValidateUtils.isNull(clusterDO) || ValidateUtils.isNull(topicName)) {
-            return null;
+            return new ArrayList<>();
         }
         TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterDO.getId(), topicName);
         if (ValidateUtils.isNull(topicMetadata)) {
-            return null;
+            return new ArrayList<>();
         }
 
         List<PartitionState> partitionStateList = KafkaZookeeperUtils.getTopicPartitionState(
@@ -528,7 +528,7 @@ public class TopicServiceImpl implements TopicService {
     public List<PartitionOffsetDTO> getPartitionOffsetList(ClusterDO clusterDO, String topicName, Long timestamp) {
         TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterDO.getId(), topicName);
         if (topicMetadata == null) {
-            return null;
+            return new ArrayList<>();
         }
         Map<TopicPartition, Long> timestampsToSearch = new HashMap<>();
         for (Integer partitionId : topicMetadata.getPartitionMap().getPartitions().keySet()) {
@@ -572,7 +572,7 @@ public class TopicServiceImpl implements TopicService {
                 kafkaConsumer.close();
             }
         }
-        return null;
+        return new ArrayList<>();
     }
 
     private List<String> fetchTopicData(KafkaConsumer kafkaConsumer, ClusterDO clusterDO, String topicName, TopicDataSampleDTO reqObj) {
@@ -585,7 +585,7 @@ public class TopicServiceImpl implements TopicService {
             tpList.add(new TopicPartition(topicName, partitionId));
         }
         if (ValidateUtils.isEmptyList(tpList)) {
-            return null;
+            return new ArrayList<>();
         }
 
         kafkaConsumer.assign(tpList);
