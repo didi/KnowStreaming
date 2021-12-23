@@ -31,6 +31,10 @@ import java.util.*;
  */
 public class LogicalClusterServiceTest extends BaseTest {
 
+    private final static Long INVALID_CLUSTER_ID = -1L;
+
+    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+
     @Autowired
     @InjectMocks
     private LogicalClusterService logicalClusterService;
@@ -52,8 +56,8 @@ public class LogicalClusterServiceTest extends BaseTest {
     @DataProvider(name = "provideLogicalClusterDO")
     public Object[][] provideLogicalClusterDO() {
         LogicalClusterDO logicalClusterDO = new LogicalClusterDO();
-        logicalClusterDO.setId(100L);
-        logicalClusterDO.setClusterId(1L);
+        logicalClusterDO.setId(INVALID_CLUSTER_ID);
+        logicalClusterDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         logicalClusterDO.setIdentification("moduleTestLogicalCluster");
         logicalClusterDO.setName("moduleTestLogicalCluster");
         logicalClusterDO.setMode(1);
@@ -66,8 +70,8 @@ public class LogicalClusterServiceTest extends BaseTest {
 
     private LogicalClusterDO getLogicalClusterDO() {
         LogicalClusterDO logicalClusterDO = new LogicalClusterDO();
-        logicalClusterDO.setId(100L);
-        logicalClusterDO.setClusterId(1L);
+        logicalClusterDO.setId(INVALID_CLUSTER_ID);
+        logicalClusterDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         logicalClusterDO.setIdentification("moduleTestLogicalCluster");
         logicalClusterDO.setName("moduleTestLogicalCluster");
         logicalClusterDO.setMode(0);
@@ -120,7 +124,7 @@ public class LogicalClusterServiceTest extends BaseTest {
         Assert.assertEquals(result1.getCode(), ResultStatus.RESOURCE_ALREADY_USED.getCode());
 
         // regionList为空情况
-        logicalClusterDO.setClusterId(1L);
+        logicalClusterDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         logicalClusterDO.setRegionList("");
         ResultStatus result2 = logicalClusterService.createLogicalCluster(logicalClusterDO);
         Assert.assertEquals(result2.getCode(), ResultStatus.RESOURCE_ALREADY_USED.getCode());
@@ -135,7 +139,7 @@ public class LogicalClusterServiceTest extends BaseTest {
         LogicalClusterDO logicalClusterDO = getLogicalClusterDO();
         Mockito.when(logicalClusterDao.insert(Mockito.any())).thenReturn(1);
         // 不存在该物理集群情况
-        logicalClusterDO.setClusterId(100L);
+        logicalClusterDO.setClusterId(INVALID_CLUSTER_ID);
         ResultStatus result1 = logicalClusterService.createLogicalCluster(logicalClusterDO);
         Assert.assertNotEquals(result1.getCode(), ResultStatus.RESOURCE_ALREADY_USED.getCode());
         Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
@@ -205,7 +209,7 @@ public class LogicalClusterServiceTest extends BaseTest {
     private void deleteById2ResourceNotExistTest() {
         Mockito.when(logicalClusterDao.deleteById(Mockito.anyLong())).thenReturn(-1);
 
-        ResultStatus resultStatus = logicalClusterService.deleteById(100L);
+        ResultStatus resultStatus = logicalClusterService.deleteById(INVALID_CLUSTER_ID);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.RESOURCE_NOT_EXIST.getCode());
     }
 
@@ -235,7 +239,7 @@ public class LogicalClusterServiceTest extends BaseTest {
 
     @Test(dataProvider = "provideLogicalClusterDO", description = "修改集群时无对应逻辑集群")
     public void updateById2ResourceNotExistTest(LogicalClusterDO logicalClusterDO) {
-        logicalClusterDO.setId(100L);
+        logicalClusterDO.setId(INVALID_CLUSTER_ID);
         ResultStatus resultStatus2 = logicalClusterService.updateById(logicalClusterDO);
         Assert.assertEquals(resultStatus2.getCode(), ResultStatus.RESOURCE_NOT_EXIST.getCode());
     }
@@ -250,7 +254,7 @@ public class LogicalClusterServiceTest extends BaseTest {
         Assert.assertEquals(result1.getCode(), ResultStatus.RESOURCE_ALREADY_USED.getCode());
 
         // regionList为空情况
-        logicalClusterDO.setClusterId(1L);
+        logicalClusterDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         logicalClusterDO.setRegionList("");
         ResultStatus result2 = logicalClusterService.updateById(logicalClusterDO);
         Assert.assertEquals(result2.getCode(), ResultStatus.RESOURCE_ALREADY_USED.getCode());
@@ -315,7 +319,7 @@ public class LogicalClusterServiceTest extends BaseTest {
     }
 
     private void getLogicalCluster2NullTest() {
-        LogicalCluster logicalCluster = logicalClusterService.getLogicalCluster(100L);
+        LogicalCluster logicalCluster = logicalClusterService.getLogicalCluster(INVALID_CLUSTER_ID);
         Assert.assertNull(logicalCluster);
     }
 
