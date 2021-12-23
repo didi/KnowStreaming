@@ -416,9 +416,6 @@ public class TopicServiceImpl implements TopicService {
                     topicDO,
                     appDO
             );
-            if (ValidateUtils.isNull(overview)) {
-                continue;
-            }
             dtoList.add(overview);
         }
 
