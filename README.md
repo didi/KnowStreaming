@@ -5,7 +5,7 @@
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
-
+`LogiKM开源至今备受关注，考虑到开源项目应该更贴合Apache Kafka未来发展方向，经项目组慎重考虑，预计22年5月份将其品牌升级成Know Streaming，届时项目名称和Logo也将统一更新，感谢大家一如既往的支持，敬请期待！`
 
 阅读本README文档，您可以了解到滴滴Logi-KafkaManager的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。
 
@@ -71,25 +71,23 @@
 
 ## 3 滴滴Logi开源用户交流群
 
-
 ![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
-微信加群：添加mike_zhangliang的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
+微信加群：添加mike_zhangliang、danke-xie的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
 
 ## 4 知识星球
 
-![image](https://user-images.githubusercontent.com/51046167/140718512-5ab1b336-5c48-46c0-90bd-44b5c7e168c8.png)
+<img width="447" alt="image" src="https://user-images.githubusercontent.com/71620349/147314042-843a371a-48c0-4d9a-a65e-ca40236f3300.png">
 
-✅知识星球首个【Kafka中文社区】，内测期免费加入～https://z.didi.cn/5gSF9  
+✅我们正在组建国内最大最权威的【Kafka中文社区】，在这里你可以结交各大互联网Kafka大佬以及近2000+Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待您的加入中～https://z.didi.cn/5gSF9  
 有问必答~！  
 互动有礼~！  
-1600+群友一起共建国内最专业的【Kafka中文社区】  
-PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况哦～！如使用版本、操作步骤、报错/警告信息等，方便嘉宾们快速解答～
+PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况哦～！如使用版本、操作步骤、报错/警告信息等，方便大V们快速解答～
 
 ## 5 项目成员
 
 ### 5.1 内部核心人员
 
-`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`
+`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`xiepeng`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`
 
 
 ### 5.2 外部贡献者
