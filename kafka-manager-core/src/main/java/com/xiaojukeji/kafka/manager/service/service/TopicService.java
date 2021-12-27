@@ -104,6 +104,13 @@ public interface TopicService {
      */
     List<TopicBrokerDTO> getTopicBrokerList(Long clusterId, String topicName);
 
+    /**
+     * 判断topic是否有数据写入，即分区topic的offset变化
+     * @param physicalClusterId 物理集群Id
+     * @param topicName topic名称
+     * @param latestTime 离当前多久开始计算
+     * @return
+     */
     Result<TopicOffsetChangedEnum> checkTopicOffsetChanged(Long physicalClusterId, String topicName, Long latestTime);
 
 }
