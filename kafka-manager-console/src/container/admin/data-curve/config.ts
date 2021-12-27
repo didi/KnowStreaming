@@ -1,4 +1,3 @@
-import { EChartOption } from 'echarts/lib/echarts';
 import moment from 'moment';
 import { ICurve } from 'container/common-curve/config';
 import { adminMonitor } from 'store/admin-monitor';
@@ -124,7 +123,7 @@ export interface ICurveType {
   type: curveType;
   title: string;
   curves: ICurve[];
-  parser: (option: ICurve, data: any[]) => EChartOption;
+  parser: (option: ICurve, data: any[]) => any;
 }
 
 export const byteTypeCurves: ICurveType[] = [

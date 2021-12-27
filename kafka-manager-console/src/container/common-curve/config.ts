@@ -1,5 +1,4 @@
-import { EChartOption } from 'echarts/lib/echarts';
-import moment from 'moment';
+import { EChartsOption } from 'echarts';
 
 export interface ILineData {
   value: number;
@@ -9,7 +8,7 @@ export interface ICurve {
   title?: string;
   path: string;
   colors: string[];
-  parser?: (option: ICurve, data: ILineData) => EChartOption;
+  parser?: (option: ICurve, data: ILineData) => EChartsOption;
   message?: string;
   unit?: string;
   api?: any;
@@ -69,13 +68,13 @@ export const noAxis = {
   },
 };
 
-export const getHight = (options: EChartOption) => {
-  let grid = options ? options.grid as EChartOption.Grid : null;
+export const getHight = (options: any) => {
+  let grid = options ? options.grid : null;
   if (!options || !grid) grid = baseLineGrid;
   return Number(grid.height) + getLegendHight(options) + Number(grid.top) + LEGEND_PADDING + UNIT_HEIGHT;
 };
 
-export const getLegendHight = (options: EChartOption) => {
+export const getLegendHight = (options: any) => {
   if (!options) return 0;
   if (options.legend.show === false) return 0;
   const legendHight = options.legend.textStyle.lineHeight + defaultLegendPadding;
