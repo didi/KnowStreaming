@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -81,16 +82,19 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
     }
 
     public static String getUserName(){
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
         String username = null;
-        if (TrickLoginConstant.TRICK_LOGIN_SWITCH_ON.equals(request.getHeader(TrickLoginConstant.TRICK_LOGIN_SWITCH))) {
-            // trick登录方式的获取用户
-            username = request.getHeader(TrickLoginConstant.TRICK_LOGIN_USER);
-        } else {
-            // 走页面登录方式登录的获取用户
-            HttpSession session = request.getSession();
-            username = (String) session.getAttribute(LoginConstant.SESSION_USERNAME_KEY);
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (!ValidateUtils.isNull(requestAttributes)) {
+            HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+
+            if (TrickLoginConstant.TRICK_LOGIN_SWITCH_ON.equals(request.getHeader(TrickLoginConstant.TRICK_LOGIN_SWITCH))) {
+                // trick登录方式的获取用户
+                username = request.getHeader(TrickLoginConstant.TRICK_LOGIN_USER);
+            } else {
+                // 走页面登录方式登录的获取用户
+                HttpSession session = request.getSession();
+                username = (String) session.getAttribute(LoginConstant.SESSION_USERNAME_KEY);
+            }
         }
 
         if (ValidateUtils.isNull(username)) {
