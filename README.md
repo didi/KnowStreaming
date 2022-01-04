@@ -65,7 +65,7 @@
 - [7年沉淀之作--滴滴Logi日志服务套件](https://mp.weixin.qq.com/s/-KQp-Qo3WKEOc9wIR2iFnw)
 - [滴滴Logi-KafkaManager 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
 - [滴滴Logi-KafkaManager 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
-- [滴滴Logi-KafkaManager 系列视频教程](https://mp.weixin.qq.com/s/9X7gH0tptHPtfjPPSdGO8g)
+- [滴滴Logi-KafkaManager 系列视频教程](https://space.bilibili.com/442531657/channel/seriesdetail?sid=571649)
 - [kafka实践（十五）：滴滴开源Kafka管控平台 Logi-KafkaManager研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
 - [kafka的灵魂伴侣Logi-KafkaManager系列文章专栏 --石臻](https://blog.csdn.net/u010634066/category_10977588.html)
 
