@@ -62,6 +62,9 @@ public class DeleteTopicOrder extends AbstractTopicOrder {
                 OrderExtensionDeleteTopicDTO.class);
         orderDetailDTO.setTopicName(orderExtensionDTO.getTopicName());
         ClusterNameDTO clusterNameDTO = clusterService.getClusterName(orderExtensionDTO.getClusterId());
+        if(ValidateUtils.isNull(clusterNameDTO)) {
+            return orderDetailDTO;
+        }
         orderDetailDTO.setLogicalClusterId(clusterNameDTO.getLogicalClusterId());
         orderDetailDTO.setLogicalClusterName(clusterNameDTO.getLogicalClusterName());
         orderDetailDTO.setPhysicalClusterId(clusterNameDTO.getPhysicalClusterId());
@@ -129,6 +132,8 @@ public class DeleteTopicOrder extends AbstractTopicOrder {
         if (!PhysicalClusterMetadataManager.isTopicExistStrictly(physicalClusterId, extensionDTO.getTopicName())) {
             return ResultStatus.TOPIC_NOT_EXIST;
         }
+
+        // 最近topic是否还有生产或者消费操作
         if (connectionService.isExistConnection(
                 physicalClusterId,
                 extensionDTO.getTopicName(),
