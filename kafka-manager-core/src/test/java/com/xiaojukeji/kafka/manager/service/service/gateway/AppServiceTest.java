@@ -27,13 +27,13 @@ public class AppServiceTest extends BaseTest {
     public static Object[][] provideAppDO() {
         AppDO appDO = new AppDO();
         appDO.setId(4L);
-        appDO.setAppId("testAppId");
-        appDO.setName("testApp");
-        appDO.setPassword("testApp");
+        appDO.setAppId("moduleTestAppId");
+        appDO.setName("moduleTestApp");
+        appDO.setPassword("moduleTestApp");
         appDO.setType(1);
         appDO.setApplicant("admin");
         appDO.setPrincipals("admin");
-        appDO.setDescription("testApp");
+        appDO.setDescription("moduleTestApp");
         appDO.setCreateTime(new Date(1638786493173L));
         appDO.setModifyTime(new Date(1638786493173L));
         return new Object[][] {{appDO}};
@@ -59,7 +59,6 @@ public class AppServiceTest extends BaseTest {
         addApp2MysqlErrorTest();
     }
 
-    @Rollback(false)
     private void addApp2SuccessTest(AppDO appDO) {
         ResultStatus addAppResult = appService.addApp(appDO, "admin");
         Assert.assertEquals(addAppResult.getCode(), ResultStatus.SUCCESS.getCode());
@@ -70,7 +69,6 @@ public class AppServiceTest extends BaseTest {
         Assert.assertEquals(addAppResult.getCode(), ResultStatus.RESOURCE_ALREADY_EXISTED.getCode());
     }
 
-    @Rollback()
     private void addApp2MysqlErrorTest() {
         ResultStatus addAppResult = appService.addApp(new AppDO(), "admin");
         Assert.assertEquals(addAppResult.getCode(), ResultStatus.MYSQL_ERROR.getCode());
@@ -78,20 +76,24 @@ public class AppServiceTest extends BaseTest {
 
     @Test(dataProvider = "provideAppDO")
     public void deleteAppTest(AppDO appDO) {
+        appService.addApp(appDO, "admin");
+
         // 测试删除app成功
         deleteApp2SuccessTest(appDO);
         // 测试删除app失败
-        deleteApp2FailureTest();
+        deleteApp2FailureTest(appDO);
     }
 
-    @Rollback()
     private void deleteApp2SuccessTest(AppDO appDO) {
+        appService.addApp(appDO, "admin");
+
         int result = appService.deleteApp(appDO, "admin");
         Assert.assertEquals(result, 1);
     }
 
-    @Rollback()
-    private void deleteApp2FailureTest() {
+    private void deleteApp2FailureTest(AppDO appDO) {
+        appService.addApp(appDO, "admin");
+
         int result = appService.deleteApp(new AppDO(), "admin");
         Assert.assertEquals(result, 0);
     }
@@ -116,7 +118,6 @@ public class AppServiceTest extends BaseTest {
         Assert.assertEquals(result.getCode(), ResultStatus.USER_WITHOUT_AUTHORITY.getCode());
     }
 
-    @Rollback()
     private void updateByAppId2SucessTest(AppDTO appDTO) {
         ResultStatus result1 = appService.updateByAppId(appDTO, "admin", false);
         Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
