@@ -27,7 +27,7 @@ import java.util.*;
 @CustomScheduled(name = "storeDiDiTopicRequestTimeMetrics", cron = "51 0/1 * * * ?", threadNum = 5)
 @ConditionalOnProperty(prefix = "custom.store-metrics-task.didi", name = "topic-request-time-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreDiDiTopicRequestTimeMetrics extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
     @Autowired
     private JmxService jmxService;
@@ -51,7 +51,7 @@ public class StoreDiDiTopicRequestTimeMetrics extends AbstractScheduledTask<Clus
             LOGGER.info("save topic metrics, clusterId:{}, start.", clusterDO.getId());
             getAndBatchAddTopicRequestTimeMetrics(startTime, clusterDO.getId());
             LOGGER.info("save topic metrics, clusterId:{}, end costTime:{}.", clusterDO.getId(), System.currentTimeMillis() - startTime);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             LOGGER.error("save topic metrics failed, clusterId:{}.", clusterDO.getId(), t);
         }
     }
@@ -69,7 +69,12 @@ public class StoreDiDiTopicRequestTimeMetrics extends AbstractScheduledTask<Clus
 
         int i = 0;
         do {
-            topicRequestMetricsDao.batchAdd(doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size())));
+            List<TopicMetricsDO> subDOList = doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size()));
+            if (ValidateUtils.isEmptyList(subDOList)) {
+                return;
+            }
+
+            topicRequestMetricsDao.batchAdd(subDOList);
             i += Constant.BATCH_INSERT_SIZE;
         } while (i < doList.size());
     }
