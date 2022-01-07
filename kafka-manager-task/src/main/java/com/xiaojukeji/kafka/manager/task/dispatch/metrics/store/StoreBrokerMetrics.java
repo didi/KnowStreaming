@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.metrics.store;
 
+import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BaseMetrics;
@@ -54,8 +55,6 @@ public class StoreBrokerMetrics extends AbstractScheduledTask<ClusterDO> {
     @Autowired
     private AbstractHealthScoreStrategy healthScoreStrategy;
 
-    private static final Integer INSERT_BATCH_SIZE = 100;
-
     @Override
     protected List<ClusterDO> listAllTasks() {
         return clusterService.list();
@@ -72,7 +71,7 @@ public class StoreBrokerMetrics extends AbstractScheduledTask<ClusterDO> {
                     clusterDO.getId(),
                     MetricsConvertUtils.merge2BaseMetricsByAdd(brokerMetricsList))
             );
-        } catch (Throwable t) {
+        } catch (Exception t) {
             LOGGER.error("collect failed, clusterId:{}.", clusterDO.getId(), t);
         }
         long endTime = System.currentTimeMillis();
@@ -82,6 +81,11 @@ public class StoreBrokerMetrics extends AbstractScheduledTask<ClusterDO> {
                 startTime,
                 clusterMetricsList
         );
+
+        if (ValidateUtils.isEmptyList(doList)) {
+            return;
+        }
+
         clusterMetricsDao.batchAdd(doList);
     }
 
@@ -110,9 +114,15 @@ public class StoreBrokerMetrics extends AbstractScheduledTask<ClusterDO> {
                 MetricsConvertUtils.convertAndUpdateCreateTime2BrokerMetricsDOList(startTime, metricsList);
         int i = 0;
         do {
-            brokerMetricsDao.batchAdd(doList.subList(i, Math.min(i + INSERT_BATCH_SIZE, doList.size())));
-            i += INSERT_BATCH_SIZE;
+            List<BrokerMetricsDO> subDOList = doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size()));
+            if (ValidateUtils.isEmptyList(subDOList)) {
+                break;
+            }
+
+            brokerMetricsDao.batchAdd(subDOList);
+            i += Constant.BATCH_INSERT_SIZE;
         } while (i < doList.size());
+
         return metricsList;
     }
 
