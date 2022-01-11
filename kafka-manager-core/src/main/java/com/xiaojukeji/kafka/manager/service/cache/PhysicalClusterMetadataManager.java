@@ -539,9 +539,12 @@ public class PhysicalClusterMetadataManager {
     }
 
     public static Set<String> getBrokerTopicNum(Long clusterId, Set<Integer> brokerIdSet) {
-        Set<String> topicNameSet = new HashSet<>();
-
         Map<String, TopicMetadata> metadataMap = TOPIC_METADATA_MAP.get(clusterId);
+        if (metadataMap == null) {
+            return new HashSet<>();
+        }
+
+        Set<String> topicNameSet = new HashSet<>();
         for (String topicName: metadataMap.keySet()) {
             try {
                 TopicMetadata tm = metadataMap.get(topicName);
