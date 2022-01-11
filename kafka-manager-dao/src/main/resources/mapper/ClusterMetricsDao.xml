@@ -27,9 +27,9 @@
         </foreach>
     </insert>
 
-    <delete id="deleteBeforeTime" parameterType="java.util.Date">
+    <delete id="deleteBeforeTime" parameterType="java.util.Map">
         <![CDATA[
-		DELETE FROM cluster_metrics WHERE gmt_create < #{endTime} LIMIT 200
+		DELETE FROM cluster_metrics WHERE gmt_create < #{endTime} LIMIT #{limitSize}
 	]]>
     </delete>
 </mapper>

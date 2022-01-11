@@ -33,9 +33,7 @@ public interface TopicRequestMetricsDao {
      * @param endTime
      * @return
      */
-    int deleteBeforeTime(Date endTime);
-
-    int deleteBeforeId(Long id);
+    int deleteBeforeTime(Date endTime, Integer limitSize);
 
     List<TopicMetricsDO> getById(Long startId, Long endId);
 }

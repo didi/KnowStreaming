@@ -20,5 +20,5 @@ public interface BrokerMetricsDao {
      */
     List<BrokerMetricsDO> getBrokerMetrics(Long clusterId, Integer brokerId, Date startTime, Date endTime);
 
-    int deleteBeforeTime(Date endTime);
+    int deleteBeforeTime(Date endTime, Integer limitSize);
 }
