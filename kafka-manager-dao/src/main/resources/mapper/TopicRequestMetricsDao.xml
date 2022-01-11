@@ -34,15 +34,9 @@
         ORDER BY gmt_create ASC
     </select>
 
-	<delete id="deleteBeforeTime" parameterType="java.util.Date">
+	<delete id="deleteBeforeTime" parameterType="java.util.Map">
 		<![CDATA[
-		DELETE FROM topic_request_time_metrics WHERE gmt_create < #{endTime} LIMIT 2000
-	]]>
-	</delete>
-
-	<delete id="deleteBeforeId" parameterType="java.lang.Long">
-		<![CDATA[
-		DELETE FROM topic_request_time_metrics WHERE id < #{id} LIMIT 20000
+		DELETE FROM topic_request_time_metrics WHERE gmt_create < #{endTime} LIMIT #{limitSize}
 	]]>
 	</delete>
 

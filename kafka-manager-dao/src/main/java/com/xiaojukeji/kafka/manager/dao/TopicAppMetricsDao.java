@@ -30,5 +30,5 @@ public interface TopicAppMetricsDao {
      * @param endTime
      * @return
      */
-    int deleteBeforeTime(Date endTime);
+    int deleteBeforeTime(Date endTime, Integer limitSize);
 }

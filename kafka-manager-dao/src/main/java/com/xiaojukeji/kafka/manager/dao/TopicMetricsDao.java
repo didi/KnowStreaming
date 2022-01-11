@@ -22,5 +22,5 @@ public interface TopicMetricsDao {
 
     List<TopicMetricsDO> getLatestTopicMetrics(Long clusterId, Date afterTime);
 
-    int deleteBeforeTime(Date endTime);
+    int deleteBeforeTime(Date endTime, Integer limitSize);
 }
