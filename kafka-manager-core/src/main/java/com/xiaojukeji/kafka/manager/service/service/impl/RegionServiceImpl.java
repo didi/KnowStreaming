@@ -2,6 +2,8 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO;
+import com.xiaojukeji.kafka.manager.common.events.RegionCreatedEvent;
+import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.dao.RegionDao;
@@ -59,6 +61,8 @@ public class RegionServiceImpl implements RegionService {
                 return ResultStatus.BROKER_NOT_EXIST;
             }
             if (regionDao.insert(regionDO) > 0) {
+                // 发布region创建事件
+                SpringTool.publish(new RegionCreatedEvent(this, regionDO));
                 return ResultStatus.SUCCESS;
             }
         } catch (DuplicateKeyException e) {
