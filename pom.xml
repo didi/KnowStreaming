@@ -17,8 +17,8 @@
 
     <properties>
         <kafka-manager.revision>2.5</kafka-manager.revision>
-        <swagger2.version>2.7.0</swagger2.version>
-        <swagger.version>1.5.13</swagger.version>
+        <swagger2.version>2.9.2</swagger2.version>
+        <swagger.version>1.5.21</swagger.version>
 
         <maven.test.skip>true</maven.test.skip>
         <downloadSources>true</downloadSources>

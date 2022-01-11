@@ -14,7 +14,6 @@ import javax.naming.Context;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,19 +25,25 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2015/11/9.
  */
 public class JmxConnectorWrap {
-    private final static Logger LOGGER = LoggerFactory.getLogger(JmxConnectorWrap.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JmxConnectorWrap.class);
 
-    private String host;
+    private final Long physicalClusterId;
 
-    private int port;
+    private final Integer brokerId;
+
+    private final String host;
+
+    private final int port;
 
     private JMXConnector jmxConnector;
 
-    private AtomicInteger atomicInteger;
+    private final AtomicInteger atomicInteger;
 
     private JmxConfig jmxConfig;
 
-    public JmxConnectorWrap(String host, int port, JmxConfig jmxConfig) {
+    public JmxConnectorWrap(Long physicalClusterId, Integer brokerId, String host, int port, JmxConfig jmxConfig) {
+        this.physicalClusterId = physicalClusterId;
+        this.brokerId = brokerId;
         this.host = host;
         this.port = port;
         this.jmxConfig = jmxConfig;
@@ -68,7 +73,7 @@ public class JmxConnectorWrap {
         try {
             jmxConnector.close();
         } catch (IOException e) {
-            LOGGER.warn("close JmxConnector exception, host:{} port:{}.", host, port, e);
+            LOGGER.warn("close JmxConnector exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
         }
     }
 
@@ -91,12 +96,12 @@ public class JmxConnectorWrap {
             }
 
             jmxConnector = JMXConnectorFactory.connect(new JMXServiceURL(jmxUrl), environment);
-            LOGGER.info("JMX connect success, host:{} port:{}.", host, port);
+            LOGGER.info("JMX connect success, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port);
             return true;
         } catch (MalformedURLException e) {
-            LOGGER.error("JMX url exception, host:{} port:{} jmxUrl:{}", host, port, jmxUrl, e);
+            LOGGER.error("JMX url exception, physicalClusterId:{} brokerId:{} host:{} port:{} jmxUrl:{}", physicalClusterId, brokerId, host, port, jmxUrl, e);
         } catch (Exception e) {
-            LOGGER.error("JMX connect exception, host:{} port:{}.", host, port, e);
+            LOGGER.error("JMX connect exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
         }
         return false;
     }
