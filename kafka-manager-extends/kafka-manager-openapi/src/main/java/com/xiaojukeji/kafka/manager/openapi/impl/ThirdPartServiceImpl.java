@@ -42,6 +42,9 @@ public class ThirdPartServiceImpl implements ThirdPartService {
     @Autowired
     private ConsumerService consumerService;
 
+    @Autowired
+    private KafkaClientPool kafkaClientPool;
+
     @Override
     public Result<ConsumeHealthEnum> checkConsumeHealth(Long clusterId,
                                                         String topicName,
@@ -109,7 +112,7 @@ public class ThirdPartServiceImpl implements ThirdPartService {
                                                                     Long timestamp) {
         KafkaConsumer kafkaConsumer = null;
         try {
-            kafkaConsumer = KafkaClientPool.borrowKafkaConsumerClient(clusterDO);
+            kafkaConsumer = kafkaClientPool.borrowKafkaConsumerClient(clusterDO);
             if (ValidateUtils.isNull(kafkaConsumer)) {
                 return null;
             }
