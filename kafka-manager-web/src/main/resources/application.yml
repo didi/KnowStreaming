@@ -116,4 +116,4 @@ client-pool:
     min-idle-client-num: 24       # 最小空闲客户端数
     max-idle-client-num: 24       # 最大空闲客户端数
     max-total-client-num: 24      # 最大客户端数
-    borrow-timeout-unit-ms: 3000  # 租借超时时间，单位秒
+    borrow-timeout-unit-ms: 3000  # 租借超时时间，单位毫秒
