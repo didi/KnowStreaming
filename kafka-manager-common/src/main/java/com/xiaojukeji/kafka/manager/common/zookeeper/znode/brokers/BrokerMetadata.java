@@ -21,7 +21,7 @@ import java.util.Map;
  * 节点结构:
  * {
  *      "listener_security_protocol_map":{"SASL_PLAINTEXT":"SASL_PLAINTEXT"},
- *      "endpoints":["SASL_PLAINTEXT://10.179.162.202:9093"],
+ *      "endpoints":["SASL_PLAINTEXT://127.0.0.1:9093"],
  *      "jmx_port":9999,
  *      "host":null,
  *      "timestamp":"1546632983233",
@@ -32,9 +32,9 @@ import java.util.Map;
  *
  * {
  * 	"listener_security_protocol_map":{"SASL_PLAINTEXT":"SASL_PLAINTEXT","PLAINTEXT":"PLAINTEXT"},
- * 	"endpoints":["SASL_PLAINTEXT://10.179.162.202:9093","PLAINTEXT://10.179.162.202:9092"],
+ * 	"endpoints":["SASL_PLAINTEXT://127.0.0.1:9093","PLAINTEXT://127.0.0.1:9092"],
  * 	"jmx_port":8099,
- * 	"host":"10.179.162.202",
+ * 	"host":"127.0.0.1",
  * 	"timestamp":"1628833925822",
  * 	"port":9092,
  * 	"version":4
@@ -42,7 +42,7 @@ import java.util.Map;
  *
  * {
  * 	"listener_security_protocol_map":{"EXTERNAL":"SASL_PLAINTEXT","INTERNAL":"SASL_PLAINTEXT"},
- * 	"endpoints":["EXTERNAL://10.179.162.202:7092","INTERNAL://10.179.162.202:7093"],
+ * 	"endpoints":["EXTERNAL://127.0.0.1:7092","INTERNAL://127.0.0.1:7093"],
  * 	"jmx_port":8099,
  * 	"host":null,
  * 	"timestamp":"1627289710439",

@@ -40,7 +40,7 @@ public class ThreadPool {
                 120L,
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(collectMetricsQueueSize),
-                new DefaultThreadFactory("Collect-Metrics-Thread")
+                new DefaultThreadFactory("TaskThreadPool")
         );
 
         apiCallThreadPool = new ThreadPoolExecutor(
@@ -49,7 +49,7 @@ public class ThreadPool {
                 120L,
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(apiCallQueueSize),
-                new DefaultThreadFactory("Api-Call-Thread")
+                new DefaultThreadFactory("ApiThreadPool")
         );
     }
 
