@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { EChartOption } from 'echarts';
+import { EChartsOption } from 'echarts';
 import { ICurve, ILineData, baseLineLegend, baseLineGrid, baseAxisStyle, noAxis, UNIT_HEIGHT } from 'container/common-curve/config';
 import { IClusterMetrics, ISeriesOption } from 'types/base-type';
 import { timeFormat } from 'constants/strategy';
@@ -48,20 +48,20 @@ export const getBaseOptions = (option: ICurve, data: ILineData[]) => {
         return Number(i.value);
       }),
     }],
-  } as EChartOption;
+  } as EChartsOption;
 };
 
-export const parseLine = (option: ICurve, data: ILineData[]): EChartOption => {
+export const parseLine = (option: ICurve, data: ILineData[]): EChartsOption => {
   return Object.assign({}, getBaseOptions(option, data), {
     legend: {
       ...baseLineLegend,
       bottom: '0',
       align: 'auto',
     },
-  }) as EChartOption;
+  }) as EChartsOption;
 };
 
-export const parseBrokerMetricOption = (option: ICurve, data: IClusterMetrics[]): EChartOption => {
+export const parseBrokerMetricOption = (option: ICurve, data: IClusterMetrics[]): EChartsOption => {
   let name;
   let series: ISeriesOption[];
   data = data || [];
