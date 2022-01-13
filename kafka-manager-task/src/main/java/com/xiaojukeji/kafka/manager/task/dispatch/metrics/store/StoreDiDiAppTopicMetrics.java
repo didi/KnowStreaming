@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -28,7 +27,7 @@ import java.util.*;
 @CustomScheduled(name = "storeDiDiAppTopicMetrics", cron = "41 0/1 * * * ?", threadNum = 5)
 @ConditionalOnProperty(prefix = "custom.store-metrics-task.didi", name = "app-topic-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreDiDiAppTopicMetrics extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
 
     @Autowired
     private JmxService jmxService;
@@ -50,7 +49,7 @@ public class StoreDiDiAppTopicMetrics extends AbstractScheduledTask<ClusterDO> {
 
         try {
             getAndBatchAddTopicAppMetrics(startTime, clusterDO.getId());
-        } catch (Throwable t) {
+        } catch (Exception t) {
             LOGGER.error("save topic metrics failed, clusterId:{}.", clusterDO.getId(), t);
         }
     }
@@ -65,7 +64,12 @@ public class StoreDiDiAppTopicMetrics extends AbstractScheduledTask<ClusterDO> {
                 MetricsConvertUtils.convertAndUpdateCreateTime2TopicMetricsDOList(startTime, metricsList);
         int i = 0;
         do {
-            topicAppMetricsDao.batchAdd(doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size())));
+            List<TopicMetricsDO> subDOList = doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size()));
+            if (ValidateUtils.isEmptyList(subDOList)) {
+                return;
+            }
+
+            topicAppMetricsDao.batchAdd(subDOList);
             i += Constant.BATCH_INSERT_SIZE;
         } while (i < doList.size());
     }

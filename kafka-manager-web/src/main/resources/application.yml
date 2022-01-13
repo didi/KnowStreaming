@@ -9,6 +9,8 @@ server:
 spring:
   application:
     name: kafkamanager
+  profiles:
+    active: dev
   datasource:
     kafka-manager:
       jdbc-url: jdbc:mysql://localhost:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
@@ -18,8 +20,6 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-  profiles:
-    active: dev
   servlet:
     multipart:
       max-file-size: 100MB
@@ -30,25 +30,31 @@ logging:
 
 custom:
   idc: cn
-  jmx:
-    max-conn: 10 # 2.3版本配置不在这个地方生效
   store-metrics-task:
     community:
       broker-metrics-enabled: true
       topic-metrics-enabled: true
-    didi:
+    didi: # 滴滴Kafka特有的指标
       app-topic-metrics-enabled: false
       topic-request-time-metrics-enabled: false
-      topic-throttled-metrics: false
-    save-days: 7
+      topic-throttled-metrics-enabled: false
 
-# 任务相关的开关
+# 任务相关的配置
 task:
   op:
     sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
     order-auto-exec:          # 工单自动化审批线程的开关
       topic-enabled: false      # Topic工单自动化审批开关, false:关闭自动化审批, true:开启
       app-enabled: false        # App工单自动化审批开关, false:关闭自动化审批, true:开启
+  metrics:
+    delete-metrics:
+      delete-limit-size: 1000
+      cluster-metrics-save-days: 14                   # 集群指标保存天数
+      broker-metrics-save-days: 14                    # Broker指标保存天数
+      topic-metrics-save-days: 7                      # Topic指标保存天数
+      topic-request-time-metrics-save-days: 7         # Topic请求耗时指标保存天数
+      topic-throttled-metrics-save-days: 7            # Topic限流指标保存天数
+      app-topic-metrics-save-days: 7                  # App+Topic指标保存天数
 
 account:
   ldap:

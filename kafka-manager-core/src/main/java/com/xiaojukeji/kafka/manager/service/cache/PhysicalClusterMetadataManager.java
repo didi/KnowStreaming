@@ -317,7 +317,7 @@ public class PhysicalClusterMetadataManager {
         metadataMap.put(brokerId, brokerMetadata);
 
         Map<Integer, JmxConnectorWrap> jmxMap = JMX_CONNECTOR_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());
-        jmxMap.put(brokerId, new JmxConnectorWrap(brokerMetadata.getHost(), brokerMetadata.getJmxPort(), jmxConfig));
+        jmxMap.put(brokerId, new JmxConnectorWrap(clusterId, brokerId, brokerMetadata.getHost(), brokerMetadata.getJmxPort(), jmxConfig));
         JMX_CONNECTOR_MAP.put(clusterId, jmxMap);
 
         Map<Integer, KafkaVersion> versionMap = KAFKA_VERSION_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());
@@ -542,9 +542,12 @@ public class PhysicalClusterMetadataManager {
     }
 
     public static Set<String> getBrokerTopicNum(Long clusterId, Set<Integer> brokerIdSet) {
-        Set<String> topicNameSet = new HashSet<>();
-
         Map<String, TopicMetadata> metadataMap = TOPIC_METADATA_MAP.get(clusterId);
+        if (metadataMap == null) {
+            return new HashSet<>();
+        }
+
+        Set<String> topicNameSet = new HashSet<>();
         for (String topicName: metadataMap.keySet()) {
             try {
                 TopicMetadata tm = metadataMap.get(topicName);

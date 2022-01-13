@@ -1,14 +1,29 @@
 import * as React from 'react';
 import { Spin, notification } from 'component/antd';
-import echarts, { EChartOption } from 'echarts/lib/echarts';
+import * as echarts from 'echarts/core';
 
 // 引入柱状图
-import 'echarts/lib/chart/bar';
+import { BarChart } from 'echarts/charts';
 
 // 引入提示框和标题组件
-import 'echarts/lib/component/tooltip';
-import 'echarts/lib/component/title';
-import 'echarts/lib/component/legend';
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+import { EChartsOption } from 'echarts';
+
+// 注册必须的组件
+echarts.use([
+  TitleComponent,
+  LegendComponent,
+  TooltipComponent,
+  BarChart,
+  GridComponent,
+  CanvasRenderer,
+]);
 
 interface IChartProps {
   getChartData: any;
@@ -38,7 +53,7 @@ export class BarChartComponet extends React.Component<IChartProps> {
     this.chart.resize();
   }
 
-  public isHasData = (data: EChartOption) => {
+  public isHasData = (data: any) => {
     const noData = !(data.series && data.series.length);
     this.setState({ noData });
     return !noData;
@@ -54,7 +69,7 @@ export class BarChartComponet extends React.Component<IChartProps> {
     const chartOptions = getChartData();
 
     if ((typeof chartOptions.then) === 'function') {
-      return chartOptions.then((data: EChartOption) => {
+      return chartOptions.then((data: EChartsOption) => {
         this.setState({ loading: false });
 
         if (this.isHasData(data)) {

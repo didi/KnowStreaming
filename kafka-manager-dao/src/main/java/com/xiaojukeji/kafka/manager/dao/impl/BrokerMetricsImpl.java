@@ -37,7 +37,10 @@ public class BrokerMetricsImpl implements BrokerMetricsDao {
     }
 
     @Override
-    public int deleteBeforeTime(Date endTime) {
-        return sqlSession.delete("BrokerMetricsDao.deleteBeforeTime", endTime);
+    public int deleteBeforeTime(Date endTime, Integer limitSize) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("endTime", endTime);
+        params.put("limitSize", limitSize);
+        return sqlSession.delete("BrokerMetricsDao.deleteBeforeTime", params);
     }
 }

@@ -25,6 +25,7 @@
 		WHERE cluster_id = #{clusterId}
 			AND topic_name = #{topicName}
 			AND gmt_create BETWEEN #{startTime} AND #{endTime}
+		ORDER BY gmt_create
 	]]>
 	</select>
 
@@ -32,12 +33,13 @@
 		<![CDATA[
 		SELECT * FROM topic_metrics
 		WHERE cluster_id = #{clusterId} AND #{afterTime} <= gmt_create
+		ORDER BY gmt_create
 	]]>
 	</select>
 
-	<delete id="deleteBeforeTime" parameterType="java.util.Date">
+	<delete id="deleteBeforeTime" parameterType="java.util.Map">
 		<![CDATA[
-		DELETE FROM topic_metrics WHERE gmt_create < #{endTime} LIMIT 3000
+		DELETE FROM topic_metrics WHERE gmt_create < #{endTime} LIMIT #{limitSize}
 	]]>
 	</delete>
 </mapper>
