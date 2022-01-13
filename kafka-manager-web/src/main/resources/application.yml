@@ -102,3 +102,18 @@ notify:
     topic-name: didi-kafka-notify
   order:
     detail-url: http://127.0.0.1
+
+thread-pool:
+  collect-metrics:
+    thread-num: 256  # 收集指标线程池大小
+    queue-size: 5000 # 收集指标线程池的queue大小
+  api-call:
+    thread-num: 16   # api服务线程池大小
+    queue-size: 5000 # api服务线程池的queue大小
+
+client-pool:
+  kafka-consumer:
+    min-idle-client-num: 24       # 最小空闲客户端数
+    max-idle-client-num: 24       # 最大空闲客户端数
+    max-total-client-num: 24      # 最大客户端数
+    borrow-timeout-unit-ms: 3000  # 租借超时时间，单位毫秒

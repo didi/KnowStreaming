@@ -32,6 +32,9 @@ public class FlushZKConsumerGroupMetadata {
     @Autowired
     private ClusterService clusterService;
 
+    @Autowired
+    private ThreadPool threadPool;
+
     @Scheduled(cron="35 0/1 * * * ?")
     public void schedule() {
         List<ClusterDO> doList = clusterService.list();
@@ -95,7 +98,7 @@ public class FlushZKConsumerGroupMetadata {
                     return new ArrayList<>();
                 }
             });
-            ThreadPool.submitCollectMetricsTask(taskList[i]);
+            threadPool.submitCollectMetricsTask(clusterId, taskList[i]);
         }
 
         Map<String, Set<String>> topicNameConsumerGroupMap = new HashMap<>();
