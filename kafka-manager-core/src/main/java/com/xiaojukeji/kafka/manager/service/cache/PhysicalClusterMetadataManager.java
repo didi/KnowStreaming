@@ -50,6 +50,9 @@ public class PhysicalClusterMetadataManager {
     @Autowired
     private ClusterService clusterService;
 
+    @Autowired
+    private ThreadPool threadPool;
+
     private static final Map<Long, ClusterDO> CLUSTER_MAP = new ConcurrentHashMap<>();
 
     private static final Map<Long, ControllerData> CONTROLLER_DATA_MAP = new ConcurrentHashMap<>();
@@ -125,7 +128,7 @@ public class PhysicalClusterMetadataManager {
             zkConfig.watchChildren(ZkPathUtil.BROKER_IDS_ROOT, brokerListener);
 
             //增加Topic监控
-            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig);
+            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig, threadPool);
             topicListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_TOPICS_ROOT, topicListener);
 
