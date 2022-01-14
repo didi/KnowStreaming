@@ -8,8 +8,8 @@ public class BackoffUtils {
     }
 
     /**
-     * 需要进行延迟的事件
-     * <事件名，延迟结束事件>
+     * 需要进行回退的事件信息
+     * <回退事件名，回退结束时间>
      */
     private static final Map<String, Long> NEED_BACK_OFF_EVENT_MAP = new ConcurrentHashMap<>();
 
@@ -28,7 +28,7 @@ public class BackoffUtils {
     }
 
     /**
-     * 记录延迟设置
+     * 记录回退设置
      * @param backoffEventKey 回退事件key
      * @param backoffTimeUnitMs 回退时间(ms)
      */
