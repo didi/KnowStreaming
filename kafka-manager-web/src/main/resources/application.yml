@@ -79,6 +79,9 @@ client-pool:
     borrow-timeout-unit-ms: 3000  # 租借超时时间，单位毫秒
 
 account:
+  jump-login:
+    gateway-api: false            # 网关接口
+    third-part-api: false         # 第三方接口
   ldap:
     enabled: false
     url: ldap://127.0.0.1:389/
@@ -92,19 +95,20 @@ account:
     auth-user-registration: true
     auth-user-registration-role: normal
 
-kcm:
-  enabled: false
-  s3:
+kcm:                                  # 集群安装部署，仅安装broker
+  enabled: false                      # 是否开启
+  s3:                                   # s3 存储服务
     endpoint: s3.didiyunapi.com
     access-key: 1234567890
     secret-key: 0987654321
     bucket: logi-kafka
-  n9e:
-    base-url: http://127.0.0.1:8004
-    user-token: 12345678
-    timeout: 300
-    account: root
-    script-file: kcm_script.sh
+  n9e:                                  # 夜莺
+    base-url: http://127.0.0.1:8004     # 夜莺job服务地址
+    user-token: 12345678                # 用户的token
+    timeout: 300                        # 当台操作的超时时间
+    account: root                       # 操作时使用的账号
+    script-file: kcm_script.sh          # 脚本，已内置好，在源码的kcm模块内，此处配置无需修改
+    logikm-url: http://127.0.0.1:8080   # logikm部署地址，部署时kcm_script.sh会调用logikm检查部署中的一些状态
 
 monitor:
   enabled: false

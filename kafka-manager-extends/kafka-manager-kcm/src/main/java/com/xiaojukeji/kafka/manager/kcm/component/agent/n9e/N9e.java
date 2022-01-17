@@ -37,20 +37,23 @@ import java.util.Map;
 public class N9e extends AbstractAgent {
     private static final Logger LOGGER = LoggerFactory.getLogger(N9e.class);
 
-    @Value("${kcm.n9e.base-url}")
+    @Value("${kcm.n9e.base-url:}")
     private String      baseUrl;
 
-    @Value("${kcm.n9e.user-token}")
+    @Value("${kcm.n9e.user-token:12345678}")
     private String      userToken;
 
-    @Value("${kcm.n9e.account}")
+    @Value("${kcm.n9e.account:root}")
     private String      account;
 
-    @Value("${kcm.n9e.timeout}")
+    @Value("${kcm.n9e.timeout:300}")
     private Integer     timeout;
 
-    @Value("${kcm.n9e.script-file}")
+    @Value("${kcm.n9e.script-file:kcm_script.sh}")
     private String      scriptFile;
+
+    @Value("${kcm.n9e.logikm-url:}")
+    private String      logiKMUrl;
 
     private String      script;
 
@@ -219,7 +222,8 @@ public class N9e extends AbstractAgent {
         sb.append(creationTaskData.getKafkaPackageUrl()).append(",,");
         sb.append(creationTaskData.getServerPropertiesName().replace(KafkaFileEnum.SERVER_CONFIG.getSuffix(), "")).append(",,");
         sb.append(creationTaskData.getServerPropertiesMd5()).append(",,");
-        sb.append(creationTaskData.getServerPropertiesUrl());
+        sb.append(creationTaskData.getServerPropertiesUrl()).append(",,");
+        sb.append(this.logiKMUrl);
 
         N9eCreationTask n9eCreationTask = new N9eCreationTask();
         n9eCreationTask.setTitle(Constant.TASK_TITLE_PREFIX + "-集群ID:" + creationTaskData.getClusterId());

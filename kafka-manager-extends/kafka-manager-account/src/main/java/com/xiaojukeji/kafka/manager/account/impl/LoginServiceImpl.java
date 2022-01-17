@@ -14,6 +14,7 @@ import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Cookie;
@@ -27,7 +28,13 @@ import javax.servlet.http.HttpSession;
  */
 @Service("loginService")
 public class LoginServiceImpl implements LoginService {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LoginServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginServiceImpl.class);
+
+    @Value(value = "${account.jump-login.gateway-api:false}")
+    private Boolean jumpLoginGatewayApi;
+
+    @Value(value = "${account.jump-login.third-part-api:false}")
+    private Boolean jumpLoginThirdPartApi;
 
     @Autowired
     private AccountService accountService;
@@ -75,8 +82,10 @@ public class LoginServiceImpl implements LoginService {
             return false;
         }
 
-        if (classRequestMappingValue.equals(ApiPrefix.API_V1_SSO_PREFIX)) {
-            // 白名单接口直接true
+        if (classRequestMappingValue.equals(ApiPrefix.API_V1_SSO_PREFIX) ||
+                (jumpLoginGatewayApi != null && jumpLoginGatewayApi && classRequestMappingValue.equals(ApiPrefix.GATEWAY_API_V1_PREFIX)) ||
+                (jumpLoginThirdPartApi != null && jumpLoginThirdPartApi && classRequestMappingValue.equals(ApiPrefix.API_V1_THIRD_PART_PREFIX))) {
+            // 登录接口 or 允许跳过且是跳过类型的接口，则直接跳过登录
             return true;
         }
 
