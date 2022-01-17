@@ -9,6 +9,7 @@ server:
 spring:
   application:
     name: kafkamanager
+    version: @project.version@
   profiles:
     active: dev
   datasource:
