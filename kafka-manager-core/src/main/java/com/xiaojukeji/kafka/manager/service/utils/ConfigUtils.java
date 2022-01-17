@@ -18,6 +18,9 @@ public class ConfigUtils {
     @Value(value = "${custom.idc:cn}")
     private String idc;
 
-    @Value(value = "${spring.profiles.active}")
+    @Value(value = "${spring.profiles.active:dev}")
     private String kafkaManagerEnv;
+
+    @Value(value = "${spring.application.version:unknown}")
+    private String applicationVersion;
 }

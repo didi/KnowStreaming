@@ -9,6 +9,7 @@ server:
 spring:
   application:
     name: kafkamanager
+    version: @project.version@
   profiles:
     active: dev
   datasource:
@@ -32,7 +33,6 @@ custom:
   idc: cn
   store-metrics-task:
     community:
-      broker-metrics-enabled: true
       topic-metrics-enabled: true
     didi: # 滴滴Kafka特有的指标
       app-topic-metrics-enabled: false
@@ -42,19 +42,41 @@ custom:
 # 任务相关的配置
 task:
   op:
-    sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
-    order-auto-exec:          # 工单自动化审批线程的开关
-      topic-enabled: false      # Topic工单自动化审批开关, false:关闭自动化审批, true:开启
-      app-enabled: false        # App工单自动化审批开关, false:关闭自动化审批, true:开启
+    sync-topic-enabled: false                       # 未落盘的Topic定期同步到DB中
+    order-auto-exec:                                # 工单自动化审批线程的开关
+      topic-enabled: false                          # Topic工单自动化审批开关, false:关闭自动化审批, true:开启
+      app-enabled: false                            # App工单自动化审批开关, false:关闭自动化审批, true:开启
   metrics:
-    delete-metrics:
-      delete-limit-size: 1000
+    collect:                                # 收集指标
+      broker-metrics-enabled: true          # 收集Broker指标
+    sink:                                       # 上报指标
+      cluster-metrics:                          # 上报cluster指标
+        sink-db-enabled: true                   # 上报到db
+      broker-metrics:                           # 上报broker指标
+        sink-db-enabled: true                   # 上报到db
+    delete:                                           # 删除指标
+      delete-limit-size: 1000                         # 单次删除的批大小
       cluster-metrics-save-days: 14                   # 集群指标保存天数
       broker-metrics-save-days: 14                    # Broker指标保存天数
       topic-metrics-save-days: 7                      # Topic指标保存天数
       topic-request-time-metrics-save-days: 7         # Topic请求耗时指标保存天数
       topic-throttled-metrics-save-days: 7            # Topic限流指标保存天数
       app-topic-metrics-save-days: 7                  # App+Topic指标保存天数
+
+thread-pool:
+  collect-metrics:
+    thread-num: 256  # 收集指标线程池大小
+    queue-size: 5000 # 收集指标线程池的queue大小
+  api-call:
+    thread-num: 16   # api服务线程池大小
+    queue-size: 5000 # api服务线程池的queue大小
+
+client-pool:
+  kafka-consumer:
+    min-idle-client-num: 24       # 最小空闲客户端数
+    max-idle-client-num: 24       # 最大空闲客户端数
+    max-total-client-num: 24      # 最大客户端数
+    borrow-timeout-unit-ms: 3000  # 租借超时时间，单位毫秒
 
 account:
   ldap:
@@ -102,18 +124,3 @@ notify:
     topic-name: didi-kafka-notify
   order:
     detail-url: http://127.0.0.1
-
-thread-pool:
-  collect-metrics:
-    thread-num: 256  # 收集指标线程池大小
-    queue-size: 5000 # 收集指标线程池的queue大小
-  api-call:
-    thread-num: 16   # api服务线程池大小
-    queue-size: 5000 # api服务线程池的queue大小
-
-client-pool:
-  kafka-consumer:
-    min-idle-client-num: 24       # 最小空闲客户端数
-    max-idle-client-num: 24       # 最大空闲客户端数
-    max-total-client-num: 24      # 最大客户端数
-    borrow-timeout-unit-ms: 3000  # 租借超时时间，单位毫秒

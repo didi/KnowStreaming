@@ -1,4 +1,4 @@
-package com.xiaojukeji.kafka.manager.task.listener;
+package com.xiaojukeji.kafka.manager.task.listener.sink.monitor;
 
 import com.xiaojukeji.kafka.manager.monitor.common.entry.bizenum.MonitorMetricNameEnum;
 import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
