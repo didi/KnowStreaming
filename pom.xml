@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.1.RELEASE</version>  <!-- 莫要修改该版本, 否则可能会导致自自定义的schedule不生效 -->
+        <version>2.1.18.RELEASE</version>  <!-- 莫要修改该版本, 否则可能会导致自自定义的schedule不生效 -->
         <!--<relativePath/>-->
     </parent>
 
