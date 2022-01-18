@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.component;
 
 import com.google.common.collect.Lists;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.utils.factory.DefaultThreadFactory;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.NetUtils;
@@ -29,7 +28,7 @@ import java.util.concurrent.*;
  * @date 20/8/10
  */
 public abstract class AbstractScheduledTask<E extends Comparable> implements SchedulingConfigurer {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScheduledTask.class);
 
     @Autowired
     private HeartbeatDao heartbeatDao;

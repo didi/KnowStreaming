@@ -61,6 +61,9 @@ public class BrokerServiceImpl implements BrokerService {
     @Autowired
     private PhysicalClusterMetadataManager physicalClusterMetadataManager;
 
+    @Autowired
+    private ThreadPool threadPool;
+
     @Override
     public ClusterBrokerStatus getClusterBrokerStatus(Long clusterId) {
         // 副本同步状态
@@ -201,7 +204,7 @@ public class BrokerServiceImpl implements BrokerService {
                     return getBrokerMetricsFromJmx(clusterId, brokerId, metricsCode);
                 }
             });
-            ThreadPool.submitApiCallTask(taskList[i]);
+            threadPool.submitApiCallTask(clusterId, taskList[i]);
         }
         List<BrokerMetrics> metricsList = new ArrayList<>(brokerIdSet.size());
         for (int i = 0; i < brokerIdList.size(); i++) {

@@ -74,15 +74,10 @@ public class BrokerStateListener implements StateChangeListener {
         BrokerMetadata brokerMetadata = null;
         try {
             brokerMetadata = zkConfig.get(ZkPathUtil.getBrokerIdNodePath(brokerId), BrokerMetadata.class);
-            if (!brokerMetadata.getEndpoints().isEmpty()) {
-                String endpoint = brokerMetadata.getEndpoints().get(0);
-                int idx = endpoint.indexOf("://");
-                endpoint = endpoint.substring(idx + "://".length());
-                idx = endpoint.indexOf(":");
 
-                brokerMetadata.setHost(endpoint.substring(0, idx));
-                brokerMetadata.setPort(Integer.parseInt(endpoint.substring(idx + 1)));
-            }
+            // 解析并更新本次存储的broker元信息
+            BrokerMetadata.parseAndUpdateBrokerMetadata(brokerMetadata);
+
             brokerMetadata.setClusterId(clusterId);
             brokerMetadata.setBrokerId(brokerId);
             PhysicalClusterMetadataManager.putBrokerMetadata(clusterId, brokerId, brokerMetadata, jmxConfig);

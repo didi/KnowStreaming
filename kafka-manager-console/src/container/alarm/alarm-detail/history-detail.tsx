@@ -6,7 +6,7 @@ import { alarm } from 'store/alarm';
 import { observer } from 'mobx-react';
 import { handlePageBack } from 'lib/utils';
 import LineChart, { hasData } from 'component/chart/line-chart';
-import { EChartOption } from 'echarts';
+import { EChartsOption } from 'echarts';
 import { timeFormat } from 'constants/strategy';
 import Url from 'lib/url-parser';
 import moment = require('moment');
@@ -40,7 +40,7 @@ export class HistoryDetail extends React.Component {
     return <div className="no-data-info" style={{ ...style }} key="loading"><Spin /></div>;
   }
 
-  public renderEchart = (options: EChartOption, loading = false) => {
+  public renderEchart = (options: EChartsOption, loading = false) => {
     const data = hasData(options);
     if (loading) return this.renderLoading(400);
     if (!data) return this.renderNoData(400);
@@ -51,7 +51,7 @@ export class HistoryDetail extends React.Component {
   }
 
   public renderHistoricalTraffic(metric: IMonitorMetric) {
-    const option = this.getChartOption() as EChartOption;
+    const option = this.getChartOption() as EChartsOption;
 
     return (
       <>

@@ -44,6 +44,9 @@ public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
     @Autowired
     private ConsumerService consumerService;
 
+    @Autowired
+    private ThreadPool threadPool;
+
     @Override
     protected List<ClusterDO> listAllTasks() {
         return clusterService.list();
@@ -82,7 +85,7 @@ public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
                     return getTopicConsumerMetrics(clusterDO, topicName, startTimeUnitMs);
                 }
             });
-            ThreadPool.submitCollectMetricsTask(taskList[i]);
+            threadPool.submitCollectMetricsTask(clusterDO.getId(), taskList[i]);
         }
 
         List<ConsumerMetrics> consumerMetricsList = new ArrayList<>();

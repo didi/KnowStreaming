@@ -18,12 +18,13 @@ p_kafka_server_properties_name=${7}   #server配置名
 p_kafka_server_properties_md5=${8}    #server配置MD5
 p_kafka_server_properties_url=${9}    #server配置文件下载地址
 
+p_kafka_manager_url=${10}             #LogiKM地址
+
 #----------------------------------------配置信息------------------------------------------------------#
 g_base_dir='/home'
 g_cluster_task_dir=${g_base_dir}"/kafka_cluster_task/task_${p_task_id}"  #部署升级路径
 g_rollback_version=${g_cluster_task_dir}"/rollback_version"              #回滚版本
 g_new_kafka_package_name=''                                              #最终的包名
-g_kafka_manager_addr=''                                                  #kafka-manager地址
 g_local_ip=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
 g_hostname=${g_local_ip}
 
@@ -47,7 +48,7 @@ function dchat_alarm() {
 
 # 检查并初始化环境
 function check_and_init_env() {
-    if [ -z "${p_task_id}" -o -z "${p_cluster_task_type}" -o -z "${p_kafka_package_url}" -o -z "${p_cluster_id}" -o -z "${p_kafka_package_name}" -o -z "${p_kafka_package_md5}" -o -z "${p_kafka_server_properties_name}" -o -z "${p_kafka_server_properties_md5}" ]; then
+    if [ -z "${p_task_id}" -o -z "${p_cluster_task_type}" -o -z "${p_kafka_package_url}" -o -z "${p_cluster_id}" -o -z "${p_kafka_package_name}" -o -z "${p_kafka_package_md5}" -o -z "${p_kafka_server_properties_name}" -o -z "${p_kafka_server_properties_md5}" -o -z "${p_kafka_manager_url}" ]; then
         ECHO_LOG "存在为空的参数不合法, 退出集群任务"
         dchat_alarm "存在为空的参数不合法, 退出集群任务"
         exit 1
@@ -72,11 +73,11 @@ function check_and_init_env() {
 
 # 检查并等待集群所有的副本处于同步的状态
 function check_and_wait_broker_stabled() {
-    under_replication_count=`curl -s -G -d "hostname="${g_hostname} ${g_kafka_manager_addr}/api/v1/third-part/${p_cluster_id}/broker-stabled | python -m json.tool | grep true |wc -l`
+    under_replication_count=`curl -s -G -d "hostname="${g_hostname} ${p_kafka_manager_url}/api/v1/third-part/${p_cluster_id}/broker-stabled | python -m json.tool | grep true |wc -l`
     while [ "$under_replication_count" -ne 1 ]; do
         ECHO_LOG "存在${under_replication_count}个副本未同步, sleep 10s"
         sleep 10
-        under_replication_count=`curl -s -G -d "hostname="${g_hostname} ${g_kafka_manager_addr}/api/v1/third-part/${p_cluster_id}/broker-stabled | python -m json.tool | grep true |wc -l`
+        under_replication_count=`curl -s -G -d "hostname="${g_hostname} ${p_kafka_manager_url}/api/v1/third-part/${p_cluster_id}/broker-stabled | python -m json.tool | grep true |wc -l`
     done
     ECHO_LOG "集群副本都已经处于同步的状态, 可以进行集群升级"
 }
@@ -324,6 +325,7 @@ ECHO_LOG "      p_kafka_package_name=${p_kafka_package_name}"
 ECHO_LOG "      p_kafka_package_md5=${p_kafka_package_md5}"
 ECHO_LOG "      p_kafka_server_properties_name=${p_kafka_server_properties_name}"
 ECHO_LOG "      p_kafka_server_properties_md5=${p_kafka_server_properties_md5}"
+ECHO_LOG "      p_kafka_manager_url=${p_kafka_manager_url}"
 
 
 
@@ -342,7 +344,7 @@ fi
 ECHO_LOG "停kafka服务"
 stop_kafka_server
 
-ECHO_LOG "停5秒, 确保"
+ECHO_LOG "再停5秒, 确保端口已释放"
 sleep 5
 
 if [ "${p_cluster_task_type}" == "0" ];then

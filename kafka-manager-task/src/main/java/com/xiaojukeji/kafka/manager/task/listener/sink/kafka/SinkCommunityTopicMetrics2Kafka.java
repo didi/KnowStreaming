@@ -1,4 +1,4 @@
-package com.xiaojukeji.kafka.manager.task.listener;
+package com.xiaojukeji.kafka.manager.task.listener.sink.kafka;
 
 import com.xiaojukeji.kafka.manager.common.constant.ConfigConstant;
 import com.xiaojukeji.kafka.manager.common.constant.LogConstant;

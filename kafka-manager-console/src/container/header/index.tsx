@@ -7,7 +7,7 @@ import { urlPrefix } from 'constants/left-menu';
 import { region, IRegionIdcs } from 'store/region';
 import logoUrl from '../../assets/image/kafka-logo.png';
 import userIcon from '../../assets/image/normal.png';
-import weChat from '../../assets/image/wechat.png';
+import weChat from '../../assets/image/weChat.png';
 import { users } from 'store/users';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';

@@ -42,25 +42,25 @@ public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
     @Autowired
     private TopicThrottledMetricsDao    topicThrottledMetricsDao;
 
-    @Value(value = "${task.metrics.delete-metrics.delete-limit-size:1000}")
+    @Value(value = "${task.metrics.delete.delete-limit-size:1000}")
     private Integer deleteLimitSize;
 
-    @Value(value = "${task.metrics.delete-metrics.cluster-metrics-save-days:14}")
+    @Value(value = "${task.metrics.delete.cluster-metrics-save-days:14}")
     private Integer clusterMetricsSaveDays;
 
-    @Value(value = "${task.metrics.delete-metrics.broker-metrics-save-days:14}")
+    @Value(value = "${task.metrics.delete.broker-metrics-save-days:14}")
     private Integer brokerMetricsSaveDays;
 
-    @Value(value = "${task.metrics.delete-metrics.topic-metrics-save-days:7}")
+    @Value(value = "${task.metrics.delete.topic-metrics-save-days:7}")
     private Integer topicMetricsSaveDays;
 
-    @Value(value = "${task.metrics.delete-metrics.topic-request-time-metrics-save-days:7}")
+    @Value(value = "${task.metrics.delete.topic-request-time-metrics-save-days:7}")
     private Integer topicRequestTimeMetricsSaveDays;
 
-    @Value(value = "${task.metrics.delete-metrics.topic-throttled-metrics-save-days:7}")
+    @Value(value = "${task.metrics.delete.topic-throttled-metrics-save-days:7}")
     private Integer topicThrottledMetricsSaveDays;
 
-    @Value(value = "${task.metrics.delete-metrics.app-topic-metrics-save-days:7}")
+    @Value(value = "${task.metrics.delete.app-topic-metrics-save-days:7}")
     private Integer appTopicMetricsSaveDays;
 
     @Override
