@@ -295,7 +295,7 @@ export class ClusterList extends SearchAndFilterContainer {
                 cancelText="取消"
                 okText="确认"
               >
-                <Tooltip placement="left" title="暂停监控将无法正常监控指标信息，建议开启监控">
+                <Tooltip placement="bottom" title="暂停监控将无法正常监控指标信息，建议开启监控">
                   <a
                     className="action-button"
                   >
