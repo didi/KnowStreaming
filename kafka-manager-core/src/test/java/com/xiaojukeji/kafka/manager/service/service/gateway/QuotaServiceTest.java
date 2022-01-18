@@ -2,9 +2,16 @@ package com.xiaojukeji.kafka.manager.service.service.gateway;
 
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
+import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -15,7 +22,19 @@ import org.testng.annotations.Test;
 public class QuotaServiceTest extends BaseTest {
     
     @Autowired
+    @InjectMocks
     private QuotaService quotaService;
+
+    @Mock
+    private LogicalClusterMetadataManager logicalClusterMetadataManager;
+
+    @Mock
+    private AuthorityService authorityService;
+
+    @BeforeMethod
+    public void init() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @DataProvider(name = "provideTopicQuota")
     public static Object[][] provideTopicQuota() {
@@ -26,6 +45,13 @@ public class QuotaServiceTest extends BaseTest {
         topicQuotaDO.setProduceQuota(100000L);
         topicQuotaDO.setConsumeQuota(100000L);
         return new Object[][] {{topicQuotaDO}};
+    }
+
+    private AuthorityDO getAuthority() {
+        AuthorityDO authorityDO = new AuthorityDO();
+        authorityDO.setAccess(0);
+
+        return authorityDO;
     }
 
     @Test(dataProvider = "provideTopicQuota")
@@ -109,41 +135,38 @@ public class QuotaServiceTest extends BaseTest {
         addTopicQuotaByAuthority2ClusterNotExistTest(topicQuotaDO);
         // 测试新增时，无权限异常
         addTopicQuotaByAuthority2UserWithoutAuthority1Test(topicQuotaDO);
-        // 测试新增时，无权限异常,修改数据库access为0测试
-        addTopicQuotaByAuthority2UserWithoutAuthority2Test(topicQuotaDO);
         // 测试新增成功，包含三个流程，access为1，2，3时，通过数据库修改
         addTopicQuotaByAuthority2SuccessTest(topicQuotaDO);
         // 测试新增时，无法写入zk异常(关闭zk)，包含三个流程，access为1，2，3时，通过数据库修改
-        addTopicQuotaByAuthority2ZookeeperWriteFailedTest(topicQuotaDO);
+//        addTopicQuotaByAuthority2ZookeeperWriteFailedTest(topicQuotaDO);
     }
 
     private void addTopicQuotaByAuthority2SuccessTest(TopicQuota topicQuotaDO) {
-        topicQuotaDO.setClusterId(7L);
+        Mockito.when(logicalClusterMetadataManager.getPhysicalClusterId(Mockito.any())).thenReturn(1L);
+        AuthorityDO authority = getAuthority();
+        authority.setAccess(2);
+        Mockito.when(authorityService.getAuthority(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(authority);
+        Mockito.when(logicalClusterMetadataManager.getPhysicalClusterId(Mockito.any())).thenReturn(1L);
         ResultStatus resultStatus = quotaService.addTopicQuotaByAuthority(topicQuotaDO);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
     private void addTopicQuotaByAuthority2ClusterNotExistTest(TopicQuota topicQuotaDO) {
-        topicQuotaDO.setClusterId(10L);
+        Mockito.when(logicalClusterMetadataManager.getPhysicalClusterId(Mockito.any())).thenReturn(null);
         ResultStatus resultStatus = quotaService.addTopicQuotaByAuthority(topicQuotaDO);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.CLUSTER_NOT_EXIST.getCode());
     }
 
     private void addTopicQuotaByAuthority2UserWithoutAuthority1Test(TopicQuota topicQuotaDO) {
-        topicQuotaDO.setClusterId(7L);
+        Mockito.when(logicalClusterMetadataManager.getPhysicalClusterId(Mockito.any())).thenReturn(1L);
+        Mockito.when(authorityService.getAuthority(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
         topicQuotaDO.setTopicName("xxx");
         ResultStatus resultStatus1 = quotaService.addTopicQuotaByAuthority(topicQuotaDO);
         Assert.assertEquals(resultStatus1.getCode(), ResultStatus.USER_WITHOUT_AUTHORITY.getCode());
     }
 
-    private void addTopicQuotaByAuthority2UserWithoutAuthority2Test(TopicQuota topicQuotaDO) {
-        topicQuotaDO.setClusterId(7L);
-        ResultStatus resultStatus = quotaService.addTopicQuotaByAuthority(topicQuotaDO);
-        Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
-    }
-
     private void addTopicQuotaByAuthority2ZookeeperWriteFailedTest(TopicQuota topicQuotaDO) {
-        topicQuotaDO.setClusterId(7L);
+        Mockito.when(logicalClusterMetadataManager.getPhysicalClusterId(Mockito.any())).thenReturn(1L);
         ResultStatus resultStatus = quotaService.addTopicQuotaByAuthority(topicQuotaDO);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.ZOOKEEPER_WRITE_FAILED.getCode());
     }

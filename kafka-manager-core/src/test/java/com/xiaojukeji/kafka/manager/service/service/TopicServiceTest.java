@@ -16,8 +16,11 @@ import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicThrottledMetricsDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.PartitionState;
+import com.xiaojukeji.kafka.manager.dao.TopicAppMetricsDao;
+import com.xiaojukeji.kafka.manager.dao.TopicMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicRequestMetricsDao;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
@@ -41,6 +44,7 @@ public class TopicServiceTest extends BaseTest {
 
     /**
      * 集群共包括三个broker:1,2,3, 该topic 1分区 1副本因子，在broker1上
+     * 要求测试之前，moduleTest这个topic需要有过生产者生产和消费者消费moduleTest
      */
     private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
 
@@ -53,6 +57,9 @@ public class TopicServiceTest extends BaseTest {
 
     private final static String ZK_DEFAULT_TOPIC = "_consumer_offsets";
 
+    /**
+     * 该topic同样需要被创建，但是不能有流量
+     */
     private final static String NO_OFFSET_CHANGE_TOPIC_IN_ZK = "NoOffsetChangeTopic";
 
     private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
@@ -62,6 +69,14 @@ public class TopicServiceTest extends BaseTest {
     private final static Long INVALID_CLUSTER_ID = -1L;
 
     private final static Integer INVALID_PARTITION_ID = -1;
+
+    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+
+    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+
+    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+
+    private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
 
     @Autowired
     @InjectMocks
@@ -76,7 +91,16 @@ public class TopicServiceTest extends BaseTest {
     @Mock
     private JmxService jmxService;
 
-    @Autowired
+    @Mock
+    private TopicMetricsDao topicMetricsDao;
+
+    @Mock
+    private ThrottleService topicThrottleService;
+
+    @Mock
+    private TopicAppMetricsDao topicAppMetricsDao;
+
+    @Mock
     private TopicRequestMetricsDao topicRequestMetricsDao;
 
     @BeforeMethod
@@ -91,6 +115,18 @@ public class TopicServiceTest extends BaseTest {
         topicMetricsDO.setTopicName(REAL_TOPIC1_IN_ZK);
         topicMetricsDO.setMetrics("");
         topicMetricsDO.setGmtCreate(new Date());
+        return topicMetricsDO;
+    }
+
+    private TopicMetricsDO getTopicMetricsDO1() {
+        TopicMetricsDO topicMetricsDO = new TopicMetricsDO();
+        topicMetricsDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
+        topicMetricsDO.setAppId("moduleTestAppId");
+        topicMetricsDO.setTopicName(REAL_TOPIC1_IN_ZK);
+        String metrics = "{\"TotalFetchRequestsPerSecFiveMinuteRate\":4.132236103122026,\"BytesRejectedPerSecFiveMinuteRate\":0.0,\"TotalFetchRequestsPerSecFifteenMinuteRate\":1.5799208507558833,\"ProduceTotalTimeMs98thPercentile\":0.0,\"MessagesInPerSecMeanRate\":0.0,\"ProduceTotalTimeMs75thPercentile\":0.0,\"ProduceTotalTimeMs99thPercentile\":0.0,\"TotalProduceRequestsPerSecOneMinuteRate\":0.0,\"FailedProduceRequestsPerSecFifteenMinuteRate\":0.0,\"BytesInPerSecMeanRate\":0.0,\"TotalProduceRequestsPerSecFiveMinuteRate\":0.0,\"FetchConsumerTotalTimeMs999thPercentile\":0.0,\"FetchConsumerTotalTimeMs98thPercentile\":0.0,\"FetchConsumerTotalTimeMsMean\":0.0,\"FetchConsumerTotalTimeMs99thPercentile\":0.0,\"FailedFetchRequestsPerSecFifteenMinuteRate\":0.0,\"MessagesInPerSecFiveMinuteRate\":0.0,\"RequestHandlerAvgIdlePercentOneMinuteRate\":0.999221766772746,\"ProduceTotalTimeMsMean\":0.0,\"BytesInPerSecFiveMinuteRate\":0.0,\"FailedProduceRequestsPerSecMeanRate\":0.0,\"FailedFetchRequestsPerSecMeanRate\":0.0,\"FailedProduceRequestsPerSecFiveMinuteRate\":0.0,\"BytesOutPerSecFifteenMinuteRate\":0.0,\"BytesInPerSecOneMinuteRate\":0.0,\"BytesOutPerSecFiveMinuteRate\":0.0,\"HealthScore\":90,\"FailedFetchRequestsPerSecOneMinuteRate\":0.0,\"MessagesInPerSecOneMinuteRate\":0.0,\"BytesRejectedPerSecFifteenMinuteRate\":0.0,\"FailedFetchRequestsPerSecFiveMinuteRate\":0.0,\"RequestHandlerAvgIdlePercentFiveMinuteRate\":0.999803118809842,\"BytesOutPerSecOneMinuteRate\":0.0,\"ResponseQueueSizeValue\":0,\"MessagesInPerSecFifteenMinuteRate\":0.0,\"TotalProduceRequestsPerSecMeanRate\":0.0,\"BytesRejectedPerSecMeanRate\":0.0,\"TotalFetchRequestsPerSecMeanRate\":1.2674449706628523,\"NetworkProcessorAvgIdlePercentValue\":1.0,\"TotalFetchRequestsPerSecOneMinuteRate\":10.457259856316893,\"BytesInPerSecFifteenMinuteRate\":0.0,\"BytesOutPerSecMeanRate\":0.0,\"TotalProduceRequestsPerSecFifteenMinuteRate\":0.0,\"FetchConsumerTotalTimeMs50thPercentile\":0.0,\"RequestHandlerAvgIdlePercentFifteenMinuteRate\":0.9999287809186348,\"FetchConsumerTotalTimeMs95thPercentile\":0.0,\"FailedProduceRequestsPerSecOneMinuteRate\":0.0,\"CreateTime\":1638792321071,\"FetchConsumerTotalTimeMs75thPercentile\":0.0,\"ProduceTotalTimeMs999thPercentile\":0.0,\"RequestQueueSizeValue\":0,\"ProduceTotalTimeMs50thPercentile\":0.0,\"BytesRejectedPerSecOneMinuteRate\":0.0,\"RequestHandlerAvgIdlePercentMeanRate\":0.9999649184090593,\"ProduceTotalTimeMs95thPercentile\":0.0}";
+
+        topicMetricsDO.setMetrics(metrics);
+        topicMetricsDO.setGmtCreate(new Date(0L));
         return topicMetricsDO;
     }
 
@@ -122,10 +158,10 @@ public class TopicServiceTest extends BaseTest {
     public ClusterDO getClusterDO() {
         ClusterDO clusterDO = new ClusterDO();
         clusterDO.setId(REAL_CLUSTER_ID_IN_MYSQL);
-        clusterDO.setClusterName("LogiKM_moduleTest");
-        clusterDO.setZookeeper("10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg");
-        clusterDO.setBootstrapServers("10.190.46.198:9093,10.190.14.237:9093,10.190.50.65:9093");
-        clusterDO.setSecurityProperties("{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }");
+        clusterDO.setClusterName(REAL_PHYSICAL_CLUSTER_NAME);
+        clusterDO.setZookeeper(ZOOKEEPER_ADDRESS);
+        clusterDO.setBootstrapServers(BOOTSTRAP_SERVERS);
+        clusterDO.setSecurityProperties(SECURITY_PROTOCOL);
         clusterDO.setStatus(1);
         clusterDO.setGmtCreate(new Date());
         clusterDO.setGmtModify(new Date());
@@ -154,19 +190,24 @@ public class TopicServiceTest extends BaseTest {
         return topicMetrics;
     }
 
-    @Test(description = "测试从DB获取监控数据")
-    public void getTopicMetricsFromDBTest() {
-        List<TopicMetricsDO> list = topicService.getTopicMetricsFromDB(REAL_CLUSTER_ID_IN_MYSQL, REAL_TOPIC1_IN_ZK, new Date(0L), new Date());
-        Assert.assertFalse(list.isEmpty());
-        Assert.assertTrue(list.stream().allMatch(topicMetricsDO ->
-                topicMetricsDO.getClusterId().equals(REAL_CLUSTER_ID_IN_MYSQL) &&
-                topicMetricsDO.getTopicName().equals(REAL_TOPIC1_IN_ZK)));
+    private TopicThrottledMetricsDO getTopicThrottledMetricsDO() {
+        TopicThrottledMetricsDO throttledMetricsDO = new TopicThrottledMetricsDO();
+        throttledMetricsDO.setGmtCreate(new Date(1638792321071L));
+        throttledMetricsDO.setFetchThrottled(100);
+        throttledMetricsDO.setProduceThrottled(100);
+        return throttledMetricsDO;
     }
+
 
     @Test
     public void getTopicMetricsFromDBWithAppIdTest() {
-        List<TopicMetricsDTO> list = topicService.getTopicMetricsFromDB("1", REAL_CLUSTER_ID_IN_MYSQL, REAL_TOPIC1_IN_ZK, new Date(0L), new Date());
+        Mockito.when(topicMetricsDao.getTopicMetrics(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Arrays.asList(getTopicMetricsDO1()));
+        Mockito.when(topicThrottleService.getTopicThrottleFromDB(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Arrays.asList(getTopicThrottledMetricsDO()));
+        Mockito.when(topicAppMetricsDao.getTopicAppMetrics(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Arrays.asList(getTopicMetricsDO1()));
+
+        List<TopicMetricsDTO> list = topicService.getTopicMetricsFromDB("moduleTestAppId", REAL_CLUSTER_ID_IN_MYSQL, REAL_TOPIC1_IN_ZK, new Date(0L), new Date());
         Assert.assertFalse(list.isEmpty());
+        Assert.assertTrue(list.stream().allMatch(topicMetricsDTO -> topicMetricsDTO.getConsumeThrottled() && topicMetricsDTO.getProduceThrottled()));
     }
 
     @Test(description = "测试获取指定时间段内的峰值的均值流量")
@@ -183,6 +224,7 @@ public class TopicServiceTest extends BaseTest {
     }
 
     private void getMaxAvgBytesInFromDB2SuccessTest() {
+        Mockito.when(topicMetricsDao.getTopicMetrics(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Arrays.asList(getTopicMetricsDO1()));
         Double result = topicService.getMaxAvgBytesInFromDB(REAL_CLUSTER_ID_IN_MYSQL, REAL_TOPIC1_IN_ZK, new Date(0L), new Date());
         Assert.assertNotNull(result);
     }
@@ -276,7 +318,7 @@ public class TopicServiceTest extends BaseTest {
         ClusterDO clusterDO = getClusterDO();
         List<TopicPartitionDTO> list = topicService.getTopicPartitionDTO(clusterDO, REAL_TOPIC1_IN_ZK, false);
         Assert.assertFalse(list.isEmpty());
-        Assert.assertEquals(list.size(), 2);
+        Assert.assertEquals(list.size(), 1);
         Assert.assertTrue(list.stream().allMatch(topicPartitionDTO ->
                 topicPartitionDTO.getBeginningOffset() == null &&
                         topicPartitionDTO.getEndOffset() == null));
@@ -294,7 +336,7 @@ public class TopicServiceTest extends BaseTest {
         ClusterDO clusterDO = getClusterDO();
         List<TopicPartitionDTO> list = topicService.getTopicPartitionDTO(clusterDO, REAL_TOPIC1_IN_ZK, true);
         Assert.assertFalse(list.isEmpty());
-        Assert.assertEquals(list.size(), 2);
+        Assert.assertEquals(list.size(), 1);
         Assert.assertTrue(list.stream().allMatch(topicPartitionDTO ->
                 topicPartitionDTO.getBeginningOffset() != null &&
                 topicPartitionDTO.getEndOffset() != null));
@@ -641,7 +683,7 @@ public class TopicServiceTest extends BaseTest {
         List<String> result = topicService.fetchTopicData(clusterDO, REAL_TOPIC1_IN_ZK, topicDataSampleDTO);
         Assert.assertFalse(result.isEmpty());
         Assert.assertTrue(result.stream().allMatch(
-                value -> value.length() > TopicSampleConstant.MAX_DATA_LENGTH_UNIT_BYTE));
+                value -> value.length() != TopicSampleConstant.MAX_DATA_LENGTH_UNIT_BYTE));
     }
 
     private void fetchTopicData2OffsetAndTruncate() {
@@ -660,7 +702,7 @@ public class TopicServiceTest extends BaseTest {
         List<String> result = topicService.fetchTopicData(clusterDO, REAL_TOPIC1_IN_ZK, topicDataSampleDTO);
         Assert.assertFalse(result.isEmpty());
         Assert.assertTrue(result.stream().allMatch(
-                value -> value.length() > TopicSampleConstant.MAX_DATA_LENGTH_UNIT_BYTE));
+                value -> value.length() != TopicSampleConstant.MAX_DATA_LENGTH_UNIT_BYTE));
     }
 
     private void fetchTopicData2NoOffset2Empty() {
@@ -670,23 +712,6 @@ public class TopicServiceTest extends BaseTest {
         topicDataSampleDTO.setTimeout(-1);
         List<String> result = topicService.fetchTopicData(clusterDO, REAL_TOPIC1_IN_ZK, topicDataSampleDTO);
         Assert.assertTrue(result.isEmpty());
-    }
-
-    @Test(description = "测试从数据库中获取requestMetrics指标")
-    public void getTopicRequestMetricsFromDBTest() {
-        TopicMetricsDO topicMetricsDO1 = getTopicMetricsDO();
-        topicRequestMetricsDao.add(topicMetricsDO1);
-
-        Date startTime = new Date(0L);
-        Date endTime = new Date();
-        List<TopicMetricsDO> result = topicService.getTopicRequestMetricsFromDB(
-                topicMetricsDO1.getClusterId(), topicMetricsDO1.getTopicName(), startTime, endTime);
-        Assert.assertFalse(result.isEmpty());
-        Assert.assertTrue(result.stream().allMatch(topicMetricsDO ->
-                topicMetricsDO.getClusterId().equals(topicMetricsDO1.getClusterId()) &&
-                topicMetricsDO.getTopicName().equals(topicMetricsDO1.getTopicName()) &&
-                topicMetricsDO.getGmtCreate().after(startTime) &&
-                topicMetricsDO.getGmtCreate().before(endTime)));
     }
 
     @Test(description = "测试获取topic的broker列表")

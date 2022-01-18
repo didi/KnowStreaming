@@ -25,7 +25,9 @@ public class ZookeeperServiceTest extends BaseTest {
     @Autowired
     private ZookeeperService zookeeperService;
 
-    private final static String ZOOKEEPER_ADDRESS = "10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg";
+//    private final static String ZOOKEEPER_ADDRESS = "10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg";
+    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+
 
     @DataProvider(name = "extendsAndCandidatesZnodeExist")
     public static Object[][] extendsAndCandidatesZnodeExist() {

@@ -133,13 +133,6 @@ public class ConfigServiceTest extends BaseTest {
         Assert.assertEquals(updateResult, ResultStatus.CONFIG_NOT_EXIST);
     }
 
-//    @Test(dataProvider = "configDTO", description = "updateByKey, MySQL_ERROR测试")
-//    public void updateByKey2MySQLErrorTest(ConfigDTO dto) {
-//        dto.setConfigKey(null);
-//        ResultStatus updateResult = configService.updateByKey(dto);
-//        Assert.assertEquals(updateResult, ResultStatus.CONFIG_NOT_EXIST);
-//    }
-
 
     @Test(dataProvider = "configDTO")
     public void updateByKeyTest2(ConfigDTO dto) {

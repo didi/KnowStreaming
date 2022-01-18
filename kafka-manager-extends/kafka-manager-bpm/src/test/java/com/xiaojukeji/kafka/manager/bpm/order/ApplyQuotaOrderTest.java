@@ -287,7 +287,7 @@ public class ApplyQuotaOrderTest extends BaseTest {
         OrderDO orderDO = getOrderDO();
         OrderHandleBaseDTO orderHandleBaseDTO = getOrderHandleBaseDTO();
         ResultStatus resultStatus = applyQuotaOrder.handleOrderDetail(orderDO, orderHandleBaseDTO, ADMIN);
-        Assert.assertEquals(resultStatus.getCode(), ResultStatus.OPERATION_FORBIDDEN.getCode());
+        Assert.assertEquals(resultStatus.getCode(), ResultStatus.OPERATION_FAILED.getCode());
     }
 
     @Test

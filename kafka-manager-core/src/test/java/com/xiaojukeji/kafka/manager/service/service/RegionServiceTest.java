@@ -19,6 +19,11 @@ import java.util.stream.Collectors;
  * @date 2021/12/8
  */
 public class RegionServiceTest extends  BaseTest{
+    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+
+    private final static String REAL_REGION_NAME_IN_CLUSTER = "region_1";
+
+    private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
     @Autowired
     private RegionService regionService;
 
@@ -28,15 +33,28 @@ public class RegionServiceTest extends  BaseTest{
         regionDO.setStatus(0);
         regionDO.setName("region1");
         // 物理集群id
-        regionDO.setClusterId(1L);
+        regionDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         regionDO.setDescription("test");
 
         List<Integer> brokerIdList = new ArrayList<>();
-        brokerIdList.add(1);
-        brokerIdList.add(2);
+        brokerIdList.add(3);
         regionDO.setBrokerList(ListUtils.intList2String(brokerIdList));
 
         return new Object[][] {{regionDO}};
+    }
+
+    private RegionDO getRegionDO() {
+        RegionDO regionDO = new RegionDO();
+        regionDO.setStatus(0);
+        regionDO.setName("region1");
+        // 物理集群id
+        regionDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
+        regionDO.setDescription("test");
+
+        List<Integer> brokerIdList = new ArrayList<>();
+        brokerIdList.add(3);
+        regionDO.setBrokerList(ListUtils.intList2String(brokerIdList));
+        return regionDO;
     }
 
 
@@ -45,23 +63,24 @@ public class RegionServiceTest extends  BaseTest{
         Assert.assertEquals(regionService.createRegion(null), ResultStatus.PARAM_ILLEGAL);
     }
 
-    @Test(dataProvider = "regionDO", description = "createRegion, 成功测试")
-    public void createRegion2SuccessTest(RegionDO regionDO) {
+    @Test(description = "createRegion, 成功测试")
+    public void createRegion2SuccessTest() {
+        RegionDO regionDO = getRegionDO();
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
     }
 
-    @Test(dataProvider = "regionDO", description = "createRegion, clusterId为空测试")
-    public void createRegion2ExistBrokerIdAlreadyInRegionTest1(RegionDO regionDO) {
+    @Test(description = "createRegion, clusterId为空测试")
+    public void createRegion2ExistBrokerIdAlreadyInRegionTest1() {
+        RegionDO regionDO = getRegionDO();
         regionDO.setClusterId(null);
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.RESOURCE_ALREADY_USED);
     }
 
 
-    @Test(dataProvider = "regionDO", description = "createRegion, 创建时传入的brokerList中有被使用过的")
-    public void createRegion2ExistBrokerIdAlreadyInRegionTest2(RegionDO regionDO) {
-        // 首先创建一个Region, 使用1,2broker
-        Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
-
+    @Test(description = "createRegion, 创建时传入的brokerList中有被使用过的")
+    public void createRegion2ExistBrokerIdAlreadyInRegionTest2() {
+        RegionDO regionDO = getRegionDO();
+        // 真实物理集群和数据库中region使用1,2broker
         // 再创建一个Region, 使用1,3broker
         List<Integer> newBrokerIdList = new ArrayList<>();
         newBrokerIdList.add(1);
@@ -70,28 +89,26 @@ public class RegionServiceTest extends  BaseTest{
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.RESOURCE_ALREADY_USED);
     }
 
-    @Test(dataProvider = "regionDO", description = "createRegion, 创建时，region使用到的broker挂掉了")
-    public void createRegion2BrokerNotExistTest(RegionDO regionDO) {
+    @Test(description = "createRegion, 创建时，region使用到的broker挂掉了")
+    public void createRegion2BrokerNotExistTest() {
+        RegionDO regionDO = getRegionDO();
         // 传入一个不存在的物理集群，检测时，会认为该集群存活的broker个数为0
-        regionDO.setClusterId(5L);
+        regionDO.setClusterId(-1L);
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.BROKER_NOT_EXIST);
     }
 
-    @Test(dataProvider = "regionDO", description = "createRegion, 创建时，regionName重复")
-    public void createRegion2ResourceAlreadyExistTest(RegionDO regionDO) {
-        // 先插入一个
-        Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
-
+    @Test(description = "createRegion, 创建时，regionName重复")
+    public void createRegion2ResourceAlreadyExistTest() {
+        RegionDO regionDO = getRegionDO();
         // 插入同名Region，注意brokerList需要保持不一样，不然会返回RESOURCE_ALREADY_USED
-        List<Integer> brokerIdList = new ArrayList<>();
-        brokerIdList.add(3);
-        regionDO.setBrokerList(ListUtils.intList2String(brokerIdList));
+        regionDO.setName(REAL_REGION_NAME_IN_CLUSTER);
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.RESOURCE_ALREADY_EXISTED);
     }
 
 
-    @Test(dataProvider = "regionDO")
-    public void deleteByIdTest(RegionDO regionDO) {
+    @Test
+    public void deleteByIdTest() {
+        RegionDO regionDO = getRegionDO();
         // 参数非法测试
         deleteById2ParamIllegalTest(regionDO);
 
@@ -122,21 +139,24 @@ public class RegionServiceTest extends  BaseTest{
     }
 
 
-    @Test(dataProvider = "regionDO", description = "updateRegion, 参数非法测试")
-    public void updateRegion2ParamIllegalTest1(RegionDO regionDO) {
+    @Test(description = "updateRegion, 参数非法测试")
+    public void updateRegion2ParamIllegalTest1() {
+        RegionDO regionDO = getRegionDO();
         Assert.assertEquals(regionService.updateRegion(null), ResultStatus.PARAM_ILLEGAL);
         Assert.assertEquals(regionService.updateRegion(regionDO), ResultStatus.PARAM_ILLEGAL);
     }
 
-    @Test(dataProvider = "regionDO", description = "updateRegion, 资源不存在测试")
-    public void updateRegion2ResourceNotExistTest1(RegionDO regionDO) {
+    @Test(description = "updateRegion, 资源不存在测试")
+    public void updateRegion2ResourceNotExistTest1() {
+        RegionDO regionDO = getRegionDO();
         // 不插入Region，直接更新
-        regionDO.setId(1L);
+        regionDO.setId(-1L);
         Assert.assertEquals(regionService.updateRegion(regionDO), ResultStatus.RESOURCE_NOT_EXIST);
     }
 
-    @Test(dataProvider = "regionDO", description = "updateRegion, brokerList未改变，成功测试")
-    public void updateRegion2SuccessWithBrokerListNotChangeTest1(RegionDO regionDO) {
+    @Test(description = "updateRegion, brokerList未改变，成功测试")
+    public void updateRegion2SuccessWithBrokerListNotChangeTest1() {
+        RegionDO regionDO = getRegionDO();
         // 先在数据库中创建一个Region
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
 
@@ -148,8 +168,9 @@ public class RegionServiceTest extends  BaseTest{
         Assert.assertEquals(regionService.updateRegion(newRegionDO), ResultStatus.SUCCESS);
     }
 
-    @Test(dataProvider = "regionDO", description = "updateRegion, 传入的broker已经被使用测试")
-    public void updateRegion2ResourceAlreadyUsedTest1(RegionDO regionDO) {
+    @Test(description = "updateRegion, 传入的broker已经被使用测试")
+    public void updateRegion2ResourceAlreadyUsedTest1() {
+        RegionDO regionDO = getRegionDO();
         // 先在数据库中创建一个Region
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
 
@@ -168,8 +189,9 @@ public class RegionServiceTest extends  BaseTest{
         Assert.assertEquals(regionService.updateRegion(newRegionDO), ResultStatus.RESOURCE_ALREADY_USED);
     }
 
-    @Test(dataProvider = "regionDO", description = "updateRegion, 更新的broker不存在")
-    public void updateRegion2BrokerNotExistTest1(RegionDO regionDO) {
+    @Test(description = "updateRegion, 更新的broker不存在")
+    public void updateRegion2BrokerNotExistTest1() {
+        RegionDO regionDO = getRegionDO();
         // 先在数据库中创建一个Region
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
 
@@ -187,11 +209,9 @@ public class RegionServiceTest extends  BaseTest{
     }
 
 
-    @Test(dataProvider = "regionDO", description = "updateRegion, brokeList发生了改变，成功测试")
-    public void updateRegion2SuccessWithBrokerListChangeTest1(RegionDO regionDO) {
-        // 先在数据库中创建一个Region
-        Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
-
+    @Test(description = "updateRegion, brokeList发生了改变，成功测试")
+    public void updateRegion2SuccessWithBrokerListChangeTest1() {
+        RegionDO regionDO = getRegionDO();
         // 查询出创建的Region,并修改brokerList后，作为新的Region
         List<RegionDO> regionDOList = regionService.getByClusterId(1L);
         RegionDO newRegionDO = regionDOList.get(0);
@@ -205,14 +225,16 @@ public class RegionServiceTest extends  BaseTest{
         Assert.assertEquals(regionService.updateRegion(newRegionDO), ResultStatus.SUCCESS);
     }
 
-    @Test(dataProvider = "regionDO", description = "updateRegion重载方法，参数非法测试")
-    public void updateRegion2ParamIllegalTest2(RegionDO regionDO) {
+    @Test(description = "updateRegion重载方法，参数非法测试")
+    public void updateRegion2ParamIllegalTest2() {
+        RegionDO regionDO = getRegionDO();
         Assert.assertEquals(regionService.updateRegion(null, "1,3"), ResultStatus.PARAM_ILLEGAL);
         Assert.assertEquals(regionService.updateRegion(1L, "1, 3"), ResultStatus.PARAM_ILLEGAL);
     }
 
-    @Test(dataProvider = "regionDO", description = "updateRegion重载方法，成功测试")
-    public void updateRegion2SuccessTest2(RegionDO regionDO) {
+    @Test(description = "updateRegion重载方法，成功测试")
+    public void updateRegion2SuccessTest2() {
+        RegionDO regionDO = getRegionDO();
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
         List<RegionDO> regionDOList = regionService.getByClusterId(1L);
         RegionDO region = regionDOList.get(0);
@@ -220,8 +242,9 @@ public class RegionServiceTest extends  BaseTest{
     }
 
 
-    @Test(dataProvider = "regionDO")
-    public void updateCapacityByIdTest(RegionDO regionDO) {
+    @Test
+    public void updateCapacityByIdTest() {
+        RegionDO regionDO = getRegionDO();
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
         RegionDO region = regionService.getByClusterId(1L).get(0);
         region.setCapacity(1000L);
@@ -244,8 +267,9 @@ public class RegionServiceTest extends  BaseTest{
     }
 
 
-    @Test(dataProvider = "regionDO")
-    public void getByIdTest(RegionDO regionDO) {
+    @Test
+    public void getByIdTest() {
+        RegionDO regionDO = getRegionDO();
         Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
 
         // 获取成功测试
@@ -266,22 +290,10 @@ public class RegionServiceTest extends  BaseTest{
         Assert.assertNull(regionService.getById(regionDO.getId()));
     }
 
-    @Test(dataProvider = "regionDO")
-    public void getByClusterIdTest(RegionDO regionDO) {
-        regionService.createRegion(regionDO);
-
-        // 获取成功测试
-        getByClusterId2SuccessTest(regionDO);
-
-        // 获取失败测试
-        getByClusterId2FailureTest(regionDO);
-    }
-
     private void getByClusterId2SuccessTest(RegionDO regionDO) {
         Assert.assertNotNull(regionService.getByClusterId(regionDO.getClusterId()));
         Assert.assertTrue(regionService.getByClusterId(regionDO.getClusterId()).stream().allMatch(regionDO1 ->
-                regionDO1.getName().equals(regionDO.getName()) &&
-                regionDO1.getBrokerList().equals(regionDO.getBrokerList())));
+                regionDO1.getName().equals(regionDO.getName())));
     }
 
     private void getByClusterId2FailureTest(RegionDO regionDO) {
@@ -289,21 +301,8 @@ public class RegionServiceTest extends  BaseTest{
     }
 
     @Test(dataProvider = "regionDO")
-    public void listAllTest(RegionDO regionDO) {
-        Assert.assertTrue(regionService.listAll().isEmpty());
-        regionService.createRegion(regionDO);
-        Assert.assertNotNull(regionService.listAll());
-
-        Assert.assertTrue(regionService.listAll().stream().allMatch(regionDO1 ->
-                regionDO1.getName().equals(regionDO.getName()) &&
-                regionDO1.getBrokerList().equals(regionDO.getBrokerList())));
-    }
-
-    @Test(dataProvider = "regionDO")
     public void getRegionNumTest(RegionDO regionDO) {
         // 插入一条数据
-        regionService.createRegion(regionDO);
-
         Map<Long, Integer> regionNum = regionService.getRegionNum();
         for(Map.Entry<Long, Integer> entry : regionNum.entrySet()) {
             Assert.assertEquals(entry.getKey(), Long.valueOf(1));
@@ -353,18 +352,6 @@ public class RegionServiceTest extends  BaseTest{
         Assert.assertEquals(allBrokerIdList, fullBrokerIdList);
     }
 
-    @Test(dataProvider = "regionDO")
-    public void convert2BrokerIdRegionMapTest(RegionDO regionDO) {
-        Assert.assertEquals(regionService.createRegion(regionDO), ResultStatus.SUCCESS);
-        List<RegionDO> regionDOList = regionService.getByClusterId(1L);
-
-        // regionDOList是null测试
-        convert2BrokerIdRegionMap2RegionListDOIsNull();
-
-        // 成功测试
-        convert2BrokerIdRegionMap2Success(regionDO);
-    }
-
     private void convert2BrokerIdRegionMap2RegionListDOIsNull() {
         Assert.assertTrue(regionService.convert2BrokerIdRegionMap(null).isEmpty());
     }
@@ -400,13 +387,11 @@ public class RegionServiceTest extends  BaseTest{
 
     private void getIdleRegionBrokerList2RegionDOListIsEmptyTest() {
         List<Long> regionIdList = new ArrayList<>();
-        regionIdList.add(1L);
+        regionIdList.add(-1L);
         Assert.assertNull(regionService.getIdleRegionBrokerList(1L, regionIdList));
     }
 
     private void getIdleRegionBrokerList2SuccessTest(RegionDO regionDO) {
-        // 先插入
-        regionService.createRegion(regionDO);
         // 从数据库中查找
         List<Long> regionIdList = regionService.getByClusterId(1L).stream().map(RegionDO::getId).collect(Collectors.toList());
         List<Integer> brokerIdList = regionService.getByClusterId(1L)
@@ -423,12 +408,10 @@ public class RegionServiceTest extends  BaseTest{
 
         // 这个方法是返回topicName -> topic所使用broker以及这些broker所在region中所有的broker
         Map<String, Set<Integer>> topicNameRegionBrokerIdMap = regionService.getTopicNameRegionBrokerIdMap(1L);
-        Map<String, Set<Integer>> expectedMap = new HashMap<>();
         Set<Integer> set = new HashSet<>();
         set.add(1);
         set.add(2);
-        expectedMap.put("topic_a", set);
-        Assert.assertEquals(topicNameRegionBrokerIdMap, expectedMap);
+        Assert.assertEquals(topicNameRegionBrokerIdMap.get(REAL_TOPIC1_IN_ZK), set);
     }
 
     @Test
@@ -447,6 +430,6 @@ public class RegionServiceTest extends  BaseTest{
 
     private void getRegionListByTopicName2Success() {
         List<RegionDO> expectedResult = regionService.getByClusterId(1L);
-        Assert.assertEquals(regionService.getRegionListByTopicName(1L, "topic_a"), expectedResult);
+        Assert.assertEquals(regionService.getRegionListByTopicName(1L, REAL_TOPIC1_IN_ZK), expectedResult);
     }
 }

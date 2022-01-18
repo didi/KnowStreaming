@@ -31,6 +31,10 @@ import java.util.List;
  * @Date 2021/12/29
  */
 public class AccountServiceTest extends BaseTest {
+    /*
+    此测试不能一起运行，因为一些test中会执行一次flush()，执行完毕后，缓存就不为null
+    后面的测试中本来应该再次刷新缓存，但由于缓存不为null，就不会再执行flush
+     */
     @Autowired
     @InjectMocks
     private AccountService accountService;

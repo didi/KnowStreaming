@@ -16,6 +16,14 @@ import java.util.List;
  */
 public class TopicExpiredServiceTest extends BaseTest {
 
+    /*
+    该topic在region_1上，region_1使用了1,2broker，该topic3个分区，2个副本
+     */
+    private final static String REAL_TOPIC1_IN_ZK = "topic_a";
+
+    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+
+
     @Autowired
     private TopicExpiredDao topicExpiredDao;
 
@@ -25,9 +33,9 @@ public class TopicExpiredServiceTest extends BaseTest {
 
     private TopicExpiredDO getTopicExpiredDO() {
         TopicExpiredDO topicExpiredDO = new TopicExpiredDO();
-        topicExpiredDO.setClusterId(1L);
+        topicExpiredDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         topicExpiredDO.setExpiredDay(30);
-        topicExpiredDO.setTopicName("topic_a");
+        topicExpiredDO.setTopicName(REAL_TOPIC1_IN_ZK);
         topicExpiredDO.setStatus(0);
 
         return topicExpiredDO;

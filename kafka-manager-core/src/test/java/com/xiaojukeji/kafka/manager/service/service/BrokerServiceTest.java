@@ -8,7 +8,9 @@ import com.xiaojukeji.kafka.manager.common.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerMetricsDO;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
+import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
+import org.apache.kafka.common.TopicPartition;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -26,6 +28,11 @@ import java.util.*;
  * @Date 2021/12/10
  */
 public class BrokerServiceTest extends BaseTest {
+    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+
+    private final static Integer REAL_BROKER_ID_IN_ZK = 1;
+
+    private final static String END_POINTS_IN_BROKER = "SASL_PLAINTEXT://10.179.162.202:9093";
 
     @Autowired
     @InjectMocks
@@ -33,6 +40,9 @@ public class BrokerServiceTest extends BaseTest {
 
     @Mock
     private JmxService jmxService;
+
+    @Mock
+    private TopicService topicService;
 
     @BeforeMethod
     public void setup() {
@@ -42,7 +52,7 @@ public class BrokerServiceTest extends BaseTest {
     @DataProvider(name = "provideBrokerDO")
     public static Object[][] provideBrokerDO() {
         BrokerDO brokerDO = new BrokerDO();
-        brokerDO.setClusterId(1L);
+        brokerDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         brokerDO.setBrokerId(100);
         brokerDO.setHost("127.0.0.1");
         brokerDO.setPort(9093);
@@ -57,8 +67,8 @@ public class BrokerServiceTest extends BaseTest {
     @DataProvider(name = "provideBrokerMetadata")
     public static Object[][] provideBrokerMetadata() {
         BrokerMetadata brokerMetadata = new BrokerMetadata();
-        brokerMetadata.setBrokerId(1);
-        brokerMetadata.setClusterId(1L);
+        brokerMetadata.setBrokerId(REAL_BROKER_ID_IN_ZK);
+        brokerMetadata.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         brokerMetadata.setHost("127.0.0.1");
         brokerMetadata.setPort(9092);
         brokerMetadata.setEndpoints(Arrays.asList("SASL_PLAINTEXT://10.179.162.202:9093"));
@@ -69,6 +79,44 @@ public class BrokerServiceTest extends BaseTest {
         return new Object[][] {{brokerMetadata}};
     }
 
+    private TopicDiskLocation getTopicDiskLocation() {
+        TopicDiskLocation topicDiskLocation = new TopicDiskLocation();
+        topicDiskLocation.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
+        topicDiskLocation.setBrokerId(1);
+        topicDiskLocation.setTopicName("testTopic");
+        topicDiskLocation.setDiskName("disk");
+        topicDiskLocation.setLeaderPartitions(new ArrayList<>());
+        topicDiskLocation.setFollowerPartitions(Arrays.asList(0));
+        topicDiskLocation.setUnderReplicatedPartitions(new ArrayList<>());
+        topicDiskLocation.setUnderReplicated(false);
+
+        return topicDiskLocation;
+    }
+
+    private TopicPartition getTopicPartition() {
+        TopicPartition topicPartition = new TopicPartition("testTopic", 0);
+        return topicPartition;
+    }
+
+    private Map<TopicPartition, String> getDiskNameMap() {
+        Map<TopicPartition, String> diskNameMap = new HashMap<>();
+        TopicPartition topicPartition = getTopicPartition();
+        diskNameMap.put(topicPartition, "disk");
+        return diskNameMap;
+    }
+
+    private PartitionState getPartitionState() {
+        PartitionState partitionState = new PartitionState();
+        return partitionState;
+    }
+
+    private Map<String, List<PartitionState>> getStateMap() {
+        PartitionState partitionState = getPartitionState();
+        Map<String, List<PartitionState>> stateMap = new HashMap<>();
+        stateMap.put("string", Arrays.asList(partitionState));
+        return stateMap;
+    }
+
     public BrokerMetrics getBrokerMetrics() {
         BrokerMetrics brokerMetrics = new BrokerMetrics(1L, 1);
         Map<String, Object> metricsMap = new HashMap<>();
@@ -76,44 +124,6 @@ public class BrokerServiceTest extends BaseTest {
         metricsMap.put("LeaderCountValue", 100);
         brokerMetrics.setMetricsMap(metricsMap);
         return brokerMetrics;
-    }
-
-    @Test(dataProvider = "provideBrokerDO")
-    public void replaceTest(BrokerDO brokerDO) {
-        int result = brokerService.replace(brokerDO);
-        Assert.assertEquals(result, 2);
-    }
-
-    public void delete2operationFailedTest(BrokerDO brokerDO) {
-        brokerService.replace(brokerDO);
-
-        ResultStatus res = brokerService.delete(100L, brokerDO.getBrokerId());
-        Assert.assertEquals(res.getCode(), ResultStatus.OPERATION_FAILED.getCode());
-    }
-
-    public void delete2SuccessTest(BrokerDO brokerDO) {
-        brokerService.replace(brokerDO);
-
-        ResultStatus res = brokerService.delete(1L, brokerDO.getBrokerId());
-        Assert.assertEquals(res.getCode(), ResultStatus.SUCCESS.getCode());
-    }
-
-    @Test(dataProvider = "provideBrokerDO", description = "测试删除broker")
-    public void deleteTest(BrokerDO brokerDO) {
-        // 删除broker成功
-        delete2SuccessTest(brokerDO);
-        // 删除broker时，出现operation failed
-        delete2operationFailedTest(brokerDO);
-    }
-
-    @Test(dataProvider = "provideBrokerDO")
-    public void listAllTest(BrokerDO brokerDO) {
-        brokerService.replace(brokerDO);
-
-        List<BrokerDO> brokerDOS = brokerService.listAll();
-        Assert.assertFalse(brokerDOS.isEmpty());
-        Assert.assertTrue(brokerDOS.stream().allMatch(broker ->
-                broker.getClusterId().equals(brokerDO.getClusterId())));
     }
 
     @Test
@@ -164,28 +174,16 @@ public class BrokerServiceTest extends BaseTest {
         Assert.assertNotNull(result1.getLeaderCount());
     }
 
-    @Test(description = "根据时间区间获取Broker监控数据测试")
-    public void getBrokerMetricsFromDBTest() {
-        long startTime = 1639360565000L;
-        long endTime = 1639407365000L;
-        List<BrokerMetricsDO> brokerMetricsDOList = brokerService.getBrokerMetricsFromDB(
-                1L, 1, new Date(startTime), new Date(endTime));
-        Assert.assertFalse(brokerMetricsDOList.isEmpty());
-        Assert.assertTrue(brokerMetricsDOList.stream().allMatch(brokerMetricsDO ->
-                brokerMetricsDO.getClusterId().equals(1L) &&
-                brokerMetricsDO.getBrokerId().equals(1) &&
-                brokerMetricsDO.getGmtCreate().after(new Date(startTime)) &&
-                brokerMetricsDO.getGmtCreate().before(new Date(endTime))));
-    }
-
     @Test
     public void getBrokerTopicLocationTest() {
-        // TODO 待补充， jmxService和topicService测试完成后
-        List<TopicDiskLocation> brokerTopicLocations = brokerService.getBrokerTopicLocation(1L, 1);
-        Assert.assertFalse(brokerTopicLocations.isEmpty());
-        Assert.assertTrue(brokerTopicLocations.stream().allMatch(brokerTopicLocation ->
-                brokerTopicLocation.getClusterId().equals(1L) &&
-                brokerTopicLocation.getBrokerId().equals(1)));
+        Map<TopicPartition, String> diskNameMap = getDiskNameMap();
+        Mockito.when(jmxService.getBrokerTopicLocation(Mockito.any(), Mockito.any())).thenReturn(diskNameMap);
+        Map<String, List<PartitionState>> stateMap = getStateMap();
+        Mockito.when(topicService.getTopicPartitionState(Mockito.any(), Mockito.any())).thenReturn(stateMap);
+        TopicDiskLocation topicDiskLocation = getTopicDiskLocation();
+        List<TopicDiskLocation> expectedResult = Arrays.asList(topicDiskLocation);
+        List<TopicDiskLocation> actualResult = brokerService.getBrokerTopicLocation(1L, 1);
+        Assert.assertEquals(expectedResult.toString(), actualResult.toString());
     }
 
     @Test(description = "计算Broker的峰值均值流量测试")
@@ -217,8 +215,9 @@ public class BrokerServiceTest extends BaseTest {
     }
 
     private void calBrokerMaxAvgBytesIn2Success() {
-        long startTime = 1639360565000L;
-        long endTime = 1639407365000L;
+        // 此测试需要brokerId=1的broker上有真实的流量
+        long startTime = 0L;
+        long endTime = new Date().getTime();
         Double result = brokerService.calBrokerMaxAvgBytesIn(
                 1L, 1, 2, new Date(startTime), new Date(endTime));
         Assert.assertTrue(result > 0.0);
