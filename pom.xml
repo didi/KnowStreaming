@@ -11,14 +11,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.1.RELEASE</version>  <!-- 莫要修改该版本, 否则可能会导致自自定义的schedule不生效 -->
+        <version>2.1.18.RELEASE</version>  <!-- 莫要修改该版本, 否则可能会导致自自定义的schedule不生效 -->
         <!--<relativePath/>-->
     </parent>
 
     <properties>
-        <kafka-manager.revision>2.4.2-SNAPSHOT</kafka-manager.revision>
-        <swagger2.version>2.7.0</swagger2.version>
-        <swagger.version>1.5.13</swagger.version>
+        <kafka-manager.revision>2.5</kafka-manager.revision>
+        <swagger2.version>2.9.2</swagger2.version>
+        <swagger.version>1.5.21</swagger.version>
 
         <maven.test.skip>true</maven.test.skip>
         <downloadSources>true</downloadSources>
@@ -26,7 +26,9 @@
         <java_target_version>1.8</java_target_version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file_encoding>UTF-8</file_encoding>
-        <tomcat.version>8.5.66</tomcat.version>
+        <tomcat.version>8.5.72</tomcat.version>
+        <log4j2.version>2.16.0</log4j2.version>
+        <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
     </properties>
 
     <modules>
@@ -42,6 +44,7 @@
         <module>kafka-manager-extends/kafka-manager-openapi</module>
         <module>kafka-manager-task</module>
         <module>kafka-manager-web</module>
+        <module>distribution</module>
     </modules>
 
     <dependencyManagement>
@@ -60,6 +63,11 @@
             <dependency>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
 
@@ -229,6 +237,25 @@
                 <artifactId>minio</artifactId>
                 <version>7.1.0</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.2</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>

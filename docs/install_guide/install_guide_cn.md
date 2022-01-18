@@ -31,17 +31,23 @@
 
 **2、源代码进行打包**
 
-下载好代码之后，进入`Logi-KafkaManager`的主目录，执行`sh build.sh`命令即可，执行完成之后会在`output/kafka-manager-xxx`目录下面生成一个jar包。
+下载好代码之后，进入`Logi-KafkaManager`的主目录，执行`mvn -Prelease-kafka-manager -Dmaven.test.skip=true clean install -U  `命令即可，
+执行完成之后会在`distribution/target`目录下面生成一个`kafka-manager-*.tar.gz`。
+和一个`kafka-manager-*.zip` 文件,随便任意一个压缩包都可以; 
+当然此时同级目录有一个已经解压好的文件夹;
 
-对于`windows`环境的用户，估计执行不了`sh build.sh`命令，因此可以直接执行`mvn install`，然后在`kafka-manager-web/target`目录下生成一个kafka-manager-web-xxx.jar的包。
 
-获取到jar包之后，我们继续下面的步骤。
 
 ---
 
-## 3、MySQL-DB初始化
+## 3. 解压安装包
+解压完成后; 在文件目录中可以看到有`kafka-manager/conf/create_mysql_table.sql` 有个mysql初始化文件
+先初始化DB
 
-执行[create_mysql_table.sql](create_mysql_table.sql)中的SQL命令，从而创建所需的MySQL库及表，默认创建的库名是`logi_kafka_manager`。
+      
+## 4、MySQL-DB初始化
+
+执行[create_mysql_table.sql](../../distribution/conf/create_mysql_table.sql)中的SQL命令，从而创建所需的MySQL库及表，默认创建的库名是`logi_kafka_manager`。
 
 ```
 # 示例：
@@ -50,15 +56,38 @@ mysql -uXXXX -pXXX -h XXX.XXX.XXX.XXX -PXXXX < ./create_mysql_table.sql
 
 ---
 
-## 4、启动
+## 5.修该配置
+请将`conf/application.yml.example` 文件复制一份出来命名为`application.yml` 放在同级目录:conf/application.yml ;
+并且修改配置; 当然不修改的话 就会用默认的配置;
+至少 mysql配置成自己的吧
 
-```
-# application.yml 是配置文件，最简单的是仅修改MySQL相关的配置即可启动
 
-nohup java -jar kafka-manager.jar --spring.config.location=./application.yml > /dev/null 2>&1 &
-```
+## 6、启动/关闭
+解压包中有启动和关闭脚本 
+`kafka-manager/bin/shutdown.sh`
+`kafka-manager/bin/startup.sh`
 
-### 5、使用
+执行 sh startup.sh 启动
+执行 sh shutdown.sh 关闭
+
+
+
+### 6、使用
 
 本地启动的话，访问`http://localhost:8080`，输入帐号及密码(默认`admin/admin`)进行登录。更多参考：[kafka-manager 用户使用手册](../user_guide/user_guide_cn.md)
 
+### 7. 升级
+
+如果是升级版本,请查看文件 [kafka-manager 升级手册](../../distribution/upgrade_config.md) 
+ 在您下载的启动包(V2.5及其后)中也有记录,在 kafka-manager/upgrade_config.md 中
+
+
+### 8. 在IDE中启动
+> 如果想参与开发或者想在IDE中启动的话
+> 先执行  `mvn -Dmaven.test.skip=true clean install -U ` 
+> 
+> 然后这个时候可以选择去 [pom.xml](../../pom.xml) 中将`kafka-manager-console`模块注释掉;
+> 注释是因为每次install的时候都会把前端文件`kafka-manager-console`重新打包进`kafka-manager-web`
+> 
+> 完事之后,只需要直接用IDE启动运行`kafka-manager-web`模块中的
+> com.xiaojukeji.kafka.manager.web.MainApplication main方法就行了

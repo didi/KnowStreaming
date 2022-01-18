@@ -210,7 +210,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             }
         }
 
-        // 增加流量信息
+        // 增加流量和描述信息
         Map<Long, Map<String, TopicMetrics>> metricMap = KafkaMetricsCache.getAllTopicMetricsFromCache();
         for (MineTopicSummary mineTopicSummary : summaryList) {
             TopicMetrics topicMetrics = getTopicMetricsFromCacheOrJmx(
@@ -219,6 +219,10 @@ public class TopicManagerServiceImpl implements TopicManagerService {
                     metricMap);
             mineTopicSummary.setBytesIn(topicMetrics.getSpecifiedMetrics("BytesInPerSecOneMinuteRate"));
             mineTopicSummary.setBytesOut(topicMetrics.getSpecifiedMetrics("BytesOutPerSecOneMinuteRate"));
+
+            // 增加topic描述信息
+            TopicDO topicDO = topicDao.getByTopicName(mineTopicSummary.getPhysicalClusterId(), mineTopicSummary.getTopicName());
+            mineTopicSummary.setDescription(topicDO.getDescription());
         }
         return summaryList;
     }

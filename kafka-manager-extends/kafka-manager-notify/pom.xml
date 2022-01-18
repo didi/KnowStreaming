@@ -25,7 +25,6 @@
         <java_target_version>1.8</java_target_version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file_encoding>UTF-8</file_encoding>
-        <spring-version>5.1.3.RELEASE</spring-version>
     </properties>
 
     <dependencies>
@@ -48,7 +47,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring-version}</version>
         </dependency>
     </dependencies>
 </project>

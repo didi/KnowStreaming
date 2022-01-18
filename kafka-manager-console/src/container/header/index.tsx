@@ -7,7 +7,7 @@ import { urlPrefix } from 'constants/left-menu';
 import { region, IRegionIdcs } from 'store/region';
 import logoUrl from '../../assets/image/kafka-logo.png';
 import userIcon from '../../assets/image/normal.png';
-import weChat from '../../assets/image/wechat.jpeg';
+import weChat from '../../assets/image/weChat.png';
 import { users } from 'store/users';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -60,8 +60,8 @@ export const Header = observer((props: IHeader) => {
     });
   };
   const content = (
-    <div style={{ height: '250px', padding: '5px' }} className="kafka-avatar-img">
-      <img style={{ width: '190px', height: '246px' }} src={weChat} alt="" />
+    <div style={{ height: '200px', padding: '5px' }} className="kafka-avatar-img">
+      <img style={{ width: '190px', height: '190px' }} src={weChat} alt="" />
     </div>
   );
   const helpCenter = (
@@ -144,8 +144,8 @@ export const Header = observer((props: IHeader) => {
     <div className="kafka-header-container">
       <div className="left-content">
         <img className="kafka-header-icon" src={logoUrl} alt="" />
-        <span className="kafka-header-text">Kafka Manager</span>
-        <a className='kafka-header-version' href="https://github.com/didi/Logi-KafkaManager/releases" target='_blank'>v2.4.2</a>
+        <span className="kafka-header-text">LogiKM</span>
+        <a className='kafka-header-version' href="https://github.com/didi/Logi-KafkaManager/releases" target='_blank'>v2.5.0</a>
         {/* 添加版本超链接 */}
       </div>
       <div className="mid-content">

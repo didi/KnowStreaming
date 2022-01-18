@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author zengqiao
@@ -240,9 +241,11 @@ public class ExpertServiceImpl implements ExpertService {
             return new ArrayList<>();
         }
 
+        //获取满足条件的过期Topic
         List<TopicExpiredDO> filteredExpiredTopicList = new ArrayList<>();
         for (TopicExpiredDO elem: expiredTopicList) {
-            if (config.getIgnoreClusterIdList().contains(elem.getClusterId())) {
+            //判定是否为忽略Cluster或者判定是否为忽略Topic名，使用正则来过滤理论上不属于过期的Topic
+            if (config.getIgnoreClusterIdList().contains(elem.getClusterId()) || Pattern.matches(config.getFilterRegex(), elem.getTopicName())) {
                 continue;
             }
             filteredExpiredTopicList.add(elem);

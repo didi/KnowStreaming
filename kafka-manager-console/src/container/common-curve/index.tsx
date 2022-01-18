@@ -1,4 +1,4 @@
-import { EChartOption } from 'echarts';
+import { EChartsOption } from 'echarts';
 import { observer } from 'mobx-react';
 import React from 'react';
 import { curveInfo } from 'store/curve-info';
@@ -10,7 +10,7 @@ import LineChart, { hasData } from 'component/chart/line-chart';
 
 export interface ICommonCurveProps {
   options: ICurve;
-  parser?: (option: ICurve, data: any[]) => EChartOption;
+  parser?: (option: ICurve, data: any[]) => any;
 }
 
 @observer
@@ -41,7 +41,7 @@ export class CommonCurve extends React.Component<ICommonCurveProps> {
     fullScreen.show(this.renderCurve(options, loading, true));
   }
 
-  public renderOpBtns = (options: EChartOption, expand = false) => {
+  public renderOpBtns = (options: EChartsOption, expand = false) => {
     const data = hasData(options);
     return (
       <div className="charts-op" key="op">
@@ -85,7 +85,7 @@ export class CommonCurve extends React.Component<ICommonCurveProps> {
     return <div className="no-data-info" style={{ ...style }} key="loading"><Spin /></div>;
   }
 
-  public renderEchart = (options: EChartOption, loading = false) => {
+  public renderEchart = (options: EChartsOption, loading = false) => {
     const height = getHight(options);
     const data = hasData(options);
 
@@ -94,7 +94,7 @@ export class CommonCurve extends React.Component<ICommonCurveProps> {
     return <LineChart height={height} options={options} key="chart" />;
   }
 
-  public renderCurve = (options: EChartOption, loading: boolean, expand = false) => {
+  public renderCurve = (options: any, loading: boolean, expand = false) => {
     const data = hasData(options);
     return (
       <div className="common-chart-wrapper" >

@@ -5,9 +5,9 @@
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
+`LogiKM开源至今备受关注，考虑到开源项目应该更贴合Apache Kafka未来发展方向，经项目组慎重考虑，预计22年5月份将其品牌升级成Know Streaming，届时项目名称和Logo也将统一更新，感谢大家一如既往的支持，敬请期待！`
 
-
-阅读本README文档，您可以了解到滴滴Logi-KafkaManager的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。<br>若滴滴Logi-KafkaManager已在贵司的生产环境进行使用，并想要获得官方更好地支持和指导，可以通过[`OCE认证`](http://obsuite.didiyun.com/open/openAuth)，加入官方交流平台。
+阅读本README文档，您可以了解到滴滴Logi-KafkaManager的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。
 
 
 ## 1 产品简介
@@ -55,35 +55,56 @@
 ## 2 相关文档
 
 ### 2.1 产品文档
-- [滴滴Logi-KafkaManager 安装手册](docs/install_guide/install_guide_cn.md)
-- [滴滴Logi-KafkaManager 接入集群](docs/user_guide/add_cluster/add_cluster.md)
-- [滴滴Logi-KafkaManager 用户使用手册](docs/user_guide/user_guide_cn.md)
-- [滴滴Logi-KafkaManager FAQ](docs/user_guide/faq.md)
+- [滴滴LogiKM 安装手册](docs/install_guide/install_guide_cn.md)
+- [滴滴LogiKM 接入集群](docs/user_guide/add_cluster/add_cluster.md)
+- [滴滴LogiKM 用户使用手册](docs/user_guide/user_guide_cn.md)
+- [滴滴LogiKM FAQ](docs/user_guide/faq.md)
 
 ### 2.2 社区文章
+- [kafka最强最全知识图谱](https://www.szzdzhp.com/kafka/)
+- [LogiKM新用户入门系列文章专栏 --石臻臻](https://www.szzdzhp.com/categories/LogIKM/)
 - [滴滴云官网产品介绍](https://www.didiyun.com/production/logi-KafkaManager.html)
 - [7年沉淀之作--滴滴Logi日志服务套件](https://mp.weixin.qq.com/s/-KQp-Qo3WKEOc9wIR2iFnw)
 - [滴滴Logi-KafkaManager 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
 - [滴滴Logi-KafkaManager 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
-- [滴滴Logi-KafkaManager 系列视频教程](https://mp.weixin.qq.com/s/9X7gH0tptHPtfjPPSdGO8g)
+- [滴滴Logi-KafkaManager 系列视频教程](https://space.bilibili.com/442531657/channel/seriesdetail?sid=571649)
 - [kafka实践（十五）：滴滴开源Kafka管控平台 Logi-KafkaManager研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
-- [kafka的灵魂伴侣Logi-KafkaManager系列文章专栏 --石臻](https://blog.csdn.net/u010634066/category_10977588.html)
+
 
 ## 3 滴滴Logi开源用户交流群
 
-
 ![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
-微信加群：关注公众号 云原生可观测性 回复 "Logi加群"
 
-## 4 OCE认证
-OCE是一个认证机制和交流平台，为滴滴Logi-KafkaManager生产用户量身打造，我们会为OCE企业提供更好的技术支持，比如专属的技术沙龙、企业一对一的交流机会、专属的答疑群等，如果贵司Logi-KafkaManager上了生产，[快来加入吧](http://obsuite.didiyun.com/open/openAuth)
+想跟各个大佬交流Kafka Es 等中间件/大数据相关技术请 加微信进群。
 
+微信加群：添加<font color=red>mike_zhangliang</font>、<font color=red>danke-xie</font>的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
+
+## 4 知识星球
+
+<img width="447" alt="image" src="https://user-images.githubusercontent.com/71620349/147314042-843a371a-48c0-4d9a-a65e-ca40236f3300.png">
+
+<br>
+<center>
+  ✅我们正在组建国内最大最权威的
+</center>
+<br>
+<center>
+<font color=red size=5><b>【Kafka中文社区】</b></font>
+</center>
+  
+在这里你可以结交各大互联网Kafka大佬以及近2000+Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待您的加入中～https://z.didi.cn/5gSF9  
+
+<font color=red size=5>有问必答~！  </font>
+
+<font color=red size=5>互动有礼~！  </font>
+
+PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况哦～！如使用版本、操作步骤、报错/警告信息等，方便大V们快速解答～
 
 ## 5 项目成员
 
 ### 5.1 内部核心人员
 
-`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`
+`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`xiepeng`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`、`石臻臻`
 
 
 ### 5.2 外部贡献者
@@ -93,4 +114,4 @@ OCE是一个认证机制和交流平台，为滴滴Logi-KafkaManager生产用户
 
 ## 6 协议
 
-`kafka-manager`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
+`LogiKM`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)

@@ -17,6 +17,9 @@ public class ConsumerMetadataCache {
 
     private static final Map<Long, ConsumerMetadata> CG_METADATA_IN_BK_MAP = new ConcurrentHashMap<>();
 
+    private ConsumerMetadataCache() {
+    }
+
     public static void putConsumerMetadataInZK(Long clusterId, ConsumerMetadata consumerMetadata) {
         if (clusterId == null || consumerMetadata == null) {
             return;

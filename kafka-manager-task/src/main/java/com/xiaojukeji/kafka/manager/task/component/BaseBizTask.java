@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.task.component;
 
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,11 +8,11 @@ import org.slf4j.LoggerFactory;
  * @date 20/8/10
  */
 public class BaseBizTask<E extends Comparable> implements Runnable {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScheduledTask.class);
 
-    private E task;
+    private final E task;
 
-    private AbstractScheduledTask scheduledTask;
+    private final AbstractScheduledTask scheduledTask;
 
     public BaseBizTask(E task, AbstractScheduledTask scheduledTask) {
         this.task = task;
@@ -30,6 +29,7 @@ public class BaseBizTask<E extends Comparable> implements Runnable {
         } catch (Throwable t) {
             LOGGER.error("scheduled task scheduleName:{} execute failed, task:{}", scheduledTask.getScheduledName(), task, t);
         }
+
         LOGGER.info("scheduled task scheduleName:{} finished, cost-time:{}ms.", scheduledTask.getScheduledName(), System.currentTimeMillis() - startTime);
     }
 }

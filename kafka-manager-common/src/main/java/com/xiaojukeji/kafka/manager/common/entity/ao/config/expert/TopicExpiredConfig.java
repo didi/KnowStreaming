@@ -10,6 +10,8 @@ import java.util.List;
 public class TopicExpiredConfig {
     private Integer minExpiredDay = 30;
 
+    private String filterRegex = "";
+
     private List<Long> ignoreClusterIdList = new ArrayList<>();
 
     public Integer getMinExpiredDay() {
@@ -28,10 +30,19 @@ public class TopicExpiredConfig {
         this.ignoreClusterIdList = ignoreClusterIdList;
     }
 
+    public String getFilterRegex() {
+        return filterRegex;
+    }
+
+    public void setFilterRegex(String filterRegex) {
+        this.filterRegex = filterRegex;
+    }
+
     @Override
     public String toString() {
         return "TopicExpiredConfig{" +
                 "minExpiredDay=" + minExpiredDay +
+                ", filterRegex='" + filterRegex + '\'' +
                 ", ignoreClusterIdList=" + ignoreClusterIdList +
                 '}';
     }

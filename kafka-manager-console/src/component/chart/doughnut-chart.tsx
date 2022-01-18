@@ -1,13 +1,27 @@
 import * as React from 'react';
 import { Spin } from 'component/antd';
-import echarts from 'echarts/lib/echarts';
-// 引入饼状图
-import 'echarts/lib/chart/pie';
-// 引入提示框和标题组件
-import 'echarts/lib/component/tooltip';
-import 'echarts/lib/component/title';
-import 'echarts/lib/component/legend';
+import * as echarts from 'echarts/core';
+// 引入饼图
+import { PieChart } from 'echarts/charts';
 
+// 引入提示框和标题组件
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+
+// 注册必须的组件
+echarts.use([
+  PieChart,
+  TitleComponent,
+  LegendComponent,
+  TooltipComponent,
+  GridComponent,
+  CanvasRenderer,
+]);
 interface IPieProps {
   getChartData: any;
 }

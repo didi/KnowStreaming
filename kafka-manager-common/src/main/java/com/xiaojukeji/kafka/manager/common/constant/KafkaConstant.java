@@ -17,6 +17,10 @@ public class KafkaConstant {
 
     public static final String RETENTION_MS_KEY = "retention.ms";
 
+    public static final String EXTERNAL_KEY = "EXTERNAL";
+
+    public static final String INTERNAL_KEY = "INTERNAL";
+
     private KafkaConstant() {
     }
 }
