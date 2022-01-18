@@ -14,7 +14,10 @@ public class KafkaMetricsCache {
     /**
      * <clusterId, Metrics List>
      */
-    private static Map<Long, Map<String, TopicMetrics>> TopicMetricsMap = new ConcurrentHashMap<>();
+    private static final Map<Long, Map<String, TopicMetrics>> TOPIC_METRICS_MAP = new ConcurrentHashMap<>();
+
+    private KafkaMetricsCache() {
+    }
 
     public static void putTopicMetricsToCache(Long clusterId, List<TopicMetrics> dataList) {
         if (clusterId == null || dataList == null) {
@@ -24,22 +27,22 @@ public class KafkaMetricsCache {
         for (TopicMetrics topicMetrics : dataList) {
             subMetricsMap.put(topicMetrics.getTopicName(), topicMetrics);
         }
-        TopicMetricsMap.put(clusterId, subMetricsMap);
+        TOPIC_METRICS_MAP.put(clusterId, subMetricsMap);
     }
 
     public static Map<String, TopicMetrics> getTopicMetricsFromCache(Long clusterId) {
-        return TopicMetricsMap.getOrDefault(clusterId, Collections.emptyMap());
+        return TOPIC_METRICS_MAP.getOrDefault(clusterId, Collections.emptyMap());
     }
 
     public static Map<Long, Map<String, TopicMetrics>> getAllTopicMetricsFromCache() {
-        return TopicMetricsMap;
+        return TOPIC_METRICS_MAP;
     }
 
     public static TopicMetrics getTopicMetricsFromCache(Long clusterId, String topicName) {
         if (clusterId == null || topicName == null) {
             return null;
         }
-        Map<String, TopicMetrics> subMap = TopicMetricsMap.getOrDefault(clusterId, Collections.emptyMap());
+        Map<String, TopicMetrics> subMap = TOPIC_METRICS_MAP.getOrDefault(clusterId, Collections.emptyMap());
         return subMap.get(topicName);
     }
 }

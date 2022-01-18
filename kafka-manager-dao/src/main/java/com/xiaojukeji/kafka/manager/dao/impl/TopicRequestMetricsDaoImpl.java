@@ -45,13 +45,11 @@ public class TopicRequestMetricsDaoImpl implements TopicRequestMetricsDao {
     }
 
     @Override
-    public int deleteBeforeTime(Date endTime) {
-        return sqlSession.delete("TopicRequestMetricsDao.deleteBeforeTime", endTime);
-    }
-
-    @Override
-    public int deleteBeforeId(Long id) {
-        return sqlSession.delete("TopicRequestMetricsDao.deleteBeforeId", id);
+    public int deleteBeforeTime(Date endTime, Integer limitSize) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("endTime", endTime);
+        params.put("limitSize", limitSize);
+        return sqlSession.delete("TopicRequestMetricsDao.deleteBeforeTime", params);
     }
 
     @Override

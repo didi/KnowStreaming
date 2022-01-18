@@ -27,7 +27,7 @@ public class ClusterMetricsDaoImpl implements ClusterMetricsDao {
 
     @Override
     public List<ClusterMetricsDO> getClusterMetrics(long clusterId, Date startTime, Date endTime) {
-        Map<String, Object> map = new HashMap<String, Object>(3);
+        Map<String, Object> map = new HashMap<>(3);
         map.put("clusterId", clusterId);
         map.put("startTime", startTime);
         map.put("endTime", endTime);
@@ -35,7 +35,10 @@ public class ClusterMetricsDaoImpl implements ClusterMetricsDao {
     }
 
     @Override
-    public int deleteBeforeTime(Date endTime) {
-        return sqlSession.delete("ClusterMetricsDao.deleteBeforeTime", endTime);
+    public int deleteBeforeTime(Date endTime, Integer limitSize) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("endTime", endTime);
+        params.put("limitSize", limitSize);
+        return sqlSession.delete("ClusterMetricsDao.deleteBeforeTime", params);
     }
 }

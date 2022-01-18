@@ -55,7 +55,7 @@ data:
         didi:
           app-topic-metrics-enabled: false
           topic-request-time-metrics-enabled: false
-          topic-throttled-metrics: false
+          topic-throttled-metrics-enabled: false
         save-days: 7
 
     # 任务相关的开关
@@ -67,7 +67,16 @@ data:
       # ldap settings
       ldap:
         enabled: false
-        authUserRegistration: false
+        url: ldap://127.0.0.1:389/
+        basedn: dc=tsign,dc=cn
+        factory: com.sun.jndi.ldap.LdapCtxFactory
+        filter: sAMAccountName
+        security:
+          authentication: simple
+          principal: cn=admin,dc=tsign,dc=cn
+          credentials: admin
+        auth-user-registration: false
+        auth-user-registration-role: normal
 
     kcm:
       enabled: false

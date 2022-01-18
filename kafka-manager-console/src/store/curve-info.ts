@@ -1,6 +1,6 @@
 import { observable, action } from 'mobx';
 import moment = require('moment');
-import { EChartOption } from 'echarts/lib/echarts';
+import { EChartsOption } from 'echarts';
 import { ICurve } from 'container/common-curve/config';
 import { curveKeys, PERIOD_RADIO_MAP } from 'container/admin/data-curve/config';
 import { timeFormat } from 'constants/strategy';
@@ -13,7 +13,7 @@ class CurveInfo {
   public timeRange: [moment.Moment, moment.Moment] = PERIOD_RADIO_MAP.get(this.periodKey).dateRange;
 
   @observable
-  public curveData: { [key: string]: EChartOption } = {};
+  public curveData: { [key: string]: EChartsOption } = {};
 
   @observable
   public curveLoading: { [key: string]: boolean } = {};
@@ -25,7 +25,7 @@ class CurveInfo {
   public currentOperator: string;
 
   @action.bound
-  public setCurveData(key: curveKeys | string, data: EChartOption) {
+  public setCurveData(key: curveKeys | string, data: EChartsOption) {
     this.curveData[key] = data;
   }
 
@@ -59,7 +59,7 @@ class CurveInfo {
 
   public getCommonCurveData = (
     options: ICurve,
-    parser: (option: ICurve, data: any[]) => EChartOption,
+    parser: (option: ICurve, data: any[]) => EChartsOption,
     reload?: boolean) => {
     const { path } = options;
     this.setCurveData(path, null);

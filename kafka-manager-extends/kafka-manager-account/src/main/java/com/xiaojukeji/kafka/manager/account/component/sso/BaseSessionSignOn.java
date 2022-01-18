@@ -32,16 +32,16 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
     private LdapAuthentication ldapAuthentication;
 
     //是否开启ldap验证
-    @Value(value = "${account.ldap.enabled:}")
+    @Value(value = "${account.ldap.enabled:false}")
     private Boolean accountLdapEnabled;
 
     //ldap自动注册的默认角色。请注意：它通常来说都是低权限角色
-    @Value(value = "${account.ldap.auth-user-registration-role:}")
+    @Value(value = "${account.ldap.auth-user-registration-role:normal}")
     private String authUserRegistrationRole;
 
     //ldap自动注册是否开启
-    @Value(value = "${account.ldap.auth-user-registration:}")
-    private boolean authUserRegistration;
+    @Value(value = "${account.ldap.auth-user-registration:false}")
+    private Boolean authUserRegistration;
 
     @Override
     public Result<String> loginAndGetLdap(HttpServletRequest request, HttpServletResponse response, LoginDTO dto) {

@@ -75,7 +75,10 @@ public class TopicThrottledMetricsDaoImpl implements TopicThrottledMetricsDao {
     }
 
     @Override
-    public int deleteBeforeTime(Date endTime) {
-        return sqlSession.delete("TopicThrottledMetricsDao.deleteBeforeTime", endTime);
+    public int deleteBeforeTime(Date endTime, Integer limitSize) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("endTime", endTime);
+        params.put("limitSize", limitSize);
+        return sqlSession.delete("TopicThrottledMetricsDao.deleteBeforeTime", params);
     }
 }

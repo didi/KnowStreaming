@@ -9,7 +9,7 @@ public class Constant {
 
     public static final Integer MAX_AVG_BYTES_DURATION = 10;
 
-    public static final Integer BATCH_INSERT_SIZE = 50;
+    public static final Integer BATCH_INSERT_SIZE = 30;
 
     public static final Integer DEFAULT_SESSION_TIMEOUT_UNIT_MS = 30000;
 

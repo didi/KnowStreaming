@@ -95,12 +95,21 @@ public class ReassignModelConverter {
         vo.setBeginTime(0L);
         vo.setEndTime(0L);
 
+        StringBuilder clusterAndTopicName = new StringBuilder();
+
         Integer completedTopicNum = 0;
         Set<Integer> statusSet = new HashSet<>();
         for (ReassignTaskDO elem: doList) {
             vo.setGmtCreate(elem.getGmtCreate().getTime());
             vo.setOperator(elem.getOperator());
             vo.setDescription(elem.getDescription());
+
+            if (clusterAndTopicName.length() == 0) {
+                clusterAndTopicName.append("-").append(elem.getClusterId()).append("-").append(elem.getTopicName());
+            } else {
+                clusterAndTopicName.append("等");
+            }
+
             if (TaskStatusReassignEnum.isFinished(elem.getStatus())) {
                 completedTopicNum += 1;
                 statusSet.add(elem.getStatus());
@@ -113,6 +122,9 @@ public class ReassignModelConverter {
             // 任务计划开始时间
             vo.setBeginTime(elem.getBeginTime().getTime());
         }
+
+        // 任务名称上，增加展示集群ID和Topic名称，多个时，仅展示第一个. PR from Hongten
+        vo.setTaskName(String.format("%s 数据迁移任务%s", DateUtils.getFormattedDate(taskId), clusterAndTopicName.toString()));
 
         // 任务整体状态
         if (statusSet.contains(TaskStatusReassignEnum.RUNNING.getCode())) {

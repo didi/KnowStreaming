@@ -122,11 +122,11 @@ module.exports = {
     },
   },
   devServer: {
-    contentBase: outPath,
+    // contentBase: outPath,
     host: '127.0.0.1',
     port: 1025,
     hot: true,
-    disableHostCheck: true,
+    // disableHostCheck: true,
     historyApiFallback: true,
     proxy: {
       '/api/v1/': {

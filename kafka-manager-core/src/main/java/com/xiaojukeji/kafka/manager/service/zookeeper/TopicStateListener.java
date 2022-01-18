@@ -10,6 +10,7 @@ import com.xiaojukeji.kafka.manager.service.cache.ThreadPool;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,9 +29,12 @@ public class TopicStateListener implements StateChangeListener {
 
     private ZkConfigImpl zkConfig;
 
-    public TopicStateListener(Long clusterId, ZkConfigImpl zkConfig) {
+    private ThreadPool threadPool;
+
+    public TopicStateListener(Long clusterId, ZkConfigImpl zkConfig, ThreadPool threadPool) {
         this.clusterId = clusterId;
         this.zkConfig = zkConfig;
+        this.threadPool = threadPool;
     }
 
     @Override
@@ -47,7 +51,7 @@ public class TopicStateListener implements StateChangeListener {
                         return null;
                     }
                 });
-                ThreadPool.submitCollectMetricsTask(taskList[i]);
+                threadPool.submitCollectMetricsTask(clusterId, taskList[i]);
             }
         } catch (Exception e) {
             LOGGER.error("init topics metadata failed, clusterId:{}.", clusterId, e);

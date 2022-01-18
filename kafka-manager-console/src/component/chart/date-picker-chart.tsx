@@ -3,16 +3,34 @@ import { DatePicker, notification, Spin } from 'component/antd';
 import moment, { Moment } from 'moment';
 import { timeStampStr } from 'constants/strategy';
 import { disabledDate } from 'lib/utils';
-import echarts from 'echarts';
+import * as echarts from 'echarts/core';
 
-// 引入柱状图和折线图
-import 'echarts/lib/chart/bar';
-import 'echarts/lib/chart/line';
+// 引入柱状图
+import { BarChart, LineChart } from 'echarts/charts';
 
 // 引入提示框和标题组件
-import 'echarts/lib/component/tooltip';
-import 'echarts/lib/component/title';
-import 'echarts/lib/component/legend';
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+  MarkLineComponent,
+  DatasetComponent,
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+
+// 注册必须的组件
+echarts.use([
+  TitleComponent,
+  LegendComponent,
+  TooltipComponent,
+  GridComponent,
+  BarChart,
+  LineChart,
+  CanvasRenderer,
+  DatasetComponent,
+  MarkLineComponent,
+]);
 import './index.less';
 
 const { RangePicker } = DatePicker;
@@ -60,6 +78,23 @@ export class ChartWithDatePicker extends React.Component<IChartProps> {
   public changeChartOptions(options: any) {
     const noData = options.series.length ? false : true;
     this.setState({ noData });
+    options.tooltip.formatter = (params: any) => {
+      let res =
+        '<div style=\'margin-bottom:5px;padding:0 12px;width:100%;height:24px;line-height:24px;border-radius:3px;\'><p>' +
+        params[0].data.time +
+        ' </p></div>';
+      // tslint:disable-next-line:prefer-for-of
+      for (let i = 0; i < params.length; i++) {
+        res += `<div key=${params[i].seriesName} style="color: #fff;padding:0 12px;line-height: 24px">
+                  <span style="display:inline-block;margin-right:5px;border-radius:50%;width:10px;height:10px;background-color:${[
+            params[i].color,
+          ]};"></span>
+                  ${params[i].seriesName}
+                  ${params[i].data[params[i].seriesName]}
+                </div>`;
+      }
+      return res;
+    };
     this.chart.setOption(options, true);
   }
 
@@ -79,7 +114,7 @@ export class ChartWithDatePicker extends React.Component<IChartProps> {
   public render() {
     const { customerNode } = this.props;
     return (
-      <div className="status-box" style={{minWidth: '930px'}}>
+      <div className="status-box" style={{ minWidth: '930px' }}>
         <div className="status-graph">
           <div className="k-toolbar">
             {customerNode}

@@ -36,4 +36,8 @@
     <select id="getByTopic" parameterType="java.util.Map" resultMap="TopicExpiredMap">
         SELECT * FROM topic_expired WHERE cluster_id = #{clusterId} AND topic_name = #{topicName}
     </select>
+
+    <delete id="deleteByName" parameterType="java.util.Map">
+        DELETE FROM topic_expired WHERE cluster_id=#{clusterId} AND topic_name=#{topicName}
+    </delete>
 </mapper>

@@ -16,10 +16,9 @@
     <properties>
         <java_source_version>1.8</java_source_version>
         <java_target_version>1.8</java_target_version>
-        <springframework.boot.version>2.1.1.RELEASE</springframework.boot.version>
-        <spring-version>5.1.3.RELEASE</spring-version>
         <failOnMissingWebXml>false</failOnMissingWebXml>
-        <tomcat.version>8.5.66</tomcat.version>
+        <tomcat.version>8.5.72</tomcat.version>
+        <log4j2.version>2.16.0</log4j2.version>
     </properties>
 
     <dependencies>
@@ -72,22 +71,22 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${springframework.boot.version}</version>
+            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-            <version>${springframework.boot.version}</version>
+            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
-            <version>${springframework.boot.version}</version>
+            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>${springframework.boot.version}</version>
+            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -104,16 +103,17 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>${spring-version}</version>
         </dependency>
     </dependencies>
 
     <build>
+        <finalName>kafka-manager</finalName>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${springframework.boot.version}</version>
+                <version>${spring.boot.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -121,6 +121,7 @@
                         </goals>
                     </execution>
                 </executions>
+
             </plugin>
         </plugins>
     </build>

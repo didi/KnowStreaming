@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 public class PhysicalClusterMetadataManager {
-    private final static Logger LOGGER = LoggerFactory.getLogger(PhysicalClusterMetadataManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PhysicalClusterMetadataManager.class);
 
     @Autowired
     private ControllerDao controllerDao;
@@ -50,22 +50,25 @@ public class PhysicalClusterMetadataManager {
     @Autowired
     private ClusterService clusterService;
 
-    private final static Map<Long, ClusterDO> CLUSTER_MAP = new ConcurrentHashMap<>();
+    @Autowired
+    private ThreadPool threadPool;
 
-    private final static Map<Long, ControllerData> CONTROLLER_DATA_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, ClusterDO> CLUSTER_MAP = new ConcurrentHashMap<>();
 
-    private final static Map<Long, ZkConfigImpl> ZK_CONFIG_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, ControllerData> CONTROLLER_DATA_MAP = new ConcurrentHashMap<>();
 
-    private final static Map<Long, Map<String, TopicMetadata>> TOPIC_METADATA_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, ZkConfigImpl> ZK_CONFIG_MAP = new ConcurrentHashMap<>();
 
-    private final static Map<Long, Map<String, Properties>> TOPIC_PROPERTIES_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, Map<String, TopicMetadata>> TOPIC_METADATA_MAP = new ConcurrentHashMap<>();
 
-    private final static Map<Long, Map<Integer, BrokerMetadata>> BROKER_METADATA_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, Map<String, Properties>> TOPIC_PROPERTIES_MAP = new ConcurrentHashMap<>();
+
+    private static final Map<Long, Map<Integer, BrokerMetadata>> BROKER_METADATA_MAP = new ConcurrentHashMap<>();
 
     /**
      * JXM连接, 延迟连接
      */
-    private final static Map<Long, Map<Integer, JmxConnectorWrap>> JMX_CONNECTOR_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, Map<Integer, JmxConnectorWrap>> JMX_CONNECTOR_MAP = new ConcurrentHashMap<>();
 
     /**
      * KafkaBroker版本, 延迟获取
@@ -125,7 +128,7 @@ public class PhysicalClusterMetadataManager {
             zkConfig.watchChildren(ZkPathUtil.BROKER_IDS_ROOT, brokerListener);
 
             //增加Topic监控
-            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig);
+            TopicStateListener topicListener = new TopicStateListener(clusterDO.getId(), zkConfig, threadPool);
             topicListener.init();
             zkConfig.watchChildren(ZkPathUtil.BROKER_TOPICS_ROOT, topicListener);
 
@@ -314,7 +317,7 @@ public class PhysicalClusterMetadataManager {
         metadataMap.put(brokerId, brokerMetadata);
 
         Map<Integer, JmxConnectorWrap> jmxMap = JMX_CONNECTOR_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());
-        jmxMap.put(brokerId, new JmxConnectorWrap(brokerMetadata.getHost(), brokerMetadata.getJmxPort(), jmxConfig));
+        jmxMap.put(brokerId, new JmxConnectorWrap(clusterId, brokerId, brokerMetadata.getHost(), brokerMetadata.getJmxPort(), jmxConfig));
         JMX_CONNECTOR_MAP.put(clusterId, jmxMap);
 
         Map<Integer, KafkaVersion> versionMap = KAFKA_VERSION_MAP.getOrDefault(clusterId, new ConcurrentHashMap<>());
@@ -398,7 +401,7 @@ public class PhysicalClusterMetadataManager {
                                            KafkaBrokerRoleEnum roleEnum) {
         BrokerMetadata brokerMetadata =
                 PhysicalClusterMetadataManager.getBrokerMetadata(clusterId, brokerId);
-        if (ValidateUtils.isNull(brokerMetadata)) {
+        if (brokerMetadata == null) {
             return;
         }
         String hostname = brokerMetadata.getHost().replace(KafkaConstant.BROKER_HOST_NAME_SUFFIX, "");
@@ -438,7 +441,7 @@ public class PhysicalClusterMetadataManager {
                                            KafkaBrokerRoleEnum roleEnum) {
         BrokerMetadata brokerMetadata =
                 PhysicalClusterMetadataManager.getBrokerMetadata(clusterId, brokerId);
-        if (ValidateUtils.isNull(brokerMetadata)) {
+        if (brokerMetadata == null) {
             return;
         }
 
@@ -539,9 +542,12 @@ public class PhysicalClusterMetadataManager {
     }
 
     public static Set<String> getBrokerTopicNum(Long clusterId, Set<Integer> brokerIdSet) {
-        Set<String> topicNameSet = new HashSet<>();
-
         Map<String, TopicMetadata> metadataMap = TOPIC_METADATA_MAP.get(clusterId);
+        if (metadataMap == null) {
+            return new HashSet<>();
+        }
+
+        Set<String> topicNameSet = new HashSet<>();
         for (String topicName: metadataMap.keySet()) {
             try {
                 TopicMetadata tm = metadataMap.get(topicName);

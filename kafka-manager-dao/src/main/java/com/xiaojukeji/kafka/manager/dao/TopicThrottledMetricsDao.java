@@ -32,5 +32,5 @@ public interface TopicThrottledMetricsDao {
 
     List<TopicThrottledMetricsDO> getLatestTopicThrottledMetrics(Long clusterId, Date afterTime);
 
-    int deleteBeforeTime(Date endTime);
+    int deleteBeforeTime(Date endTime, Integer limitSize);
 }

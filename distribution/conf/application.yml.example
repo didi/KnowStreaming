@@ -1,0 +1,136 @@
+
+## kafka-manager的配置文件，该文件中的配置会覆盖默认配置
+## 下面的配置信息基本就是jar中的 application.yml默认配置了;
+## 可以只修改自己变更的配置,其他的删除就行了; 比如只配置一下mysql
+
+
+server:
+  port: 8080
+  tomcat:
+    accept-count: 1000
+    max-connections: 10000
+    max-threads: 800
+    min-spare-threads: 100
+
+spring:
+  application:
+    name: kafkamanager
+    version: @project.version@
+  profiles:
+    active: dev
+  datasource:
+    kafka-manager:
+      jdbc-url: jdbc:mysql://localhost:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+      username: root
+      password: 123456
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+logging:
+  config: classpath:logback-spring.xml
+
+custom:
+  idc: cn
+  store-metrics-task:
+    community:
+      topic-metrics-enabled: true
+    didi: # 滴滴Kafka特有的指标
+      app-topic-metrics-enabled: false
+      topic-request-time-metrics-enabled: false
+      topic-throttled-metrics-enabled: false
+
+# 任务相关的配置
+task:
+  op:
+    sync-topic-enabled: false                       # 未落盘的Topic定期同步到DB中
+    order-auto-exec:                                # 工单自动化审批线程的开关
+      topic-enabled: false                          # Topic工单自动化审批开关, false:关闭自动化审批, true:开启
+      app-enabled: false                            # App工单自动化审批开关, false:关闭自动化审批, true:开启
+  metrics:
+    collect:                                # 收集指标
+      broker-metrics-enabled: true          # 收集Broker指标
+    sink:                                       # 上报指标
+      cluster-metrics:                          # 上报cluster指标
+        sink-db-enabled: true                   # 上报到db
+      broker-metrics:                           # 上报broker指标
+        sink-db-enabled: true                   # 上报到db
+    delete:                                           # 删除指标
+      delete-limit-size: 1000                         # 单次删除的批大小
+      cluster-metrics-save-days: 14                   # 集群指标保存天数
+      broker-metrics-save-days: 14                    # Broker指标保存天数
+      topic-metrics-save-days: 7                      # Topic指标保存天数
+      topic-request-time-metrics-save-days: 7         # Topic请求耗时指标保存天数
+      topic-throttled-metrics-save-days: 7            # Topic限流指标保存天数
+      app-topic-metrics-save-days: 7                  # App+Topic指标保存天数
+
+thread-pool:
+  collect-metrics:
+    thread-num: 256  # 收集指标线程池大小
+    queue-size: 5000 # 收集指标线程池的queue大小
+  api-call:
+    thread-num: 16   # api服务线程池大小
+    queue-size: 5000 # api服务线程池的queue大小
+
+client-pool:
+  kafka-consumer:
+    min-idle-client-num: 24       # 最小空闲客户端数
+    max-idle-client-num: 24       # 最大空闲客户端数
+    max-total-client-num: 24      # 最大客户端数
+    borrow-timeout-unit-ms: 3000  # 租借超时时间，单位毫秒
+
+account:
+  jump-login:
+    gateway-api: false            # 网关接口
+    third-part-api: false         # 第三方接口
+  ldap:
+    enabled: false
+    url: ldap://127.0.0.1:389/
+    basedn: dc=tsign,dc=cn
+    factory: com.sun.jndi.ldap.LdapCtxFactory
+    filter: sAMAccountName
+    security:
+      authentication: simple
+      principal: cn=admin,dc=tsign,dc=cn
+      credentials: admin
+    auth-user-registration: true
+    auth-user-registration-role: normal
+
+kcm:                                  # 集群安装部署，仅安装broker
+  enabled: false                      # 是否开启
+  s3:                                   # s3 存储服务
+    endpoint: s3.didiyunapi.com
+    access-key: 1234567890
+    secret-key: 0987654321
+    bucket: logi-kafka
+  n9e:                                  # 夜莺
+    base-url: http://127.0.0.1:8004     # 夜莺job服务地址
+    user-token: 12345678                # 用户的token
+    timeout: 300                        # 当台操作的超时时间
+    account: root                       # 操作时使用的账号
+    script-file: kcm_script.sh          # 脚本，已内置好，在源码的kcm模块内，此处配置无需修改
+    logikm-url: http://127.0.0.1:8080   # logikm部署地址，部署时kcm_script.sh会调用logikm检查部署中的一些状态
+
+monitor:
+  enabled: false
+  n9e:
+    nid: 2
+    user-token: 1234567890
+    mon:
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
+    sink:
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
+    rdb:
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
+
+notify:
+  kafka:
+    cluster-id: 95
+    topic-name: didi-kafka-notify
+  order:
+    detail-url: http://127.0.0.1
