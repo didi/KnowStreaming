@@ -54,7 +54,8 @@ public class BaseEnterpriseStaffService extends AbstractEnterpriseStaffService {
             }
             List<EnterpriseStaff> staffList = new ArrayList<>();
             for (AccountDO accountDO: doList) {
-                staffList.add(new EnterpriseStaff(accountDO.getUsername(), accountDO.getUsername(), ""));
+                //这里对chineseName填充共识的displayName，Department则获取Department信息
+                staffList.add(new EnterpriseStaff(accountDO.getUsername(), accountDO.getDisplayName(), accountDO.getDepartment()));
             }
             return staffList;
         } catch (Exception e) {

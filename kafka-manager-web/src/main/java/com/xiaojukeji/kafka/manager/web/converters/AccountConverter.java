@@ -18,6 +18,9 @@ public class AccountConverter {
         accountDO.setUsername(dto.getUsername());
         accountDO.setPassword(dto.getPassword());
         accountDO.setRole(dto.getRole());
+        accountDO.setDepartment(dto.getDepartment());
+        accountDO.setMail(dto.getMail());
+        accountDO.setDisplayName(dto.getDisplayName());
         return accountDO;
     }
 

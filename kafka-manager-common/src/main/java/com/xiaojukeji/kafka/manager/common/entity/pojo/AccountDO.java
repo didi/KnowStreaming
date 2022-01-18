@@ -21,6 +21,12 @@ public class AccountDO {
 
     private Integer role;
 
+    private String displayName;
+
+    private String department;
+
+    private String mail;
+
     public String getUsername() {
         return username;
     }
@@ -45,16 +51,43 @@ public class AccountDO {
         this.role = role;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
     @Override
     public String toString() {
         return "AccountDO{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", role=" + role +
-                ", id=" + id +
+                "id=" + id +
                 ", status=" + status +
                 ", gmtCreate=" + gmtCreate +
                 ", gmtModify=" + gmtModify +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                ", displayName='" + displayName + '\'' +
+                ", department='" + department + '\'' +
+                ", mail='" + mail + '\'' +
                 '}';
     }
 }

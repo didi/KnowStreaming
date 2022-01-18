@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * @author zengqiao
@@ -47,15 +48,19 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
         if (ValidateUtils.isBlank(dto.getUsername()) || ValidateUtils.isNull(dto.getPassword())) {
             return Result.buildFailure("Missing parameters");
         }
-
-        Result<AccountDO> accountResult = accountService.getAccountDO(dto.getUsername());
+        //先创建空对象，看是在LDAP去做填充，还是直接查表填充
+        Result<AccountDO> accountResult;
 
         //判断是否激活了LDAP验证, 若激活则也可使用ldap进行认证
         if(!ValidateUtils.isNull(accountLdapEnabled) && accountLdapEnabled){
             //去LDAP验证账密
-            if(!ldapAuthentication.authenticate(dto.getUsername(),dto.getPassword())){
+            Map<String, Object> ldapAttrsInfo = ldapAuthentication.authenticate(dto.getUsername(),dto.getPassword());;
+            if(ValidateUtils.isNull(ldapAttrsInfo)){
                 return Result.buildFrom(ResultStatus.LDAP_AUTHENTICATION_FAILED);
             }
+            //LDAP验证通过，拿LDAP的sAMAccountName替换dto对象的值，便于第一次自动注册采用LDAP值，并且第二次也避免REPLACE
+            dto.setUsername(ldapAttrsInfo.get("sAMAccountName").toString());
+            accountResult = accountService.getAccountDO(dto.getUsername());
 
             if((ValidateUtils.isNull(accountResult) || ValidateUtils.isNull(accountResult.getData())) && authUserRegistration){
                 //自动注册
@@ -63,11 +68,16 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
                 accountDO.setUsername(dto.getUsername());
                 accountDO.setRole(AccountRoleEnum.getUserRoleEnum(authUserRegistrationRole).getRole());
                 accountDO.setPassword(dto.getPassword());
+                accountDO.setDisplayName(ldapAttrsInfo.get("displayName").toString());
+                accountDO.setDepartment(ldapAttrsInfo.get("department").toString());
+                accountDO.setMail(ldapAttrsInfo.get("mail").toString());
                 accountService.createAccount(accountDO);
             }
 
             return Result.buildSuc(dto.getUsername());
         }
+        //不走LDAP认证直接查表填充
+        accountResult = accountService.getAccountDO(dto.getUsername());
 
         if (ValidateUtils.isNull(accountResult) || accountResult.failed()) {
             return new Result<>(accountResult.getCode(), accountResult.getMessage());
