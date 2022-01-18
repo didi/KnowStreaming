@@ -13,12 +13,12 @@ CREATE TABLE `account` (
   `username` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT '用户名',
   `password` varchar(128) NOT NULL DEFAULT '' COMMENT '密码',
   `role` tinyint(8) NOT NULL DEFAULT '0' COMMENT '角色类型, 0:普通用户 1:研发 2:运维',
+  `department` varchar(256) DEFAULT '' COMMENT '部门名',
+  `display_name` varchar(256) DEFAULT '' COMMENT '用户姓名',
+  `mail` varchar(256) DEFAULT '' COMMENT '邮箱',
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '0标识使用中，-1标识已废弃',
   `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-  `department` varchar(128) DEFAULT '' COMMENT '部门名',
-  `display_name` varchar(128) DEFAULT '' COMMENT '用户姓名',
-  `mail` varchar(128) DEFAULT '' COMMENT '邮箱',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='账号表';

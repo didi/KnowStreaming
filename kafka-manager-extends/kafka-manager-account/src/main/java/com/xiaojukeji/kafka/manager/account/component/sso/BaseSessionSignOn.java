@@ -58,6 +58,7 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
             if(ValidateUtils.isNull(ldapAttrsInfo)){
                 return Result.buildFrom(ResultStatus.LDAP_AUTHENTICATION_FAILED);
             }
+
             //LDAP验证通过，拿LDAP的sAMAccountName替换dto对象的值，便于第一次自动注册采用LDAP值，并且第二次也避免REPLACE
             dto.setUsername(ldapAttrsInfo.get("sAMAccountName").toString());
             accountResult = accountService.getAccountDO(dto.getUsername());
@@ -68,9 +69,9 @@ public class BaseSessionSignOn extends AbstractSingleSignOn {
                 accountDO.setUsername(dto.getUsername());
                 accountDO.setRole(AccountRoleEnum.getUserRoleEnum(authUserRegistrationRole).getRole());
                 accountDO.setPassword(dto.getPassword());
-                accountDO.setDisplayName(ldapAttrsInfo.get("displayName").toString());
-                accountDO.setDepartment(ldapAttrsInfo.get("department").toString());
-                accountDO.setMail(ldapAttrsInfo.get("mail").toString());
+                accountDO.setDisplayName(ldapAttrsInfo.getOrDefault("displayName", "").toString());
+                accountDO.setDepartment(ldapAttrsInfo.getOrDefault("department", "").toString());
+                accountDO.setMail(ldapAttrsInfo.getOrDefault("mail", "").toString());
                 accountService.createAccount(accountDO);
             }
 

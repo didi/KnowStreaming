@@ -8,11 +8,11 @@
         <result property="username"     column="username" />
         <result property="password"     column="password" />
         <result property="role"         column="role" />
+        <result property="displayName"  column="display_name" />
+        <result property="department"   column="department" />
+        <result property="mail"         column="mail" />
         <result property="gmtCreate"    column="gmt_create" />
         <result property="gmtModify"    column="gmt_modify" />
-        <result property="displayName"    column="display_name" />
-        <result property="department"    column="department" />
-        <result property="mail"    column="mail" />
     </resultMap>
 
     <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO">
