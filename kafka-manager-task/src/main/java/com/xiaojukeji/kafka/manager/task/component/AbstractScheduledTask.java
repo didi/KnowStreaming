@@ -80,10 +80,9 @@ public abstract class AbstractScheduledTask<E extends Comparable> implements Sch
             return true;
         }
 
-        LOGGER.error("modify scheduledCron failed, format invalid, scheduledName:{} scheduledCron:{}."
-                , scheduledName, scheduledCron);
+        LOGGER.error("modify scheduledCron failed, format invalid, scheduledName:{} scheduledCron:{}.", scheduledName, scheduledCron);
         if (existIfIllegal) {
-            System.exit(0);
+            throw new UnsupportedOperationException(String.format("scheduledName:%s scheduledCron:%s format invalid", scheduledName, scheduledCron));
         }
         return false;
     }
