@@ -39,4 +39,14 @@ ALTER TABLE `gateway_config`
 ADD COLUMN `description` TEXT NULL COMMENT '描述信息' AFTER `version`;
 ```
 
+### 升级至`2.6.0`版本
 
+#### 1.mysql变更
+`2.6.0`版本在`account`表增加用户姓名，部门名，邮箱三个字段，因此需要执行下面的sql进行字段的增加。
+
+```sql
+ALTER TABLE `account`
+ADD COLUMN `display_name` VARCHAR(256) NOT NULL DEFAULT '' COMMENT '用户名' AFTER `role`,
+ADD COLUMN `department` VARCHAR(256) NOT NULL DEFAULT '' COMMENT '部门名' AFTER `display_name`,
+ADD COLUMN `mail` VARCHAR(256) NOT NULL DEFAULT '' COMMENT '邮箱' AFTER `department`;
+```

@@ -1,5 +1,6 @@
 package com.xiaojukeji.kafka.manager.account.component.ldap;
 
+import com.xiaojukeji.kafka.manager.common.utils.SplitUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,9 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 @Component
 public class LdapAuthentication {
@@ -60,8 +63,11 @@ public class LdapAuthentication {
         return null;
     }
 
-    private String getUserDN(String account, LdapContext ctx) {
+    private Map<String, Object> getLdapAttrsInfo(String account, LdapContext ctx) {
+        //存储更多的LDAP元信息
+        Map<String, Object> ldapAttrsInfo = new HashMap<>();
         String userDN = "";
+        ldapAttrsInfo.clear();
         try {
             SearchControls constraints = new SearchControls();
             constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -69,7 +75,7 @@ public class LdapAuthentication {
 
             NamingEnumeration<SearchResult> en = ctx.search("", filter, constraints);
             if (en == null || !en.hasMoreElements()) {
-                return "";
+                return null;
             }
             // maybe more than one element
             while (en.hasMoreElements()) {
@@ -78,13 +84,25 @@ public class LdapAuthentication {
                     SearchResult si = (SearchResult) obj;
                     userDN += si.getName();
                     userDN += "," + ldapBasedn;
+                    //携带LDAP更多元信息以填充用户元信息
+                    ldapAttrsInfo.put("userDN", userDN);
+                    ldapAttrsInfo.put("sAMAccountName",
+                            SplitUtils.keyValueSplit(si.getAttributes().get("samaccountname").toString()));
+                    ldapAttrsInfo.put("department",
+                            SplitUtils.keyValueSplit(si.getAttributes().get("department").toString()));
+                    ldapAttrsInfo.put("company",
+                            SplitUtils.keyValueSplit(si.getAttributes().get("company").toString()));
+                    ldapAttrsInfo.put("displayName",
+                            SplitUtils.keyValueSplit(si.getAttributes().get("displayname").toString()));
+                    ldapAttrsInfo.put("mail",
+                            SplitUtils.keyValueSplit(si.getAttributes().get("mail").toString()));
                     break;
                 }
             }
         } catch (Exception e) {
             LOGGER.error("class=LdapAuthentication||method=getUserDN||account={}||errMsg={}", account, e);
         }
-        return userDN;
+        return ldapAttrsInfo;
     }
 
     /**
@@ -93,23 +111,23 @@ public class LdapAuthentication {
      * @param password
      * @return
      */
-    public boolean authenticate(String account, String password) {
+    public Map<String, Object> authenticate(String account, String password) {
         LdapContext ctx = getLdapContext();
         if (ValidateUtils.isNull(ctx)) {
-            return false;
+            return null;
         }
 
         try {
-            String userDN = getUserDN(account, ctx);
-            if(ValidateUtils.isBlank(userDN)){
-                return false;
+            Map<String, Object> ldapAttrsInfo = getLdapAttrsInfo(account, ctx);
+            if(ValidateUtils.isNull(ldapAttrsInfo)){
+                return null;
             }
 
-            ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, userDN);
+            ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, ldapAttrsInfo.get("userDN").toString());
             ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             ctx.reconnect(null);
 
-            return true;
+            return ldapAttrsInfo;
         } catch (AuthenticationException  e) {
             LOGGER.warn("class=LdapAuthentication||method=authenticate||account={}||errMsg={}", account, e);
         } catch (NamingException e) {
@@ -125,6 +143,6 @@ public class LdapAuthentication {
                 }
             }
         }
-        return false;
+        return null;
     }
 }
