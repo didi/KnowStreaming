@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +33,8 @@ import java.util.List;
  */
 public class OrderServiceTest extends BaseTest {
 
-    private static final String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
     private static final Integer INVALID_ORDER_TYPE = -1;
 

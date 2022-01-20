@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,35 +47,44 @@ public class TopicServiceTest extends BaseTest {
      * 集群共包括三个broker:1,2,3, 该topic 1分区 1副本因子，在broker1上
      * 要求测试之前，moduleTest这个topic需要有过生产者生产和消费者消费moduleTest
      */
-    private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String REAL_TOPIC1_IN_ZK;
 
     /**
      * 集群共包括三个broker:1,2,3, 该topic 2分区 3副本因子，在broker1,2,3上
      */
-    private final static String REAL_TOPIC2_IN_ZK = "xgTest";
+    @Value("${test.topic.name2}")
+    private String REAL_TOPIC2_IN_ZK;
 
     private final static String INVALID_TOPIC = "xxxxx";
 
-    private final static String ZK_DEFAULT_TOPIC = "_consumer_offsets";
+    @Value("${test.topic.name6}")
+    private String ZK_DEFAULT_TOPIC;
 
     /**
      * 该topic同样需要被创建，但是不能有流量
      */
-    private final static String NO_OFFSET_CHANGE_TOPIC_IN_ZK = "NoOffsetChangeTopic";
+    @Value("${test.topic.name5}")
+    private String NO_OFFSET_CHANGE_TOPIC_IN_ZK;
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static Integer REAL_BROKER_ID_IN_ZK = 3;
+    @Value("${test.broker.id3}")
+    private Integer REAL_BROKER_ID_IN_ZK;
 
     private final static Long INVALID_CLUSTER_ID = -1L;
 
     private final static Integer INVALID_PARTITION_ID = -1;
 
-    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+    @Value("${test.phyCluster.name}")
+    private String REAL_PHYSICAL_CLUSTER_NAME;
 
-    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+    @Value("${test.ZK.address}")
+    private String ZOOKEEPER_ADDRESS;
 
-    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+    @Value("${test.ZK.bootstrap-servers}")
+    private String BOOTSTRAP_SERVERS;
 
     private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
 

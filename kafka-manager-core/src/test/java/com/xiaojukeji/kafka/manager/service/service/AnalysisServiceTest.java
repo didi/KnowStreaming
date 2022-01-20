@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.analysis.AnalysisBrokerDTO;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -13,8 +14,10 @@ import org.testng.annotations.Test;
  */
 public class AnalysisServiceTest extends BaseTest {
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
+    @Value("${test.broker.id1}")
     private final static Integer REAL_BROKER_ID_IN_ZK = 1;
 
     private final static Long INVALID_CLUSTER_ID = -1L;

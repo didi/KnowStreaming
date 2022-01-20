@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,7 +26,8 @@ import org.testng.annotations.Test;
  */
 public class ApplyClusterOrderTest extends BaseTest {
 
-    private final static String APP_ID = "dkm_admin";
+    @Value("${test.app.id}")
+    private String APP_ID;
 
     private final static String IDC = "国内";
 
@@ -33,7 +35,8 @@ public class ApplyClusterOrderTest extends BaseTest {
 
     private final static String INVALID_IDC = "xxx";
 
-    private final static String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
     @Autowired
     @Qualifier("applyClusterOrder")

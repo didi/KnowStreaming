@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,7 +26,8 @@ import org.testng.annotations.Test;
  */
 public class ModifyClusterOrderTest extends BaseTest {
 
-    private static final String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
     private static final String INVALID_USER_NAME = "xxxxx";
 
@@ -39,7 +41,8 @@ public class ModifyClusterOrderTest extends BaseTest {
 
     private static final String EXTENSIONS = "{\"clusterId\":7}";
 
-    private static final Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
     @Autowired
     @Qualifier("modifyClusterOrder")

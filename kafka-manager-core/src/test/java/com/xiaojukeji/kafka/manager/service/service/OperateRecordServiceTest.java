@@ -54,12 +54,6 @@ public class OperateRecordServiceTest extends BaseTest {
         Assert.assertEquals(result, 1);
     }
 
-//    @Test(dataProvider = "operateRecordDO", description = "插入操作记录失败测试")
-//    public void insert2FailureTest(OperateRecordDO operateRecordDO) {
-//        operateRecordDO.setResource(null);
-//        int result = operateRecordService.insert(operateRecordDO);
-//        Assert.assertEquals(result, 0);
-//    }
 
 
     @Test(description = "插入的重载方法操作成功测试")
@@ -70,13 +64,6 @@ public class OperateRecordServiceTest extends BaseTest {
         Assert.assertEquals(result, 1);
     }
 
-//    @Test(description = "插入的重载方法操作失败测试")
-//    public void insert2FailureTest1() {
-//        Map<String, String> content = new HashMap<>();
-//        content.put("key", "value");
-//        int result = operateRecordService.insert(null, ModuleEnum.CLUSTER, "testOpRecord", OperateEnum.ADD, content);
-//        Assert.assertEquals(result, 0);
-//    }
 
     @Test(dataProvider = "operateRecordDO")
     public void queryByConditionTest(OperateRecordDO operateRecordDO) {

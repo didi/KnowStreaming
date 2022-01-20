@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,9 +31,11 @@ import java.util.Arrays;
  */
 public class ClusterTaskServiceTest extends BaseTest {
 
-    private static final Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private static final String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
     private static final String BASEURL = "127.0.0.1";
 

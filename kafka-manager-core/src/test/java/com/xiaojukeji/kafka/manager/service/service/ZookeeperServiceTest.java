@@ -9,6 +9,7 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.didi.TopicJmxSwitch;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -25,8 +26,8 @@ public class ZookeeperServiceTest extends BaseTest {
     @Autowired
     private ZookeeperService zookeeperService;
 
-//    private final static String ZOOKEEPER_ADDRESS = "10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg";
-    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+    @Value("${test.ZK.address}")
+    private String ZOOKEEPER_ADDRESS;
 
 
     @DataProvider(name = "extendsAndCandidatesZnodeExist")

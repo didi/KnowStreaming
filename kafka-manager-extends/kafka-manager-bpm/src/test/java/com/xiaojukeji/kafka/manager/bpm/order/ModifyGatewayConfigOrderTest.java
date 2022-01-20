@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -23,8 +24,8 @@ import org.testng.annotations.Test;
  * @Date 2021/12/31
  */
 public class ModifyGatewayConfigOrderTest extends BaseTest {
-
-    private static final String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
     private static final String INVALID_USER_NAME = "xxxxx";
 
@@ -48,7 +49,8 @@ public class ModifyGatewayConfigOrderTest extends BaseTest {
 
     private static final Long INVALID_CLUSTER_ID = -1L;
 
-    private static final String APP_ID = "dkm_admin";
+    @Value("${test.app.id}")
+    private String APP_ID;
 
     /**
      * 工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消

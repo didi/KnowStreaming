@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -37,17 +38,22 @@ public class KafkaBillServiceTest extends BaseTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @DataProvider(name = "provideKafkaBillDO")
-    public static Object[][] provideKafkaBillDO() {
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
+
+    @Value("${test.admin}")
+    private String ADMIN;
+
+    private KafkaBillDO getKafkaBillDO() {
         KafkaBillDO kafkaBillDO = new KafkaBillDO();
-        kafkaBillDO.setClusterId(1L);
+        kafkaBillDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         kafkaBillDO.setCost(100.0d);
         kafkaBillDO.setGmtCreate(new Date(1638605696062L));
         kafkaBillDO.setGmtDay("10");
-        kafkaBillDO.setPrincipal("admin");
+        kafkaBillDO.setPrincipal(ADMIN);
         kafkaBillDO.setQuota(1000.0d);
         kafkaBillDO.setTopicName("moduleTest");
-        return new Object[][] {{kafkaBillDO}};
+        return kafkaBillDO;
     }
 
     private BrokerMetricsDO getBrokerMetricsDO() {
@@ -56,8 +62,9 @@ public class KafkaBillServiceTest extends BaseTest {
         return metricsDO;
     }
 
-    @Test(dataProvider = "provideKafkaBillDO")
-    public void replaceTest(KafkaBillDO kafkaBillDO) {
+    @Test()
+    public void replaceTest() {
+        KafkaBillDO kafkaBillDO = getKafkaBillDO();
         // 插入成功
         replace2SuccessTest(kafkaBillDO);
         // 插入失败
@@ -76,8 +83,9 @@ public class KafkaBillServiceTest extends BaseTest {
         Assert.assertEquals(result, 0);
     }
 
-    @Test(dataProvider = "provideKafkaBillDO")
-    public void getByTopicNameTest(KafkaBillDO kafkaBillDO) {
+    @Test()
+    public void getByTopicNameTest() {
+        KafkaBillDO kafkaBillDO = getKafkaBillDO();
         // 查询成功
         getByTopicName2SuccessTest(kafkaBillDO);
         // 查询异常
@@ -102,8 +110,9 @@ public class KafkaBillServiceTest extends BaseTest {
         Assert.assertTrue(result.isEmpty());
     }
 
-    @Test(dataProvider = "provideKafkaBillDO")
-    public void getByPrincipalTest(KafkaBillDO kafkaBillDO) {
+    @Test()
+    public void getByPrincipalTest() {
+        KafkaBillDO kafkaBillDO = getKafkaBillDO();
         // 查询成功
         getByPrincipal2SuccessTest(kafkaBillDO);
         // 查询失败
@@ -127,8 +136,9 @@ public class KafkaBillServiceTest extends BaseTest {
         Assert.assertTrue(result.isEmpty());
     }
 
-    @Test(dataProvider = "provideKafkaBillDO")
-    public void getByTimeBetweenTest(KafkaBillDO kafkaBillDO) {
+    @Test()
+    public void getByTimeBetweenTest() {
+        KafkaBillDO kafkaBillDO = getKafkaBillDO();
         // 查询成功
         getByTimeBetween2SuccessTest(kafkaBillDO);
         // 查询失败
@@ -152,8 +162,9 @@ public class KafkaBillServiceTest extends BaseTest {
         Assert.assertTrue(result.isEmpty());
     }
 
-    @Test(dataProvider = "provideKafkaBillDO")
-    public void getByGmtDayTest(KafkaBillDO kafkaBillDO) {
+    @Test()
+    public void getByGmtDayTest() {
+        KafkaBillDO kafkaBillDO = getKafkaBillDO();
         // 查询成功
         getByGmtDay2SuccessTest(kafkaBillDO);
         // 查询失败

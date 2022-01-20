@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -28,25 +29,32 @@ import java.util.List;
  */
 public class ThirdPartServiceTest extends BaseTest {
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static String REAL_TOPIC_IN_ZK = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String REAL_TOPIC_IN_ZK;
 
-    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+    @Value("${test.phyCluster.name}")
+    private String REAL_PHYSICAL_CLUSTER_NAME;
 
-    private final static String ZOOKEEPER = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+    @Value("${test.ZK.address}")
+    private String ZOOKEEPER;
 
-    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+    @Value("${test.ZK.bootstrap-servers}")
+    private String BOOTSTRAP_SERVERS;
 
     private final static String SECURITY_PROPERTIES = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
 
     private final static String JMX_PROPERTIES = "{\n" + "\t\"maxConn\": 100000\n" + "}";
     private final static Integer STATUS = 1;
 
-    private final static String REAL_APP_ID = "dkm_admin";
+    @Value("${test.app.id}")
+    private String REAL_APP_ID;
 
     // 要求消费moduleTest这个topic的消费者所属的消费者组是moduleTestGroup
-    private final static String REAL_CONSUMER_GROUP_ID = "moduleTestGroup";
+    @Value("${test.consumer-group}")
+    private String REAL_CONSUMER_GROUP_ID;
 
     @Autowired
     @InjectMocks

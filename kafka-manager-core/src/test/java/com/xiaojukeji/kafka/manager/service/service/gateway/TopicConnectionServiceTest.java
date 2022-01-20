@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -21,14 +22,19 @@ public class TopicConnectionServiceTest extends BaseTest {
     @Autowired
     private TopicConnectionService topicConnectionService;
 
-    private static final String TOPIC_NAME = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String TOPIC_NAME;
 
-    private static final Long CLUSTER_ID = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long CLUSTER_ID;
 
-    private static final String APP_ID = "dkm_admin";
+    @Value("${test.app.id}")
+    private String APP_ID;
 
-    @DataProvider(name = "provideTopicConnection")
-    public static Object[][] provideTopicConnection() {
+    @Value("${test.gateway}")
+    private String GATEWAY;
+
+    public TopicConnectionDO getTopicConnectionDO() {
         TopicConnectionDO topicConnectionDO = new TopicConnectionDO();
         topicConnectionDO.setId(13L);
         topicConnectionDO.setAppId(APP_ID);
@@ -36,10 +42,10 @@ public class TopicConnectionServiceTest extends BaseTest {
         topicConnectionDO.setTopicName(TOPIC_NAME);
         topicConnectionDO.setType("fetch");
 //        topicConnectionDO.setIp("172.23.142.253");
-        topicConnectionDO.setIp("172.23.161.128");
+        topicConnectionDO.setIp(GATEWAY);
         topicConnectionDO.setClientVersion("2.4");
         topicConnectionDO.setCreateTime(new Date(1638786493173L));
-        return new Object[][] {{topicConnectionDO}};
+        return topicConnectionDO;
     }
 
     // 测试批量插入为空的情况
@@ -49,8 +55,9 @@ public class TopicConnectionServiceTest extends BaseTest {
     }
 
     // 测试批量插入成功的情况，通过调整list的数量和TopicConnectionServiceImpl中splitInterval的数量，使每个流程都测试一遍
-    @Test(dataProvider = "provideTopicConnection")
-    private void batchAdd2SuccessTest(TopicConnectionDO topicConnectionDO) {
+    @Test()
+    private void batchAdd2SuccessTest() {
+        TopicConnectionDO topicConnectionDO = getTopicConnectionDO();
         List<TopicConnectionDO> list = new ArrayList<>();
         list.add(topicConnectionDO);
         list.add(topicConnectionDO);
@@ -58,8 +65,9 @@ public class TopicConnectionServiceTest extends BaseTest {
         topicConnectionService.batchAdd(list);
     }
 
-    @Test(dataProvider = "provideTopicConnection")
-    public void getByTopicName2Test(TopicConnectionDO topicConnectionDO) {
+    @Test()
+    public void getByTopicName2Test() {
+        TopicConnectionDO topicConnectionDO = getTopicConnectionDO();
         List<TopicConnection> result = topicConnectionService.getByTopicName(CLUSTER_ID, TOPIC_NAME, new Date(0L), new Date());
         Assert.assertFalse(result.isEmpty());
     }
@@ -72,8 +80,9 @@ public class TopicConnectionServiceTest extends BaseTest {
     }
 
     // 测试获取数据,clusterId不为null，TODO
-    @Test(dataProvider = "provideTopicConnection")
-    public void getByTopicName2SuccessTest(TopicConnectionDO topicConnectionDO) {
+    @Test()
+    public void getByTopicName2SuccessTest() {
+        TopicConnectionDO topicConnectionDO = getTopicConnectionDO();
         List<TopicConnectionDO> list = new ArrayList<>();
         list.add(topicConnectionDO);
         topicConnectionService.batchAdd(list);

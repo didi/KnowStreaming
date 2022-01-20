@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,7 @@ public class KafkaFileServiceTest extends BaseTest {
 
     private static final Long KAFKA_FILE_ID = 1L;
 
+    @Value("${test.admin}")
     private static final String ADMIN = "admin";
 
     private KafkaFileDTO getKafkaFileDTO() {

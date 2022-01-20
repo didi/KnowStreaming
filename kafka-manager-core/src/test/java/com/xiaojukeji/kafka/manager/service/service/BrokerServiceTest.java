@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -28,11 +29,14 @@ import java.util.*;
  * @Date 2021/12/10
  */
 public class BrokerServiceTest extends BaseTest {
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static Integer REAL_BROKER_ID_IN_ZK = 1;
+    @Value("${test.broker.id1}")
+    private Integer REAL_BROKER_ID_IN_ZK;
 
-    private final static String END_POINTS_IN_BROKER = "SASL_PLAINTEXT://10.179.162.202:9093";
+    @Value("${test.sasl-plaintext}")
+    private String END_POINTS_IN_BROKER;
 
     @Autowired
     @InjectMocks
@@ -49,8 +53,7 @@ public class BrokerServiceTest extends BaseTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @DataProvider(name = "provideBrokerDO")
-    public static Object[][] provideBrokerDO() {
+    private BrokerDO getBrokerDO() {
         BrokerDO brokerDO = new BrokerDO();
         brokerDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         brokerDO.setBrokerId(100);
@@ -61,22 +64,21 @@ public class BrokerServiceTest extends BaseTest {
         brokerDO.setStatus(0);
         brokerDO.setGmtCreate(new Date(1638605696062L));
         brokerDO.setGmtModify(new Date(1638605696062L));
-        return new Object[][]{{brokerDO}};
+        return brokerDO;
     }
 
-    @DataProvider(name = "provideBrokerMetadata")
-    public static Object[][] provideBrokerMetadata() {
+    private BrokerMetadata getBrokerMetadata() {
         BrokerMetadata brokerMetadata = new BrokerMetadata();
         brokerMetadata.setBrokerId(REAL_BROKER_ID_IN_ZK);
         brokerMetadata.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         brokerMetadata.setHost("127.0.0.1");
         brokerMetadata.setPort(9092);
-        brokerMetadata.setEndpoints(Arrays.asList("SASL_PLAINTEXT://10.179.162.202:9093"));
+        brokerMetadata.setEndpoints(Arrays.asList(END_POINTS_IN_BROKER));
         brokerMetadata.setTimestamp(1638605696062L);
         brokerMetadata.setJmxPort(9999);
         brokerMetadata.setRack("CY");
         brokerMetadata.setVersion("2");
-        return new Object[][] {{brokerMetadata}};
+        return brokerMetadata;
     }
 
     private TopicDiskLocation getTopicDiskLocation() {

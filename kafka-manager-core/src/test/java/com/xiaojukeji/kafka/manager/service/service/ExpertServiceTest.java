@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -27,9 +28,11 @@ import java.util.*;
  * @date 2021/12/27
  */
 public class ExpertServiceTest extends BaseTest {
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static String REAL_TOPIC_IN_ZK = "topic_a";
+    @Value("${test.topic.name4}")
+    private String REAL_TOPIC_IN_ZK;
 
     private final static Set<Integer> REAL_BROKER_ID_SET = new HashSet<>();
 

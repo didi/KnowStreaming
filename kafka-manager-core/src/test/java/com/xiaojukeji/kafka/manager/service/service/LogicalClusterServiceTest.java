@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -33,7 +34,8 @@ public class LogicalClusterServiceTest extends BaseTest {
 
     private final static Long INVALID_CLUSTER_ID = -1L;
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
     @Autowired
     @InjectMocks

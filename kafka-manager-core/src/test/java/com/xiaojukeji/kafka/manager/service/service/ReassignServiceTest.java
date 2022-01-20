@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,9 +34,11 @@ public class ReassignServiceTest extends BaseTest {
     /**
      * 集群共包括三个broker:1,2,3, 该topic 2分区 3副本因子，在broker1,2,3上
      */
-    private final static String REAL_TOPIC2_IN_ZK = "xgTest";
+    @Value("${test.topic.name2}")
+    private String REAL_TOPIC2_IN_ZK;
 
-    private final static String ADMIN_OPERATOR = "admin";
+    @Value("${test.admin}")
+    private String ADMIN_OPERATOR;
 
     @Autowired
     @InjectMocks
@@ -55,19 +58,22 @@ public class ReassignServiceTest extends BaseTest {
         MockitoAnnotations.initMocks(this);
     }
 
-//    private final static String ZOOKEEPER_ADDRESS = "10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg";
-    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+    @Value("${test.ZK.address}")
+    private String ZOOKEEPER_ADDRESS;
 
-    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+    @Value("${test.ZK.bootstrap-servers}")
+    private String BOOTSTRAP_SERVERS;
 
     private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
 
     private final static String REASSIGNMENTJSON =
             "{ \"version\": 1, \"partitions\": [ { \"topic\": \"reassignTest\", \"partition\": 1, \"replicas\": [ 1,2,3 ], \"log_dirs\": [ \"any\",\"any\",\"any\" ] }, { \"topic\": \"reassignTest\", \"partition\": 0, \"replicas\": [ 1,2,3 ], \"log_dirs\": [ \"any\",\"any\",\"any\" ] } ] }";
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+    @Value("${test.phyCluster.name}")
+    private String REAL_PHYSICAL_CLUSTER_NAME;
 
 
     private ReassignTopicDTO getReassignTopicDTO() {
@@ -76,7 +82,7 @@ public class ReassignServiceTest extends BaseTest {
         reassignTopicDTO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         reassignTopicDTO.setTopicName(REAL_TOPIC2_IN_ZK);
         reassignTopicDTO.setBrokerIdList(Arrays.asList(2,3));
-        reassignTopicDTO.setRegionId(2L);
+        reassignTopicDTO.setRegionId(1000000L);
         // 原本Topic只有两个分区
         reassignTopicDTO.setPartitionIdList(Arrays.asList(0, 1));
         reassignTopicDTO.setThrottle(100000L);

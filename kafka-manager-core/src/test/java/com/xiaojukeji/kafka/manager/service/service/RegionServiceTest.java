@@ -7,6 +7,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -19,11 +20,14 @@ import java.util.stream.Collectors;
  * @date 2021/12/8
  */
 public class RegionServiceTest extends  BaseTest{
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static String REAL_REGION_NAME_IN_CLUSTER = "region_1";
+    @Value("${test.region-name}")
+    private String REAL_REGION_NAME_IN_CLUSTER;
 
-    private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String REAL_TOPIC1_IN_ZK;
     @Autowired
     private RegionService regionService;
 

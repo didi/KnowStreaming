@@ -96,3 +96,32 @@ notify:
     topic-name: didi-kafka-notify
   order:
     detail-url: http://127.0.0.1
+
+test:
+  topic:
+    name1: moduleTest
+    name2: xgTest
+    name3: expandPartitionTopic
+    name4: topic_a
+    name5: NoOffsetChangeTopic
+    name6: _consumer_offsets
+  phyCluster:
+    id: 1
+    name: LogiKM_moduleTest
+  logicalCluster:
+    name: logical_cluster_1
+  broker:
+    id1: 1
+    id2: 2
+    id3: 3
+  app:
+    id: dkm_admin
+  ZK:
+    address: 10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc
+    bootstrap-servers: 10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093
+  gateway: 172.23.161.128
+  sasl-plaintext: SASL_PLAINTEXT://10.179.162.202:9093
+  admin: admin
+  consumer-group: moduleTestGroup
+  client-id: dkm_admin.moduleTest
+  region-name: region_1

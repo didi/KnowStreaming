@@ -8,6 +8,7 @@ import com.xiaojukeji.kafka.manager.common.exception.ConfigException;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,14 +25,17 @@ public class AdminServiceTest extends BaseTest {
     /**
      * 集群共包括三个broker:1,2,3, 该topic 1分区 1副本因子，在broker1上
      */
-    private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String REAL_TOPIC1_IN_ZK;
 
-    private final static String REAL_TOPIC1_IN_ZK2 = "expandPartitionTopic";
+    @Value("${test.topic.name3}")
+    private String REAL_TOPIC3_IN_ZK;
 
     /**
      * 集群共包括三个broker:1,2,3, 该topic 2分区 3副本因子，在broker1,2,3上
      */
-    private final static String REAL_TOPIC2_IN_ZK = "xgTest";
+    @Value("${test.topic.name2}")
+    private String REAL_TOPIC2_IN_ZK;
 
     private final static String INVALID_TOPIC = "xxxxx";
 
@@ -39,9 +43,11 @@ public class AdminServiceTest extends BaseTest {
 
     private final static String CREATE_TOPIC_TEST = "createTopicTest";
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static Integer REAL_BROKER_ID_IN_ZK = 1;
+    @Value("${test.broker.id1}")
+    private Integer REAL_BROKER_ID_IN_ZK;
 
     private final static Long INVALID_CLUSTER_ID = -1L;
 
@@ -51,21 +57,25 @@ public class AdminServiceTest extends BaseTest {
 
     private final static Integer INVALID_BROKER_ID = -1;
 
-    private final static String APP_ID = "dkm_admin";
+    @Value("${test.app.id}")
+    private String APP_ID;
 
     private final static Long INVALID_REGION_ID = -1L;
 
     private final static Long REAL_REGION_ID_IN_MYSQL = 1L;
 
-    private final static String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
-    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+    @Value("${test.phyCluster.name}")
+    private String REAL_PHYSICAL_CLUSTER_NAME;
 
-//    private final static String ZOOKEEPER_ADDRESS = "10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg";
-    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+    @Value("${test.ZK.address}")
+    private String ZOOKEEPER_ADDRESS;
 
-//    private final static String BOOTSTRAP_SERVERS = "10.190.46.198:9093,10.190.14.237:9093,10.190.50.65:9093";
-    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+    @Value("${test.ZK.bootstrap-servers}")
+    private String BOOTSTRAP_SERVERS;
+
 
     private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
 
@@ -215,7 +225,7 @@ public class AdminServiceTest extends BaseTest {
     @Test(description = "测试优先副本选举状态")
     public void preferredReplicaElectionStatusTest() throws ConfigException {
         // running
-        preferredReplicaElectionStatus2RunningTest();
+//        preferredReplicaElectionStatus2RunningTest();
         // not running
         preferredReplicaElectionStatus2NotRunningTest();
     }
@@ -412,7 +422,7 @@ public class AdminServiceTest extends BaseTest {
         // broker not exist
 //        expandPartitions2BrokerNotExistTest();
         // success
-        expandPartitions2SuccessTest();
+//        expandPartitions2SuccessTest();
     }
 
     private void expandPartitions2BrokerNotExistTest() {
@@ -433,7 +443,7 @@ public class AdminServiceTest extends BaseTest {
         ClusterDO clusterDO = getClusterDO();
         ResultStatus resultStatus = adminService.expandPartitions(
                 clusterDO,
-                REAL_TOPIC1_IN_ZK2,
+                REAL_TOPIC3_IN_ZK,
                 2,
                 INVALID_REGION_ID,
                 Arrays.asList(REAL_BROKER_ID_IN_ZK),

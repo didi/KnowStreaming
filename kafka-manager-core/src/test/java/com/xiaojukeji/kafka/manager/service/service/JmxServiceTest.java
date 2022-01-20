@@ -9,6 +9,7 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.PartitionStat
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -22,12 +23,14 @@ public class JmxServiceTest extends BaseTest {
     /**
      * 集群共包括三个broker:1,2,3, 该topic 1分区 1副本因子，在broker1上
      */
-    private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String REAL_TOPIC1_IN_ZK;
 
     /**
      * 集群共包括三个broker:1,2,3, 该topic 2分区 3副本因子，在broker1,2,3上
      */
-    private final static String REAL_TOPIC2_IN_ZK = "xgTest";
+    @Value("${test.topic.name2}")
+    private String REAL_TOPIC2_IN_ZK;
 
     private final static String INVALID_TOPIC = "xxxxx";
 
@@ -35,9 +38,11 @@ public class JmxServiceTest extends BaseTest {
 
     private final static String NO_OFFSET_CHANGE_TOPIC_IN_ZK = "NoOffsetChangeTopic";
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static Integer REAL_BROKER_ID_IN_ZK = 1;
+    @Value("${test.broker.id1}")
+    private Integer REAL_BROKER_ID_IN_ZK;
 
     private final static Integer INVALID_BROKER_ID = -1;
 
@@ -45,7 +50,8 @@ public class JmxServiceTest extends BaseTest {
 
     private final static Integer INVALID_PARTITION_ID = -1;
 
-    private final static String CLIENT_ID = "dkm_admin.moduleTest";
+    @Value("${test.client-id}")
+    private String CLIENT_ID;
 
     private final static Integer INVALID_METRICS_CODE = -1;
 

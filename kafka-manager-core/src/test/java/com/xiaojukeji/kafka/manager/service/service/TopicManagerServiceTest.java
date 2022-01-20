@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,21 +38,27 @@ import java.util.*;
  * @date 2021/12/21
  */
 public class TopicManagerServiceTest extends BaseTest {
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static String REAL_TOPIC_IN_ZK = "topic_a";
+    @Value("${test.topic.name4}")
+    private String REAL_TOPIC_IN_ZK;
 
-    private final static String ADMIN_NAME_IN_MYSQL = "admin";
+    @Value("${test.admin}")
+    private String ADMIN_NAME_IN_MYSQL;
 
     private final static String KAFKA_MANAGER_APP_NAME = "KM管理员";
 
-    private final static String KAFKA_MANAGER_APP_ID = "dkm_admin";
+    @Value("${test.app.id}")
+    private String KAFKA_MANAGER_APP_ID;
 
     private final static Set<Integer> REAL_BROKER_ID_SET = new HashSet<>();
 
-    private final static String REAL_REGION_IN_CLUSTER = "region1";
+    @Value("${test.region-name}")
+    private String REAL_REGION_IN_CLUSTER;
 
-    private final static String REAL_LOGICAL_CLUSTER_NAME = "logical_cluster_1";
+    @Value("${test.logicalCluster.name}")
+    private String REAL_LOGICAL_CLUSTER_NAME;
 
     // 共享集群
     private final static Integer REAL_LOGICAL_CLUSTER_MODE = 0;

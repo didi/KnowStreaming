@@ -11,6 +11,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -26,16 +27,13 @@ import java.util.Map;
  */
 public class ConsumerServiceTest extends BaseTest {
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
-
-    private final static Integer REAL_BROKER_ID_IN_ZK = 1;
-
-    private final static Long INVALID_CLUSTER_ID = -1L;
-
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
     /**
      * 集群共包括三个broker:1,2,3, 该topic 1分区 1副本因子，在broker1上
      */
-    private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String REAL_TOPIC1_IN_ZK;
 
     /**
      * 集群共包括三个broker:1,2,3, 该topic 2分区 3副本因子，在broker1,2,3上
@@ -44,17 +42,21 @@ public class ConsumerServiceTest extends BaseTest {
 
     private final static String INVALID_TOPIC = "xxxxxx";
 
-    private final static String REAL_CONSUMER_GROUP_NAME = "moduleTestGroup";
+    @Value("${test.consumer-group}")
+    private String REAL_CONSUMER_GROUP_NAME;
 
     private final static String INVALID_CONSUMER_GROUP_NAME = "xxxxxxxx";
 
-    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+    @Value("${test.phyCluster.name}")
+    private String REAL_PHYSICAL_CLUSTER_NAME;
 
-    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+    @Value("${test.ZK.address}")
+    private String ZOOKEEPER_ADDRESS;
 
-    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+    @Value("${test.ZK.bootstrap-servers}")
+    private String BOOTSTRAP_SERVERS;
 
-    private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
+    private String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
 
     @Autowired
     private ConsumerService consumerService;

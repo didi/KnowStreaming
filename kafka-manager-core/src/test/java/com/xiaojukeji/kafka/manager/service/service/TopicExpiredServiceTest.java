@@ -5,6 +5,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicExpiredDO;
 import com.xiaojukeji.kafka.manager.dao.TopicExpiredDao;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -19,9 +20,11 @@ public class TopicExpiredServiceTest extends BaseTest {
     /*
     该topic在region_1上，region_1使用了1,2broker，该topic3个分区，2个副本
      */
-    private final static String REAL_TOPIC1_IN_ZK = "topic_a";
+    @Value("${test.topic.name4}")
+    private String REAL_TOPIC1_IN_ZK;
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
 
     @Autowired

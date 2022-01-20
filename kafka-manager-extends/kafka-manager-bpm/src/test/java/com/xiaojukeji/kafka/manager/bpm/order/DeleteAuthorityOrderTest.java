@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,15 +33,18 @@ public class DeleteAuthorityOrderTest extends BaseTest {
 
     private final static String EXTENSIONS = "{\"clusterId\":7,\"topicName\":\"moduleTest\",\"appId\":\"dkm_admin\",\"access\":\"3\"}";
 
+    @Value("${test.phyCluster.id}")
     private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
 
     private static final Long ORDER_ID = 1L;
 
-    private static final String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
     private static final Integer APPLY_TOPIC_TYPE = 0;
 
-    private static final String APP_ID = "dkm_admin";
+    @Value("${test.app.id}")
+    private String APP_ID;
 
     private static final String INVALIDE_USER = "xxxx";
 

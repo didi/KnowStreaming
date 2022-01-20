@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -22,20 +23,17 @@ import java.util.*;
  */
 public class ThrottleServiceTest extends BaseTest {
 
-    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
-    private final static String REAL_TOPIC_IN_ZK = "moduleTest";
+    @Value("${test.topic.name1}")
+    private String REAL_TOPIC_IN_ZK;
 
-    private final static String ADMIN_NAME_IN_MYSQL = "admin";
+    @Value("${test.app.id}")
+    private String KAFKA_MANAGER_APP_ID;
 
-    private final static String KAFKA_MANAGER_APP_NAME = "KM管理员";
-
-    private final static String KAFKA_MANAGER_APP_ID = "dkm_admin";
 
     private final static Set<Integer> REAL_BROKER_ID_SET = new HashSet<>();
-
-    // 共享集群
-    private final static Integer REAL_LOGICAL_CLUSTER_MODE = 0;
 
     static {
         REAL_BROKER_ID_SET.add(1);

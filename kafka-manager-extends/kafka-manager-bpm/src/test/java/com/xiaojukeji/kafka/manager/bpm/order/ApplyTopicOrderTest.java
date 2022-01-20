@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -34,7 +35,8 @@ import java.util.Date;
  * @Date 2021/12/27
  */
 public class ApplyTopicOrderTest extends BaseTest {
-    private static final String ADMIN = "admin";
+    @Value("${test.admin}")
+    private String ADMIN;
 
     private static final String INVALID_USER_NAME = "xxxxx";
 
@@ -52,7 +54,8 @@ public class ApplyTopicOrderTest extends BaseTest {
 
     private static final String APPROVE_ORDER_APPLY_DETAIL = "{\"brokerIdList\":[3],\"partitionNum\":1,\"replicaNum\":1,\"retentionTime\":12}";
 
-    private static final Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+    @Value("${test.phyCluster.id}")
+    private Long REAL_CLUSTER_ID_IN_MYSQL;
 
     /**
      * 工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消
