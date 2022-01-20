@@ -1,5 +1,7 @@
 package com.xiaojukeji.kafka.manager.service.service;
 
+import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.LogicalClusterMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerMetricsDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.KafkaBillDO;
 import com.xiaojukeji.kafka.manager.dao.KafkaBillDao;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
@@ -46,6 +48,12 @@ public class KafkaBillServiceTest extends BaseTest {
         kafkaBillDO.setQuota(1000.0d);
         kafkaBillDO.setTopicName("moduleTest");
         return new Object[][] {{kafkaBillDO}};
+    }
+
+    private BrokerMetricsDO getBrokerMetricsDO() {
+        BrokerMetricsDO metricsDO = new BrokerMetricsDO();
+        metricsDO.setMetrics("");
+        return metricsDO;
     }
 
     @Test(dataProvider = "provideKafkaBillDO")

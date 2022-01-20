@@ -24,7 +24,7 @@ public class ThrottleServiceTest extends BaseTest {
 
     private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
 
-    private final static String REAL_TOPIC_IN_ZK = "topic_a";
+    private final static String REAL_TOPIC_IN_ZK = "moduleTest";
 
     private final static String ADMIN_NAME_IN_MYSQL = "admin";
 
@@ -33,10 +33,6 @@ public class ThrottleServiceTest extends BaseTest {
     private final static String KAFKA_MANAGER_APP_ID = "dkm_admin";
 
     private final static Set<Integer> REAL_BROKER_ID_SET = new HashSet<>();
-
-    private final static String REAL_REGION_IN_CLUSTER = "region1";
-
-    private final static String REAL_LOGICAL_CLUSTER_NAME = "logical_cluster_1";
 
     // 共享集群
     private final static Integer REAL_LOGICAL_CLUSTER_MODE = 0;

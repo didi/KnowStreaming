@@ -30,9 +30,9 @@ public class ThirdPartServiceTest extends BaseTest {
 
     private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
 
-    private final static String REAL_TOPIC_IN_ZK = "topic_a";
+    private final static String REAL_TOPIC_IN_ZK = "moduleTest";
 
-    private final static String REAL_PHYSICAL_CLUSTER_NAME = "cluster1";
+    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
 
     private final static String ZOOKEEPER = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
 
@@ -45,8 +45,8 @@ public class ThirdPartServiceTest extends BaseTest {
 
     private final static String REAL_APP_ID = "dkm_admin";
 
-    // 要求消费topic_a这个topic的消费者所属的消费者组是group.demo
-    private final static String REAL_CONSUMER_GROUP_ID = "group.demo";
+    // 要求消费moduleTest这个topic的消费者所属的消费者组是moduleTestGroup
+    private final static String REAL_CONSUMER_GROUP_ID = "moduleTestGroup";
 
     @Autowired
     @InjectMocks
@@ -133,7 +133,7 @@ public class ThirdPartServiceTest extends BaseTest {
 
     @Test
     public void resetOffsetSuccessTest() {
-        // 要求有消费组group.demo
+        // 要求有消费组moduleTestGroup
         Result expectedResult = Result.buildSuc();
         ClusterDO clusterDO = getClusterDO();
         OffsetResetDTO offsetResetDTO = getOffsetResetDTO();

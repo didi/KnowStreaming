@@ -4,6 +4,8 @@ import com.xiaojukeji.kafka.manager.common.bizenum.TaskStatusEnum;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
+import com.xiaojukeji.kafka.manager.common.exception.ConfigException;
+import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -23,6 +25,8 @@ public class AdminServiceTest extends BaseTest {
      * 集群共包括三个broker:1,2,3, 该topic 1分区 1副本因子，在broker1上
      */
     private final static String REAL_TOPIC1_IN_ZK = "moduleTest";
+
+    private final static String REAL_TOPIC1_IN_ZK2 = "expandPartitionTopic";
 
     /**
      * 集群共包括三个broker:1,2,3, 该topic 2分区 3副本因子，在broker1,2,3上
@@ -55,6 +59,23 @@ public class AdminServiceTest extends BaseTest {
 
     private final static String ADMIN = "admin";
 
+    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+
+//    private final static String ZOOKEEPER_ADDRESS = "10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg";
+    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+
+//    private final static String BOOTSTRAP_SERVERS = "10.190.46.198:9093,10.190.14.237:9093,10.190.50.65:9093";
+    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+
+    private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
+
+    // 优先副本节点在zk上的路径
+    private final static String ZK_NODE_PATH_PREFERRED = "/admin/preferred_replica_election";
+
+    // 创建的topic节点在zk上的路径;brokers节点下的
+    private final static String ZK_NODE_PATH_BROKERS_TOPIC = "/brokers/topics/createTopicTest";
+    // config节点下的
+    private final static String ZK_NODE_PATH_CONFIG_TOPIC = "/config/topics/createTopicTest";
 
     @Autowired
     private AdminService adminService;
@@ -75,10 +96,10 @@ public class AdminServiceTest extends BaseTest {
     public ClusterDO getClusterDO() {
         ClusterDO clusterDO = new ClusterDO();
         clusterDO.setId(REAL_CLUSTER_ID_IN_MYSQL);
-        clusterDO.setClusterName("LogiKM_moduleTest");
-        clusterDO.setZookeeper("10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg");
-        clusterDO.setBootstrapServers("10.190.46.198:9093,10.190.14.237:9093,10.190.50.65:9093");
-        clusterDO.setSecurityProperties("{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }");
+        clusterDO.setClusterName(REAL_PHYSICAL_CLUSTER_NAME);
+        clusterDO.setZookeeper(ZOOKEEPER_ADDRESS);
+        clusterDO.setBootstrapServers(BOOTSTRAP_SERVERS);
+        clusterDO.setSecurityProperties(SECURITY_PROTOCOL);
         clusterDO.setStatus(1);
         clusterDO.setGmtCreate(new Date());
         clusterDO.setGmtModify(new Date());
@@ -86,13 +107,21 @@ public class AdminServiceTest extends BaseTest {
     }
 
     @Test(description = "测试创建topic")
-    public void createTopicTest() {
+    public void createTopicTest() throws ConfigException {
         // broker not exist
         createTopic2BrokerNotExistTest();
         // success to create topic
         createTopic2SuccessTest();
         // failure to create topic, topic already exists
         createTopic2FailureTest();
+
+        // 创建成功后，数据库和zk中会存在该Topic，需要删除防止影响后面测试
+        // 写入数据库的整个Test结束后回滚，因此只用删除zk上的topic节点
+        ZkConfigImpl zkConfig = new ZkConfigImpl(ZOOKEEPER_ADDRESS);
+        zkConfig.delete(ZK_NODE_PATH_BROKERS_TOPIC);
+        zkConfig.delete(ZK_NODE_PATH_CONFIG_TOPIC);
+        zkConfig.close();
+
     }
 
     private void createTopic2BrokerNotExistTest() {
@@ -103,7 +132,7 @@ public class AdminServiceTest extends BaseTest {
                 topicDO,
                 1,
                 1,
-                1L,
+                INVALID_REGION_ID,
                 Arrays.asList(INVALID_BROKER_ID),
                 new Properties(),
                 ADMIN,
@@ -163,9 +192,18 @@ public class AdminServiceTest extends BaseTest {
 
     private void deleteTopic2SuccessTest() {
         TopicDO topicDO = getTopicDO();
-        topicManagerService.addTopic(topicDO);
-
         ClusterDO clusterDO = getClusterDO();
+        ResultStatus result = adminService.createTopic(
+                clusterDO,
+                topicDO,
+                1,
+                1,
+                INVALID_REGION_ID,
+                Arrays.asList(REAL_BROKER_ID_IN_ZK),
+                new Properties(),
+                ADMIN,
+                ADMIN);
+        Assert.assertEquals(result.getCode(), ResultStatus.SUCCESS.getCode());
         ResultStatus resultStatus = adminService.deleteTopic(
                 clusterDO,
                 CREATE_TOPIC_TEST,
@@ -175,36 +213,52 @@ public class AdminServiceTest extends BaseTest {
     }
 
     @Test(description = "测试优先副本选举状态")
-    public void preferredReplicaElectionStatusTest() {
+    public void preferredReplicaElectionStatusTest() throws ConfigException {
         // running
         preferredReplicaElectionStatus2RunningTest();
         // not running
         preferredReplicaElectionStatus2NotRunningTest();
     }
 
-    private void preferredReplicaElectionStatus2RunningTest() {
+    private void preferredReplicaElectionStatus2RunningTest() throws ConfigException{
         // zk上需要创建/admin/preferred_replica_election节点
+        ZkConfigImpl zkConfig = new ZkConfigImpl(ZOOKEEPER_ADDRESS);
+        zkConfig.setOrCreatePersistentNodeStat(ZK_NODE_PATH_PREFERRED, "");
         ClusterDO clusterDO = getClusterDO();
         TaskStatusEnum taskStatusEnum = adminService.preferredReplicaElectionStatus(clusterDO);
         Assert.assertEquals(taskStatusEnum.getCode(), TaskStatusEnum.RUNNING.getCode());
+
+        // 删除之前创建的节点，防止影响后续测试
+        zkConfig.delete(ZK_NODE_PATH_PREFERRED);
+        zkConfig.close();
     }
 
-    private void preferredReplicaElectionStatus2NotRunningTest() {
+    private void preferredReplicaElectionStatus2NotRunningTest() throws ConfigException {
         ClusterDO clusterDO = getClusterDO();
         // zk上无/admin/preferred_replica_election节点
         TaskStatusEnum taskStatusEnum = adminService.preferredReplicaElectionStatus(clusterDO);
         Assert.assertEquals(taskStatusEnum.getCode(), TaskStatusEnum.SUCCEED.getCode());
+
+        // 删除创建的节点，防止影响后续测试
+        ZkConfigImpl zkConfig = new ZkConfigImpl(ZOOKEEPER_ADDRESS);
+        zkConfig.delete(ZK_NODE_PATH_PREFERRED);
+        zkConfig.close();
     }
 
     @Test(description = "测试集群纬度优先副本选举")
-    public void preferredReplicaElectionOfCluster2Test() {
+    public void preferredReplicaElectionOfCluster2Test() throws ConfigException {
         ClusterDO clusterDO = getClusterDO();
         ResultStatus resultStatus = adminService.preferredReplicaElection(clusterDO, ADMIN);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
+
+        // 删除创建的节点，防止影响后续测试
+        ZkConfigImpl zkConfig = new ZkConfigImpl(ZOOKEEPER_ADDRESS);
+        zkConfig.delete(ZK_NODE_PATH_PREFERRED);
+        zkConfig.close();
     }
 
     @Test(description = "Broker纬度优先副本选举")
-    public void preferredReplicaElectionOfBrokerTest() {
+    public void preferredReplicaElectionOfBrokerTest() throws ConfigException {
         // 参数异常
         preferredReplicaElectionOfBroker2ParamIllegalTest();
         // success
@@ -221,7 +275,7 @@ public class AdminServiceTest extends BaseTest {
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.PARAM_ILLEGAL.getCode());
     }
 
-    private void preferredReplicaElectionOfBroker2SuccessTest() {
+    private void preferredReplicaElectionOfBroker2SuccessTest() throws ConfigException {
         ClusterDO clusterDO = getClusterDO();
         ResultStatus resultStatus = adminService.preferredReplicaElection(
                 clusterDO,
@@ -229,10 +283,15 @@ public class AdminServiceTest extends BaseTest {
                 ADMIN
         );
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
+
+        // 删除创建的节点，防止影响后续测试
+        ZkConfigImpl zkConfig = new ZkConfigImpl(ZOOKEEPER_ADDRESS);
+        zkConfig.delete(ZK_NODE_PATH_PREFERRED);
+        zkConfig.close();
     }
 
     @Test(description = "Topic纬度优先副本选举")
-    public void preferredReplicaElectionOfTopicTest() {
+    public void preferredReplicaElectionOfTopicTest() throws ConfigException {
         // topic not exist
         preferredReplicaElectionOfTopic2TopicNotExistTest();
         // success
@@ -249,7 +308,7 @@ public class AdminServiceTest extends BaseTest {
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.TOPIC_NOT_EXIST.getCode());
     }
 
-    private void preferredReplicaElectionOfTopic2SuccessTest() {
+    private void preferredReplicaElectionOfTopic2SuccessTest() throws ConfigException {
         ClusterDO clusterDO = getClusterDO();
         ResultStatus resultStatus = adminService.preferredReplicaElection(
                 clusterDO,
@@ -257,10 +316,15 @@ public class AdminServiceTest extends BaseTest {
                 ADMIN
         );
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
+
+        // 删除创建的节点，防止影响后续测试
+        ZkConfigImpl zkConfig = new ZkConfigImpl(ZOOKEEPER_ADDRESS);
+        zkConfig.delete(ZK_NODE_PATH_PREFERRED);
+        zkConfig.close();
     }
 
-    @Test(description = "Topic纬度优先副本选举")
-    public void preferredReplicaElectionOfPartitionTest() {
+    @Test(description = "分区纬度优先副本选举")
+    public void preferredReplicaElectionOfPartitionTest() throws ConfigException {
         // topic not exist
         preferredReplicaElectionOfPartition2TopicNotExistTest();
         // partition Not Exist
@@ -291,7 +355,7 @@ public class AdminServiceTest extends BaseTest {
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.PARTITION_NOT_EXIST.getCode());
     }
 
-    private void preferredReplicaElectionOfPartition2SuccessTest() {
+    private void preferredReplicaElectionOfPartition2SuccessTest() throws ConfigException {
         ClusterDO clusterDO = getClusterDO();
         ResultStatus resultStatus = adminService.preferredReplicaElection(
                 clusterDO,
@@ -300,6 +364,11 @@ public class AdminServiceTest extends BaseTest {
                 ADMIN
         );
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
+
+        // 删除创建的节点，防止影响后续测试
+        ZkConfigImpl zkConfig = new ZkConfigImpl(ZOOKEEPER_ADDRESS);
+        zkConfig.delete(ZK_NODE_PATH_PREFERRED);
+        zkConfig.close();
     }
 
     @Test(description = "测试获取Topic配置")
@@ -338,9 +407,10 @@ public class AdminServiceTest extends BaseTest {
     }
 
     @Test(description = "测试扩分区")
+    // 该测试会导致真实topic分区发生变化
     public void expandPartitionsTest() {
         // broker not exist
-        expandPartitions2BrokerNotExistTest();
+//        expandPartitions2BrokerNotExistTest();
         // success
         expandPartitions2SuccessTest();
     }
@@ -363,13 +433,13 @@ public class AdminServiceTest extends BaseTest {
         ClusterDO clusterDO = getClusterDO();
         ResultStatus resultStatus = adminService.expandPartitions(
                 clusterDO,
-                REAL_TOPIC1_IN_ZK,
+                REAL_TOPIC1_IN_ZK2,
                 2,
                 INVALID_REGION_ID,
                 Arrays.asList(REAL_BROKER_ID_IN_ZK),
                 ADMIN
         );
-        Assert.assertEquals(resultStatus.getCode(), ResultStatus.BROKER_NOT_EXIST.getCode());
+        Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
 }

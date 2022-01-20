@@ -250,6 +250,7 @@ public class ClusterTaskServiceTest extends BaseTest {
     private void executeTask2RollbackForbiddenTest() {
         Mockito.when(abstractAgent.getTaskExecuteState(Mockito.anyLong())).thenReturn(Result.buildSuc(ClusterTaskStateEnum.RUNNING));
         ClusterTaskDO clusterTaskDO = getClusterTaskDO();
+        clusterTaskDO.setAgentRollbackTaskId(1L);
         Mockito.when(clusterTaskDao.getById(Mockito.anyLong())).thenReturn(clusterTaskDO);
 
         // operation failed

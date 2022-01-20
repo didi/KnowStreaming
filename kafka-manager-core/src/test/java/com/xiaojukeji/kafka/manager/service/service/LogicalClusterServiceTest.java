@@ -171,24 +171,6 @@ public class LogicalClusterServiceTest extends BaseTest {
         Assert.assertEquals(result3.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    @Test(dataProvider = "provideLogicalClusterDO", description = "通过物理集群ID查找")
-    public void getByPhysicalClusterIdTest(LogicalClusterDO logicalClusterDO) {
-        logicalClusterDO.setClusterId(2L);
-        logicalClusterDao.insert(logicalClusterDO);
-        List<LogicalClusterDO> result = logicalClusterService.getByPhysicalClusterId(logicalClusterDO.getClusterId());
-        Assert.assertFalse(result.isEmpty());
-        Assert.assertTrue(result.stream().allMatch(logicalClusterDO1 ->
-                logicalClusterDO1.getClusterId().equals(logicalClusterDO.getClusterId()) &&
-                logicalClusterDO1.getIdentification().equals(logicalClusterDO.getIdentification())));
-    }
-
-    @Test(dataProvider = "provideLogicalClusterDO", description = "通过逻辑集群ID查找")
-    public void getByIdTest(LogicalClusterDO logicalClusterDO) {
-        LogicalClusterDO result = logicalClusterService.getById(7L);
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result.getIdentification(), logicalClusterDO.getIdentification());
-    }
-
     @Test(description = "测试删除集群")
     public void deleteByIdTest() {
         // 删除集群成功
@@ -433,7 +415,7 @@ public class LogicalClusterServiceTest extends BaseTest {
                 .thenReturn(set);
 
         long startTime = 1639360565000L;
-        long endTime = 1639407365000L;
+        long endTime = new Date().getTime();
         List<LogicalClusterMetrics> list = logicalClusterService.getLogicalClusterMetricsFromDB(
                 logicalClusterDO, new Date(startTime), new Date(endTime));
         Assert.assertFalse(list.isEmpty());

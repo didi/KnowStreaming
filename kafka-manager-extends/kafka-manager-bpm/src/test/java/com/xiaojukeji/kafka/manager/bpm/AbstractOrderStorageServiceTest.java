@@ -60,6 +60,7 @@ public class AbstractOrderStorageServiceTest extends BaseTest {
 
     private void cancel2WithoutAuthority() {
         OrderDO orderDO = getOrderDO();
+        Mockito.when(orderDao.getById(Mockito.any())).thenReturn(orderDO);
         Assert.assertEquals(abstractOrderStorageService.cancel(1L, "username"), ResultStatus.USER_WITHOUT_AUTHORITY);
     }
 

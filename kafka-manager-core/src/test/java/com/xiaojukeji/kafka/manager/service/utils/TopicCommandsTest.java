@@ -21,6 +21,8 @@ public class TopicCommandsTest extends BaseTest {
 
     private final static String TEST_CREATE_TOPIC = "createTopicTest";
 
+    private final static String REAL_TOPIC1_IN_ZK2 = "expandPartitionTopic";
+
     private final static String REAL_TOPIC_IN_ZK = "moduleTest";
 
     private final static String INVALID_TOPIC = ".,&";
@@ -31,13 +33,22 @@ public class TopicCommandsTest extends BaseTest {
 
     private final static Integer BROKER_ID = 1;
 
+    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+
+    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+
+    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+
+    private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
+
+
     public ClusterDO getClusterDO() {
         ClusterDO clusterDO = new ClusterDO();
         clusterDO.setId(REAL_CLUSTER_ID_IN_MYSQL);
-        clusterDO.setClusterName("LogiKM_moduleTest");
-        clusterDO.setZookeeper("10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg");
-        clusterDO.setBootstrapServers("10.190.46.198:9093,10.190.14.237:9093,10.190.50.65:9093");
-        clusterDO.setSecurityProperties("{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }");
+        clusterDO.setClusterName(REAL_PHYSICAL_CLUSTER_NAME);
+        clusterDO.setZookeeper(ZOOKEEPER_ADDRESS);
+        clusterDO.setBootstrapServers(BOOTSTRAP_SERVERS);
+        clusterDO.setSecurityProperties(SECURITY_PROTOCOL);
         clusterDO.setStatus(1);
         clusterDO.setGmtCreate(new Date());
         clusterDO.setGmtModify(new Date());
@@ -139,6 +150,10 @@ public class TopicCommandsTest extends BaseTest {
                 new Properties()
         );
         Assert.assertEquals(result.getCode(), ResultStatus.SUCCESS.getCode());
+
+        // 删除这个Topic
+        ResultStatus result1 = TopicCommands.deleteTopic(clusterDO, TEST_CREATE_TOPIC);
+        Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
     @Test(description = "测试修改topic配置")
@@ -195,7 +210,7 @@ public class TopicCommandsTest extends BaseTest {
         ClusterDO clusterDO = getClusterDO();
         ResultStatus result = TopicCommands.expandTopic(
                 clusterDO,
-                TEST_CREATE_TOPIC,
+                REAL_TOPIC1_IN_ZK2,
                 PARTITION_NUM + 1,
                 Arrays.asList(BROKER_ID, 2)
         );
@@ -227,8 +242,19 @@ public class TopicCommandsTest extends BaseTest {
     }
 
     private void deleteTopic2SuccessTest() {
+        // 需要先创建这个Topic
         ClusterDO clusterDO = getClusterDO();
-        ResultStatus result = TopicCommands.deleteTopic(clusterDO, TEST_CREATE_TOPIC);
+        ResultStatus result = TopicCommands.createTopic(
+                clusterDO,
+                TEST_CREATE_TOPIC,
+                PARTITION_NUM,
+                REPLICA_NUM,
+                Arrays.asList(BROKER_ID),
+                new Properties()
+        );
         Assert.assertEquals(result.getCode(), ResultStatus.SUCCESS.getCode());
+
+        ResultStatus result1 = TopicCommands.deleteTopic(clusterDO, TEST_CREATE_TOPIC);
+        Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
     }
 }

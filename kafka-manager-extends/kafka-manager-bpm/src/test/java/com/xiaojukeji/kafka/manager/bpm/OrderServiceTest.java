@@ -12,6 +12,7 @@ import com.xiaojukeji.kafka.manager.bpm.config.BaseTest;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
+import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -41,7 +42,8 @@ public class OrderServiceTest extends BaseTest {
 
     private static final Long INVALID_ORDER_ID = -1L;
 
-    private static final String EXTENSIONS = "{\"clusterId\":7,\"topicName\":\"moduleTest2\",\"appId\":\"dkm_admin\",\"peakBytesIn\":104857600000}";
+    // EXTENSIONS中的clusterId需要是自己数据库中真实的逻辑集群id，这样createOrder才能跑通
+    private static final String EXTENSIONS = "{\"clusterId\":15,\"topicName\":\"moduleTest2\",\"appId\":\"dkm_admin\",\"peakBytesIn\":104857600000}";
 
     /**
      * 工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消

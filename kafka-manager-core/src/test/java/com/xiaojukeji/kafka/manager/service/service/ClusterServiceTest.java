@@ -7,6 +7,7 @@ import com.xiaojukeji.kafka.manager.common.entity.ao.ClusterDetailDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.ControllerPreferredCandidate;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.ClusterNameDTO;
+import com.xiaojukeji.kafka.manager.dao.ClusterDao;
 import com.xiaojukeji.kafka.manager.dao.ClusterMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.ControllerDao;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -24,6 +26,7 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
@@ -31,6 +34,21 @@ import static org.mockito.Mockito.when;
  * @Date 2021/12/8
  */
 public class ClusterServiceTest extends BaseTest {
+
+    private final static Long REAL_CLUSTER_ID_IN_MYSQL = 1L;
+
+    private final static Integer REAL_BROKER_ID_IN_ZK = 1;
+
+    private final static String REAL_PHYSICAL_CLUSTER_NAME = "LogiKM_moduleTest";
+
+    //    private final static String ZOOKEEPER_ADDRESS = "10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg";
+    private final static String ZOOKEEPER_ADDRESS = "10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc";
+
+    //    private final static String BOOTSTRAP_SERVERS = "10.190.46.198:9093,10.190.14.237:9093,10.190.50.65:9093";
+    private final static String BOOTSTRAP_SERVERS = "10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093";
+
+    private final static String SECURITY_PROTOCOL = "{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }";
+
 
     @Autowired
     @InjectMocks
@@ -54,6 +72,15 @@ public class ClusterServiceTest extends BaseTest {
     @Mock
     private ZookeeperService zookeeperService;
 
+    @Mock
+    private OperateRecordService operateRecordService;
+
+    @Mock
+    private ClusterDao clusterDao;
+
+    @Mock
+    private ConsumerService consumerService;
+
     @BeforeMethod
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -63,10 +90,10 @@ public class ClusterServiceTest extends BaseTest {
     public static Object[][] provideClusterDO() {
         ClusterDO clusterDO = new ClusterDO();
         clusterDO.setId(3L);
-        clusterDO.setClusterName("LogiKM_moduleTest");
-        clusterDO.setZookeeper("10.190.46.198:2181,10.190.14.237:2181,10.190.50.65:2181/xg");
-        clusterDO.setBootstrapServers("10.190.46.198:9093,10.190.14.237:9093,10.190.50.65:9093");
-        clusterDO.setSecurityProperties("{ \t\"security.protocol\": \"SASL_PLAINTEXT\", \t\"sasl.mechanism\": \"PLAIN\", \t\"sasl.jaas.config\": \"org.apache.kafka.common.security.plain.PlainLoginModule required username=\\\"dkm_admin\\\" password=\\\"km_kMl4N8as1Kp0CCY\\\";\" }");
+        clusterDO.setClusterName(REAL_PHYSICAL_CLUSTER_NAME);
+        clusterDO.setZookeeper(ZOOKEEPER_ADDRESS);
+        clusterDO.setBootstrapServers(BOOTSTRAP_SERVERS);
+        clusterDO.setSecurityProperties(SECURITY_PROTOCOL);
         clusterDO.setStatus(1);
         clusterDO.setGmtCreate(new Date());
         clusterDO.setGmtModify(new Date());
@@ -77,7 +104,7 @@ public class ClusterServiceTest extends BaseTest {
     public static Object[][] provideClusterMetricsDO() {
         ClusterMetricsDO clusterMetricsDO = new ClusterMetricsDO();
         clusterMetricsDO.setId(10L);
-        clusterMetricsDO.setClusterId(1L);
+        clusterMetricsDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
         clusterMetricsDO.setMetrics("{\"PartitionNum\":52,\"BrokerNum\":0,\"CreateTime\":1638235221102,\"TopicNum\":2}");
         clusterMetricsDO.setGmtCreate(new Date());
         return new Object[][] {{clusterMetricsDO}};
@@ -86,22 +113,45 @@ public class ClusterServiceTest extends BaseTest {
     @DataProvider(name = "provideControllerDO")
     public static Object[][] provideControllerDO() {
         ControllerDO controllerDO = new ControllerDO();
-        controllerDO.setClusterId(1L);
-        controllerDO.setBrokerId(1);
+        controllerDO.setClusterId(REAL_CLUSTER_ID_IN_MYSQL);
+        controllerDO.setBrokerId(REAL_BROKER_ID_IN_ZK);
         controllerDO.setHost("127.0.0.1");
         controllerDO.setTimestamp(0L);
         controllerDO.setVersion(1);
         return new Object[][] {{controllerDO}};
     }
 
+    private Map<Long, Integer> getRegionNum() {
+        Map<Long, Integer> map = new HashMap<>();
+        map.put(REAL_CLUSTER_ID_IN_MYSQL, 1);
+        return map;
+    }
+
+    private Map<Long, Integer> getConsumerGroupNumMap() {
+        Map<Long, Integer> map = new HashMap<>();
+        map.put(REAL_CLUSTER_ID_IN_MYSQL, 1);
+        return map;
+    }
+
+    private ClusterDO getClusterDO() {
+        ClusterDO clusterDO = new ClusterDO();
+        clusterDO.setId(3L);
+        clusterDO.setClusterName(REAL_PHYSICAL_CLUSTER_NAME);
+        clusterDO.setZookeeper("zzz");
+        clusterDO.setBootstrapServers(BOOTSTRAP_SERVERS);
+        clusterDO.setSecurityProperties(SECURITY_PROTOCOL);
+        clusterDO.setStatus(1);
+        clusterDO.setGmtCreate(new Date());
+        clusterDO.setGmtModify(new Date());
+        return clusterDO;
+    }
+
     @Test(dataProvider = "provideClusterDO", description = "测试新增物理集群")
     public void addNewTest(ClusterDO clusterDO) {
         // 测试新增物理集群成功
-        addaddNew2SuccessTest(clusterDO);
+        addNew2SuccessTest(clusterDO);
         // 测试新增物理集群时键重复
-        addaddNew2DuplicateKeyTest(clusterDO);
-        // 测试新增物理集群时数据库插入失败
-        addaddNew2MysqlErrorTest(clusterDO);
+        addNew2DuplicateKeyTest(clusterDO);
         // 测试新增物理集群时参数有误
         addNew2ParamIllegalTest(clusterDO);
         // 测试新增物理集群时zk无法连接
@@ -122,49 +172,17 @@ public class ClusterServiceTest extends BaseTest {
         Assert.assertEquals(result.getCode(), ResultStatus.ZOOKEEPER_CONNECT_FAILED.getCode());
     }
 
-    private void addaddNew2SuccessTest(ClusterDO clusterDO) {
+    private void addNew2SuccessTest(ClusterDO clusterDO) {
+        Mockito.when(operateRecordService.insert(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
+        Mockito.when(clusterDao.insert(Mockito.any())).thenReturn(1);
         ResultStatus result = clusterService.addNew(clusterDO, "admin");
         Assert.assertEquals(result.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    public void addaddNew2DuplicateKeyTest(ClusterDO clusterDO) {
-
+    public void addNew2DuplicateKeyTest(ClusterDO clusterDO) {
+        Mockito.when(operateRecordService.insert(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(DuplicateKeyException.class);
         ResultStatus result = clusterService.addNew(clusterDO, "admin");
         Assert.assertEquals(result.getCode(), ResultStatus.RESOURCE_ALREADY_EXISTED.getCode());
-    }
-
-    public void addaddNew2MysqlErrorTest(ClusterDO clusterDO) {
-        // operateRecord数据库插入失败
-        clusterDO.setClusterName(null);
-        ResultStatus result = clusterService.addNew(clusterDO, "admin");
-        Assert.assertEquals(result.getCode(), ResultStatus.MYSQL_ERROR.getCode());
-
-        // cluster数据库插入失败
-        clusterDO.setClusterName("clusterTest");
-        clusterDO.setBootstrapServers(null);
-        ResultStatus result2 = clusterService.addNew(clusterDO, "admin");
-        Assert.assertEquals(result2.getCode(), ResultStatus.MYSQL_ERROR.getCode());
-    }
-
-    @Test(dataProvider = "provideClusterDO", description = "测试由id获取ClusterDO")
-    public void getById(ClusterDO clusterDO) {
-        // 测试由id获取ClusterDO时，返回null
-        getById2NullTest();
-        // 测试由id获取ClusterDO时，返回成功
-        getById2SuccessTest(clusterDO);
-    }
-
-    private void getById2NullTest() {
-        ClusterDO clusterDO = clusterService.getById(null);
-        Assert.assertNull(clusterDO);
-    }
-
-    private void getById2SuccessTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
-        ClusterDO result = clusterService.getById(clusterDO.getId());
-        Assert.assertNotNull(result);
-        Assert.assertEquals(result, clusterDO);
     }
 
     @Test(dataProvider = "provideClusterDO", description = "测试修改物理集群")
@@ -173,23 +191,21 @@ public class ClusterServiceTest extends BaseTest {
         updateById2ParamIllegalTest(clusterDO);
         // 测试修改物理集群时,集群不存在
         updateById2ClusterNotExistTest(clusterDO);
-        // 测试修改物理集群时,zk配置不能修改
-        updateById2ChangeZookeeperForbiddenTest(clusterDO);
     }
 
     @Test(dataProvider = "provideClusterDO", description = "测试修改物理集群时,mysqlError")
     public void updateById2mysqlErrorTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
-        clusterDO.setBootstrapServers(null);
+        Mockito.when(clusterDao.getById(Mockito.any())).thenReturn(clusterDO);
+        Mockito.when(operateRecordService.insert(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
+        Mockito.when(clusterDao.updateById(Mockito.any())).thenReturn(0);
         ResultStatus result1 = clusterService.updateById(clusterDO, "admin");
         Assert.assertEquals(result1.getCode(), ResultStatus.MYSQL_ERROR.getCode());
     }
 
     @Test(dataProvider = "provideClusterDO", description = "测试修改物理集群成功")
     public void updateById2SuccessTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
+        Mockito.when(clusterDao.getById(Mockito.any())).thenReturn(clusterDO);
+        Mockito.when(clusterDao.updateById(Mockito.any())).thenReturn(1);
         clusterDO.setJmxProperties("jmx");
         ResultStatus result1 = clusterService.updateById(clusterDO, "admin");
         Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
@@ -204,15 +220,16 @@ public class ClusterServiceTest extends BaseTest {
     }
 
     private void updateById2ClusterNotExistTest(ClusterDO clusterDO) {
-        clusterDO.setId(100L);
+        Mockito.when(clusterDao.getById(Mockito.any())).thenReturn(null);
         ResultStatus result1 = clusterService.updateById(clusterDO, "admin");
         Assert.assertEquals(result1.getCode(), ResultStatus.CLUSTER_NOT_EXIST.getCode());
     }
 
-    private void updateById2ChangeZookeeperForbiddenTest(ClusterDO clusterDO) {
-        clusterDO.setZookeeper("zzz");
-        clusterDO.setId(1L);
-        ResultStatus result1 = clusterService.updateById(clusterDO, "admin");
+    @Test(dataProvider = "provideClusterDO")
+    public void updateById2ChangeZookeeperForbiddenTest(ClusterDO clusterDO) {
+        ClusterDO clusterDO1 = getClusterDO();
+        Mockito.when(clusterDao.getById(Mockito.any())).thenReturn(clusterDO);
+        ResultStatus result1 = clusterService.updateById(clusterDO1, "admin");
         Assert.assertEquals(result1.getCode(), ResultStatus.CHANGE_ZOOKEEPER_FORBIDDEN.getCode());
     }
 
@@ -236,81 +253,20 @@ public class ClusterServiceTest extends BaseTest {
 
     public void modifyStatus2ClusterNotExistTest() {
         ResultStatus result1 = clusterService.modifyStatus(100L, 0, "admin");
+        Mockito.when(clusterDao.getById(Mockito.any())).thenReturn(null);
         Assert.assertEquals(result1.getCode(), ResultStatus.CLUSTER_NOT_EXIST.getCode());
     }
 
     public void modifyStatus2SuccessTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
+        Mockito.when(clusterDao.getById(Mockito.any())).thenReturn(clusterDO);
+        Mockito.when(clusterDao.updateById(Mockito.any())).thenReturn(1);
         ResultStatus result1 = clusterService.modifyStatus(clusterDO.getId(), clusterDO.getStatus(), "admin");
         Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    @Test(dataProvider = "provideClusterDO")
-    public void listTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
-        List<ClusterDO> list = clusterService.list();
-        Assert.assertEquals(list.size(), 1);
-        Assert.assertEquals(list.get(0), clusterDO);
-    }
-
-    @Test(dataProvider = "provideClusterDO")
-    public void listMapTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
-        Map<Long, ClusterDO> longClusterDOMap = clusterService.listMap();
-        Assert.assertEquals(longClusterDOMap.size(), 1);
-        Assert.assertEquals(longClusterDOMap.get(clusterDO.getId()), clusterDO);
-    }
-
-    @Test(dataProvider = "provideClusterDO")
-    public void listAllTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
-        List<ClusterDO> list = clusterService.listAll();
-        list.forEach(System.out::println);
-
-        Assert.assertEquals(list.size(), 1);
-        Assert.assertEquals(list.get(0), clusterDO);
-    }
-
-    @Test(dataProvider = "provideClusterMetricsDO")
-    public void getClusterMetricsFromDBTest(ClusterMetricsDO clusterMetricsDO) {
-        clusterMetricsDao.batchAdd(Arrays.asList(clusterMetricsDO));
-
-        List<ClusterMetricsDO> clusterMetricsDOList = clusterService.getClusterMetricsFromDB(
-                clusterMetricsDO.getClusterId(),
-                new Date(0L), new Date()
-        );
-
-        Assert.assertNotNull(clusterMetricsDOList);
-        Assert.assertEquals(clusterMetricsDOList.size(), 1);
-        Assert.assertTrue(clusterMetricsDOList.stream().allMatch(clusterMetricsDO1 ->
-                clusterMetricsDO1.getMetrics().equals(clusterMetricsDO.getMetrics()) &&
-                clusterMetricsDO1.getClusterId().equals(clusterMetricsDO.getClusterId())));
-
-    }
-
-    @Test(dataProvider = "provideControllerDO")
-    public void getKafkaControllerHistoryTest(ControllerDO controllerDO) {
-        controllerDao.insert(controllerDO);
-
-        List<ControllerDO> kafkaControllerHistory = clusterService.getKafkaControllerHistory(controllerDO.getClusterId());
-        Assert.assertNotNull(kafkaControllerHistory);
-        Assert.assertTrue(kafkaControllerHistory.stream()
-                .filter(controllerDO1 -> controllerDO1.getTimestamp().equals(0L))
-                .allMatch(controllerDO1 ->
-                    controllerDO1.getClusterId().equals(controllerDO.getClusterId()) &&
-                    controllerDO1.getBrokerId().equals(controllerDO.getBrokerId()) &&
-                    controllerDO1.getTimestamp().equals(controllerDO.getTimestamp()))
-        );
-    }
-
     @Test(dataProvider = "provideClusterDO", description = "参数needDetail为false")
     public void getClusterDetailDTOListWithFalseNeedDetailTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
+        Mockito.when(clusterDao.listAll()).thenReturn(Arrays.asList(clusterDO));
         String kafkaVersion = "2.7";
         when(physicalClusterMetadataManager.getKafkaVersionFromCache(Mockito.anyLong())).thenReturn(kafkaVersion);
 
@@ -324,13 +280,15 @@ public class ClusterServiceTest extends BaseTest {
 
     @Test(dataProvider = "provideClusterDO", description = "参数needDetail为true")
     public void getClusterDetailDTOListWithTrueNeedDetailTest(ClusterDO clusterDO) {
+        Mockito.when(clusterDao.listAll()).thenReturn(Arrays.asList(clusterDO));
+        Mockito.when(regionService.getRegionNum()).thenReturn(getRegionNum());
+        Mockito.when(consumerService.getConsumerGroupNumMap(Mockito.any())).thenReturn(getConsumerGroupNumMap());
         List<ClusterDetailDTO> clusterDetailDTOList = clusterService.getClusterDetailDTOList(true);
         Assert.assertNotNull(clusterDetailDTOList);
         Assert.assertTrue(clusterDetailDTOList.stream().allMatch(clusterDetailDTO ->
                 clusterDetailDTO.getBootstrapServers().equals(clusterDO.getBootstrapServers()) &&
                         clusterDetailDTO.getZookeeper().equals(clusterDO.getZookeeper()) &&
-                        clusterDetailDTO.getClusterName().equals("LogiKM_xg") &&
-                        clusterDetailDTO.getBrokerNum().equals(1)));
+                        clusterDetailDTO.getClusterName().equals(REAL_PHYSICAL_CLUSTER_NAME)));
     }
 
     @Test(description = "测试获取ClusterNameDTO时，无对应的逻辑集群")
@@ -349,6 +307,7 @@ public class ClusterServiceTest extends BaseTest {
         logicalClusterDO.setClusterId(clusterDO.getId());
         logicalClusterDO.setId(1L);
         when(logicalClusterMetadataManager.getLogicalCluster(Mockito.anyLong())).thenReturn(logicalClusterDO);
+        Mockito.when(clusterDao.getById(Mockito.any())).thenReturn(clusterDO);
         ClusterNameDTO clusterName = clusterService.getClusterName(logicalClusterDO.getId());
         Assert.assertEquals(clusterName.getLogicalClusterName(), logicalClusterDO.getName());
         Assert.assertEquals(clusterName.getLogicalClusterId(), logicalClusterDO.getId());
@@ -365,18 +324,20 @@ public class ClusterServiceTest extends BaseTest {
 
     @Test(dataProvider = "provideClusterDO", description = "测试删除集群成功")
     public void deleteById2SuccessTest(ClusterDO clusterDO) {
-        clusterService.addNew(clusterDO, "admin");
-
         when(regionService.getByClusterId(Mockito.anyLong())).thenReturn(Collections.emptyList());
+        Mockito.when(operateRecordService.insert(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
+        Mockito.when(clusterDao.deleteById(Mockito.any())).thenReturn(1);
         ResultStatus resultStatus = clusterService.deleteById(clusterDO.getId(), "admin");
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
 
     }
 
-    @Test(description = "测试删除集群成功")
+    @Test(description = "测试MYSQL_ERROR")
     public void deleteById2MysqlErrorTest() {
         when(regionService.getByClusterId(Mockito.anyLong())).thenReturn(Collections.emptyList());
         ResultStatus resultStatus = clusterService.deleteById(100L, "admin");
+        Mockito.when(operateRecordService.insert(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
+        Mockito.when(clusterDao.deleteById(Mockito.any())).thenReturn(-1);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.MYSQL_ERROR.getCode());
     }
 

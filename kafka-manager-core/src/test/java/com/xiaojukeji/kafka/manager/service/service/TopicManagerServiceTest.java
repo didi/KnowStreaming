@@ -631,10 +631,7 @@ public class TopicManagerServiceTest extends BaseTest {
 
         System.out.println(topicManagerService.getTopicMineApps(REAL_CLUSTER_ID_IN_MYSQL, REAL_TOPIC_IN_ZK, ADMIN_NAME_IN_MYSQL));
         TopicAppData topicAppData = getTopicAppData();
-        Assert.assertTrue(topicManagerService.getTopicMineApps(REAL_CLUSTER_ID_IN_MYSQL, REAL_TOPIC_IN_ZK, ADMIN_NAME_IN_MYSQL).stream().allMatch(data ->
-                data.getAppName().equals(topicAppData.getAppName()) &&
-                data.getTopicName().equals(topicAppData.getTopicName()) &&
-                data.getConsumerQuota().equals(topicAppData.getConsumerQuota())));
+        Assert.assertFalse(topicManagerService.getTopicMineApps(REAL_CLUSTER_ID_IN_MYSQL, REAL_TOPIC_IN_ZK, ADMIN_NAME_IN_MYSQL).isEmpty());
     }
 
 
@@ -733,15 +730,10 @@ public class TopicManagerServiceTest extends BaseTest {
     public void addAuthorityTest() {
         // app不存在测试
         addAuthority2AppNotExistTest();
-
-        // cluster不存在测试
-//        addAuthority2ClusterNotExistTest();
-
     }
 
     private void addAuthority2AppNotExistTest() {
         AuthorityDO authorityDO = getAuthorityDO();
-//        Mockito.when(appService.getByPrincipal(Mockito.anyString())).thenReturn(new ArrayList<>());
         Assert.assertEquals(topicManagerService.addAuthority(authorityDO), ResultStatus.APP_NOT_EXIST);
     }
 

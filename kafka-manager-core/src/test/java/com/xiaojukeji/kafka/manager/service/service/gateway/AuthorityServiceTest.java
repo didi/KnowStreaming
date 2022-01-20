@@ -201,14 +201,6 @@ public class AuthorityServiceTest extends BaseTest {
         Assert.assertTrue(result.isEmpty());
     }
 
-    @Test(dataProvider = "provideAuthorityDO")
-    public void listAllTest(AuthorityDO authorityDO) {
-        authorityService.addAuthority(authorityDO);
-
-        List<AuthorityDO> result = authorityService.listAll();
-        Assert.assertEquals(result.size(), 1);
-    }
-
     @Test(dataProvider = "provideAuthorityDO", description = "添加权限和quota")
     public void addAuthorityAndQuotaTest(AuthorityDO authorityDO) {
         // 添加权限和quota成功
@@ -227,14 +219,6 @@ public class AuthorityServiceTest extends BaseTest {
         // 重复插入
         int result2 = authorityService.addAuthorityAndQuota(authorityDO, getTopicQuota());
         Assert.assertEquals(result2, 0);
-    }
-
-    @Test(dataProvider = "provideAuthorityDO")
-    public void getAllAuthorityTest(AuthorityDO authorityDO) {
-        authorityService.addAuthority(authorityDO);
-
-        Map<String, Map<Long, Map<String, AuthorityDO>>> allAuthority = authorityService.getAllAuthority();
-        Assert.assertEquals(allAuthority.size(), 1);
     }
 
     @Test(dataProvider = "provideAuthorityDO", description = "测试删除")

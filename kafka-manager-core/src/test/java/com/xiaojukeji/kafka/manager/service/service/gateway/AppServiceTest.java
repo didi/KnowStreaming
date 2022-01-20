@@ -6,7 +6,6 @@ import com.xiaojukeji.kafka.manager.common.entity.dto.normal.AppDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.service.config.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -47,6 +46,18 @@ public class AppServiceTest extends BaseTest {
         appDTO.setPrincipals("admin");
         appDTO.setDescription("testApp");
         return new Object[][] {{appDTO}};
+    }
+
+    private AppDO getAppDO() {
+        AppDO appDO = new AppDO();
+        appDO.setId(4L);
+        appDO.setAppId("testAppId");
+        appDO.setName("testApp");
+        appDO.setPassword("password");
+        appDO.setType(1);
+        appDO.setApplicant("admin");
+        appDO.setPrincipals("admin");
+        return appDO;
     }
 
     @Test(dataProvider = "provideAppDO")
@@ -103,9 +114,11 @@ public class AppServiceTest extends BaseTest {
         // 测试更新app时，app不存在
         updateByAppId2AppNotExistTest();
         // 测试更新app时，用户无权限
+        AppDO appDO = getAppDO();
+        appService.addApp(appDO, "admin");
         updateByAppId2UserWithoutAuthorityTest(appDTO);
         // 测试更新app成功
-        updateByAppId2SucessTest(appDTO);
+        updateByAppId2SuccessTest(appDTO);
     }
 
     private void updateByAppId2AppNotExistTest() {
@@ -118,7 +131,7 @@ public class AppServiceTest extends BaseTest {
         Assert.assertEquals(result.getCode(), ResultStatus.USER_WITHOUT_AUTHORITY.getCode());
     }
 
-    private void updateByAppId2SucessTest(AppDTO appDTO) {
+    private void updateByAppId2SuccessTest(AppDTO appDTO) {
         ResultStatus result1 = appService.updateByAppId(appDTO, "admin", false);
         Assert.assertEquals(result1.getCode(), ResultStatus.SUCCESS.getCode());
 
