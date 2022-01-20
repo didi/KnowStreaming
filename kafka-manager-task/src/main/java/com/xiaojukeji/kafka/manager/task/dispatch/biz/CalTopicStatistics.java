@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.biz;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicStatisticsDO;
 import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
@@ -30,7 +29,7 @@ import java.util.Map;
  */
 @CustomScheduled(name = "calTopicStatistics", cron = "0 0 0/4 * * ?", threadNum = 5)
 public class CalTopicStatistics extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CalTopicStatistics.class);
 
     @Autowired
     private ClusterService clusterService;

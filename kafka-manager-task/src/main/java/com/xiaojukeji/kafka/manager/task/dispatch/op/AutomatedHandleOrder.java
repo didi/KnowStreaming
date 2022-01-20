@@ -4,7 +4,6 @@ import com.xiaojukeji.kafka.manager.bpm.OrderService;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderStatusEnum;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderTypeEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.bpm.common.handle.OrderHandleBaseDTO;
 import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
@@ -34,7 +33,7 @@ import java.util.*;
 @CustomScheduled(name = "automatedHandleOrder", cron = "0 0/1 * * * ?", threadNum = 1)
 @ConditionalOnProperty(prefix = "task.op.order-auto-exec", name = "app-enabled", havingValue = "true", matchIfMissing = false)
 public class AutomatedHandleOrder extends AbstractScheduledTask<EmptyEntry> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AutomatedHandleOrder.class);
 
     @Autowired
     private OrderService orderService;

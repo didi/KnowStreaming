@@ -72,16 +72,15 @@ public abstract class AbstractScheduledTask<E extends Comparable> implements Sch
         LOGGER.info("init custom scheduled finished, scheduledName:{} scheduledCron:{}.", scheduledName, scheduledCron);
     }
 
-    private boolean checkAndModifyCron(String scheduledName, String scheduledCron, boolean existIfIllegal) {
+    private boolean checkAndModifyCron(String scheduledName, String scheduledCron, boolean isInit) {
         if (scheduledCron.matches(ScheduledTaskConstant.CRON_REG_EX)) {
             this.scheduledCron = scheduledCron;
-            LOGGER.info("modify scheduledCron success, scheduledName:{} scheduledCron:{}."
-                    , scheduledName, scheduledCron);
+            LOGGER.info("{} scheduledCron success, scheduledName:{} scheduledCron:{}.", isInit? "init": "modify", scheduledName, scheduledCron);
             return true;
         }
 
         LOGGER.error("modify scheduledCron failed, format invalid, scheduledName:{} scheduledCron:{}.", scheduledName, scheduledCron);
-        if (existIfIllegal) {
+        if (isInit) {
             throw new UnsupportedOperationException(String.format("scheduledName:%s scheduledCron:%s format invalid", scheduledName, scheduledCron));
         }
         return false;
@@ -128,7 +127,8 @@ public abstract class AbstractScheduledTask<E extends Comparable> implements Sch
             LOGGER.info("customScheduled task finished, empty selected task, scheduledName:{}.", scheduledName);
             return;
         }
-        LOGGER.info("customScheduled task running, selected tasks, IP:{} selectedTasks:{}.",
+
+        LOGGER.debug("customScheduled task running, selected tasks, IP:{} selectedTasks:{}.",
                 NetUtils.localIp(), JsonUtils.toJSONString(selectTasks)
         );
 

@@ -2,7 +2,6 @@ package com.xiaojukeji.kafka.manager.task.listener.sink.db;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicThrottledMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicThrottledMetricsDO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
@@ -24,7 +23,7 @@ import java.util.*;
 @Component("storeTopicThrottledMetrics2DB")
 @ConditionalOnProperty(prefix = "custom.store-metrics-task.didi", name = "topic-throttled-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreTopicThrottledMetrics2DB implements ApplicationListener<TopicThrottledMetricsCollectedEvent> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StoreTopicThrottledMetrics2DB.class);
 
     @Autowired
     private ThrottleService throttleService;

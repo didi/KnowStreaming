@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.listener.sink.kafka;
 
 import com.xiaojukeji.kafka.manager.common.constant.ConfigConstant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ao.config.TopicNameConfig;
 import com.xiaojukeji.kafka.manager.common.entity.ao.remote.KafkaTopicMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
@@ -27,7 +26,7 @@ import java.util.List;
  */
 @Component("sinkCommunityTopicMetrics2Kafka")
 public class SinkCommunityTopicMetrics2Kafka implements ApplicationListener<TopicMetricsCollectedEvent> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SinkCommunityTopicMetrics2Kafka.class);
 
     @Autowired
     private ConfigService configService;

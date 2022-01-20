@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.schedule;
 
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
@@ -22,7 +21,7 @@ import java.util.*;
  */
 @Component
 public class FlushTopicMetrics {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushTopicMetrics.class);
 
     @Autowired
     private JmxService jmxService;

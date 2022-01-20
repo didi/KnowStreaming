@@ -2,7 +2,6 @@ package com.xiaojukeji.kafka.manager.task.dispatch.metrics.store;
 
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.TopicRequestMetricsDao;
@@ -27,7 +26,7 @@ import java.util.*;
 @CustomScheduled(name = "storeDiDiTopicRequestTimeMetrics", cron = "51 0/1 * * * ?", threadNum = 5)
 @ConditionalOnProperty(prefix = "custom.store-metrics-task.didi", name = "topic-request-time-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreDiDiTopicRequestTimeMetrics extends AbstractScheduledTask<ClusterDO> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StoreDiDiTopicRequestTimeMetrics.class);
 
     @Autowired
     private JmxService jmxService;

@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.metrics.collect;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.ConsumerMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
@@ -33,7 +32,7 @@ import java.util.concurrent.FutureTask;
  */
 @CustomScheduled(name = "newCollectAndPublishCGData", cron = "30 0/1 * * * *", threadNum = 10)
 public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CollectAndPublishCGData.class);
 
     @Autowired
     private TopicService topicService;
