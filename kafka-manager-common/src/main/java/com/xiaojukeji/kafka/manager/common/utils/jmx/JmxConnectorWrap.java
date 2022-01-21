@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * JMXConnector包装类
@@ -41,6 +42,8 @@ public class JmxConnectorWrap {
 
     private JmxConfig jmxConfig;
 
+    private final ReentrantLock modifyJMXConnectorLock = new ReentrantLock();
+
     public JmxConnectorWrap(Long physicalClusterId, Integer brokerId, String host, int port, JmxConfig jmxConfig) {
         this.physicalClusterId = physicalClusterId;
         this.brokerId = brokerId;
@@ -51,7 +54,12 @@ public class JmxConnectorWrap {
             this.jmxConfig = new JmxConfig();
         }
         if (ValidateUtils.isNullOrLessThanZero(this.jmxConfig.getMaxConn())) {
-            this.jmxConfig.setMaxConn(1);
+            // 默认设置20
+            this.jmxConfig.setMaxConn(20);
+        }
+        if (ValidateUtils.isNullOrLessThanZero(this.jmxConfig.getRetryConnectBackoffTimeUnitMs())) {
+            // 默认回退10分钟
+            this.jmxConfig.setRetryConnectBackoffTimeUnitMs(10 * 60 * 1000L);
         }
         this.atomicInteger = new AtomicInteger(this.jmxConfig.getMaxConn());
     }
@@ -63,17 +71,40 @@ public class JmxConnectorWrap {
         if (port == -1) {
             return false;
         }
-        return createJmxConnector();
+        return safeCreateJmxConnector();
     }
 
-    public synchronized void close() {
+    public void close() {
+        this.closeJmxConnect();
+    }
+
+    public void closeJmxConnect() {
         if (jmxConnector == null) {
             return;
         }
+
         try {
+            modifyJMXConnectorLock.lock();
+
+            // 移除设置的backoff事件
+            BackoffUtils.removeNeedBackoffEvent(buildConnectJmxFailedBackoffEventKey(physicalClusterId, brokerId));
+
             jmxConnector.close();
-        } catch (IOException e) {
-            LOGGER.warn("close JmxConnector exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
+        } catch (Exception e) {
+            LOGGER.error("close JmxConnector exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
+        } finally {
+            jmxConnector = null;
+
+            modifyJMXConnectorLock.unlock();
+        }
+    }
+
+    private boolean safeCreateJmxConnector() {
+        try {
+            modifyJMXConnectorLock.lock();
+            return createJmxConnector();
+        } finally {
+            modifyJMXConnectorLock.unlock();
         }
     }
 
@@ -81,6 +112,12 @@ public class JmxConnectorWrap {
         if (jmxConnector != null) {
             return true;
         }
+
+        if (BackoffUtils.isNeedBackoff(buildConnectJmxFailedBackoffEventKey(physicalClusterId, brokerId))) {
+            // 被设置了需要进行回退，则本次不进行创建
+            return false;
+        }
+
         String jmxUrl = String.format("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", host, port);
         try {
             Map<String, Object> environment = new HashMap<String, Object>();
@@ -88,7 +125,9 @@ public class JmxConnectorWrap {
                 // fixed by riyuetianmu
                 environment.put(JMXConnector.CREDENTIALS, new String[]{this.jmxConfig.getUsername(), this.jmxConfig.getPassword()});
             }
-            if (jmxConfig.isOpenSSL() != null && this.jmxConfig.isOpenSSL()) {
+
+            if (jmxConfig.getOpenSSL() != null && this.jmxConfig.getOpenSSL()) {
+                // 开启ssl
                 environment.put(Context.SECURITY_PROTOCOL, "ssl");
                 SslRMIClientSocketFactory clientSocketFactory = new SslRMIClientSocketFactory();
                 environment.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, clientSocketFactory);
@@ -96,13 +135,17 @@ public class JmxConnectorWrap {
             }
 
             jmxConnector = JMXConnectorFactory.connect(new JMXServiceURL(jmxUrl), environment);
-            LOGGER.info("JMX connect success, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port);
+            LOGGER.info("connect JMX success, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port);
             return true;
         } catch (MalformedURLException e) {
-            LOGGER.error("JMX url exception, physicalClusterId:{} brokerId:{} host:{} port:{} jmxUrl:{}", physicalClusterId, brokerId, host, port, jmxUrl, e);
+            LOGGER.error("connect JMX failed, JMX url exception, physicalClusterId:{} brokerId:{} host:{} port:{} jmxUrl:{}.", physicalClusterId, brokerId, host, port, jmxUrl, e);
         } catch (Exception e) {
-            LOGGER.error("JMX connect exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
+            LOGGER.error("connect JMX failed, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
         }
+
+        // 设置连接backoff
+        BackoffUtils.putNeedBackoffEvent(buildConnectJmxFailedBackoffEventKey(physicalClusterId, brokerId), this.jmxConfig.getRetryConnectBackoffTimeUnitMs());
+
         return false;
     }
 
@@ -116,6 +159,11 @@ public class JmxConnectorWrap {
             acquire();
             MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
             return mBeanServerConnection.getAttribute(name, attribute);
+        } catch (IOException ioe) {
+            // io错误，则重置连接
+            this.closeJmxConnect();
+
+            throw ioe;
         } finally {
             atomicInteger.incrementAndGet();
         }
@@ -131,6 +179,11 @@ public class JmxConnectorWrap {
             acquire();
             MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
             return mBeanServerConnection.getAttributes(name, attributes);
+        } catch (IOException ioe) {
+            // io错误，则重置连接
+            this.closeJmxConnect();
+
+            throw ioe;
         } finally {
             atomicInteger.incrementAndGet();
         }
@@ -143,6 +196,11 @@ public class JmxConnectorWrap {
             acquire();
             MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
             return mBeanServerConnection.queryNames(name, query);
+        } catch (IOException ioe) {
+            // io错误，则重置连接
+            this.closeJmxConnect();
+
+            throw ioe;
         } finally {
             atomicInteger.incrementAndGet();
         }
@@ -164,5 +222,9 @@ public class JmxConnectorWrap {
                 // ignore
             }
         }
+    }
+
+    private static String buildConnectJmxFailedBackoffEventKey(Long physicalClusterId, Integer brokerId) {
+        return "CONNECT_JMX_FAILED_BACK_OFF_EVENT_PHY_" + physicalClusterId + "_BROKER_" + brokerId;
     }
 }

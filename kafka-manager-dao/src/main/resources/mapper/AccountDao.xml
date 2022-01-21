@@ -8,6 +8,9 @@
         <result property="username"     column="username" />
         <result property="password"     column="password" />
         <result property="role"         column="role" />
+        <result property="displayName"  column="display_name" />
+        <result property="department"   column="department" />
+        <result property="mail"         column="mail" />
         <result property="gmtCreate"    column="gmt_create" />
         <result property="gmtModify"    column="gmt_modify" />
     </resultMap>
@@ -15,9 +18,9 @@
     <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.AccountDO">
         <![CDATA[
         REPLACE account
-        (username, password, role)
+        (username, password, role, display_name, department, mail)
         VALUES
-        (#{username}, #{password}, #{role})
+        (#{username}, #{password}, #{role}, #{displayName}, #{department}, #{mail})
     ]]>
     </insert>
 

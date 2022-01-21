@@ -1,7 +1,6 @@
-package com.xiaojukeji.kafka.manager.task.listener;
+package com.xiaojukeji.kafka.manager.task.listener.sink.monitor;
 
 import com.xiaojukeji.kafka.manager.monitor.common.entry.bizenum.MonitorMetricNameEnum;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.monitor.common.MonitorSinkConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.ConsumerMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
@@ -32,7 +31,7 @@ import java.util.*;
 @Component("sinkConsumerMetrics2Monitor")
 @ConditionalOnProperty(prefix = "monitor", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SinkConsumerMetrics2Monitor implements ApplicationListener<ConsumerMetricsCollectedEvent> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SinkConsumerMetrics2Monitor.class);
 
     @Autowired
     private LogicalClusterMetadataManager logicalClusterMetadataManager;

@@ -1,7 +1,6 @@
-package com.xiaojukeji.kafka.manager.task.listener;
+package com.xiaojukeji.kafka.manager.task.listener.sink.monitor;
 
 import com.xiaojukeji.kafka.manager.monitor.common.entry.bizenum.MonitorMetricNameEnum;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.monitor.common.MonitorSinkConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.monitor.common.entry.sink.MonitorTopicSinkTag;
@@ -33,7 +32,7 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "monitor", name = "enabled", havingValue = "true", matchIfMissing = true)
 @CustomScheduled(name = "sinkCommunityTopicMetrics2Monitor", cron = "1 0/1 * * * ?", threadNum = 5)
 public class SinkCommunityTopicMetrics2Monitor extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SinkCommunityTopicMetrics2Monitor.class);
 
     @Autowired
     private AbstractMonitorService abstractMonitor;

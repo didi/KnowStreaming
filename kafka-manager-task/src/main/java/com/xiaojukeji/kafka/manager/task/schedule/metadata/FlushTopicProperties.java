@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.task.schedule.metadata;
 
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
@@ -22,7 +21,7 @@ import java.util.Properties;
  */
 @Component
 public class FlushTopicProperties {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushTopicProperties.class);
 
     @Autowired
     private ClusterService clusterService;

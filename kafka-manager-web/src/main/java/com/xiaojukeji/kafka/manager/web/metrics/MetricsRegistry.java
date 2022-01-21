@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.web.metrics;
 
 import com.codahale.metrics.*;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.utils.factory.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class MetricsRegistry {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.API_METRICS_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricsRegistry.class);
 
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#");
 

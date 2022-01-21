@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.task.schedule.metadata;
 
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ConsumerMetadata;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
@@ -25,7 +24,7 @@ import java.util.*;
  */
 @Component
 public class FlushBKConsumerGroupMetadata {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushBKConsumerGroupMetadata.class);
 
     @Autowired
     private ClusterService clusterService;

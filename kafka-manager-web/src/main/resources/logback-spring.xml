@@ -131,15 +131,15 @@
         </filter>
     </appender>
 
-    <!-- Metrics信息收集日志 -->
-    <appender name="COLLECTOR_METRICS_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.path}/metrics/collector_metrics.log</file>
+    <!-- Task模块相关日志 -->
+    <appender name="TASK_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/log_task.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/metrics/collector_metrics_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${log.path}/log_task_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -147,15 +147,15 @@
         </rollingPolicy>
     </appender>
 
-    <!-- Metrics信息收集日志 -->
+    <!-- Api-Metrics信息相关日志 -->
     <appender name="API_METRICS_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.path}/metrics/api_metrics.log</file>
+        <file>${log.path}/api_metrics.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/metrics/api_metrics_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${log.path}/api_metrics_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -163,30 +163,12 @@
         </rollingPolicy>
     </appender>
 
-    <!-- Metrics信息收集日志 -->
-    <appender name="SCHEDULED_TASK_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.path}/metrics/scheduled_tasks.log</file>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/metrics/scheduled_tasks_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-            <maxHistory>5</maxHistory>
-        </rollingPolicy>
-    </appender>
+    <logger name="com.xiaojukeji.kafka.manager.task" level="INFO" additivity="false">
+        <appender-ref ref="TASK_LOGGER"/>
+    </logger>
 
-    <logger name="COLLECTOR_METRICS_LOGGER" level="DEBUG" additivity="false">
-        <appender-ref ref="COLLECTOR_METRICS_LOGGER"/>
-    </logger>
-    <logger name="API_METRICS_LOGGER" level="DEBUG" additivity="false">
+    <logger name="com.xiaojukeji.kafka.manager.web.metrics" level="INFO" additivity="false">
         <appender-ref ref="API_METRICS_LOGGER"/>
-    </logger>
-    <logger name="SCHEDULED_TASK_LOGGER" level="DEBUG" additivity="false">
-        <appender-ref ref="SCHEDULED_TASK_LOGGER"/>
     </logger>
 
     <logger name="org.apache.ibatis" level="INFO" additivity="false" />
@@ -199,17 +181,6 @@
         <appender-ref ref="INFO_FILE" />
         <appender-ref ref="WARN_FILE" />
         <appender-ref ref="ERROR_FILE" />
-        <!--<appender-ref ref="METRICS_LOG" />-->
+<!--        <appender-ref ref="TASK_LOGGER" />-->
     </root>
-
-    <!--生产环境:输出到文件-->
-    <!--<springProfile name="pro">-->
-        <!--<root level="info">-->
-            <!--<appender-ref ref="CONSOLE" />-->
-            <!--<appender-ref ref="DEBUG_FILE" />-->
-            <!--<appender-ref ref="INFO_FILE" />-->
-            <!--<appender-ref ref="ERROR_FILE" />-->
-            <!--<appender-ref ref="WARN_FILE" />-->
-        <!--</root>-->
-    <!--</springProfile>-->
 </configuration>

@@ -1,8 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.biz;
 
-
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.task.config.TopicBillConfig;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
@@ -30,7 +28,7 @@ import java.util.*;
  */
 @CustomScheduled(name = "calKafkaBill", cron = "0 0 1 * * *", threadNum = 1)
 public class CalKafkaTopicBill extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CalKafkaTopicBill.class);
 
     @Autowired
     private AppService appService;

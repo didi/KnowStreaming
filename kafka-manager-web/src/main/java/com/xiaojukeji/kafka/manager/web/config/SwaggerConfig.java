@@ -1,5 +1,7 @@
 package com.xiaojukeji.kafka.manager.web.config;
 
+import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
@@ -20,6 +22,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableWebMvc
 @EnableSwagger2
 public class SwaggerConfig implements WebMvcConfigurer {
+    @Autowired
+    private ConfigUtils configUtils;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
@@ -41,7 +46,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
         return new ApiInfoBuilder()
                 .title("LogiKM接口文档")
                 .description("欢迎使用滴滴LogiKM")
-                .version("2.5.0")
+                .version(configUtils.getApplicationVersion())
                 .build();
     }
 

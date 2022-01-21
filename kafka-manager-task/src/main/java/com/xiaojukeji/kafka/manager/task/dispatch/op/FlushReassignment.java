@@ -3,7 +3,6 @@ package com.xiaojukeji.kafka.manager.task.dispatch.op;
 import com.xiaojukeji.kafka.manager.common.bizenum.TaskStatusEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TaskStatusReassignEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
@@ -36,7 +35,7 @@ import java.util.*;
 @Component
 @CustomScheduled(name = "flushReassignment", cron = "0 0/1 * * * ?", threadNum = 1)
 public class FlushReassignment extends AbstractScheduledTask<EmptyEntry> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushReassignment.class);
 
     @Autowired
     private ClusterService clusterService;

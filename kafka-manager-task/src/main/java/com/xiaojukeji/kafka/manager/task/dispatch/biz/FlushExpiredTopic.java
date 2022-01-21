@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.biz;
 
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicExpiredDO;
@@ -32,7 +31,7 @@ import java.util.Map;
  */
 @CustomScheduled(name = "flushExpiredTopic", cron = "0 0 0/5 * * ?", threadNum = 1)
 public class FlushExpiredTopic extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushExpiredTopic.class);
 
     @Autowired
     private TopicExpiredDao topicExpiredDao;
