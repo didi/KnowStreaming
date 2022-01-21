@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * 定时上报Topic监控指标
  * @author zengqiao
  * @date 20/8/10
  */

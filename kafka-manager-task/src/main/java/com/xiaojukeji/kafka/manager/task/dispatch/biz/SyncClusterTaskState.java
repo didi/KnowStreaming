@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * 同步更新集群任务状态
  * @author zengqiao
  * @date 20/9/7
  */

@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
+ * 收集并发布消费者指标数据
  * @author zengqiao
  * @date 20/9/14
  */

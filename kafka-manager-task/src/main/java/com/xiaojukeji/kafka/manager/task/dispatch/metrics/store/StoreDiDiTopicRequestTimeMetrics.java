@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import java.util.*;
 
 /**
+ * JMX中获取的TopicRequestTimeMetrics信息存DB
  * @author zengqiao
  * @date 20/7/21
  */

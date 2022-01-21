@@ -30,6 +30,9 @@ public class FlushBKConsumerGroupMetadata {
     @Autowired
     private ClusterService clusterService;
 
+    /**
+     * 定时刷新broker上消费组信息到缓存中
+     */
     @Scheduled(cron="15 0/1 * * * ?")
     public void schedule() {
         List<ClusterDO> doList = clusterService.list();

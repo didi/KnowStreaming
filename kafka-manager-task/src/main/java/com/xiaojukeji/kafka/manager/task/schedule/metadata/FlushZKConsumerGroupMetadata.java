@@ -35,6 +35,9 @@ public class FlushZKConsumerGroupMetadata {
     @Autowired
     private ThreadPool threadPool;
 
+    /**
+     * 定时刷新zk上的消费组信息到缓存中
+     */
     @Scheduled(cron="35 0/1 * * * ?")
     public void schedule() {
         List<ClusterDO> doList = clusterService.list();

@@ -23,6 +23,9 @@ public class Heartbeat {
     @Autowired
     private HeartbeatDao heartbeatDao;
 
+    /**
+     * 定时获取管控平台所在机器IP等信息到DB
+     */
     @Scheduled(cron = ScheduledTaskConstant.HEARTBEAT_CRON)
     public void ipFlush() {
         try {

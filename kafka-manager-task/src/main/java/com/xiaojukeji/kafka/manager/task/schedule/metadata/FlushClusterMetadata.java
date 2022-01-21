@@ -25,6 +25,9 @@ public class FlushClusterMetadata {
     @Autowired
     private PhysicalClusterMetadataManager physicalClusterMetadataManager;
 
+    /**
+     * 定时刷新物理集群元信息到缓存中
+     */
     @Scheduled(cron="0/30 * * * * ?")
     public void flush() {
         Map<Long, ClusterDO> dbClusterMap = clusterService.list().stream().collect(Collectors.toMap(ClusterDO::getId, Function.identity(), (key1, key2) -> key2));

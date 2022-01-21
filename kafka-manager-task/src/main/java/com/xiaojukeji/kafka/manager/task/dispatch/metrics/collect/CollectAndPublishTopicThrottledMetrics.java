@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 
 /**
+ * 收集和发布Topic限流信息
  * @author zengqiao
  * @date 2019-05-10
  */
