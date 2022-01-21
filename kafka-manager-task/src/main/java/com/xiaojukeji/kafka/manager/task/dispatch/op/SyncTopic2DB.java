@@ -2,7 +2,6 @@ package com.xiaojukeji.kafka.manager.task.dispatch.op;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
@@ -36,10 +35,10 @@ import java.util.stream.Collectors;
  * @date 19/12/29
  */
 @Component
-@CustomScheduled(name = "syncTopic2DB", cron = "0 0/2 * * * ?", threadNum = 1)
+@CustomScheduled(name = "syncTopic2DB", cron = "0 0/2 * * * ?", threadNum = 1, description = "定期将未落盘的Topic刷新到DB中")
 @ConditionalOnProperty(prefix = "task.op", name = "sync-topic-enabled", havingValue = "true", matchIfMissing = false)
 public class SyncTopic2DB extends AbstractScheduledTask<EmptyEntry> {
-    private static final  Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyncTopic2DB.class);
 
     private static final String SYNC_TOPIC_2_DB_CONFIG_KEY = "SYNC_TOPIC_2_DB_CONFIG_KEY";
 

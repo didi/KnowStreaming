@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.metrics.delete;
 
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.utils.BackoffUtils;
 import com.xiaojukeji.kafka.manager.dao.*;
 import com.xiaojukeji.kafka.manager.task.component.AbstractScheduledTask;
@@ -20,9 +19,9 @@ import java.util.List;
  * @author zengqiao
  * @date 20/1/8
  */
-@CustomScheduled(name = "deleteMetrics", cron = "0 0/2 * * * ?", threadNum = 1)
+@CustomScheduled(name = "deleteMetrics", cron = "0 0/2 * * * ?", threadNum = 1, description = "定期删除Metrics信息")
 public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteMetrics.class);
 
     @Autowired
     private TopicMetricsDao             topicMetricsDao;

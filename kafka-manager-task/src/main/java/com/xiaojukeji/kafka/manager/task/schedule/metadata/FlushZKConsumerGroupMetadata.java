@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.task.schedule.metadata;
 
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ConsumerMetadata;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class FlushZKConsumerGroupMetadata {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushZKConsumerGroupMetadata.class);
 
     @Autowired
     private ClusterService clusterService;
@@ -35,6 +34,9 @@ public class FlushZKConsumerGroupMetadata {
     @Autowired
     private ThreadPool threadPool;
 
+    /**
+     * 定时刷新zk上的消费组信息到缓存中
+     */
     @Scheduled(cron="35 0/1 * * * ?")
     public void schedule() {
         List<ClusterDO> doList = clusterService.list();

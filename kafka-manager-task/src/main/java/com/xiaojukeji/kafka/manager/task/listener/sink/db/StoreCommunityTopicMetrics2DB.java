@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.listener.sink.db;
 
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO;
 import com.xiaojukeji.kafka.manager.common.events.TopicMetricsCollectedEvent;
@@ -25,7 +24,7 @@ import java.util.List;
 @Component("storeCommunityTopicMetrics2DB")
 @ConditionalOnProperty(prefix = "custom.store-metrics-task.community", name = "topic-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreCommunityTopicMetrics2DB implements ApplicationListener<TopicMetricsCollectedEvent> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StoreCommunityTopicMetrics2DB.class);
 
     @Autowired
     private TopicMetricsDao topicMetricsDao;

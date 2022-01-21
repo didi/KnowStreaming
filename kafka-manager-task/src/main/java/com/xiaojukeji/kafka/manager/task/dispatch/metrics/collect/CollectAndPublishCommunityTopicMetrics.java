@@ -20,7 +20,7 @@ import java.util.*;
  * @author zengqiao
  * @date 20/7/21
  */
-@CustomScheduled(name = "collectAndPublishCommunityTopicMetrics", cron = "31 0/1 * * * ?", threadNum = 5)
+@CustomScheduled(name = "collectAndPublishCommunityTopicMetrics", cron = "31 0/1 * * * ?", threadNum = 5, description = "Topic社区指标收集")
 public class CollectAndPublishCommunityTopicMetrics extends AbstractScheduledTask<ClusterDO> {
     @Autowired
     private JmxService jmxService;
