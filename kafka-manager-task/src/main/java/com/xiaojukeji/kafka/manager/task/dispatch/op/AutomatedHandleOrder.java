@@ -30,7 +30,7 @@ import java.util.*;
  * @date 2020/6/12
  */
 @Component
-@CustomScheduled(name = "automatedHandleOrder", cron = "0 0/1 * * * ?", threadNum = 1)
+@CustomScheduled(name = "automatedHandleOrder", cron = "0 0/1 * * * ?", threadNum = 1, description = "工单自动化审批")
 @ConditionalOnProperty(prefix = "task.op.order-auto-exec", name = "app-enabled", havingValue = "true", matchIfMissing = false)
 public class AutomatedHandleOrder extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutomatedHandleOrder.class);

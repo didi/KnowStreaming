@@ -30,11 +30,12 @@ import java.util.List;
 import java.util.Properties;
 
 /**
+ * 定时自动处理Topic相关工单
  * @author zengqiao
  * @date 20/7/28
  */
 @Component
-@CustomScheduled(name = "autoHandleTopicOrder", cron = "0 0/1 * * * ?", threadNum = 1)
+@CustomScheduled(name = "autoHandleTopicOrder", cron = "0 0/1 * * * ?", threadNum = 1, description = "定时自动处理Topic相关工单")
 @ConditionalOnProperty(prefix = "task.op.order-auto-exec", name = "topic-enabled", havingValue = "true", matchIfMissing = false)
 public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoHandleTopicOrder.class);

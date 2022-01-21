@@ -19,7 +19,7 @@ import java.util.List;
  * @author zengqiao
  * @date 20/1/8
  */
-@CustomScheduled(name = "deleteMetrics", cron = "0 0/2 * * * ?", threadNum = 1)
+@CustomScheduled(name = "deleteMetrics", cron = "0 0/2 * * * ?", threadNum = 1, description = "定期删除Metrics信息")
 public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteMetrics.class);
 

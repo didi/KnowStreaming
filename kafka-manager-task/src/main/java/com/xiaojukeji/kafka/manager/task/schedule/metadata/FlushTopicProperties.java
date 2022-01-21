@@ -26,6 +26,9 @@ public class FlushTopicProperties {
     @Autowired
     private ClusterService clusterService;
 
+    /**
+     * 定时刷新物理集群配置到缓存中
+     */
     @Scheduled(cron="25 0/1 * * * ?")
     public void flush() {
         List<ClusterDO> doList = clusterService.list();

@@ -156,6 +156,9 @@ public class LogicalClusterMetadataManager {
         return logicalClusterDO.getClusterId();
     }
 
+    /**
+     * 定时刷新逻辑集群元数据到缓存中
+     */
     @Scheduled(cron="0/30 * * * * ?")
     public void flush() {
         List<LogicalClusterDO> logicalClusterDOList = logicalClusterService.listAll();

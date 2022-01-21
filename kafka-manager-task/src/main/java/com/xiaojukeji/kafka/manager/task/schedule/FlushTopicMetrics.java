@@ -29,6 +29,9 @@ public class FlushTopicMetrics {
     @Autowired
     private ClusterService clusterService;
 
+    /**
+     * 定时刷新topic指标到缓存中
+     */
     @Scheduled(cron="5 0/1 * * * ?")
     public void flushTopicMetrics() {
         long startTime = System.currentTimeMillis();

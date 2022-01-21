@@ -33,7 +33,7 @@ import java.util.*;
  * @date 19/12/29
  */
 @Component
-@CustomScheduled(name = "flushReassignment", cron = "0 0/1 * * * ?", threadNum = 1)
+@CustomScheduled(name = "flushReassignment", cron = "0 0/1 * * * ?", threadNum = 1, description = "定时处理分区迁移任务")
 public class FlushReassignment extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlushReassignment.class);
 

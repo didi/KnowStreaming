@@ -275,6 +275,9 @@ public class AccountServiceImpl implements AccountService {
         return enterpriseStaffService.searchEnterpriseStaffByKeyWord(prefix);
     }
 
+    /**
+     * 定时刷新account信息到缓存中
+     */
     @Scheduled(cron ="0/5 * * * * ?")
     public void flush() {
         try {

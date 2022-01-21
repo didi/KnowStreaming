@@ -22,11 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 
 /**
- * 计算账单
  * @author zengqiao
  * @date 20/5/11
  */
-@CustomScheduled(name = "calKafkaBill", cron = "0 0 1 * * *", threadNum = 1)
+@CustomScheduled(name = "calKafkaBill", cron = "0 0 1 * * ?", threadNum = 1, description = "计算账单")
 public class CalKafkaTopicBill extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CalKafkaTopicBill.class);
 
