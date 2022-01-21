@@ -117,10 +117,10 @@ test:
   app:
     id: dkm_admin
   ZK:
-    address: 10.190.12.242:2181,10.190.25.160:2181,10.190.25.41:2181/wyc
-    bootstrap-servers: 10.190.12.242:9093,10.190.25.160:9093,10.190.25.41:9093
-  gateway: 172.23.161.128
-  sasl-plaintext: SASL_PLAINTEXT://10.179.162.202:9093
+    address: 127.0.0.1:2181/wyc
+    bootstrap-servers: 127.0.0.1:9093
+  gateway: 127.0.0.1
+  sasl-plaintext: SASL_PLAINTEXT://127.0.0.1:9093
   admin: admin
   consumer-group: moduleTestGroup
   client-id: dkm_admin.moduleTest
