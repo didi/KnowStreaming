@@ -31,7 +31,7 @@ import java.util.concurrent.FutureTask;
  * @author zengqiao
  * @date 20/9/14
  */
-@CustomScheduled(name = "newCollectAndPublishCGData", cron = "30 0/1 * * * *", threadNum = 10, description = "收集并发布消费者指标数据")
+@CustomScheduled(name = "newCollectAndPublishCGData", cron = "30 0/1 * * * ?", threadNum = 10, description = "收集并发布消费者指标数据")
 public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectAndPublishCGData.class);
 
