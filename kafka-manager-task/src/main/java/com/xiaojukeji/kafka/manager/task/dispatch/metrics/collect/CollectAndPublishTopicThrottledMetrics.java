@@ -20,7 +20,7 @@ import java.util.*;
  * @author zengqiao
  * @date 2019-05-10
  */
-@CustomScheduled(name = "collectAndPublishTopicThrottledMetrics", cron = "11 0/1 * * * ?", threadNum = 5)
+@CustomScheduled(name = "collectAndPublishTopicThrottledMetrics", cron = "11 0/1 * * * ?", threadNum = 5, description = "收集和发布Topic限流信息")
 public class CollectAndPublishTopicThrottledMetrics extends AbstractScheduledTask<ClusterDO> {
     @Autowired
     private ClusterService clusterService;

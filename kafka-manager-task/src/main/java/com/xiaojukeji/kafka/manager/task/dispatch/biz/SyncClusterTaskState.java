@@ -20,7 +20,7 @@ import java.util.List;
  * @author zengqiao
  * @date 20/9/7
  */
-@CustomScheduled(name = "syncClusterTaskState", cron = "0 0/1 * * * ?", threadNum = 1)
+@CustomScheduled(name = "syncClusterTaskState", cron = "0 0/1 * * * ?", threadNum = 1, description = "同步更新集群任务状态")
 @ConditionalOnProperty(prefix = "kcm", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SyncClusterTaskState extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncClusterTaskState.class);

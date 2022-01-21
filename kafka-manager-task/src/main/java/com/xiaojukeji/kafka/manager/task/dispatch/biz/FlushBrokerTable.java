@@ -24,7 +24,7 @@ import java.util.*;
  * @author zengqiao
  * @date 20/6/2
  */
-@CustomScheduled(name = "flushBrokerTable", cron = "0 0 0/1 * * ?", threadNum = 1)
+@CustomScheduled(name = "flushBrokerTable", cron = "0 0 0/1 * * ?", threadNum = 1, description = "定时刷新BrokerTable数据")
 public class FlushBrokerTable extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlushBrokerTable.class);
 

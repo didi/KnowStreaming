@@ -24,7 +24,7 @@ import java.util.*;
  * @author zengqiao
  * @date 20/7/21
  */
-@CustomScheduled(name = "storeDiDiAppTopicMetrics", cron = "41 0/1 * * * ?", threadNum = 5)
+@CustomScheduled(name = "storeDiDiAppTopicMetrics", cron = "41 0/1 * * * ?", threadNum = 5, description = "JMX中获取appId维度的流量信息存DB")
 @ConditionalOnProperty(prefix = "custom.store-metrics-task.didi", name = "app-topic-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreDiDiAppTopicMetrics extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StoreDiDiAppTopicMetrics.class);

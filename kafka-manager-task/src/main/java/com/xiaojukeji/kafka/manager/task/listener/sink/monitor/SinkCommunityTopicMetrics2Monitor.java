@@ -30,7 +30,7 @@ import java.util.List;
  * @date 20/8/10
  */
 @ConditionalOnProperty(prefix = "monitor", name = "enabled", havingValue = "true", matchIfMissing = true)
-@CustomScheduled(name = "sinkCommunityTopicMetrics2Monitor", cron = "1 0/1 * * * ?", threadNum = 5)
+@CustomScheduled(name = "sinkCommunityTopicMetrics2Monitor", cron = "1 0/1 * * * ?", threadNum = 5, description = "定时上报Topic监控指标")
 public class SinkCommunityTopicMetrics2Monitor extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SinkCommunityTopicMetrics2Monitor.class);
 

@@ -29,7 +29,7 @@ import java.util.Map;
  * @author zengqiao
  * @date 20/4/1
  */
-@CustomScheduled(name = "flushExpiredTopic", cron = "0 0 0/5 * * ?", threadNum = 1)
+@CustomScheduled(name = "flushExpiredTopic", cron = "0 0 0/5 * * ?", threadNum = 1, description = "定期更新过期Topic")
 public class FlushExpiredTopic extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlushExpiredTopic.class);
 

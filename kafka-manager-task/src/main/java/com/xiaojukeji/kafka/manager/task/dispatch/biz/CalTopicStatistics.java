@@ -27,7 +27,7 @@ import java.util.Map;
  * @author zengqiao
  * @date 20/3/29
  */
-@CustomScheduled(name = "calTopicStatistics", cron = "0 0 0/4 * * ?", threadNum = 5)
+@CustomScheduled(name = "calTopicStatistics", cron = "0 0 0/4 * * ?", threadNum = 5, description = "定时计算Topic统计数据")
 public class CalTopicStatistics extends AbstractScheduledTask<ClusterDO> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CalTopicStatistics.class);
 

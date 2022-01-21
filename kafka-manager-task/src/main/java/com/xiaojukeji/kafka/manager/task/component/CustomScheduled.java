@@ -18,4 +18,6 @@ public @interface CustomScheduled {
     String cron();
 
     int threadNum() default 1;
+
+    String description() default "";
 }

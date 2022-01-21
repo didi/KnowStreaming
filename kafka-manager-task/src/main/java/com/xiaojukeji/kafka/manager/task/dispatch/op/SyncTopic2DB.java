@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @date 19/12/29
  */
 @Component
-@CustomScheduled(name = "syncTopic2DB", cron = "0 0/2 * * * ?", threadNum = 1)
+@CustomScheduled(name = "syncTopic2DB", cron = "0 0/2 * * * ?", threadNum = 1, description = "定期将未落盘的Topic刷新到DB中")
 @ConditionalOnProperty(prefix = "task.op", name = "sync-topic-enabled", havingValue = "true", matchIfMissing = false)
 public class SyncTopic2DB extends AbstractScheduledTask<EmptyEntry> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncTopic2DB.class);
