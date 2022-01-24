@@ -15,7 +15,7 @@ server:
 spring:
   application:
     name: kafkamanager
-    version: @project.version@
+    version: 2.6.0
   profiles:
     active: dev
   datasource:
