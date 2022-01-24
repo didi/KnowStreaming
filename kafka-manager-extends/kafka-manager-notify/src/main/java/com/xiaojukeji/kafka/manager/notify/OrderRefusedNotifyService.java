@@ -19,7 +19,7 @@ public class OrderRefusedNotifyService implements ApplicationListener<OrderRefus
     @Autowired
     private AbstractNotifyService notifyService;
 
-    @Value("${notify.order.detail-url}")
+    @Value("${notify.order.detail-url:}")
     private String orderDetailUrl;
 
     @Async

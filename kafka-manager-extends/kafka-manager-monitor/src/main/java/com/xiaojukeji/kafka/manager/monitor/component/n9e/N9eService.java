@@ -27,19 +27,19 @@ import java.util.concurrent.TimeUnit;
 public class N9eService extends AbstractMonitorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(N9eService.class);
 
-    @Value("${monitor.n9e.nid}")
+    @Value("${monitor.n9e.nid:}")
     private Integer monitorN9eNid;
 
-    @Value("${monitor.n9e.user-token}")
+    @Value("${monitor.n9e.user-token:}")
     private String monitorN9eUserToken;
 
-    @Value("${monitor.n9e.mon.base-url}")
+    @Value("${monitor.n9e.mon.base-url:}")
     private String monitorN9eMonBaseUrl;
 
-    @Value("${monitor.n9e.sink.base-url}")
+    @Value("${monitor.n9e.sink.base-url:}")
     private String monitorN9eSinkBaseUrl;
 
-    @Value("${monitor.n9e.rdb.base-url}")
+    @Value("${monitor.n9e.rdb.base-url:}")
     private String monitorN9eRdbBaseUrl;
 
     private static final Cache<String, NotifyGroup> NOTIFY_GROUP_CACHE = Caffeine.newBuilder()
