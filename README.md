@@ -69,7 +69,7 @@
 - [kafka最强最全知识图谱](https://www.szzdzhp.com/kafka/)
 - [滴滴LogiKM新用户入门系列文章专栏 --石臻臻](https://www.szzdzhp.com/categories/LogIKM/)
 - [kafka实践（十五）：滴滴开源Kafka管控平台 LogiKM研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
-
+- [基于云原生应用管理平台Rainbond安装 滴滴LogiKM](https://www.rainbond.com/docs/opensource-app/logikm/?channel=logikm)
 
 ## 3 滴滴Logi开源用户交流群
 
