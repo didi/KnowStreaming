@@ -1,0 +1,28 @@
+
+## kafka-manager的配置文件，该文件中的配置会覆盖默认配置
+## 下面的配置信息基本就是jar中的 application.yml默认配置了;
+## 可以只修改自己变更的配置,其他的删除就行了; 比如只配置一下mysql
+
+
+server:
+  port: 8080
+  tomcat:
+    accept-count: 1000
+    max-connections: 10000
+    max-threads: 800
+    min-spare-threads: 100
+
+spring:
+  application:
+    name: kafkamanager
+    version: 2.6.0
+  profiles:
+    active: dev
+  datasource:
+    kafka-manager:
+      jdbc-url: jdbc:mysql://${LOGI_MYSQL_HOST:mysql}:${LOGI_MYSQL_PORT:3306}/${LOGI_MYSQL_DATABASE:logi_kafka_manager}?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+      username: ${LOGI_MYSQL_USER:root}
+      password: ${LOGI_MYSQL_PASSWORD:root}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
