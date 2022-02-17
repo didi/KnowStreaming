@@ -102,5 +102,6 @@ UPDATE cluster SET jmx_properties='{ "maxConn": 10,	"username": "xxxxx", "passwo
 ```
 ### 4、解决方法 —— 不允许其他机器访问
 ![1971b46243fe1d547063ee55b1505ed](https://user-images.githubusercontent.com/2869938/154413486-f6531946-8c4c-447e-aa2e-b112e5e623d6.png)
+
 该图中的127.0.0.1表明该端口只允许本机访问.
 在cdh中可以点击配置->搜索jmx->寻找broker_java_opts 修改com.sun.management.jmxremote.host和java.rmi.server.hostname为本机ip
