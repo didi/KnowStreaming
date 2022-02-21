@@ -118,10 +118,7 @@ public class LogicalClusterDTO {
     }
 
     public boolean legal() {
-        if (ValidateUtils.isNull(clusterId)
-                || ValidateUtils.isNull(clusterId)
-                || ValidateUtils.isEmptyList(regionIdList)
-                || ValidateUtils.isNull(mode)) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isEmptyList(regionIdList) || ValidateUtils.isNull(mode)) {
             return false;
         }
         if (!ClusterModeEnum.SHARED_MODE.getCode().equals(mode) && ValidateUtils.isNull(appId)) {

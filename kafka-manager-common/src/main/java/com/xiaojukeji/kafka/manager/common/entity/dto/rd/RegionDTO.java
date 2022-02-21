@@ -94,10 +94,7 @@ public class RegionDTO {
     }
 
     public boolean legal() {
-        if (ValidateUtils.isNull(clusterId)
-                || ValidateUtils.isNull(clusterId)
-                || ValidateUtils.isEmptyList(brokerIdList)
-                || ValidateUtils.isNull(status)) {
+        if (ValidateUtils.isNull(clusterId) || ValidateUtils.isEmptyList(brokerIdList) || ValidateUtils.isNull(status)) {
             return false;
         }
         description = ValidateUtils.isNull(description)? "": description;
