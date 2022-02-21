@@ -7,13 +7,11 @@ import com.xiaojukeji.kafka.manager.common.entity.dto.op.ControllerPreferredCand
 import com.xiaojukeji.kafka.manager.common.entity.dto.rd.ClusterDTO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.rd.cluster.ClusterDetailVO;
 import com.xiaojukeji.kafka.manager.web.config.BaseTest;
-import com.xiaojukeji.kafka.manager.web.config.Constant;
-import com.xiaojukeji.kafka.manager.web.config.HttpUtils;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import com.xiaojukeji.kafka.manager.web.config.ConfigConstant;
 import org.springframework.http.*;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -27,26 +25,26 @@ import java.util.Map;
  */
 public class OpClusterControllerTest extends BaseTest {
 
-    private final TestRestTemplate testRestTemplate = new TestRestTemplate();
+    @BeforeClass
+    public void init() {
+        super.init();
 
-    @BeforeMethod
-    public void addNewCluster() {
-        String url = Constant.BASE_URL + "/api/v1/op/clusters";
+        String url = baseUrl + "/api/v1/op/clusters";
         // 接入成功
-        addnewCluster1Test(url);
+        addNewCluter1Test(url);
     }
 
-    @AfterMethod
+    @AfterClass
     public void deleteCluster() {
-        String url = Constant.BASE_URL + "/api/v1/op/clusters";
+        String url = baseUrl + "/api/v1/op/clusters";
         // 删除集群成功
         deleteCluster1Test(url);
     }
 
     private Long getPhysicalClusterId() {
-        String url = Constant.BASE_URL + "/api/v1/rd/clusters/basic-info?need-detail=true";
-
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
+        String url = baseUrl + "/api/v1/rd/clusters/basic-info?need-detail=true";
+        String clusterName = configMap.get(ConfigConstant.CLUSTER_NAME);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> httpEntity = new HttpEntity<>("", httpHeaders);
         ResponseEntity<Result> result = testRestTemplate.exchange(url, HttpMethod.GET, httpEntity, Result.class);
         Assert.assertEquals(result.getStatusCodeValue(), HttpStatus.OK.value());
@@ -54,7 +52,7 @@ public class OpClusterControllerTest extends BaseTest {
         String s = JSON.toJSONString(result.getBody().getData());
         List<ClusterDetailVO> clusterDetailVOS = JSON.parseArray(s, ClusterDetailVO.class);
         for (ClusterDetailVO clusterDetailVO : clusterDetailVOS) {
-            if (clusterDetailVO.getClusterName().equals(Constant.CLUSTER_NAME)) {
+            if (clusterDetailVO.getClusterName().equals(clusterName)) {
                 return clusterDetailVO.getClusterId();
             }
         }
@@ -65,28 +63,27 @@ public class OpClusterControllerTest extends BaseTest {
         ClusterDTO clusterDTO = new ClusterDTO();
         Long physicalClusterId = getPhysicalClusterId();
         clusterDTO.setClusterId(physicalClusterId);
-        clusterDTO.setClusterName(Constant.CLUSTER_NAME);
-        clusterDTO.setZookeeper(Constant.ZK_ADDRESS);
-        clusterDTO.setBootstrapServers(Constant.BOOTSTRAP_SERVERS);
-        clusterDTO.setIdc(Constant.IDC);
+        clusterDTO.setClusterName(configMap.get(ConfigConstant.CLUSTER_NAME));
+        clusterDTO.setZookeeper(configMap.get(ConfigConstant.ZOOKEEPER_ADDRESS));
+        clusterDTO.setBootstrapServers(configMap.get(ConfigConstant.BOOTSTRAP_ADDRESS));
+        clusterDTO.setIdc(ConfigConstant.IDC);
         return clusterDTO;
     }
 
     @Test(description = "测试接入集群")
     public void addNewClusterTest() {
-        String url = Constant.BASE_URL + "/api/v1/op/clusters";
+        String url = baseUrl + "/api/v1/op/clusters";
 
         // 参数无效
-        addnewCluster2Test(url);
+        addNewCluster2Test(url);
         // 无效的zk地址
-        addnewCluster3Test(url);
+        addNewCluster3Test(url);
         // 重复创建
-        addnewCluster4Test(url);
+        addNewCluster4Test(url);
     }
 
-    private void addnewCluster1Test(String url) {
+    private void addNewCluter1Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -97,10 +94,9 @@ public class OpClusterControllerTest extends BaseTest {
         Assert.assertEquals(result.getBody().getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    private void addnewCluster2Test(String url) {
+    private void addNewCluster2Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
         clusterDTO.setZookeeper(null);
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -111,10 +107,9 @@ public class OpClusterControllerTest extends BaseTest {
         Assert.assertEquals(result.getBody().getCode(), ResultStatus.PARAM_ILLEGAL.getCode());
     }
 
-    private void addnewCluster3Test(String url) {
+    private void addNewCluster3Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
-        clusterDTO.setZookeeper(Constant.INVALID);
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
+        clusterDTO.setZookeeper(ConfigConstant.INVALID_STRING);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -125,9 +120,8 @@ public class OpClusterControllerTest extends BaseTest {
         Assert.assertEquals(result.getBody().getCode(), ResultStatus.ZOOKEEPER_CONNECT_FAILED.getCode());
     }
 
-    private void addnewCluster4Test(String url) {
+    private void addNewCluster4Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -140,7 +134,7 @@ public class OpClusterControllerTest extends BaseTest {
 
     @Test(description = "测试修改物理集群")
     public void modifyClusterTest() {
-        String url = Constant.BASE_URL + "/api/v1/op/clusters";
+        String url =  baseUrl + "/api/v1/op/clusters";
         // 修改成功
         modifyCluster1Test(url);
         // 参数错误
@@ -153,7 +147,6 @@ public class OpClusterControllerTest extends BaseTest {
 
     private void modifyCluster1Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -167,7 +160,6 @@ public class OpClusterControllerTest extends BaseTest {
     private void modifyCluster2Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
         clusterDTO.setClusterId(null);
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -180,8 +172,7 @@ public class OpClusterControllerTest extends BaseTest {
 
     private void modifyCluster3Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
-        clusterDTO.setClusterId(Constant.INVALID_CLUSTER_ID_IN_MYSQL);
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
+        clusterDTO.setClusterId(ConfigConstant.INVALID_CLUSTER_ID);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -194,8 +185,7 @@ public class OpClusterControllerTest extends BaseTest {
 
     private void modifyCluster4Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
-        clusterDTO.setZookeeper(Constant.INVALID);
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
+        clusterDTO.setZookeeper(ConfigConstant.INVALID_STRING);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ClusterDTO> httpEntity =
                 new HttpEntity<>(clusterDTO, httpHeaders);
@@ -208,7 +198,7 @@ public class OpClusterControllerTest extends BaseTest {
 
     @Test(description = "测试开启｜关闭集群监控")
     public void clusterMonitorTest() {
-        String url = Constant.BASE_URL + "/api/v1/op/clusters/{clusterId}/monitor";
+        String url = baseUrl + "/api/v1/op/clusters/{clusterId}/monitor";
         // 监控关闭成功
         clusterMonitor1Test(url);
         // 监控开启成功
@@ -219,7 +209,6 @@ public class OpClusterControllerTest extends BaseTest {
 
     private void clusterMonitor1Test(String url) {
         url = url + "?status=0";
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         HttpEntity<Long> httpEntity =
                 new HttpEntity<>(null, httpHeaders);
         Map<String, Object> urlVariables = new HashMap<>();
@@ -234,7 +223,6 @@ public class OpClusterControllerTest extends BaseTest {
 
     private void clusterMonitor2Test(String url) {
         url = url + "?status=1";
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         HttpEntity<Long> httpEntity =
                 new HttpEntity<>(null, httpHeaders);
         Map<String, Object> urlVariables = new HashMap<>();
@@ -249,11 +237,10 @@ public class OpClusterControllerTest extends BaseTest {
 
     private void clusterMonitor3Test(String url) {
         url = url + "?status=1";
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         HttpEntity<Long> httpEntity =
                 new HttpEntity<>(null, httpHeaders);
         Map<String, Object> urlVariables = new HashMap<>();
-        urlVariables.put("clusterId", Constant.INVALID_ID);
+        urlVariables.put("clusterId", ConfigConstant.INVALID_CLUSTER_ID);
 
         ResponseEntity<Result> result = testRestTemplate.exchange(
                 url, HttpMethod.PUT, httpEntity, Result.class, urlVariables);
@@ -264,21 +251,22 @@ public class OpClusterControllerTest extends BaseTest {
 
     @Test(description = "测试增加Controller优先候选的Broker")
     public void addControllerPreferredCandidatesTest() {
-        String url = Constant.BASE_URL + "/api/v1/op/cluster-controller/preferred-candidates";
+        String url = baseUrl + "/api/v1/op/cluster-controller/preferred-candidates";
+        Long physicalClusterId = Long.parseLong(configMap.get(ConfigConstant.PHYSICAL_CLUSTER_ID));
         // 增加成功
-        addControllerPreferredCandidates1Test(url);
+        addControllerPreferredCandidates1Test(url, physicalClusterId);
         // broker不存在
-        addControllerPreferredCandidates2Test(url);
+        addControllerPreferredCandidates2Test(url, physicalClusterId);
         // 参数错误
-        addControllerPreferredCandidates3Test(url);
+        addControllerPreferredCandidates3Test(url, physicalClusterId);
     }
 
-    private void addControllerPreferredCandidates1Test(String url) {
+    private void addControllerPreferredCandidates1Test(String url, Long physicalClusterId) {
         ControllerPreferredCandidateDTO dto = new ControllerPreferredCandidateDTO();
-        dto.setClusterId(getPhysicalClusterId());
-        dto.setBrokerIdList(Arrays.asList(Constant.ALIVE_BROKER_ID));
+        dto.setClusterId(physicalClusterId);
+        String aliveBrokerId = configMap.get(ConfigConstant.ALIVE_BROKER_ID);
+        dto.setBrokerIdList(Arrays.asList(Integer.parseInt(aliveBrokerId)));
 
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ControllerPreferredCandidateDTO> httpEntity =
                 new HttpEntity<>(dto, httpHeaders);
@@ -289,12 +277,11 @@ public class OpClusterControllerTest extends BaseTest {
         Assert.assertEquals(result.getBody().getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    private void addControllerPreferredCandidates2Test(String url) {
+    private void addControllerPreferredCandidates2Test(String url, Long physicalClusterId) {
         ControllerPreferredCandidateDTO dto = new ControllerPreferredCandidateDTO();
-        dto.setClusterId(getPhysicalClusterId());
-        dto.setBrokerIdList(Arrays.asList(-1));
+        dto.setClusterId(physicalClusterId);
+        dto.setBrokerIdList(Arrays.asList(ConfigConstant.INVALID_BROKER_ID));
 
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ControllerPreferredCandidateDTO> httpEntity =
                 new HttpEntity<>(dto, httpHeaders);
@@ -305,11 +292,10 @@ public class OpClusterControllerTest extends BaseTest {
         Assert.assertEquals(result.getBody().getCode(), ResultStatus.BROKER_NOT_EXIST.getCode());
     }
 
-    private void addControllerPreferredCandidates3Test(String url) {
+    private void addControllerPreferredCandidates3Test(String url, Long physicalClusterId) {
         ControllerPreferredCandidateDTO dto = new ControllerPreferredCandidateDTO();
-        dto.setClusterId(getPhysicalClusterId());
+        dto.setClusterId(physicalClusterId);
 
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ControllerPreferredCandidateDTO> httpEntity =
                 new HttpEntity<>(dto, httpHeaders);
@@ -323,19 +309,20 @@ public class OpClusterControllerTest extends BaseTest {
 
     @Test(description = "测试删除Controller优先候选的Broker")
     public void deleteControllerPreferredCandidatesTest() {
-        String url = Constant.BASE_URL + "/api/v1/op/cluster-controller/preferred-candidates";
+        String url = baseUrl + "/api/v1/op/cluster-controller/preferred-candidates";
+        Long physicalClusterId = Long.parseLong(configMap.get(ConfigConstant.PHYSICAL_CLUSTER_ID));
         // 删除成功
-        deleteControllerPreferredCandidates1Test(url);
+        deleteControllerPreferredCandidates1Test(url, physicalClusterId);
         // 参数错误
-        deleteControllerPreferredCandidates2Test(url);
+        deleteControllerPreferredCandidates2Test(url, physicalClusterId);
     }
 
-    private void deleteControllerPreferredCandidates1Test(String url) {
+    private void deleteControllerPreferredCandidates1Test(String url, Long physicalClusterId) {
         ControllerPreferredCandidateDTO dto = new ControllerPreferredCandidateDTO();
-        dto.setClusterId(getPhysicalClusterId());
-        dto.setBrokerIdList(Arrays.asList(Constant.ALIVE_BROKER_ID));
+        dto.setClusterId(physicalClusterId);
+        String aliveBrokerId = configMap.get(ConfigConstant.ALIVE_BROKER_ID);
+        dto.setBrokerIdList(Arrays.asList(Integer.parseInt(aliveBrokerId)));
 
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ControllerPreferredCandidateDTO> httpEntity =
                 new HttpEntity<>(dto, httpHeaders);
@@ -346,11 +333,10 @@ public class OpClusterControllerTest extends BaseTest {
         Assert.assertEquals(result.getBody().getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    private void deleteControllerPreferredCandidates2Test(String url) {
+    private void deleteControllerPreferredCandidates2Test(String url, Long physicalClusterId) {
         ControllerPreferredCandidateDTO dto = new ControllerPreferredCandidateDTO();
-        dto.setClusterId(getPhysicalClusterId());
+        dto.setClusterId(physicalClusterId);
 
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ControllerPreferredCandidateDTO> httpEntity =
                 new HttpEntity<>(dto, httpHeaders);
@@ -363,7 +349,7 @@ public class OpClusterControllerTest extends BaseTest {
 
     @Test(description = "测试删除物理集群")
     public void deleteClusterTest() {
-        String url = Constant.BASE_URL + "/api/v1/op/clusters";
+        String url = baseUrl + "/api/v1/op/clusters";
         // 集群不存在
         deleteCluster2Test(url);
     }
@@ -371,7 +357,6 @@ public class OpClusterControllerTest extends BaseTest {
     private void deleteCluster1Test(String url) {
         ClusterDTO clusterDTO = getClusterDTO();
         url = url + "?clusterId=" + clusterDTO.getClusterId();
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
         HttpEntity<Long> httpEntity =
                 new HttpEntity<>(null, httpHeaders);
         ResponseEntity<Result> result = testRestTemplate.exchange(
@@ -382,8 +367,7 @@ public class OpClusterControllerTest extends BaseTest {
     }
 
     private void deleteCluster2Test(String url) {
-        url = url + "?clusterId=" + Constant.INVALID_CLUSTER_ID_IN_MYSQL;
-        HttpHeaders httpHeaders = HttpUtils.getHttpHeaders();
+        url = url + "?clusterId=" + ConfigConstant.INVALID_CLUSTER_ID;
         HttpEntity<Long> httpEntity =
                 new HttpEntity<>(null, httpHeaders);
 
