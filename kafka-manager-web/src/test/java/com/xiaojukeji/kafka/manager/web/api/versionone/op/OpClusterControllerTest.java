@@ -280,7 +280,7 @@ public class OpClusterControllerTest extends BaseTest {
     private void addControllerPreferredCandidates2Test(String url, Long physicalClusterId) {
         ControllerPreferredCandidateDTO dto = new ControllerPreferredCandidateDTO();
         dto.setClusterId(physicalClusterId);
-        dto.setBrokerIdList(Arrays.asList(ConfigConstant.INVALID_BROKER_ID));
+        dto.setBrokerIdList(Arrays.asList(ConfigConstant.INVALID_ID));
 
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ControllerPreferredCandidateDTO> httpEntity =

@@ -39,6 +39,12 @@ public interface ConfigConstant {
 
     String GATEWAY_DESCRIPTION = "gateway.config.description";
 
+    String ACCOUNT_USERNAME = "account.username";
+
+    String ACCOUNT_ROLE = "account.role";
+
+    String ACCOUNT_PASSWORD = "account.password";
+
 
     /**
      * 登陆参数
@@ -65,9 +71,9 @@ public interface ConfigConstant {
     Long INVALID_CLUSTER_ID = Long.MAX_VALUE;
 
     /**
-     * 无效broker id
+     * 无效id
      */
-    Integer INVALID_BROKER_ID = -1;
+    Integer INVALID_ID = -1;
 
     /**
      * 数据中心
@@ -79,6 +85,8 @@ public interface ConfigConstant {
     String CONFIG_VALUE = "value";
 
     String KAFKA_MANAGER = "kafka-manager";
+
+    String DESCRIPTION = "integrationTest";
 
     /**
      * 操作权限

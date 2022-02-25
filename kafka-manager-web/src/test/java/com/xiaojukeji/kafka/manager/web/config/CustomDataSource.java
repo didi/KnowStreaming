@@ -1,6 +1,8 @@
 package com.xiaojukeji.kafka.manager.web.config;
 
+import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.OrderDTO;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.gateway.OrderExtensionAddGatewayConfigDTO;
+import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.gateway.OrderExtensionModifyGatewayConfigDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.config.ConfigDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicCreationDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicDeletionDTO;
@@ -82,5 +84,29 @@ public class CustomDataSource {
         orderExtensionAddGatewayConfigDTO.setValue(configMap.get(ConfigConstant.GATEWAY_VALUE));
         orderExtensionAddGatewayConfigDTO.setValue(configMap.get(ConfigConstant.GATEWAY_DESCRIPTION));
         return orderExtensionAddGatewayConfigDTO;
+    }
+
+    public static OrderExtensionModifyGatewayConfigDTO getOrderExtensionModifyGatewayConfigDTO(Map<String, String> configMap) {
+        OrderExtensionModifyGatewayConfigDTO orderExtensionModifyGatewayConfigDTO = new OrderExtensionModifyGatewayConfigDTO();
+        orderExtensionModifyGatewayConfigDTO.setName(configMap.get(ConfigConstant.GATEWAY_NAME));
+        orderExtensionModifyGatewayConfigDTO.setType(configMap.get(ConfigConstant.GATEWAY_TYPE));
+        orderExtensionModifyGatewayConfigDTO.setValue(configMap.get(ConfigConstant.GATEWAY_VALUE));
+        orderExtensionModifyGatewayConfigDTO.setDescription(configMap.get(ConfigConstant.GATEWAY_DESCRIPTION));
+        return orderExtensionModifyGatewayConfigDTO;
+    }
+
+    public static OrderDTO getOrderDTO(Map<String, String> configMap) {
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setApplicant(ConfigConstant.ADMIN_USER);
+        orderDTO.setType(0);
+        orderDTO.setDescription(ConfigConstant.DESCRIPTION);
+        long logicalClusterId = Long.parseLong(configMap.get(ConfigConstant.LOGICAL_CLUSTER_ID));
+        String topicName = configMap.get(ConfigConstant.TOPIC_NAME);
+        String appId = configMap.get(ConfigConstant.APPID);
+
+        String extensions = "{\"clusterId\":\"" + logicalClusterId +
+                "\",\"topicName\":\"" + topicName + "\",\"appId\":\"" + appId + "\",\"peakBytesIn\":104857600000}";
+        orderDTO.setExtensions(extensions);
+        return orderDTO;
     }
 }
