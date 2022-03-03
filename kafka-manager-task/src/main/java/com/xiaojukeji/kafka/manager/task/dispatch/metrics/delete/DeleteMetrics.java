@@ -114,21 +114,21 @@ public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
     }
 
     private boolean deleteCommunityTopicMetrics() {
-        return topicMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.topicMetricsSaveDays * 24 * 60 * 60 * 1000), this.deleteLimitSize) >= this.deleteLimitSize;
+        return topicMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.topicMetricsSaveDays * 24L * 60L* 60L * 1000L), this.deleteLimitSize) >= this.deleteLimitSize;
     }
 
     private boolean deleteDiDiTopicMetrics() {
         boolean needReDelete = false;
 
-        if (topicAppMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.appTopicMetricsSaveDays * 24 * 60 * 60 * 1000), this.deleteLimitSize) >= this.deleteLimitSize) {
+        if (topicAppMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.appTopicMetricsSaveDays * 24L * 60L* 60L * 1000L), this.deleteLimitSize) >= this.deleteLimitSize) {
             needReDelete = true;
         }
 
-        if (topicRequestMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.topicRequestTimeMetricsSaveDays * 24 * 60 * 60 * 1000), this.deleteLimitSize) >= this.deleteLimitSize) {
+        if (topicRequestMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.topicRequestTimeMetricsSaveDays * 24L * 60L* 60L * 1000L), this.deleteLimitSize) >= this.deleteLimitSize) {
             needReDelete = true;
         }
 
-        if (topicThrottledMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.topicThrottledMetricsSaveDays * 24 * 60 * 60 * 1000), this.deleteLimitSize) >= this.deleteLimitSize) {
+        if (topicThrottledMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.topicThrottledMetricsSaveDays * 24L * 60L* 60L * 1000L), this.deleteLimitSize) >= this.deleteLimitSize) {
             needReDelete = true;
         }
 
@@ -136,8 +136,8 @@ public class DeleteMetrics extends AbstractScheduledTask<EmptyEntry> {
     }
 
     private void deleteClusterBrokerMetrics() {
-        brokerMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.brokerMetricsSaveDays * 24 * 60 * 60 * 1000), this.deleteLimitSize);
+        brokerMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.brokerMetricsSaveDays * 24L * 60L* 60L * 1000L), this.deleteLimitSize);
 
-        clusterMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.clusterMetricsSaveDays * 24 * 60 * 60 * 1000), this.deleteLimitSize);
+        clusterMetricsDao.deleteBeforeTime(new Date(System.currentTimeMillis() - this.clusterMetricsSaveDays * 24L * 60L * 60L * 1000L), this.deleteLimitSize);
     }
 }
