@@ -72,7 +72,7 @@ public class OpTopicControllerTest extends BaseTest {
         return deletionDTO;
     }
 
-    @Test
+    @Test(description = "测试创建Topic")
     public void createCommonTopicTest() {
         String url = baseUrl + "/api/v1/op/topics";
 
@@ -115,7 +115,7 @@ public class OpTopicControllerTest extends BaseTest {
         Assert.assertEquals(result.getBody().getCode(), ResultStatus.SUCCESS.getCode());
     }
 
-    @Test
+    @Test(description = "测试删除Topic")
     public void deleteTopicsTest() {
         String url = baseUrl + "/api/v1/op/topics";
         // PARAM_ILLEGAL
