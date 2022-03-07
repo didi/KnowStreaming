@@ -39,6 +39,9 @@ public class ApplyAppOrder extends AbstractAppOrder {
 
         }
         OrderDetailApplyAppDTO orderDetailDTO = new OrderDetailApplyAppDTO();
+        if (ValidateUtils.isNull(orderExtensionDTO)) {
+            return orderDetailDTO;
+        }
         orderDetailDTO.setName(orderExtensionDTO.getName());
         orderDetailDTO.setPrincipals(orderExtensionDTO.getPrincipals());
         AppDO appDO = appService.getByName(orderExtensionDTO.getName());

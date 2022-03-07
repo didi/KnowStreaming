@@ -29,10 +29,10 @@ public class TopicQuotaData {
 
     public static TopicQuotaData getClientData(Long producerByteRate, Long consumerByteRate) {
         TopicQuotaData clientData = new TopicQuotaData();
-        if (!ValidateUtils.isNull(producerByteRate) && consumerByteRate != -1) {
+        if (!ValidateUtils.isNull(consumerByteRate) && consumerByteRate != -1) {
             clientData.setConsumer_byte_rate(consumerByteRate.toString());
         }
-        if (!ValidateUtils.isNull(consumerByteRate) && producerByteRate != -1) {
+        if (!ValidateUtils.isNull(producerByteRate) && producerByteRate != -1) {
             clientData.setProducer_byte_rate(producerByteRate.toString());
         }
         return clientData;

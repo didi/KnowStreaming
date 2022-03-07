@@ -419,6 +419,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             authorityDO.setTopicName(topicName);
             authorityDO.setAccess(TopicAuthorityEnum.READ_WRITE.getCode());
             authorityService.addAuthority(authorityDO);
+            return ResultStatus.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("modify topic failed, clusterId:{} topicName:{} description:{} operator:{} ",
                     clusterId, topicName, description, operator, e);
@@ -631,7 +632,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             // 该用户无应用，需要先申请应用
             return ResultStatus.APP_NOT_EXIST;
         }
-        List<Long> appIds = appDOs.stream().map(AppDO::getId).collect(Collectors.toList());
+        List<String> appIds = appDOs.stream().map(AppDO::getAppId).collect(Collectors.toList());
         if (!appIds.contains(authorityDO.getAppId())) {
             // 入参中的appId，该用户未拥有
             return ResultStatus.APP_NOT_EXIST;

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @author zengqiao
  * @date 20/8/21
  */
-@Api(tags = "RD-Jmx维度相关接口(REST)")
+@Api(tags = "Normal-Jmx维度相关接口(REST)")
 @RestController
 @RequestMapping(ApiPrefix.API_V1_NORMAL_PREFIX)
 public class NormalJmxController {

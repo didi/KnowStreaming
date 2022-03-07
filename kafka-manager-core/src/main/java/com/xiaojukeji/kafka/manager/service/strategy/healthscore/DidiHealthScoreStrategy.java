@@ -92,15 +92,15 @@ public class DidiHealthScoreStrategy extends AbstractHealthScoreStrategy {
                 return HEALTH_SCORE_BAD;
             }
 
-            Object RequestHandlerAvgIdlePercentOneMinuteRate = metrics.getMetricsMap().get("RequestHandlerAvgIdlePercentOneMinuteRate");
-            Object NetworkProcessorAvgIdlePercentValue = metrics.getMetricsMap().get("NetworkProcessorAvgIdlePercentValue");
-            if (ValidateUtils.isNull(RequestHandlerAvgIdlePercentOneMinuteRate)
-                    || ValidateUtils.isNull(NetworkProcessorAvgIdlePercentValue)) {
+            Object requestHandlerAvgIdlePercentOneMinuteRate = metrics.getMetricsMap().get("RequestHandlerAvgIdlePercentOneMinuteRate");
+            Object networkProcessorAvgIdlePercentValue = metrics.getMetricsMap().get("NetworkProcessorAvgIdlePercentValue");
+            if (ValidateUtils.isNull(requestHandlerAvgIdlePercentOneMinuteRate)
+                    || ValidateUtils.isNull(networkProcessorAvgIdlePercentValue)) {
                 // 数据获取失败
                 return Constant.INVALID_CODE;
             }
-            if (((Double) RequestHandlerAvgIdlePercentOneMinuteRate) < MIN_IDLE * KAFKA_REQUEST_HANDLER_POOL_SIZE
-                    || ((Double) NetworkProcessorAvgIdlePercentValue) < MIN_IDLE) {
+            if (((Double) requestHandlerAvgIdlePercentOneMinuteRate) < MIN_IDLE * KAFKA_REQUEST_HANDLER_POOL_SIZE
+                    || ((Double) networkProcessorAvgIdlePercentValue) < MIN_IDLE) {
                 return HEALTH_SCORE_NORMAL;
             }
             return HEALTH_SCORE_HEALTHY;
@@ -117,7 +117,7 @@ public class DidiHealthScoreStrategy extends AbstractHealthScoreStrategy {
             return Constant.INVALID_CODE;
         }
 
-        List<Integer> brokerIdList = new ArrayList<>(metadata.getBrokerIdSet().size());
+        List<Integer> brokerIdList = new ArrayList<>(metadata.getBrokerIdSet());
 
         FutureTask<Integer>[] taskList = new FutureTask[brokerIdList.size()];
         for (int i = 0; i < brokerIdList.size(); ++i) {

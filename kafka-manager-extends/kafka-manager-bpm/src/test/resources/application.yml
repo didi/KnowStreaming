@@ -1,0 +1,127 @@
+server:
+  port: 8080
+  tomcat:
+    accept-count: 1000
+    max-connections: 10000
+    max-threads: 800
+    min-spare-threads: 100
+
+spring:
+  application:
+    name: kafkamanager
+  profiles:
+    active: dev
+  datasource:
+    kafka-manager:
+      jdbc-url: jdbc:mysql://localhost:3306/user_test?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+      username: root
+      password: 123456
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+logging:
+  config: classpath:logback-spring.xml
+
+custom:
+  idc: cn
+  jmx:
+    max-conn: 10 # 2.3版本配置不在这个地方生效
+  store-metrics-task:
+    community:
+      broker-metrics-enabled: true
+      topic-metrics-enabled: true
+    didi:
+      app-topic-metrics-enabled: false
+      topic-request-time-metrics-enabled: false
+      topic-throttled-metrics: false
+    save-days: 7
+
+# 任务相关的开关
+task:
+  op:
+    sync-topic-enabled: false # 未落盘的Topic定期同步到DB中
+    order-auto-exec:          # 工单自动化审批线程的开关
+      topic-enabled: false      # Topic工单自动化审批开关, false:关闭自动化审批, true:开启
+      app-enabled: false        # App工单自动化审批开关, false:关闭自动化审批, true:开启
+
+account:
+  ldap:
+    enabled: false
+    url: ldap://127.0.0.1:389/
+    basedn: dc=tsign,dc=cn
+    factory: com.sun.jndi.ldap.LdapCtxFactory
+    filter: sAMAccountName
+    security:
+      authentication: simple
+      principal: cn=admin,dc=tsign,dc=cn
+      credentials: admin
+    auth-user-registration: true
+    auth-user-registration-role: normal
+
+kcm:
+  enabled: false
+  s3:
+    endpoint: s3.didiyunapi.com
+    access-key: 1234567890
+    secret-key: 0987654321
+    bucket: logi-kafka
+  n9e:
+    base-url: http://127.0.0.1:8004
+    user-token: 12345678
+    timeout: 300
+    account: root
+    script-file: kcm_script.sh
+
+monitor:
+  enabled: false
+  n9e:
+    nid: 2
+    user-token: 1234567890
+    mon:
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
+    sink:
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
+    rdb:
+      base-url: http://127.0.0.1:8000 # 夜莺v4版本，默认端口统一调整为了8000
+
+notify:
+  kafka:
+    cluster-id: 95
+    topic-name: didi-kafka-notify
+  order:
+    detail-url: http://127.0.0.1
+
+test:
+  topic:
+    name1: moduleTest
+    name2: xgTest
+    name3: expandPartitionTopic
+    name4: topic_a
+    name5: NoOffsetChangeTopic
+    name6: _consumer_offsets
+  phyCluster:
+    id: 1
+    name: LogiKM_moduleTest
+  logicalCluster:
+    name: logical_cluster_1
+  broker:
+    id1: 1
+    id2: 2
+    id3: 3
+  app:
+    id: dkm_admin
+  ZK:
+    address: 127.0.0.1:2181/wyc
+    bootstrap-servers: 127.0.0.1:9093
+  gateway: 127.0.0.1
+  sasl-plaintext: SASL_PLAINTEXT://127.0.0.1:9093
+  admin: admin
+  consumer-group: moduleTestGroup
+  client-id: dkm_admin.moduleTest
+  region-name: region_1

@@ -42,6 +42,13 @@ public interface ConsumerService {
      */
     List<String> getConsumerGroupConsumedTopicList(Long clusterId, String consumerGroup, String location);
 
+    /**
+     * 获取消费者offset
+     * @param clusterDO 集群
+     * @param topicName topic
+     * @param consumerGroup 消费组
+     * @return Map<partitionId, offset>
+     */
     Map<Integer, Long> getConsumerOffset(ClusterDO clusterDO, String topicName, ConsumerGroup consumerGroup);
 
     /**
@@ -52,7 +59,20 @@ public interface ConsumerService {
                                      ConsumerGroup consumerGroup,
                                      List<PartitionOffsetDTO> partitionOffsetDTOList);
 
+    /**
+     * 获取每个集群消费组的个数
+     * @param clusterDOList 物理集群列表
+     * @return Map<clusterId, consumerGroupNums>
+     */
     Map<Long, Integer> getConsumerGroupNumMap(List<ClusterDO> clusterDOList);
 
+    /**
+     * 验证消费组是否存在
+     * @param offsetLocation offset存放位置
+     * @param id 集群id
+     * @param topicName topic
+     * @param consumerGroup 消费组
+     * @return true:存在，false:不存在
+     */
     boolean checkConsumerGroupExist(OffsetLocationEnum offsetLocation, Long id, String topicName, String consumerGroup);
 }

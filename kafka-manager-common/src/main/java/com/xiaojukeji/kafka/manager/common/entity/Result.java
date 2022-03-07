@@ -82,15 +82,15 @@ public class Result<T> implements Serializable {
         return JSON.toJSONString(this);
     }
 
-    public static Result buildSuc() {
-        Result result = new Result();
+    public static <T> Result<T> buildSuc() {
+        Result<T> result = new Result<>();
         result.setCode(ResultStatus.SUCCESS.getCode());
         result.setMessage(ResultStatus.SUCCESS.getMessage());
         return result;
     }
 
     public static <T> Result<T> buildSuc(T data) {
-        Result<T> result = new Result<T>();
+        Result<T> result = new Result<>();
         result.setCode(ResultStatus.SUCCESS.getCode());
         result.setMessage(ResultStatus.SUCCESS.getMessage());
         result.setData(data);
@@ -98,7 +98,7 @@ public class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> buildGatewayFailure(String message) {
-        Result<T> result = new Result<T>();
+        Result<T> result = new Result<>();
         result.setCode(ResultStatus.GATEWAY_INVALID_REQUEST.getCode());
         result.setMessage(message);
         result.setData(null);
@@ -106,22 +106,22 @@ public class Result<T> implements Serializable {
     }
 
     public static <T> Result<T> buildFailure(String message) {
-        Result<T> result = new Result<T>();
+        Result<T> result = new Result<>();
         result.setCode(ResultStatus.FAIL.getCode());
         result.setMessage(message);
         result.setData(null);
         return result;
     }
 
-    public static Result buildFrom(ResultStatus resultStatus) {
-        Result result = new Result();
+    public static <T> Result<T> buildFrom(ResultStatus resultStatus) {
+        Result<T> result = new Result<>();
         result.setCode(resultStatus.getCode());
         result.setMessage(resultStatus.getMessage());
         return result;
     }
 
-    public static Result buildFrom(ResultStatus resultStatus, Object data) {
-        Result result = new Result();
+    public static <T> Result<T> buildFrom(ResultStatus resultStatus, T data) {
+        Result<T> result = new Result<>();
         result.setCode(resultStatus.getCode());
         result.setMessage(resultStatus.getMessage());
         result.setData(data);
