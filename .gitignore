@@ -111,3 +111,4 @@ dist/
 dist/*
 kafka-manager-web/src/main/resources/templates/
 .DS_Store
+kafka-manager-console/package-lock.json
