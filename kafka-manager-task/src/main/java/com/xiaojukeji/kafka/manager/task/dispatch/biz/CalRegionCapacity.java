@@ -19,7 +19,7 @@ import java.util.*;
  * @author zengqiao
  * @date 20/6/30
  */
-@CustomScheduled(name = "calRegionCapacity", cron = "0 0 0/12 * * ?", threadNum = 1)
+@CustomScheduled(name = "calRegionCapacity", cron = "0 0 0/12 * * ?", threadNum = 1, description = "计算Region容量")
 public class CalRegionCapacity extends AbstractScheduledTask<RegionDO> {
     @Autowired
     private RegionService regionService;

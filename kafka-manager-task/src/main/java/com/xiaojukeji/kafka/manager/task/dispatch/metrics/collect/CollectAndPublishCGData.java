@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.metrics.collect;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ao.consumer.ConsumerGroup;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.ConsumerMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
@@ -28,12 +27,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
+ * 收集并发布消费者指标数据
  * @author zengqiao
  * @date 20/9/14
  */
-@CustomScheduled(name = "newCollectAndPublishCGData", cron = "30 0/1 * * * *", threadNum = 10)
+@CustomScheduled(name = "newCollectAndPublishCGData", cron = "30 0/1 * * * ?", threadNum = 10, description = "收集并发布消费者指标数据")
 public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CollectAndPublishCGData.class);
 
     @Autowired
     private TopicService topicService;
@@ -43,6 +43,9 @@ public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
 
     @Autowired
     private ConsumerService consumerService;
+
+    @Autowired
+    private ThreadPool threadPool;
 
     @Override
     protected List<ClusterDO> listAllTasks() {
@@ -82,7 +85,7 @@ public class CollectAndPublishCGData extends AbstractScheduledTask<ClusterDO> {
                     return getTopicConsumerMetrics(clusterDO, topicName, startTimeUnitMs);
                 }
             });
-            ThreadPool.submitCollectMetricsTask(taskList[i]);
+            threadPool.submitCollectMetricsTask(clusterDO.getId(), taskList[i]);
         }
 
         List<ConsumerMetrics> consumerMetricsList = new ArrayList<>();

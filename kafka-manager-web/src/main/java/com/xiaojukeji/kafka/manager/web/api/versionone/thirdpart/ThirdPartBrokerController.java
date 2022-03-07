@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 @Api(tags = "开放接口-Broker相关接口(REST)")
 @RestController
-@RequestMapping(ApiPrefix.API_V1_THIRD_PART_OP_PREFIX)
+@RequestMapping(ApiPrefix.API_V1_THIRD_PART_PREFIX)
 public class ThirdPartBrokerController {
     @Autowired
     private BrokerService brokerService;
@@ -44,7 +44,7 @@ public class ThirdPartBrokerController {
     private ClusterService clusterService;
 
     @ApiOperation(value = "Broker信息概览", notes = "")
-    @RequestMapping(value = "{clusterId}/brokers/{brokerId}/overview", method = RequestMethod.GET)
+    @GetMapping(value = "{clusterId}/brokers/{brokerId}/overview")
     @ResponseBody
     public Result<ThirdPartBrokerOverviewVO> getBrokerOverview(@PathVariable Long clusterId,
                                                                @PathVariable Integer brokerId) {
@@ -70,7 +70,7 @@ public class ThirdPartBrokerController {
     }
 
     @ApiOperation(value = "BrokerRegion信息", notes = "所有集群的")
-    @RequestMapping(value = "broker-regions", method = RequestMethod.GET)
+    @GetMapping(value = "broker-regions")
     @ResponseBody
     public Result<List<BrokerRegionVO>> getBrokerRegions() {
         List<ClusterDO> clusterDOList = clusterService.list();

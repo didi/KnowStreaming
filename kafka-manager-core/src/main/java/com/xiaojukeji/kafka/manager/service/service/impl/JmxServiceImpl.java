@@ -39,6 +39,9 @@ public class JmxServiceImpl implements JmxService {
     @Autowired
     private PhysicalClusterMetadataManager physicalClusterMetadataManager;
 
+    @Autowired
+    private ThreadPool threadPool;
+
     @Override
     public BrokerMetrics getBrokerMetrics(Long clusterId, Integer brokerId, Integer metricsCode) {
         if (clusterId == null || brokerId == null || metricsCode == null) {
@@ -98,7 +101,7 @@ public class JmxServiceImpl implements JmxService {
                     );
                 }
             });
-            ThreadPool.submitCollectMetricsTask(taskList[i]);
+            threadPool.submitCollectMetricsTask(clusterId, taskList[i]);
         }
 
         List<TopicMetrics> metricsList = new ArrayList<>();
@@ -305,7 +308,7 @@ public class JmxServiceImpl implements JmxService {
                     return metricsList;
                 }
             });
-            ThreadPool.submitCollectMetricsTask(taskList[i]);
+            threadPool.submitCollectMetricsTask(clusterId, taskList[i]);
         }
 
         Map<String, TopicMetrics> metricsMap = new HashMap<>();

@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.dispatch.biz;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.DBStatusEnum;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerDO;
@@ -25,9 +24,9 @@ import java.util.*;
  * @author zengqiao
  * @date 20/6/2
  */
-@CustomScheduled(name = "flushBrokerTable", cron = "0 0 0/1 * * ?", threadNum = 1)
+@CustomScheduled(name = "flushBrokerTable", cron = "0 0 0/1 * * ?", threadNum = 1, description = "定时刷新BrokerTable数据")
 public class FlushBrokerTable extends AbstractScheduledTask<ClusterDO> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushBrokerTable.class);
 
     @Autowired
     private BrokerService brokerService;

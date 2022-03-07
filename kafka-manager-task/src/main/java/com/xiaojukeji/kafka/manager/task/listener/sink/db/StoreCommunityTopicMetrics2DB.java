@@ -1,7 +1,6 @@
-package com.xiaojukeji.kafka.manager.task.listener;
+package com.xiaojukeji.kafka.manager.task.listener.sink.db;
 
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicMetricsDO;
 import com.xiaojukeji.kafka.manager.common.events.TopicMetricsCollectedEvent;
@@ -25,7 +24,7 @@ import java.util.List;
 @Component("storeCommunityTopicMetrics2DB")
 @ConditionalOnProperty(prefix = "custom.store-metrics-task.community", name = "topic-metrics-enabled", havingValue = "true", matchIfMissing = true)
 public class StoreCommunityTopicMetrics2DB implements ApplicationListener<TopicMetricsCollectedEvent> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StoreCommunityTopicMetrics2DB.class);
 
     @Autowired
     private TopicMetricsDao topicMetricsDao;
@@ -40,17 +39,21 @@ public class StoreCommunityTopicMetrics2DB implements ApplicationListener<TopicM
 
         try {
             store2DB(System.currentTimeMillis(), metricsList);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             LOGGER.error("save topic metrics failed, clusterId:{}.", event.getClusterId(), t);
         }
     }
 
-    private void store2DB(Long startTime, List<TopicMetrics> metricsList) throws Exception {
-        List<TopicMetricsDO> doList =
-                MetricsConvertUtils.convertAndUpdateCreateTime2TopicMetricsDOList(startTime, metricsList);
+    private void store2DB(Long startTime, List<TopicMetrics> metricsList) {
+        List<TopicMetricsDO> doList = MetricsConvertUtils.convertAndUpdateCreateTime2TopicMetricsDOList(startTime, metricsList);
         int i = 0;
         do {
-            topicMetricsDao.batchAdd(doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size())));
+            List<TopicMetricsDO> subDOList = doList.subList(i, Math.min(i + Constant.BATCH_INSERT_SIZE, doList.size()));
+            if (ValidateUtils.isEmptyList(subDOList)) {
+                return;
+            }
+
+            topicMetricsDao.batchAdd(subDOList);
             i += Constant.BATCH_INSERT_SIZE;
         } while (i < doList.size());
     }

@@ -4,7 +4,6 @@ import com.xiaojukeji.kafka.manager.bpm.OrderService;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderStatusEnum;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderTypeEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.constant.SystemCodeConstant;
 import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
@@ -31,14 +30,15 @@ import java.util.List;
 import java.util.Properties;
 
 /**
+ * 定时自动处理Topic相关工单
  * @author zengqiao
  * @date 20/7/28
  */
 @Component
-@CustomScheduled(name = "autoHandleTopicOrder", cron = "0 0/1 * * * ?", threadNum = 1)
+@CustomScheduled(name = "autoHandleTopicOrder", cron = "0 0/1 * * * ?", threadNum = 1, description = "定时自动处理Topic相关工单")
 @ConditionalOnProperty(prefix = "task.op.order-auto-exec", name = "topic-enabled", havingValue = "true", matchIfMissing = false)
 public class AutoHandleTopicOrder extends AbstractScheduledTask<EmptyEntry> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AutoHandleTopicOrder.class);
 
     @Autowired
     private ConfigService configService;

@@ -51,7 +51,7 @@ custom:
     didi:
       app-topic-metrics-enabled: false # 滴滴埋入的指标, 社区AK不存在该指标，因此默认关闭
       topic-request-time-metrics-enabled: false # 滴滴埋入的指标, 社区AK不存在该指标，因此默认关闭
-      topic-throttled-metrics: false # 滴滴埋入的指标, 社区AK不存在该指标，因此默认关闭
+      topic-throttled-metrics-enabled: false # 滴滴埋入的指标, 社区AK不存在该指标，因此默认关闭
     save-days: 7 #指标在DB中保持的天数，-1表示永久保存，7表示保存近7天的数据
 
 # 任务相关的开关

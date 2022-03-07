@@ -37,9 +37,9 @@
 	]]>
 	</select>
 
-	<delete id="deleteBeforeTime" parameterType="java.util.Date">
+	<delete id="deleteBeforeTime" parameterType="java.util.Map">
 		<![CDATA[
-		DELETE FROM topic_metrics WHERE gmt_create < #{endTime} LIMIT 3000
+		DELETE FROM topic_metrics WHERE gmt_create < #{endTime} LIMIT #{limitSize}
 	]]>
 	</delete>
 </mapper>

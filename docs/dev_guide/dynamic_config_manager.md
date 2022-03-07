@@ -136,7 +136,8 @@ EXPIRED_TOPIC_CONFIG
 配置Value：
 ```json
 {
-  "minExpiredDay": 30,  #过期时间大于此值才显示
+  "minExpiredDay": 30,  #过期时间大于此值才显示,
+  "filterRegex": ".*XXX\\s+", #忽略符合此正则规则的Topic
   "ignoreClusterIdList": [  # 忽略的集群
     50
   ]

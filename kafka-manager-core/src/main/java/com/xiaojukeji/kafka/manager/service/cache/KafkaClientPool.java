@@ -14,6 +14,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Properties;
@@ -25,8 +27,21 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author zengqiao
  * @date 19/12/24
  */
+@Service
 public class KafkaClientPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaClientPool.class);
+
+    @Value(value = "${client-pool.kafka-consumer.min-idle-client-num:24}")
+    private Integer kafkaConsumerMinIdleClientNum;
+
+    @Value(value = "${client-pool.kafka-consumer.max-idle-client-num:24}")
+    private Integer kafkaConsumerMaxIdleClientNum;
+
+    @Value(value = "${client-pool.kafka-consumer.max-total-client-num:24}")
+    private Integer kafkaConsumerMaxTotalClientNum;
+
+    @Value(value = "${client-pool.kafka-consumer.borrow-timeout-unit-ms:3000}")
+    private Integer kafkaConsumerBorrowTimeoutUnitMs;
 
     /**
      * AdminClient
@@ -84,7 +99,7 @@ public class KafkaClientPool {
         return true;
     }
 
-    private static void initKafkaConsumerPool(ClusterDO clusterDO) {
+    private void initKafkaConsumerPool(ClusterDO clusterDO) {
         lock.lock();
         try {
             GenericObjectPool<KafkaConsumer<String, String>> objectPool = KAFKA_CONSUMER_POOL.get(clusterDO.getId());
@@ -92,9 +107,9 @@ public class KafkaClientPool {
                 return;
             }
             GenericObjectPoolConfig<KafkaConsumer<String, String>> config = new GenericObjectPoolConfig<>();
-            config.setMaxIdle(24);
-            config.setMinIdle(24);
-            config.setMaxTotal(24);
+            config.setMaxIdle(kafkaConsumerMaxIdleClientNum);
+            config.setMinIdle(kafkaConsumerMinIdleClientNum);
+            config.setMaxTotal(kafkaConsumerMaxTotalClientNum);
             KAFKA_CONSUMER_POOL.put(clusterDO.getId(), new GenericObjectPool<>(new KafkaConsumerFactory(clusterDO), config));
         } catch (Exception e) {
             LOGGER.error("create kafka consumer pool failed, clusterDO:{}.", clusterDO, e);
@@ -118,7 +133,7 @@ public class KafkaClientPool {
         }
     }
 
-    public static KafkaConsumer<String, String> borrowKafkaConsumerClient(ClusterDO clusterDO) {
+    public KafkaConsumer<String, String> borrowKafkaConsumerClient(ClusterDO clusterDO) {
         if (ValidateUtils.isNull(clusterDO)) {
             return null;
         }
@@ -132,7 +147,7 @@ public class KafkaClientPool {
         }
 
         try {
-            return objectPool.borrowObject(3000);
+            return objectPool.borrowObject(kafkaConsumerBorrowTimeoutUnitMs);
         } catch (Exception e) {
             LOGGER.error("borrow kafka consumer client failed, clusterDO:{}.", clusterDO, e);
         }

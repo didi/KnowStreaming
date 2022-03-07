@@ -19,7 +19,7 @@ public class OrderPassedNotifyService implements ApplicationListener<OrderPassed
     @Autowired
     private AbstractNotifyService notifyService;
 
-    @Value("${notify.order.detail-url}")
+    @Value("${notify.order.detail-url:}")
     private String orderDetailUrl;
 
     @Async

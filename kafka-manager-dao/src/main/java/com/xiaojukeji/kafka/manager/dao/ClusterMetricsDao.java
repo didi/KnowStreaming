@@ -10,5 +10,5 @@ public interface ClusterMetricsDao {
 
     List<ClusterMetricsDO> getClusterMetrics(long clusterId, Date startTime, Date endTime);
 
-    int deleteBeforeTime(Date endTime);
+    int deleteBeforeTime(Date endTime, Integer limitSize);
 }

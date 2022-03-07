@@ -45,6 +45,9 @@ public class DidiHealthScoreStrategy extends AbstractHealthScoreStrategy {
     @Autowired
     private JmxService jmxService;
 
+    @Autowired
+    private ThreadPool threadPool;
+
     @Override
     public Integer calBrokerHealthScore(Long clusterId, Integer brokerId) {
         BrokerMetadata brokerMetadata = PhysicalClusterMetadataManager.getBrokerMetadata(clusterId, brokerId);
@@ -125,7 +128,7 @@ public class DidiHealthScoreStrategy extends AbstractHealthScoreStrategy {
                     return calBrokerHealthScore(clusterId, brokerId);
                 }
             });
-            ThreadPool.submitApiCallTask(taskList[i]);
+            threadPool.submitApiCallTask(clusterId, taskList[i]);
         }
 
         Integer topicHealthScore = HEALTH_SCORE_HEALTHY;

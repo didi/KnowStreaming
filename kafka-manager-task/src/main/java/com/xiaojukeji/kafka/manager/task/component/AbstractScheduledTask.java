@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.task.component;
 
 import com.google.common.collect.Lists;
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.utils.factory.DefaultThreadFactory;
 import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
 import com.xiaojukeji.kafka.manager.common.utils.NetUtils;
@@ -29,7 +28,7 @@ import java.util.concurrent.*;
  * @date 20/8/10
  */
 public abstract class AbstractScheduledTask<E extends Comparable> implements SchedulingConfigurer {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScheduledTask.class);
 
     @Autowired
     private HeartbeatDao heartbeatDao;
@@ -73,18 +72,16 @@ public abstract class AbstractScheduledTask<E extends Comparable> implements Sch
         LOGGER.info("init custom scheduled finished, scheduledName:{} scheduledCron:{}.", scheduledName, scheduledCron);
     }
 
-    private boolean checkAndModifyCron(String scheduledName, String scheduledCron, boolean existIfIllegal) {
+    private boolean checkAndModifyCron(String scheduledName, String scheduledCron, boolean isInit) {
         if (scheduledCron.matches(ScheduledTaskConstant.CRON_REG_EX)) {
             this.scheduledCron = scheduledCron;
-            LOGGER.info("modify scheduledCron success, scheduledName:{} scheduledCron:{}."
-                    , scheduledName, scheduledCron);
+            LOGGER.info("{} scheduledCron success, scheduledName:{} scheduledCron:{}.", isInit? "init": "modify", scheduledName, scheduledCron);
             return true;
         }
 
-        LOGGER.error("modify scheduledCron failed, format invalid, scheduledName:{} scheduledCron:{}."
-                , scheduledName, scheduledCron);
-        if (existIfIllegal) {
-            System.exit(0);
+        LOGGER.error("modify scheduledCron failed, format invalid, scheduledName:{} scheduledCron:{}.", scheduledName, scheduledCron);
+        if (isInit) {
+            throw new UnsupportedOperationException(String.format("scheduledName:%s scheduledCron:%s format invalid", scheduledName, scheduledCron));
         }
         return false;
     }
@@ -130,7 +127,8 @@ public abstract class AbstractScheduledTask<E extends Comparable> implements Sch
             LOGGER.info("customScheduled task finished, empty selected task, scheduledName:{}.", scheduledName);
             return;
         }
-        LOGGER.info("customScheduled task running, selected tasks, IP:{} selectedTasks:{}.",
+
+        LOGGER.debug("customScheduled task running, selected tasks, IP:{} selectedTasks:{}.",
                 NetUtils.localIp(), JsonUtils.toJSONString(selectTasks)
         );
 

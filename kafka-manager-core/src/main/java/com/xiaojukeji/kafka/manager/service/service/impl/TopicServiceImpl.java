@@ -87,6 +87,9 @@ public class TopicServiceImpl implements TopicService {
     @Autowired
     private AbstractHealthScoreStrategy healthScoreStrategy;
 
+    @Autowired
+    private KafkaClientPool kafkaClientPool;
+
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
         try {
@@ -340,7 +343,7 @@ public class TopicServiceImpl implements TopicService {
         Map<TopicPartition, Long> topicPartitionLongMap = new HashMap<>();
         KafkaConsumer kafkaConsumer = null;
         try {
-            kafkaConsumer = KafkaClientPool.borrowKafkaConsumerClient(clusterDO);
+            kafkaConsumer = kafkaClientPool.borrowKafkaConsumerClient(clusterDO);
             if ((offsetPosEnum.getCode() & OffsetPosEnum.END.getCode()) > 0) {
                 topicPartitionLongMap = kafkaConsumer.endOffsets(topicPartitionList);
             } else if ((offsetPosEnum.getCode() & OffsetPosEnum.BEGINNING.getCode()) > 0) {
@@ -538,7 +541,7 @@ public class TopicServiceImpl implements TopicService {
 
         List<PartitionOffsetDTO> partitionOffsetDTOList = new ArrayList<>();
         try {
-            kafkaConsumer = KafkaClientPool.borrowKafkaConsumerClient(clusterDO);
+            kafkaConsumer = kafkaClientPool.borrowKafkaConsumerClient(clusterDO);
             Map<TopicPartition, OffsetAndTimestamp> offsetAndTimestampMap = kafkaConsumer.offsetsForTimes(timestampsToSearch);
             if (offsetAndTimestampMap == null) {
                 return new ArrayList<>();

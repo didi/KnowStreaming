@@ -185,7 +185,8 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
             List<GatewayConfigDO> gatewayConfigDOList = gatewayConfigDao.getByConfigType(gatewayConfigDO.getType());
             Long version = 1L;
             for (GatewayConfigDO elem: gatewayConfigDOList) {
-                if (elem.getVersion() > version) {
+                if (elem.getVersion() >= version) {
+                    // 大于等于的情况下，都需要+1
                     version = elem.getVersion() + 1L;
                 }
             }
@@ -204,6 +205,7 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
     @Override
     public Result deleteById(Long id) {
         try {
+            // TODO 删除的时候，不能直接删，也需要变更一下version
             if (gatewayConfigDao.deleteById(id) > 0) {
                 return Result.buildSuc();
             }
@@ -232,7 +234,8 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
             List<GatewayConfigDO> gatewayConfigDOList = gatewayConfigDao.getByConfigType(newGatewayConfigDO.getType());
             Long version = 1L;
             for (GatewayConfigDO elem: gatewayConfigDOList) {
-                if (elem.getVersion() > version) {
+                if (elem.getVersion() >= version) {
+                    // 大于等于的情况下，都需要+1
                     version = elem.getVersion() + 1L;
                 }
             }

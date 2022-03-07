@@ -13,11 +13,19 @@ import java.util.List;
  * @date 19/5/3
  */
 public class AccountConverter {
+    private AccountConverter() {
+    }
+
     public static AccountDO convert2AccountDO(AccountDTO dto) {
         AccountDO accountDO = new AccountDO();
         accountDO.setUsername(dto.getUsername());
         accountDO.setPassword(dto.getPassword());
         accountDO.setRole(dto.getRole());
+
+        // 兼容前端未传这些信息的情况
+        accountDO.setDepartment(dto.getDepartment() == null? "": dto.getDepartment());
+        accountDO.setMail(dto.getMail() == null? "": dto.getMail());
+        accountDO.setDisplayName(dto.getDisplayName() == null? "": dto.getDisplayName());
         return accountDO;
     }
 

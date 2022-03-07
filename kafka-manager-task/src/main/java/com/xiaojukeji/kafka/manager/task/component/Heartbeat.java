@@ -1,6 +1,5 @@
 package com.xiaojukeji.kafka.manager.task.component;
 
-import com.xiaojukeji.kafka.manager.common.constant.LogConstant;
 import com.xiaojukeji.kafka.manager.common.utils.NetUtils;
 import com.xiaojukeji.kafka.manager.dao.HeartbeatDao;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.HeartbeatDO;
@@ -18,11 +17,14 @@ import java.util.Date;
  */
 @Component
 public class Heartbeat {
-    private final static Logger LOGGER = LoggerFactory.getLogger(LogConstant.SCHEDULED_TASK_LOGGER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Heartbeat.class);
 
     @Autowired
     private HeartbeatDao heartbeatDao;
 
+    /**
+     * 定时获取管控平台所在机器IP等信息到DB
+     */
     @Scheduled(cron = ScheduledTaskConstant.HEARTBEAT_CRON)
     public void ipFlush() {
         try {
