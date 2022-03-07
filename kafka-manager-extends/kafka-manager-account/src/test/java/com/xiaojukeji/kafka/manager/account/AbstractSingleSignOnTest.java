@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
 /**
  * @author wyc
@@ -142,7 +143,7 @@ public class AbstractSingleSignOnTest extends BaseTest {
         Field accountLdapEnabled = abstractSingleSignOn.getClass().getDeclaredField("accountLdapEnabled");
         FieldSetter.setField(abstractSingleSignOn, accountLdapEnabled, true);
 
-        Mockito.when(ldapAuthentication.authenticate(Mockito.anyString(), Mockito.anyString())).thenReturn(false);
+        Mockito.when(ldapAuthentication.authenticate(Mockito.anyString(), Mockito.anyString())).thenReturn(null);
         Assert.assertEquals(abstractSingleSignOn.loginAndGetLdap(request, response, dto).toString(), Result.buildFrom(ResultStatus.LDAP_AUTHENTICATION_FAILED).toString());
     }
 
@@ -158,7 +159,7 @@ public class AbstractSingleSignOnTest extends BaseTest {
         Field accountLdapEnabled = abstractSingleSignOn.getClass().getDeclaredField("accountLdapEnabled");
         FieldSetter.setField(abstractSingleSignOn, accountLdapEnabled, true);
 
-        Mockito.when(ldapAuthentication.authenticate(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+        Mockito.when(ldapAuthentication.authenticate(Mockito.anyString(), Mockito.anyString())).thenReturn(new HashMap<>());
 
         // 通过反射初始化成员变量，防止出现空指针异常
         Field authUserRegistrationRole = abstractSingleSignOn.getClass().getDeclaredField("authUserRegistrationRole");
