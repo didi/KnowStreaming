@@ -159,7 +159,7 @@ public class ConsumerServiceImpl implements ConsumerService {
         if (topicMetadata == null) {
             logger.warn("class=ConsumerServiceImpl||method=getConsumeDetail||clusterId={}||topicName={}||msg=topicMetadata is null!",
                     clusterDO.getId(), topicName);
-            return null;
+            return Collections.emptyList();
         }
 
         List<ConsumeDetailDTO> consumerGroupDetailDTOList = null;
@@ -170,7 +170,7 @@ public class ConsumerServiceImpl implements ConsumerService {
         }
         if (consumerGroupDetailDTOList == null) {
             logger.info("class=ConsumerServiceImpl||method=getConsumeDetail||msg=consumerGroupDetailDTOList is null!");
-            return null;
+            return Collections.emptyList();
         }
 
         Map<TopicPartition, Long> topicPartitionLongMap = topicService.getPartitionOffset(clusterDO, topicName, OffsetPosEnum.END);
@@ -317,9 +317,6 @@ public class ConsumerServiceImpl implements ConsumerService {
                                                        String consumerGroup) {
         Map<Integer, String> stringOffsetMap =
                 getOffsetByGroupAndTopicFromBroker(clusterDO, consumerGroup, topicName);
-        if (ValidateUtils.isNull(stringOffsetMap)) {
-            return new HashMap<>(0);
-        }
 
         Map<Integer, Long> offsetMap = new HashMap<>(stringOffsetMap.size());
         for (Map.Entry<Integer, String> entry: stringOffsetMap.entrySet()) {

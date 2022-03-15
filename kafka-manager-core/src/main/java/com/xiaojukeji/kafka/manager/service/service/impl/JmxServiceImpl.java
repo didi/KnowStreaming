@@ -167,9 +167,11 @@ public class JmxServiceImpl implements JmxService {
         if (ValidateUtils.isNull(jmxConnectorWrap)|| !jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
             return null;
         }
+
+        KafkaVersion kafkaVersion = physicalClusterMetadataManager.getKafkaVersion(clusterId, brokerId);
+
         TopicMetrics metrics = new TopicMetrics(clusterId, topicName);
         for (MbeanV2 mbeanV2: mbeanV2List) {
-            KafkaVersion kafkaVersion = physicalClusterMetadataManager.getKafkaVersion(clusterId, brokerId);
             try {
                 getAndSupplyAttributes2BaseMetrics(
                         metrics,

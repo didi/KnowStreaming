@@ -57,7 +57,7 @@ public class RdLogicalClusterController {
         );
     }
 
-    @ApiOperation(value = "查询逻辑集群列表", notes = "")
+    @ApiOperation(value = "根据逻辑集群Id获取逻辑集群", notes = "")
     @RequestMapping(value = "logical-clusters", method = RequestMethod.GET)
     @ResponseBody
     public Result<LogicalClusterVO> getByLogicalClusterId(@RequestParam("id") Long physicalClusterId) {

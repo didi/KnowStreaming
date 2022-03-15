@@ -215,7 +215,7 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             LOGGER.error("get wait deal order failed.", e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -225,7 +225,7 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             LOGGER.error("get passed order failed, startTime:{}.", startTime, e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private TopicDO getTopicDOFromCacheOrDB(Long physicalClusterId,

@@ -27,13 +27,13 @@
         ]]>
     </delete>
 
-    <select id="getNeedReportTopics" parameterType="java.util.Map" resultMap="TopicReportMap">
+    <select id="getNeedReportTopic" parameterType="java.util.Map" resultMap="TopicReportMap">
         <![CDATA[
         SELECT *
         FROM topic_report
         WHERE (cluster_id = #{clusterId}
             AND start_time <= #{now}
-            And end_time >= #{now})
+            AND end_time >= #{now})
         ]]>
     </select>
 
