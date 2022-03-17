@@ -104,7 +104,7 @@ PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 ### 5.1 内部核心人员
 
-`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`xiepeng`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`、`石臻臻`
+`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`zhaoqingrong`、`xiepeng`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`、`石臻臻`
 
 
 ### 5.2 外部贡献者
