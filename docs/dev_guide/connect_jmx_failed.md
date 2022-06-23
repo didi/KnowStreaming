@@ -29,6 +29,7 @@
 - `JMX`配置错误：见`2、解决方法`。
 - 存在防火墙或者网络限制：网络通的另外一台机器`telnet`试一下看是否可以连接上。
 - 需要进行用户名及密码的认证：见`3、解决方法 —— 认证的JMX`。
+- 当logikm和kafka不在同一台机器上时,kafka的Jmx端口不允许其他机器访问:见`4、解决方法`。
 
 
 错误日志例子：
@@ -99,3 +100,8 @@ SQL的例子：
 ```sql
 UPDATE cluster SET jmx_properties='{ "maxConn": 10,	"username": "xxxxx", "password": "xxxx", "openSSL": false }' where id={xxx};
 ```
+### 4、解决方法 —— 不允许其他机器访问
+![1971b46243fe1d547063ee55b1505ed](https://user-images.githubusercontent.com/2869938/154413486-f6531946-8c4c-447e-aa2e-b112e5e623d6.png)
+
+该图中的127.0.0.1表明该端口只允许本机访问.
+在cdh中可以点击配置->搜索jmx->寻找broker_java_opts 修改com.sun.management.jmxremote.host和java.rmi.server.hostname为本机ip

@@ -15,15 +15,14 @@ server:
 spring:
   application:
     name: kafkamanager
-    version: 2.6.1
+    version: 2.6.0
   profiles:
     active: dev
   datasource:
     kafka-manager:
-      jdbc-url: jdbc:mysql://localhost:3306/logi_kafka_manager?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
-      username: root
-      password: 123456
+      jdbc-url: jdbc:mysql://${LOGI_MYSQL_HOST:mysql}:${LOGI_MYSQL_PORT:3306}/${LOGI_MYSQL_DATABASE:logi_kafka_manager}?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+      username: ${LOGI_MYSQL_USER:root}
+      password: ${LOGI_MYSQL_PASSWORD:root}
       driver-class-name: com.mysql.cj.jdbc.Driver
   main:
     allow-bean-definition-overriding: true
-

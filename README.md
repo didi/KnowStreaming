@@ -61,15 +61,15 @@
 - [滴滴LogiKM FAQ](docs/user_guide/faq.md)
 
 ### 2.2 社区文章
-- [kafka最强最全知识图谱](https://www.szzdzhp.com/kafka/)
-- [LogiKM新用户入门系列文章专栏 --石臻臻](https://www.szzdzhp.com/categories/LogIKM/)
 - [滴滴云官网产品介绍](https://www.didiyun.com/production/logi-KafkaManager.html)
 - [7年沉淀之作--滴滴Logi日志服务套件](https://mp.weixin.qq.com/s/-KQp-Qo3WKEOc9wIR2iFnw)
-- [滴滴Logi-KafkaManager 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
-- [滴滴Logi-KafkaManager 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
-- [滴滴Logi-KafkaManager 系列视频教程](https://space.bilibili.com/442531657/channel/seriesdetail?sid=571649)
-- [kafka实践（十五）：滴滴开源Kafka管控平台 Logi-KafkaManager研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
-
+- [滴滴LogiKM 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
+- [滴滴LogiKM 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
+- [滴滴LogiKM 系列视频教程](https://space.bilibili.com/442531657/channel/seriesdetail?sid=571649)
+- [kafka最强最全知识图谱](https://www.szzdzhp.com/kafka/)
+- [滴滴LogiKM新用户入门系列文章专栏 --石臻臻](https://www.szzdzhp.com/categories/LogIKM/)
+- [kafka实践（十五）：滴滴开源Kafka管控平台 LogiKM研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
+- [基于云原生应用管理平台Rainbond安装 滴滴LogiKM](https://www.rainbond.com/docs/opensource-app/logikm/?channel=logikm)
 
 ## 3 滴滴Logi开源用户交流群
 
@@ -104,7 +104,7 @@ PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 ### 5.1 内部核心人员
 
-`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`xiepeng`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`、`石臻臻`
+`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`zhaoqingrong`、`xiepeng`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`、`zhaoyinrui`、`marzkonglingxu`、`joysunchao`、`石臻臻`
 
 
 ### 5.2 外部贡献者

@@ -1,0 +1,24 @@
+[client]
+default-character-set = utf8  
+
+[mysqld]
+character_set_server = utf8  
+pid-file        = /var/run/mysqld/mysqld.pid
+socket          = /var/run/mysqld/mysqld.sock
+datadir         = /var/lib/mysql
+symbolic-links=0
+
+max_allowed_packet = 10M
+sort_buffer_size = 1M
+read_rnd_buffer_size = 2M
+max_connections=2000
+
+lower_case_table_names=1
+character-set-server=utf8
+
+max_allowed_packet = 1G
+sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+group_concat_max_len = 102400
+default-time-zone = '+08:00'
+[mysql]
+default-character-set = utf8
