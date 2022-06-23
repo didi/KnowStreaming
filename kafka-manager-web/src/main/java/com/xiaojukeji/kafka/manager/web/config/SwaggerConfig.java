@@ -1,7 +1,6 @@
 package com.xiaojukeji.kafka.manager.web.config;
 
-import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.xiaojukeji.kafka.manager.common.utils.GitPropUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
@@ -22,9 +21,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableWebMvc
 @EnableSwagger2
 public class SwaggerConfig implements WebMvcConfigurer {
-    @Autowired
-    private ConfigUtils configUtils;
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
@@ -43,10 +39,13 @@ public class SwaggerConfig implements WebMvcConfigurer {
     }
 
     private ApiInfo apiInfo() {
+        String version = GitPropUtil.getProps(GitPropUtil.VERSION_FIELD_NAME);
+        String commitId = GitPropUtil.getProps(GitPropUtil.COMMIT_ID_FIELD_NAME);
+
         return new ApiInfoBuilder()
                 .title("LogiKM接口文档")
                 .description("欢迎使用滴滴LogiKM")
-                .version(configUtils.getApplicationVersion())
+                .version(String.format("%s-%s", version == null? "": version, commitId == null? "": commitId))
                 .build();
     }
 

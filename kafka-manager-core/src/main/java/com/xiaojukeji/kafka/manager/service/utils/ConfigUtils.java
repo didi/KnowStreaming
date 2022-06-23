@@ -20,7 +20,4 @@ public class ConfigUtils {
 
     @Value(value = "${spring.profiles.active:dev}")
     private String kafkaManagerEnv;
-
-    @Value(value = "${spring.application.version:unknown}")
-    private String applicationVersion;
 }
