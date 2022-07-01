@@ -30,6 +30,7 @@
         <tomcat.version>8.5.72</tomcat.version>
         <log4j2.version>2.16.0</log4j2.version>
         <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
+        <logback.version>1.2.9</logback.version>
     </properties>
 
     <modules>
