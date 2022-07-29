@@ -115,3 +115,7 @@ PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 ## 6 协议
 
 `LogiKM`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
+
+## 7 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=didi/LogiKM&type=Date)](https://star-history.com/#didi/LogiKM&Date)
