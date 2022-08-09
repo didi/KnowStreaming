@@ -117,4 +117,5 @@ PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 ## 7 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=didi/LogiKM&type=Date)](https://star-history.com/#didi/LogiKM&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=didi/KnowStreaming&type=Date)](https://star-history.com/#didi/KnowStreaming&Date)
+
