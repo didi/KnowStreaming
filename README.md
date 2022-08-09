@@ -1,7 +1,6 @@
 
 ---
-
-![logikm_logo](https://user-images.githubusercontent.com/71620349/125024570-9e07a100-e0b3-11eb-8ebc-22e73e056771.png)
+![KnowStreaing](https://user-images.githubusercontent.com/71620349/183545777-4968448b-445b-4d9a-b6e9-d7a9d0a8ed86.png)
 
 **一站式`Apache Kafka`集群指标监控与运维管控平台**
 
