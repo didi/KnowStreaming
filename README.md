@@ -54,29 +54,29 @@
 ## 2 相关文档
 
 ### 2.1 产品文档
-- [滴滴LogiKM 安装手册](docs/install_guide/install_guide_cn.md)
-- [滴滴LogiKM 接入集群](docs/user_guide/add_cluster/add_cluster.md)
-- [滴滴LogiKM 用户使用手册](docs/user_guide/user_guide_cn.md)
-- [滴滴LogiKM FAQ](docs/user_guide/faq.md)
+- [滴滴Know Streaming 安装手册](docs/install_guide/install_guide_cn.md)
+- [滴滴Know Streaming 接入集群](docs/user_guide/add_cluster/add_cluster.md)
+- [滴滴Know Streaming 用户使用手册](docs/user_guide/user_guide_cn.md)
+- [滴滴Know Streaming FAQ](docs/user_guide/faq.md)
 
 ### 2.2 社区文章
 - [滴滴云官网产品介绍](https://www.didiyun.com/production/logi-KafkaManager.html)
 - [7年沉淀之作--滴滴Logi日志服务套件](https://mp.weixin.qq.com/s/-KQp-Qo3WKEOc9wIR2iFnw)
-- [滴滴LogiKM 一站式Kafka监控与管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
-- [滴滴LogiKM 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
-- [滴滴LogiKM 系列视频教程](https://space.bilibili.com/442531657/channel/seriesdetail?sid=571649)
+- [滴滴Know Streaming 一站式Kafka管控平台](https://mp.weixin.qq.com/s/9qSZIkqCnU6u9nLMvOOjIQ)
+- [滴滴Know Streaming 开源之路](https://xie.infoq.cn/article/0223091a99e697412073c0d64)
+- [滴滴Know Streaming 系列视频教程](https://space.bilibili.com/442531657/channel/seriesdetail?sid=571649)
 - [kafka最强最全知识图谱](https://www.szzdzhp.com/kafka/)
-- [滴滴LogiKM新用户入门系列文章专栏 --石臻臻](https://www.szzdzhp.com/categories/LogIKM/)
-- [kafka实践（十五）：滴滴开源Kafka管控平台 LogiKM研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
-- [基于云原生应用管理平台Rainbond安装 滴滴LogiKM](https://www.rainbond.com/docs/opensource-app/logikm/?channel=logikm)
+- [滴滴Know Streaming新用户入门系列文章专栏 --石臻臻](https://www.szzdzhp.com/categories/LogIKM/)
+- [kafka实践（十五）：滴滴开源Kafka管控平台 Know Streaming研究--A叶子叶来](https://blog.csdn.net/yezonggang/article/details/113106244)
+- [基于云原生应用管理平台Rainbond安装 滴滴Know Streaming](https://www.rainbond.com/docs/opensource-app/logikm/?channel=logikm)
 
-## 3 滴滴Logi开源用户交流群
+## 3 Know Streaming开源用户交流群
 
 ![image](https://user-images.githubusercontent.com/5287750/111266722-e531d800-8665-11eb-9242-3484da5a3099.png)  
 
 想跟各个大佬交流Kafka Es 等中间件/大数据相关技术请 加微信进群。
 
-微信加群：添加<font color=red>mike_zhangliang</font>、<font color=red>danke-x</font>的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
+微信加群：添加<font color=red>mike_zhangliang</font>、<font color=red>danke-x</font>的微信号备注Know Streaming加群或关注公众号 云原生可观测性 回复 "Know Streaming加群"
 
 ## 4 知识星球
 
@@ -113,7 +113,7 @@ PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 ## 6 协议
 
-`LogiKM`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
+`Know Streaming`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
 
 ## 7 Star History
 
