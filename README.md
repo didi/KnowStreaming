@@ -1,10 +1,10 @@
 
 ---
-![KnowStreaing](https://user-images.githubusercontent.com/71620349/183545777-4968448b-445b-4d9a-b6e9-d7a9d0a8ed86.png)
+![KnowStreaing](https://user-images.githubusercontent.com/71620349/183546097-71451983-d00e-4ad4-afb0-43fb597c69a9.png)
 
-**一站式`Apache Kafka`集群指标监控与运维管控平台**
+**一站式`Apache Kafka`管控平台**
 
-`LogiKM开源至今备受关注，考虑到开源项目应该更贴合Apache Kafka未来发展方向，经项目组慎重考虑，预计22年下半年将其品牌升级成Know Streaming，届时项目名称和Logo也将统一更新，感谢大家一如既往的支持，敬请期待！`
+`LogiKM开源至今备受关注，考虑到开源项目应该更贴合Apache Kafka未来发展方向，经项目组慎重考虑，将其品牌升级成Know Streaming，新的大版本更新马上就绪，感谢大家一如既往的支持！`
 
 阅读本README文档，您可以了解到滴滴Logi-KafkaManager的用户群体、产品定位等信息，并通过体验地址，快速体验Kafka集群指标监控与运维管控的全流程。
 
@@ -14,7 +14,7 @@
 
 ### 1.1 快速体验地址
 
-- 体验地址 http://117.51.150.133:8080  账号密码 admin/admin
+- 体验地址（新的体验地址马上就来） http://117.51.150.133:8080  账号密码 admin/admin
 
 ### 1.2 体验地图
 相比较于同类产品的用户视角单一（大多为管理员视角），滴滴Logi-KafkaManager建立了基于分角色、多场景视角的体验地图。分别是：**用户体验地图、运维体验地图、运营体验地图**
