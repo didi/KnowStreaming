@@ -1,0 +1,27 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+      %s
+   }
+}

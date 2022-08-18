@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ksmysql.fullname" . }}
+metadata:
+  name: {{ include "ksmysql.fullname" . }}
+  labels:
+    app: {{ template "ksmysql.name" . }}
+    chart: {{ template "ksmysql.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: server
+data:
+  my.cnf: |
+    [client]
+    default-character-set=utf8
+    [mysql]
+    default-character-set=utf8
+    [mysqld]
+    skip-host-cache
+    skip-name-resolve
+    datadir=/data/mysql
+    socket=/var/lib/mysql/mysql.sock
+    secure-file-priv=/var/lib/mysql-files
+    character-set-server=utf8
+    user=mysql
+    symbolic-links=0
+    pid-file=/var/run/mysqld/mysqld.pid
+    sql_mode=ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION

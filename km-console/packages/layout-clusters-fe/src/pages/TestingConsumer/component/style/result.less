@@ -1,0 +1,157 @@
+.test-result-panel {
+  flex: 1;
+  height: calc(100vh - 180px);
+  padding: 16px 24px;
+  background: #FFFFFF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 156px);
+  .page-title {
+    font-family: @font-family-bold;
+    font-size: 18px;
+    color: #212529;
+    letter-spacing: 0;
+    text-align: justify;
+    line-height: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-panel {
+    background: #f8f9fe;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+
+    .card-item {
+      height: 56px;
+
+      .label {
+        font-size: 14px;
+        color: #495057;
+        letter-spacing: 0;
+        text-align: justify;
+        line-height: 20px;
+      }
+
+      .value {
+        font-family: DIDIFD-Medium;
+        font-size: 32px;
+        color: #212529;
+        line-height: 36px;
+      }
+
+      .unit {
+        font-size: 16px;
+        color: #74788D;
+        letter-spacing: 0;
+        text-align: justify;
+        line-height: 14px;
+        padding-left: 4px;
+      }
+    }
+  }
+
+  .process-panel {
+    margin-bottom: 32px;
+    max-height: 300px;
+    overflow-y: auto;
+    .title {
+      font-family: @font-family-bold;
+      font-size: 14px;
+      color: #495057;
+      letter-spacing: 0;
+      margin-bottom: 12px;
+    }
+
+    .process-item:not(:last-child) {
+      margin-right: 55px;
+    }
+
+    .process-item {
+      width: 140px;
+      height: 25px;
+      display: inline-block;
+
+      .content {
+        display: flex;
+        justify-content: space-between;
+        line-height: 16px;
+
+        .label {
+          font-size: 12px;
+          color: #74788D;
+          letter-spacing: 0;
+        }
+
+        .info {
+          font-size: 10px;
+          color: #ADB5BC;
+          letter-spacing: 0;
+        }
+      }
+
+      .dcloud-progress-inner {
+        border-radius: 12px;
+      }
+
+      .dcloud-progress-status-success .dcloud-progress-bg {
+        background-color: none;
+      }
+    }
+  }
+
+  .table-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    .table-title {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 13px;
+
+      .consume-table-header{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+
+      .title{
+        font-family: @font-family-bold;
+        font-size: 14px;
+        color: #495057;
+        font-weight: 500;
+      }
+
+      .info {
+        font-size: 12px;
+        color: #74788D;
+        letter-spacing: 0;
+        text-align: justify;
+        line-height: 16px;
+      }
+
+      .num {
+        font-size: 14px;
+        color: #212529;
+        letter-spacing: 0;
+        text-align: justify;
+        line-height: 20px;
+      }
+
+      .info-download{
+        cursor: pointer;
+      }
+    }
+    .pro-table-container {
+      flex: 1;
+      overflow: auto;
+    }
+  }
+
+}

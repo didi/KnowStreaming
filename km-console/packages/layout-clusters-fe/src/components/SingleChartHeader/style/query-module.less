@@ -1,0 +1,26 @@
+@root-entry-name: 'default';
+@import '~knowdesign/es/basic/style/themes/index';
+@import '~knowdesign/es/basic/style/mixins/index';
+
+.query-select {
+  .horizontal {
+    .@{ant-prefix}-col {
+      display: flex;
+      .@{ant-prefix}-select {
+        flex: 1;
+      }
+    }
+  }
+  .label-name {
+    height: 34px;
+    line-height: 34px;
+    font-size: 13px;
+    color: #495057;
+    display: inline-block;
+  }
+  .@{ant-prefix}-row {
+    .@{ant-prefix}-select {
+      display: block;
+    }
+  }
+}

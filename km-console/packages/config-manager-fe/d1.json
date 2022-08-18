@@ -1,0 +1,29 @@
+{
+    "appConfig": {
+        "appName": "config-manager-fe",
+        "ident": "config",
+        "port": "8001",
+        "webpackCustom": "",
+        "webpackChain": "",
+        "entry": [
+            {
+                "title": "配置管理",
+                "name": "/config",
+                "src": "./src/index.html"
+            }
+        ],
+        "layout": "layout-clusters-fe",
+        "packages": [
+            "config-manager-fe",
+            "layout-clusters-fe"
+        ]
+    },
+    "entrust": true,
+    "localBuilderVersion": true,
+    "extensions": [],
+    "preset": "@didi/d1-preset-opensource",
+    "builderType": "@didi/d1-preset-opensource",
+    "generatorType": "",
+    "mockDir": "mock",
+    "webpackCustomPath": "./webpack.config.js"
+}

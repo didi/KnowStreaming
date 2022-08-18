@@ -1,0 +1,6 @@
+---
+clusterName: upgrade
+# Rolling upgrade doesn't work when upgrading from clusters with security disabled.
+# This is because nodes with security enabled can't join a cluster with security disabled.
+# Every nodes need to be recreated at the same time so they can recreate a cluster with security enabled
+updateStrategy: OnDelete

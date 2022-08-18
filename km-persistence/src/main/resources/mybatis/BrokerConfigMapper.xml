@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerConfigDAO">
+  <resultMap id="BrokerConfigMap"         type="com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerConfigPO">
+    <id column="id"                       property="id" />
+    <result column="create_time"          property="createTime" />
+    <result column="update_time"          property="updateTime" />
+
+    <result column="cluster_phy_id"       property="clusterPhyId" />
+    <result column="broker_id"            property="brokerId" />
+    <result column="config_name"          property="configName" />
+    <result column="config_value"         property="configValue" />
+    <result column="diff_type"            property="diffType" />
+  </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerConfigPO">
+      REPLACE ks_km_broker_config
+        (cluster_phy_id, broker_id, config_name, config_value, diff_type, update_time)
+    VALUES
+        (#{clusterPhyId}, #{brokerId}, #{configName}, #{configValue}, #{diffType}, #{updateTime})
+    </insert>
+</mapper>

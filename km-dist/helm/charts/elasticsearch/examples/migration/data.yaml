@@ -1,0 +1,14 @@
+---
+replicas: 2
+
+esMajorVersion: 6
+
+extraEnvs:
+  - name: discovery.zen.ping.unicast.hosts
+    value: "my-release-elasticsearch-discovery"
+
+clusterName: "elasticsearch"
+nodeGroup: "data"
+
+roles:
+  - data

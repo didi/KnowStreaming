@@ -1,0 +1,40 @@
+package com.xiaojukeji.know.streaming.km.task.job;
+
+import com.didiglobal.logi.job.annotation.Task;
+import com.didiglobal.logi.job.common.TaskResult;
+import com.didiglobal.logi.job.core.consensual.ConsensualEnum;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignJobService;
+import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Task(name = "CommunityReassignJobTask",
+        description = "原生副本迁移调度执行任务",
+        cron = "0 0/1 * * * ? *",
+        autoRegister = true,
+        consensual = ConsensualEnum.BROADCAST,
+        timeout = 6 * 60)
+public class CommunityReassignJobTask extends AbstractClusterPhyDispatchTask {
+
+    @Autowired
+    private ReassignJobService reassignJobService;
+
+    @Override
+    protected TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
+        // 获取迁移中的任务
+        Long jobId = reassignJobService.getOneRunningJobId(clusterPhy.getId());
+        if (jobId == null) {
+            // 当前无任务
+            return TaskResult.SUCCESS;
+        }
+
+        // 更新任务的状态
+        Result<Void> rv = reassignJobService.verifyAndUpdateStatue(jobId);
+
+        // 更新同步进度信息
+        reassignJobService.getAndUpdateSubJobExtendData(jobId);
+
+        return rv.failed()? TaskResult.FAIL: TaskResult.SUCCESS;
+    }
+}

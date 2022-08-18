@@ -1,0 +1,59 @@
+.security-users-page {
+  &-list {
+    width: 100%;
+    height: calc(100vh - 90px);
+    padding: 16px 24px;
+    margin-top: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    .operate-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+  }
+}
+
+.users-edit-drawer {
+  .dcloud-form-item {
+    margin-bottom: 14px;
+
+    &-label {
+      font-family: @font-family-bold;
+      font-size: 13px;
+      color: #495057;
+      letter-spacing: 0;
+      line-height: 18px !important;
+      label {
+        width: 100%;
+      }
+
+      .complex-label {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+
+        .random-icon {
+          font-size: 18px;
+          height: 18px;
+          color: #adb5bc;
+        }
+
+        .random-icon:hover {
+          height: 18px;
+          text-align: center;
+          border-radius: 9px;
+          line-height: 20px;
+          color: #74788d;
+          background: rgba(33, 37, 41, 0.04);
+        }
+
+        .switch {
+          margin-left: 12px;
+        }
+      }
+    }
+  }
+}

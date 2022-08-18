@@ -1,0 +1,187 @@
+@login-container-width: 500px;
+@layout-main-height: 700px;
+
+@media screen and (max-width: 960px) {
+  .login-page {
+    .login-page-left {
+      display: none;
+    }
+    .login-page-right {
+      width: 100vw;
+    }
+  }
+}
+
+.login-page {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  min-height: @layout-main-height;
+  overflow: auto;
+
+  &-left {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% - @login-container-width);
+    height: 100%;
+    background: no-repeat right top / 23% url('./img/login-bg-1.png'), no-repeat top left / cover url('./img/login-bg.png');
+
+    .dcloud-carousel {
+      width: 100%;
+      height: 100%;
+      .slick-slider {
+        height: 100%;
+      }
+      .slick-dots {
+        li {
+          width: 22px;
+          button {
+            height: 6px;
+            opacity: 0.7;
+            border-radius: 2px;
+            background-color: #fff;
+          }
+          &.slick-active {
+            button {
+              opacity: 1;
+              width: 26px;
+              background-color: @primary-color;
+            }
+          }
+        }
+      }
+      .carousel-eg-ctr {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        min-height: @layout-main-height;
+        &-one {
+          &-img {
+            width: 100%;
+            &.img-one {
+              max-width: 271px;
+            }
+            &.img-two {
+              max-width: 940px;
+            }
+          }
+          &-desc {
+            &.desc-one {
+              margin: 21px 0 17px 0;
+              font-size: 20px;
+              color: rgba(0, 0, 0, 0.84);
+              line-height: 30px;
+            }
+          }
+        }
+        &-two {
+          &-img {
+            width: 100%;
+            &.img-one {
+              max-width: 820px;
+            }
+          }
+          &-desc {
+            &.desc-one {
+              margin: 20px 0 10px 0;
+              font-size: 15px;
+              color: #525570;
+              line-height: 33px;
+              & > span {
+                &:first-child {
+                  font-family: @font-family-bold;
+                  color: #333554;
+                  opacity: 0.84;
+                }
+                &:nth-child(2) {
+                  font-size: 20px;
+                  color: @primary-color;
+                }
+              }
+            }
+            &.desc-two {
+              padding: 0 24px;
+              text-align: justify;
+              font-size: 15px;
+              opacity: 0.6;
+              color: #333554;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &-right {
+    display: flex;
+    align-items: center;
+    width: @login-container-width;
+    height: 100%;
+    background-color: #ffffff;
+
+    &-content {
+      width: 340px;
+      margin: 0 auto;
+
+      &-title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .logo {
+          width: 240px;
+          height: 31px;
+        }
+        .desc {
+          margin-top: 12px;
+          font-size: 16px;
+          color: rgba(14, 16, 51, 0.84);
+          line-height: 30px;
+        }
+      }
+
+      &-content {
+        width: 100%;
+        padding-top: 85px;
+        .login-form {
+          .dcloud-form-item-label > label {
+            font-size: 14px;
+            font-family: @font-family;
+            color: #303a51;
+            line-height: 20px;
+          }
+          .dcloud-input .dcloud-input-affix-wrapper {
+            height: 40px;
+          }
+          .submit-btn {
+            width: 100%;
+            height: 50px;
+            margin-top: 22px;
+            > span {
+              font-family: @font-family-bold;
+              font-size: 18px;
+              color: #ffffff;
+            }
+          }
+        }
+      }
+
+      &-bottom {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 50px;
+
+        p {
+          font-size: 12px;
+          color: #999999;
+          letter-spacing: 0;
+          text-align: center;
+          line-height: 18px;
+        }
+      }
+    }
+  }
+}

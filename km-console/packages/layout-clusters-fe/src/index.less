@@ -1,0 +1,260 @@
+@font-face {
+  font-family: 'DIDIFD-Medium';
+  src: url(assets/DIDIFD-Medium.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'DIDIFD-Black';
+  src: url(assets/DIDIFD-Black.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'DIDIFD-Regular';
+  src: url(assets/DIDIFD-Regular.woff2) format('woff2');
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+@body-background: #ebebf3;
+
+html {
+}
+
+body {
+}
+
+#layout {
+  height: 100%;
+  .dcd-layout-two-columns {
+    > div:nth-child(3) {
+      height: 0;
+    }
+  }
+}
+
+.dcd-layout-two-columns .dcd-layout-two-columns-header .left .header-logo {
+  height: 24px;
+}
+
+.ant-layout {
+  background-color: #f9f9fa;
+}
+
+.hide {
+  display: none;
+}
+
+li {
+  list-style-type: none;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mt-24 {
+  margin-top: 24px;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.success {
+  color: #46d677;
+}
+
+.error {
+  color: #ef645c;
+}
+
+.ml-5 {
+  margin-left: 5px;
+}
+
+.ml-10 {
+  margin-left: 10px;
+}
+
+.ml-15 {
+  margin-left: 15px;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+
+.mr-10 {
+  margin-right: 10px;
+}
+
+.mr-15 {
+  margin-right: 15px;
+}
+
+.pt-20 {
+  padding-top: 20px;
+}
+
+.fr {
+  float: right;
+}
+
+.ant-select-selector {
+  text-align: left;
+}
+
+.table-item-tags {
+  .item-nums {
+    background: rgba(42, 143, 255, 0.06);
+    border: 0 solid #2a8fff;
+    border-radius: 1px;
+
+    transform: rotate(-360deg);
+    font-family: @font-family-bold;
+    font-size: 10px;
+    color: #2a8fff;
+    text-align: right;
+    line-height: 10px;
+  }
+
+  .ant-tag {
+    background: #f8fafd;
+    border: 1px solid #eaeef5;
+    border-radius: 1px;
+    font-size: 12px;
+    color: #303a51;
+    text-align: center;
+    line-height: 20px;
+  }
+}
+
+.table-popover {
+  max-width: 560px;
+  max-height: 200px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  .ant-tag {
+    margin: 5px;
+    background: #f8fafd;
+    border: 1px solid #eaeef5;
+    border-radius: 1px;
+    font-size: 12px;
+    color: #303a51;
+    text-align: center;
+    line-height: 20px;
+  }
+}
+
+.line-chart-sp {
+  position: relative;
+  text-align: center;
+  padding-top: 20px;
+
+  &.no-padding {
+    padding-top: 0px;
+  }
+
+  .chart-op {
+    position: absolute;
+    top: -29px;
+    right: 0px;
+
+    span {
+      margin-left: 19px;
+      cursor: pointer;
+    }
+  }
+}
+
+.cmb-page-header {
+  &.ant-page-header {
+    background: #ffffff;
+    border-radius: 2px;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 7px 24px 4px 24px;
+    font-family: Helvetica-Bold;
+    font-size: 18px;
+    color: #374053;
+  }
+}
+
+.modal-metric-box {
+  .ant-form-item {
+    margin-bottom: 0px !important;
+  }
+
+  .metric-box-chart {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ant-modal-body {
+    padding: 0px 20px 20px 20px;
+  }
+
+  .select-time-box {
+    margin-bottom: 0px !important;
+  }
+
+  .select-type-time-form {
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+}
+
+.ant-table-wrapper.dantd-table .ant-table-pagination.ant-pagination {
+  margin: 10px 0px 0px 0px !important;
+}
+
+.table-alert {
+  margin-top: 10px !important;
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+  text-align: left;
+
+  &.no-margin {
+    margin: 0px !important;
+    width: 100%;
+  }
+
+  &.small-margin {
+    margin: 10px 0px !important;
+  }
+
+  .ant-alert-message {
+    color: #f4a838;
+  }
+}
+
+.dcloud-layout-content {
+  padding: 10px;
+}
+
+.d-table-box-header {
+  // 去除DTable的margin
+  margin-bottom: 0px !important;
+}
+
+// 抽屉内 Alert 特殊样式
+.dcloud-drawer {
+  &-body {
+    .drawer-alert-full-screen {
+      border: none;
+      margin-left: -20px;
+      margin-right: -20px;
+      .dcloud-alert-icon {
+        font-size: 16px;
+      }
+    }
+  }
+}

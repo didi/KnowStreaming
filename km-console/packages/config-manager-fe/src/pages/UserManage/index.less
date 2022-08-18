@@ -1,0 +1,46 @@
+.checkbox-content-ellipsis {
+  width: 100%;
+  & > span:last-child {
+    width: calc(100% - 16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.role-tab-detail,
+.role-tab-assign-user {
+  .desc-row {
+    .label-col,
+    .value-col {
+      font-size: 13px;
+      line-height: 18px;
+    }
+    .label-col {
+      color: #74788d;
+      text-align: right;
+    }
+    .value-col {
+      color: #495057;
+    }
+  }
+}
+
+.role-tab-detail .role-permissions-container {
+  margin-top: 24px;
+  .title {
+    height: 40px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #f9f9fa;
+    font-family: @font-family-bold;
+    font-size: 13px;
+    color: #353a40;
+    text-align: left;
+    line-height: 20px;
+  }
+}
+
+.role-tab-assign-user .desc-row {
+  margin-bottom: 24px;
+}

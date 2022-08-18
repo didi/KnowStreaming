@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>km-persistence</artifactId>
+    <version>${km.revision}</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <artifactId>km</artifactId>
+        <groupId>com.xiaojukeji.kafka</groupId>
+        <version>${km.revision}</version>
+    </parent>
+
+    <properties>
+        <!-- maven properties -->
+        <maven.test.skip>true</maven.test.skip>
+        <downloadSources>true</downloadSources>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <file_encoding>UTF-8</file_encoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>km-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.zqrferrari</groupId>
+            <artifactId>logi-elasticsearch-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.13</artifactId>
+        </dependency>
+    </dependencies>
+</project>

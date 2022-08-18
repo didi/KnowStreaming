@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.partition.PartitionDAO">
+    <resultMap id="PartitionMap"              type="com.xiaojukeji.know.streaming.km.common.bean.po.partition.PartitionPO">
+        <id column="id"                       property="id" />
+        <result column="create_time"          property="createTime" />
+        <result column="update_time"          property="updateTime" />
+
+        <result column="cluster_phy_id"       property="clusterPhyId" />
+        <result column="topic_name"           property="topicName" />
+        <result column="partition_id"         property="partitionId" />
+        <result column="leader_broker_id"     property="leaderBrokerId" />
+        <result column="in_sync_replicas"     property="inSyncReplicas" />
+        <result column="assign_replicas"      property="assignReplicas" />
+  </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.partition.PartitionPO">
+        REPLACE ks_km_partition
+            (cluster_phy_id, topic_name, partition_id, leader_broker_id, in_sync_replicas, assign_replicas)
+        VALUES
+            (#{clusterPhyId}, #{topicName}, #{partitionId}, #{leaderBrokerId}, #{inSyncReplicas}, #{assignReplicas})
+    </insert>
+</mapper>

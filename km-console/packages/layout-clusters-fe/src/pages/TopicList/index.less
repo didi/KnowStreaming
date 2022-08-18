@@ -1,0 +1,236 @@
+.operation-bar {
+  // height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  .left {
+    display: flex;
+    align-items: center;
+    .divider {
+      margin-left: 8px;
+      margin-right: 8px;
+      width: 1px;
+      height: 20px;
+      background-color: #ced4da;
+    }
+    .internal-switch {
+      display: flex;
+      align-items: center;
+      > span {
+        margin-left: 4px;
+      }
+    }
+  }
+  .right {
+    display: flex;
+    align-items: center;
+    .dcloud-form-item {
+      margin-bottom: 0;
+    }
+    .search-input {
+      width: 248px;
+      margin-right: 8px;
+    }
+    .search-input-short {
+      width: 120px;
+      margin-right: 8px;
+    }
+    .batch-btn{
+      margin-right: 8px;
+    }
+    .add-btn {
+      width: 117px;
+    }
+  }
+}
+.operation-list {
+  button {
+    padding: 0;
+    margin-right: 12px;
+  }
+}
+.metric-data-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  .cur-val {
+    width: 34px;
+    margin-right: 11px;
+  }
+  .dcloud-spin-nested-loading{
+    flex: 1;
+  }
+}
+.del-topic-modal,
+.cluster-topic-add {
+  .tip-info {
+    height: 27px;
+    line-height: 27px;
+    color: #592d00;
+    padding: 0 14px;
+    font-size: 13px;
+    background: #fffae0;
+    .anticon {
+      color: #ffc300;
+      margin-right: 4px;
+    }
+    .test-right-away {
+      color: #556ee6;
+      cursor: pointer;
+    }
+    .dcloud-alert-content{
+      flex: none;
+    }
+  }
+}
+.cluster-topic-add {
+  .data-save-time-label{
+    &>.dcloud-form-item-control{
+      &>.dcloud-form-item-explain{
+        display: none;
+      }
+    }
+  }
+  .data-save-time-wrap {
+    display: flex;
+    .num {
+      width: 370px;
+      margin-right: 20px;
+    }
+    .unit {
+      width: 370px;
+    }
+  }
+  .more-config {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    .txt {
+      width: 52px;
+      color: #495057;
+      font-family: @font-family-bold;
+    }
+    .horizontal-line {
+      width: 334px;
+      height: 1px;
+      margin: 8px 4px;
+      background: #ced4da;
+    }
+    .switch-expand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #556EE6;
+      .txt {
+        width: 26px;
+        margin-right: 4px;
+        color: #556EE6;
+        font-family: @font-family;
+      }
+      .anticon {
+        transform: scaleY(0.9);
+        padding: 4px;
+      }
+    }
+  }
+  .tip-info {
+    margin-top: 7px;
+    margin-bottom: 13px;
+  }
+}
+.operate-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .operate-btns-divider {
+    width: 1px;
+    height: 17px;
+    background: rgba(0, 0, 0, 0.13);
+    margin: 0 16px;
+  }
+}
+.msg-size-info-modal {
+  .msg-size-info {
+    line-height: 18px;
+    margin-bottom: 8px;
+  }
+  .statistics-info {
+    text-align: right;
+    span {
+      margin-left: 10px;
+      color: #adb5bc;
+    }
+  }
+}
+.expand-partition-drawer {
+  .dcloud-drawer-body {
+    padding: 12px 20px;
+    .brief-info {
+      display: flex;
+      .item {
+        display: flex;
+        font-size: 13px;
+        line-height: 18px;
+        .field {
+          width: 68px;
+          color: #74788d;
+        }
+        .desc-field {
+          width: 34px;
+        }
+        .val,
+        .desc-val {
+          color: #495057;
+          letter-spacing: 0;
+          font-weight: 400;
+        }
+        .val {
+          width: 105px;
+          margin-left: 12px;
+        }
+        .desc-val {
+          width: 809px;
+          height: 36px;
+          overflow: hidden;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+        }
+      }
+    }
+    .operation {
+      display: flex;
+      align-items: center;
+      margin-top: 24px;
+      font-size: 12px;
+      .partition-input {
+        display: flex;
+        .cur,
+        .expand-to {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .remark {
+            margin-left: 4px;
+            color: #74788d;
+          }
+        }
+        .expand-to {
+          margin-left: 40px;
+        }
+      }
+    }
+  }
+}
+
+
+.create-topic-flex-layout{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  .dcloud-form-item{
+    width: 370px;
+  }
+}

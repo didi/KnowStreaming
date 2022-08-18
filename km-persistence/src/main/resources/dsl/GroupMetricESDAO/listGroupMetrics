@@ -1,0 +1,71 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "group": {
+              "value": "%s"
+            }
+         }
+       },
+       {
+         "term": {
+           "topic": {
+             "value": "%s"
+           }
+        }
+       },
+       {
+         "term": {
+           "partitionId": {
+            "value": %d
+          }
+        }
+       },
+       {
+        "term": {
+          "groupMetric": {
+            "value": "0"
+          }
+        }
+       },
+       {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+      {
+        "timestamp": {
+          "order": "desc"
+        }
+      }
+    ],
+   "aggs": {
+     "hist": {
+       "date_histogram": {
+         "field": "timestamp",
+         "fixed_interval": "%s",
+         "time_zone": "Asia/Shanghai",
+         "min_doc_count": 0
+       },
+       "aggs": {
+         %s
+       }
+     }
+   }
+}

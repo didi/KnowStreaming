@@ -1,0 +1,27 @@
+apiVersion: v2
+name: knowstreaming-manager
+description: A Helm chart for Kubernetes
+
+type: application
+
+version: 0.1.0
+
+maintainers:
+- email: didicloud@didiglobal.com
+  name: didicloud
+
+appVersion: "1.0.0"
+
+dependencies:
+  - name: knowstreaming-web
+    version: 0.1.0
+    repository: https://docker.nginx.com/
+    condition: knowstreaming-manager.knowstreaming-web.enabled,web.enabled
+  - name: elasticsearch
+    version: 7.6.0
+    repository: https://docker.elastic.co/
+    condition: knowstreaming-manager.elasticsearch.enabled,elasticsearch.enabled
+  - name: ksmysql
+    version: 5.7.38-1
+    repository: https://docker.mysql.co/
+    condition: knowstreaming-manager.ksmysql.enabled,ksmysql.enabled

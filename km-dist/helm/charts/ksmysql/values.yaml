@@ -1,0 +1,30 @@
+# Default values for k11gMysql.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+mysql:
+  dbname: k11g
+  username: root
+  password: "admin2022_"
+
+replicaCount: 1
+
+resources:
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+  requests:
+    cpu: "1000m"
+    memory: "2Gi"
+
+service:
+  name: k11gmysql-server
+  type: ClusterIP
+  port: 3306
+
+persistence:
+  enabled: true
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 30Gi
