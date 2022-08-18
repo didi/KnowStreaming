@@ -1,6 +1,6 @@
 {
   "name": "logi-kafka",
-  "version": "2.6.1",
+  "version": "3.0.0-beta",
   "description": "",
   "scripts": {
     "prestart": "npm install --save-dev webpack-dev-server",

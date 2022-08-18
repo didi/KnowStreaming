@@ -145,7 +145,7 @@ export const Header = observer((props: IHeader) => {
       <div className="left-content">
         <img className="kafka-header-icon" src={logoUrl} alt="" />
         <span className="kafka-header-text">LogiKM</span>
-        <a className='kafka-header-version' href="https://github.com/didi/Logi-KafkaManager/releases" target='_blank'>v2.6.1</a>
+        <a className='kafka-header-version' href="https://github.com/didi/Logi-KafkaManager/releases" target='_blank'>v3.0.0-beta</a>
         {/* 添加版本超链接 */}
       </div>
       <div className="mid-content">
