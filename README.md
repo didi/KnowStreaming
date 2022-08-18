@@ -113,7 +113,7 @@ PS:提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 ## 6 协议
 
-`Know Streaming`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
+`Know Streaming`基于`AGPL-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
 
 ## 7 Star History
 
