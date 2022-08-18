@@ -123,9 +123,9 @@
 <br/>
 <br/>
 
-👍 我们正在组建国内最大，最权威的 **[Kafka中文社区](https://z.didi.cn/5gSF9)**
+👍 我们组建了国内最大，最权威的 **[Kafka中文社区](https://z.didi.cn/5gSF9)**
 
-在这里你可以结交各大互联网的 Kafka大佬 以及 3000+ Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待 👏 &nbsp; 您的加入中～ https://z.didi.cn/5gSF9
+在这里你可以结交各大互联网的 Kafka大佬 以及 4000+ Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待 👏 &nbsp; 您的加入中～ https://z.didi.cn/5gSF9
 
 有问必答~！ 互动有礼~！
 
@@ -135,4 +135,4 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 **`2、微信群`**
 
-微信加群：添加`mike_zhangliang`、`danke-x`的微信号备注Logi加群。
+微信加群：添加`mike_zhangliang`、`PenceXie`的微信号备注Kafka加群。
