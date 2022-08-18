@@ -91,7 +91,7 @@
 <font color=red size=5><b>【Kafka中文社区】</b></font>
 </center>
   
-在这里你可以结交各大互联网Kafka大佬以及3000+Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待您的加入中～https://z.didi.cn/5gSF9  
+在这里你可以结交各大互联网Kafka大佬以及4000+Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待您的加入中～https://z.didi.cn/5gSF9  
 
 <font color=red size=5>有问必答~！  </font>
 
