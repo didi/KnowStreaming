@@ -80,7 +80,7 @@
 
 ## 4 知识星球
 
-<img width="447" alt="image" src="https://user-images.githubusercontent.com/71620349/147314042-843a371a-48c0-4d9a-a65e-ca40236f3300.png">
+<img width="447" alt="image" src="https://user-images.githubusercontent.com/71620349/185357284-fdff1dad-c5e9-4ddf-9a82-0be1c970980d.JPG">
 
 <br>
 <center>
