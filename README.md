@@ -1,6 +1,7 @@
 
 <p align="center">
-<img src="docs/assets/KnowStreamingLogo.png" width = "512" height = "129" div align=center />
+<img src="https://user-images.githubusercontent.com/71620349/185368586-aed82d30-1534-453d-86ff-ecfa9d0f35bd.png" width = "256"  div align=center />
+
 </p>
 
 <p align="center">
@@ -111,7 +112,7 @@
 **`1、知识星球`**
 
 <p align="left">
-<img src="docs/assets/readme/ZSXQ.jpg" width = "512" height = "160" div align=left />
+<img src="https://user-images.githubusercontent.com/71620349/185357284-fdff1dad-c5e9-4ddf-9a82-0be1c970980d.JPG"  height = "180" div align=left />
 </p>       
 
 <br/>
