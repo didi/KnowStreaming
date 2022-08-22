@@ -1,13 +1,13 @@
 
 <p align="center">
-<img src="https://user-images.githubusercontent.com/71620349/185368586-aed82d30-1534-453d-86ff-ecfa9d0f35bd.png" width = "256"  div align=center />
+<img src="docs/assets/KnowStreamingLogo.png" width = "256"  div align=center />
 
 </p>
 
 <p align="center">
     <a href="https://knowstreaming.com">产品官网</a> | 
     <a href="https://github.com/didi/KnowStreaming/releases">下载地址</a> | 
-    <a href="https://doc.knowstreaming.com">文档资源</a> | 
+    <a href="https://doc.knowstreaming.com/product">文档资源</a> | 
     <a href="https://demo.knowstreaming.com">体验环境</a> 
 </p>
 
@@ -45,27 +45,23 @@
 
 ## `Know Streaming` 简介
 
+`Know Streaming`是一套云原生的Kafka管控平台，脱胎于众多互联网内部多年的Kafka运营实践经验，专注于Kafka运维管控、监控告警、资源治理、多活容灾等核心场景。在用户体验、监控、运维管控上进行了平台化、可视化、智能化的建设，提供一系列特色的功能，极大地方便了用户和运维人员的日常使用，让普通运维人员都能成为Kafka专家。整体具有以下特点：
 
-`Know Streaming`专注于Kafka运维管控、监控告警、资源治理、多活容灾等核心场景，经历大规模集群、海量大数据考验，在用户体验、监控、运维管控上进行了平台化、可视化、智能化的建设，提供一系列特色的功能，极大地方便了用户和运维人员的日常使用。与其他Kafka管控产品相比，`Know Streaming` 具有以下特点：
+- 👀 &nbsp;**零侵入、全覆盖**
+  - 无需侵入改造 `Apache Kafka` ，一键便能纳管 `0.10.x` ~ `3.x.x` 众多版本的Kafka，包括 `ZK` 或 `Raft` 运行模式的版本，同时在兼容架构上具备良好的扩展性，帮助您提升集群管理水平；
 
-- 👀 &nbsp;**简单易用**：提炼高频的 CLI 能力，设计合理的产品使用路径，绘制清新美观的 GUI 页面，始终将简单易用作为产品的主要目标。
+- 🌪️ &nbsp;**零成本、界面化**
+  - 提炼高频 CLI 能力，设计合理的产品路径，提供清新美观的 GUI 界面，支持 Cluster、Broker、Topic、Group、Message、ACL 等组件 GUI 管理，普通用户5分钟即可上手；
 
+- 👏 &nbsp;**云原生、插件化**
+  - 基于云原生构建，具备水平扩展能力，只需要增加节点即可获取更强的采集及对外服务能力，提供众多可热插拔的企业级特性，覆盖可观测性生态整合、资源治理、多活容灾等核心场景；
 
-- 🌪️ &nbsp;**功能丰富**：主要包含`多集群管理`和`系统管理`两大块，具体包含：
-  1. 多集群管理：包括集群管理、Broker管理、Topic管理、Group管理、Security管理、Jobs管理等六大功能模块，几乎涵盖 CLI 的所有高频能力。
-  2. 系统管理：包括配置管理、用户管理、审计日志等3大功能模块，基本满足开源用户的使用需要。
+- 🚀 &nbsp;**专业能力**
+  - 集群管理：支持集群一键纳管，健康分析、核心组件观测 等功能；
+  - 观测提升：多维度指标观测大盘、观测指标最佳实践 等功能； 
+  - 异常巡检：集群多维度健康巡检、集群多维度健康分 等功能； 
+  - 能力增强：Topic扩缩分区、Topic扩缩副本、Topic副本迁移 等功能；
 
-
-- 👏 &nbsp;**版本兼容**：支持 0.10 及以上，**`ZK`** 或 **`Raft`** 运行模式的Kafka版本，此外在兼容架构上具备良好的扩展性。
-
-
-- 🚀 &nbsp;**专业能力**：不仅是 CLI 到 GUI 的优秀翻译，更是涵盖一系列专业能力的产品，包括但不限于：
-  1. 观测提升： **`多维度指标观测大盘`**、**`观测指标最佳实践`** 等功能。
-  2. 异常巡检：**`集群多维度健康巡检`**、 **`集群多维度健康分`** 等功能。
-  3. 能力增强：**`Topic扩缩副本`**、**`Topic副本迁移`** 等功能。
-
-
-- ⚡️ &nbsp;**支持分布式**：具备水平扩展能力，只需要增加节点即可获取更强的采集及对外服务能力。
 
 &nbsp;
 **产品图**
@@ -112,7 +108,7 @@
 **`1、知识星球`**
 
 <p align="left">
-<img src="https://user-images.githubusercontent.com/71620349/185357284-fdff1dad-c5e9-4ddf-9a82-0be1c970980d.JPG"  height = "180" div align=left />
+<img src="docs/assets/readme/ZSXQ.jpeg"  height = "180" div align=left />
 </p>       
 
 <br/>
@@ -124,9 +120,9 @@
 <br/>
 <br/>
 
-👍 我们组建了国内最大，最权威的 **[Kafka中文社区](https://z.didi.cn/5gSF9)**
+👍 我们正在组建国内最大，最权威的 **[Kafka中文社区](https://z.didi.cn/5gSF9)**
 
-在这里你可以结交各大互联网的 Kafka大佬 以及 4000+ Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待 👏 &nbsp; 您的加入中～ https://z.didi.cn/5gSF9
+在这里你可以结交各大互联网的 Kafka大佬 以及 3000+ Kafka爱好者，一起实现知识共享，实时掌控最新行业资讯，期待 👏 &nbsp; 您的加入中～ https://z.didi.cn/5gSF9
 
 有问必答~！ 互动有礼~！
 
@@ -136,4 +132,4 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 **`2、微信群`**
 
-微信加群：添加`mike_zhangliang`、`PenceXie`的微信号备注Kafka加群。
+微信加群：添加`mike_zhangliang`、`danke-x`的微信号备注Logi加群。
