@@ -9,6 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.ParamErrorException;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author didi
@@ -67,4 +68,10 @@ public interface ClusterPhyService {
             DuplicateException,
             NotExistException,
             AdminOperateException;
+
+    /**
+     * 获取系统已存在的kafka版本列表
+     * @return
+     */
+    Set<String> getClusterVersionSet();
 }

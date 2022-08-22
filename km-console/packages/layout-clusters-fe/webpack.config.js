@@ -85,11 +85,11 @@ module.exports = merge(config, {
     proxy: {
       '/ks-km/api/v3': {
         changeOrigin: true,
-        target: 'localhost',
+        target: 'https://api-kylin-xg02.intra.xiaojukeji.com/ks-km/',
       },
       '/logi-security/api/v1': {
         changeOrigin: true,
-        target: 'localhost',
+        target: 'https://api-kylin-xg02.intra.xiaojukeji.com/ks-km/',
       },
     },
   },

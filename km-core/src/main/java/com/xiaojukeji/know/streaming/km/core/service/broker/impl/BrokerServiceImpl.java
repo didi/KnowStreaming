@@ -59,7 +59,7 @@ import static com.xiaojukeji.know.streaming.km.common.jmx.JmxName.JMX_SERVER_APP
 public class BrokerServiceImpl extends BaseVersionControlService implements BrokerService {
     private static final ILog log = LogFactory.getLog(BrokerServiceImpl.class);
 
-    private static final String BROKER_LOG_DIR    = "getLogDir";
+    private static final String BROKER_LOG_DIR = "getLogDir";
 
     @Autowired
     private TopicService topicService;
@@ -83,6 +83,12 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
     protected VersionItemTypeEnum getVersionItemType() {
         return SERVICE_SEARCH_BROKER;
     }
+
+    private static final Cache<String, String> brokerVersionCache = Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.DAYS)
+            .maximumSize(5000)
+            .build();
+
 
     private final Cache<Long, List<Broker>> brokersCache = Caffeine.newBuilder()
             .expireAfterWrite(90, TimeUnit.SECONDS)
@@ -224,6 +230,22 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
         return "";
     }
+
+    @Override
+    public String getBrokerVersionFromKafkaWithCacheFirst(Long clusterPhyId, Integer brokerId,Long startTime) {
+        //id唯一确定一个broker
+        String id = String.valueOf(clusterPhyId) + String.valueOf(brokerId)+String.valueOf(startTime);
+        //先尝试读缓存
+        String brokerVersion = brokerVersionCache.getIfPresent(id);
+        if (brokerVersion != null) {
+            return brokerVersion;
+        }
+        String version = getBrokerVersionFromKafka(clusterPhyId, brokerId);
+        brokerVersionCache.put(id,version);
+        return version;
+    }
+
+
 
     @Override
     public Integer countAllBrokers() {

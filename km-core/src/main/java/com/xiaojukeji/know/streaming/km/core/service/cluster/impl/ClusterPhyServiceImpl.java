@@ -25,6 +25,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author didi
@@ -200,5 +202,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
             throw new AdminOperateException("modify cluster failed", e, ResultStatus.MYSQL_OPERATE_FAILED);
         }
+    }
+
+    @Override
+    public Set<String> getClusterVersionSet() {
+        List<ClusterPhy> clusterPhyList = listAllClusters();
+        Set<String> versionSet = clusterPhyList.stream().map(elem -> elem.getKafkaVersion()).collect(Collectors.toSet());
+        return versionSet;
     }
 }

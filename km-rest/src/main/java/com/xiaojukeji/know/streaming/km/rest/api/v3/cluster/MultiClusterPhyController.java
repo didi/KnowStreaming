@@ -9,11 +9,14 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyDashboa
 import com.xiaojukeji.know.streaming.km.common.constant.ApiPrefix;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
+import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 
 /**
@@ -27,6 +30,9 @@ public class MultiClusterPhyController {
     @Autowired
     private MultiClusterPhyManager multiClusterPhyManager;
 
+    @Autowired
+    private ClusterPhyService clusterPhyService;
+
     @ApiOperation(value = "多物理集群-大盘", notes = "")
     @PostMapping(value = "physical-clusters/dashboard")
     @ResponseBody
@@ -39,5 +45,11 @@ public class MultiClusterPhyController {
     @ResponseBody
     public Result<ClusterPhysStateVO> getClusterPhysState() {
         return Result.buildSuc(ConvertUtil.obj2Obj(multiClusterPhyManager.getClusterPhysState(), ClusterPhysStateVO.class));
+    }
+
+    @ApiOperation(value = "多物理集群-已存在kafka版本", notes = "")
+    @GetMapping(value = "physical-clusters/exist-version")
+    public Result<Set<String>> getClusterPhysVersion() {
+        return Result.buildSuc(clusterPhyService.getClusterVersionSet());
     }
 }

@@ -58,9 +58,9 @@ module.exports = () => {
       filename: cssFileName,
     }),
     !isProd &&
-      new ReactRefreshWebpackPlugin({
-        overlay: false,
-      }),
+    new ReactRefreshWebpackPlugin({
+      overlay: false,
+    }),
   ].filter(Boolean);
   const resolve = {
     symlinks: false,
@@ -86,17 +86,17 @@ module.exports = () => {
     },
     externals: isProd
       ? [
-          /^react$/,
-          /^react\/lib.*/,
-          /^react-dom$/,
-          /.*react-dom.*/,
-          /^single-spa$/,
-          /^single-spa-react$/,
-          /^moment$/,
-          /^antd$/,
-          /^lodash$/,
-          /^echarts$/,
-        ]
+        /^react$/,
+        /^react\/lib.*/,
+        /^react-dom$/,
+        /.*react-dom.*/,
+        /^single-spa$/,
+        /^single-spa-react$/,
+        /^moment$/,
+        /^antd$/,
+        /^lodash$/,
+        /^echarts$/,
+      ]
       : [],
     resolve,
     plugins,
@@ -163,14 +163,14 @@ module.exports = () => {
     },
     optimization: isProd
       ? {
-          minimizer: [
-            new TerserJSPlugin({
-              cache: true,
-              sourceMap: true,
-            }),
-            new OptimizeCSSAssetsPlugin({}),
-          ],
-        }
+        minimizer: [
+          new TerserJSPlugin({
+            cache: true,
+            sourceMap: true,
+          }),
+          new OptimizeCSSAssetsPlugin({}),
+        ],
+      }
       : {},
     devtool: isProd ? 'cheap-module-source-map' : '',
     node: {

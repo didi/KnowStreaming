@@ -211,7 +211,7 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
     private List<String> getBrokerVersionList(Long clusterPhyId, List<Broker> brokerList) {
         Set<String> brokerVersionList = new HashSet<>();
         for (Broker broker : brokerList) {
-            brokerVersionList.add(brokerService.getBrokerVersionFromKafka(clusterPhyId, broker.getBrokerId()));
+            brokerVersionList.add(brokerService.getBrokerVersionFromKafkaWithCacheFirst(broker.getClusterPhyId(),broker.getBrokerId(),broker.getStartTimestamp()));
         }
         brokerVersionList.remove("");
         return new ArrayList<>(brokerVersionList);

@@ -33,6 +33,7 @@ module.exports = merge(config, {
 
   output: {
     path: outPath,
+    // publicPath: isProd ? `//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn/${pkgJson.ident}/` : `http://localhost:${pkgJson.port}/${pkgJson.ident}/`,
     publicPath: isProd ? `/${pkgJson.ident}/` : `http://localhost:${pkgJson.port}/${pkgJson.ident}/`,
     library: pkgJson.ident,
     libraryTarget: 'amd',

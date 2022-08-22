@@ -56,6 +56,13 @@ public interface BrokerService {
     String getBrokerVersionFromKafka(Long clusterPhyId, Integer brokerId);
 
     /**
+     * 优先从本地缓存中获取Broker的版本信息
+     * @param
+     * @return
+     */
+    String getBrokerVersionFromKafkaWithCacheFirst(Long clusterPhyId, Integer brokerId,Long startTime);
+
+    /**
      * 获取总的Broker数
      */
     Integer countAllBrokers();
