@@ -281,7 +281,7 @@
   border-top-right-radius: 12px;
   box-shadow: 0 2px 4px 0 rgba(0,0,0,0.01), 0 3px 6px 3px rgba(0,0,0,0.01), 0 2px 6px 0 rgba(0,0,0,0.03);
   height: calc(100vh - 222px);
-  // overflow: auto;
+  overflow: hidden;
 }
 
 // select 覆盖hover样式
@@ -337,6 +337,10 @@
   .@{select-prefix-cls}-selector {
     background: rgba(33, 37, 41, 0.06);
     border: none;
+    // select 单选选中后再次打开选择列表时，输入框内文字颜色保持一致
+    .@{select-prefix-cls}-selection-item{
+      color: @input-color;
+    }
   }
 }
 

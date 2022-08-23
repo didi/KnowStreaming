@@ -3,8 +3,7 @@
  * 注意: HtmlWebpackPlugin hooks 是 beta 版本，正式版本接口可能会变
  */
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const PublicPath = '//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn';
-const PublicPath = '';
+const PublicPath = process.env.PUBLIC_PATH;
 const isProd = process.env.NODE_ENV === 'production';
 const commonDepsMap = [
   {
@@ -32,30 +31,44 @@ const commonDepsMap = [
     development: '/static/js/moment.min.js',
     production: `${PublicPath}/static/js/moment.min.js`,
   },
+  {
+    name: 'react-router',
+    development: '/static/js/react-router.min.js',
+    production: `${PublicPath}/static/js/react-router.min.js`,
+  },
+  {
+    name: 'react-router-dom',
+    development: '/static/js/react-router-dom.min.js',
+    production: `${PublicPath}/static/js/react-router-dom.min.js`,
+  },
+  {
+    name: 'lodash',
+    development: '/static/js/lodash.min.js',
+    production: `${PublicPath}/static/js/lodash.min.js`,
+  },
+  {
+    name: 'echarts',
+    development: '/static/js/echarts.min.js',
+    production: `${PublicPath}/static/js/echarts.min.js`,
+  },
+  {
+    name: 'history',
+    development: '/static/js/history.production.min.js',
+    production: `${PublicPath}/static/js/history.production.min.js`,
+  },
 ];
 
 function generateSystemJsImportMap() {
-  const importMap = {
-    'react-router': 'https://unpkg.com/react-router@5.2.1/umd/react-router.min.js',
-    'react-router-dom': 'https://unpkg.com/react-router-dom@5.2.1/umd/react-router-dom.min.js',
-    lodash: 'https://unpkg.com/lodash@4.17.21/lodash.min.js',
-    history: 'https://unpkg.com/history@5/umd/history.development.js',
-    echarts: 'https://unpkg.com/echarts@5.3.1/dist/echarts.min.js',
-  };
-  //if (process.env.NODE_ENV === 'production') {
+  const importMap = {};
   commonDepsMap.forEach((o) => {
     importMap[o.name] = o[process.env.NODE_ENV];
   });
-  //}
   return JSON.stringify({
     imports: importMap,
   });
 }
 
 class CoverHtmlWebpackPlugin {
-  constructor(options) {
-    this.isBusiness = options.BUSINESS_VERSION;
-  }
   apply(compiler) {
     compiler.hooks.compilation.tap('CoverHtmlWebpackPlugin', (compilation) => {
       HtmlWebpackPlugin.getHooks(compilation).beforeEmit.tapAsync('CoverHtmlWebpackPlugin', async (data, cb) => {
@@ -69,11 +82,16 @@ class CoverHtmlWebpackPlugin {
         };
         const assetJson = JSON.parse(data.plugin.assetJson);
         let links = '';
+        let vendors = '';
 
-        assetJson.forEach((item) => {
+        assetJson.reverse().forEach((item) => {
           if (/\.js$/.test(item)) {
+            // if (item.includes('vendor~')) {
+            //   vendors += `<script async src="${item}"></script>`;
+            // } else {
             // TODO: entry 只有一个
             portalMap['@portal/layout'] = item;
+            // }
           } else if (/\.css$/.test(item)) {
             links += `<link href="${item}" rel="stylesheet">`;
           }
@@ -91,10 +109,11 @@ class CoverHtmlWebpackPlugin {
                   <script src='${isProd ? PublicPath : ''}/static/js/named-exports.min.js'></script>
                   <script src='${isProd ? PublicPath : ''}/static/js/use-default.min.js'></script>
                   <script src='${isProd ? PublicPath : ''}/static/js/amd.js'></script>
-                  ${this.isBusiness ? `<script src=${isProd ? PublicPath : ''}/static/js/ksl.min.js></script>` : ''}
+                  ${process.env.BUSINESS_VERSION === 'true' ? `<script src=${isProd ? PublicPath : ''}/static/js/ksl.min.js></script>` : ''}
                 </head>
                 <body>
                   ${depsMap}
+                  ${vendors}
                   <script type="systemjs-importmap">
                     {
                       "imports": ${JSON.stringify(portalMap)}

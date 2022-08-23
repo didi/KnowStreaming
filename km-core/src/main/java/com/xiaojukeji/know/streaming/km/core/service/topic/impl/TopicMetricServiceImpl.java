@@ -29,7 +29,7 @@ import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.cache.CollectMetricsLocalCache;
+import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
@@ -120,7 +120,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
 
     @Override
     public Result<List<TopicMetrics>> collectTopicMetricsFromKafkaWithCacheFirst(Long clusterPhyId, String topicName, String metricName) {
-        List<TopicMetrics> metricsList = CollectMetricsLocalCache.getTopicMetrics(clusterPhyId, topicName, metricName);
+        List<TopicMetrics> metricsList = CollectedMetricsLocalCache.getTopicMetrics(clusterPhyId, topicName, metricName);
         if(null != metricsList) {
             return Result.buildSuc(metricsList);
         }
@@ -133,7 +133,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         // 更新cache
         TopicMetrics metrics = metricsResult.getData().get(0);
         metrics.getMetrics().entrySet().forEach(
-                metricEntry -> CollectMetricsLocalCache.putTopicMetrics(
+                metricEntry -> CollectedMetricsLocalCache.putTopicMetrics(
                         clusterPhyId,
                         metrics.getTopic(),
                         metricEntry.getKey(),

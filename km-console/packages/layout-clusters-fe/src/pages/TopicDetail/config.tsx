@@ -129,22 +129,22 @@ export const getTopicMessagesColmns = () => {
 
 export const getTopicConfigurationColmns = (arg: any) => {
   const columns: any = [
-    {
-      title: '',
-      dataIndex: 'readOnly',
-      key: 'readOnly',
-      align: 'right',
-      // eslint-disable-next-line react/display-name
-      render: (t: string, r: any) => {
-        return t ? (
-          <Tooltip title="该配置无法修改" visible={r.name === arg?.readOnlyRecord?.name && arg?.readOnlyVisible}>
-            <IconFont style={{ color: '#556EE6', fontSize: '16px' }} type="icon-suoding" />
-          </Tooltip>
-        ) : null;
-      },
-      width: 56,
-      classsName: 'xxxxxxxx',
-    },
+    // {
+    //   title: '',
+    //   dataIndex: 'readOnly',
+    //   key: 'readOnly',
+    //   align: 'right',
+    //   // eslint-disable-next-line react/display-name
+    //   render: (t: string, r: any) => {
+    //     return t ? (
+    //       <Tooltip title="该配置无法修改" visible={r.name === arg?.readOnlyRecord?.name && arg?.readOnlyVisible}>
+    //         <IconFont style={{ color: '#556EE6', fontSize: '16px' }} type="icon-suoding" />
+    //       </Tooltip>
+    //     ) : null;
+    //   },
+    //   width: 56,
+    //   classsName: 'xxxxxxxx',
+    // },
     {
       title: '配置名',
       dataIndex: 'name',

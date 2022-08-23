@@ -16,7 +16,7 @@ import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.cache.CollectMetricsLocalCache;
+import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
@@ -29,10 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -78,7 +75,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
 
     @Override
     public Result<List<PartitionMetrics>> collectPartitionsMetricsFromKafkaWithCache(Long clusterPhyId, String topicName, String metricName) {
-        List<PartitionMetrics> metricsList = CollectMetricsLocalCache.getPartitionMetricsList(clusterPhyId, topicName, metricName);
+        List<PartitionMetrics> metricsList = CollectedMetricsLocalCache.getPartitionMetricsList(clusterPhyId, topicName, metricName);
         if(null != metricsList) {
             return Result.buildSuc(metricsList);
         }
@@ -91,7 +88,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
         // 更新cache
         PartitionMetrics metrics = metricsResult.getData().get(0);
         metrics.getMetrics().entrySet().forEach(
-                metricEntry -> CollectMetricsLocalCache.putPartitionMetricsList(
+                metricEntry -> CollectedMetricsLocalCache.putPartitionMetricsList(
                         clusterPhyId,
                         metrics.getTopic(),
                         metricEntry.getKey(),
@@ -100,6 +97,32 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
         );
 
         return metricsResult;
+    }
+
+    @Override
+    public Result<List<PartitionMetrics>> collectPartitionsMetricsFromKafka(Long clusterPhyId, String topicName, List<String> metricNameList) {
+        Set<String> collectedMetricSet = new HashSet<>();
+
+        Map<Integer, PartitionMetrics> metricsMap = new HashMap<>();
+        for (String metricName: metricNameList) {
+            if (collectedMetricSet.contains(metricName)) {
+                continue;
+            }
+
+            Result<List<PartitionMetrics>> metricsResult = this.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, metricName);
+            if(null == metricsResult || metricsResult.failed() || null == metricsResult.getData() || metricsResult.getData().isEmpty()) {
+                continue;
+            }
+
+            collectedMetricSet.addAll(metricsResult.getData().get(0).getMetrics().keySet());
+
+            for (PartitionMetrics metrics: metricsResult.getData()) {
+                metricsMap.putIfAbsent(metrics.getPartitionId(), metrics);
+                metricsMap.get(metrics.getPartitionId()).putMetric(metrics.getMetrics());
+            }
+        }
+
+        return Result.buildSuc(new ArrayList<>(metricsMap.values()));
     }
 
     @Override

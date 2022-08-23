@@ -1,16 +1,16 @@
 /* eslint-disable */
-const isProd = process.env.NODE_ENV === 'production';
-const pkgJson = require('./package');
 const path = require('path');
-// const outPath = path.resolve(__dirname, `../../pub/${pkgJson.ident}`);
-const outPath = path.resolve(__dirname, `../../../km-rest/src/main/resources/templates/${pkgJson.ident}`);
+require('dotenv').config({ path: path.resolve(process.cwd(), '../../.env') });
+const isProd = process.env.NODE_ENV === 'production';
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const merge = require('webpack-merge');
 const webpack = require('webpack');
-
+const merge = require('webpack-merge');
+const pkgJson = require('./package');
 const getWebpackCommonConfig = require('./config/d1-webpack.base');
-const config = getWebpackCommonConfig();
-module.exports = merge(config, {
+const outPath = path.resolve(__dirname, `../../../km-rest/src/main/resources/templates/${pkgJson.ident}`);
+const jsFileName = isProd ? '[name]-[chunkhash].js' : '[name].js';
+
+module.exports = merge(getWebpackCommonConfig(), {
   mode: isProd ? 'production' : 'development',
   entry: {
     [pkgJson.ident]: ['./src/index.tsx'],
@@ -30,13 +30,13 @@ module.exports = merge(config, {
       inject: 'body',
     }),
   ],
-
   output: {
     path: outPath,
-    // publicPath: isProd ? `//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn/${pkgJson.ident}/` : `http://localhost:${pkgJson.port}/${pkgJson.ident}/`,
-    publicPath: isProd ? `/${pkgJson.ident}/` : `http://localhost:${pkgJson.port}/${pkgJson.ident}/`,
+    publicPath: isProd ? `${process.env.PUBLIC_PATH}/${pkgJson.ident}/` : `http://localhost:${pkgJson.port}/${pkgJson.ident}/`,
     library: pkgJson.ident,
     libraryTarget: 'amd',
+    filename: jsFileName,
+    chunkFilename: jsFileName,
   },
   devtool: isProd ? 'none' : 'cheap-module-eval-source-map',
   devServer: {

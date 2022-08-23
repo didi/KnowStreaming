@@ -1,4 +1,4 @@
-import { getUnit, getDataNumberUnit, getBasicChartConfig } from '@src/constants/chartConfig';
+import { getUnit, getDataNumberUnit, getBasicChartConfig, CHART_COLOR_LIST } from '@src/constants/chartConfig';
 import { MetricType } from '@src/api';
 import { MetricsDefine } from '@src/pages/CommonConfig';
 
@@ -140,7 +140,7 @@ const seriesCallback = (lines: { name: string; data: [number, string | number][]
     return {
       ...line,
       lineStyle: {
-        width: 1,
+        width: 1.5,
       },
       symbol: 'emptyCircle',
       symbolSize: 4,
@@ -158,6 +158,7 @@ export const getChartConfig = (title: string, metricLength: number) => {
       title: { show: false },
       grid: { top: 24 },
       tooltip: { enterable: metricLength > 9, legendContextMaxHeight: 192 },
+      color: CHART_COLOR_LIST,
       // xAxis: {
       //   type: 'time',
       //   boundaryGap: ['5%', '5%'],

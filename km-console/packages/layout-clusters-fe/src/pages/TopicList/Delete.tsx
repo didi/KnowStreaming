@@ -56,9 +56,17 @@ export default (props: { record: any; onConfirm?: () => void }) => {
         okButtonProps={{
           danger: true,
           size: 'small',
+          style: {
+            paddingLeft: '16px',
+            paddingRight: '16px',
+          },
         }}
         cancelButtonProps={{
           size: 'small',
+          style: {
+            paddingLeft: '16px',
+            paddingRight: '16px',
+          },
         }}
       >
         <div className="tip-info">

@@ -8,7 +8,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class CollectMetricsLocalCache {
+public class CollectedMetricsLocalCache {
     private static final Cache<String, Float> brokerMetricsCache = Caffeine.newBuilder()
             .expireAfterWrite(60, TimeUnit.SECONDS)
             .maximumSize(2000)
@@ -30,47 +30,47 @@ public class CollectMetricsLocalCache {
             .build();
 
     public static Float getBrokerMetrics(Long clusterPhyId, Integer brokerId, String metricName) {
-        return brokerMetricsCache.getIfPresent(CollectMetricsLocalCache.genBrokerMetricKey(clusterPhyId, brokerId, metricName));
+        return brokerMetricsCache.getIfPresent(CollectedMetricsLocalCache.genBrokerMetricKey(clusterPhyId, brokerId, metricName));
     }
 
     public static void putBrokerMetrics(Long clusterPhyId, Integer brokerId, String metricName, Float value) {
         if (value == null) {
             return;
         }
-        brokerMetricsCache.put(CollectMetricsLocalCache.genBrokerMetricKey(clusterPhyId, brokerId, metricName), value);
+        brokerMetricsCache.put(CollectedMetricsLocalCache.genBrokerMetricKey(clusterPhyId, brokerId, metricName), value);
     }
 
     public static List<TopicMetrics> getTopicMetrics(Long clusterPhyId, String topicName, String metricName) {
-        return topicMetricsCache.getIfPresent(CollectMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName));
+        return topicMetricsCache.getIfPresent(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName));
     }
 
     public static void putTopicMetrics(Long clusterPhyId, String topicName, String metricName, List<TopicMetrics> metricsList) {
         if (metricsList == null) {
             return;
         }
-        topicMetricsCache.put(CollectMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName), metricsList);
+        topicMetricsCache.put(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName), metricsList);
     }
 
     public static List<PartitionMetrics> getPartitionMetricsList(Long clusterPhyId, String topicName, String metricName) {
-        return partitionMetricsCache.getIfPresent(CollectMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName));
+        return partitionMetricsCache.getIfPresent(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName));
     }
 
     public static void putPartitionMetricsList(Long clusterPhyId, String topicName, String metricName, List<PartitionMetrics> metricsList) {
         if (metricsList == null) {
             return;
         }
-        partitionMetricsCache.put(CollectMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName), metricsList);
+        partitionMetricsCache.put(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName), metricsList);
     }
 
     public static Float getReplicaMetrics(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, String metricName) {
-        return replicaMetricsValueCache.getIfPresent(CollectMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topicName, partitionId, metricName));
+        return replicaMetricsValueCache.getIfPresent(CollectedMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topicName, partitionId, metricName));
     }
 
     public static void putReplicaMetrics(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, String metricName, Float value) {
         if (value == null) {
             return;
         }
-        replicaMetricsValueCache.put(CollectMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topicName, partitionId, metricName), value);
+        replicaMetricsValueCache.put(CollectedMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topicName, partitionId, metricName), value);
     }
 
 

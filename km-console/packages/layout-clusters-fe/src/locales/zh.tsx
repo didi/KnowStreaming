@@ -32,7 +32,7 @@ export default {
   [`menu.${systemKey}.topic.dashbord`]: 'Overview',
   [`menu.${systemKey}.topic.list`]: 'Topics',
 
-  [`menu.${systemKey}.produce-consume`]: 'Testing',
+  [`menu.${systemKey}.produce-consume`]: 'Message',
   [`menu.${systemKey}.produce-consume.producer`]: 'Produce',
   [`menu.${systemKey}.produce-consume.consumer`]: 'Consume',
 

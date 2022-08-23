@@ -174,13 +174,7 @@ const JobsList: React.FC = (props: any) => {
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
           <Form form={form} layout="inline" onFinish={onFinish}>
             <Form.Item name="type">
-              <Select
-                allowClear
-                options={jobType}
-                style={{ width: '190px' }}
-                className={'detail-table-select'}
-                placeholder="选择任务类型"
-              />
+              <Select options={jobType} style={{ width: '190px' }} className={'detail-table-select'} placeholder="选择任务类型" />
             </Form.Item>
             <Form.Item name="jobTarget">
               <Input allowClear style={{ width: '190px' }} placeholder="请输入执行任务对象" />
@@ -188,7 +182,7 @@ const JobsList: React.FC = (props: any) => {
             <Form.Item name="status">
               <Select
                 mode="multiple"
-                maxTagCount={1}
+                maxTagCount={'responsive'}
                 options={runningStatus}
                 style={{ width: '190px' }}
                 className={'detail-table-select'}

@@ -17,7 +17,7 @@ import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.cache.CollectMetricsLocalCache;
+import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
@@ -79,7 +79,7 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
     @Override
     public Result<ReplicationMetrics> collectReplicaMetricsFromKafkaWithCache(Long clusterPhyId, String topic,
                                                                               Integer brokerId, Integer partitionId, String metric){
-        Float keyValue = CollectMetricsLocalCache.getReplicaMetrics(clusterPhyId, brokerId, topic, partitionId, metric);
+        Float keyValue = CollectedMetricsLocalCache.getReplicaMetrics(clusterPhyId, brokerId, topic, partitionId, metric);
         if(null != keyValue){
             ReplicationMetrics replicationMetrics = new ReplicationMetrics(clusterPhyId, topic, partitionId, brokerId);
             replicationMetrics.putMetric(metric, keyValue);
@@ -91,7 +91,7 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
 
         // 更新cache
         ret.getData().getMetrics().entrySet().stream().forEach(
-                metricNameAndValueEntry -> CollectMetricsLocalCache.putReplicaMetrics(
+                metricNameAndValueEntry -> CollectedMetricsLocalCache.putReplicaMetrics(
                         clusterPhyId,
                         brokerId,
                         topic,

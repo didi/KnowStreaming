@@ -103,8 +103,6 @@ public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics
             }
         }
 
-        doOptimizeMetric(metrics);
-
         // 记录采集性能
         metrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, (System.currentTimeMillis() - startTime) / 1000.0f);
     }

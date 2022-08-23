@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { debounce } from 'lodash';
 import { MetricDefaultChartDataType, MetricChartDataType, formatChartData, getDetailChartConfig } from './config';
 import { UNIT_MAP } from '@src/constants/chartConfig';
+import { CloseOutlined } from '@ant-design/icons';
 
 interface ChartDetailProps {
   metricType: MetricType;
@@ -51,6 +52,7 @@ const colunms = [
   {
     title: 'Host',
     dataIndex: 'name',
+    width: 200,
     render(name: string, record: any) {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -63,6 +65,7 @@ const colunms = [
   {
     title: 'Avg',
     dataIndex: 'avg',
+    width: 120,
     render(num: number) {
       return num.toFixed(2);
     },
@@ -70,6 +73,7 @@ const colunms = [
   {
     title: 'Max',
     dataIndex: 'max',
+    width: 120,
     render(num: number, record: any) {
       return (
         <div>
@@ -81,6 +85,7 @@ const colunms = [
   {
     title: 'Min',
     dataIndex: 'min',
+    width: 120,
     render(num: number, record: any) {
       return (
         <div>
@@ -92,6 +97,7 @@ const colunms = [
   {
     title: 'Latest',
     dataIndex: 'latest',
+    width: 120,
     render(latest: number[]) {
       return `${latest[1].toFixed(2)}`;
     },
@@ -553,7 +559,7 @@ const ChartDetail = (props: ChartDetailProps) => {
               </div>
               <div className="right">
                 <Button type="text" size="small" onClick={onClose}>
-                  <IconFont type="icon-guanbi" />
+                  <CloseOutlined />
                 </Button>
               </div>
             </div>

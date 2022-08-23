@@ -3,6 +3,7 @@ import * as singleSpa from 'single-spa';
 const customProps = {
   env: {
     NODE_ENV: process.env.NODE_ENV,
+    BUSINESS_VERSION: process.env.BUSINESS_VERSION,
   },
 };
 

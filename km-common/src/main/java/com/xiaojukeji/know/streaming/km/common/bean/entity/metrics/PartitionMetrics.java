@@ -20,7 +20,7 @@ public class PartitionMetrics extends BaseMetrics {
 
     private Integer     brokerId;
 
-    public PartitionMetrics(Long clusterId, String topicName, Integer brokerId, Integer partitionId){
+    public PartitionMetrics(Long clusterId, String topicName, Integer brokerId, Integer partitionId) {
         super(clusterId);
         this.topic          = topicName;
         this.brokerId       = brokerId;

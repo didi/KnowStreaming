@@ -30,8 +30,8 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const jobNameMap: any = {
-  expandAndReduce: '批量扩缩容',
-  transfer: '批量迁移',
+  expandAndReduce: '批量扩缩副本',
+  transfer: '批量迁移副本',
 };
 
 interface DefaultConfig {
@@ -454,6 +454,8 @@ export default (props: DefaultConfig) => {
                   <Select
                     placeholder="请选择Topic，可多选"
                     mode="multiple"
+                    maxTagCount={'responsive'}
+                    allowClear
                     onChange={(v: any) => {
                       setTopicSelectValue(v);
                     }}
@@ -473,6 +475,8 @@ export default (props: DefaultConfig) => {
                   <Select
                     placeholder="请选择Broker，可多选"
                     mode="multiple"
+                    maxTagCount={'responsive'}
+                    allowClear
                     onChange={(v: any) => {
                       setSelectBrokerList(v);
                     }}

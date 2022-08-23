@@ -250,17 +250,17 @@ export const getHealthySettingColumn = (form: any, data: any, clusterId: string)
               rules={
                 validator
                   ? [
-                    {
-                      required: true,
-                      validator: validator,
-                    },
-                  ]
+                      {
+                        required: true,
+                        validator: validator,
+                      },
+                    ]
                   : [
-                    {
-                      required: true,
-                      message: '请输入',
-                    },
-                  ]
+                      {
+                        required: true,
+                        message: '请输入',
+                      },
+                    ]
               }
             >
               {percent ? (
@@ -280,7 +280,7 @@ export const getHealthySettingColumn = (form: any, data: any, clusterId: string)
         };
 
         if (record.configItemName === 'Controller') {
-          return <div className="table-form-item">不等于 1 则不通过</div>;
+          return <div className="table-form-item">≠ 1 则不通过</div>;
         }
         if (record.configItemName === 'RequestQueueSize' || record.configItemName === 'NoLeader') {
           return (

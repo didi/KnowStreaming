@@ -131,8 +131,6 @@ public class TopicMetricCollector extends AbstractMetricCollector<List<TopicMetr
             }
         }
 
-        doOptimizeMetric(aggMetrics);
-
         // 记录采集性能
         aggMetrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, (System.currentTimeMillis() - startTime) / 1000.0f);
     }

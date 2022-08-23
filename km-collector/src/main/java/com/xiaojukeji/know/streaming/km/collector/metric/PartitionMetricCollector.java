@@ -124,7 +124,5 @@ public class PartitionMetricCollector extends AbstractMetricCollector<PartitionM
                 );
             }
         }
-
-        metricsMap.entrySet().forEach(elem -> doOptimizeMetric(elem.getValue()));
     }
 }

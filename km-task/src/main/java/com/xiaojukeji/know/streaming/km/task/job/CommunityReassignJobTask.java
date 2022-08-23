@@ -3,6 +3,8 @@ package com.xiaojukeji.know.streaming.km.task.job;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.consensual.ConsensualEnum;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignJobService;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
         consensual = ConsensualEnum.BROADCAST,
         timeout = 6 * 60)
 public class CommunityReassignJobTask extends AbstractClusterPhyDispatchTask {
+    private static final ILog log = LogFactory.getLog(CommunityReassignJobTask.class);
 
     @Autowired
     private ReassignJobService reassignJobService;
@@ -31,6 +34,9 @@ public class CommunityReassignJobTask extends AbstractClusterPhyDispatchTask {
 
         // 更新任务的状态
         Result<Void> rv = reassignJobService.verifyAndUpdateStatue(jobId);
+        if (rv != null && rv.failed()) {
+            log.error("class=CommunityReassignJobTask||method=processSubTask||jobId={}||result={}||msg=verify and update task status failed", jobId, rv);
+        }
 
         // 更新同步进度信息
         reassignJobService.getAndUpdateSubJobExtendData(jobId);

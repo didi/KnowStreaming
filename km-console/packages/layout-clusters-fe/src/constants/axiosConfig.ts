@@ -7,7 +7,6 @@ export const licenseEventBus = new EventBus();
 
 export const goLogin = () => {
   if (!window.location.pathname.includes('login')) {
-    // notification.error({ message: '当前未登录，将自动跳转到登录页' });
     window.history.replaceState({}, '', `/login?redirect=${window.location.href.slice(window.location.origin.length)}`);
   }
 };
@@ -22,7 +21,7 @@ serviceInstance.interceptors.request.use(
   (config: any) => {
     const user = Utils.getCookie('X-SSO-USER');
     const id = Utils.getCookie('X-SSO-USER-ID');
-    if ((!user || !id) && !window.location.pathname.toLowerCase().startsWith('/login')) {
+    if (!user || !id) {
       goLogin();
     } else {
       config.headers['X-SSO-USER'] = user; // 请求携带token

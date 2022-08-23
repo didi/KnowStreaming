@@ -4,6 +4,7 @@
   }
 }
 .joyride-tooltip {
+  position: relative;
   min-width: 284px;
   max-width: 384px;
   padding: 16px 24px;
@@ -36,6 +37,22 @@
       .dcloud-btn {
         margin-left: 4px;
       }
+    }
+  }
+  &-arrow {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #fff;
+    transform-origin: 4px;
+    &-line {
+      position: absolute;
+      top: 3px;
+      left: 7px;
+      width: 17px;
+      height: 1px;
+      background-color: #fff;
     }
   }
 }

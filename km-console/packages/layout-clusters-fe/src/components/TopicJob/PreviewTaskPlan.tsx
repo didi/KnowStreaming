@@ -97,7 +97,7 @@ export default (props: any) => {
         className="preview-task-plan-drawer"
         maskClosable={false}
         destroyOnClose
-      // closeIcon={<ArrowLeftOutlined />}
+        // closeIcon={<ArrowLeftOutlined />}
       >
         <Table
           rowKey={'topicName'}
@@ -130,6 +130,8 @@ export default (props: any) => {
                       <Select
                         value={reassignBrokerIdList}
                         mode="multiple"
+                        maxTagCount={'responsive'}
+                        allowClear
                         onChange={(selBrokerIds) => {
                           let reassignBrokerIdListEditStatusMapCopy = JSON.parse(JSON.stringify(reassignBrokerIdListEditStatusMap));
                           reassignBrokerIdListEditStatusMapCopy[topicRecord.topicName][partitionRecord.partitionId].reassignBrokerIdList =

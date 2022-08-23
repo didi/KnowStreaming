@@ -292,6 +292,8 @@ export const getFormConfig = (params: any) => {
       type: FormItemType.select,
       attrs: {
         mode: 'multiple',
+        maxTagCount: 'responsive',
+        allowClear: true,
       },
       options: info.partitionIdList || [],
       rules: [{ required: false, message: '请选择' }],

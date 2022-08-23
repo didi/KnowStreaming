@@ -230,6 +230,7 @@ const ProduceClientTest = () => {
         <TestResult
           showProcessList={false}
           tableProps={{
+            showHeader: false,
             scroll: { y: 600 },
             columns: getTableColumns(),
             dataSource: tableData,

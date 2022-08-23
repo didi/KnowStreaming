@@ -30,11 +30,11 @@ const ChangeLog = () => {
     total: 0,
   });
 
-  const getChangeLog = () => {
+  const getChangeLog = (pageSize = 10) => {
     const promise = Utils.request(API.getClusterChangeLog(+clusterId), {
       params: {
         pageNo: pagination.pageNo + 1,
-        pageSize: 10,
+        pageSize,
       },
     });
     promise.then((res: any) => {
@@ -45,7 +45,7 @@ const ChangeLog = () => {
   };
 
   React.useEffect(() => {
-    getChangeLog().then(
+    getChangeLog(20).then(
       () => setLoading(false),
       () => setLoading(false)
     );

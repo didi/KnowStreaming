@@ -1,5 +1,32 @@
 import moment from 'moment';
 
+export const CHART_COLOR_LIST = [
+  '#657DFC',
+  '#A7B1EB',
+  '#85C80D',
+  '#C9E795',
+  '#FFC300',
+  '#F9D77B',
+  '#8BA3C4',
+  '#C2D0E3',
+  '#FF7066',
+  '#F5B6B3',
+  '#2AC8E4',
+  '#9DDEEB',
+  '#A76CEC',
+  '#CCABF1',
+  '#FF9C1B',
+  '#F5C993',
+  '#3991FF',
+  '#94BEF2',
+  '#12CA7A',
+  '#A7E6C7',
+  '#FF5AB2',
+  '#F19FC9',
+  '#AEAEAE',
+  '#D1D1D1',
+];
+
 export const UNIT_MAP = {
   TB: Math.pow(1024, 4),
   GB: Math.pow(1024, 3),
@@ -160,11 +187,8 @@ export const getBasicChartConfig = (props: any = {}) => {
     yAxis: {
       type: 'value',
       axisLabel: {
-        interval: 0,
-        hideOverlap: false,
         color: '#495057',
         fontSize: 12,
-        lineHeight: 20,
       },
       splitLine: {
         show: true,
@@ -183,11 +207,11 @@ export const getBasicChartConfig = (props: any = {}) => {
         const result =
           tooltipWidth + pos[0] < size.viewSize[0]
             ? {
-                top: 40,
+                top: 10,
                 left: pos[0] + 30,
               }
             : {
-                top: 40,
+                top: 10,
                 left: pos[0] - tooltipWidth - 30,
               };
         return result;

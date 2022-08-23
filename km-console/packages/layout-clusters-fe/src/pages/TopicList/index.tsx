@@ -269,10 +269,10 @@ const AutoPage = (props: any) => {
   const menu = (
     <Menu>
       <Menu.Item>
-        <a onClick={() => setChangeVisible(true)}>批量扩缩副本</a>
+        <a onClick={() => setChangeVisible(true)}>扩缩副本</a>
       </Menu.Item>
       <Menu.Item>
-        <a onClick={() => setMoveVisible(true)}>批量迁移</a>
+        <a onClick={() => setMoveVisible(true)}>迁移副本</a>
       </Menu.Item>
     </Menu>
   );

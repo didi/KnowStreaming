@@ -1,5 +1,6 @@
 import React, { useLayoutEffect } from 'react';
 import { Utils, AppContainer } from 'knowdesign';
+import { goLogin } from 'constants/axiosConfig';
 
 // 权限对应表
 export enum ConfigPermissionMap {
@@ -33,12 +34,7 @@ const CommonConfig = (): JSX.Element => {
   const [global, setGlobal] = AppContainer.useGlobalValue();
 
   // 获取权限树
-  const getPermissionTree = () => {
-    // 如果未登录，直接退出
-    const userInfo = localStorage.getItem('userInfo');
-    if (!userInfo) return false;
-
-    const userId = JSON.parse(userInfo).id;
+  const getPermissionTree = (userId: number) => {
     const getUserInfo = Utils.request(`/logi-security/api/v1/user/${userId}`);
     const getPermissionTree = Utils.request('/logi-security/api/v1/permission/tree');
 
@@ -58,7 +54,19 @@ const CommonConfig = (): JSX.Element => {
   };
 
   useLayoutEffect(() => {
-    getPermissionTree();
+    // 如果未登录，直接跳转到登录页
+    const userInfo = localStorage.getItem('userInfo');
+    let userId: number;
+
+    try {
+      userId = JSON.parse(userInfo).id;
+      if (!userId) throw 'err';
+    } catch (_) {
+      goLogin();
+      return;
+    }
+
+    getPermissionTree(userId);
   }, []);
 
   return <></>;

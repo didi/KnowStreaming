@@ -10,14 +10,11 @@ const HappyPack = require('happypack');
 const os = require('os');
 const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const theme = require('./theme');
 var cwd = process.cwd();
 
 const path = require('path');
 const isProd = process.env.NODE_ENV === 'production';
-// const publicPath = isProd ? '//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn/' : '/';
-const publicPath = '/';
 const babelOptions = {
   cacheDirectory: true,
   babelrc: false,
@@ -49,11 +46,9 @@ const babelOptions = {
 };
 module.exports = () => {
   const manifestName = `manifest.json`;
-  const jsFileName = isProd ? '[name]-[chunkhash].js' : '[name].js';
   const cssFileName = isProd ? '[name]-[chunkhash].css' : '[name].css';
 
   const plugins = [
-    // !isProd && new HardSourceWebpackPlugin(),
     new ProgressBarPlugin(),
     new CaseSensitivePathsPlugin(),
     new MiniCssExtractPlugin({
@@ -83,18 +78,28 @@ module.exports = () => {
       new ReactRefreshWebpackPlugin({
         overlay: false,
       }),
+    // new BundleAnalyzerPlugin({
+    //   analyzerPort: 8889
+    // }),
   ].filter(Boolean);
   if (isProd) {
     plugins.push(new CleanWebpackPlugin());
   }
   return {
-    output: {
-      filename: jsFileName,
-      chunkFilename: jsFileName,
-      publicPath,
-    },
     externals: isProd
-      ? [/^react$/, /^react\/lib.*/, /^react-dom$/, /.*react-dom.*/, /^single-spa$/, /^single-spa-react$/, /^moment$/, /^antd$/, /^lodash$/]
+      ? [
+          /^react$/,
+          /^react\/lib.*/,
+          /^react-dom$/,
+          /.*react-dom.*/,
+          /^single-spa$/,
+          /^single-spa-react$/,
+          /^moment$/,
+          /^antd$/,
+          /^lodash$/,
+          /^react-router$/,
+          /^react-router-dom$/,
+        ]
       : [],
     resolve: {
       symlinks: false,

@@ -129,7 +129,6 @@ public class GroupMetricCollector extends AbstractMetricCollector<List<GroupMetr
             }
         }
 
-        doOptimizeMetric(groupMetrics);
         groupMetricsList.add(groupMetrics);
         groupMetricsList.addAll(tpGroupPOMap.values());
 

@@ -249,7 +249,7 @@ const AutoPage = (props: any) => {
                 //   rowExpandable: (record: any) => true,
                 // },
                 onChange: onTableChange,
-                scroll: { y: 'calc(100vh - 390px)' },
+                scroll: { y: 'calc(100vh - 400px)' },
                 // className: `frameless-table ${scene !== 'topicDetail' && 'clustom-table-content'}`, // 纯无边框表格类名
               },
             }}

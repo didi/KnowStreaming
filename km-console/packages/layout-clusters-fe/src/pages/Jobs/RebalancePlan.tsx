@@ -223,8 +223,6 @@ const RebalancePlan = (props: PropsType) => {
           style={{ fontSize: '13px' }}
           column={2}
           labelStyle={{
-            width: '100px',
-            textAlign: 'right',
             display: 'flex',
             justifyContent: 'end',
             color: '#74788D',
@@ -232,27 +230,21 @@ const RebalancePlan = (props: PropsType) => {
           }}
           contentStyle={{ fontSize: '13px' }}
         >
-          <Descriptions.Item labelStyle={{ width: '79px' }} label="任务类型">
-            {typeObj[data?.type] || '-'}
-          </Descriptions.Item>
-          <Descriptions.Item labelStyle={{ width: '79px' }} label="总迁移大小">
-            {Utils.getSizeAndUnit(data?.moveSize, 'B').valueWithUnit}
-          </Descriptions.Item>
+          <Descriptions.Item label="任务类型">{typeObj[data?.type] || '-'}</Descriptions.Item>
+          <Descriptions.Item label="总迁移大小">{Utils.getSizeAndUnit(data?.moveSize, 'B').valueWithUnit}</Descriptions.Item>
           <Descriptions.Item label="Topic黑名单">
             {data?.blackTopics && data?.blackTopics?.length > 0 ? data?.blackTopics.join('、') : '-'}
           </Descriptions.Item>
-          <Descriptions.Item labelStyle={{ width: '79px' }} label="迁移副本数">
-            {data?.replicas || '-'}
-          </Descriptions.Item>
-          <Descriptions.Item labelStyle={{ width: '79px' }} label="均衡阈值">
+          <Descriptions.Item label="迁移副本数">{data?.replicas || '-'}</Descriptions.Item>
+          <Descriptions.Item label="均衡阈值">
             {data?.clusterBalanceIntervalList
               ? data?.clusterBalanceIntervalList?.map((item: any) => {
-                return (
-                  <Tag style={{ padding: '4px 8px', backgroundColor: 'rgba(33,37,41,0.08)', marginRight: '4px' }} key={item?.priority}>
-                    {item.type + ':' + item.intervalPercent + '%'}
-                  </Tag>
-                );
-              })
+                  return (
+                    <Tag style={{ padding: '4px 8px', backgroundColor: 'rgba(33,37,41,0.08)', marginRight: '4px' }} key={item?.priority}>
+                      {item.type + ':' + item.intervalPercent + '%'}
+                    </Tag>
+                  );
+                })
               : '-'}
           </Descriptions.Item>
         </Descriptions>

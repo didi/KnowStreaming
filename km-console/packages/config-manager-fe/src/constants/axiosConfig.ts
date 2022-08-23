@@ -3,9 +3,10 @@
 
 import { notification, Utils } from 'knowdesign';
 
-const goLogin = () => {
-  // notification.error({ message: '当前未登录，将自动跳转到登录页' });
-  window.history.replaceState({}, '', `/login?redirect=${window.location.href.slice(window.location.origin.length)}`);
+export const goLogin = () => {
+  if (!window.location.pathname.toLowerCase().startsWith('/login')) {
+    window.history.replaceState({}, '', `/login?redirect=${window.location.href.slice(window.location.origin.length)}`);
+  }
 };
 
 const serviceInstance = Utils.service;
@@ -18,7 +19,7 @@ serviceInstance.interceptors.request.use(
   (config: any) => {
     const user = Utils.getCookie('X-SSO-USER');
     const id = Utils.getCookie('X-SSO-USER-ID');
-    if ((!user || !id) && !window.location.pathname.toLowerCase().startsWith('/login')) {
+    if (!user || !id) {
       goLogin();
     } else {
       config.headers['X-SSO-USER'] = user; // 请求携带token

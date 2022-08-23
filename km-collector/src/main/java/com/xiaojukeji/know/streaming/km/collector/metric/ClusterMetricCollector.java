@@ -73,7 +73,6 @@ public class ClusterMetricCollector extends AbstractMetricCollector<ClusterMetri
         }
 
         future.waitExecute(30000);
-        doOptimizeMetric(metrics);
 
         metrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, (System.currentTimeMillis() - startTime) / 1000.0f);
 

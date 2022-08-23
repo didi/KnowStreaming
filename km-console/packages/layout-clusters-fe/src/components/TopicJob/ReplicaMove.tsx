@@ -31,8 +31,8 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const jobNameMap: any = {
-  expandAndReduce: '批量扩缩容',
-  transfer: '批量迁移',
+  expandAndReduce: '批量扩缩副本',
+  transfer: '批量迁移副本',
 };
 
 interface DefaultConfig {
@@ -101,6 +101,7 @@ export default (props: DefaultConfig) => {
     {
       title: '需迁移Partition',
       dataIndex: 'partitionIdList',
+      width: 220,
       render: (v: any, r: any, i: number) => {
         return (
           <Select
@@ -109,6 +110,8 @@ export default (props: DefaultConfig) => {
             defaultValue={v}
             value={needMovePartitions[i]}
             mode="multiple"
+            maxTagCount={'responsive'}
+            allowClear
             onChange={(a: any) => {
               const needMovePartitionsCopy = JSON.parse(JSON.stringify(needMovePartitions));
               needMovePartitionsCopy[i] = a;
@@ -468,6 +471,8 @@ export default (props: DefaultConfig) => {
                   <Select
                     placeholder="请选择Topic，可多选"
                     mode="multiple"
+                    maxTagCount={'responsive'}
+                    allowClear
                     onChange={(v: any) => {
                       setTopicSelectValue(v);
                     }}

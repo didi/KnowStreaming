@@ -241,7 +241,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
             return Result.buildSuc();
         }
 
-        Result<List<PartitionMetrics>> metricsResult = partitionMetricService.getLatestMetricsFromES(clusterPhyId, topicName, metricsNames);
+        Result<List<PartitionMetrics>> metricsResult = partitionMetricService.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, metricsNames);
         if (metricsResult.failed()) {
             // 仅打印错误日志，但是不直接返回错误
             log.error(

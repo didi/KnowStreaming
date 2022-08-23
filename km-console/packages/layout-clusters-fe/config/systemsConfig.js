@@ -6,11 +6,7 @@ const feSystemsConfig = {
         publicPath: 'http://localhost:8001/config/',
         index: 'http://localhost:8001/config/manifest.json',
       },
-      production: { publicPath: '/config/', index: '/config/manifest.json' },
-      // production: {
-      //   publicPath: '//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn/config/',
-      //   index: '//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn/config/manifest.json',
-      // },
+      production: { publicPath: `${process.env.PUBLIC_PATH}/config/`, index: `${process.env.PUBLIC_PATH}/config/manifest.json` },
     },
   ],
   feConfig: {
@@ -24,4 +20,4 @@ const feSystemsConfig = {
     },
   },
 };
-module.exports = feSystemsConfig;
+export default feSystemsConfig;

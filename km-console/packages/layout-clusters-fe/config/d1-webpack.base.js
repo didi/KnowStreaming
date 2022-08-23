@@ -10,11 +10,8 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const theme = require('./theme');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
-const BUSINESS_VERSION = false;
 
 const isProd = process.env.NODE_ENV === 'production';
-// const publicPath = isProd ? '//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn/' : '/';
-const publicPath = '/';
 const babelOptions = {
   cacheDirectory: true,
   babelrc: false,
@@ -44,23 +41,19 @@ const babelOptions = {
 };
 
 module.exports = () => {
-  const jsFileName = isProd ? '[name]-[chunkhash].js' : '[name].js';
   const cssFileName = isProd ? '[name]-[chunkhash].css' : '[name].css';
-
   const plugins = [
     // !isProd && new HardSourceWebpackPlugin(),
-    new CoverHtmlWebpackPlugin({
-      BUSINESS_VERSION,
-    }),
+    new CoverHtmlWebpackPlugin(),
     new ProgressBarPlugin(),
     new CaseSensitivePathsPlugin(),
     new MiniCssExtractPlugin({
       filename: cssFileName,
     }),
     !isProd &&
-    new ReactRefreshWebpackPlugin({
-      overlay: false,
-    }),
+      new ReactRefreshWebpackPlugin({
+        overlay: false,
+      }),
   ].filter(Boolean);
   const resolve = {
     symlinks: false,
@@ -77,26 +70,21 @@ module.exports = () => {
   }
 
   return {
-    output: {
-      filename: jsFileName,
-      chunkFilename: jsFileName,
-      library: 'layout',
-      libraryTarget: 'amd',
-      publicPath,
-    },
     externals: isProd
       ? [
-        /^react$/,
-        /^react\/lib.*/,
-        /^react-dom$/,
-        /.*react-dom.*/,
-        /^single-spa$/,
-        /^single-spa-react$/,
-        /^moment$/,
-        /^antd$/,
-        /^lodash$/,
-        /^echarts$/,
-      ]
+          /^react$/,
+          /^react\/lib.*/,
+          /^react-dom$/,
+          /.*react-dom.*/,
+          /^single-spa$/,
+          /^single-spa-react$/,
+          /^moment$/,
+          /^antd$/,
+          /^lodash$/,
+          /^echarts$/,
+          /^react-router$/,
+          /^react-router-dom$/,
+        ]
       : [],
     resolve,
     plugins,
@@ -161,17 +149,34 @@ module.exports = () => {
         },
       ],
     },
-    optimization: isProd
-      ? {
-        minimizer: [
-          new TerserJSPlugin({
-            cache: true,
-            sourceMap: true,
-          }),
-          new OptimizeCSSAssetsPlugin({}),
-        ],
-      }
-      : {},
+    optimization: Object.assign(
+      // {
+      //   splitChunks: {
+      //     cacheGroups: {
+      //       vendor: {
+      //         test: /[\\/]node_modules[\\/]/,
+      //         chunks: 'all',
+      //         name: 'vendor',
+      //         priority: 10,
+      //         enforce: true,
+      //         minChunks: 1,
+      //         maxSize: 3500000,
+      //       },
+      //     },
+      //   },
+      // },
+      isProd
+        ? {
+            minimizer: [
+              new TerserJSPlugin({
+                cache: true,
+                sourceMap: true,
+              }),
+              new OptimizeCSSAssetsPlugin({}),
+            ],
+          }
+        : {}
+    ),
     devtool: isProd ? 'cheap-module-source-map' : '',
     node: {
       fs: 'empty',
@@ -180,4 +185,3 @@ module.exports = () => {
     },
   };
 };
-module.exports.BUSINESS_VERSION = BUSINESS_VERSION;

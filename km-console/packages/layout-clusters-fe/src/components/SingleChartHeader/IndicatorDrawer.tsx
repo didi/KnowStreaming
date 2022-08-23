@@ -249,6 +249,7 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
   return (
     <>
       <Drawer
+        className="indicator-drawer"
         title={indicatorSelectModule.drawerTitle || '指标筛选'}
         width="868px"
         forceRender={true}
@@ -275,6 +276,7 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
       >
         <ProTable
           tableProps={{
+            showHeader: false,
             rowKey: 'category',
             columns: columns,
             dataSource: categoryData,

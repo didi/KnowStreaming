@@ -1,28 +1,22 @@
-const isProd = process.env.NODE_ENV === 'production';
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const merge = require('webpack-merge');
-const webpack = require('webpack');
 const path = require('path');
-// const outPath = path.resolve(__dirname, `../../pub/layout`);
-const outPath = path.resolve(__dirname, `../../../km-rest/src/main/resources/templates/layout`);
+require('dotenv').config({ path: path.resolve(process.cwd(), '../../.env') });
+const webpack = require('webpack');
+const merge = require('webpack-merge');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const getWebpackCommonConfig = require('./config/d1-webpack.base');
-const config = getWebpackCommonConfig();
 const CountPlugin = require('./config/CountComponentWebpackPlugin');
-
-module.exports = merge(config, {
+const isProd = process.env.NODE_ENV === 'production';
+const jsFileName = isProd ? '[name]-[chunkhash].js' : '[name].js';
+const outPath = path.resolve(__dirname, `../../../km-rest/src/main/resources/templates/layout`);
+module.exports = merge(getWebpackCommonConfig(), {
   mode: isProd ? 'production' : 'development',
   entry: {
     layout: ['./src/index.tsx'],
   },
-  // node: {
-  //   console: true,
-  //   fs: true,
-  //   module: 'empty',
-  // },
   plugins: [
     new CountPlugin({
-      pathname: '@didi/dcloud-design',
+      pathname: 'knowdesign',
       startCount: true,
       isExportExcel: false,
     }),
@@ -30,7 +24,8 @@ module.exports = merge(config, {
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         RUN_ENV: JSON.stringify(process.env.RUN_ENV),
-        BUSINESS_VERSION: getWebpackCommonConfig.BUSINESS_VERSION,
+        BUSINESS_VERSION: process.env.BUSINESS_VERSION === 'true',
+        PUBLIC_PATH: JSON.stringify(process.env.PUBLIC_PATH),
       },
     }),
     new HtmlWebpackPlugin({
@@ -41,28 +36,30 @@ module.exports = merge(config, {
       favicon: path.resolve('favicon.ico'),
       inject: 'body',
     }),
-    isProd
-      ? new CopyWebpackPlugin([
+    new CopyWebpackPlugin(
+      [
         {
           from: path.resolve(__dirname, 'static'),
           to: path.resolve(outPath, '../static'),
         },
-        {
-          from: path.resolve(__dirname, 'favicon.ico'),
-          to: path.resolve(outPath, '../favicon.ico'),
-        },
-      ])
-      : new CopyWebpackPlugin([
-        {
-          from: path.resolve(__dirname, 'static'),
-          to: path.resolve(outPath, '../static'),
-        },
-      ]),
+      ].concat(
+        isProd
+          ? [
+              {
+                from: path.resolve(__dirname, 'favicon.ico'),
+                to: path.resolve(outPath, '../favicon.ico'),
+              },
+            ]
+          : []
+      )
+    ),
   ],
   output: {
     path: outPath,
-    // publicPath: isProd ? '//img-ys011.didistatic.com/static/bp_fe_daily/bigdata_cloud_KnowStreaming_FE/gn/layout/' : '/',
-    publicPath: isProd ? '/layout/' : '/',
+    publicPath: isProd ? process.env.PUBLIC_PATH + '/layout/' : '/',
+    filename: jsFileName,
+    chunkFilename: jsFileName,
+    library: 'layout',
     libraryTarget: 'amd',
   },
   devServer: {
@@ -79,9 +76,6 @@ module.exports = merge(config, {
       pragma: 'no-cache',
       'Access-Control-Allow-Origin': '*',
     },
-    // historyApiFallback: {
-    //   rewrites: [{ from: reg, to: '/agent.html' }],
-    // },
     proxy: {
       '/ks-km/api/v3': {
         changeOrigin: true,

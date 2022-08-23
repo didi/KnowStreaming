@@ -433,13 +433,13 @@ export default () => {
           <div className="operate-bar">
             <Form form={form} layout="inline" onFinish={() => getConfigList({ page: 1 })}>
               <Form.Item name="valueGroup">
-                <Select placeholder="请选择模块" options={configGroupList} allowClear />
+                <Select style={{ width: 180 }} placeholder="请选择模块" options={configGroupList} />
               </Form.Item>
               <Form.Item name="valueName">
-                <Input placeholder="请输入配置键" />
+                <Input style={{ width: 180 }} placeholder="请输入配置键" />
               </Form.Item>
               <Form.Item name="memo">
-                <Input placeholder="请输入描述" />
+                <Input style={{ width: 180 }} placeholder="请输入描述" />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" ghost htmlType="submit">

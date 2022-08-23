@@ -38,6 +38,7 @@ const ClusterDetailSteps = {
       title: '设置健康度',
       content: '点击这里可以设置集群的健康检查项、权重及规则',
       placement: 'right-start' as const,
+      spotlightPadding: 5,
       styles: {
         spotlight: {
           borderRadius: 6,
@@ -49,6 +50,7 @@ const ClusterDetailSteps = {
       title: '查看健康状态详情',
       content: '点击这里可以查看集群的健康状态的检查结果',
       placement: 'right-start' as const,
+      spotlightPadding: 6,
       styles: {
         spotlight: {
           borderRadius: 6,
@@ -60,6 +62,7 @@ const ClusterDetailSteps = {
       title: '编辑集群信息',
       content: '点击这里可以查看集群配置信息，并且可以对信息进行编辑',
       placement: 'right-start' as const,
+      spotlightPadding: 1,
       styles: {
         spotlight: {
           borderRadius: 6,

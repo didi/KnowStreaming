@@ -6,6 +6,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ReplicationMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.config.KafkaTopicConfigParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.reassign.ExecuteReassignParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.reassign.ReassignResult;
@@ -19,6 +20,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.bean.po.reassign.ReassignJobPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.reassign.ReassignSubJobPO;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
+import com.xiaojukeji.know.streaming.km.common.constant.kafka.TopicConfig0100;
 import com.xiaojukeji.know.streaming.km.common.converter.ReassignConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.job.JobStatusEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
@@ -33,6 +35,7 @@ import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignJobService;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
+import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.reassign.ReassignJobDAO;
@@ -78,6 +81,9 @@ public class ReassignJobServiceImpl implements ReassignJobService {
 
     @Autowired
     private OpLogWrapService opLogWrapService;
+
+    @Autowired
+    private TopicConfigService topicConfigService;
 
     @Override
     @Transactional
@@ -266,13 +272,19 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         }
 
         // 修改DB状态
-        this.setJobInRunning(jobPO);
+        Result<List<ReassignSubJobPO>> subJobPOListResult = this.setJobInRunning(jobPO);
 
         // 执行任务
         Result<Void> rv = reassignService.executePartitionReassignments(new ExecuteReassignParam(jobPO.getClusterPhyId(), jobPO.getReassignmentJson(), jobPO.getThrottleUnitByte()));
         if (rv.failed()) {
-
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return rv;
+        }
+
+        // 修改保存时间
+        rv = this.modifyRetentionTime(jobPO.getClusterPhyId(), subJobPOListResult.getData(), operator);
+        if (rv.failed()) {
+            log.error("method=execute||jobId={}||result={}||errMsg=modify retention time failed", jobId, rv);
             return rv;
         }
 
@@ -358,6 +370,12 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         if (rrr.failed()) {
             log.error("method=verifyAndUpdateStatue||jobId={}||result={}||msg=verify reassignment failed", jobId, rrr);
             return Result.buildFromIgnoreData(rrr);
+        }
+
+        // 还原数据保存时间，后续可以优化为缩短一段时间后就还原为原来时间
+        rv = this.recoveryRetentionTime(jobPO, rrr.getData());
+        if (rv != null && rv.failed()) {
+            log.error("method=verifyAndUpdateStatue||jobId={}||result={}||msg=recovery retention time failed", jobId, rv);
         }
 
         // 更新任务状态
@@ -524,7 +542,7 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         return Result.buildSuc();
     }
 
-    private Result<Void> setJobInRunning(ReassignJobPO jobPO) {
+    private Result<List<ReassignSubJobPO>> setJobInRunning(ReassignJobPO jobPO) {
         long now = System.currentTimeMillis();
 
         // 更新子任务状态
@@ -545,7 +563,7 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         newJobPO.setStartTime(new Date(now));
         reassignJobDAO.updateById(newJobPO);
 
-        return Result.buildSuc();
+        return Result.buildSuc(subJobPOList);
     }
 
 
@@ -713,5 +731,77 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         }
 
         return replicaMetricsResult.getData().getMetric(ReplicaMetricVersionItems.REPLICATION_METRIC_LOG_SIZE);
+    }
+
+    /**
+     * 还原保存时间
+     */
+    private Result<Void> recoveryRetentionTime(ReassignJobPO jobPO, ReassignResult reassignmentResult) {
+        Map<String, Long> finishedTopicRetentionTimeMap = new HashMap<>();
+
+        List<ReassignSubJobPO> subJobPOList = this.getSubJobsByJobId(jobPO.getId());
+        for (ReassignSubJobPO subJobPO: subJobPOList) {
+            ReassignSubJobExtendData extendData = ConvertUtil.str2ObjByJson(subJobPO.getExtendData(), ReassignSubJobExtendData.class);
+            if (extendData == null
+                    || extendData.getOriginalRetentionTimeUnitMs() == null
+                    || extendData.getReassignRetentionTimeUnitMs() == null
+                    || extendData.getOriginalRetentionTimeUnitMs().equals(extendData.getReassignRetentionTimeUnitMs())) {
+                // 不存在扩展数据，或者这个时间是不需要调整的，则直接跳过
+                continue;
+            }
+
+            finishedTopicRetentionTimeMap.put(subJobPO.getTopicName(), extendData.getOriginalRetentionTimeUnitMs());
+        }
+
+        // 仅保留已经迁移完成的Topic
+        for (ReassignSubJobPO subJobPO: subJobPOList) {
+            if (!reassignmentResult.checkPartitionFinished(subJobPO.getTopicName(), subJobPO.getPartitionId())) {
+                // 移除未完成的Topic
+                finishedTopicRetentionTimeMap.remove(subJobPO.getTopicName());
+            }
+        }
+
+        // 还原迁移完成的Topic的保存时间
+        for (Map.Entry<String, Long> entry: finishedTopicRetentionTimeMap.entrySet()) {
+            Map<String, String> changedProps = new HashMap<>();
+            changedProps.put(TopicConfig0100.RETENTION_MS_CONFIG, String.valueOf(entry.getValue()));
+
+            Result<Void> rv = topicConfigService.modifyTopicConfig(new KafkaTopicConfigParam(jobPO.getClusterPhyId(), entry.getKey(), changedProps), jobPO.getCreator());
+            if (rv == null || rv.failed()) {
+                return rv;
+            }
+        }
+
+        return Result.buildSuc();
+    }
+
+    private Result<Void> modifyRetentionTime(Long clusterPhyId, List<ReassignSubJobPO> subJobPOList, String operator) {
+        Map<String, Long> needModifyTopicRetentionTimeMap = new HashMap<>();
+        for (ReassignSubJobPO subJobPO: subJobPOList) {
+            ReassignSubJobExtendData extendData = ConvertUtil.str2ObjByJson(subJobPO.getExtendData(), ReassignSubJobExtendData.class);
+            if (extendData == null
+                    || extendData.getOriginalRetentionTimeUnitMs() == null
+                    || extendData.getReassignRetentionTimeUnitMs() == null
+                    || extendData.getOriginalRetentionTimeUnitMs().equals(extendData.getReassignRetentionTimeUnitMs())) {
+                // 不存在扩展数据，或者这个时间是不需要调整的，则直接跳过
+                continue;
+            }
+
+            needModifyTopicRetentionTimeMap.put(subJobPO.getTopicName(), extendData.getReassignRetentionTimeUnitMs());
+        }
+
+        // 修改Topic的保存时间
+        Result<Void> returnRV = Result.buildSuc();
+        for (Map.Entry<String, Long> entry: needModifyTopicRetentionTimeMap.entrySet()) {
+            Map<String, String> changedProps = new HashMap<>();
+            changedProps.put(TopicConfig0100.RETENTION_MS_CONFIG, String.valueOf(entry.getValue()));
+
+            Result<Void> rv = topicConfigService.modifyTopicConfig(new KafkaTopicConfigParam(clusterPhyId, entry.getKey(), changedProps), operator);
+            if (rv == null || rv.failed()) {
+                returnRV = rv;
+            }
+        }
+
+        return returnRV;
     }
 }

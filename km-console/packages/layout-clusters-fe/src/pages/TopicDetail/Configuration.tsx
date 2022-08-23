@@ -77,7 +77,7 @@ const BrokerConfiguration = (props: any) => {
 
   // 多选配置
   const checkedBoxOptions = [
-    { label: 'Hide read-only', value: 'readOnly' },
+    // { label: 'Hide read-only', value: 'readOnly' },
     { label: 'Show Overrides Only', value: 'override' },
   ];
 

@@ -114,7 +114,7 @@ export default () => {
         <div className="operate-bar">
           <Form form={form} layout="inline" onFinish={() => getData({ page: 1 })}>
             <Form.Item name="targetType">
-              <Select placeholder="请选择模块" options={configGroupList} style={{ width: 160 }} allowClear />
+              <Select placeholder="请选择模块" options={configGroupList} style={{ width: 160 }} />
             </Form.Item>
             <Form.Item name="target">
               <Input placeholder="请输入操作对象" />

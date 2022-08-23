@@ -25,7 +25,7 @@ import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.cache.CollectMetricsLocalCache;
+import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
@@ -112,7 +112,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     @Override
     public Result<BrokerMetrics> collectBrokerMetricsFromKafkaWithCacheFirst(Long clusterId, Integer brokerId, String metric){
 
-        Float keyValue = CollectMetricsLocalCache.getBrokerMetrics(clusterId, brokerId, metric);
+        Float keyValue = CollectedMetricsLocalCache.getBrokerMetrics(clusterId, brokerId, metric);
         if(null != keyValue) {
             BrokerMetrics brokerMetrics = new BrokerMetrics(clusterId, brokerId);
             brokerMetrics.putMetric(metric, keyValue);
@@ -124,7 +124,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
 
         Map<String, Float> metricsMap = ret.getData().getMetrics();
         for(Map.Entry<String, Float> metricNameAndValueEntry : metricsMap.entrySet()){
-            CollectMetricsLocalCache.putBrokerMetrics(clusterId, brokerId, metricNameAndValueEntry.getKey(), metricNameAndValueEntry.getValue());
+            CollectedMetricsLocalCache.putBrokerMetrics(clusterId, brokerId, metricNameAndValueEntry.getKey(), metricNameAndValueEntry.getValue());
         }
 
         return ret;

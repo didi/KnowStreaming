@@ -22,10 +22,23 @@ const joyrideCommonStyle = {
 };
 
 const JoyrideTooltip = (props: TooltipRenderProps) => {
-  const { continuous, index, size, step, isLastStep, backProps, skipProps, primaryProps, tooltipProps } = props;
+  const { continuous, index, size, step, isLastStep, skipProps, primaryProps, tooltipProps } = props;
+
+  const isTop = step.placement.startsWith('top');
+  const isRight = step.placement.startsWith('right');
+  const isBottom = step.placement.startsWith('bottom');
+  const tooltipStyle = {
+    [`margin-${isTop ? 'bottom' : isRight ? 'left' : isBottom ? 'top' : 'right'}`]: 20,
+    [`margin-${isTop || isBottom ? 'left' : 'top'}`]: -10,
+  };
+  const arrowStyle = {
+    [isTop || isBottom ? 'left' : 'top']: 24,
+    [isTop ? 'bottom' : isRight ? 'left' : isBottom ? 'top' : 'right']: -24,
+    transform: `rotate(${isTop ? -90 : isRight ? 0 : isBottom ? 90 : 180}deg)`,
+  };
 
   return (
-    <div className="joyride-tooltip" {...tooltipProps}>
+    <div className="joyride-tooltip" {...tooltipProps} style={tooltipStyle}>
       {step.title && <div className="joyride-tooltip-header">{step.title}</div>}
       <div className="joyride-tooltip-body">{step.content}</div>
       <div className="joyride-tooltip-footer">
@@ -49,6 +62,9 @@ const JoyrideTooltip = (props: TooltipRenderProps) => {
             )}
           </Space>
         </div>
+      </div>
+      <div className="joyride-tooltip-arrow" style={arrowStyle}>
+        <div className="joyride-tooltip-arrow-line"></div>
       </div>
     </div>
   );
@@ -89,6 +105,10 @@ const TourGuide = ({ guide, run: ready }: TourGuideProps) => {
       disableScrollParentFix
       tooltipComponent={JoyrideTooltip}
       styles={joyrideCommonStyle}
+      floaterProps={{
+        hideArrow: true,
+        offset: 60,
+      }}
     />
   );
 };

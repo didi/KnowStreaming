@@ -37,7 +37,5 @@
   "lint-staged": {
     "*.{js,tsx}": "eslint"
   },
-  "dependencies": {
-    "react-cron-antd": "^1.1.2"
-  }
+  "dependencies": {}
 }

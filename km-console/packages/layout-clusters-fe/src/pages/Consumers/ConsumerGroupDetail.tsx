@@ -3,7 +3,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { AppContainer, Divider, Drawer, IconFont, ProTable, Select, SingleChart, Space, Tooltip, Utils } from 'knowdesign';
 import { DRangeTime } from 'knowdesign';
-import { getBasicChartConfig } from '@src/constants/chartConfig';
+import { CHART_COLOR_LIST, getBasicChartConfig } from '@src/constants/chartConfig';
 import Api from '@src/api/index';
 import { hashDataParse } from '@src/constants/common';
 import { ClustersPermissionMap } from '../CommonConfig';
@@ -277,10 +277,9 @@ export default (props: any) => {
       return curPartition === '__all__'
         ? allData
         : {
-          metricName: item.metricName,
-          // metricLine: curPartition === '__all__' ? {} : item.metricLines.find(line => line.name.indexOf(curPartition) >= 0)
-          metricLine: item.metricLines.find((line) => line.name.indexOf(curPartition) >= 0),
-        };
+            metricName: item.metricName,
+            metricLine: item.metricLines.find((line) => line.name.indexOf(curPartition) >= 0),
+          };
     });
     setGroupMetricsData(filteredData);
   }, [curPartition, allGroupMetricsData]);
@@ -419,10 +418,10 @@ export default (props: any) => {
               paginationProps:
                 pageTotal > 0
                   ? {
-                    current: pageIndex,
-                    total: pageTotal,
-                    pageSize: pageSize,
-                  }
+                      current: pageIndex,
+                      total: pageTotal,
+                      pageSize: pageSize,
+                    }
                   : null,
               attrs: {
                 sortDirections: ['descend', 'ascend', 'default'],
@@ -458,6 +457,7 @@ export default (props: any) => {
                 legend: {
                   left: 'center',
                 },
+                color: CHART_COLOR_LIST,
                 grid: {
                   left: 0,
                   right: 0,
@@ -467,53 +467,16 @@ export default (props: any) => {
                   customWidth: 200,
                 },
               })}
-              // option={{
-              //   title: {
-              //     show: false,
-              //   },
-              //   xAxis: {
-              //     show: true,
-              //     type: 'category',
-              //   },
-              //   yAxis: {
-              //     type: 'value',
-              //     show: true,
-              //   },
-              //   legend: {
-              //     show: true,
-              //     right: 'auto',
-              //     top: 220,
-              //   },
-              //   toolBox: {
-              //     show: false,
-              //   },
-              //   grid: {
-              //     left: 0,
-              //     right: 0,
-              //     top: 10,
-              //   },
-              // }}
               chartTypeProp="line"
               propChartData={groupMetricsData}
-              // xAxisCallback={(data: []) => {
-              //   // @ts-ignore
-              //   return data.length > 0 ? data[0].metricLine.metricPoints.map((item: any) => item.timeStamp) : '';
-              // }}
               seriesCallback={(data: any) => {
-                // return data.map((metricData: any) => {
-                //   const partitionMetricData = metricData.metricLine?.metricPoints || []
-                //   return {
-                //     name: metricData.metricName,
-                //     data: partitionMetricData.map((pmd: any) => pmd.value)
-                //   }
-                // })
                 return data.map((metricData: any) => {
                   const partitionMetricData = metricData.metricLine?.metricPoints || [];
                   return {
                     name: metricData.metricName,
                     data: partitionMetricData.map((item: any) => [item.timeStamp, item.value, item.unit]),
                     lineStyle: {
-                      width: 1,
+                      width: 1.5,
                     },
                     symbol: 'emptyCircle',
                     symbolSize: 4,

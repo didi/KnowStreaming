@@ -39,7 +39,7 @@ data:
         location ~ ^/ks-km/api/v3 {
             #rewrite ^/ks-km/api/v3/(.*)$ /ks-km/ks-km/api/v3/$1 break;
             proxy_pass http://{{ .Release.Name }}-knowstreaming-manager;
-            #proxy_pass https://api-kylin-xg02.intra.xiaojukeji.com;
+            #proxy_pass http://127.0.0.1:8080;
             #proxy_cookie_path  /ks-km/ /;
             #proxy_set_header Host $host;
             #proxy_set_header Referer $http_referer;
@@ -50,7 +50,7 @@ data:
         location ~ ^/logi-security/api/v1 {
             #rewrite ^/logi-security/api/v1/(.*)$ /ks-km/logi-security/api/v1/$1 break;
             proxy_pass http://{{ .Release.Name }}-knowstreaming-manager;
-            #proxy_pass https://api-kylin-xg02.intra.xiaojukeji.com;
+            #proxy_pass https://127.0.0.1:8080;
         }
         location ~ ^/(401|403|404|500){
              rewrite ^.*$ /;

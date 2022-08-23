@@ -15,6 +15,7 @@ public interface PartitionMetricService {
      */
     Result<List<PartitionMetrics>> collectPartitionsMetricsFromKafkaWithCache(Long clusterPhyId, String topicName, String metricName);
 
+    Result<List<PartitionMetrics>> collectPartitionsMetricsFromKafka(Long clusterPhyId, String topicName, List<String> metricNameList);
     Result<List<PartitionMetrics>> collectPartitionsMetricsFromKafka(Long clusterPhyId, String topicName, String metricName);
 
     Result<PartitionMetrics> collectPartitionMetricsFromKafka(Long clusterPhyId, String topicName, Integer partitionId, String metricName);

@@ -39,44 +39,46 @@ public class MetricESSender implements ApplicationListener<BaseMetricEvent> {
 
     @Override
     public void onApplicationEvent(BaseMetricEvent event) {
-        if(event instanceof BrokerMetricEvent){
+        if(event instanceof BrokerMetricEvent) {
             BrokerMetricEvent brokerMetricEvent = (BrokerMetricEvent)event;
             send2es(KafkaMetricIndexEnum.BROKER_INFO,
-                    ConvertUtil.list2List(brokerMetricEvent.getBrokerMetrics(), BrokerMetricPO.class));
+                    ConvertUtil.list2List(brokerMetricEvent.getBrokerMetrics(), BrokerMetricPO.class)
+            );
 
-        }else if(event instanceof ClusterMetricEvent){
+        } else if(event instanceof ClusterMetricEvent) {
             ClusterMetricEvent clusterMetricEvent = (ClusterMetricEvent)event;
             send2es(KafkaMetricIndexEnum.CLUSTER_INFO,
-                    ConvertUtil.list2List(clusterMetricEvent.getClusterMetrics(), ClusterMetricPO.class));
+                    ConvertUtil.list2List(clusterMetricEvent.getClusterMetrics(), ClusterMetricPO.class)
+            );
 
-        }else if(event instanceof TopicMetricEvent){
+        } else if(event instanceof TopicMetricEvent) {
             TopicMetricEvent topicMetricEvent = (TopicMetricEvent)event;
             send2es(KafkaMetricIndexEnum.TOPIC_INFO,
-                    ConvertUtil.list2List(topicMetricEvent.getTopicMetrics(), TopicMetricPO.class));
+                    ConvertUtil.list2List(topicMetricEvent.getTopicMetrics(), TopicMetricPO.class)
+            );
 
-        }else if(event instanceof PartitionMetricEvent){
+        } else if(event instanceof PartitionMetricEvent) {
             PartitionMetricEvent partitionMetricEvent = (PartitionMetricEvent)event;
             send2es(KafkaMetricIndexEnum.PARTITION_INFO,
-                    ConvertUtil.list2List(partitionMetricEvent.getPartitionMetrics(), PartitionMetricPO.class));
+                    ConvertUtil.list2List(partitionMetricEvent.getPartitionMetrics(), PartitionMetricPO.class)
+            );
 
-        }else if(event instanceof GroupMetricEvent){
+        } else if(event instanceof GroupMetricEvent) {
             GroupMetricEvent groupMetricEvent = (GroupMetricEvent)event;
             send2es(KafkaMetricIndexEnum.GROUP_INFO,
-                    ConvertUtil.list2List(groupMetricEvent.getGroupMetrics(), GroupMetricPO.class));
+                    ConvertUtil.list2List(groupMetricEvent.getGroupMetrics(), GroupMetricPO.class)
+            );
 
-        }else if(event instanceof ReplicaMetricEvent){
+        } else if(event instanceof ReplicaMetricEvent) {
             ReplicaMetricEvent replicaMetricEvent = (ReplicaMetricEvent)event;
             send2es(KafkaMetricIndexEnum.REPLICATION_INFO,
-                    ConvertUtil.list2List(replicaMetricEvent.getReplicationMetrics(), ReplicationMetricPO.class));
+                    ConvertUtil.list2List(replicaMetricEvent.getReplicationMetrics(), ReplicationMetricPO.class)
+            );
         }
     }
 
     /**
      * 根据不同监控维度来发送
-     *
-     * @param stats
-     * @param statsList
-     * @return
      */
     private boolean send2es(KafkaMetricIndexEnum stats, List<? extends BaseESPO> statsList){
         if (CollectionUtils.isEmpty(statsList)) {
@@ -98,8 +100,9 @@ public class MetricESSender implements ApplicationListener<BaseMetricEvent> {
         int num  = (size) % THRESHOLD == 0 ? (size / THRESHOLD) : (size / THRESHOLD + 1);
 
         if (size < THRESHOLD) {
-            esExecutor.execute(() ->
-                    baseMetricESDao.batchInsertStats(statsList));
+            esExecutor.execute(
+                    () -> baseMetricESDao.batchInsertStats(statsList)
+            );
             return true;
         }
 
@@ -107,8 +110,9 @@ public class MetricESSender implements ApplicationListener<BaseMetricEvent> {
             int end   = (i * THRESHOLD) > size ? size : (i * THRESHOLD);
             int start = (i - 1) * THRESHOLD;
 
-            esExecutor.execute(() ->
-                    baseMetricESDao.batchInsertStats(statsList.subList(start, end)));
+            esExecutor.execute(
+                    () -> baseMetricESDao.batchInsertStats(statsList.subList(start, end))
+            );
         }
 
         return true;

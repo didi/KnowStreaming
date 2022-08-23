@@ -46,13 +46,13 @@ const EditUserDrawer = forwardRef((props, ref) => {
       const requestPromise =
         type === UserOperate.Add
           ? request(api.addUser, {
-            method: 'PUT',
-            data: formData,
-          })
+              method: 'PUT',
+              data: formData,
+            })
           : request(api.editUser, {
-            method: 'POST',
-            data: { ...formData },
-          });
+              method: 'POST',
+              data: { ...formData },
+            });
       requestPromise.then(
         (res) => {
           callback.current();
@@ -300,7 +300,7 @@ export default (props: { curTabKey: string }) => {
           return (
             <>
               {global.hasPermission &&
-                (global.hasPermission(ConfigPermissionMap.USER_EDIT) || global.hasPermission(ConfigPermissionMap.USER_CHANGE_PASS)) ? (
+              (global.hasPermission(ConfigPermissionMap.USER_EDIT) || global.hasPermission(ConfigPermissionMap.USER_CHANGE_PASS)) ? (
                 <Button
                   type="link"
                   size="small"
@@ -349,7 +349,7 @@ export default (props: { curTabKey: string }) => {
             <Input placeholder="请输入用户实名" />
           </Form.Item>
           <Form.Item name="roleId">
-            <Select style={{ width: 190 }} placeholder="选择平台已创建的角色名" allowClear options={simpleRoleList} />
+            <Select style={{ width: 190 }} placeholder="选择平台已创建的角色名" options={simpleRoleList} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" ghost htmlType="submit">
