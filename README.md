@@ -91,7 +91,7 @@
 - [FAQ](docs/user_guide/faq.md)
 
 
-**点击 [这里](https://doc.knowstreaming.com/product/1-quick-start)，也可以从官网获取到更多文档**
+**点击 [这里](https://doc.knowstreaming.com/product)，也可以从官网获取到更多文档**
 
 
 
