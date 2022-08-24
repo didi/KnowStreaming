@@ -13,6 +13,7 @@ export const getChartConfig = (title: string) => {
         lineStyle: {
           width: 1,
         },
+        smooth: 0.25,
         symbol: 'emptyCircle',
         symbolSize: 4,
         emphasis: {

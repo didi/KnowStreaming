@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Select, ProTable, DatePicker, Utils } from 'knowdesign';
+import { Button, Form, Input, Select, ProTable, DatePicker, Utils, Tooltip } from 'knowdesign';
 import api from 'api';
 import { defaultPagination } from 'constants/common';
 import TypicalListCard from '../../components/TypicalListCard';
@@ -39,6 +39,13 @@ export default () => {
       dataIndex: 'detail',
       width: 350,
       lineClampOne: true,
+      render(content) {
+        return (
+          <Tooltip placement="bottomLeft" title={content}>
+            {content}
+          </Tooltip>
+        );
+      },
     },
     {
       title: '操作时间',

@@ -66,6 +66,7 @@ const api = {
   getPhyClusterBasic: (clusterPhyId: number) => getApi(`/physical-clusters/${clusterPhyId}/basic`),
   getPhyClusterMetrics: (clusterPhyId: number) => getApi(`/physical-clusters/${clusterPhyId}/latest-metrics`),
   getClusterBasicExit: (clusterPhyName: string) => getApi(`/physical-clusters/${clusterPhyName}/basic-combine-exist`),
+  getClustersVersion: getApi('/physical-clusters/exist-version'),
 
   kafkaValidator: getApi(`/utils/kafka-validator`),
 

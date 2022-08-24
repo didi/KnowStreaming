@@ -17,11 +17,12 @@ const MultiClusterPage = () => {
   const [run, setRun] = useState<boolean>(false);
   const [global] = AppContainer.useGlobalValue();
   const [statusList, setStatusList] = React.useState([1, 0]);
-  const [kafkaVersion, setKafkaVersion] = React.useState({});
+  const [kafkaVersions, setKafkaVersions] = React.useState<string[]>([]);
+  const [existKafkaVersion, setExistKafkaVersion] = React.useState<string[]>([]);
   const [visible, setVisible] = React.useState(false);
   const [list, setList] = useState<[]>([]);
   const [healthScoreRange, setHealthScoreRange] = React.useState([0, 100]);
-  const [checkedKafkaVersion, setCheckedKafkaVersion] = React.useState({});
+  const [checkedKafkaVersions, setCheckedKafkaVersions] = React.useState<string[]>([]);
   const [sortInfo, setSortInfo] = React.useState({
     sortField: 'HealthScore',
     sortType: 'asc',
@@ -59,7 +60,7 @@ const MultiClusterPage = () => {
       preciseFilterDTOList: [
         {
           fieldName: 'kafkaVersion',
-          fieldValueList: checkedKafkaVersion,
+          fieldValueList: checkedKafkaVersions as (string | number)[],
         },
       ],
       rangeFilterDTOList: [
@@ -83,12 +84,18 @@ const MultiClusterPage = () => {
   };
 
   const getSupportKafkaVersion = () => {
+    Utils.request(API.supportKafkaVersion).then((res) => {
+      setKafkaVersions(Object.keys(res || {}));
+    });
+  };
+
+  const getExistKafkaVersion = () => {
     setVersionLoading(true);
-    Utils.request(API.supportKafkaVersion)
-      .then((res) => {
-        setKafkaVersion(res || {});
+    Utils.request(API.getClustersVersion)
+      .then((versions: string[]) => {
+        setExistKafkaVersion(versions || []);
         setVersionLoading(false);
-        setCheckedKafkaVersion(res ? Object.keys(res) : []);
+        setCheckedKafkaVersions(versions || []);
       })
       .catch((err) => {
         setVersionLoading(false);
@@ -108,6 +115,7 @@ const MultiClusterPage = () => {
   useEffect(() => {
     getPhyClusterState();
     getSupportKafkaVersion();
+    getExistKafkaVersion();
   }, []);
 
   useEffect(() => {
@@ -128,7 +136,7 @@ const MultiClusterPage = () => {
       .finally(() => {
         setClusterLoading(false);
       });
-  }, [sortInfo, checkedKafkaVersion, healthScoreRange, statusList, searchKeywords, isReload]);
+  }, [sortInfo, checkedKafkaVersions, healthScoreRange, statusList, searchKeywords, isReload]);
 
   const onSilderChange = (value: number[]) => {
     setHealthScoreRange(value);
@@ -151,7 +159,7 @@ const MultiClusterPage = () => {
   };
 
   const onChangeCheckGroup = (list: []) => {
-    setCheckedKafkaVersion(list);
+    setCheckedKafkaVersions(list);
   };
 
   const afterSubmitSuccessAccessClusters = () => {
@@ -247,10 +255,10 @@ const MultiClusterPage = () => {
 
                 <div className="header-filter-bottom">
                   <div className="header-filter-bottom-item header-filter-bottom-item-checkbox">
-                    <h3 className="header-filter-bottom-item-title">版本选择</h3>
+                    <h3 className="header-filter-bottom-item-title">版本分布</h3>
                     <div className="header-filter-bottom-item-content flex">
-                      {Object.keys(kafkaVersion).length ? (
-                        <CustomCheckGroup kafkaVersion={Object.keys(kafkaVersion)} onChangeCheckGroup={onChangeCheckGroup} />
+                      {existKafkaVersion.length ? (
+                        <CustomCheckGroup kafkaVersions={existKafkaVersion} onChangeCheckGroup={onChangeCheckGroup} />
                       ) : null}
                     </div>
                   </div>
@@ -307,7 +315,7 @@ const MultiClusterPage = () => {
       <AccessClusters
         visible={visible}
         setVisible={setVisible}
-        kafkaVersion={Object.keys(kafkaVersion)}
+        kafkaVersion={kafkaVersions}
         afterSubmitSuccess={afterSubmitSuccessAccessClusters}
       />
     </>

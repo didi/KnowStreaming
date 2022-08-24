@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-
 import { notification, Utils } from 'knowdesign';
 const { EventBus } = Utils;
 export const licenseEventBus = new EventBus();
@@ -14,7 +11,7 @@ export const goLogin = () => {
 const serviceInstance = Utils.service;
 
 // 清除 axios 实例默认的响应拦截
-serviceInstance.interceptors.response.handlers = [];
+(serviceInstance.interceptors.response as any).handlers = [];
 
 // 请求拦截
 serviceInstance.interceptors.request.use(
@@ -26,8 +23,8 @@ serviceInstance.interceptors.request.use(
     } else {
       config.headers['X-SSO-USER'] = user; // 请求携带token
       config.headers['X-SSO-USER-ID'] = id;
-      return config;
     }
+    return config;
   },
   (err: any) => {
     return err;
@@ -54,8 +51,8 @@ serviceInstance.interceptors.response.use(
     return res;
   },
   (err: any) => {
-    const config = err.config;
-    if (!config || !config.retryTimes) return dealResponse(err, config.customNotification);
+    const config = err?.config;
+    if (!config || !config.retryTimes) return dealResponse(err);
     const { __retryCount = 0, retryDelay = 300, retryTimes } = config;
     config.__retryCount = __retryCount;
     if (__retryCount >= retryTimes) {

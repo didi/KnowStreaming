@@ -37,6 +37,7 @@ const LINE_CONFIG = {
   lineStyle: {
     color: '#556EE6',
     width: 1,
+    smooth: 0.25,
   },
   areaStyle: {
     color: {

@@ -1,18 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  AppContainer,
-  Button,
-  Divider,
-  Drawer,
-  Form,
-  InputNumber,
-  notification,
-  SingleChart,
-  Space,
-  Spin,
-  Utils,
-} from 'knowdesign';
+import { AppContainer, Button, Divider, Drawer, Form, InputNumber, notification, SingleChart, Space, Spin, Utils } from 'knowdesign';
 import Api, { MetricType } from '@src/api/index';
 import { getBasicChartConfig, getUnit } from '@src/constants/chartConfig';
 import { formatChartData, MetricDefaultChartDataType } from '@src/components/DashboardDragChart/config';
@@ -193,6 +181,7 @@ const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
                       lineStyle: {
                         width: 1,
                       },
+                      smooth: 0.25,
                       symbol: 'emptyCircle',
                       symbolSize: 4,
                       emphasis: {

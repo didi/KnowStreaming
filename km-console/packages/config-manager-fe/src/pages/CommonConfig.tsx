@@ -31,10 +31,10 @@ export interface PermissionNode {
 }
 
 const CommonConfig = (): JSX.Element => {
-  const [global, setGlobal] = AppContainer.useGlobalValue();
+  const [, setGlobal] = AppContainer.useGlobalValue();
 
   // 获取权限树
-  const getPermissionTree = (userId: number) => {
+  const getPermissionTree = (userInfo, userId: number) => {
     const getUserInfo = Utils.request(`/logi-security/api/v1/user/${userId}`);
     const getPermissionTree = Utils.request('/logi-security/api/v1/permission/tree');
 
@@ -55,18 +55,16 @@ const CommonConfig = (): JSX.Element => {
 
   useLayoutEffect(() => {
     // 如果未登录，直接跳转到登录页
-    const userInfo = localStorage.getItem('userInfo');
-    let userId: number;
+    const userInfoStorage = localStorage.getItem('userInfo');
 
     try {
-      userId = JSON.parse(userInfo).id;
+      const userInfo = JSON.parse(userInfoStorage);
+      const userId = userInfo.id;
       if (!userId) throw 'err';
+      getPermissionTree(userInfo, userId);
     } catch (_) {
       goLogin();
-      return;
     }
-
-    getPermissionTree(userId);
   }, []);
 
   return <></>;

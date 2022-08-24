@@ -84,6 +84,7 @@ export const getChartConfig = (props: any) => {
           lineStyle: {
             width: 1,
           },
+          smooth: 0.25,
           symbol: 'emptyCircle',
           symbolSize: 4,
           // 面积图样式

@@ -478,6 +478,7 @@ export default (props: any) => {
                     lineStyle: {
                       width: 1.5,
                     },
+                    smooth: 0.25,
                     symbol: 'emptyCircle',
                     symbolSize: 4,
                     emphasis: {

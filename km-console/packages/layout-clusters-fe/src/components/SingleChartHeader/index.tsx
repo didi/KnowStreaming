@@ -85,10 +85,10 @@ const SingleChartHeader = ({
   hideGridSelect = false,
   onChange: onChangeCallback,
 }: PropsType): JSX.Element => {
-  const [gridNum, setGridNum] = useState<number>(GRID_SIZE_OPTIONS[0].value);
+  const [gridNum, setGridNum] = useState<number>(GRID_SIZE_OPTIONS[1].value);
   const [rangeTime, setRangeTime] = useState<[number, number]>(() => {
     const curTimeStamp = moment().valueOf();
-    return [curTimeStamp - 15 * 60 * 1000, curTimeStamp];
+    return [curTimeStamp - 60 * 60 * 1000, curTimeStamp];
   });
   const [isRelativeRangeTime, setIsRelativeRangeTime] = useState(true);
   const [isAutoReload, setIsAutoReload] = useState(false);

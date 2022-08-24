@@ -144,9 +144,10 @@ const seriesCallback = (lines: { name: string; data: [number, string | number][]
       },
       symbol: 'emptyCircle',
       symbolSize: 4,
-      // emphasis: {
-      //   focus: 'self',
-      // },
+      smooth: 0.25,
+      areaStyle: {
+        opacity: 0.02,
+      },
     };
   });
 };
@@ -181,6 +182,7 @@ export const getDetailChartConfig = (title: string, sliderPos: readonly [number,
       legend: {
         show: false,
       },
+      color: CHART_COLOR_LIST,
       dataZoom: [
         {
           type: 'inside',

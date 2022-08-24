@@ -38,7 +38,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   const [selectedMetricNames, setSelectedMetricNames] = useState<(string | number)[]>([]); // 默认选中的指标的列表
   const [curHeaderOptions, setCurHeaderOptions] = useState<ChartFilterOptions>();
   const [metricChartData, setMetricChartData] = useState<MetricChartDataType[]>([]); // 指标图表数据列表
-  const [gridNum, setGridNum] = useState<number>(8); // 图表列布局
+  const [gridNum, setGridNum] = useState<number>(12); // 图表列布局
   const chartDetailRef = useRef(null);
   const chartDragOrder = useRef([]);
   const curFetchingTimestamp = useRef(0);
@@ -49,13 +49,13 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
     const list = res.map((item: any) => {
       return dashboardType === MetricType.Broker
         ? {
-          label: item.host,
-          value: item.brokerId,
-        }
+            label: item.host,
+            value: item.brokerId,
+          }
         : {
-          label: item.topicName,
-          value: item.topicName,
-        };
+            label: item.topicName,
+            value: item.topicName,
+          };
     });
     setScopeList(list);
   };
@@ -145,7 +145,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   const ksHeaderChange = (ksOptions: KsHeaderOptions) => {
     // 重新渲染图表
     if (gridNum !== ksOptions.gridNum) {
-      setGridNum(ksOptions.gridNum || 8);
+      setGridNum(ksOptions.gridNum || 12);
       busInstance.emit('chartResize');
     } else {
       // 如果为相对时间，则当前时间减去 1 分钟，避免最近一分钟的数据还没采集到时前端多补一个点
