@@ -85,8 +85,8 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
 
     @PostConstruct
     private void init() {
-        registerVCHandler(PARTITION_OFFSET_GET,     V_0_10_0_0, V_0_10_2_0,  "getPartitionOffsetFromKafkaConsumerClient",       this::getPartitionOffsetFromKafkaConsumerClient);
-        registerVCHandler(PARTITION_OFFSET_GET,     V_0_10_2_0, V_MAX,       "getPartitionOffsetFromKafkaAdminClient",          this::getPartitionOffsetFromKafkaAdminClient);
+        registerVCHandler(PARTITION_OFFSET_GET,     V_0_10_0_0, V_0_11_0_0,  "getPartitionOffsetFromKafkaConsumerClient",       this::getPartitionOffsetFromKafkaConsumerClient);
+        registerVCHandler(PARTITION_OFFSET_GET,     V_0_11_0_0, V_MAX,       "getPartitionOffsetFromKafkaAdminClient",          this::getPartitionOffsetFromKafkaAdminClient);
     }
 
     @Override
