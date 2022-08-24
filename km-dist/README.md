@@ -24,10 +24,6 @@
 
 - libs：Java的libs
   - ks-km.jar：KnowStreaming的Jar包
-  
 
-- packages：额外安装包
-  - KnowLicense-1.0.0.tar.gz：License安装包
-  
 
 - LICENSE：开源协议
