@@ -24,7 +24,7 @@ import './index.less';
 import Api, { MetricType } from '@src/api/index';
 import moment from 'moment';
 import PreviewTaskPlan from './PreviewTaskPlan';
-import { timeFormat } from '@src/lib/utils';
+import { timeFormater } from '@src/constants/common';
 import type { RangePickerProps } from 'knowdesign/es/basic/date-picker';
 
 const { TextArea } = Input;
@@ -135,7 +135,7 @@ export default (props: DefaultConfig) => {
       title: '数据保存时间',
       dataIndex: 'retentionMs',
       render: (v: any) => {
-        return timeFormat(v);
+        return timeFormater(v);
       },
     },
     {
@@ -154,7 +154,6 @@ export default (props: DefaultConfig) => {
               setMoveDataTimeRanges(moveDataTimeRangesCopy);
             }}
             formatter={(value) => (value ? `${value} h` : '')}
-            // @ts-ignore
             parser={(value) => value.replace('h', '')}
           ></InputNumber>
         );

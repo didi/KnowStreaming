@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Badge, Descriptions, Dropdown, ProTable, DTable, Table, Utils, Spin, Tag } from 'knowdesign';
+import { Badge, Descriptions, ProTable, Utils, Spin, Tag } from 'knowdesign';
 import { useParams } from 'react-router-dom';
 import Api from '@src/api';
-import { getNodeTrafficColumns } from './config';
 import { getSizeAndUnit } from '@src/constants/common';
+import TagsWithHide from '@src/components/TagsWithHide';
 interface PropsType {
   jobId?: any;
   balanceData?: any;
@@ -54,7 +54,6 @@ const RebalancePlan = (props: PropsType) => {
         // });
 
         // setData(mockData);
-
         setData(res || []);
         setLoading(false);
       })
@@ -221,9 +220,10 @@ const RebalancePlan = (props: PropsType) => {
       <Spin spinning={loading}>
         <Descriptions
           style={{ fontSize: '13px' }}
-          column={2}
+          column={3}
           labelStyle={{
             display: 'flex',
+            textAlign: 'right',
             justifyContent: 'end',
             color: '#74788D',
             fontSize: '13px',
@@ -231,11 +231,12 @@ const RebalancePlan = (props: PropsType) => {
           contentStyle={{ fontSize: '13px' }}
         >
           <Descriptions.Item label="任务类型">{typeObj[data?.type] || '-'}</Descriptions.Item>
-          <Descriptions.Item label="总迁移大小">{Utils.getSizeAndUnit(data?.moveSize, 'B').valueWithUnit}</Descriptions.Item>
-          <Descriptions.Item label="Topic黑名单">
-            {data?.blackTopics && data?.blackTopics?.length > 0 ? data?.blackTopics.join('、') : '-'}
+          <Descriptions.Item labelStyle={{ width: '100px' }} label="总迁移大小">
+            {Utils.getSizeAndUnit(data?.moveSize, 'B').valueWithUnit}
           </Descriptions.Item>
-          <Descriptions.Item label="迁移副本数">{data?.replicas || '-'}</Descriptions.Item>
+          <Descriptions.Item labelStyle={{ width: '100px' }} label="迁移副本数">
+            {data?.replicas || '-'}
+          </Descriptions.Item>
           <Descriptions.Item label="均衡阈值">
             {data?.clusterBalanceIntervalList
               ? data?.clusterBalanceIntervalList?.map((item: any) => {
@@ -246,6 +247,13 @@ const RebalancePlan = (props: PropsType) => {
                   );
                 })
               : '-'}
+          </Descriptions.Item>
+          <Descriptions.Item labelStyle={{ width: '100px' }} label="Topic黑名单">
+            {data?.blackTopics && data?.blackTopics?.length > 0 ? (
+              <TagsWithHide placement="bottomLeft" list={data?.blackTopics} expandTagContent={(num: any) => `共有${num}个`} />
+            ) : (
+              '-'
+            )}
           </Descriptions.Item>
         </Descriptions>
       </Spin>
@@ -271,7 +279,7 @@ const RebalancePlan = (props: PropsType) => {
       </div>
       {data?.reassignmentJson && (
         <>
-          <h3 style={{ fontSize: '16px', marginTop: '22px' }}>执行文件</h3>
+          <h3 style={{ fontSize: '16px' }}>执行文件</h3>
           <div>
             <a href={`data:,${data?.reassignmentJson}`} rel="noopener" download="reassignment.json">
               Reassignment json file（点击下载）

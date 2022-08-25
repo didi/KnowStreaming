@@ -376,7 +376,8 @@ export default (props: { curTabKey: string }): JSX.Element => {
   const [pagination, setPagination] = useState<any>(defaultPagination);
   const [loading, setLoading] = useState<boolean>(true);
   const [deleteBtnLoading, setDeleteBtnLoading] = useState<number>(-1);
-  const [form] = Form.useForm();
+  const [searchKeywords, setSearchKeywords] = useState('');
+  const [searchKeywordsInput, setSearchKeywordsInput] = useState('');
   const detailRef = useRef(null);
   const assignRolesRef = useRef(null);
 
@@ -472,11 +473,10 @@ export default (props: { curTabKey: string }): JSX.Element => {
   ];
 
   const getRoleList = (query = {}) => {
-    const formData = form.getFieldsValue();
     const data = {
       page: pagination.current,
       size: pagination.pageSize,
-      ...formData,
+      roleName: searchKeywords,
       ...query,
     };
 
@@ -582,19 +582,33 @@ export default (props: { curTabKey: string }): JSX.Element => {
     }
   }, [curTabKey]);
 
+  useEffect(() => {
+    (searchKeywords || searchKeywords === '') && getRoleList({ pageNo: 1 });
+  }, [searchKeywords]);
+
   return (
     <>
-      <div className="operate-bar">
-        <Form form={form} layout="inline" onFinish={() => getRoleList({ page: 1 })}>
-          <Form.Item name="roleName">
-            <Input placeholder="请输入角色名称" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" ghost htmlType="submit">
-              查询
-            </Button>
-          </Form.Item>
-        </Form>
+      <div className="operate-bar-right">
+        <Input
+          className="search-input"
+          suffix={
+            <IconFont
+              type="icon-fangdajing"
+              onClick={(_) => {
+                setSearchKeywords(searchKeywordsInput);
+              }}
+              style={{ fontSize: '16px' }}
+            />
+          }
+          placeholder="请输入角色名称"
+          value={searchKeywordsInput}
+          onPressEnter={(_) => {
+            setSearchKeywords(searchKeywordsInput);
+          }}
+          onChange={(e) => {
+            setSearchKeywordsInput(e.target.value);
+          }}
+        />
         {global.hasPermission && global.hasPermission(ConfigPermissionMap.ROLE_ADD) ? (
           <Button
             type="primary"

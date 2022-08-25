@@ -114,7 +114,7 @@ export default (props: any) => {
       key: 'memberId',
       width: 200,
       render: (v: string) => {
-        return <ContentWithCopy content={v} />;
+        return v ? <ContentWithCopy content={v} /> : '-';
       },
     },
     {

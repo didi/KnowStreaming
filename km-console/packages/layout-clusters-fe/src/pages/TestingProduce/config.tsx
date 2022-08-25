@@ -3,8 +3,7 @@ import { IconFont, Switch, Tooltip } from 'knowdesign';
 import { FormItemType, IFormItem } from 'knowdesign/lib/extend/x-form';
 import moment from 'moment';
 import React from 'react';
-import { timeFormat } from '../../constants/common';
-import { getRandomStr } from '../../lib/utils';
+import { timeFormat, getRandomStr } from '@src/constants/common';
 import { ControlStatusMap } from '../CommonRoute';
 
 export const filterList = [

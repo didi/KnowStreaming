@@ -74,23 +74,23 @@ const BrokerDetail = (props: any) => {
   useEffect(() => {
     global?.clusterInfo?.id && hashDataParse(urlLocation.hash).brokerId
       ? Utils.request(Api.getBrokerMetadata(hashDataParse(urlLocation.hash).brokerId, global?.clusterInfo?.id), {
-        init: {
-          errorNoTips: true,
-        },
-      })
-        .then((brokerData: any) => {
-          if (brokerData?.exist && brokerData?.alive && hashDataParse(urlLocation.hash).host === brokerData.host) {
-            setHashData(brokerData);
-            setVisible(true);
-          } else {
+          init: {
+            errorNoTips: true,
+          },
+        })
+          .then((brokerData: any) => {
+            if (brokerData?.exist && brokerData?.alive) {
+              setHashData(brokerData);
+              setVisible(true);
+            } else {
+              history.replace(urlLocation.pathname);
+              setVisible(false);
+            }
+          })
+          .catch((err) => {
             history.replace(urlLocation.pathname);
             setVisible(false);
-          }
-        })
-        .catch((err) => {
-          history.replace(urlLocation.pathname);
-          setVisible(false);
-        })
+          })
       : setVisible(false);
   }, [hashDataParse(urlLocation.hash).brokerId, global?.clusterInfo, urlLocation]);
 

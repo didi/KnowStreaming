@@ -4,7 +4,7 @@ import { Button, Divider, Drawer, Form, Input, InputNumber, message, Radio, Sele
 import * as React from 'react';
 import { useIntl } from 'react-intl';
 import api from '../../api';
-import { regClusterName, regUsername } from '../../common/reg';
+import { regClusterName, regUsername } from '../../constants/reg';
 import { bootstrapServersErrCodes, jmxErrCodes, zkErrCodes } from './config';
 import CodeMirrorFormItem from '@src/components/CodeMirrorFormItem';
 

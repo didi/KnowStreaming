@@ -21,7 +21,7 @@ import { CloseOutlined, EyeInvisibleOutlined, EyeOutlined, LoadingOutlined } fro
 import './index.less';
 import api from '@src/api';
 import { useParams } from 'react-router-dom';
-import { regKafkaPassword } from '@src/common/reg';
+import { regKafkaPassword } from '@src/constants/reg';
 
 export const randomString = (len = 32, chars = 'abcdefghijklmnopqrstuvwxyz1234567890'): string => {
   const maxPos = chars.length;
@@ -283,18 +283,17 @@ const SecurityUsers = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<UsersProps[]>([]);
   const [pagination, setPagination] = useState<any>(defaultPagination);
-  const [form] = Form.useForm();
+  const [searchKeywords, setSearchKeywords] = useState('');
+  const [searchKeywordsInput, setSearchKeywordsInput] = useState('');
   const editDrawerRef = useRef(null);
 
   const getKafkaUserList = (query = {}) => {
-    const formData = form.getFieldsValue();
     const queryParams = {
       pageNo: pagination.current,
       pageSize: pagination.pageSize,
-      ...formData,
+      searchKeywords,
       ...query,
     };
-
     setLoading(true);
     Utils.request(api.getKafkaUsers(clusterId), {
       method: 'POST',
@@ -413,6 +412,10 @@ const SecurityUsers = (): JSX.Element => {
     getKafkaUserList();
   }, []);
 
+  useEffect(() => {
+    (searchKeywords || searchKeywords === '') && getKafkaUserList({ pageNo: 1 });
+  }, [searchKeywords]);
+
   return (
     <div className="security-users-page">
       <DKSBreadcrumb
@@ -424,16 +427,26 @@ const SecurityUsers = (): JSX.Element => {
       />
       <div className="security-users-page-list">
         <div className="operate-bar">
-          <Form form={form} layout="inline" onFinish={() => getKafkaUserList({ pageNo: 1 })}>
-            <Form.Item name="searchKeywords">
-              <Input placeholder="请输入 Kafka User" />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" ghost htmlType="submit">
-                查询
-              </Button>
-            </Form.Item>
-          </Form>
+          <Input
+            className="search-input"
+            suffix={
+              <IconFont
+                type="icon-fangdajing"
+                onClick={(_) => {
+                  setSearchKeywords(searchKeywordsInput);
+                }}
+                style={{ fontSize: '16px' }}
+              />
+            }
+            placeholder="请输入 Kafka User"
+            value={searchKeywordsInput}
+            onPressEnter={(_) => {
+              setSearchKeywords(searchKeywordsInput);
+            }}
+            onChange={(e) => {
+              setSearchKeywordsInput(e.target.value);
+            }}
+          />
           <Button
             type="primary"
             // icon={<PlusOutlined />}

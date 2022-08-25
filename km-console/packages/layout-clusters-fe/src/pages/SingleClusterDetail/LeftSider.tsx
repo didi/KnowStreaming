@@ -107,6 +107,7 @@ const LeftSider = () => {
             strokeWidth={4}
             strokeColor={getHealthProcessColor(clusterMetrics?.HealthScore, clusterMetrics?.Alive)}
             percent={clusterMetrics?.HealthScore ?? '-'}
+            className={+clusterMetrics.Alive <= 0 ? 'red-circle' : +clusterMetrics?.HealthScore < 90 ? 'blue-circle' : 'green-circle'}
             format={() => (
               <div className={`healthy-percent ${getHealthClassName(clusterMetrics?.HealthScore, clusterMetrics?.Alive)}`}>
                 {getHealthText(clusterMetrics?.HealthScore, clusterMetrics?.Alive)}

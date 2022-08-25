@@ -1,3 +1,7 @@
+interface IMap {
+  [key: string]: string;
+}
+
 export const defaultPagination = {
   current: 1,
   pageSize: 10,
@@ -122,10 +126,37 @@ export const hashDataParse = (hash: string) => {
   return newHashData;
 };
 
-const BUSINESS_VERSION = process.env.BUSINESS_VERSION;
+export const urlParser = () => {
+  const Url = {
+    hash: {} as IMap,
+    search: {} as IMap,
+  } as {
+    hash: IMap;
+    search: IMap;
+    [key: string]: IMap;
+  };
+
+  window.location.hash
+    .slice(1)
+    .split('&')
+    .forEach((str) => {
+      const kv = str.split('=');
+      Url.hash[kv[0]] = kv[1];
+    });
+
+  window.location.search
+    .slice(1)
+    .split('&')
+    .forEach((str) => {
+      const kv = str.split('=');
+      Url.search[kv[0]] = kv[1];
+    });
+
+  return Url;
+};
 
 export const getLicenseInfo = (cbk: (msg: string) => void) => {
-  if (BUSINESS_VERSION) {
+  if (process.env.BUSINESS_VERSION) {
     const info = (window as any).code;
     if (!info) {
       setTimeout(() => getLicenseInfo(cbk), 1000);
@@ -136,4 +167,97 @@ export const getLicenseInfo = (cbk: (msg: string) => void) => {
       }
     }
   }
+};
+
+export const getRandomStr = (length?: number) => {
+  const NUM_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const LOW_LETTERS_LIST = [
+    'a',
+    'b',
+    'c',
+    'd',
+    'e',
+    'f',
+    'g',
+    'h',
+    'i',
+    'j',
+    'k',
+    'l',
+    'm',
+    'n',
+    'o',
+    'p',
+    'q',
+    'r',
+    's',
+    't',
+    'u',
+    'v',
+    'w',
+    'x',
+    'y',
+    'z',
+  ];
+  const CAP_LETTERS_LIST = LOW_LETTERS_LIST.map((v) => v.toUpperCase());
+  const SPECIAL_LIST = [
+    '!',
+    '"',
+    '#',
+    '$',
+    '%',
+    '&',
+    "'",
+    '(',
+    ')',
+    '*',
+    '+',
+    '-',
+    '.',
+    '/',
+    ':',
+    ';',
+    '<',
+    '=',
+    '>',
+    '?',
+    '@',
+    '[',
+    '\\',
+    ']',
+    '^',
+    '_',
+    '`',
+    '{',
+    '|',
+    '}',
+    '~',
+  ];
+  const ALL_LIST = [...NUM_list, ...LOW_LETTERS_LIST, ...CAP_LETTERS_LIST];
+  const randomNum = (Math.random() * 128) | 0;
+  const randomKeys = new Array(length ?? randomNum).fill('');
+
+  for (let i = 0; i < randomKeys.length; i++) {
+    // ALL_LIST 随机字符
+    const index = (Math.random() * ALL_LIST.length) | 0;
+    randomKeys[i] = ALL_LIST[index - 1];
+  }
+  return randomKeys.join('');
+};
+
+export const timeFormater = function formatDuring(mss: number) {
+  const days = Math.floor(mss / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((mss % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = (mss % (1000 * 60)) / 1000;
+  const parts = [
+    { v: days, unit: '天' },
+    { v: hours, unit: '小时' },
+    { v: minutes, unit: '分钟' },
+    { v: seconds, unit: '秒' },
+  ];
+  return parts
+    .filter((o) => o.v > 0)
+    .map((o: any) => `${o.v}${o.unit}`)
+    .join();
 };

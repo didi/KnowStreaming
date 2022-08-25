@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CardBar from '@src/components/CardBar';
 import { healthDataProps } from '.';
-import { Tag, Utils } from 'knowdesign';
+import { Tag, Tooltip, Utils } from 'knowdesign';
 import api from '@src/api';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 export default () => {
   const routeParams = useParams<{
@@ -85,7 +86,16 @@ export default () => {
           },
         },
         {
-          title: 'Similar Config',
+          title() {
+            return (
+              <div>
+                <span style={{ display: 'inline-block', marginRight: '8px' }}>Similar Config</span>
+                <Tooltip overlayClassName="rebalance-tooltip" title="所有broker配置是否一致">
+                  <QuestionCircleOutlined />
+                </Tooltip>
+              </div>
+            );
+          },
           value: () => {
             return (
               <>

@@ -8,7 +8,7 @@ const { request } = Utils;
 const defaultParams: any = {
   truncate: true,
   maxRecords: 100,
-  pullTimeoutUnitMs: 8000,
+  pullTimeoutUnitMs: 5000,
   // filterPartitionId: 1,
 };
 const defaultpaPagination = {

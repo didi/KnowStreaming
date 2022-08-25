@@ -1,18 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Utils,
-  Drawer,
-  Button,
-  Form,
-  Space,
-  Divider,
-  AppContainer,
-  Input,
-  Transfer,
-  message,
-  IconFont,
-  InputNumber,
-} from 'knowdesign';
+import { Utils, Drawer, Button, Form, Space, Divider, AppContainer, Input, Transfer, message, IconFont, InputNumber } from 'knowdesign';
 import { CloseOutlined } from '@ant-design/icons';
 import api from '../../api';
 import './style/BalanceDrawer.less';
@@ -38,7 +25,7 @@ const ClusterNorms: React.FC<PropsType> = ({ onClose, visible, genData }) => {
     // 周期均衡
     form.validateFields().then((values) => {
       const params = values?.brokers?.map((item: any) => {
-        const brokerId = nodeData?.filter((key) => key.brokerId === item && item)[0]?.brokerId;
+        const brokerId = nodeData?.filter((key) => key.brokerId === item)[0]?.brokerId;
         const newValue = brokerId && { brokerId, cpu: values?.cpu, disk: values?.disk, flow: values?.flow };
         return {
           clusterId: global?.clusterInfo?.id + '',

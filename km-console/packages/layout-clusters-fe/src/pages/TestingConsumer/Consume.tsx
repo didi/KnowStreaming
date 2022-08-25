@@ -219,7 +219,7 @@ const ConsumeClientTest = () => {
     ];
     const _params = {
       clusterId,
-      maxDurationUnitMs: 8000, // 前端超时时间为10s，这里接口超时设置8s
+      maxDurationUnitMs: 5000, // 前端超时时间为10s，这里接口超时设置8s
       clientProperties: {},
       maxRecords: 10,
       topicName: values.topic,
@@ -239,9 +239,9 @@ const ConsumeClientTest = () => {
             ? offsetLists
             : undefined
           : lastPartitionList.current?.map((item) => ({
-            offset: item.consumedOffset,
-            partitionId: item.partitionId,
-          })),
+              offset: item.consumedOffset,
+              partitionId: item.partitionId,
+            })),
         timestampUnitMs:
           values.start[1] === 'a specific date'
             ? startFromMap[values.start[1]].getDate(values.startDate)

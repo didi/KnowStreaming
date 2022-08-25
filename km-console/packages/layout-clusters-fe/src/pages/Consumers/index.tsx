@@ -60,7 +60,10 @@ const AutoPage = (props: any) => {
     setConsumersListLoading(true);
     Utils.post(Api.getOperatingStateList(clusterPhyId), params).then((data: any) => {
       setConsumersListLoading(false);
-      setConsumerGroupList(data?.bizData || []);
+      const newData = data?.bizData.map((item: any, key: number) => {
+        return { ...item, unique: key * pageIndex * pageSize + item?.groupName };
+      });
+      setConsumerGroupList(newData || []);
       setPageIndex(data.pagination.pageNo);
       setPageTotal(data.pagination.total);
       setPageSize(data.pagination.pageSize);
@@ -230,7 +233,7 @@ const AutoPage = (props: any) => {
             tableProps={{
               loading: consumersListLoading,
               showHeader: false,
-              rowKey: 'groupName',
+              rowKey: 'unique',
               columns: columns(),
               dataSource: consumerGroupList,
               paginationProps:
@@ -250,7 +253,6 @@ const AutoPage = (props: any) => {
                 // },
                 onChange: onTableChange,
                 scroll: { y: 'calc(100vh - 400px)' },
-                // className: `frameless-table ${scene !== 'topicDetail' && 'clustom-table-content'}`, // 纯无边框表格类名
               },
             }}
           />
