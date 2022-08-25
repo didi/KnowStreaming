@@ -1,7 +1,4 @@
 
-![Logo](../assets/KnowStreamingLogo.png)
-
-
 # FAQ 
 
 ## 8.1、支持哪些 Kafka 版本？
@@ -95,7 +92,10 @@ Trick-Login-User : admin
 步骤二：点击右上角"系统管理"，选择配置管理，在页面中添加以下键值对。
 
 ```shell
-# 设置的key，必须是这个
+# 模块选择
+SECURITY.LOGIN
+
+# 设置的配置键，必须是这个
 SECURITY.TRICK_USERS
 
 # 设置的value，是json数组的格式，包含步骤一header中设置的用户名，例如
