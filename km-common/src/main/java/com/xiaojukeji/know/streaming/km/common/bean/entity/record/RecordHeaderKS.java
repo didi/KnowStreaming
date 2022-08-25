@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class RecordHeaderKS {
     private String key;
 
-    private byte[] value;
+    private String value;
 }

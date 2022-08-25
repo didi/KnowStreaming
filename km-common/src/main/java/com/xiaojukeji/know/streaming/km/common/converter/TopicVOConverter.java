@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class TopicVOConverter {
@@ -51,7 +52,7 @@ public class TopicVOConverter {
         vo.setValue(consumerRecord.value());
         vo.setHeaderList(new ArrayList<>());
         for (Header header : consumerRecord.headers().toArray()) {
-            vo.getHeaderList().add(new RecordHeaderKS(header.key(), header.value()));
+            vo.getHeaderList().add(new RecordHeaderKS(header.key(), new String(header.value(), StandardCharsets.UTF_8)));
         }
         return vo;
     }
