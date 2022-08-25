@@ -238,7 +238,7 @@ public class TopicServiceImpl implements TopicService {
         try {
             AdminClient adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
 
-            ListTopicsResult listTopicsResult = adminClient.listTopics(new ListTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
+            ListTopicsResult listTopicsResult = adminClient.listTopics(new ListTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).listInternal(true));
 
             List<Topic> topicList = new ArrayList<>();
 

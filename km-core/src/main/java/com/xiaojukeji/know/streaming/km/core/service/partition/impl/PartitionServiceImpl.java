@@ -372,7 +372,7 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
             AdminClient adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
 
             // 获取Topic列表
-            ListTopicsResult listTopicsResult = adminClient.listTopics(new ListTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
+            ListTopicsResult listTopicsResult = adminClient.listTopics(new ListTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).listInternal(true));
             for (String topicName: listTopicsResult.names().get()) {
                 DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(
                         Arrays.asList(topicName),
