@@ -187,14 +187,16 @@ public class PaginationMetricsUtil {
             // 指标数据排序
             Float m1 = a1.getMetric(metricName);
             Float m2 = a2.getMetric(metricName);
-            if (m1 != null && m2 != null) {
-                // 两个都不为空，则进行大小比较
-                return compareObject(m2, m1);
-            }
-            if (m1 != null) {
+            if (m1 != null && m2 == null) {
                 return -1;
-            } else if (m2 != null) {
+            } else if (m1 == null && m2 != null) {
                 return 1;
+            } else if (m1 != null && m2 != null) {
+                // 两个都不为空，则进行大小比较
+                int val = compareObject(m2, m1);
+                if (val != 0) {
+                    return val;
+                }
             }
 
             // 默认字段排序
