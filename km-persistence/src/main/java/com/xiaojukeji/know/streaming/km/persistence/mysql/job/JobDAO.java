@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JobDAO extends BaseMapper<JobPO> {
+    int addAndSetId(JobPO jobPO);
 }

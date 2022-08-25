@@ -62,3 +62,8 @@ INSERT INTO `logi_security_role_permission` (`id`, `role_id`, `permission_id`, `
 
 -- 初始化 用户角色关系
 INSERT INTO `logi_security_user_role` (`id`, `user_id`, `role_id`, `is_delete`, `app_name`) VALUES ('1', '1', '1677', '0', 'know-streaming');
+
+INSERT INTO `logi_security_config`
+(`value_group`,`value_name`,`value`,`edit`,`status`,`memo`,`is_delete`,`app_name`,`operator`)
+VALUES
+('SECURITY.LOGIN','SECURITY.TRICK_USERS','[\n  \"admin\"\n]',1,1,'允许跳过登录的用户',0,'know-streaming','admin');

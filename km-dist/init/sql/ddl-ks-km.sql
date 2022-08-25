@@ -150,7 +150,7 @@ CREATE TABLE `ks_km_job` (
   `job_desc` varchar(1024) NOT NULL DEFAULT '' COMMENT '任务描述',
   `cluster_id` int(11) NOT NULL COMMENT 'kafka集群id',
   `target` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '任务执行对象',
-  `running_status` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '任务运行详细状态(json), Success：7  Fail：1  Doing：2',
+  `running_status` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT '任务运行详细状态(json), Success：7  Fail：1  Doing：2',
   `creator` varchar(45) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT '创建者',
   `plan_time` timestamp NOT NULL DEFAULT '1971-1-1 00:00:00' COMMENT '计划执行时间',
   `start_time` timestamp NOT NULL DEFAULT '1971-1-1 00:00:00' COMMENT '实际执行时间',

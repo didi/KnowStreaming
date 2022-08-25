@@ -73,8 +73,11 @@ public class JobServiceImpl implements JobService {
         }
 
         Job job = ConvertUtil.obj2Obj(jobDTO, Job.class);
+        job.setJobName(job.getJobName() == null? job.getJobDesc(): job.getJobName());
         job.setCreator(operator);
         job.setClusterId(clusterPhyId);
+        job.setJobDesc(job.getJobDesc()== null ? "" : job.getJobDesc());
+        job.setJobName(job.getJobName()== null ? job.getJobDesc() : job.getJobName());
 
         try {
             // 写入job表
@@ -448,7 +451,7 @@ public class JobServiceImpl implements JobService {
     private boolean insert(Job task) {
         try {
             JobPO  jobPO = ConvertUtil.obj2Obj(task, JobPO.class);
-            if (jobDao.insert( jobPO ) > 0) {
+            if (jobDao.addAndSetId( jobPO ) > 0) {
                 task.setId(jobPO.getId());
                 return true;
             }
