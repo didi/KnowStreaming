@@ -26,7 +26,7 @@ const ClusterNorms: React.FC<PropsType> = ({ onClose, visible, genData }) => {
     form.validateFields().then((values) => {
       const params = values?.brokers?.map((item: any) => {
         const brokerId = nodeData?.filter((key) => key.brokerId === item)[0]?.brokerId;
-        const newValue = brokerId && { brokerId, cpu: values?.cpu, disk: values?.disk, flow: values?.flow };
+        const newValue = brokerId !== undefined && { brokerId, cpu: values?.cpu, disk: values?.disk, flow: values?.flow };
         return {
           clusterId: global?.clusterInfo?.id + '',
           value: JSON.stringify(newValue),
