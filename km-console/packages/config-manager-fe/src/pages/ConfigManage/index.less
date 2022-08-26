@@ -1,0 +1,72 @@
+.config-manage-page {
+  .d-table {
+    .text-overflow-two-row {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .hover-light:hover {
+      color: #556ee6;
+      cursor: pointer;
+    }
+  }
+}
+
+// 新增/编辑配置抽屉 代码编辑器样式
+.config-manage-edit-drawer {
+  .codemirror-form-item {
+    > .cm-s-default {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: all 0.3s;
+      &:hover,
+      &.CodeMirror-focused {
+        border-color: #74788d;
+      }
+      .CodeMirror-scroll {
+        background: rgba(33, 37, 41, 0.06);
+        transition: all 0.3s;
+        .CodeMirror-gutters {
+          background: transparent;
+          border-right: none;
+        }
+      }
+    }
+  }
+
+  .dcloud-form-item-has-error {
+    .codemirror-form-item {
+      > .cm-s-default {
+        border-color: #ff7066;
+        .CodeMirror-scroll {
+          background: #fffafa;
+        }
+      }
+    }
+  }
+}
+
+// 列表配置值弹窗
+.config-manage-value-modal {
+  .dcloud-modal-header {
+    border-bottom: 0;
+  }
+  .dcloud-modal-body {
+    padding: 0 8px 8px 8px;
+    .react-codemirror2 {
+      > .cm-s-default {
+        border-radius: 8px;
+        overflow: hidden;
+        .CodeMirror-scroll {
+          background: #556de60a;
+          .CodeMirror-gutters {
+            background: transparent;
+            border-right: none;
+          }
+        }
+      }
+    }
+  }
+}

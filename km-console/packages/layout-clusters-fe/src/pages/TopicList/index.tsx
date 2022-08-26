@@ -1,0 +1,401 @@
+/* eslint-disable react/display-name */
+import React, { useState, useEffect } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { AppContainer, IconFont, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button } from 'knowdesign';
+import Create from './Create';
+import './index.less';
+import Api from '@src/api/index';
+import ExpandPartition from './ExpandPartition';
+import TopicHealthCheck from '@src/components/CardBar/TopicHealthCheck';
+import TopicDetail from '../TopicDetail';
+import Delete from './Delete';
+import { ClustersPermissionMap } from '../CommonConfig';
+import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import ReplicaChange from '@src/components/TopicJob/ReplicaChange';
+import SmallChart from '@src/components/SmallChart';
+import ReplicaMove from '@src/components/TopicJob/ReplicaMove';
+import { formatAssignSize } from '../Jobs/config';
+import { DownOutlined } from '@ant-design/icons';
+
+const { Option } = Select;
+
+const AutoPage = (props: any) => {
+  const routeParams = useParams<{ clusterId: string }>();
+  const history = useHistory();
+  const [global] = AppContainer.useGlobalValue();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  const [topicList, setTopicList] = useState([]);
+  const [pageIndex, setPageIndex] = useState(1);
+  const [pageTotal, setPageTotal] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [showInternalTopics, setShowInternalTopics] = useState(false);
+  const [searchKeywords, setSearchKeywords] = useState('');
+  const [searchKeywordsInput, setSearchKeywordsInput] = useState('');
+  const [topicListLoading, setTopicListLoading] = useState(false);
+  const [type, setType] = useState<string>('');
+  const [changeVisible, setChangeVisible] = useState(false);
+  const [moveVisible, setMoveVisible] = useState(false);
+  const [selectValue, setSelectValue] = useState('批量操作');
+
+  const [sortObj, setSortObj] = useState<{
+    sortField: string;
+    sortType: 'desc' | 'asc' | '';
+  }>({ sortField: 'createTime', sortType: 'desc' });
+  const getRecent1DayTimeStamp = () => [Date.now() - 24 * 60 * 60 * 1000, Date.now()];
+  const getTopicsList = () => {
+    const [startStamp, endStamp] = getRecent1DayTimeStamp();
+    // const [startStamp, endStamp] = [1650445216000, 1650448576988]
+    const params: any = {
+      metricLines: {
+        aggType: 'avg',
+        endTime: endStamp,
+        metricsNames: ['HealthScore', 'BytesIn', 'BytesOut', 'LogSize'],
+        startTime: startStamp,
+        topNu: 0,
+      },
+      latestMetricNames: ['HealthScore', 'BytesIn', 'BytesOut', 'LogSize'],
+      pageNo: pageIndex,
+      pageSize: pageSize,
+      searchKeywords,
+      showInternalTopics,
+      sortType: sortObj.sortType || 'desc',
+      sortField: sortObj.sortField || 'createTime',
+    };
+    // if (sortObj.sortField && sortObj.sortType) {
+    //   params.sortField = sortObj.sortField;
+    //   params.sortType = sortObj.sortType || 'desc';
+    // }
+    Utils.post(Api.getTopicsList(Number(routeParams.clusterId)), params)
+      .then((data: any) => {
+        setTopicListLoading(false);
+        setTopicList(data?.bizData || []);
+        // setPageIndex(data.pagination.pageNo)
+        setPageTotal(data.pagination.total);
+        // setPageSize(data.pagination.pageSize)
+      })
+      .catch((e) => {
+        setTopicListLoading(false);
+      });
+  };
+  useEffect(() => {
+    setTopicListLoading(true);
+    getTopicsList();
+  }, [sortObj, showInternalTopics, searchKeywords, pageIndex, pageSize]);
+
+  const calcCurValue = (record: any, metricName: string) => {
+    // const item = (record.metricPoints || []).find((item: any) => item.metricName === metricName);
+    // return item?.value || '';
+    const orgVal = record?.latestMetrics?.metrics?.[metricName];
+    if (orgVal !== undefined) {
+      if (metricName === 'HealthScore') {
+        return Math.round(orgVal);
+      } else if (metricName === 'LogSize') {
+        return Number(Utils.formatAssignSize(orgVal, 'MB')).toString().length > 3 ? (
+          <Tooltip title={Utils.formatAssignSize(orgVal, 'MB')}>
+            {Number(Utils.formatAssignSize(orgVal, 'MB')).toString().slice(0, 3) + '...'}
+          </Tooltip>
+        ) : (
+          Number(Utils.formatAssignSize(orgVal, 'MB'))
+        );
+      } else {
+        return Number(Utils.formatAssignSize(orgVal, 'KB')).toString().length > 3 ? (
+          <Tooltip title={Utils.formatAssignSize(orgVal, 'KB')}>
+            {Number(Utils.formatAssignSize(orgVal, 'KB')).toString().slice(0, 3) + '...'}
+          </Tooltip>
+        ) : (
+          Number(Utils.formatAssignSize(orgVal, 'KB'))
+        );
+        // return Utils.formatAssignSize(orgVal, 'KB');
+      }
+    }
+    return '-';
+    // return orgVal !== undefined ? (metricName !== 'HealthScore' ? formatAssignSize(orgVal, 'KB') : orgVal) : '-';
+  };
+  const renderLine = (record: any, metricName: string) => {
+    const points = record.metricLines.find((item: any) => item.metricName === metricName)?.metricPoints || [];
+    return (
+      <div className="metric-data-wrap">
+        <span className="cur-val">{calcCurValue(record, metricName)}</span>
+        <SmallChart
+          width={'100%'}
+          height={40}
+          chartData={{
+            name: record.metricName,
+            data: points.map((item: any) => ({ time: item.timeStamp, value: item.value })),
+          }}
+        />
+      </div>
+    );
+  };
+
+  const columns = () => {
+    const baseColumns: any = [
+      {
+        title: 'TopicName',
+        dataIndex: 'topicName',
+        key: 'topicName',
+        fixed: 'left',
+        width: 140,
+        className: 'clean-padding-left',
+        lineClampOne: true,
+        // eslint-disable-next-line react/display-name
+        render: (t: string, r: any) => {
+          return (
+            <Tooltip title={t}>
+              <a
+                onClick={() => {
+                  window.location.hash = `topicName=${t}`;
+                }}
+              >
+                {t}
+              </a>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        title: 'Partitions',
+        dataIndex: 'partitionNum',
+        key: 'partitionNum',
+        width: 95,
+      },
+      {
+        title: 'Replications',
+        dataIndex: 'replicaNum',
+        key: 'replicaNum',
+        width: 95,
+      },
+      {
+        title: '健康分',
+        dataIndex: 'HealthScore',
+        key: 'HealthScore',
+        sorter: true,
+        // 设计图上量出来的是144，但做的时候发现写144 header部分的sort箭头不出来，所以临时调大些
+        width: 170,
+        render: (value: any, record: any) => renderLine(record, 'HealthScore'),
+      },
+      // {
+      //   title: '创建时间',
+      //   dataIndex: 'createTime',
+      //   key: 'createTime',
+      //   width: 240,
+      //   render: (v: string) => moment(new Date(v)).format('YYYY-MM-DD HH:mm:ss')
+      // },
+      {
+        title: 'Bytes In(KB/s)',
+        dataIndex: 'BytesIn',
+        key: 'BytesIn',
+        sorter: true,
+        width: 170,
+        render: (value: any, record: any) => renderLine(record, 'BytesIn'),
+      },
+      {
+        title: 'Bytes Out(KB/s)',
+        dataIndex: 'BytesOut',
+        key: 'BytesOut',
+        sorter: true,
+        width: 170,
+        render: (value: any, record: any) => renderLine(record, 'BytesOut'),
+      },
+      {
+        title: 'MessageSize(MB)',
+        dataIndex: 'LogSize',
+        key: 'LogSize',
+        sorter: true,
+        width: 170,
+        render: (value: any, record: any) => renderLine(record, 'LogSize'),
+      },
+      {
+        title: '保存时间(h)',
+        dataIndex: 'retentionTimeUnitMs',
+        key: 'retentionTimeUnitMs',
+        width: 120,
+        render: (v: any) => {
+          return (v / 3600000).toFixed(2);
+        },
+      },
+      {
+        title: '描述',
+        dataIndex: 'description',
+        key: 'description',
+        lineClampTwo: true,
+        width: 150,
+        needTooltip: true,
+      },
+    ];
+
+    if (
+      global.hasPermission &&
+      (global.hasPermission(ClustersPermissionMap.TOPIC_EXPOND) || global.hasPermission(ClustersPermissionMap.TOPIC_DEL))
+    ) {
+      baseColumns.push({
+        title: '操作',
+        dataIndex: 'desc',
+        key: 'desc',
+        fixed: 'right',
+        width: 140,
+        render: (value: any, record: any) => {
+          return (
+            <div className="operation-list">
+              {global.hasPermission(ClustersPermissionMap.TOPIC_EXPOND) ? (
+                <ExpandPartition record={record} onConfirm={getTopicsList}></ExpandPartition>
+              ) : (
+                <></>
+              )}
+              {global.hasPermission(ClustersPermissionMap.TOPIC_DEL) ? <Delete record={record} onConfirm={getTopicsList}></Delete> : <></>}
+            </div>
+          );
+        },
+      });
+    }
+
+    return baseColumns;
+  };
+  const onSelectChange = (selectedRowKeys: any, selectedRows: any) => {
+    setSelectedRowKeys(selectedRowKeys);
+    setSelectedRows(selectedRows);
+  };
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
+  const onclose = () => {
+    setChangeVisible(false);
+    setMoveVisible(false);
+    setSelectValue('批量操作');
+  };
+
+  const menu = (
+    <Menu>
+      <Menu.Item>
+        <a onClick={() => setChangeVisible(true)}>扩缩副本</a>
+      </Menu.Item>
+      <Menu.Item>
+        <a onClick={() => setMoveVisible(true)}>迁移副本</a>
+      </Menu.Item>
+    </Menu>
+  );
+
+  return (
+    <>
+      <div className="breadcrumb" style={{ marginBottom: '10px' }}>
+        <DBreadcrumb
+          breadcrumbs={[
+            { label: '多集群管理', aHref: '/' },
+            { label: global?.clusterInfo?.name, aHref: `/cluster/${global?.clusterInfo?.id}` },
+            { label: 'Topic', aHref: `/cluster/${routeParams?.clusterId}/topic` },
+            { label: 'Topics', aHref: `` },
+          ]}
+        />
+      </div>
+      <div style={{ margin: '12px 0' }}>
+        <TopicHealthCheck></TopicHealthCheck>
+      </div>
+      <div className="clustom-table-content">
+        <div className="operation-bar">
+          <div className="left">
+            {/* 批量扩缩副本 */}
+            <ReplicaChange drawerVisible={changeVisible} jobId={''} topics={selectedRowKeys} onClose={onclose}></ReplicaChange>
+            {/* 批量迁移 */}
+            <ReplicaMove drawerVisible={moveVisible} jobId={''} topics={selectedRowKeys} onClose={onclose}></ReplicaMove>
+            {/* <Select style={{ width: 140 }} placeholder="批量操作" value={selectValue} disabled={selectedRowKeys.length <= 0}>
+              <Option value="expandAndReduce">
+                <div onClick={() => setChangeVisible(true)}>批量扩缩副本</div>
+              </Option>
+              <Option value="transfer">
+                <div onClick={() => setMoveVisible(true)}>批量迁移</div>
+              </Option>
+            </Select> */}
+            {/* <Dropdown overlay={menu} disabled={selectedRowKeys.length <= 0} trigger={['click']}>
+              <Button icon={<DownOutlined />} type="primary" ghost disabled={selectedRowKeys.length <= 0}>
+                批量操作
+              </Button>
+            </Dropdown> */}
+            {/* <div className="divider"></div> */}
+            <div className="internal-switch">
+              <Switch
+                size="small"
+                checked={showInternalTopics}
+                onChange={(checked) => {
+                  setShowInternalTopics(checked);
+                }}
+              />
+              <span>展示系统Topic</span>
+            </div>
+          </div>
+          <div className="right">
+            <Input
+              className="search-input"
+              suffix={
+                <IconFont
+                  type="icon-fangdajing"
+                  onClick={(_) => {
+                    setSearchKeywords(searchKeywordsInput);
+                  }}
+                  style={{ fontSize: '16px' }}
+                />
+              }
+              placeholder="请输入TopicName"
+              value={searchKeywordsInput}
+              onPressEnter={(_) => {
+                setSearchKeywords(searchKeywordsInput);
+              }}
+              onChange={(e) => {
+                setSearchKeywordsInput(e.target.value);
+              }}
+            />
+            <Dropdown overlay={menu} trigger={['click']}>
+              <Button className="batch-btn" icon={<DownOutlined />} type="primary" ghost>
+                批量操作
+              </Button>
+            </Dropdown>
+            {global.hasPermission && global.hasPermission(ClustersPermissionMap.TOPIC_ADD) ? (
+              <Create onConfirm={getTopicsList}></Create>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+        {/* <Table rowKey={'topicName'} columns={columns} dataSource={topicList} scroll={{ x: 1500 }} /> */}
+        <ProTable
+          showQueryForm={false}
+          tableProps={{
+            loading: topicListLoading,
+            showHeader: false,
+            rowKey: 'topicName',
+            columns: columns(),
+            dataSource: topicList,
+            lineFillColor: true,
+            paginationProps:
+              pageTotal > 0
+                ? {
+                    current: pageIndex,
+                    total: pageTotal,
+                    pageSize: pageSize,
+                  }
+                : null,
+            attrs: {
+              className: `topic-list`,
+              bordered: false,
+              // rowSelection: rowSelection,
+              scroll: { x: 'max-content', y: 'calc(100vh - 400px)' },
+              sortDirections: ['descend', 'ascend', 'default'],
+              onChange: (pagination: any, filters: any, sorter: any) => {
+                setSortObj({
+                  sortField: sorter.field || '',
+                  sortType: sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : '',
+                });
+                setPageIndex(pagination.current);
+                setPageSize(pagination.pageSize);
+              },
+            },
+          }}
+        />
+      </div>
+      {<TopicDetail />}
+    </>
+  );
+};
+
+export default AutoPage;

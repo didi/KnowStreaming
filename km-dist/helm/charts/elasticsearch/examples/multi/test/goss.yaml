@@ -1,0 +1,12 @@
+http:
+  https://localhost:9200/_cluster/health:
+    status: 200
+    timeout: 2000
+    allow-insecure: true
+    username: elastic
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    body:
+      - "green"
+      - '"cluster_name":"multi"'
+      - '"number_of_nodes":9'
+      - '"number_of_data_nodes":3'

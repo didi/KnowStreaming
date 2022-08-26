@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.reassign.ReassignJobDAO">
+  <resultMap id="ReassignJobMap"           type="com.xiaojukeji.know.streaming.km.common.bean.po.reassign.ReassignJobPO">
+    <id column="id"                       property="id" />
+    <result column="create_time"          property="createTime" />
+    <result column="update_time"          property="updateTime" />
+
+    <result column="cluster_phy_id"       property="clusterPhyId" />
+    <result column="reassignment_json"    property="reassignmentJson" />
+    <result column="description"          property="description" />
+    <result column="throttle_unit_byte"   property="throttleUnitByte" />
+    <result column="start_time"           property="startTime" />
+    <result column="finished_time"        property="finishedTime" />
+    <result column="creator"              property="creator" />
+    <result column="status"               property="status" />
+  </resultMap>
+
+  <insert id="addAndSetId" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.reassign.ReassignJobPO">
+    INSERT INTO ks_km_reassign_job
+        (id, cluster_phy_id, reassignment_json, description, throttle_unit_byte, start_time, finished_time, creator, status)
+    VALUES
+        (#{id}, #{clusterPhyId}, #{reassignmentJson}, #{description}, #{throttleUnitByte}, #{startTime}, #{finishedTime}, #{creator}, #{status})
+  </insert>
+</mapper>

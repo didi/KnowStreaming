@@ -1,0 +1,48 @@
+---
+clusterName: "multi"
+nodeGroup: "data"
+
+extraEnvs:
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: multi-master-credentials
+        key: password
+  - name: xpack.security.enabled 
+    value: "true" 
+  - name: xpack.security.transport.ssl.enabled 
+    value: "true" 
+  - name: xpack.security.http.ssl.enabled 
+    value: "true" 
+  - name: xpack.security.transport.ssl.verification_mode 
+    value: "certificate" 
+  - name: xpack.security.transport.ssl.key 
+    value: "/usr/share/elasticsearch/config/certs/tls.key" 
+  - name: xpack.security.transport.ssl.certificate 
+    value: "/usr/share/elasticsearch/config/certs/tls.crt" 
+  - name: xpack.security.transport.ssl.certificate_authorities 
+    value: "/usr/share/elasticsearch/config/certs/ca.crt" 
+  - name: xpack.security.http.ssl.key 
+    value: "/usr/share/elasticsearch/config/certs/tls.key" 
+  - name: xpack.security.http.ssl.certificate 
+    value: "/usr/share/elasticsearch/config/certs/tls.crt" 
+  - name: xpack.security.http.ssl.certificate_authorities 
+    value: "/usr/share/elasticsearch/config/certs/ca.crt" 
+
+roles:
+  - data
+  - data_content
+  - data_hot
+  - data_warm
+  - data_cold
+  - data_frozen
+  - ingest
+
+secret:
+  enabled: false
+
+createCert: false
+secretMounts:
+  - name: elastic-certificates
+    secretName: multi-master-certs
+    path: /usr/share/elasticsearch/config/certs

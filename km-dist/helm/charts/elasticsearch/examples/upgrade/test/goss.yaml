@@ -1,0 +1,22 @@
+http:
+  https://localhost:9200/_cluster/health:
+    status: 200
+    username: elastic
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    allow-insecure: true
+    timeout: 2000
+    body:
+      - "green"
+      - '"number_of_nodes":3'
+      - '"number_of_data_nodes":3'
+
+  https://localhost:9200:
+    status: 200
+    username: elastic
+    password: "{{ .Env.ELASTIC_PASSWORD }}"
+    allow-insecure: true
+    timeout: 2000
+    body:
+      - '"number" : "8.1.0"'
+      - '"cluster_name" : "upgrade"'
+      - "You Know, for Search"

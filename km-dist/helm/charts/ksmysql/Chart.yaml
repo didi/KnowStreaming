@@ -1,0 +1,9 @@
+apiVersion: v2
+name: ksmysql
+description: MySql for KnowStreaming
+
+type: application
+
+version: 0.1.0
+
+appVersion: "5.7.38-1"

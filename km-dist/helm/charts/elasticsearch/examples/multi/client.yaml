@@ -1,0 +1,50 @@
+---
+clusterName: "multi"
+nodeGroup: "client"
+
+extraEnvs:
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: multi-master-credentials
+        key: password
+  - name: xpack.security.enabled 
+    value: "true" 
+  - name: xpack.security.transport.ssl.enabled 
+    value: "true" 
+  - name: xpack.security.http.ssl.enabled 
+    value: "true" 
+  - name: xpack.security.transport.ssl.verification_mode 
+    value: "certificate" 
+  - name: xpack.security.transport.ssl.key 
+    value: "/usr/share/elasticsearch/config/certs/tls.key" 
+  - name: xpack.security.transport.ssl.certificate 
+    value: "/usr/share/elasticsearch/config/certs/tls.crt"
+  - name: xpack.security.transport.ssl.certificate_authorities
+    value: "/usr/share/elasticsearch/config/certs/ca.crt"
+  - name: xpack.security.http.ssl.key
+    value: "/usr/share/elasticsearch/config/certs/tls.key"
+  - name: xpack.security.http.ssl.certificate
+    value: "/usr/share/elasticsearch/config/certs/tls.crt"
+  - name: xpack.security.http.ssl.certificate_authorities
+    value: "/usr/share/elasticsearch/config/certs/ca.crt"
+
+roles: []
+
+persistence:
+  enabled: false
+
+# For client nodes, we also need to add an empty node.roles in elasticsearch.yml
+# This is due to https://github.com/elastic/helm-charts/pull/1186#discussion_r631225687
+esConfig:
+  elasticsearch.yml: |
+    node.roles: []
+
+secret:
+  enabled: false
+
+createCert: false
+secretMounts:
+  - name: elastic-certificates
+    secretName: multi-master-certs
+    path: /usr/share/elasticsearch/config/certs

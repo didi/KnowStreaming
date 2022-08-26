@@ -1,0 +1,41 @@
+{
+  "name": "root",
+  "private": true,
+  "devDependencies": {
+    "@commitlint/cli": "^13.1.0",
+    "@commitlint/config-conventional": "^13.1.0",
+    "@typescript-eslint/eslint-plugin": "4.13.0",
+    "@typescript-eslint/parser": "4.13.0",
+    "babel-eslint": "10.1.0",
+    "commitizen": "^4.2.4",
+    "conventional-changelog-cli": "^2.1.1",
+    "cz-conventional-changelog-zh": "0.0.2",
+    "eslint": "7.30.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-jsx-a11y": "6.4.1",
+    "eslint-plugin-prettier": "3.4.0",
+    "eslint-plugin-react": "7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "4.3.7",
+    "lerna": "^4.0.0",
+    "lint-staged": "10.5.3",
+    "prettier": "2.3.2"
+  },
+  "scripts": {
+    "i": "npm install && lerna bootstrap",
+    "clean": "rm -rf node_modules package-lock.json packages/*/node_modules packages/*/package-lock.json",
+    "start": "sh ./tool/start.sh",
+    "build": "sh ./tool/build.sh",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
+    "cm": "git add . && cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog-zh"
+    }
+  },
+  "lint-staged": {
+    "*.{js,tsx}": "eslint"
+  },
+  "dependencies": {}
+}

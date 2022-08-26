@@ -1,0 +1,17 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "timestamp": {
+              "value": %d
+            }
+          }
+        }
+        %s
+      ]
+    }
+  },
+  "sort":[%s]
+}

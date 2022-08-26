@@ -1,0 +1,10 @@
+############knowstreaming-manager############
+
+1. Watch all cluster members come up. 启动需要几分钟时间进行初始化，请稍等~
+
+  $ kubectl get pods --namespace={{ .Release.Namespace }} -l release={{ .Release.Name }} -w
+
+
+2. 获取KnowStreaming前端ui的service. 默认nodeport方式.(http://nodeIP:nodeport)
+
+  $ kubectl get service --namespace={{ .Release.Namespace }} {{ .Release.Name }}-knowstreaming-web

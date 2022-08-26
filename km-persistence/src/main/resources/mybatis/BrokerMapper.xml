@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerDAO">
+  <resultMap id="BrokerMap"               type="com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerPO">
+    <id column="id"                       property="id" />
+    <result column="create_time"          property="createTime" />
+    <result column="update_time"          property="updateTime" />
+
+    <result column="cluster_phy_id"       property="clusterPhyId" />
+    <result column="broker_id"            property="brokerId" />
+    <result column="host"                 property="host" />
+    <result column="port"                 property="port" />
+    <result column="jmx_port"             property="jmxPort" />
+    <result column="start_timestamp"      property="startTimestamp" />
+    <result column="status"               property="status" />
+  </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerPO">
+      REPLACE ks_km_broker
+        (cluster_phy_id, broker_id, host, port, jmx_port, start_timestamp, status, update_time)
+    VALUES
+        (#{clusterPhyId}, #{brokerId}, #{host}, #{port}, #{jmxPort}, #{startTimestamp}, #{status}, #{updateTime})
+    </insert>
+</mapper>

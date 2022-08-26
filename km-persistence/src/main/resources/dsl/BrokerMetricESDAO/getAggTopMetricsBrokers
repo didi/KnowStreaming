@@ -1,0 +1,45 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+      "hist": {
+        "terms": {
+          "field": "brokerId",
+          "collect_mode": "breadth_first"
+        },
+        "aggs": {
+          "hist": {
+            "date_histogram": {
+              "field": "timestamp",
+              "fixed_interval": "%s",
+              "time_zone": "Asia/Shanghai",
+              "min_doc_count": 0
+            },
+            "aggs": {
+              %s
+            }
+          }
+        }
+      }
+    }
+}

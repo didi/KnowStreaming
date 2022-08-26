@@ -1,0 +1,65 @@
+.config-form-panel {
+  width: 280px;
+  min-width: 280px;
+  min-height: 260px;
+  margin-right: 12px;
+  padding: 16px 24px 60px;
+  background: #FFFFFF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  height: calc(100vh - 156px);
+  .dcloud-radio-wrapper.dcloud-radio-wrapper-checked {
+    .dcloud-radio-inner {
+      background-color: #526ecc;
+    }
+  }
+
+  .dcloud-radio-inner {
+    border-color: #ADB5BD;
+  }
+
+  .dcloud-radio-inner::after {
+    background-color: #fff;
+  }
+
+
+  &-title {
+    font-family: @font-family-bold;
+    font-size: 18px;
+    color: #212529;
+    letter-spacing: 0;
+    text-align: justify;
+    line-height: 20px;
+    padding-bottom: 16px;
+  }
+
+  &-content{
+    overflow-y: auto;
+    height: calc(100vh - 326px);
+    min-height: 90px;
+    .dcloud-row{
+      margin-left:0 !important;
+      margin-right:0 !important;
+      .dcloud-col{
+        padding-left:0 !important;
+        padding-right:0 !important;
+      }
+    }
+  }
+
+  &-footer-btn {
+    position: absolute;
+    bottom: 10px;
+    height: 48px;
+    line-height: 48px;
+    width: 240px;
+    text-align: right;
+    border-top: 1px solid #EBEDEF;
+    padding-top: 5px;
+
+    button+button {
+      margin-left: 8px;
+    }
+  }
+}

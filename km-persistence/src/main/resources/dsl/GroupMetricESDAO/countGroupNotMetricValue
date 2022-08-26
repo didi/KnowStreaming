@@ -1,0 +1,40 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "group": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "groupMetric": {
+              "value": "1"
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ],
+     "must_not": [
+       %s
+     ]
+    }
+  }
+}

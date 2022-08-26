@@ -1,0 +1,83 @@
+.topic-job-drawer {
+  .divider {
+    margin-left: 8px;
+    margin-right: 8px;
+    width: 1px;
+    height: 20px;
+    background-color: #CED4DA;
+  }
+
+  .dcloud-drawer-body {
+    // padding: 0 20px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .wrap {
+    .title {
+      font-size: 16px;
+      color: #212529;
+      letter-spacing: 0;
+      line-height: 25px;
+      margin: 16px 0;
+      font-family: @font-family-bold;
+    }
+
+    .topic-execution-time{
+      .dcloud-form-item-has-error{
+        .dcloud-picker{
+          border-color: #ff7066 !important;
+          background: #fffafa !important;
+        }
+      }
+      .dcloud-picker{
+        background-color: rgba(33, 37, 41, 0.06);
+        border-color: transparent;
+        border-radius: 8px;
+      }
+      .dcloud-picker-focused,.dcloud-picker:hover{
+        border-color: #74788d;
+        box-shadow: none;
+      }
+    }
+  }
+
+  .custom-tag-wrap {
+    display: flex;
+
+    .custom-tag {
+      padding: 4px;
+      background: #ECECF6;
+      border-radius: 5px;
+      font-size: 12px;
+      line-height: 12px;
+      color: #495057;
+      margin-right: 4px;
+
+      .time {
+        color: #74788D;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .task-form {
+    margin-top: 16px;
+  }
+
+  .dcloud-select-selector {
+    max-height: 100px;
+    overflow: scroll;
+  }
+}
+
+.preview-task-plan-drawer {
+  .partition-task-plan-list {
+    padding: 12px 16px;
+
+    .dcloud-table .dcloud-table-content .dcloud-table-thead .dcloud-table-cell,
+    .dcloud-table .dcloud-table-content .dcloud-table-tbody .dcloud-table-cell {
+      background: #F8F9FA;
+    }
+  }
+}

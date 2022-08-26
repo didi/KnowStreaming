@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.job.JobDAO">
+    <resultMap id="KmJobMap"              type="com.xiaojukeji.know.streaming.km.common.bean.po.job.JobPO">
+    <id column="id"                       property="id" />
+    <result column="create_time"          property="createTime" />
+    <result column="update_time"          property="updateTime" />
+
+    <result column="cluster_id"           property="clusterId" />
+    <result column="job_name"             property="jobName" />
+    <result column="job_desc"             property="jobDesc" />
+    <result column="job_type"             property="jobType" />
+    <result column="job_data"             property="jobData" />
+    <result column="job_status"           property="jobStatus" />
+    <result column="running_status"       property="runningStatus" />
+    <result column="target"               property="target" />
+    <result column="creator"              property="creator" />
+    <result column="plan_time"            property="planTime" />
+    <result column="start_time"           property="startTime" />
+  </resultMap>
+
+  <insert id="addAndSetId"
+          parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.job.JobPO"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO ks_km_job
+        (cluster_id, job_name, job_desc, job_type, job_data, job_status, target, creator, plan_time)
+    VALUES
+        (#{clusterId}, #{jobName}, #{jobDesc}, #{jobType}, #{jobData}, #{jobStatus}, #{target}, #{creator}, #{planTime})
+  </insert>
+</mapper>

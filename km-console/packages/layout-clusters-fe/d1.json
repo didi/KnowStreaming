@@ -1,0 +1,29 @@
+{
+    "appConfig": {
+        "appName": "layout-clusters-fe",
+        "ident": "",
+        "port": "8000",
+        "webpackCustom": "",
+        "webpackChain": "",
+        "entry": [
+            {
+                "title": "多集群管理",
+                "name": "index",
+                "src": "./src/index.html"
+            }
+        ],
+        "layout": "layout-clusters-fe",
+        "packages": [
+            "config-manager-fe",
+            "layout-clusters-fe"
+        ]
+    },
+    "entrust": true,
+    "localBuilderVersion": true,
+    "extensions": [],
+    "preset": "@didi/d1-preset-opensource",
+    "builderType": "@didi/d1-preset-opensource",
+    "generatorType": "",
+    "mockDir": "mock",
+    "webpackCustomPath": "./webpack.config.js"
+}
