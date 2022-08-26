@@ -60,7 +60,7 @@
   - 集群管理：支持集群一键纳管，健康分析、核心组件观测 等功能；
   - 观测提升：多维度指标观测大盘、观测指标最佳实践 等功能； 
   - 异常巡检：集群多维度健康巡检、集群多维度健康分 等功能； 
-  - 能力增强：Topic扩缩分区、Topic扩缩副本、Topic副本迁移 等功能；
+  - 能力增强：Topic扩缩副本、Topic副本迁移 等功能；
 
 
 &nbsp;
@@ -68,7 +68,7 @@
 
 <p align="center">
 
-<img src="docs/assets/readme/KnowStreamingPageDemo.jpg" width = "768" height = "473" div align=center />
+<img src="http://img-ys011.didistatic.com/static/dc2img/do1_sPmS4SNLX9m1zlpmHaLJ" width = "768" height = "473" div align=center />
 
 </p>
 
