@@ -78,17 +78,17 @@ data:
     thread-pool:
       scheduled:
         thread-num: 2 # @Scheduled任务的线程池大小，默认是一个
-      collector:
-        future-util:
-          num: 1
-          thread-num: 8
-          queue-size: 10000
-          select-suitable-enable: true
-          suitable-queue-size: 1000
-      task:
-        heaven:
-          thread-num: 20
-          queue-size: 1000
+      collector:                      # 采集模块的配置
+        future-util:                  # 采集模块线程池配置
+          num: 3                      # 线程池个数
+          thread-num: 64              # 每个线程池核心线程数
+          queue-size: 10000           # 每个线程池队列大小
+          select-suitable-enable: true # 任务是否自动选择合适的线程池，非主要，可不修改
+          suitable-queue-size: 1000    # 线程池理想的队列大小，非主要，可不修改
+      task:                            # 任务模块的配置
+        heaven:                        # 采集任务配置
+          thread-num: 20               # 采集任务线程池核心线程数
+          queue-size: 1000             # 采集任务线程池队列大小
 
 
 
@@ -118,6 +118,9 @@ data:
           base-path: /metrics
           exposure:
             include: '*'
+      health:
+        elasticsearch:
+          enabled: false
       metrics:
         export:
           prometheus:
