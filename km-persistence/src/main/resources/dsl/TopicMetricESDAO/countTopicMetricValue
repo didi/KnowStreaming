@@ -1,0 +1,38 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "topic": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "brokerAgg": {
+              "value": "1"
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        %s
+      ]
+    }
+  }
+}

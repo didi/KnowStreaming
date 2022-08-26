@@ -1,0 +1,159 @@
+.tabs-panel {
+  margin: 10px 0 0;
+  position: relative;
+
+  .dcloud-tabs-nav {
+    height: 50px;
+    background: rgba(33, 37, 41, 0.04);
+    border-radius: 8px;
+    line-height: 50px;
+    padding: 0px 100px 0 12px;
+    margin-bottom: 12px;
+    .dcloud-tabs-tab {
+      font-size: 15px;
+    }
+  }
+
+  .add-task {
+    margin-right: 12px;
+  }
+
+  .dcloud-btn-dashed {
+    border-color: #74788D;
+    background: none;
+    border-radius: 6px;
+    border-style: dashed;
+    font-size: 12px;
+    color: #74788D;
+    letter-spacing: 0;
+    height: 30px;
+    padding: 6px 8px;
+  }
+
+  .dcloud-btn-dashed:hover,
+  .dcloud-btn-dashed:focus,
+  .dcloud-btn-dashed:active {
+    color: #556EE6;
+    border-color: #556EE6;
+    background: none;
+  }
+
+  .dcloud-btn>.anticon+span,
+  .dcloud-btn>span+.anticon {
+    margin-left: 4px;
+  }
+
+  .dcloud-tabs-card.dcloud-tabs-top>.dcloud-tabs-nav .dcloud-tabs-tab+.dcloud-tabs-tab,
+  .dcloud-tabs-card.dcloud-tabs-bottom>.dcloud-tabs-nav .dcloud-tabs-tab+.dcloud-tabs-tab,
+  .dcloud-tabs-card.dcloud-tabs-top>div>.dcloud-tabs-nav .dcloud-tabs-tab+.dcloud-tabs-tab,
+  .dcloud-tabs-card.dcloud-tabs-bottom>div>.dcloud-tabs-nav .dcloud-tabs-tab+.dcloud-tabs-tab {
+    margin-left: 12px;
+  }
+
+  .dcloud-tabs-card.dcloud-tabs-top>.dcloud-tabs-nav .dcloud-tabs-tab,
+  .dcloud-tabs-card.dcloud-tabs-top>div>.dcloud-tabs-nav .dcloud-tabs-tab {
+    padding: 0px 10px;
+    border-radius: 6px;
+    background: #d7d7e2;
+    height: 30px;
+    margin-top: 10px;
+    border: none;
+    transition: none;
+    width: 139px;
+    justify-content: space-between;
+
+    .dcloud-tabs-tab-btn {
+      outline: none;
+      transition: none;
+      font-size: 12px;
+      color: #74788D;
+      letter-spacing: 0;
+      width: 120px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  .dcloud-tabs-card.dcloud-tabs-top>.dcloud-tabs-nav .dcloud-tabs-tab-active,
+  .dcloud-tabs-card.dcloud-tabs-top>div>.dcloud-tabs-nav .dcloud-tabs-tab-active {
+    background: #556EE6;
+    opacity: 1;
+
+    .dcloud-tabs-tab-btn {
+      color: white;
+    }
+
+    .dcloud-tabs-tab-remove {
+      color: white;
+    }
+  }
+
+  .dcloud-tabs>.dcloud-tabs-nav .dcloud-tabs-nav-operations,
+  .dcloud-tabs>div>.dcloud-tabs-nav .dcloud-tabs-nav-operations {
+    display: none;
+  }
+
+  .dcloud-tabs-extra-content {
+
+    .tab-nav-right {
+      text-align: center;
+      padding-left: 14px;
+      height: 50px;
+      line-height: 50px;
+
+      &-icon {
+        color: #495057;
+        font-size: 7px;
+
+        &.disabled {
+          opacity: 0.5;
+        }
+      }
+
+      &-text {
+        font-size: 11px;
+        color: #495057;
+        text-align: center;
+        line-height: 16px;
+        padding: 0px 6px;
+
+        &-divider {
+          line-height: 22px;
+        }
+      }
+    }
+  }
+
+  .tab-nav-right {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background: none;
+    background-image: linear-gradient(90deg, rgba(226, 226, 235, 0.00) 0%, #E2E2EB 29%);
+    height: 50px;
+    line-height: 50px;
+    padding: 0px 20px;
+    border-radius: 8px;
+
+    &-icon {
+      color: #495057;
+      font-size: 7px;
+
+      &.disabled {
+        opacity: 0.5;
+      }
+    }
+
+    &-text {
+      font-size: 11px;
+      color: #495057;
+      text-align: center;
+      line-height: 16px;
+      padding: 0px 6px;
+
+      &-divider {
+        line-height: 22px;
+      }
+    }
+  }
+}

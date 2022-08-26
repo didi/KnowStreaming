@@ -1,0 +1,36 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+        %s
+      ]
+    }
+  },
+  "aggs": {
+        "hist": {
+          "terms": {
+            "field": "topic",
+            "collect_mode": "breadth_first"
+          },
+          "aggs": {
+            %s
+          }
+        }
+      }
+}

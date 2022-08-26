@@ -1,0 +1,37 @@
+.config-form-panel-consume {
+  width: 280px;
+  min-width: 280px;
+  margin-right: 12px;
+  padding: 16px 24px 60px;
+  background: #FFFFFF;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  .dcloud-row {
+    display: block;
+  }
+  &-title {
+    font-family: @font-family-bold;
+    font-size: 18px;
+    color: #212529;
+    letter-spacing: 0;
+    text-align: justify;
+    line-height: 20px;
+    padding-bottom: 16px;
+  }
+
+  &-footer-btn {
+    position: absolute;
+    bottom: 10px;
+    height: 48px;
+    line-height: 48px;
+    width: 240px;
+    text-align: right;
+    border-top: 1px solid #EBEDEF;
+    padding-top: 5px;
+
+    button+button {
+      margin-left: 8px;
+    }
+  }
+}

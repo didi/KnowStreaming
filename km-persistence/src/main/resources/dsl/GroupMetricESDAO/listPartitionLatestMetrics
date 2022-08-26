@@ -1,0 +1,51 @@
+{
+  "size": 1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "group": {
+              "value": "%s"
+            }
+         }
+       },
+       {
+         "term": {
+           "topic": {
+             "value": "%s"
+           }
+        }
+       },
+       {
+        "term": {
+          "groupMetric": {
+            "value": "0"
+          }
+        }
+       },
+       {
+        "term": {
+         "timestamp": {
+           "value": %d
+         }
+        }
+       }
+      ]
+    }
+  },
+  "sort": [
+      {
+        "timestamp": {
+          "order": "desc"
+        }
+      }
+    ]
+}

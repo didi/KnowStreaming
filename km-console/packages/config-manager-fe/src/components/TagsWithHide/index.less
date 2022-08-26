@@ -1,0 +1,74 @@
+.list-with-hide-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  .container-item {
+    flex-shrink: 0;
+    height: 20px;
+    padding: 4px 6px;
+    border-radius: 5px;
+    margin-right: 4px;
+    background: rgba(33, 37, 41, 0.08);
+    font-size: 12px;
+    color: #495057;
+    text-align: center;
+    line-height: 12px;
+    opacity: 0;
+    &.show {
+      opacity: 1;
+    }
+    &.hide {
+      display: none;
+    }
+  }
+  .expand-item {
+    font-size: 12px;
+    color: #495057;
+    line-height: 12px;
+    opacity: 0;
+    &.show {
+      opacity: 1;
+    }
+    &.hide {
+      display: none;
+    }
+  }
+  &.hide {
+    position: absolute;
+    z-index: -10000;
+    opacity: 0;
+  }
+}
+
+.tags-with-hide-popover {
+  .dcloud-popover-inner {
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.04), 0 6px 12px 12px rgba(0, 0, 0, 0.04), 0 6px 10px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    &-content {
+      padding: 0;
+    }
+  }
+  .dcloud-popover-arrow-content {
+    display: none !important;
+  }
+  .container-item-popover {
+    display: flex;
+    flex-flow: row wrap;
+    max-width: 560px;
+    padding: 10px 8px 4px 8px;
+    .container-item {
+      flex-shrink: 0;
+      height: 20px;
+      padding: 4px 6px;
+      border-radius: 5px;
+      margin-right: 4px;
+      background: rgba(33, 37, 41, 0.08);
+      font-size: 12px;
+      color: #495057;
+      text-align: center;
+      line-height: 12px;
+      margin-bottom: 6px;
+    }
+  }
+}

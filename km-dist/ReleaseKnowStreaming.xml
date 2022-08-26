@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<assembly>
+    <id>${project.version}</id>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <formats>
+        <format>dir</format>
+        <format>tar.gz</format>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>../km-rest/src/main/resources</directory>
+            <outputDirectory>conf</outputDirectory>
+            <includes>
+                <include>application.yml</include>
+                <include>logback-spring.xml</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../docs</directory>
+            <outputDirectory>docs</outputDirectory>
+            <includes>
+                <include>*</include>
+                <include>*/*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*</include>
+                <include>*/*</include>
+            </includes>
+            <fileMode>0755</fileMode>
+        </fileSet>
+
+        <fileSet>
+            <includes>
+                <include>helm/*</include>
+                <include>helm/**</include>
+
+                <include>init/*</include>
+                <include>init/*/*</include>
+
+                <include>packages/*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>README.md</source>
+            <outputDirectory>.</outputDirectory>
+        </file>
+        <file>
+            <source>../LICENSE</source>
+            <outputDirectory>.</outputDirectory>
+        </file>
+
+        <file>
+            <source>../km-rest/target/ks-km.jar</source>
+            <outputDirectory>libs/</outputDirectory>
+        </file>
+    </files>
+</assembly>

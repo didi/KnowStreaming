@@ -1,0 +1,36 @@
+.codemirror-form-item {
+  > .cm-s-default {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    &:hover,
+    &.CodeMirror-focused {
+      border-color: #74788d;
+    }
+    // 隐藏多余的滚动条
+    .CodeMirror-hscrollbar,.CodeMirror-vscrollbar{
+      display: none !important;
+    }
+    .CodeMirror-scroll {
+      width: 100%; // 和父级宽度保持一致
+      background: #f2f2f2;
+      transition: background-color 0.3s ease;
+      border-radius: 8px;
+      overflow: hidden;
+      .CodeMirror-gutters {
+        background: #f2f2f2;
+        transition: background-color 0.3s ease;
+        border-right: none;
+      }
+    }
+    &.CodeMirror-empty {
+      color: #adb5bc;
+    }
+  }
+  &-resize {
+    > .cm-s-default {
+      resize: vertical;
+      min-height: 60px;
+    }
+  }
+}

@@ -1,0 +1,8 @@
+1. Watch all cluster members come up.
+  $ kubectl get pods --namespace={{ .Release.Namespace }} -l app={{ template "elasticsearch.uname" . }} -w
+2. Retrieve elastic user's password.
+  $ kubectl get secrets --namespace={{ .Release.Namespace }} {{ template "elasticsearch.uname" . }}-credentials -ojsonpath='{.data.password}' | base64 -d
+{{- if .Values.tests.enabled }}
+3. Test cluster health using Helm test.
+  $ helm --namespace={{ .Release.Namespace }} test {{ .Release.Name }}
+{{- end -}}

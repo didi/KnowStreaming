@@ -1,0 +1,16 @@
+{{ if .Values.servicemonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "knowstreaming-manager.fullname" . }}
+  labels:
+    {{- include "knowstreaming-manager.labels" . | nindent 4 }}
+spec:
+  endpoints:
+    - port: http
+      scheme: http
+      path: /metrics/prometheus
+  selector:
+    matchLabels:
+      {{- include "knowstreaming-manager.selectorLabels" . | nindent 4 }}
+{{- end }}

@@ -1,11 +1,70 @@
 
+
+## v3.0.0-beta
+
+**1、多集群管理**
+
+- 增加健康监测体系、关键组件&指标 GUI 展示
+- 增加 2.8.x 以上 Kafka 集群接入，覆盖 0.10.x-3.x
+- 删除逻辑集群、共享集群、Region 概念
+
+**2、Cluster 管理**
+
+- 增加集群概览信息、集群配置变更记录
+- 增加 Cluster 健康分，健康检查规则支持自定义配置
+- 增加 Cluster 关键指标统计和 GUI 展示，支持自定义配置
+- 增加 Cluster 层 I/O、Disk 的 Load Reblance 功能，支持定时均衡任务（企业版）
+- 删除限流、鉴权功能
+- 删除 APPID 概念
+
+**3、Broker 管理**
+
+- 增加 Broker 健康分
+- 增加 Broker 关键指标统计和 GUI 展示，支持自定义配置
+- 增加 Broker 参数配置功能，需重启生效
+- 增加 Controller 变更记录
+- 增加 Broker Datalogs 记录
+- 删除 Leader Rebalance 功能
+- 删除 Broker 优先副本选举
+
+**4、Topic 管理**
+
+- 增加 Topic 健康分
+- 增加 Topic 关键指标统计和 GUI 展示，支持自定义配置
+- 增加 Topic 参数配置功能，可实时生效
+- 增加 Topic 批量迁移、Topic 批量扩缩副本功能
+- 增加查看系统 Topic 功能
+- 优化 Partition 分布的 GUI 展示
+- 优化 Topic Message 数据采样
+- 删除 Topic 过期概念
+- 删除 Topic 申请配额功能
+
+**5、Consumer 管理**
+
+- 优化了 ConsumerGroup 展示形式，增加 Consumer Lag 的 GUI 展示
+
+**6、ACL 管理**
+
+- 增加原生 ACL GUI 配置功能，可配置生产、消费、自定义多种组合权限
+- 增加 KafkaUser 功能，可自定义新增 KafkaUser
+
+**7、消息测试（企业版）**
+
+- 增加生产者消息模拟器，支持 Data、Flow、Header、Options 自定义配置（企业版）
+- 增加消费者消息模拟器，支持 Data、Flow、Header、Options 自定义配置（企业版）
+
+**8、Job**
+
+- 优化 Job 模块，支持任务进度管理
+
+**9、系统管理**
+
+- 优化用户、角色管理体系，支持自定义角色配置页面及操作权限
+- 优化审计日志信息
+- 删除多租户体系
+- 删除工单流程
+
 ---
-
-![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
-
-**一站式`Apache Kafka`集群指标监控与运维管控平台**
-
---- 
 
 ## v2.6.0
 
@@ -40,6 +99,16 @@
 - 修复Dockerfile执行时提示缺少application.yml文件的问题
 - 修复逻辑集群更新时，会报空指针的问题
 
+
+## v2.5.0
+
+版本上线时间：2021-07-10
+
+### 体验优化
+- 更改产品名为LogiKM
+- 更新产品图标
+
+
 ## v2.4.1+
 
 版本上线时间：2021-05-21
@@ -49,7 +118,7 @@
 - 增加接口调用可绕过登录的功能(v2.4.1)
 
 ### 体验优化
-- tomcat 版本提升至8.5.66(v2.4.2)
+- Tomcat 版本提升至8.5.66(v2.4.2)
 - op接口优化，拆分util接口为topic、leader两类接口(v2.4.1)
 - 简化Gateway配置的Key长度(v2.4.1)
 

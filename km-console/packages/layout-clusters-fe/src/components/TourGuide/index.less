@@ -1,0 +1,58 @@
+#react-joyride-portal {
+  .react-joyride__overlay {
+    min-width: 1440px;
+  }
+}
+.joyride-tooltip {
+  position: relative;
+  min-width: 284px;
+  max-width: 384px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  background: #fff;
+  &-header {
+    margin-bottom: 8px;
+    font-family: @font-family-bold;
+    font-size: 16px;
+    color: #212529;
+    letter-spacing: 0;
+    line-height: 22px;
+  }
+  &-body {
+    font-size: 14px;
+    color: #74788d;
+    letter-spacing: 0;
+    line-height: 22px;
+    font-weight: 400;
+  }
+  &-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    &-left {
+      color: #74788d;
+    }
+    &-right {
+      .dcloud-btn {
+        margin-left: 4px;
+      }
+    }
+  }
+  &-arrow {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #fff;
+    transform-origin: 4px;
+    &-line {
+      position: absolute;
+      top: 3px;
+      left: 7px;
+      width: 17px;
+      height: 1px;
+      background-color: #fff;
+    }
+  }
+}

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.kafkacontroller.KafkaControllerDAO">
+  <resultMap id="KafkaControllerMap"      type="com.xiaojukeji.know.streaming.km.common.bean.po.kafkacontrollr.KafkaControllerPO">
+    <id column="id"                       property="id" />
+    <result column="create_time"          property="createTime" />
+    <result column="update_time"          property="updateTime" />
+
+    <result column="cluster_phy_id"       property="clusterPhyId" />
+    <result column="broker_id"            property="brokerId" />
+    <result column="broker_host"          property="brokerHost" />
+    <result column="broker_rack"          property="brokerRack" />
+    <result column="timestamp"            property="timestamp" />
+  </resultMap>
+
+  <select id="listAllLatest" resultMap="KafkaControllerMap">
+    SELECT Table_B.* FROM
+      (SELECT max(`id`) as id FROM `ks_km_kafka_controller` GROUP BY `cluster_phy_id`) AS Table_A
+        JOIN `ks_km_kafka_controller` AS Table_B ON
+        Table_A.id=Table_B.id;
+  </select>
+
+</mapper>

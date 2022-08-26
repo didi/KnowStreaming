@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.group.GroupMemberDAO">
+  <resultMap id="GroupMemberMap"          type="com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupMemberPO">
+    <id column="id"                       property="id" />
+    <result column="create_time"          property="createTime" />
+    <result column="update_time"          property="updateTime" />
+
+    <result column="cluster_phy_id"       property="clusterPhyId" />
+    <result column="topic_name"           property="topicName" />
+    <result column="group_name"           property="groupName" />
+    <result column="state"                property="state" />
+    <result column="member_count"         property="memberCount" />
+  </resultMap>
+
+    <insert id="replace" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupMemberPO">
+      REPLACE ks_km_group_member
+          (cluster_phy_id, topic_name, group_name, `state`, member_count, update_time)
+          VALUES
+          (#{clusterPhyId}, #{topicName}, #{groupName}, #{state}, #{memberCount}, #{updateTime})
+    </insert>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="26px" height="6px" viewBox="0 0 26 6" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>形状结合 3</title>
+    <defs>
+        <linearGradient x1="-13.5966047%" y1="52.230507%" x2="206.130712%" y2="51.6554654%" id="linearGradient-1">
+            <stop stop-color="#556EE6" stop-opacity="0.02" offset="0%"></stop>
+            <stop stop-color="#556EE6" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="修改" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="JOB查看进度-均衡计划" transform="translate(-592.000000, -233.000000)" fill="url(#linearGradient-1)">
+            <g id="编组-18" transform="translate(384.000000, 133.000000)">
+                <g id="编组-15" transform="translate(161.000000, 9.000000)">
+                    <g id="编组-4" transform="translate(0.000000, 84.000000)">
+                        <g id="形状结合-3" transform="translate(47.000000, 7.562925)">
+                            <path d="M17.0539865,0.079753169 L24.4180254,3.2056022 C24.8792975,3.40140061 25.1173077,3.90284648 24.9962642,4.37384348 L25,4.28609753 C25,4.83838228 24.5522847,5.28609753 24,5.28609753 L1,5.28609753 C0.44771525,5.28609753 6.76353751e-17,4.83838228 0,4.28609753 C-6.76353751e-17,3.73381278 0.44771525,3.28609753 1,3.28609753 L19.49,3.286 L16.2725243,1.92076288 C15.7641435,1.70496803 15.5269557,1.11790769 15.7427505,0.609526894 C15.9585454,0.101146101 16.5456057,-0.136041675 17.0539865,0.079753169 Z" id="形状结合"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

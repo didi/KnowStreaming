@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "src/*"
+      ],
+      "@src/*":["src/*"]
+    },
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "module": "es2015",
+    "target": "es2015",
+    "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "pub/*",
+  ],
+}

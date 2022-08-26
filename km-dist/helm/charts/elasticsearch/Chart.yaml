@@ -1,0 +1,12 @@
+apiVersion: v1
+description: Official Elastic helm chart for Elasticsearch
+home: https://github.com/elastic/helm-charts
+maintainers:
+- email: helm-charts@elastic.co
+  name: Elastic
+name: elasticsearch
+version: 7.6.0
+appVersion: 7.6.0
+sources:
+  - https://github.com/elastic/elasticsearch
+icon: https://helm.elastic.co/icons/elasticsearch.png

@@ -1,0 +1,32 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "topic": {
+              "value": "%s"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort":[%s]
+}

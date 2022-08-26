@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.know.streaming.km.persistence.mysql.KafkaAclDAO">
+  <resultMap id="ClusterPhyMap"           type="com.xiaojukeji.know.streaming.km.common.bean.po.KafkaAclPO">
+    <id column="id"                       property="id" />
+    <result column="create_time"          property="createTime" />
+    <result column="update_time"          property="updateTime" />
+
+    <result column="cluster_phy_id"       property="clusterPhyId" />
+    <result column="principal"            property="principal" />
+    <result column="operation"            property="operation" />
+    <result column="permission_type"      property="permissionType" />
+    <result column="host"                 property="host" />
+    <result column="resource_type"        property="resourceType" />
+    <result column="resource_name"        property="resourceName" />
+    <result column="pattern_type"         property="patternType" />
+    <result column="unique_field"         property="uniqueField" />
+  </resultMap>
+</mapper>

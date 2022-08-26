@@ -1,0 +1,14 @@
+node_modules
+dist/
+pub/
+build/
+.sass-cache/
+.DS_Store
+.idea/
+.vscode/
+coverage
+versions/
+debug.log
+package-lock.json
+yarn.lock
+.d1-workspace.json
