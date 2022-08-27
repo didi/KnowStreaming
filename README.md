@@ -77,7 +77,7 @@
 
 想跟各个大佬交流Kafka Es 等中间件/大数据相关技术请 加微信进群。
 
-微信加群：添加<font color=red>mike_zhangliang</font>、<font color=red>danke-xie</font>的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
+微信加群：添加<font color=red>mike_zhangliang</font>、<font color=red>PenceXie</font>的微信号备注Logi加群或关注公众号 云原生可观测性 回复 "Logi加群"
 
 ## 4 知识星球
 
