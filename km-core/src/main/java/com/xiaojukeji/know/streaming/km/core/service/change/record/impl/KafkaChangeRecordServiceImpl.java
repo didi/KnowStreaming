@@ -5,13 +5,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.changerecord.KafkaChangeRecordPO;
 import com.xiaojukeji.know.streaming.km.core.service.change.record.KafkaChangeRecordService;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.changerecord.KafkaChangeRecordDAO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 
 @Service
 public class KafkaChangeRecordServiceImpl implements KafkaChangeRecordService {
@@ -20,11 +25,24 @@ public class KafkaChangeRecordServiceImpl implements KafkaChangeRecordService {
     @Autowired
     private KafkaChangeRecordDAO kafkaChangeRecordDAO;
 
+    private static final Cache<String, String> recordCache = Caffeine.newBuilder()
+            .expireAfterWrite(12, TimeUnit.HOURS)
+            .maximumSize(1000)
+            .build();
+
     @Override
     public int insertAndIgnoreDuplicate(KafkaChangeRecordPO recordPO) {
         try {
+            String cacheData = recordCache.getIfPresent(recordPO.getUniqueField());
+            if (cacheData != null || this.checkExistInDB(recordPO.getUniqueField())) {
+                // 已存在时，则直接返回
+                return 0;
+            }
+
+            recordCache.put(recordPO.getUniqueField(), recordPO.getUniqueField());
+
             return kafkaChangeRecordDAO.insert(recordPO);
-        } catch (DuplicateKeyException dke) {
+        } catch (Exception e) {
             return 0;
         }
     }
@@ -40,4 +58,12 @@ public class KafkaChangeRecordServiceImpl implements KafkaChangeRecordService {
 
     /**************************************************** private method ****************************************************/
 
+    private boolean checkExistInDB(String uniqueField) {
+        LambdaQueryWrapper<KafkaChangeRecordPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(KafkaChangeRecordPO::getUniqueField, uniqueField);
+
+        List<KafkaChangeRecordPO> poList = kafkaChangeRecordDAO.selectList(lambdaQueryWrapper);
+
+        return poList != null && !poList.isEmpty();
+    }
 }
