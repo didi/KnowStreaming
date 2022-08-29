@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.core.service.acl.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -10,10 +11,12 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.po.KafkaAclPO;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
+import com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterAuthTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.acl.KafkaAclService;
+import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
@@ -57,6 +60,9 @@ public class KafkaAclServiceImpl extends BaseVersionControlService implements Ka
 
     @Autowired
     private KafkaAdminZKClient kafkaAdminZKClient;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -175,6 +181,18 @@ public class KafkaAclServiceImpl extends BaseVersionControlService implements Ka
     private Result<List<AclBinding>> getAclByKafkaClient(VersionItemParam itemParam) {
         ClusterPhyParam param = (ClusterPhyParam) itemParam;
         try {
+            // 获取集群
+            ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(param.getClusterPhyId());
+            if (clusterPhy == null) {
+                return Result.buildFromRSAndMsg(ResultStatus.CLUSTER_NOT_EXIST, MsgConstant.getClusterPhyNotExist(param.getClusterPhyId()));
+            }
+
+            // 判断是否开启认证
+            if (!ClusterAuthTypeEnum.enableAuth(clusterPhy.getAuthType())) {
+                log.warn("method=getAclByKafkaClient||clusterPhyId={}||msg=not open auth and ignore get acls", clusterPhy.getId());
+                return Result.buildSuc(new ArrayList<>());
+            }
+
             AdminClient adminClient = kafkaAdminClient.getClient(param.getClusterPhyId());
 
             DescribeAclsResult describeAclsResult =
