@@ -44,6 +44,7 @@ public interface BrokerService {
      * 获取具体Broker
      */
     Broker getBroker(Long clusterPhyId, Integer brokerId);
+    Broker getBrokerFromCacheFirst(Long clusterPhyId, Integer brokerId);
 
     /**
      * 获取BrokerLog-Dir信息
