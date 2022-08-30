@@ -111,7 +111,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
             throw new DuplicateException(String.format("clusterName:%s duplicated", clusterPhyPO.getName()));
         } catch (Exception e) {
-            log.error("cmethod=addClusterPhy||clusterPhyId={}||operator={}||msg=add cluster failed||errMsg=exception!", clusterPhyPO.getId(), operator, e);
+            log.error("method=addClusterPhy||clusterPhyId={}||operator={}||msg=add cluster failed||errMsg=exception!", clusterPhyPO.getId(), operator, e);
 
             throw new AdminOperateException("add cluster failed", e, ResultStatus.MYSQL_OPERATE_FAILED);
         }
