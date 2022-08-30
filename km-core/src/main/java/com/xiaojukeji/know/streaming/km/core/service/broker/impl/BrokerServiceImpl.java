@@ -207,6 +207,22 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
     }
 
     @Override
+    public Broker getBrokerFromCacheFirst(Long clusterPhyId, Integer brokerId) {
+        List<Broker> brokerList = this.listAliveBrokersFromCacheFirst(clusterPhyId);
+        if (brokerList == null) {
+            return null;
+        }
+
+        for (Broker broker: brokerList) {
+            if (brokerId.equals(broker.getBrokerId())) {
+                return broker;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public Result<Map<String, LogDirDescription>> getBrokerLogDirDescFromKafka(Long clusterPhyId, Integer brokerId) {
         try {
             return (Result<Map<String, LogDirDescription>>) doVCHandler(clusterPhyId, BROKER_LOG_DIR, new BrokerParam(clusterPhyId, brokerId));
