@@ -56,7 +56,7 @@ public class KafkaControllerServiceImpl implements KafkaControllerService {
     @Override
     public int insertAndIgnoreDuplicateException(KafkaController kafkaController) {
         try {
-            Broker broker = brokerService.getBroker(kafkaController.getClusterPhyId(), kafkaController.getBrokerId());
+            Broker broker = brokerService.getBrokerFromCacheFirst(kafkaController.getClusterPhyId(), kafkaController.getBrokerId());
 
             KafkaControllerPO kafkaControllerPO = new KafkaControllerPO();
             kafkaControllerPO.setClusterPhyId(kafkaController.getClusterPhyId());
@@ -136,34 +136,56 @@ public class KafkaControllerServiceImpl implements KafkaControllerService {
     /**************************************************** private method ****************************************************/
 
     private Result<KafkaController> getControllerFromAdminClient(ClusterPhy clusterPhy) {
+        AdminClient adminClient = null;
         try {
-            AdminClient adminClient = null;
-            try {
-                adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
-            } catch (Exception e) {
-                log.error("class=KafkaControllerServiceImpl||method=getControllerFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
-
-                // 集群已经加载进来，但是创建admin-client失败，则设置无controller
-                return Result.buildSuc();
-            }
-
-            DescribeClusterResult describeClusterResult = adminClient.describeCluster(new DescribeClusterOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
-
-            Node controllerNode = describeClusterResult.controller().get();
-            if (controllerNode == null) {
-                return Result.buildSuc();
-            }
-
-            return Result.buildSuc(new KafkaController(
-                    clusterPhy.getId(),
-                    controllerNode.id(),
-                    System.currentTimeMillis()
-            ));
+            adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
         } catch (Exception e) {
             log.error("class=KafkaControllerServiceImpl||method=getControllerFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
-            return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
+            // 集群已经加载进来，但是创建admin-client失败，则设置无controller
+            return Result.buildSuc();
         }
+
+        // 先从DB获取该集群controller
+        KafkaController dbKafkaController = null;
+
+        for (int i = 1; i <= Constant.DEFAULT_RETRY_TIME; ++i) {
+            try {
+                if (i == 1) {
+                    // 获取DB中的controller信息
+                    dbKafkaController = this.getKafkaControllerFromDB(clusterPhy.getId());
+                }
+
+                DescribeClusterResult describeClusterResult = adminClient.describeCluster(
+                        new DescribeClusterOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
+                );
+
+                Node controllerNode = describeClusterResult.controller().get();
+                if (controllerNode == null) {
+                    return Result.buildSuc();
+                }
+
+                if (dbKafkaController != null && controllerNode.id() == dbKafkaController.getBrokerId()) {
+                    // ID没有变化，直接返回原先的
+                    return Result.buildSuc(dbKafkaController);
+                }
+
+                // 发生了变化
+                return Result.buildSuc(new KafkaController(
+                        clusterPhy.getId(),
+                        controllerNode.id(),
+                        System.currentTimeMillis()
+                ));
+            } catch (Exception e) {
+                log.error(
+                        "class=KafkaControllerServiceImpl||method=getControllerFromAdminClient||clusterPhyId={}||tryTime={}||errMsg=exception",
+                        clusterPhy.getId(), i, e
+                );
+            }
+        }
+
+        // 三次出错，则直接返回无controller
+        return Result.buildSuc();
     }
 
     private Result<KafkaController> getControllerFromZKClient(ClusterPhy clusterPhy) {
