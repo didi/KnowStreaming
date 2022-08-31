@@ -19,7 +19,7 @@
 
 未开启时，直接到`2、解决方法`查看如何开启即可。
 
-![check_jmx_opened](./assets/connect_jmx_failed/check_jmx_opened.jpg)
+![check_jmx_opened](http://img-ys011.didistatic.com/static/dc2img/do1_dRX6UHE2IUSHqsN95DGb)
 
 
 **类型二：配置错误**
