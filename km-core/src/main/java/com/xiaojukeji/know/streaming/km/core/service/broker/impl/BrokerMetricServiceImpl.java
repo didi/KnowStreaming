@@ -110,9 +110,10 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     }
 
     @Override
-    public Result<BrokerMetrics> collectBrokerMetricsFromKafkaWithCacheFirst(Long clusterId, Integer brokerId, String metric){
+    public Result<BrokerMetrics> collectBrokerMetricsFromKafkaWithCacheFirst(Long clusterId, Integer brokerId, String metric) {
+        String brokerMetricKey = CollectedMetricsLocalCache.genBrokerMetricKey(clusterId, brokerId, metric);
 
-        Float keyValue = CollectedMetricsLocalCache.getBrokerMetrics(clusterId, brokerId, metric);
+        Float keyValue = CollectedMetricsLocalCache.getBrokerMetrics(brokerMetricKey);
         if(null != keyValue) {
             BrokerMetrics brokerMetrics = new BrokerMetrics(clusterId, brokerId);
             brokerMetrics.putMetric(metric, keyValue);
@@ -124,7 +125,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
 
         Map<String, Float> metricsMap = ret.getData().getMetrics();
         for(Map.Entry<String, Float> metricNameAndValueEntry : metricsMap.entrySet()){
-            CollectedMetricsLocalCache.putBrokerMetrics(clusterId, brokerId, metricNameAndValueEntry.getKey(), metricNameAndValueEntry.getValue());
+            CollectedMetricsLocalCache.putBrokerMetrics(brokerMetricKey, metricNameAndValueEntry.getValue());
         }
 
         return ret;

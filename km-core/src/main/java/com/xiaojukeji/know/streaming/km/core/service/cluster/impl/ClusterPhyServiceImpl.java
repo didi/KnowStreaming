@@ -24,8 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -205,9 +206,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     @Override
-    public Set<String> getClusterVersionSet() {
-        List<ClusterPhy> clusterPhyList = listAllClusters();
-        Set<String> versionSet = clusterPhyList.stream().map(elem -> elem.getKafkaVersion()).collect(Collectors.toSet());
-        return versionSet;
+    public List<String> getClusterVersionList() {
+        List<ClusterPhy> clusterPhyList = this.listAllClusters();
+
+        List<String> versionList = new ArrayList<>(clusterPhyList.stream().map(elem -> elem.getKafkaVersion()).collect(Collectors.toSet()));
+        Collections.sort(versionList);
+
+        return versionList;
     }
 }

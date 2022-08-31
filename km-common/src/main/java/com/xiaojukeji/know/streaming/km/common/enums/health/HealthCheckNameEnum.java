@@ -26,7 +26,7 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.CLUSTER,
             "Controller",
             Constant.HC_CONFIG_NAME_PREFIX + "CLUSTER_NO_CONTROLLER",
-            "集群Controller数错误",
+            "集群Controller数正常",
             HealthCompareValueConfig.class
     ),
 
@@ -34,7 +34,7 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.BROKER,
             "RequestQueueSize",
             Constant.HC_CONFIG_NAME_PREFIX + "BROKER_REQUEST_QUEUE_FULL",
-            "Broker-RequestQueueSize被打满",
+            "Broker-RequestQueueSize指标",
             HealthCompareValueConfig.class
     ),
 
@@ -42,7 +42,7 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.BROKER,
             "NetworkProcessorAvgIdlePercent",
             Constant.HC_CONFIG_NAME_PREFIX + "BROKER_NETWORK_PROCESSOR_AVG_IDLE_TOO_LOW",
-            "Broker-NetworkProcessorAvgIdlePercent的Idle过低",
+            "Broker-NetworkProcessorAvgIdlePercent指标",
             HealthCompareValueConfig.class
     ),
 
@@ -50,7 +50,7 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.GROUP,
             "Group Re-Balance",
             Constant.HC_CONFIG_NAME_PREFIX + "GROUP_RE_BALANCE_TOO_FREQUENTLY",
-            "Group re-balance太频繁",
+            "Group re-balance频率",
             HealthDetectedInLatestMinutesConfig.class
     ),
 
@@ -66,7 +66,7 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.TOPIC,
             "UnderReplicaTooLong",
             Constant.HC_CONFIG_NAME_PREFIX + "TOPIC_UNDER_REPLICA_TOO_LONG",
-            "Topic 长期处于未同步状态",
+            "Topic 未同步持续时间",
             HealthDetectedInLatestMinutesConfig.class
     ),
 
