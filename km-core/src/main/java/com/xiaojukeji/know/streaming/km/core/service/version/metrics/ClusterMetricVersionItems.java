@@ -35,6 +35,7 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
     public static final String CLUSTER_METRIC_HEALTH_SCORE_CLUSTER                  = "HealthScore_Cluster";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_CLUSTER           = "HealthCheckPassed_Cluster";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CLUSTER            = "HealthCheckTotal_Cluster";
+
     public static final String CLUSTER_METRIC_TOTAL_REQ_QUEUE_SIZE                  = "TotalRequestQueueSize";
     public static final String CLUSTER_METRIC_TOTAL_RES_QUEUE_SIZE                  = "TotalResponseQueueSize";
     public static final String CLUSTER_METRIC_EVENT_QUEUE_SIZE                      = "EventQueueSize";

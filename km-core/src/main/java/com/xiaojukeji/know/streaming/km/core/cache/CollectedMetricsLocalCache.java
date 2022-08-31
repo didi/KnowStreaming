@@ -10,13 +10,13 @@ import java.util.concurrent.TimeUnit;
 
 public class CollectedMetricsLocalCache {
     private static final Cache<String, Float> brokerMetricsCache = Caffeine.newBuilder()
-            .expireAfterWrite(60, TimeUnit.SECONDS)
-            .maximumSize(2000)
+            .expireAfterWrite(90, TimeUnit.SECONDS)
+            .maximumSize(10000)
             .build();
 
     private static final Cache<String, List<TopicMetrics>> topicMetricsCache = Caffeine.newBuilder()
             .expireAfterWrite(90, TimeUnit.SECONDS)
-            .maximumSize(5000)
+            .maximumSize(10000)
             .build();
 
     private static final Cache<String, List<PartitionMetrics>> partitionMetricsCache = Caffeine.newBuilder()
@@ -29,63 +29,64 @@ public class CollectedMetricsLocalCache {
             .maximumSize(20000)
             .build();
 
-    public static Float getBrokerMetrics(Long clusterPhyId, Integer brokerId, String metricName) {
-        return brokerMetricsCache.getIfPresent(CollectedMetricsLocalCache.genBrokerMetricKey(clusterPhyId, brokerId, metricName));
+    public static Float getBrokerMetrics(String brokerMetricKey) {
+        return brokerMetricsCache.getIfPresent(brokerMetricKey);
     }
 
-    public static void putBrokerMetrics(Long clusterPhyId, Integer brokerId, String metricName, Float value) {
+    public static void putBrokerMetrics(String brokerMetricKey, Float value) {
         if (value == null) {
             return;
         }
-        brokerMetricsCache.put(CollectedMetricsLocalCache.genBrokerMetricKey(clusterPhyId, brokerId, metricName), value);
+
+        brokerMetricsCache.put(brokerMetricKey, value);
     }
 
-    public static List<TopicMetrics> getTopicMetrics(Long clusterPhyId, String topicName, String metricName) {
-        return topicMetricsCache.getIfPresent(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName));
+    public static List<TopicMetrics> getTopicMetrics(String topicMetricKey) {
+        return topicMetricsCache.getIfPresent(topicMetricKey);
     }
 
-    public static void putTopicMetrics(Long clusterPhyId, String topicName, String metricName, List<TopicMetrics> metricsList) {
+    public static void putTopicMetrics(String topicMetricKey, List<TopicMetrics> metricsList) {
         if (metricsList == null) {
             return;
         }
-        topicMetricsCache.put(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName), metricsList);
+
+        topicMetricsCache.put(topicMetricKey, metricsList);
     }
 
-    public static List<PartitionMetrics> getPartitionMetricsList(Long clusterPhyId, String topicName, String metricName) {
-        return partitionMetricsCache.getIfPresent(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName));
+    public static List<PartitionMetrics> getPartitionMetricsList(String partitionMetricKey) {
+        return partitionMetricsCache.getIfPresent(partitionMetricKey);
     }
 
-    public static void putPartitionMetricsList(Long clusterPhyId, String topicName, String metricName, List<PartitionMetrics> metricsList) {
+    public static void putPartitionMetricsList(String partitionMetricsKey, List<PartitionMetrics> metricsList) {
         if (metricsList == null) {
             return;
         }
-        partitionMetricsCache.put(CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName), metricsList);
+        partitionMetricsCache.put(partitionMetricsKey, metricsList);
     }
 
-    public static Float getReplicaMetrics(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, String metricName) {
-        return replicaMetricsValueCache.getIfPresent(CollectedMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topicName, partitionId, metricName));
+    public static Float getReplicaMetrics(String replicaMetricsKey) {
+        return replicaMetricsValueCache.getIfPresent(replicaMetricsKey);
     }
 
-    public static void putReplicaMetrics(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, String metricName, Float value) {
+    public static void putReplicaMetrics(String replicaMetricsKey, Float value) {
         if (value == null) {
             return;
         }
-        replicaMetricsValueCache.put(CollectedMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topicName, partitionId, metricName), value);
+        replicaMetricsValueCache.put(replicaMetricsKey, value);
     }
 
-
-    /**************************************************** private method ****************************************************/
-
-
-    private static String genBrokerMetricKey(Long clusterPhyId, Integer brokerId, String metricName) {
+    public static String genBrokerMetricKey(Long clusterPhyId, Integer brokerId, String metricName) {
         return clusterPhyId + "@" + brokerId + "@" + metricName;
     }
 
-    private static String genClusterTopicMetricKey(Long clusterPhyId, String topicName, String metricName) {
+    public static String genClusterTopicMetricKey(Long clusterPhyId, String topicName, String metricName) {
         return clusterPhyId + "@" + topicName + "@" + metricName;
     }
 
-    private static String genReplicaMetricCacheKey(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, String metricName) {
+    public static String genReplicaMetricCacheKey(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, String metricName) {
         return clusterPhyId + "@" + brokerId + "@" + topicName + "@" + partitionId + "@" + metricName;
     }
+
+    /**************************************************** private method ****************************************************/
+
 }
