@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.List;
 
 
 /**
@@ -49,7 +49,7 @@ public class MultiClusterPhyController {
 
     @ApiOperation(value = "多物理集群-已存在kafka版本", notes = "")
     @GetMapping(value = "physical-clusters/exist-version")
-    public Result<Set<String>> getClusterPhysVersion() {
-        return Result.buildSuc(clusterPhyService.getClusterVersionSet());
+    public Result<List<String>> getClusterPhysVersion() {
+        return Result.buildSuc(clusterPhyService.getClusterVersionList());
     }
 }

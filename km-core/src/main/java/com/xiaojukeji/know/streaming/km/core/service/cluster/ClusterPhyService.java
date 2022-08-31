@@ -73,5 +73,5 @@ public interface ClusterPhyService {
      * 获取系统已存在的kafka版本列表
      * @return
      */
-    Set<String> getClusterVersionSet();
+    List<String> getClusterVersionList();
 }
