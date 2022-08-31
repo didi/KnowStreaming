@@ -75,7 +75,9 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
 
     @Override
     public Result<List<PartitionMetrics>> collectPartitionsMetricsFromKafkaWithCache(Long clusterPhyId, String topicName, String metricName) {
-        List<PartitionMetrics> metricsList = CollectedMetricsLocalCache.getPartitionMetricsList(clusterPhyId, topicName, metricName);
+        String partitionMetricsKey = CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName);
+
+        List<PartitionMetrics> metricsList = CollectedMetricsLocalCache.getPartitionMetricsList(partitionMetricsKey);
         if(null != metricsList) {
             return Result.buildSuc(metricsList);
         }
@@ -88,12 +90,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
         // 更新cache
         PartitionMetrics metrics = metricsResult.getData().get(0);
         metrics.getMetrics().entrySet().forEach(
-                metricEntry -> CollectedMetricsLocalCache.putPartitionMetricsList(
-                        clusterPhyId,
-                        metrics.getTopic(),
-                        metricEntry.getKey(),
-                        metricsResult.getData()
-                )
+                metricEntry -> CollectedMetricsLocalCache.putPartitionMetricsList(partitionMetricsKey, metricsResult.getData())
         );
 
         return metricsResult;
