@@ -192,8 +192,10 @@ const ConsumeClientTest = () => {
         // 过滤出消费数量不足设定值的partition
         const filtersPartition = _partitionList.filter((item: any) => item.recordCount < untilMsgNum);
         curPartitionList.current = filtersPartition; // 用作下一次请求的入参
-        setIsStop(filtersPartition.length < 1);
-        isStopStatus.current = filtersPartition.length < 1;
+        if (!isStop) {
+          setIsStop(filtersPartition.length < 1);
+          isStopStatus.current = filtersPartition.length < 1;
+        }
         break;
       case 'max size':
         setIsStop(+recordSizeCur.current >= unitMsgSize);
@@ -202,8 +204,10 @@ const ConsumeClientTest = () => {
       case 'max size per partition':
         // 过滤出消费size不足设定值的partition
         const filters = partitionConsumedList.filter((item: any) => item.recordSizeUnitB < unitMsgSize);
-        setIsStop(filters.length < 1);
-        isStopStatus.current = filters.length < 1;
+        if (!isStop) {
+          setIsStop(filters.length < 1);
+          isStopStatus.current = filters.length < 1;
+        }
         curPartitionList.current = filters;
         break;
     }
