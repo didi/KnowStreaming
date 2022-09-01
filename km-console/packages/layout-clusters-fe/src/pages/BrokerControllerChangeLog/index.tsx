@@ -5,7 +5,7 @@ import API from '../../api';
 import { getControllerChangeLogListColumns, defaultPagination } from './config';
 import BrokerDetail from '../BrokerDetail';
 import BrokerHealthCheck from '@src/components/CardBar/BrokerHealthCheck';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import './index.less';
 
 const { request } = Utils;

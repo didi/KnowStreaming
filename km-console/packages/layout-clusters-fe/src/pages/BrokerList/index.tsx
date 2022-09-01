@@ -7,7 +7,7 @@ import { dealTableRequestParams } from '../../constants/common';
 import BrokerDetail from '../BrokerDetail';
 import CardBar from '@src/components/CardBar';
 import BrokerHealthCheck from '@src/components/CardBar/BrokerHealthCheck';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import './index.less';
 const { request } = Utils;
 
