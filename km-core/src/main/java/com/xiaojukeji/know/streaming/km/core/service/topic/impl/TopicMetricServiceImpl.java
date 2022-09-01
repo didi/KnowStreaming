@@ -120,7 +120,9 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
 
     @Override
     public Result<List<TopicMetrics>> collectTopicMetricsFromKafkaWithCacheFirst(Long clusterPhyId, String topicName, String metricName) {
-        List<TopicMetrics> metricsList = CollectedMetricsLocalCache.getTopicMetrics(clusterPhyId, topicName, metricName);
+        String topicMetricsKey = CollectedMetricsLocalCache.genClusterTopicMetricKey(clusterPhyId, topicName, metricName);
+
+        List<TopicMetrics> metricsList = CollectedMetricsLocalCache.getTopicMetrics(topicMetricsKey);
         if(null != metricsList) {
             return Result.buildSuc(metricsList);
         }
@@ -133,12 +135,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         // 更新cache
         TopicMetrics metrics = metricsResult.getData().get(0);
         metrics.getMetrics().entrySet().forEach(
-                metricEntry -> CollectedMetricsLocalCache.putTopicMetrics(
-                        clusterPhyId,
-                        metrics.getTopic(),
-                        metricEntry.getKey(),
-                        metricsResult.getData()
-                )
+                metricEntry -> CollectedMetricsLocalCache.putTopicMetrics(topicMetricsKey, metricsResult.getData())
         );
 
         return metricsResult;

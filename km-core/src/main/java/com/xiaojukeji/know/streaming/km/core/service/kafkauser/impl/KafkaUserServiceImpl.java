@@ -7,6 +7,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.didiglobal.logi.security.util.PWEncryptUtil;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkauser.KafkaUser;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.kafkauser.KafkaUserParam;
@@ -17,11 +18,13 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.po.KafkaUserPO;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
+import com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterAuthTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkauser.KafkaUserService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
@@ -32,7 +35,6 @@ import kafka.admin.ConfigCommand;
 import kafka.server.ConfigType;
 import kafka.zk.*;
 import org.apache.kafka.clients.admin.*;
-import org.apache.kafka.common.errors.UnsupportedVersionException;
 import org.apache.kafka.common.security.scram.ScramCredential;
 import org.apache.kafka.common.security.scram.internals.ScramCredentialUtils;
 import org.apache.kafka.common.security.scram.internals.ScramFormatter;
@@ -70,6 +72,9 @@ public class KafkaUserServiceImpl extends BaseVersionControlService implements K
 
     @Autowired
     private OpLogWrapService opLogWrapService;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -571,6 +576,18 @@ public class KafkaUserServiceImpl extends BaseVersionControlService implements K
     private Result<List<KafkaUser>> getKafkaUserByKafkaClient(VersionItemParam itemParam) {
         KafkaUserParam param = (KafkaUserParam) itemParam;
         try {
+            // 获取集群
+            ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(param.getClusterPhyId());
+            if (clusterPhy == null) {
+                return Result.buildFromRSAndMsg(ResultStatus.CLUSTER_NOT_EXIST, MsgConstant.getClusterPhyNotExist(param.getClusterPhyId()));
+            }
+
+            // 判断认证模式，如果是非scram模式，直接返回
+            if (!ClusterAuthTypeEnum.isScram(clusterPhy.getAuthType())) {
+                log.warn("method=getKafkaUserByKafkaClient||clusterPhyId={}||msg=not scram auth type and ignore get users", clusterPhy.getId());
+                return Result.buildSuc(new ArrayList<>());
+            }
+
             AdminClient adminClient = kafkaAdminClient.getClient(param.getClusterPhyId());
 
             // 查询集群kafka-user

@@ -41,7 +41,11 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
                 DslsConstant.GET_BROKER_LATEST_METRICS, clusterId, brokerId, startTime, endTime);
 
         BrokerMetricPO brokerMetricPO = esOpClient.performRequestAndTakeFirst(
-                brokerId.toString(), realIndex(startTime, endTime), dsl, BrokerMetricPO.class);
+                brokerId.toString(),
+                realIndex(startTime, endTime),
+                dsl,
+                BrokerMetricPO.class
+        );
 
         return (null == brokerMetricPO) ? new BrokerMetricPO(clusterId, brokerId) : brokerMetricPO;
     }
@@ -49,8 +53,12 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
     /**
      * 获取集群 clusterPhyId 中每个 metric 的指定 broker 在指定时间[startTime、endTime]区间内聚合计算(avg、max)之后的统计值
      */
-    public Map<String/*metric*/, MetricPointVO> getBrokerMetricsPoint(Long clusterPhyId, Integer brokerId, List<String> metrics,
-                                                           String aggType, Long startTime, Long endTime){
+    public Map<String/*metric*/, MetricPointVO> getBrokerMetricsPoint(Long clusterPhyId,
+                                                                      Integer brokerId,
+                                                                      List<String> metrics,
+                                                                      String aggType,
+                                                                      Long startTime,
+                                                                      Long endTime) {
         //1、获取需要查下的索引
         String realIndex = realIndex(startTime, endTime);
 
@@ -60,8 +68,13 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(
                 DslsConstant.GET_BROKER_AGG_SINGLE_METRICS, clusterPhyId, brokerId, startTime, endTime, aggDsl);
 
-        return esOpClient.performRequestWithRouting(String.valueOf(brokerId), realIndex, dsl,
-                s -> handleSingleESQueryResponse(s, metrics, aggType), 3);
+        return esOpClient.performRequestWithRouting(
+                String.valueOf(brokerId),
+                realIndex,
+                dsl,
+                s -> handleSingleESQueryResponse(s, metrics, aggType),
+                3
+        );
     }
 
     /**
@@ -75,10 +88,19 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         Map<String, List<Long>> metricBrokerIds = getTopNBrokerIds(clusterPhyId, metrics, aggType, topN, startTime, endTime);
 
         Table<String, Long, List<MetricPointVO>> table = HashBasedTable.create();
+
         //2、查询指标
         for(String metric : metricBrokerIds.keySet()){
-            table.putAll(listBrokerMetricsByBrokerIds(clusterPhyId, Arrays.asList(metric),
-                    aggType, metricBrokerIds.getOrDefault(metric, brokerIds), startTime, endTime));
+            table.putAll(
+                    this.listBrokerMetricsByBrokerIds(
+                            clusterPhyId,
+                            Arrays.asList(metric),
+                            aggType,
+                            metricBrokerIds.getOrDefault(metric, brokerIds),
+                            startTime,
+                            endTime
+                    )
+            );
         }
 
         return table;
@@ -87,9 +109,12 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
     /**
      * 获取集群 clusterPhyId 中每个 metric 的指定 brokers 在指定时间[startTime、endTime]区间内所有的指标
      */
-    public Table<String/*metric*/, Long/*brokerId*/, List<MetricPointVO>> listBrokerMetricsByBrokerIds(Long clusterPhyId, List<String> metrics,
-                                                                                                       String aggType, List<Long> brokerIds,
-                                                                                                       Long startTime, Long endTime){
+    public Table<String/*metric*/, Long/*brokerId*/, List<MetricPointVO>> listBrokerMetricsByBrokerIds(Long clusterPhyId,
+                                                                                                       List<String> metrics,
+                                                                                                       String aggType,
+                                                                                                       List<Long> brokerIds,
+                                                                                                       Long startTime,
+                                                                                                       Long endTime){
         //1、获取需要查下的索引
         String realIndex = realIndex(startTime, endTime);
 
@@ -105,22 +130,34 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         for(Long brokerId : brokerIds){
             try {
                 String dsl = dslLoaderUtil.getFormatDslByFileName(
-                        DslsConstant.GET_BROKER_AGG_LIST_METRICS, clusterPhyId, brokerId, startTime, endTime, interval, aggDsl);
+                        DslsConstant.GET_BROKER_AGG_LIST_METRICS,
+                        clusterPhyId,
+                        brokerId,
+                        startTime,
+                        endTime,
+                        interval,
+                        aggDsl
+                );
 
                 queryFuture.runnableTask(
                         String.format("class=BrokerMetricESDAO||method=listBrokerMetricsByBrokerIds||ClusterPhyId=%d", clusterPhyId),
                         5000,
                         () -> {
-                            Map<String, List<MetricPointVO>> metricMap = esOpClient.performRequestWithRouting(String.valueOf(brokerId), realIndex, dsl,
-                                    s -> handleListESQueryResponse(s, metrics, aggType), 3);
+                            Map<String, List<MetricPointVO>> metricMap = esOpClient.performRequestWithRouting(
+                                    String.valueOf(brokerId),
+                                    realIndex,
+                                    dsl,
+                                    s -> handleListESQueryResponse(s, metrics, aggType),
+                                    3
+                            );
 
-                            synchronized (table){
+                            synchronized (table) {
                                 for(String metric : metricMap.keySet()){
                                     table.put(metric, brokerId, metricMap.get(metric));
                                 }
                             }
                         });
-            }catch (Exception e){
+            } catch (Exception e){
                 LOGGER.error("method=listBrokerMetricsByBrokerIds||clusterPhyId={}||brokerId{}||errMsg=exception!", clusterPhyId, brokerId, e);
             }
         }

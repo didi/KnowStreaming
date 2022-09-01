@@ -126,7 +126,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     private TopicMetricService topicMetricService;
 
     @Autowired
-    private TopicService    topicService;
+    private TopicService topicService;
 
     @Autowired
     private PartitionService partitionService;
@@ -728,13 +728,10 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
         Long   clusterId    = param.getClusterId();
 
         //1、获取jmx的属性信息
-        VersionJmxInfo jmxInfo = getJMXInfo(clusterId, metric);
-        if(null == jmxInfo){return Result.buildFailure(VC_ITEM_JMX_NOT_EXIST);}
-
         List<Broker> brokers = brokerService.listAliveBrokersFromDB(clusterId);
 
         float metricVale = 0f;
-        for(Broker broker : brokers){
+        for(Broker broker : brokers) {
             Result<BrokerMetrics> ret = brokerMetricService.collectBrokerMetricsFromKafkaWithCacheFirst(clusterId, broker.getBrokerId(), metric);
 
             if(null == ret || ret.failed() || null == ret.getData()){continue;}

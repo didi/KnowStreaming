@@ -110,9 +110,10 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     }
 
     @Override
-    public Result<BrokerMetrics> collectBrokerMetricsFromKafkaWithCacheFirst(Long clusterId, Integer brokerId, String metric){
+    public Result<BrokerMetrics> collectBrokerMetricsFromKafkaWithCacheFirst(Long clusterId, Integer brokerId, String metric) {
+        String brokerMetricKey = CollectedMetricsLocalCache.genBrokerMetricKey(clusterId, brokerId, metric);
 
-        Float keyValue = CollectedMetricsLocalCache.getBrokerMetrics(clusterId, brokerId, metric);
+        Float keyValue = CollectedMetricsLocalCache.getBrokerMetrics(brokerMetricKey);
         if(null != keyValue) {
             BrokerMetrics brokerMetrics = new BrokerMetrics(clusterId, brokerId);
             brokerMetrics.putMetric(metric, keyValue);
@@ -124,7 +125,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
 
         Map<String, Float> metricsMap = ret.getData().getMetrics();
         for(Map.Entry<String, Float> metricNameAndValueEntry : metricsMap.entrySet()){
-            CollectedMetricsLocalCache.putBrokerMetrics(clusterId, brokerId, metricNameAndValueEntry.getKey(), metricNameAndValueEntry.getValue());
+            CollectedMetricsLocalCache.putBrokerMetrics(brokerMetricKey, metricNameAndValueEntry.getValue());
         }
 
         return ret;
@@ -178,11 +179,16 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
 
     @Override
     public Result<List<MetricPointVO>> getMetricPointsFromES(Long clusterPhyId, Integer brokerId, MetricDTO dto) {
-        Map<String/*metric*/, MetricPointVO> metricPointMap = brokerMetricESDAO.getBrokerMetricsPoint(clusterPhyId, brokerId,
-                dto.getMetricsNames(), dto.getAggType(), dto.getStartTime(), dto.getEndTime());
+        Map<String/*metric*/, MetricPointVO> metricPointMap = brokerMetricESDAO.getBrokerMetricsPoint(
+                clusterPhyId,
+                brokerId,
+                dto.getMetricsNames(),
+                dto.getAggType(),
+                dto.getStartTime(),
+                dto.getEndTime()
+        );
 
-        List<MetricPointVO> metricPoints = new ArrayList<>(metricPointMap.values());
-        return Result.buildSuc(metricPoints);
+        return Result.buildSuc(new ArrayList<>(metricPointMap.values()));
     }
 
     @Override
@@ -199,8 +205,10 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
 
                 brokerMetrics.add(ConvertUtil.obj2Obj(brokerMetricPO, BrokerMetrics.class));
             } catch (Exception e) {
-                LOGGER.error("method=getLatestMetricsFromES||clusterPhyId={}||brokerId={}||errMsg=exception",
-                        clusterPhyId, brokerId, e);
+                LOGGER.error(
+                        "method=getLatestMetricsFromES||clusterPhyId={}||brokerId={}||errMsg=exception",
+                        clusterPhyId, brokerId, e
+                );
             }
         }
 
@@ -219,6 +227,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     }
 
     /**************************************************** private method ****************************************************/
+
     private List<Long> listTopNBrokerIds(Long clusterId, Integer      topN){
         List<Broker> brokers = brokerService.listAliveBrokersFromDB(clusterId);
         if(CollectionUtils.isEmpty(brokers)){return new ArrayList<>();}
