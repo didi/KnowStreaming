@@ -39,7 +39,7 @@ CREATE TABLE `logi_security_oplog`
     operate_type      varchar(16)                          not null comment '操作类型',
     target_type       varchar(16)                          not null comment '对象分类',
     target            varchar(20)                          not null comment '操作对象',
-    operation_methods            varchar(20)               not null comment '操作方式',
+    operation_methods            varchar(20)               not null default '' comment '操作方式',
     detail            text                                 null comment '日志详情',
     create_time       timestamp  default CURRENT_TIMESTAMP null,
     update_time       timestamp  default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
