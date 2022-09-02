@@ -77,6 +77,7 @@ const RoleDetailAndUpdate = forwardRef((props, ref): JSX.Element => {
 
   const onSubmit = () => {
     form.validateFields().then((formData) => {
+      formData.permissionIdList = formData.permissionIdList.filter((l) => l);
       formData.permissionIdList.forEach((arr, i) => {
         // 如果分配的系统下的子权限，自动赋予该系统的权限
         if (arr !== null && arr.length) {
@@ -212,7 +213,7 @@ const RoleDetailAndUpdate = forwardRef((props, ref): JSX.Element => {
             rules={[
               () => ({
                 validator(_, value) {
-                  if (Array.isArray(value) && value.some((item) => !!item.length)) {
+                  if (Array.isArray(value) && value.some((item) => !!item?.length)) {
                     return Promise.resolve();
                   }
                   return Promise.reject(new Error('请为角色至少分配一项权限'));

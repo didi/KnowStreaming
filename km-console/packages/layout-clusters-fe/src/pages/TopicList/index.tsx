@@ -10,7 +10,7 @@ import TopicHealthCheck from '@src/components/CardBar/TopicHealthCheck';
 import TopicDetail from '../TopicDetail';
 import Delete from './Delete';
 import { ClustersPermissionMap } from '../CommonConfig';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import ReplicaChange from '@src/components/TopicJob/ReplicaChange';
 import SmallChart from '@src/components/SmallChart';
 import ReplicaMove from '@src/components/TopicJob/ReplicaMove';

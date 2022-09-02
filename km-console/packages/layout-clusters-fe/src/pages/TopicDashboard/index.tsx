@@ -3,7 +3,7 @@ import { MetricType } from '@src/api';
 import TopicHealthCheck from '@src/components/CardBar/TopicHealthCheck';
 import DashboardDragChart from '@src/components/DashboardDragChart';
 import { AppContainer } from 'knowdesign';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 
 const TopicDashboard = () => {
   const [global] = AppContainer.useGlobalValue();

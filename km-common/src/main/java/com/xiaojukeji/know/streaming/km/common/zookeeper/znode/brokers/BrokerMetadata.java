@@ -113,7 +113,7 @@ public class BrokerMetadata implements Serializable {
 
             brokerMetadata.getEndpointMap().put(endpoint.substring(0, idx1), new IpPortData(brokerHost, brokerPort));
 
-            if (KafkaConstant.EXTERNAL_KEY.equals(endpoint.substring(0, idx1))) {
+            if (KafkaConstant.INTERNAL_KEY.equals(endpoint.substring(0, idx1))) {
                 // 优先使用internal的地址进行展示
                 brokerMetadata.setHost(brokerHost);
                 brokerMetadata.setPort(ConvertUtil.string2Integer(brokerPort));

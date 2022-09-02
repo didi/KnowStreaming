@@ -1,4 +1,4 @@
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import React from 'react';
 import TourGuide, { ClusterDetailSteps } from '@src/components/TourGuide';
 import './index.less';

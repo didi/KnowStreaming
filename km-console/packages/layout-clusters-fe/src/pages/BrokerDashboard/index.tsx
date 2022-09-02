@@ -2,7 +2,7 @@ import React from 'react';
 import { MetricType } from '@src/api';
 import BrokerHealthCheck from '@src/components/CardBar/BrokerHealthCheck';
 import DashboardDragChart from '@src/components/DashboardDragChart';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import { AppContainer } from 'knowdesign';
 
 const BrokerDashboard = (): JSX.Element => {

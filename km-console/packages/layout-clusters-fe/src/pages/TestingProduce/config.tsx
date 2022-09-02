@@ -1,6 +1,6 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { IconFont, Switch, Tooltip } from 'knowdesign';
-import { FormItemType, IFormItem } from 'knowdesign/lib/extend/x-form';
+import { FormItemType, IFormItem } from 'knowdesign/es/extend/x-form';
 import moment from 'moment';
 import React from 'react';
 import { timeFormat, getRandomStr } from '@src/constants/common';
