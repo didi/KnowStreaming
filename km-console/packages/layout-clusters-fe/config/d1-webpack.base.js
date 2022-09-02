@@ -9,7 +9,6 @@ const TerserJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const theme = require('./theme');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 const isProd = process.env.NODE_ENV === 'production';
 const babelOptions = {
@@ -43,7 +42,6 @@ const babelOptions = {
 module.exports = () => {
   const cssFileName = isProd ? '[name]-[chunkhash].css' : '[name].css';
   const plugins = [
-    // !isProd && new HardSourceWebpackPlugin(),
     new CoverHtmlWebpackPlugin(),
     new ProgressBarPlugin(),
     new CaseSensitivePathsPlugin(),
@@ -150,23 +148,21 @@ module.exports = () => {
       ],
     },
     optimization: Object.assign(
-      // {
-      //   splitChunks: {
-      //     cacheGroups: {
-      //       vendor: {
-      //         test: /[\\/]node_modules[\\/]/,
-      //         chunks: 'all',
-      //         name: 'vendor',
-      //         priority: 10,
-      //         enforce: true,
-      //         minChunks: 1,
-      //         maxSize: 3500000,
-      //       },
-      //     },
-      //   },
-      // },
       isProd
         ? {
+            splitChunks: {
+              cacheGroups: {
+                vendor: {
+                  test: /[\\/]node_modules[\\/]/,
+                  chunks: 'all',
+                  name: 'vendor',
+                  priority: 10,
+                  enforce: true,
+                  minChunks: 1,
+                  maxSize: 3000000,
+                },
+              },
+            },
             minimizer: [
               new TerserJSPlugin({
                 cache: true,

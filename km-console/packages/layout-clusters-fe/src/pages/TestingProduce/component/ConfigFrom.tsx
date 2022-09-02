@@ -1,5 +1,5 @@
 import { Button, Col, Form, Row } from 'knowdesign';
-import { FormItemType, handleFormItem, IFormItem, renderFormItem } from 'knowdesign/lib/extend/x-form';
+import { FormItemType, handleFormItem, IFormItem, renderFormItem } from 'knowdesign/es/extend/x-form';
 import * as React from 'react';
 import './style/form.less';
 import EditTable from './EditTable';

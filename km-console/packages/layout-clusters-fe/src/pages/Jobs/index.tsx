@@ -4,7 +4,7 @@ import { ProTable, Drawer, Utils, AppContainer, Form, Select, Input, Button, mes
 import API from '../../api';
 import { getJobsListColumns, defaultPagination, runningStatus, jobType } from './config';
 import JobsCheck from '@src/components/CardBar/JobsCheck';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import { ViewJobsProgress } from './ViewJobsProgress';
 import './index.less';
 import ReplicaChange from '@src/components/TopicJob/ReplicaChange';
