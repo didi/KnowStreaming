@@ -224,7 +224,7 @@ public abstract class AbstractClusterPhyDispatchTask extends AbstractDispatchTas
 // 继承AbstractClusterPhyDispatchTask类 
 public class KMJobTask extends AbstractClusterPhyDispatchTask {  
 
-				@Autowired   
+	@Autowired   
         private JobService jobService;  
         
         // 执行该Kafka集群的Job模块的任务  
