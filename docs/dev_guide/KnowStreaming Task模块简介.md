@@ -199,16 +199,21 @@ public abstract class AbstractDispatchTask<E extends Comparable & EntifyIdInterf
 
 ```java
 // 继承AbstractDispatchTask的抽象类，对Kafka集群进行负载均衡执行 
-public abstract class AbstractClusterPhyDispatchTask extends AbstractDispatchTask<ClusterPhy> {   
+public abstract class AbstractClusterPhyDispatchTask extends AbstractDispatchTask<ClusterPhy> {
+
   // 执行被分配的任务，具体由子类实现    
-  protected abstract TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception;     	// 返回所有的Kafka集群   
+  protected abstract TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception;     	
+  
+  // 返回所有的Kafka集群   
   @Override    
   public List<ClusterPhy> listAllTasks() {        
     return clusterPhyService.listAllClusters();   
   }     
+  
   // 执行被分配给该KS主机的Kafka集群任务   
   @Override   
   public TaskResult processTask(List<ClusterPhy> subTaskList, long triggerTimeUnitMs) {        // ...     }
+  
 }   
 ```
 
