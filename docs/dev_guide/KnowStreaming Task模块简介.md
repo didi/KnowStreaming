@@ -41,11 +41,15 @@ Task模块基于Logi-Job的广播模式与抢占模式，分别实现了任务�
       consensual = ConsensualEnum.RANDOM, // 这里一定要设置为RANDOM        
       timeout = 6 * 60) 
 public class TestJob implements Job {   
+
   @Override    
-  public TaskResult execute(JobContext jobContext) throws Exception {        
+  public TaskResult execute(JobContext jobContext) throws Exception {  
+  
     System.out.println("测试定时任务运行中");        
     return new TaskResult();    
+    
   } 
+  
 }
 ```
 
@@ -69,12 +73,16 @@ public class TestJob implements Job {
       autoRegister = true,
       consensual = ConsensualEnum.BROADCAST, // 这里一定要设置为BROADCAST
       timeout = 6 * 60) 
-public class TestJob implements Job {    
+public class TestJob implements Job {   
+
   @Override    
-  public TaskResult execute(JobContext jobContext) throws Exception {        
+  public TaskResult execute(JobContext jobContext) throws Exception { 
+  
     System.out.println("测试定时任务运行中");        
     return new TaskResult();    
+    
     } 
+    
 }
 ```
 
