@@ -19,9 +19,9 @@ export const jobType = [
   },
   process.env.BUSSINESS_VERSION
     ? {
-      label: '集群均衡',
-      value: 2,
-    }
+        label: '集群均衡',
+        value: 2,
+      }
     : undefined,
 ].filter((t) => t);
 
@@ -75,6 +75,7 @@ export const getJobsListColumns = (arg?: any) => {
       title: '任务ID',
       dataIndex: 'id',
       key: 'id',
+      width: 70,
     },
     {
       title: '任务类型',

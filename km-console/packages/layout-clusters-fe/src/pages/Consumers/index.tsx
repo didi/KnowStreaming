@@ -7,7 +7,7 @@ import { getOperatingStateListParams } from './interface';
 import { useParams } from 'react-router-dom';
 import ConsumerGroupDetail from './ConsumerGroupDetail';
 import ConsumerGroupHealthCheck from '@src/components/CardBar/ConsumerGroupHealthCheck';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import { hashDataParse } from '@src/constants/common';
 
 const { Option } = Select;

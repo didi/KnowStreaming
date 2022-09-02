@@ -1,6 +1,6 @@
 import { DownOutlined } from '@ant-design/icons';
 import { Popover } from 'knowdesign';
-import { TooltipPlacement } from 'knowdesign/lib/basic/tooltip';
+import { TooltipPlacement } from 'knowdesign/es/basic/tooltip';
 import React, { useState, useRef, useEffect } from 'react';
 import './index.less';
 
@@ -90,8 +90,9 @@ export default (props: PropsType) => {
         return (
           <div
             key={i}
-            className={`container-item ${curState.calculated ? (curState.isHideExpandNode ? 'show' : i >= curState.endI ? 'hide' : 'show') : ''
-              }`}
+            className={`container-item ${
+              curState.calculated ? (curState.isHideExpandNode ? 'show' : i >= curState.endI ? 'hide' : 'show') : ''
+            }`}
           >
             {item}
           </div>

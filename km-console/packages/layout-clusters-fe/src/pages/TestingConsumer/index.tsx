@@ -1,5 +1,5 @@
 import { AppContainer } from 'knowdesign';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import TaskTabs from './component/TaskTabs';

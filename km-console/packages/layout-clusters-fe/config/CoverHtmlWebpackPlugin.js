@@ -86,12 +86,12 @@ class CoverHtmlWebpackPlugin {
 
         assetJson.reverse().forEach((item) => {
           if (/\.js$/.test(item)) {
-            // if (item.includes('vendor~')) {
-            //   vendors += `<script async src="${item}"></script>`;
-            // } else {
-            // TODO: entry 只有一个
-            portalMap['@portal/layout'] = item;
-            // }
+            if (item.includes('vendor~')) {
+              vendors += `<script async src="${item}"></script>`;
+            } else {
+              // TODO: entry 只有一个
+              portalMap['@portal/layout'] = item;
+            }
           } else if (/\.css$/.test(item)) {
             links += `<link href="${item}" rel="stylesheet">`;
           }

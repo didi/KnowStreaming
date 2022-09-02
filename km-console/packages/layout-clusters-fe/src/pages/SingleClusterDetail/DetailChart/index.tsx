@@ -201,6 +201,8 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           if (Number.isNaN(parsedValue)) {
             parsedValue = values.MessagesIn;
           } else {
+            // 为避免出现过小的数字影响图表展示效果，图表值统一只保留到小数点后三位
+            parsedValue = parseFloat(parsedValue.toFixed(3));
             if (maxValue < parsedValue) maxValue = parsedValue;
           }
           const valuesWithUnit = Object.entries(values).map(([key, value]) => {
@@ -287,8 +289,8 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           checkboxProps: (record: MetricInfo) => {
             return record.name === DEFAULT_METRIC
               ? {
-                disabled: true,
-              }
+                  disabled: true,
+                }
               : {};
           },
           submitCallback: indicatorChangeCallback,

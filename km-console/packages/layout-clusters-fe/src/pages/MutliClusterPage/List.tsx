@@ -147,9 +147,9 @@ const ListScroll = (props: { loadMoreData: any; list: any; pagination: any; getP
                     }}
                   >
                     {[
-                      ['BytesIn', loadReBalanceEnable && loadReBalanceNwIn],
-                      ['BytesOut', loadReBalanceEnable && loadReBalanceNwOut],
-                      ['Disk', loadReBalanceEnable && loadReBalanceDisk],
+                      ['BytesIn', loadReBalanceNwIn === 1],
+                      ['BytesOut', loadReBalanceNwOut === 1],
+                      ['Disk', loadReBalanceDisk === 1],
                     ].map(([name, isBalanced]) => {
                       return isBalanced ? (
                         <div className="balance-box balanced">{name} 已均衡</div>
