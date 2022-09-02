@@ -68,7 +68,7 @@ public class TestJob implements Job {
 // 2、在类上添加@Task注解，并且配置好信息，指定为广播抢占模式； 
 // 效果：KS集群中，每5秒，每台KS主机都会输出 "测试定时任务运行中"； 
 @Task(name = "TestJob",        
-			description = "测试定时任务",
+      description = "测试定时任务",
       cron = "*/5 * * * * ?",
       autoRegister = true,
       consensual = ConsensualEnum.BROADCAST, // 这里一定要设置为BROADCAST
@@ -103,7 +103,7 @@ public class TestJob implements Job {
 // 2、在类上添加@Task注解，并且配置好信息，指定为广播模式； 
 // 效果：在本样例中，每隔1分钟ks会将所有的kafka集群列表在ks集群主机内均衡拆分，每台主机会将分发到自身的Kafka集群依次执行processSubTask方法,实现KS集群的任务协同处理。 
 @Task(name = "kmJobTask",
-			description = "km job 模块调度执行任务",
+      description = "km job 模块调度执行任务",
       cron = "0 0/1 * * * ? *",
       autoRegister = true,
       consensual = ConsensualEnum.BROADCAST,
@@ -230,7 +230,7 @@ public abstract class AbstractClusterPhyDispatchTask extends AbstractDispatchTas
 ```java
 // 加上@Task注解，并配置任务执行信息 
 @Task(name = "kmJobTask",   
-			description = "km job 模块调度执行任务", 
+      description = "km job 模块调度执行任务", 
       cron = "0 0/1 * * * ? *",   
       autoRegister = true,    
       consensual = ConsensualEnum.BROADCAST,  
