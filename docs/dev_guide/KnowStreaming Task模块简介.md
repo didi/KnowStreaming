@@ -178,7 +178,8 @@ public abstract class AbstractDispatchTask<E extends Comparable & EntifyIdInterf
   public TaskResult execute(JobContext jobContext) {        
     try {            
       
-      long triggerTimeUnitMs = System.currentTimeMillis();            
+      long triggerTimeUnitMs = System.currentTimeMillis();  
+      
       // 获取所有的任务            
       List<E> allTaskList = this.listAllTasks();
       
