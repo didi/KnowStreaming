@@ -150,7 +150,7 @@ public @interface Task {
 
 这里以KMJobTask为例，简单介绍KM中的定时任务实现逻辑。
 
-​        ![img](https://cooper.didichuxing.com/cooper_gateway/cn/shimo-images/fXd8Bfj4tPEcdOcT/image.png)      
+​        ![img](assets/KMTask/class.jpg)   
 
 + Job：使用logi组件实现定时任务，必须实现该接口。
 + Comparable & EntufyIdInterface：比较接口，实现任务的排序逻辑。
