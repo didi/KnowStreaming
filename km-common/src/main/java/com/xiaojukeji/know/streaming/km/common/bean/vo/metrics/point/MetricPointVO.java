@@ -29,6 +29,10 @@ public class MetricPointVO implements Comparable<MetricPointVO> {
     @Override
     public int compareTo(MetricPointVO o) {
         if(null == o){return 0;}
+        if(null == this.getTimeStamp()
+                || null == o.getTimeStamp()){
+            return 0;
+        }
 
         return this.getTimeStamp().intValue() - o.getTimeStamp().intValue();
     }

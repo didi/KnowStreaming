@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.VALUE;
-import static com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum.REPLICATION_INFO;
+import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
 
 /**
  * @author didi
@@ -24,8 +24,10 @@ public class ReplicationMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName = REPLICATION_INFO.getIndex();
-        BaseMetricESDAO.register(REPLICATION_INFO, this);
+        super.indexName     = REPLICATION_INDEX;
+        super.indexTemplate = REPLICATION_TEMPLATE;
+        checkCurrentDayIndexExist();
+        BaseMetricESDAO.register(indexName, this);
     }
 
     /**

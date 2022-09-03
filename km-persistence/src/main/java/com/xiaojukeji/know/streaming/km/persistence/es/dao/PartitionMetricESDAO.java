@@ -8,7 +8,7 @@ import javax.annotation.PostConstruct;
 
 import java.util.List;
 
-import static com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum.PARTITION_INFO;
+import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
 
 /**
  * @author didi
@@ -18,8 +18,10 @@ public class PartitionMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName = PARTITION_INFO.getIndex();
-        BaseMetricESDAO.register(PARTITION_INFO, this);
+        super.indexName     = PARTITION_INDEX;
+        super.indexTemplate = PARTITION_TEMPLATE;
+        checkCurrentDayIndexExist();
+        BaseMetricESDAO.register(indexName, this);
     }
 
     public PartitionMetricPO getPartitionLatestMetrics(Long clusterPhyId, String topic,
