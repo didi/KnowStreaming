@@ -42,4 +42,9 @@ public class BrokerPO extends BasePO {
      * Broker状态
      */
     private Integer status;
+
+    /**
+     * 监听信息
+     */
+    private String endpointMap;
 }
