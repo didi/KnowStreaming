@@ -23,15 +23,17 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum.CLUSTER_INFO;
+import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
 
 @Component
 public class ClusterMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName = CLUSTER_INFO.getIndex();
-        BaseMetricESDAO.register(CLUSTER_INFO, this);
+        super.indexName     = CLUSTER_INDEX;
+        super.indexTemplate = CLUSTER_TEMPLATE;
+        checkCurrentDayIndexExist();
+        BaseMetricESDAO.register(indexName, this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("ClusterMetricESDAO", 4,8, 500);
@@ -207,7 +209,7 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
                 }
             } );
 
-            metricMap.put(metric, metricPoints);
+            metricMap.put(metric, optimizeMetricPoints(metricPoints));
         }
 
         return metricMap;

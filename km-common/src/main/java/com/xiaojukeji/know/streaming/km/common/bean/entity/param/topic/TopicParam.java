@@ -15,4 +15,12 @@ public class TopicParam extends ClusterPhyParam {
         super(clusterPhyId);
         this.topicName = topicName;
     }
+
+    @Override
+    public String toString() {
+        return "TopicParam{" +
+                "clusterPhyId=" + clusterPhyId +
+                ", topicName='" + topicName + '\'' +
+                '}';
+    }
 }

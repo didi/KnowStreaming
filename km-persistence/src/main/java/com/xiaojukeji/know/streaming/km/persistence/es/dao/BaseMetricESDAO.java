@@ -8,11 +8,12 @@ import com.google.common.collect.Maps;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.*;
 import com.xiaojukeji.know.streaming.km.common.bean.po.BaseESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.BaseMetricESPO;
-import com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.utils.IndexNameUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.BaseESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
 import lombok.NoArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -25,7 +26,8 @@ public class BaseMetricESDAO extends BaseESDAO {
     /**
      * 操作的索引名称
      */
-    protected String                indexName;
+    protected String            indexName;
+    protected String            indexTemplate;
 
     protected static final Long     ONE_MIN =  60 * 1000L;
     protected static final Long     FIVE_MIN = 5  * ONE_MIN;
@@ -35,10 +37,24 @@ public class BaseMetricESDAO extends BaseESDAO {
     /**
      * 不同维度 kafka 监控数据
      */
-    private static Map<KafkaMetricIndexEnum, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps
+    private static Map<String, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps
             .newConcurrentMap();
 
-    public static BaseMetricESDAO getByStatsType(KafkaMetricIndexEnum statsType) {
+    /**
+     * 检查 es 索引是否存在，不存在则创建索引
+     */
+    @Scheduled(cron = "0 3/5 * * * ?")
+    public void checkCurrentDayIndexExist(){
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        if(esOpClient.indexExist(realIndex)){return;}
+
+        if(esOpClient.createIndexTemplateIfNotExist(indexName, indexTemplate)){
+            esOpClient.createIndex(realIndex);
+        }
+    }
+
+    public static BaseMetricESDAO getByStatsType(String statsType) {
         return ariusStatsEsDaoMap.get(statsType);
     }
 
@@ -48,7 +64,7 @@ public class BaseMetricESDAO extends BaseESDAO {
      * @param statsType
      * @param baseAriusStatsEsDao
      */
-    public static void register(KafkaMetricIndexEnum statsType, BaseMetricESDAO baseAriusStatsEsDao) {
+    public static void register(String statsType, BaseMetricESDAO baseAriusStatsEsDao) {
         ariusStatsEsDaoMap.put(statsType, baseAriusStatsEsDao);
     }
 
@@ -358,7 +374,50 @@ public class BaseMetricESDAO extends BaseESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_LATEST_METRIC_TIME, startTime, endTime, appendQueryDsl);
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
-        return esOpClient.performRequest(realIndexName, dsl, s -> s.getHits().getHits().isEmpty()
-                ? System.currentTimeMillis() : ((Map<String, Long>)s.getHits().getHits().get(0).getSource()).get(TIME_STAMP), 3);
+        return esOpClient.performRequest(
+                realIndexName,
+                dsl,
+                s -> s == null || s.getHits().getHits().isEmpty() ? System.currentTimeMillis() : ((Map<String, Long>)s.getHits().getHits().get(0).getSource()).get(TIME_STAMP),
+                3
+        );
+    }
+
+    /**
+     * 对 metricPointVOS 进行缺点优化
+     */
+    protected List<MetricPointVO> optimizeMetricPoints(List<MetricPointVO> metricPointVOS){
+        if(CollectionUtils.isEmpty(metricPointVOS)){return metricPointVOS;}
+
+        int size = metricPointVOS.size();
+        if(size < 2){return metricPointVOS;}
+
+        Collections.sort(metricPointVOS);
+
+        List<MetricPointVO> rets = new ArrayList<>();
+        for(int first = 0, second = first + 1; second < size; first++, second++){
+            MetricPointVO firstPoint  = metricPointVOS.get(first);
+            MetricPointVO secondPoint = metricPointVOS.get(second);
+
+            if(null != firstPoint && null != secondPoint){
+                rets.add(firstPoint);
+
+                //说明有空点，那就增加一个点
+                if(secondPoint.getTimeStamp() - firstPoint.getTimeStamp() > ONE_MIN){
+                    MetricPointVO addPoint = new MetricPointVO();
+                    addPoint.setName(firstPoint.getName());
+                    addPoint.setAggType(firstPoint.getAggType());
+                    addPoint.setValue(firstPoint.getValue());
+                    addPoint.setTimeStamp(firstPoint.getTimeStamp() + ONE_MIN);
+
+                    rets.add(addPoint);
+                }
+
+                if(second == size - 1){
+                    rets.add(secondPoint);
+                }
+            }
+        }
+
+        return rets;
     }
 }

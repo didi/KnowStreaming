@@ -20,8 +20,8 @@ public class ClusterMetricESDAOTest extends KnowStreamApplicationTest {
 
     @Test
     public void listClusterMetricsByClusterIdsTest(){
-        List<String>   metrics      = Arrays.asList("BytesIn_min_1", "BytesOut_min_1");
-        List<Long>     clusterIds   = Arrays.asList(123L);
+        List<String>   metrics      = Arrays.asList("MessagesIn");
+        List<Long>     clusterIds   = Arrays.asList(293L);
         Long endTime   = System.currentTimeMillis();
         Long startTime = endTime - 4 * 60 * 60 * 1000;
 

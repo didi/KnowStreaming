@@ -13,6 +13,7 @@ CREATE TABLE `ks_km_broker` (
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '状态: 1存活，0未存活',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `endpoint_map` varchar(1024)  NOT NULL DEFAULT '' COMMENT '监听信息',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_cluster_phy_id_broker_id` (`cluster_phy_id`,`broker_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Broker信息表';
