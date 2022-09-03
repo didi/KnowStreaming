@@ -102,7 +102,10 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
         AdminClient adminClient = kafkaAdminClient.getClient(clusterPhyId);
 
         try {
-            DescribeConsumerGroupsResult describeConsumerGroupsResult = adminClient.describeConsumerGroups(Arrays.asList(groupName), new DescribeConsumerGroupsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).includeAuthorizedOperations(true));
+            DescribeConsumerGroupsResult describeConsumerGroupsResult = adminClient.describeConsumerGroups(
+                    Arrays.asList(groupName),
+                    new DescribeConsumerGroupsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).includeAuthorizedOperations(false)
+            );
 
             return describeConsumerGroupsResult.all().get().get(groupName);
         } catch(Exception e){
