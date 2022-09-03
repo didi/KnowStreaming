@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BrokerDAO extends BaseMapper<BrokerPO> {
-    int replace(BrokerPO brokerPO);
 }

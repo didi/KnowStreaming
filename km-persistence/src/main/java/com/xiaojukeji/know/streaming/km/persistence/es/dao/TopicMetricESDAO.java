@@ -22,15 +22,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum.TOPIC_INFO;
+import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
 
 @Component
 public class TopicMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName = TOPIC_INFO.getIndex();
-        BaseMetricESDAO.register(TOPIC_INFO, this);
+        super.indexName     = TOPIC_INDEX;
+        super.indexTemplate = TOPIC_TEMPLATE;
+        checkCurrentDayIndexExist();
+        BaseMetricESDAO.register(indexName, this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("TopicMetricESDAO", 4,8, 500);
@@ -352,7 +354,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
                 }
             } );
 
-            metricMap.put(metric, metricPoints);
+            metricMap.put(metric, optimizeMetricPoints(metricPoints));
         }
 
         return metricMap;

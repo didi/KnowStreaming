@@ -165,8 +165,8 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
                     clusterPhy.getId(),
                     brokerId,
                     broker.getStartTimestamp(),
-                    broker.getHost(),
-                    broker.getJmxPort() != null? broker.getJmxPort(): jmxConfig.getJmxPort(),
+                    jmxConfig != null ? broker.getJmxHost(jmxConfig.getUseWhichEndpoint()) : broker.getHost(),
+                    broker.getJmxPort() != null ? broker.getJmxPort() : jmxConfig.getJmxPort(),
                     jmxConfig
             );
 
@@ -191,6 +191,6 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
         lambdaQueryWrapper.eq(BrokerPO::getStatus, Constant.ALIVE);
 
         BrokerPO brokerPO = brokerDAO.selectOne(lambdaQueryWrapper);
-        return ConvertUtil.obj2Obj(brokerPO, Broker.class);
+        return Broker.buildFrom(brokerPO);
     }
 }

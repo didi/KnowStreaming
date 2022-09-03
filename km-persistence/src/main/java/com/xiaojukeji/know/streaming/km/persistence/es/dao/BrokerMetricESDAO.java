@@ -18,14 +18,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum.BROKER_INFO;
+import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
 
 @Component
 public class BrokerMetricESDAO extends BaseMetricESDAO {
     @PostConstruct
     public void init() {
-        super.indexName = BROKER_INFO.getIndex();
-        BaseMetricESDAO.register(BROKER_INFO, this);
+        super.indexName     = BROKER_INDEX;
+        super.indexTemplate = BROKER_TEMPLATE;
+        checkCurrentDayIndexExist();
+        BaseMetricESDAO.register(indexName, this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("BrokerMetricESDAO", 4,8, 500);
@@ -258,7 +260,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
                 }
             } );
 
-            metricMap.put(metric, metricPoints);
+            metricMap.put(metric, optimizeMetricPoints(metricPoints));
         }
 
         return metricMap;

@@ -109,3 +109,21 @@ SECURITY.TRICK_USERS
 设置完成上面两步之后，就可以直接调用需要登录的接口了。
 
 但是还有一点需要注意，绕过的用户仅能调用他有权限的接口，比如一个普通用户，那么他就只能调用普通的接口，不能去调用运维人员的接口。
+
+##  8.8、Specified key was too long; max key length is 767 bytes 
+
+**原因：**不同版本的InoDB引擎，参数‘innodb_large_prefix’默认值不同，即在5.6默认值为OFF，5.7默认值为ON。
+
+对于引擎为InnoDB，innodb_large_prefix=OFF，且行格式为Antelope即支持REDUNDANT或COMPACT时，索引键前缀长度最大为 767 字节。innodb_large_prefix=ON，且行格式为Barracuda即支持DYNAMIC或COMPRESSED时，索引键前缀长度最大为3072字节。
+
+**解决方案：**
+
+- 减少varchar字符大小低于767/4=191。
+- 将字符集改为latin1（一个字符=一个字节）。
+- 开启‘innodb_large_prefix’，修改默认行格式‘innodb_file_format’为Barracuda，并设置row_format=dynamic。
+
+## 8.9、出现ESIndexNotFoundEXception报错
+
+**原因 ：**没有创建ES索引模版
+
+**解决方案：**执行init_es_template.sh脚本，创建ES索引模版即可。 

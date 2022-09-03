@@ -27,6 +27,9 @@ public class JmxConfig implements Serializable {
 
     @ApiModelProperty(value="SSL情况下的token", example = "KsKmCCY19")
     private String token;
+
+    @ApiModelProperty(value="使用哪个endpoint网络", example = "EXTERNAL")
+    private String useWhichEndpoint;
 }
 
 

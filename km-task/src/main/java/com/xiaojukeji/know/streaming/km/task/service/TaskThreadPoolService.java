@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 /**
  * 为了尽量避免大任务的执行，由LogIJob的线程执行，
  * 因此，在Task模块，需要有自己的线程池来执行相关任务，
- * 而 FutureUtilsService 的职责就是负责任务的执行。
+ * 而 TaskThreadPoolService 的职责就是负责任务的执行。
  */
 @Service
 @NoArgsConstructor

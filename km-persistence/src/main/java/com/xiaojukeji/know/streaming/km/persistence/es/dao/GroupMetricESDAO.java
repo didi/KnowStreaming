@@ -23,16 +23,17 @@ import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.Constant.ZERO;
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.KEY;
-import static com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum.GROUP_INFO;
+import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
 
 @Component
 public class GroupMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName = GROUP_INFO.getIndex();
-        BaseMetricESDAO.register(GROUP_INFO, this);
+        super.indexName     = GROUP_INDEX;
+        super.indexTemplate = GROUP_TEMPLATE;
+        checkCurrentDayIndexExist();
+        BaseMetricESDAO.register(indexName, this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("GroupMetricESDAO", 4,8, 500);
@@ -206,7 +207,7 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
                 }
             } );
 
-            metricMap.put(metric, metricPoints);
+            metricMap.put(metric, optimizeMetricPoints(metricPoints));
         }
 
         return metricMap;

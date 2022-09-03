@@ -207,7 +207,7 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
                 .forEach(elem -> topicPartitionOffsets.put(new TopicPartition(topicName, elem.getPartitionId()), offsetSpec));
 
         try {
-            return (Result<Map<TopicPartition, Long>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicPartitionOffsets, timestamp));
+            return (Result<Map<TopicPartition, Long>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, topicPartitionOffsets, timestamp));
         } catch (VCHandlerNotExistException e) {
             return Result.buildFailure(VC_HANDLE_NOT_EXIST);
         }
@@ -226,7 +226,7 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
                 .forEach(elem -> topicPartitionOffsets.put(new TopicPartition(topicName, elem.getPartitionId()), offsetSpec));
 
         try {
-            return (Result<Map<TopicPartition, Long>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicPartitionOffsets, timestamp));
+            return (Result<Map<TopicPartition, Long>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, topicPartitionOffsets, timestamp));
         } catch (VCHandlerNotExistException e) {
             return Result.buildFailure(VC_HANDLE_NOT_EXIST);
         }
@@ -300,7 +300,10 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
         } catch (NotExistException nee) {
             return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(offsetParam.getClusterPhyId()));
         } catch (Exception e) {
-            log.error("method=getPartitionOffsetFromKafkaAdminClient||clusterPhyId={}||errMsg=exception!", offsetParam.getClusterPhyId(), e);
+            log.error(
+                    "class=PartitionServiceImpl||method=getPartitionOffsetFromKafkaAdminClient||clusterPhyId={}||topicName={}||errMsg=exception!",
+                    offsetParam.getClusterPhyId(), offsetParam.getTopicName(), e
+            );
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
@@ -355,7 +358,10 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
         } catch (NotExistException nee) {
             return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(offsetParam.getClusterPhyId()));
         } catch (Exception e) {
-            log.error("method=getPartitionOffsetFromKafkaConsumerClient||clusterPhyId={}||errMsg=exception!", offsetParam.getClusterPhyId(), e);
+            log.error(
+                    "class=PartitionServiceImpl||method=getPartitionOffsetFromKafkaConsumerClient||clusterPhyId={}||topicName={}||errMsg=exception!",
+                    offsetParam.getClusterPhyId(), offsetParam.getTopicName(), e
+            );
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         } finally {
