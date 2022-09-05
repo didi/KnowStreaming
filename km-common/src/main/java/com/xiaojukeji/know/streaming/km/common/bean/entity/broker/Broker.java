@@ -111,7 +111,7 @@ public class Broker implements Serializable {
             return host;
         }
         IpPortData ip = endpointMap.get(endPoint);
-        return ip == null ? ip.getIp() : host;
+        return ip != null ? ip.getIp() : host;
     }
 
     public boolean alive() {
