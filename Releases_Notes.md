@@ -1,6 +1,42 @@
 
+## v3.0.0-beta.1
 
-## v3.0.0-beta
+**文档**
+- 新增Task模块说明文档
+- FAQ补充 `Specified key was too long; max key length is 767 bytes ` 错误说明
+- FAQ补充 `出现ESIndexNotFoundException报错` 错误说明
+
+
+**Bug修复**
+- 修复 Consumer 点击 Stop 未停止检索的问题
+- 修复创建/编辑角色权限报错问题
+- 修复多集群管理/单集群详情均衡卡片状态错误问题
+- 修复版本列表未排序问题
+- 修复Raft集群Controller信息不断记录问题
+- 修复部分版本消费组描述信息获取失败问题
+- 修复分区Offset获取失败的日志中，缺少Topic名称信息问题
+- 修复GitHub图地址错误，及图裂问题
+- 修复Broker默认使用的地址和注释不一致问题
+- 修复 Consumer 列表分页不生效问题
+- 修复操作记录表operation_methods字段缺少默认值问题
+- 修复集群均衡表中move_broker_list字段无效的问题
+- 修复KafkaUser、KafkaACL信息获取时，日志一直重复提示不支持问题
+- 修复指标缺失时，曲线出现掉底的问题
+
+
+**体验优化**
+- 优化前端构建时间和打包体积，增加依赖打包的分包策略
+- 优化产品样式和文案展示
+- 优化ES客户端数为可配置
+- 优化日志中大量出现的MySQL Key冲突日志
+
+
+**能力提升**
+- 增加周期任务，用于主动创建缺少的ES模版及索引的能力，减少额外的脚本操作
+- 增加JMX连接的Broker地址可选择的能力
+
+
+## v3.0.0-beta.0
 
 **1、多集群管理**
 

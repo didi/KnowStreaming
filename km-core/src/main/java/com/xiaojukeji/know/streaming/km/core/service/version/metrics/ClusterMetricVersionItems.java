@@ -64,11 +64,13 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
     public static final String CLUSTER_METRIC_BYTES_OUT                             = "BytesOut";
     public static final String CLUSTER_METRIC_BYTES_OUT_5_MIN                       = "BytesOut_min_5";
     public static final String CLUSTER_METRIC_BYTES_OUT_15_MIN                      = "BytesOut_min_15";
+
     public static final String CLUSTER_METRIC_GROUP                                 = "Groups";
     public static final String CLUSTER_METRIC_GROUP_ACTIVES                         = "GroupActives";
     public static final String CLUSTER_METRIC_GROUP_EMPTYS                          = "GroupEmptys";
     public static final String CLUSTER_METRIC_GROUP_REBALANCES                      = "GroupRebalances";
     public static final String CLUSTER_METRIC_GROUP_DEADS                           = "GroupDeads";
+
     public static final String CLUSTER_METRIC_ALIVE                                 = "Alive";
 
     public static final String CLUSTER_METRIC_ACL_ENABLE                            = "AclEnable";

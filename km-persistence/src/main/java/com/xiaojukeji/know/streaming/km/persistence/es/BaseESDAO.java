@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * 直接操作es集群的dao
  */
-public class BaseESDAO {
+public abstract class BaseESDAO {
     protected static final ILog      LOGGER = LogFactory.getLog("ES_LOGGER");
 
     /**

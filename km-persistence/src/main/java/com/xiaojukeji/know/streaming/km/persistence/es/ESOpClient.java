@@ -11,7 +11,11 @@ import com.didiglobal.logi.elasticsearch.client.request.batch.ESBatchRequest;
 import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
 import com.didiglobal.logi.elasticsearch.client.response.batch.ESBatchResponse;
 import com.didiglobal.logi.elasticsearch.client.response.batch.IndexResultItemNode;
+import com.didiglobal.logi.elasticsearch.client.response.indices.gettemplate.ESIndicesGetTemplateResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.putindex.ESIndicesPutIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.puttemplate.ESIndicesPutTemplateResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -340,7 +344,94 @@ public class ESOpClient {
         return false;
     }
 
+    /**
+     * 根据表达式判断索引是否已存在
+     */
+    public boolean indexExist(String indexName) {
+        ESClient esClient = null;
+        try {
+            esClient = this.getESClientFromPool();
+            if (esClient == null) {
+                return false;
+            }
+
+            // 检查索引是否存在
+            return esClient.admin().indices().prepareExists(indexName).execute().actionGet(30, TimeUnit.SECONDS).isExists();
+        } catch (Exception e){
+            LOGGER.warn("class=ESOpClient||method=indexExist||indexName={}||msg=exception!", indexName, e);
+        } finally {
+            if (esClient != null) {
+                returnESClientToPool(esClient);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 创建索引
+     */
+    public boolean createIndex(String indexName) {
+        if (indexExist(indexName)) {
+            return true;
+        }
+
+        ESClient client = getESClientFromPool();
+        if (client != null) {
+            try {
+                ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).execute()
+                        .actionGet(30, TimeUnit.SECONDS);
+                return response.getAcknowledged();
+            } catch (Exception e){
+                LOGGER.warn( "msg=create index fail||indexName={}", indexName, e);
+            } finally {
+                returnESClientToPool(client);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 创建索引模板
+     */
+    public boolean createIndexTemplateIfNotExist(String indexTemplateName, String config) {
+        ESClient esClient = null;
+
+        try {
+            esClient = this.getESClientFromPool();
+
+            // 获取es中原来index template的配置
+            ESIndicesGetTemplateResponse getTemplateResponse =
+                    esClient.admin().indices().prepareGetTemplate( indexTemplateName ).execute().actionGet( 30, TimeUnit.SECONDS );
+
+            TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+
+            if (null != templateConfig) {
+                return true;
+            }
+
+            // 创建新的模板
+            ESIndicesPutTemplateResponse response = esClient.admin().indices().preparePutTemplate( indexTemplateName )
+                    .setTemplateConfig( config ).execute().actionGet( 30, TimeUnit.SECONDS );
+
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.warn(
+                    "class=ESOpClient||method=createIndexTemplateIfNotExist||indexTemplateName={}||config={}||msg=exception!",
+                    indexTemplateName, config, e
+            );
+        } finally {
+            if (esClient != null) {
+                this.returnESClientToPool(esClient);
+            }
+        }
+
+        return false;
+    }
+
     /**************************************************** private method ****************************************************/
+
     /**
      * 执行查询
      * @param request
