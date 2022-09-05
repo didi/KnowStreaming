@@ -93,7 +93,10 @@ const MultiClusterPage = () => {
     setVersionLoading(true);
     Utils.request(API.getClustersVersion)
       .then((versions: string[]) => {
-        setExistKafkaVersion(versions || []);
+        if (!Array.isArray(versions)) {
+          versions = [];
+        }
+        setExistKafkaVersion(versions.sort().reverse() || []);
         setVersionLoading(false);
         setCheckedKafkaVersions(versions || []);
       })
@@ -299,7 +302,9 @@ const MultiClusterPage = () => {
             <div className="test-modal-23"></div>
           </div>
         </div>
-        <Spin spinning={clusterLoading}>{renderList}</Spin>
+        <div className="multi-cluster-page-dashboard">
+          <Spin spinning={clusterLoading}>{renderList}</Spin>
+        </div>
       </div>
     );
   };

@@ -1,5 +1,3 @@
-/* eslint-disable react/display-name */
-
 import { Button, Divider, Drawer, Form, Input, InputNumber, message, Radio, Select, Spin, Space, Utils } from 'knowdesign';
 import * as React from 'react';
 import { useIntl } from 'react-intl';
@@ -16,10 +14,9 @@ const clientPropertiesPlaceholder = `用于创建Kafka客户端进行信息获�
 {
   "security.protocol": "SASL_PLAINTEXT",
   "sasl.mechanism": "SCRAM-SHA-256",
-  "sasl.jaas.config": 
-  "org.apache.kafka.common.security.scram.
-  ScramLoginModule required username="xxxxxx" 
-  password="xxxxxx";"
+  "sasl.jaas.config": "org.apache.kafka.common.security.
+scram.ScramLoginModule required username=\\"xxxxxx\\" pass
+word=\\"xxxxxx\\";"
 }
 `;
 

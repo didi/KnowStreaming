@@ -77,9 +77,14 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
     }
 
     @Override
-    public Result<ReplicationMetrics> collectReplicaMetricsFromKafkaWithCache(Long clusterPhyId, String topic,
-                                                                              Integer brokerId, Integer partitionId, String metric){
-        Float keyValue = CollectedMetricsLocalCache.getReplicaMetrics(clusterPhyId, brokerId, topic, partitionId, metric);
+    public Result<ReplicationMetrics> collectReplicaMetricsFromKafkaWithCache(Long clusterPhyId,
+                                                                              String topic,
+                                                                              Integer brokerId,
+                                                                              Integer partitionId,
+                                                                              String metric) {
+        String replicaMetricsKey = CollectedMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topic, partitionId, metric);
+
+        Float keyValue = CollectedMetricsLocalCache.getReplicaMetrics(replicaMetricsKey);
         if(null != keyValue){
             ReplicationMetrics replicationMetrics = new ReplicationMetrics(clusterPhyId, topic, partitionId, brokerId);
             replicationMetrics.putMetric(metric, keyValue);
@@ -92,11 +97,7 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
         // 更新cache
         ret.getData().getMetrics().entrySet().stream().forEach(
                 metricNameAndValueEntry -> CollectedMetricsLocalCache.putReplicaMetrics(
-                        clusterPhyId,
-                        brokerId,
-                        topic,
-                        partitionId,
-                        metricNameAndValueEntry.getKey(),
+                        replicaMetricsKey,
                         metricNameAndValueEntry.getValue()
                 )
         );

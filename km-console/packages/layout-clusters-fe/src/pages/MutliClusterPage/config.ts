@@ -1,4 +1,4 @@
-import { FormItemType, IFormItem } from 'knowdesign/lib/extend/x-form';
+import { FormItemType, IFormItem } from 'knowdesign/es/extend/x-form';
 
 export const bootstrapServersErrCodes = [10, 11, 12];
 export const zkErrCodes = [20, 21];

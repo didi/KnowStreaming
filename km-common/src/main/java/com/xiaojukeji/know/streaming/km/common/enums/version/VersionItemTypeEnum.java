@@ -31,8 +31,10 @@ public enum VersionItemTypeEnum {
 
 
     SERVICE_OP_PARTITION(320, "service_partition_operation"),
+    SERVICE_OP_PARTITION_LEADER(321, "service_partition-leader_operation"),
 
     SERVICE_OP_REASSIGNMENT(330, "service_reassign_operation"),
+
 
     /**
      * 前端操作

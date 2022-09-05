@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Select, Form, Utils, AppContainer, Input, Button, ProTable, Badge, Tag, SearchInput } from 'knowdesign';
 import BalanceDrawer from './BalanceDrawer';
 import HistoryDrawer from './HistoryDrawer';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import { getSizeAndUnit } from '../../constants/common';
 import api from '../../api';
 import './index.less';

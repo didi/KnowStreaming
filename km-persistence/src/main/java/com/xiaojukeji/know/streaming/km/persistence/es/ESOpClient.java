@@ -11,12 +11,15 @@ import com.didiglobal.logi.elasticsearch.client.request.batch.ESBatchRequest;
 import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
 import com.didiglobal.logi.elasticsearch.client.response.batch.ESBatchResponse;
 import com.didiglobal.logi.elasticsearch.client.response.batch.IndexResultItemNode;
+import com.didiglobal.logi.elasticsearch.client.response.indices.gettemplate.ESIndicesGetTemplateResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.putindex.ESIndicesPutIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.puttemplate.ESIndicesPutTemplateResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.xiaojukeji.know.streaming.km.common.bean.po.BaseESPO;
-import com.xiaojukeji.know.streaming.km.common.constant.ESConstant;
 import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +40,6 @@ import java.util.function.Function;
 
 @Component
 public class ESOpClient {
-
     private static final ILog LOGGER   = LogFactory.getLog("ES_LOGGER");
 
     /**
@@ -45,6 +47,7 @@ public class ESOpClient {
      */
     @Value("${es.client.address}")
     private String                          esAddress;
+
     /**
      * es 访问密码
      */
@@ -54,22 +57,32 @@ public class ESOpClient {
     /**
      * 客户端个数
      */
-    private static final int ES_CLIENT_COUNT    = 30;
+    @Value("${es.client.client-cnt:10}")
+    private Integer                         clientCnt;
 
-    private static final int MAX_RETRY_CNT      = 5;
+    /**
+     * 最大重试次数
+     */
+    @Value("${es.client.max-retry-cnt:5}")
+    private Integer                         maxRetryCnt;
 
-    private static final int ES_IO_THREAD_COUNT = 4;
-
+    /**
+     * IO线程数
+     */
+    @Value("${es.client.io-thread-cnt:2}")
+    private Integer                         ioThreadCnt;
 
     /**
      *  更新es数据的客户端连接队列
      */
-    private LinkedBlockingQueue<ESClient>   esClientPool  = new LinkedBlockingQueue<>( ES_CLIENT_COUNT );
+    private LinkedBlockingQueue<ESClient>   esClientPool;
 
     @PostConstruct
     public void init(){
-        for (int i = 0; i < ES_CLIENT_COUNT; ++i) {
-            ESClient esClient = buildEsClient(esAddress, esPass, "", "");
+        esClientPool = new LinkedBlockingQueue<>( clientCnt );
+
+        for (int i = 0; i < clientCnt; ++i) {
+            ESClient esClient = this.buildEsClient(esAddress, esPass, "", "");
             if (esClient != null) {
                 this.esClientPool.add(esClient);
                 LOGGER.info("class=ESOpClient||method=init||msg=add new es client {}", esAddress);
@@ -245,7 +258,7 @@ public class ESOpClient {
             esIndexRequest.source(source);
             esIndexRequest.id(id);
 
-            for (int i = 0; i < MAX_RETRY_CNT; ++i) {
+            for (int i = 0; i < this.maxRetryCnt; ++i) {
                 response = esClient.index(esIndexRequest).actionGet(10, TimeUnit.SECONDS);
                 if (response == null) {
                     continue;
@@ -307,7 +320,7 @@ public class ESOpClient {
                 batchRequest.addNode(BatchType.INDEX, indexName, null, po.getKey(), JSON.toJSONString(po));
             }
 
-            for (int i = 0; i < MAX_RETRY_CNT; ++i) {
+            for (int i = 0; i < this.maxRetryCnt; ++i) {
                 response = esClient.batch(batchRequest).actionGet(2, TimeUnit.MINUTES);
                 if (response == null) {continue;}
 
@@ -331,7 +344,94 @@ public class ESOpClient {
         return false;
     }
 
+    /**
+     * 根据表达式判断索引是否已存在
+     */
+    public boolean indexExist(String indexName) {
+        ESClient esClient = null;
+        try {
+            esClient = this.getESClientFromPool();
+            if (esClient == null) {
+                return false;
+            }
+
+            // 检查索引是否存在
+            return esClient.admin().indices().prepareExists(indexName).execute().actionGet(30, TimeUnit.SECONDS).isExists();
+        } catch (Exception e){
+            LOGGER.warn("class=ESOpClient||method=indexExist||indexName={}||msg=exception!", indexName, e);
+        } finally {
+            if (esClient != null) {
+                returnESClientToPool(esClient);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 创建索引
+     */
+    public boolean createIndex(String indexName) {
+        if (indexExist(indexName)) {
+            return true;
+        }
+
+        ESClient client = getESClientFromPool();
+        if (client != null) {
+            try {
+                ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).execute()
+                        .actionGet(30, TimeUnit.SECONDS);
+                return response.getAcknowledged();
+            } catch (Exception e){
+                LOGGER.warn( "msg=create index fail||indexName={}", indexName, e);
+            } finally {
+                returnESClientToPool(client);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 创建索引模板
+     */
+    public boolean createIndexTemplateIfNotExist(String indexTemplateName, String config) {
+        ESClient esClient = null;
+
+        try {
+            esClient = this.getESClientFromPool();
+
+            // 获取es中原来index template的配置
+            ESIndicesGetTemplateResponse getTemplateResponse =
+                    esClient.admin().indices().prepareGetTemplate( indexTemplateName ).execute().actionGet( 30, TimeUnit.SECONDS );
+
+            TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+
+            if (null != templateConfig) {
+                return true;
+            }
+
+            // 创建新的模板
+            ESIndicesPutTemplateResponse response = esClient.admin().indices().preparePutTemplate( indexTemplateName )
+                    .setTemplateConfig( config ).execute().actionGet( 30, TimeUnit.SECONDS );
+
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.warn(
+                    "class=ESOpClient||method=createIndexTemplateIfNotExist||indexTemplateName={}||config={}||msg=exception!",
+                    indexTemplateName, config, e
+            );
+        } finally {
+            if (esClient != null) {
+                this.returnESClientToPool(esClient);
+            }
+        }
+
+        return false;
+    }
+
     /**************************************************** private method ****************************************************/
+
     /**
      * 执行查询
      * @param request
@@ -428,8 +528,8 @@ public class ESOpClient {
             if(StringUtils.isNotBlank(password)){
                 esClient.setPassword(password);
             }
-            if(ES_IO_THREAD_COUNT > 0) {
-                esClient.setIoThreadCount( ES_IO_THREAD_COUNT );
+            if(this.ioThreadCnt > 0) {
+                esClient.setIoThreadCount( this.ioThreadCnt );
             }
 
             // 配置http超时
@@ -439,11 +539,13 @@ public class ESOpClient {
 
             return esClient;
         } catch (Exception e) {
-            esClient.close();
+            try {
+                esClient.close();
+            } catch (Exception innerE) {
+                // ignore
+            }
 
-            LOGGER.error("class=ESESOpClient||method=buildEsClient||errMsg={}||address={}", e.getMessage(), address,
-                    e);
-
+            LOGGER.error("class=ESESOpClient||method=buildEsClient||errMsg={}||address={}", e.getMessage(), address, e);
             return null;
         }
     }

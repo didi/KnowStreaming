@@ -14,12 +14,7 @@
     <result column="jmx_port"             property="jmxPort" />
     <result column="start_timestamp"      property="startTimestamp" />
     <result column="status"               property="status" />
+    <result column="endpoint_map"         property="endpointMap"/>
   </resultMap>
 
-    <insert id="replace" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerPO">
-      REPLACE ks_km_broker
-        (cluster_phy_id, broker_id, host, port, jmx_port, start_timestamp, status, update_time)
-    VALUES
-        (#{clusterPhyId}, #{brokerId}, #{host}, #{port}, #{jmxPort}, #{startTimestamp}, #{status}, #{updateTime})
-    </insert>
 </mapper>

@@ -13,6 +13,7 @@ CREATE TABLE `ks_km_broker` (
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '状态: 1存活，0未存活',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `endpoint_map` varchar(1024)  NOT NULL DEFAULT '' COMMENT '监听信息',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_cluster_phy_id_broker_id` (`cluster_phy_id`,`broker_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Broker信息表';
@@ -51,7 +52,6 @@ CREATE TABLE `ks_km_cluster_balance_job` (
   `total_reassign_size` double NOT NULL DEFAULT '0' COMMENT '总迁移大小',
   `total_reassign_replica_num` int(16) NOT NULL DEFAULT '0' COMMENT '总迁移副本数',
   `move_in_topic_list` varchar(4096) NOT NULL DEFAULT '' COMMENT '移入topic',
-  `move_broker_list` varchar(1024) NOT NULL DEFAULT '' COMMENT '移除节点',
   `broker_balance_detail` text COMMENT '节点均衡详情',
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '任务状态 1：进行中，2：准备，3，成功，4：失败，5：取消',
   `creator` varchar(64) NOT NULL DEFAULT '' COMMENT '操作人',

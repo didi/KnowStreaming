@@ -73,8 +73,13 @@ client-pool:
     borrow-timeout-unit-ms: 5000  # 租借超时时间，单位秒
 
 
-# es客户端服务地址
-es.client.address: 127.0.0.1:8060
+# ES客户端配置
+es:
+  client:
+    address: 127.0.0.1:8091,127.0.0.1:8061,127.0.0.1:8061
+    client-cnt: 10
+    io-thread-cnt: 2
+    max-retry-cnt: 5
 
 # 普罗米修斯指标导出相关配置
 management:

@@ -3,7 +3,7 @@ import * as React from 'react';
 import ProduceClientTest from './Produce';
 import './index.less';
 import TaskTabs from '../TestingConsumer/component/TaskTabs';
-import DBreadcrumb from 'knowdesign/lib/extend/d-breadcrumb';
+import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import { useParams } from 'react-router-dom';
 
 const Produce = () => {

@@ -130,6 +130,9 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
             // 如果当前Broker还存活，则更新DB信息
             BrokerPO newBrokerPO = ConvertUtil.obj2Obj(presentAliveBroker, BrokerPO.class);
+            if (presentAliveBroker.getEndpointMap() != null) {
+                newBrokerPO.setEndpointMap(ConvertUtil.obj2Json(presentAliveBroker.getEndpointMap()));
+            }
             newBrokerPO.setId(inDBBrokerPO.getId());
             newBrokerPO.setStatus(Constant.ALIVE);
             newBrokerPO.setCreateTime(inDBBrokerPO.getCreateTime());
@@ -203,7 +206,23 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
         lambdaQueryWrapper.eq(BrokerPO::getClusterPhyId, clusterPhyId);
         lambdaQueryWrapper.eq(BrokerPO::getBrokerId, brokerId);
 
-        return ConvertUtil.obj2Obj(brokerDAO.selectOne(lambdaQueryWrapper), Broker.class);
+        return Broker.buildFrom(brokerDAO.selectOne(lambdaQueryWrapper));
+    }
+
+    @Override
+    public Broker getBrokerFromCacheFirst(Long clusterPhyId, Integer brokerId) {
+        List<Broker> brokerList = this.listAliveBrokersFromCacheFirst(clusterPhyId);
+        if (brokerList == null) {
+            return null;
+        }
+
+        for (Broker broker: brokerList) {
+            if (brokerId.equals(broker.getBrokerId())) {
+                return broker;
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -256,9 +275,8 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
     /**************************************************** private method ****************************************************/
 
     private List<Broker> listAllBrokersAndUpdateCache(Long clusterPhyId) {
-        List<Broker> allBrokerList = ConvertUtil.list2List(this.getAllBrokerPOsFromDB(clusterPhyId), Broker.class);
+        List<Broker> allBrokerList = getAllBrokerPOsFromDB(clusterPhyId).stream().map(elem -> Broker.buildFrom(elem)).collect(Collectors.toList());
         brokersCache.put(clusterPhyId, allBrokerList);
-
         return allBrokerList;
     }
 

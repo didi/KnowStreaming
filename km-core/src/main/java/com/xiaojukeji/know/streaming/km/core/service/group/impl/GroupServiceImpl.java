@@ -102,7 +102,10 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
         AdminClient adminClient = kafkaAdminClient.getClient(clusterPhyId);
 
         try {
-            DescribeConsumerGroupsResult describeConsumerGroupsResult = adminClient.describeConsumerGroups(Arrays.asList(groupName), new DescribeConsumerGroupsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).includeAuthorizedOperations(true));
+            DescribeConsumerGroupsResult describeConsumerGroupsResult = adminClient.describeConsumerGroups(
+                    Arrays.asList(groupName),
+                    new DescribeConsumerGroupsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).includeAuthorizedOperations(false)
+            );
 
             return describeConsumerGroupsResult.all().get().get(groupName);
         } catch(Exception e){
@@ -151,12 +154,12 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
         lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
         lambdaQueryWrapper.eq(!ValidateUtils.isBlank(topicName), GroupMemberPO::getTopicName, topicName);
         lambdaQueryWrapper.eq(!ValidateUtils.isBlank(groupName), GroupMemberPO::getGroupName, groupName);
-        lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
         lambdaQueryWrapper.like(!ValidateUtils.isBlank(searchTopicKeyword), GroupMemberPO::getTopicName, searchTopicKeyword);
         lambdaQueryWrapper.like(!ValidateUtils.isBlank(searchGroupKeyword), GroupMemberPO::getGroupName, searchGroupKeyword);
+        lambdaQueryWrapper.orderByDesc(GroupMemberPO::getClusterPhyId, GroupMemberPO::getTopicName);
 
         IPage<GroupMemberPO> iPage = new Page<>();
-        iPage.setPages(dto.getPageNo());
+        iPage.setCurrent(dto.getPageNo());
         iPage.setSize(dto.getPageSize());
 
         iPage = groupMemberDAO.selectPage(iPage, lambdaQueryWrapper);

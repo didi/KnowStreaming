@@ -165,9 +165,9 @@ const LeftSider = () => {
           <div className="tag default">{clusterInfo?.kafkaVersion ?? '-'}</div>
           {clusterMetrics?.LoadReBalanceEnable !== undefined &&
             [
-              ['BytesIn', clusterMetrics?.LoadReBalanceEnable && clusterMetrics?.LoadReBalanceNwIn],
-              ['BytesOut', clusterMetrics?.LoadReBalanceEnable && clusterMetrics?.LoadReBalanceNwOut],
-              ['Disk', clusterMetrics?.LoadReBalanceEnable && clusterMetrics?.LoadReBalanceDisk],
+              ['BytesIn', clusterMetrics?.LoadReBalanceNwIn === 1],
+              ['BytesOut', clusterMetrics?.LoadReBalanceNwOut === 1],
+              ['Disk', clusterMetrics?.LoadReBalanceDisk === 1],
             ].map(([name, isBalanced]) => {
               return isBalanced ? (
                 <div className="tag balanced">{name} 已均衡</div>

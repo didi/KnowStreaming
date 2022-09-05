@@ -1,5 +1,5 @@
 import { Button, XForm } from 'knowdesign';
-import { IFormItem } from 'knowdesign/lib/extend/x-form';
+import { IFormItem } from 'knowdesign/es/extend/x-form';
 import * as React from 'react';
 import './style/form.less';
 import { useIntl } from 'react-intl';

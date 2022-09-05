@@ -5,7 +5,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.*;
 import com.xiaojukeji.know.streaming.km.common.bean.po.BaseESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.*;
-import com.xiaojukeji.know.streaming.km.common.enums.metric.KafkaMetricIndexEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.NamedThreadFactory;
@@ -20,6 +19,8 @@ import java.util.Objects;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
 
 @Component
 public class MetricESSender implements ApplicationListener<BaseMetricEvent> {
@@ -41,37 +42,37 @@ public class MetricESSender implements ApplicationListener<BaseMetricEvent> {
     public void onApplicationEvent(BaseMetricEvent event) {
         if(event instanceof BrokerMetricEvent) {
             BrokerMetricEvent brokerMetricEvent = (BrokerMetricEvent)event;
-            send2es(KafkaMetricIndexEnum.BROKER_INFO,
+            send2es(BROKER_INDEX,
                     ConvertUtil.list2List(brokerMetricEvent.getBrokerMetrics(), BrokerMetricPO.class)
             );
 
         } else if(event instanceof ClusterMetricEvent) {
             ClusterMetricEvent clusterMetricEvent = (ClusterMetricEvent)event;
-            send2es(KafkaMetricIndexEnum.CLUSTER_INFO,
+            send2es(CLUSTER_INDEX,
                     ConvertUtil.list2List(clusterMetricEvent.getClusterMetrics(), ClusterMetricPO.class)
             );
 
         } else if(event instanceof TopicMetricEvent) {
             TopicMetricEvent topicMetricEvent = (TopicMetricEvent)event;
-            send2es(KafkaMetricIndexEnum.TOPIC_INFO,
+            send2es(TOPIC_INDEX,
                     ConvertUtil.list2List(topicMetricEvent.getTopicMetrics(), TopicMetricPO.class)
             );
 
         } else if(event instanceof PartitionMetricEvent) {
             PartitionMetricEvent partitionMetricEvent = (PartitionMetricEvent)event;
-            send2es(KafkaMetricIndexEnum.PARTITION_INFO,
+            send2es(PARTITION_INDEX,
                     ConvertUtil.list2List(partitionMetricEvent.getPartitionMetrics(), PartitionMetricPO.class)
             );
 
         } else if(event instanceof GroupMetricEvent) {
             GroupMetricEvent groupMetricEvent = (GroupMetricEvent)event;
-            send2es(KafkaMetricIndexEnum.GROUP_INFO,
+            send2es(GROUP_INDEX,
                     ConvertUtil.list2List(groupMetricEvent.getGroupMetrics(), GroupMetricPO.class)
             );
 
         } else if(event instanceof ReplicaMetricEvent) {
             ReplicaMetricEvent replicaMetricEvent = (ReplicaMetricEvent)event;
-            send2es(KafkaMetricIndexEnum.REPLICATION_INFO,
+            send2es(REPLICATION_INDEX,
                     ConvertUtil.list2List(replicaMetricEvent.getReplicationMetrics(), ReplicationMetricPO.class)
             );
         }
@@ -80,19 +81,19 @@ public class MetricESSender implements ApplicationListener<BaseMetricEvent> {
     /**
      * 根据不同监控维度来发送
      */
-    private boolean send2es(KafkaMetricIndexEnum stats, List<? extends BaseESPO> statsList){
+    private boolean send2es(String index, List<? extends BaseESPO> statsList){
         if (CollectionUtils.isEmpty(statsList)) {
             return true;
         }
 
         if (!EnvUtil.isOnline()) {
             LOGGER.info("class=MetricESSender||method=send2es||ariusStats={}||size={}",
-                    stats.getIndex(), statsList.size());
+                    index, statsList.size());
         }
 
-        BaseMetricESDAO baseMetricESDao = BaseMetricESDAO.getByStatsType(stats);
+        BaseMetricESDAO baseMetricESDao = BaseMetricESDAO.getByStatsType(index);
         if (Objects.isNull( baseMetricESDao )) {
-            LOGGER.error("class=MetricESSender||method=send2es||errMsg=fail to find {}", stats.getIndex());
+            LOGGER.error("class=MetricESSender||method=send2es||errMsg=fail to find {}", index);
             return false;
         }
 
