@@ -10,6 +10,7 @@ const defaultParams: any = {
   maxRecords: 100,
   pullTimeoutUnitMs: 5000,
   // filterPartitionId: 1,
+  filterOffsetReset: 'latest'
 };
 const defaultpaPagination = {
   current: 1,
@@ -28,6 +29,12 @@ const TopicMessages = (props: any) => {
   const [partitionIdList, setPartitionIdList] = useState([]);
   const [pagination, setPagination] = useState<any>(defaultpaPagination);
   const [form] = Form.useForm();
+
+  // 获取消息开始位置
+  const offsetResetList = [
+    { 'label': 'latest', value: 'latest' },
+    { 'label': 'earliest', value: 'earliest' }
+  ];
 
   // 默认排序
   const defaultSorter = {
@@ -88,7 +95,10 @@ const TopicMessages = (props: any) => {
   };
 
   const onTableChange = (pagination: any, filters: any, sorter: any) => {
+    defaultSorter.sortField = sorter.field || '';
+    defaultSorter.sortType = sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : '';
     setPagination(pagination);
+    genData();
     // const asc = sorter?.order && sorter?.order === 'ascend' ? true : false;
     // const sortColumn = sorter.field && toLine(sorter.field);
     // genData({ pageNo: pagination.current, pageSize: pagination.pageSize, filters, asc, sortColumn, queryTerm: searchResult, ...allParams });
@@ -119,6 +129,15 @@ const TopicMessages = (props: any) => {
         </div>
         <div className="messages-query">
           <Form form={form} layout="inline" onFinish={onFinish}>
+            <Form.Item name="filterOffsetReset">
+              <Select
+                  options={offsetResetList}
+                  size="small"
+                  style={{ width: '120px' }}
+                  className={'detail-table-select'}
+                  placeholder="请选择offset"
+              />
+            </Form.Item>
             <Form.Item name="filterPartitionId">
               <Select
                 options={partitionIdList}
@@ -158,7 +177,7 @@ const TopicMessages = (props: any) => {
         showQueryForm={false}
         tableProps={{
           showHeader: false,
-          rowKey: 'path',
+          rowKey: 'offset',
           loading: loading,
           columns: getTopicMessagesColmns(),
           dataSource: data,
@@ -169,6 +188,7 @@ const TopicMessages = (props: any) => {
             bordered: false,
             onChange: onTableChange,
             scroll: { x: 'max-content' },
+            sortDirections: ['descend', 'ascend', 'default']
           },
         }}
       />

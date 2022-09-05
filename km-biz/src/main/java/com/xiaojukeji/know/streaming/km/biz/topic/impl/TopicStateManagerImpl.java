@@ -36,6 +36,7 @@ import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -161,7 +162,11 @@ public class TopicStateManagerImpl implements TopicStateManager {
             maxMessage = Math.min(maxMessage, dto.getMaxRecords());
             kafkaConsumer.assign(partitionList);
             for (TopicPartition partition : partitionList) {
-                kafkaConsumer.seek(partition, Math.max(beginOffsetsMapResult.getData().get(partition), endOffsetsMapResult.getData().get(partition) - dto.getMaxRecords()));
+                if (Constant.EARLIEST.equals(dto.getFilterOffsetReset())) {
+                    kafkaConsumer.seek(partition, beginOffsetsMapResult.getData().get(partition));
+                } else {
+                    kafkaConsumer.seek(partition, Math.max(beginOffsetsMapResult.getData().get(partition), endOffsetsMapResult.getData().get(partition) - dto.getMaxRecords()));
+                }
             }
 
             // 这里需要减去 KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS 是因为poll一次需要耗时，如果这里不减去，则可能会导致poll之后，超过要求的时间
@@ -183,6 +188,15 @@ public class TopicStateManagerImpl implements TopicStateManager {
                             || voList.size() > dto.getMaxRecords()) {
                         break;
                     }
+            }
+
+            // 排序
+            if (ObjectUtils.isNotEmpty(voList)) {
+                if (Constant.ASC.equals(dto.getSortType())) {
+                    voList.sort((o1, o2) -> (int) (o1.getTimestampUnitMs() - o2.getTimestampUnitMs()));
+                } else if (Constant.DESC.equals(dto.getSortType())) {
+                    voList.sort((o1, o2) -> (int) (o2.getTimestampUnitMs() - o1.getTimestampUnitMs()));
+                }
             }
 
             return Result.buildSuc(voList.subList(0, Math.min(dto.getMaxRecords(), voList.size())));
