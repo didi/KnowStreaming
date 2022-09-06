@@ -1,5 +1,6 @@
 package com.xiaojukeji.know.streaming.km.account.common.bizenum;
 
+import com.didiglobal.logi.security.extend.LoginExtendBeanTool;
 import lombok.Getter;
 
 @Getter
@@ -10,9 +11,12 @@ public enum LoginServiceNameEnum {
 
     ;
 
-    public static final String DEFAULT_LOGIN_NAME = "loginService";
+    /**
+     * @see LoginExtendBeanTool.DEFAULT_BEAN_NAME
+     */
+    public static final String DEFAULT_LOGIN_NAME = "logiSecurityDefaultLoginExtendImpl";
 
-    public static final String LDAP_LOGIN_NAME = "ldapLoginService";
+    public static final String LDAP_LOGIN_NAME = "ksLdapLoginService";
 
     private final String name;
 

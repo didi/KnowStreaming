@@ -7,13 +7,6 @@ import org.springframework.stereotype.Service;
 @Data
 @Service
 public class KmAccountConfig {
-    /**
-     * LoginService的默认配置
-     */
-    @Value(value = "${account.login.service.name:loginService}")
-    private String loginServiceName;
-
-
     /**************************************************** Ldap 登录相关配置 ****************************************************/
 
     @Value(value = "${account.ldap.url:}")
