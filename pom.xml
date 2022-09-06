@@ -40,6 +40,9 @@
 
         <log4j2.version>2.16.0</log4j2.version>
         <logback.version>1.2.8</logback.version>
+
+        <!--LogICommon-->
+        <logi-security.version>2.10.13</logi-security.version>
     </properties>
 
     <modules>
@@ -232,7 +235,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-elasticsearch-client</artifactId>
-                <version>1.0.16</version>
+                <version>1.0.24</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>jna</artifactId>
@@ -266,7 +269,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-security-spring-boot-starter</artifactId>
-                <version>2.10.4</version>
+                <version>${logi-security.version}</version>
             </dependency>
             <!-- logi end -->
 
