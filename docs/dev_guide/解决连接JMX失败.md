@@ -1,19 +1,14 @@
 
-![Logo](https://user-images.githubusercontent.com/71620349/185368586-aed82d30-1534-453d-86ff-ecfa9d0f35bd.png)
 
+![Logo](https://user-images.githubusercontent.com/71620349/185368586-aed82d30-1534-453d-86ff-ecfa9d0f35bd.png)
 
 ## JMX-连接失败问题解决
 
-- [JMX-连接失败问题解决](#jmx-连接失败问题解决)
-  - [1、问题&说明](#1问题说明)
-  - [2、解决方法](#2解决方法)
-  - [3、解决方法 —— 认证的JMX](#3解决方法--认证的jmx)
-
-集群正常接入Logi-KafkaManager之后，即可以看到集群的Broker列表，此时如果查看不了Topic的实时流量，或者是Broker的实时流量信息时，那么大概率就是JMX连接的问题了。
+集群正常接入`KnowStreaming`之后，即可以看到集群的Broker列表，此时如果查看不了Topic的实时流量，或者是Broker的实时流量信息时，那么大概率就是`JMX`连接的问题了。
 
 下面我们按照步骤来一步一步的检查。
 
-### 1、问题&说明
+### 1、问题说明
 
 **类型一：JMX配置未开启**
 
@@ -41,6 +36,26 @@ java.rmi.ConnectException: Connection refused to host: 192.168.0.1; nested excep
 # 错误二：错误提示的是127.0.0.1这个IP，这个是机器的hostname配置的可能有问题。
 2021-01-27 10:06:20.730 ERROR 50901 --- [ics-Thread-1-62] c.x.k.m.c.utils.jmx.JmxConnectorWrap     : JMX connect exception, host:127.0.0.1 port:9999.
 java.rmi.ConnectException: Connection refused to host: 127.0.0.1;; nested exception is: 
+```
+
+**类型三：连接特定IP**
+
+Broker 配置了内外网，而JMX在配置时，可能配置了内网IP或者外网IP，此时 `KnowStreaming` 需要连接到特定网络的IP才可以进行访问。
+
+比如：
+
+Broker在ZK的存储结构如下所示，我们期望连接到 `endpoints` 中标记为 `INTERNAL` 的地址，但是 `KnowStreaming` 却连接了 `EXTERNAL` 的地址，此时可以看 `4、解决方法 —— JMX连接特定网络` 进行解决。
+
+```json
+ {
+  	"listener_security_protocol_map": {"EXTERNAL":"SASL_PLAINTEXT","INTERNAL":"SASL_PLAINTEXT"},
+  	"endpoints": ["EXTERNAL://192.168.0.1:7092","INTERNAL://192.168.0.2:7093"],
+  	"jmx_port": 8099,
+  	"host": "192.168.0.1",
+  	"timestamp": "1627289710439",
+  	"port": -1,
+    "version": 4
+  }
 ```
 
 ### 2、解决方法
@@ -76,26 +91,36 @@ fi
 
 如果您是直接看的这个部分，建议先看一下上一节：`2、解决方法`以确保`JMX`的配置没有问题了。
 
-在JMX的配置等都没有问题的情况下，如果是因为认证的原因导致连接不了的，此时可以使用下面介绍的方法进行解决。
+在`JMX`的配置等都没有问题的情况下，如果是因为认证的原因导致连接不了的，可以在集群接入界面配置你的`JMX`认证信息。
 
-**当前这块后端刚刚开发完成，可能还不够完善，有问题随时沟通。**
+<img src='http://img-ys011.didistatic.com/static/dc2img/do1_EUU352qMEX1Jdp7pxizp' width=350>
 
-`Logi-KafkaManager 2.2.0+`之后的版本后端已经支持`JMX`认证方式的连接，但是还没有界面，此时我们可以往`cluster`表的`jmx_properties`字段写入`JMX`的认证信息。
 
-这个数据是`json`格式的字符串，例子如下所示：
 
+### 4、解决方法 —— JMX连接特定网络
+
+可以手动往`ks_km_physical_cluster`表的`jmx_properties`字段增加一个`useWhichEndpoint`字段，从而控制 `KnowStreaming` 连接到特定的JMX IP及PORT。
+
+`jmx_properties`格式：
 ```json
 {
-    "maxConn": 10,           # KM对单台Broker的最大JMX连接数
-    "username": "xxxxx",     # 用户名
-    "password": "xxxx",      # 密码
+    "maxConn": 100,           # KM对单台Broker的最大JMX连接数
+    "username": "xxxxx",     # 用户名，可以不填写
+    "password": "xxxx",      # 密码，可以不填写
     "openSSL": true,         # 开启SSL, true表示开启ssl, false表示关闭
+    "useWhichEndpoint": "EXTERNAL"  #指定要连接的网络名称，填写EXTERNAL就是连接endpoints里面的EXTERNAL地址
 }
 ```
 
 &nbsp;
 
-SQL的例子：
+SQL例子：
 ```sql
-UPDATE cluster SET jmx_properties='{ "maxConn": 10,	"username": "xxxxx", "password": "xxxx", "openSSL": false }' where id={xxx};
+UPDATE ks_km_physical_cluster SET jmx_properties='{ "maxConn": 10, "username": "xxxxx", "password": "xxxx", "openSSL": false , "useWhichEndpoint": "xxx"}' where id={xxx};
 ```
+
+注意：
+
++ 目前此功能只支持采用 `ZK` 做分布式协调的kafka集群。
+
+  
