@@ -36,13 +36,13 @@ public class ReplicaMetricVersionItems extends BaseMetricVersionMetric {
 
         // LogEndOffset 指标
         itemList.add(buildAllVersionsItem()
-                .name(REPLICATION_METRIC_LOG_END_OFFSET).unit("条").desc("副本的LogEndOffset")
+                .name(REPLICATION_METRIC_LOG_END_OFFSET).unit("").desc("副本的LogEndOffset")
                 .extend(buildJMXMethodExtend(REPLICATION_METHOD_GET_METRIC_FROM_JMX )
                         .jmxObjectName( JMX_LOG_LOG_END_OFFSET ).jmxAttribute(VALUE)));
 
         // LogStartOffset 指标
         itemList.add(buildAllVersionsItem()
-                .name( REPLICATION_METRIC_LOG_START_OFFSET ).unit("条").desc("副本的LogStartOffset")
+                .name( REPLICATION_METRIC_LOG_START_OFFSET ).unit("").desc("副本的LogStartOffset")
                 .extend(buildJMXMethodExtend(REPLICATION_METHOD_GET_METRIC_FROM_JMX )
                         .jmxObjectName( JMX_LOG_LOG_START_OFFSET ).jmxAttribute(VALUE)));
 

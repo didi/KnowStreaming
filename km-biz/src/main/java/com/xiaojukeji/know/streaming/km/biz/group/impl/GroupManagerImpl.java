@@ -75,7 +75,7 @@ public class GroupManagerImpl implements GroupManager {
         }
 
         if (!paginationResult.hasData()) {
-            return PaginationResult.buildSuc(dto);
+            return PaginationResult.buildSuc(new ArrayList<>(), paginationResult);
         }
 
         // 获取指标
