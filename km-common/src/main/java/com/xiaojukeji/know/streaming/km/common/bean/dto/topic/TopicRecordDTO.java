@@ -35,10 +35,7 @@ public class TopicRecordDTO extends BaseDTO {
     @ApiModelProperty(value = "预览超时时间", example = "10000")
     private Long pullTimeoutUnitMs = 8000L;
 
-    @ApiModelProperty(value = "排序", example = "desc")
-    private String sortType;
-
-    @ApiModelProperty(value = "offset", example = "latest")
-    private String filterOffsetReset;
+    @ApiModelProperty(value = "offset", example = "")
+    private Integer filterOffsetReset = 0;
 
 }

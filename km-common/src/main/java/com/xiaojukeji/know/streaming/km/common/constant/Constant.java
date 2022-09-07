@@ -65,16 +65,4 @@ public class Constant {
 
     public static final Integer DEFAULT_RETRY_TIME = 3;
 
-    /**
-     * 排序
-     */
-    public static final String ASC = "asc";
-    public static final String DESC = "desc";
-
-    /**
-     * 消费策略
-     */
-    public static final String LATEST = "latest";
-    public static final String EARLIEST = "earliest";
-
 }

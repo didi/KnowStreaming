@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.biz.topic.impl;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.biz.topic.TopicStateManager;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.topic.TopicRecordDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
@@ -22,17 +23,18 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.partition.TopicPart
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
-import com.xiaojukeji.know.streaming.km.common.converter.PartitionConverter;
 import com.xiaojukeji.know.streaming.km.common.converter.TopicVOConverter;
+import com.xiaojukeji.know.streaming.km.common.enums.GroupOffsetResetEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
+import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
-import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
+import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems;
@@ -121,7 +123,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
     }
 
     @Override
-    public Result<List<TopicRecordVO>> getTopicMessages(Long clusterPhyId, String topicName, TopicRecordDTO dto) throws AdminOperateException {
+    public Result<List<TopicRecordVO>> getTopicMessages(Long clusterPhyId, String topicName, TopicRecordDTO dto, PaginationSortDTO sortDto) throws AdminOperateException {
         long startTime = System.currentTimeMillis();
 
         // 获取集群
@@ -162,7 +164,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
             maxMessage = Math.min(maxMessage, dto.getMaxRecords());
             kafkaConsumer.assign(partitionList);
             for (TopicPartition partition : partitionList) {
-                if (Constant.EARLIEST.equals(dto.getFilterOffsetReset())) {
+                if (GroupOffsetResetEnum.EARLIEST.getResetType() == dto.getFilterOffsetReset()) {
                     kafkaConsumer.seek(partition, beginOffsetsMapResult.getData().get(partition));
                 } else {
                     kafkaConsumer.seek(partition, Math.max(beginOffsetsMapResult.getData().get(partition), endOffsetsMapResult.getData().get(partition) - dto.getMaxRecords()));
@@ -192,11 +194,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
             // 排序
             if (ObjectUtils.isNotEmpty(voList)) {
-                if (Constant.ASC.equals(dto.getSortType())) {
-                    voList.sort((o1, o2) -> (int) (o1.getTimestampUnitMs() - o2.getTimestampUnitMs()));
-                } else if (Constant.DESC.equals(dto.getSortType())) {
-                    voList.sort((o1, o2) -> (int) (o2.getTimestampUnitMs() - o1.getTimestampUnitMs()));
-                }
+                PaginationUtil.pageBySort(voList, sortDto.getSortField(), sortDto.getSortField());
             }
 
             return Result.buildSuc(voList.subList(0, Math.min(dto.getMaxRecords(), voList.size())));

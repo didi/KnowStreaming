@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.rest.api.v3.topic;
 import com.xiaojukeji.know.streaming.km.biz.topic.TopicStateManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.topic.TopicRecordDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BaseMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
@@ -91,8 +92,9 @@ public class TopicStateController {
     @ResponseBody
     public Result<List<TopicRecordVO>> getTopicMessages(@PathVariable Long clusterPhyId,
                                                         @PathVariable String topicName,
-                                                        @Validated @RequestBody TopicRecordDTO dto) throws Exception {
-        return topicStateManager.getTopicMessages(clusterPhyId, topicName, dto);
+                                                        @Validated @RequestBody TopicRecordDTO dto,
+                                                        @Validated PaginationSortDTO sortDto) throws Exception {
+        return topicStateManager.getTopicMessages(clusterPhyId, topicName, dto, sortDto);
     }
 
     @ApiOperation(value = "Topic-ACL信息", notes = "")

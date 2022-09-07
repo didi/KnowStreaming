@@ -10,7 +10,7 @@ const defaultParams: any = {
   maxRecords: 100,
   pullTimeoutUnitMs: 5000,
   // filterPartitionId: 1,
-  filterOffsetReset: 'latest'
+  filterOffsetReset: 0
 };
 const defaultpaPagination = {
   current: 1,
@@ -32,8 +32,8 @@ const TopicMessages = (props: any) => {
 
   // 获取消息开始位置
   const offsetResetList = [
-    { 'label': 'latest', value: 'latest' },
-    { 'label': 'earliest', value: 'earliest' }
+    { 'label': 'latest', value: '0' },
+    { 'label': 'earliest', value: '1' }
   ];
 
   // 默认排序
