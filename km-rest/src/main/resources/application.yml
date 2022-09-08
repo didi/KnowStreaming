@@ -41,6 +41,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     app-name: know-streaming
     resource-extend-bean-name: myResourceExtendImpl
+    login-extend-bean-name: logiSecurityDefaultLoginExtendImpl
 
 logging:
   config: classpath:logback-spring.xml

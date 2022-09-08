@@ -7,7 +7,7 @@ import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.common.enums.ResultCode;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
-import com.didiglobal.logi.security.service.LoginService;
+import com.didiglobal.logi.security.extend.LoginExtend;
 import com.didiglobal.logi.security.service.UserService;
 import com.didiglobal.logi.security.util.AESUtils;
 import com.didiglobal.logi.security.util.CopyBeanUtil;
@@ -39,8 +39,8 @@ import static com.didiglobal.logi.security.util.HttpRequestUtil.COOKIE_OR_SESSIO
  * @author Hu.Yue
  * @date 2021/8/4
  */
-//@Service(LoginServiceNameEnum.LDAP_LOGIN_NAME)
-public class LdapLoginServiceImpl implements LoginService {
+@Service(LoginServiceNameEnum.LDAP_LOGIN_NAME)
+public class LdapLoginServiceImpl implements LoginExtend {
     private static final Logger LOGGER  = LoggerFactory.getLogger(LdapLoginServiceImpl.class);
 
     @Autowired
@@ -89,8 +89,17 @@ public class LdapLoginServiceImpl implements LoginService {
 
     @Override
     public Result<Boolean> logout(HttpServletRequest request, HttpServletResponse response){
+        // 清理session
         request.getSession().invalidate();
         response.setStatus(REDIRECT_CODE);
+
+        // 清理cookies
+        for (Cookie cookie: request.getCookies()) {
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+        }
+
         return Result.buildSucc(Boolean.TRUE);
     }
 

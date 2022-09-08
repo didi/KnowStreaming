@@ -4,10 +4,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.constant.Constants;
 import com.didiglobal.logi.security.service.LoginService;
-import com.xiaojukeji.know.streaming.km.account.KmAccountConfig;
-import com.xiaojukeji.know.streaming.km.account.common.bizenum.LoginServiceNameEnum;
 import com.xiaojukeji.know.streaming.km.account.login.trick.TrickJumpLoginService;
-import com.xiaojukeji.know.streaming.km.common.component.HandleFactory;
 import com.xiaojukeji.know.streaming.km.common.constant.ApiPrefix;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +33,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
     private static final String     OPEN_URL_PREFIX   = ApiPrefix.API_V3_OPEN_PREFIX;
 
     @Autowired
-    private HandleFactory handleFactory;
-
-    @Autowired
-    private KmAccountConfig kmAccountConfig;
+    private LoginService loginService;
 
     @Autowired
     private TrickJumpLoginService trickJumpLoginService;
@@ -77,20 +71,10 @@ public class PermissionInterceptor implements HandlerInterceptor {
         whiteMappingValues.add(LOGIN_URL);
         whiteMappingValues.add(OPEN_URL_PREFIX);
 
-        return this.getLoginService().interceptorCheck(request, response, classRequestMappingValue, whiteMappingValues);
+        return loginService.interceptorCheck(request, response, classRequestMappingValue, whiteMappingValues);
     }
 
     /**************************************************** private method ****************************************************/
-
-    private LoginService getLoginService() {
-        LoginService loginService = handleFactory.getByClassNamePer(kmAccountConfig.getLoginServiceName(), LoginService.class);
-        if (loginService == null) {
-            LOGGER.error("method=getLoginService||specifiedLoginServiceName={}||msg=specified login service not exist and use default", kmAccountConfig.getLoginServiceName());
-            return handleFactory.getByClassNamePer(LoginServiceNameEnum.DEFAULT_LOGIN_NAME, LoginService.class);
-        }
-
-        return loginService;
-    }
 
     /**
      * 通过反射获取带有@RequestMapping的Controller

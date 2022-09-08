@@ -37,12 +37,12 @@ public class PartitionMetricVersionItems extends BaseMetricVersionMetric {
 
         // LogEndOffset 指标
         itemList.add( buildAllVersionsItem()
-                .name(PARTITION_METRIC_LOG_END_OFFSET).unit("条").desc("Partition中Leader副本的LogEndOffset")
+                .name(PARTITION_METRIC_LOG_END_OFFSET).unit("").desc("Partition中Leader副本的LogEndOffset")
                 .extendMethod(PARTITION_METHOD_GET_OFFSET_RELEVANT_METRICS));
 
         // LogStartOffset 指标
         itemList.add( buildAllVersionsItem()
-                .name(PARTITION_METRIC_LOG_START_OFFSET).unit("条").desc("Partition中Leader副本的LogStartOffset")
+                .name(PARTITION_METRIC_LOG_START_OFFSET).unit("").desc("Partition中Leader副本的LogStartOffset")
                 .extendMethod(PARTITION_METHOD_GET_OFFSET_RELEVANT_METRICS));
 
         // Messages
