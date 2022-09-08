@@ -9,24 +9,23 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
 @Task(name = "SyncControllerTask",
-        description = "Controller信息同步到DB,",
+        description = "Controller信息同步到DB",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class SyncControllerTask extends AbstractClusterPhyDispatchTask {
+public class SyncControllerTask extends AbstractAsyncMetadataDispatchTask {
     private static final ILog log = LogFactory.getLog(SyncControllerTask.class);
 
     @Autowired
     private KafkaControllerService kafkaControllerService;
 
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
         Result<KafkaController> controllerResult = kafkaControllerService.getControllerFromKafka(clusterPhy);
         if (controllerResult.failed()) {
             return new TaskResult(TaskResult.FAIL_CODE, controllerResult.getMessage());

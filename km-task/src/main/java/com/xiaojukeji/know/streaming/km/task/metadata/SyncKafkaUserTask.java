@@ -9,26 +9,25 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkauser.KafkaUser;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.core.service.kafkauser.KafkaUserService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Task(name = "SyncKafkaUserTask",
-        description = "KafkaUser信息同步到DB,",
+        description = "KafkaUser信息同步到DB",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class SyncKafkaUserTask extends AbstractClusterPhyDispatchTask {
+public class SyncKafkaUserTask extends AbstractAsyncMetadataDispatchTask {
     private static final ILog log = LogFactory.getLog(SyncKafkaUserTask.class);
 
     @Autowired
     private KafkaUserService kafkaUserService;
 
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
         // 查询KafkaUser数据
         Result<List<KafkaUser>> kafkaUserResult = kafkaUserService.getKafkaUserFromKafka(clusterPhy.getId());
         if (kafkaUserResult.failed()) {
