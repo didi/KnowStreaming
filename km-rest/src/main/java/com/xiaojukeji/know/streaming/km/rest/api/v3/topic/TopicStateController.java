@@ -92,9 +92,8 @@ public class TopicStateController {
     @ResponseBody
     public Result<List<TopicRecordVO>> getTopicMessages(@PathVariable Long clusterPhyId,
                                                         @PathVariable String topicName,
-                                                        @Validated @RequestBody TopicRecordDTO dto,
-                                                        @Validated PaginationSortDTO sortDto) throws Exception {
-        return topicStateManager.getTopicMessages(clusterPhyId, topicName, dto, sortDto);
+                                                        @Validated @RequestBody TopicRecordDTO dto) throws Exception {
+        return topicStateManager.getTopicMessages(clusterPhyId, topicName, dto);
     }
 
     @ApiOperation(value = "Topic-ACL信息", notes = "")

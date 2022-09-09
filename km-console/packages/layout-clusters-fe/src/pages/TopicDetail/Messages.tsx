@@ -32,8 +32,8 @@ const TopicMessages = (props: any) => {
 
   // 获取消息开始位置
   const offsetResetList = [
-    { 'label': 'latest', value: '0' },
-    { 'label': 'earliest', value: '1' }
+    { 'label': 'latest', value: 0 },
+    { 'label': 'earliest', value: 1 }
   ];
 
   // 默认排序
@@ -41,6 +41,8 @@ const TopicMessages = (props: any) => {
     sortField: 'timestampUnitMs',
     sortType: 'desc',
   };
+
+  const [sorter, setSorter] = useState<any>(defaultSorter);
 
   // 请求接口获取数据
   const genData = async () => {
@@ -56,7 +58,7 @@ const TopicMessages = (props: any) => {
       });
       setPartitionIdList(newPartitionIdList || []);
     });
-    request(Api.getTopicMessagesList(hashData?.topicName, urlParams?.clusterId), { data: { ...params, ...defaultSorter }, method: 'POST' })
+    request(Api.getTopicMessagesList(hashData?.topicName, urlParams?.clusterId), { data: { ...params, ...sorter }, method: 'POST' })
       .then((res: any) => {
         // setPagination({
         //   current: res.pagination?.pageNo,
@@ -94,11 +96,16 @@ const TopicMessages = (props: any) => {
     history.push(`/cluster/${urlParams?.clusterId}/testing/consumer`);
   };
 
-  const onTableChange = (pagination: any, filters: any, sorter: any) => {
-    defaultSorter.sortField = sorter.field || '';
-    defaultSorter.sortType = sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : '';
+  const onTableChange = (pagination: any, filters: any, sorter: any, extra: any) => {
     setPagination(pagination);
-    genData();
+    // 只有排序事件时，触发重新请求后端数据
+    if(extra.action === 'sort') {
+      setSorter({
+        sortField: sorter.field || '',
+        sortType: sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : ''
+      });
+      genData();
+    }
     // const asc = sorter?.order && sorter?.order === 'ascend' ? true : false;
     // const sortColumn = sorter.field && toLine(sorter.field);
     // genData({ pageNo: pagination.current, pageSize: pagination.pageSize, filters, asc, sortColumn, queryTerm: searchResult, ...allParams });
@@ -106,7 +113,7 @@ const TopicMessages = (props: any) => {
 
   useEffect(() => {
     props.positionType === 'Messages' && genData();
-  }, [props, params]);
+  }, [props, params, sorter]);
 
   return (
     <>

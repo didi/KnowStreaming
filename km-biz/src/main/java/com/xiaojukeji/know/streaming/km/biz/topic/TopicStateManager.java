@@ -16,7 +16,7 @@ import java.util.List;
 public interface TopicStateManager {
     TopicBrokerAllVO getTopicBrokerAll(Long clusterPhyId, String topicName, String searchBrokerHost) throws NotExistException;
 
-    Result<List<TopicRecordVO>> getTopicMessages(Long clusterPhyId, String topicName, TopicRecordDTO dto, PaginationSortDTO sortDto) throws AdminOperateException;
+    Result<List<TopicRecordVO>> getTopicMessages(Long clusterPhyId, String topicName, TopicRecordDTO dto) throws AdminOperateException;
 
     Result<TopicStateVO> getTopicState(Long clusterPhyId, String topicName);
 
