@@ -24,6 +24,7 @@ import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.TopicVOConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.GroupOffsetResetEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -38,6 +39,7 @@ import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
@@ -209,6 +211,10 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
             // 排序
             if (ObjectUtils.isNotEmpty(voList)) {
+                // 默认按时间倒序排序
+                if (StringUtils.isBlank(dto.getSortType())) {
+                    dto.setSortType(SortTypeEnum.DESC.getSortType());
+                }
                 PaginationUtil.pageBySort(voList, dto.getSortField(), dto.getSortType());
             }
 
