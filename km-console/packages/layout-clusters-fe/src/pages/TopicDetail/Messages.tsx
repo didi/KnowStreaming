@@ -104,7 +104,6 @@ const TopicMessages = (props: any) => {
         sortField: sorter.field || '',
         sortType: sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : ''
       });
-      genData();
     }
     // const asc = sorter?.order && sorter?.order === 'ascend' ? true : false;
     // const sortColumn = sorter.field && toLine(sorter.field);
