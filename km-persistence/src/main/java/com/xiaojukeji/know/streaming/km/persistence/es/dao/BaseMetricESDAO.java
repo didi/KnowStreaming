@@ -333,7 +333,7 @@ public class BaseMetricESDAO extends BaseESDAO {
     }
 
     protected int handleESQueryResponseCount(ESQueryResponse response){
-        if(null == response || null == response.getHits()
+        if(null == response || null == response.getHits() || response.getHits().isEmpty()
                 || null ==response.getHits().getUnusedMap()){return -1;}
 
         return Integer.valueOf(response.getHits().getUnusedMap().getOrDefault(TOTAL, 0).toString());
