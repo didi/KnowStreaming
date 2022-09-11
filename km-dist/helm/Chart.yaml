@@ -1,16 +1,16 @@
 apiVersion: v2
 name: knowstreaming-manager
-description: A Helm chart for Kubernetes
+description: knowstreaming-manager Helm chart
 
 type: application
 
-version: 0.1.0
+version: 0.1.3
 
 maintainers:
 - email: didicloud@didiglobal.com
   name: didicloud
 
-appVersion: "1.0.0"
+appVersion: "3.0.0-beta.1"
 
 dependencies:
   - name: knowstreaming-web

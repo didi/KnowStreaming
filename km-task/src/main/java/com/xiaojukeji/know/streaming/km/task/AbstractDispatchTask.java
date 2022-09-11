@@ -130,4 +130,12 @@ public abstract class AbstractDispatchTask<E extends Comparable & EntifyIdInterf
         }
         return allTaskList.subList(idx * count, Math.min(idx * count + count, allTaskList.size()));
     }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public Long getTimeoutUnitSec() {
+        return timeoutUnitSec;
+    }
 }

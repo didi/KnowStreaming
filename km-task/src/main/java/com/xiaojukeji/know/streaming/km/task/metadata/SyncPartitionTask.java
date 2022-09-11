@@ -10,7 +10,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.po.partition.PartitionPO;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -19,19 +18,19 @@ import java.util.List;
 import java.util.Map;
 
 @Task(name = "SyncPartitionTask",
-        description = "Partition信息同步到DB,",
+        description = "Partition信息同步到DB",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class SyncPartitionTask extends AbstractClusterPhyDispatchTask {
+public class SyncPartitionTask extends AbstractAsyncMetadataDispatchTask {
     private static final ILog log = LogFactory.getLog(SyncPartitionTask.class);
 
     @Autowired
     private PartitionService partitionService;
 
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
         Result<Map<String, List<Partition>>> partitionsResult = partitionService.listPartitionsFromKafka(clusterPhy);
         if (partitionsResult.failed()) {
             return new TaskResult(TaskResult.FAIL_CODE, partitionsResult.getMessage());

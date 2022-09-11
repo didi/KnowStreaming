@@ -34,7 +34,7 @@ public class KmAccountConfig {
 
     /**************************************************** Ldap 用户注册到KM相关 ****************************************************/
 
-    @Value(value = "${account.ldap.auth-user-registration-role:0,1,2}")
+    @Value(value = "${account.ldap.auth-user-registration-role:1677}")
     private String authUserRegistrationRole; // ldap自动注册的默认角色。请注意：它通常来说都是低权限角色
 
     @Value(value = "${account.ldap.auth-user-registration:false}")

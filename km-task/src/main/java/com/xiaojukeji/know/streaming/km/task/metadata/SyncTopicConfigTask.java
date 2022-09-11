@@ -12,7 +12,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.TopicConfig;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -27,12 +26,12 @@ import java.util.Map;
  * @date 22/02/25
  */
 @Task(name = "SyncTopicConfigTask",
-        description = "Topic保存时间配置同步DB,",
+        description = "Topic保存时间配置同步DB",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class SyncTopicConfigTask extends AbstractClusterPhyDispatchTask {
+public class SyncTopicConfigTask extends AbstractAsyncMetadataDispatchTask {
     protected static final ILog log = LogFactory.getLog(SyncTopicConfigTask.class);
 
     @Autowired
@@ -42,7 +41,7 @@ public class SyncTopicConfigTask extends AbstractClusterPhyDispatchTask {
     private TopicConfigService kafkaConfigService;
 
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
         boolean success = true;
 
         List<TopicConfig> topicConfigList = new ArrayList<>();

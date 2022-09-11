@@ -7,8 +7,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.collector.metric.TopicMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
-import com.xiaojukeji.know.streaming.km.task.service.TaskThreadPoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -20,22 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class TopicMetricCollectorTask extends AbstractClusterPhyDispatchTask {
+public class TopicMetricCollectorTask extends AbstractAsyncMetricsDispatchTask {
     private static final ILog log = LogFactory.getLog(TopicMetricCollectorTask.class);
 
     @Autowired
     private TopicMetricCollector topicMetricCollector;
 
-    @Autowired
-    private TaskThreadPoolService taskThreadPoolService;
-
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
-        taskThreadPoolService.submitHeavenTask(
-                String.format("TaskName=%s clusterPhyId=%d", this.taskName, clusterPhy.getId()),
-                100000,
-                () -> topicMetricCollector.collectMetrics(clusterPhy)
-        );
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
+        topicMetricCollector.collectMetrics(clusterPhy);
 
         return TaskResult.SUCCESS;
     }

@@ -7,7 +7,9 @@ import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
+import com.xiaojukeji.know.streaming.km.common.bean.event.cluster.ClusterPhyAddedEvent;
 import com.xiaojukeji.know.streaming.km.common.bean.po.cluster.ClusterPhyPO;
+import com.xiaojukeji.know.streaming.km.common.component.SpringTool;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum;
@@ -106,6 +108,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
             log.info("method=addClusterPhy||clusterPhyId={}||operator={}||msg=add cluster finished", clusterPhyPO.getId(), operator);
 
+            // 发布添加集群事件
+            SpringTool.publish(new ClusterPhyAddedEvent(this, clusterPhyPO.getId()));
             return clusterPhyPO.getId();
         } catch (DuplicateKeyException dke) {
             log.warn("method=addClusterPhy||clusterPhyId={}||operator={}||msg=add cluster failed||errMsg=duplicate data", clusterPhyPO.getId(), operator);

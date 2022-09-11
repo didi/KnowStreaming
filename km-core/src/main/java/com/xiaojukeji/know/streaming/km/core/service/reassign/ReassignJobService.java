@@ -60,4 +60,7 @@ public interface ReassignJobService {
      * 依据任务状态或者其中一个任务ID
      */
     Long getOneRunningJobId(Long clusterPhyId);
+
+
+    Result<Void> preferredReplicaElection(Long jobId);
 }

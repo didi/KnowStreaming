@@ -16,23 +16,72 @@ import javax.annotation.PostConstruct;
 @NoArgsConstructor
 public class TaskThreadPoolService {
     /**
-     * 较重任务，比如指标采集
+     * metrics任务，比如指标采集
      */
-    private FutureNoWaitUtil<Object> heavenTaskThreadPool;
+    private FutureNoWaitUtil<Object> metricsTaskThreadPool;
+
+    @Value(value = "${thread-pool.task.metrics.thread-num:18}")
+    private Integer metricsTaskThreadNum;
+
+    @Value(value = "${thread-pool.task.metrics.queue-size:180}")
+    private Integer metricsTaskQueueSize;
 
 
-    @Value(value = "${thread-pool.task.heaven.thread-num:12}")
-    private Integer heavenTaskThreadNum;
+    /**
+     * metadata任务
+     */
+    private FutureNoWaitUtil<Object> metadataTaskThreadPool;
 
-    @Value(value = "${thread-pool.task.heaven.queue-size:1000}")
-    private Integer heavenTaskQueueSize;
+    @Value(value = "${thread-pool.task.metadata.thread-num:27}")
+    private Integer metadataTaskThreadNum;
+
+    @Value(value = "${thread-pool.task.metadata.queue-size:270}")
+    private Integer metadataTaskQueueSize;
+
+    /**
+     * common任务
+     */
+    private FutureNoWaitUtil<Object> commonTaskThreadPool;
+
+    @Value(value = "${thread-pool.task.common.thread-num:15}")
+    private Integer commonTaskThreadNum;
+
+    @Value(value = "${thread-pool.task.common.queue-size:150}")
+    private Integer commonTaskQueueSize;
 
     @PostConstruct
     private void init() {
-        heavenTaskThreadPool = FutureNoWaitUtil.init("heavenTaskThreadPool", heavenTaskThreadNum, heavenTaskThreadNum, heavenTaskQueueSize);
+        metricsTaskThreadPool = FutureNoWaitUtil.init(
+                "metricsTaskThreadPool",
+                metricsTaskThreadNum,
+                metricsTaskThreadNum,
+                metricsTaskQueueSize
+        );
+
+        metadataTaskThreadPool = FutureNoWaitUtil.init(
+                "metadataTaskThreadPool",
+                metadataTaskThreadNum,
+                metadataTaskThreadNum,
+                metadataTaskQueueSize
+        );
+
+        commonTaskThreadPool = FutureNoWaitUtil.init(
+                "commonTaskThreadPool",
+                commonTaskThreadNum,
+                commonTaskThreadNum,
+                commonTaskQueueSize
+        );
     }
 
-    public void submitHeavenTask(String taskName, Integer timeoutUnisMs, Runnable runnable) {
-        heavenTaskThreadPool.runnableTask(taskName, timeoutUnisMs, runnable);
+    public void submitMetricsTask(String taskName, Integer timeoutUnisMs, Runnable runnable) {
+        metricsTaskThreadPool.runnableTask(taskName, timeoutUnisMs, runnable);
+    }
+
+    public void submitMetadataTask(String taskName, Integer timeoutUnisMs, Runnable runnable) {
+        metadataTaskThreadPool.runnableTask(taskName, timeoutUnisMs, runnable);
+    }
+
+    public void submitCommonTask(String taskName, Integer timeoutUnisMs, Runnable runnable) {
+        commonTaskThreadPool.runnableTask(taskName, timeoutUnisMs, runnable);
     }
 }
