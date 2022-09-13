@@ -209,7 +209,7 @@ const JobsList: React.FC = (props: any) => {
           tableProps={{
             tableId: 'jobs_list',
             showHeader: false,
-            rowKey: 'jobs_list',
+            rowKey: 'id',
             loading: loading,
             columns: getJobsListColumns({ onDelete, setViewProgress }),
             dataSource: data,
