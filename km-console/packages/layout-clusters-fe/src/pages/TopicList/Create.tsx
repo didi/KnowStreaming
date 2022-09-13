@@ -1,19 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Divider,
-  Drawer,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  notification,
-  Select,
-  Utils,
-} from 'knowdesign';
+import { Alert, Button, Checkbox, Divider, Drawer, Form, Input, InputNumber, Modal, notification, Select, Utils } from 'knowdesign';
 import { PlusOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import Api from '@src/api/index';
 
@@ -120,9 +107,9 @@ export default (props: any) => {
             res =
               item.name === 'cleanup.policy'
                 ? item.defaultValue
-                  .replace(/\[|\]|\s+/g, '')
-                  .split(',')
-                  .filter((_) => _)
+                    .replace(/\[|\]|\s+/g, '')
+                    .split(',')
+                    .filter((_) => _)
                 : item.defaultValue;
           } catch (e) {
             res = [];
@@ -317,7 +304,7 @@ export default (props: any) => {
               }
             />
             <div className="create-topic-flex-layout">
-              <Form.Item name={['properties', 'max.message.bytes']} label="max message size">
+              <Form.Item name={['properties', 'max.message.bytes']} label="Max message size">
                 <InputNumber
                   min={0}
                   style={{ width: '100%' }}
@@ -329,7 +316,11 @@ export default (props: any) => {
               {defaultConfigs
                 .filter((dc) => !customDefaultFields.includes(dc.name))
                 .map((configItem, i) => (
-                  <Form.Item key={i} name={['properties', configItem.name]} label={configItem.name}>
+                  <Form.Item
+                    key={i}
+                    name={['properties', configItem.name]}
+                    label={configItem.name.slice(0, 1).toUpperCase() + configItem.name.slice(1)}
+                  >
                     <Input />
                   </Form.Item>
                 ))}

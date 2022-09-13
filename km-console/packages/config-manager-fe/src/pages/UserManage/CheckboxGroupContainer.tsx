@@ -73,12 +73,12 @@ const CheckboxGroupContainer = (props: CheckboxGroupType) => {
         </Checkbox>
       </div>
       <Checkbox.Group disabled={disabled} style={{ width: '100%' }} value={checkedList} onChange={onCheckedChange}>
-        <Row gutter={[34, 10]}>
+        <Row gutter={[10, 10]}>
           {options.map((option) => {
             return (
               <Col span={8} key={option.value}>
                 <Checkbox value={option.value} className="checkbox-content-ellipsis">
-                  {option.label}
+                  {option.label.replace('Cluster-Load', '')}
                 </Checkbox>
               </Col>
             );

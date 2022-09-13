@@ -17,7 +17,7 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
-    "build": "rm -rf ../../pub/layout & cross-env NODE_ENV=production webpack --max_old_space_size=8000"
+    "build": "cross-env NODE_ENV=production webpack --max_old_space_size=8000"
   },
   "browserslist": {
     "production": [

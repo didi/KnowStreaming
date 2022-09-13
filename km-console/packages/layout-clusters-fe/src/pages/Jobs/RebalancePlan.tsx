@@ -237,12 +237,12 @@ const RebalancePlan = (props: PropsType) => {
           <Descriptions.Item labelStyle={{ width: '100px' }} label="迁移副本数">
             {data?.replicas || '-'}
           </Descriptions.Item>
-          <Descriptions.Item label="均衡阈值">
+          <Descriptions.Item label="均衡区间">
             {data?.clusterBalanceIntervalList
               ? data?.clusterBalanceIntervalList?.map((item: any) => {
                   return (
-                    <Tag style={{ padding: '4px 8px', backgroundColor: 'rgba(33,37,41,0.08)', marginRight: '4px' }} key={item?.priority}>
-                      {item.type + ':' + item.intervalPercent + '%'}
+                    <Tag style={{ padding: '4px 5px', backgroundColor: 'rgba(33,37,41,0.08)', marginRight: '4px' }} key={item?.priority}>
+                      {item.type?.slice(0, 1).toUpperCase() + item.type?.slice(1) + ':' + ' ±' + item.intervalPercent + '%'}
                     </Tag>
                   );
                 })
