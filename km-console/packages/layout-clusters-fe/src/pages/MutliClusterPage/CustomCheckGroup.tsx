@@ -1,102 +1,108 @@
 import { DoubleRightOutlined } from '@ant-design/icons';
 import { Checkbox } from 'knowdesign';
+import { CheckboxValueType } from 'knowdesign/es/basic/checkbox/Group';
 import { debounce } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const CheckboxGroup = Checkbox.Group;
 
-interface IVersion {
-  firstLine: string[];
-  leftVersions: string[];
-}
-
 const CustomCheckGroup = (props: { kafkaVersions: string[]; onChangeCheckGroup: any }) => {
-  const { kafkaVersions, onChangeCheckGroup } = props;
-  const [checkedKafkaVersion, setCheckedKafkaVersion] = React.useState<IVersion>({
-    firstLine: [],
-    leftVersions: [],
-  });
-  const [allVersion, setAllVersion] = React.useState<IVersion>({
-    firstLine: [],
-    leftVersions: [],
-  });
-
+  const { kafkaVersions: newVersions, onChangeCheckGroup } = props;
+  const [versions, setVersions] = React.useState<string[]>([]);
+  const [versionsState, setVersionsState] = React.useState<{
+    [key: string]: boolean;
+  }>({});
   const [indeterminate, setIndeterminate] = React.useState(false);
   const [checkAll, setCheckAll] = React.useState(true);
-  const [moreGroupWidth, setMoreGroupWidth] = React.useState(400);
+  const [groupInfo, setGroupInfo] = useState({
+    width: 400,
+    num: 0,
+  });
   const [showMore, setShowMore] = React.useState(false);
-
-  useEffect(() => {
-    document.addEventListener('click', handleDocumentClick);
-    return () => {
-      document.removeEventListener('click', handleDocumentClick);
-    };
-  }, []);
 
   const handleDocumentClick = (e: Event) => {
     setShowMore(false);
   };
 
-  const setCheckAllStauts = (list: string[], otherList: string[]) => {
-    onChangeCheckGroup([...list, ...otherList]);
-    setIndeterminate(!!list.length && list.length + otherList.length < kafkaVersions.length);
-    setCheckAll(list.length + otherList.length === kafkaVersions.length);
-  };
-
-  const getTwoPanelVersion = () => {
+  const updateGroupInfo = () => {
     const width = (document.getElementsByClassName('custom-check-group')[0] as any)?.offsetWidth;
     const checkgroupWidth = width - 100 - 86;
     const num = (checkgroupWidth / 108) | 0;
-    const firstLine = Array.from(kafkaVersions).splice(0, num);
-    setMoreGroupWidth(num * 108 + 88 + 66);
-    const leftVersions = Array.from(kafkaVersions).splice(num);
-    return { firstLine, leftVersions };
+    setGroupInfo({
+      width: num * 108 + 88 + 66,
+      num,
+    });
   };
 
-  const onFirstVersionChange = (list: []) => {
-    setCheckedKafkaVersion({
-      ...checkedKafkaVersion,
-      firstLine: list,
-    });
-
-    setCheckAllStauts(list, checkedKafkaVersion.leftVersions);
+  const getCheckedList = (
+    versionState: {
+      [key: string]: boolean;
+    },
+    filterFunc: (item: [string, boolean], i: number) => boolean
+  ) => {
+    return Object.entries(versionState)
+      .filter(filterFunc)
+      .map(([key]) => key);
   };
 
-  const onLeftVersionChange = (list: []) => {
-    setCheckedKafkaVersion({
-      ...checkedKafkaVersion,
-      leftVersions: list,
+  const onVersionsChange = (isFirstLine: boolean, list: CheckboxValueType[]) => {
+    const newVersionsState = { ...versionsState };
+    Object.keys(newVersionsState).forEach((key, i) => {
+      if (isFirstLine && i < groupInfo.num) {
+        newVersionsState[key] = list.includes(key);
+      } else if (!isFirstLine && i >= groupInfo.num) {
+        newVersionsState[key] = list.includes(key);
+      }
     });
-    setCheckAllStauts(list, checkedKafkaVersion.firstLine);
+    const checkedLen = Object.values(newVersionsState).filter((v) => v).length;
+
+    setVersionsState(newVersionsState);
+    setIndeterminate(checkedLen && checkedLen < newVersions.length);
+    setCheckAll(checkedLen === newVersions.length);
+    onChangeCheckGroup(getCheckedList(newVersionsState, ([, state]) => state));
   };
 
   const onCheckAllChange = (e: any) => {
-    const versions = getTwoPanelVersion();
+    const checked = e.target.checked;
+    const newVersionsState = { ...versionsState };
+    Object.keys(newVersionsState).forEach((key) => (newVersionsState[key] = checked));
 
-    setCheckedKafkaVersion(
-      e.target.checked
-        ? versions
-        : {
-            firstLine: [],
-            leftVersions: [],
-          }
-    );
-    onChangeCheckGroup(e.target.checked ? [...versions.firstLine, ...versions.leftVersions] : []);
-
+    setVersionsState(newVersionsState);
     setIndeterminate(false);
-    setCheckAll(e.target.checked);
+    setCheckAll(checked);
+    onChangeCheckGroup(e.target.checked ? versions : []);
   };
 
-  React.useEffect(() => {
-    const handleVersionLine = () => {
-      const versions = getTwoPanelVersion();
-      setAllVersion(versions);
-      setCheckedKafkaVersion(versions);
-    };
-    handleVersionLine();
+  useEffect(() => {
+    const newVersionsState = { ...versionsState };
+    Object.keys(newVersionsState).forEach((key) => {
+      if (!newVersions.includes(key)) {
+        delete newVersionsState[key];
+      }
+    });
+    newVersions.forEach((version) => {
+      if (!Object.keys(newVersionsState).includes(version)) {
+        newVersionsState[version] = true;
+      }
+    });
+    const checkedLen = Object.values(newVersionsState).filter((v) => v).length;
 
-    window.addEventListener('resize', handleVersionLine); //监听窗口大小改变
-    return () => window.removeEventListener('resize', debounce(handleVersionLine, 500));
+    setVersions([...newVersions]);
+    setVersionsState(newVersionsState);
+    setIndeterminate(checkedLen && checkedLen < newVersions.length);
+    setCheckAll(checkedLen === newVersions.length);
+    onChangeCheckGroup(getCheckedList(newVersionsState, ([, state]) => state));
+  }, [newVersions]);
+
+  useEffect(() => {
+    updateGroupInfo();
+    const listen = debounce(updateGroupInfo, 500);
+    window.addEventListener('resize', listen); //监听窗口大小改变
+    document.addEventListener('click', handleDocumentClick);
+    return () => {
+      window.removeEventListener('resize', listen);
+      document.removeEventListener('click', handleDocumentClick);
+    };
   }, []);
 
   return (
@@ -107,17 +113,21 @@ const CustomCheckGroup = (props: { kafkaVersions: string[]; onChangeCheckGroup: 
             全选
           </Checkbox>
         </div>
-        <CheckboxGroup options={allVersion.firstLine} value={checkedKafkaVersion.firstLine} onChange={onFirstVersionChange} />
+        <CheckboxGroup
+          options={Array.from(versions).splice(0, groupInfo.num)}
+          value={getCheckedList(versionsState, ([, state], i) => i < groupInfo.num && state)}
+          onChange={(list) => onVersionsChange(true, list)}
+        />
         {showMore ? (
           <CheckboxGroup
-            style={{ width: moreGroupWidth }}
+            style={{ width: groupInfo.width }}
             className="more-check-group"
-            options={allVersion.leftVersions}
-            value={checkedKafkaVersion.leftVersions}
-            onChange={onLeftVersionChange}
+            options={Array.from(versions).splice(groupInfo.num)}
+            value={getCheckedList(versionsState, ([, state], i) => i >= groupInfo.num && state)}
+            onChange={(list) => onVersionsChange(false, list)}
           />
         ) : null}
-        {allVersion.leftVersions.length ? (
+        {versions.length > groupInfo.num ? (
           <div className="more-btn" onClick={() => setShowMore(!showMore)}>
             <a>
               {!showMore ? '展开更多' : '收起更多'} <DoubleRightOutlined style={{ transform: `rotate(${showMore ? '270' : '90'}deg)` }} />
