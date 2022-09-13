@@ -6,11 +6,16 @@ import { goLogin } from '@src/constants/axiosConfig';
 // 权限对应表
 export enum ClustersPermissionMap {
   CLUSTERS_MANAGE = '多集群管理',
+  CLUSTERS_MANAGE_VIEW = '多集群管理查看',
   // Cluster
   CLUSTER_ADD = '接入集群',
   CLUSTER_DEL = '删除集群',
   CLUSTER_CHANGE_HEALTHY = 'Cluster-修改健康规则',
   CLUSTER_CHANGE_INFO = 'Cluster-修改集群信息',
+  // LoadReBalance
+  REBALANCE_CYCLE = 'Cluster-LoadReBalance-周期均衡',
+  REBALANCE_IMMEDIATE = 'Cluster-LoadReBalance-立即均衡',
+  REBALANCE_SETTING = 'Cluster-LoadReBalance-设置集群规格',
   // Broker
   BROKER_CHANGE_CONFIG = 'Broker-修改Broker配置',
   // Topic
@@ -19,6 +24,8 @@ export enum ClustersPermissionMap {
   TOPIC_DEL = 'Topic-删除Topic',
   TOPIC_EXPOND = 'Topic-扩分区',
   TOPIC_ADD = 'Topic-新增Topic',
+  TOPIC_MOVE_REPLICA = 'Topic-迁移副本',
+  TOPIC_CHANGE_REPLICA = 'Topic-扩缩副本',
   // Consumers
   CONSUMERS_RESET_OFFSET = 'Consumers-重置Offset',
   // Test
