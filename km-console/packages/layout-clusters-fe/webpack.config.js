@@ -15,11 +15,13 @@ module.exports = merge(getWebpackCommonConfig(), {
     layout: ['./src/index.tsx'],
   },
   plugins: [
-    new CountPlugin({
-      pathname: 'knowdesign',
-      startCount: true,
-      isExportExcel: false,
-    }),
+    isProd
+      ? new CountPlugin({
+          pathname: 'knowdesign',
+          startCount: true,
+          isExportExcel: false,
+        })
+      : undefined,
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
@@ -53,7 +55,7 @@ module.exports = merge(getWebpackCommonConfig(), {
           : []
       )
     ),
-  ],
+  ].filter((p) => p),
   output: {
     path: outPath,
     publicPath: isProd ? process.env.PUBLIC_PATH + '/layout/' : '/',
@@ -79,11 +81,11 @@ module.exports = merge(getWebpackCommonConfig(), {
     proxy: {
       '/ks-km/api/v3': {
         changeOrigin: true,
-        target: 'https://api-kylin-xg02.intra.xiaojukeji.com/ks-km/',
+        target: 'http://localhost:8080/',
       },
       '/logi-security/api/v1': {
         changeOrigin: true,
-        target: 'https://api-kylin-xg02.intra.xiaojukeji.com/ks-km/',
+        target: 'http://localhost:8080/',
       },
     },
   },

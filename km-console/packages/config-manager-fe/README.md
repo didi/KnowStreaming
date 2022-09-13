@@ -1,6 +1,6 @@
 ## 使用说明
 
-### 依赖安装：
+### 依赖安装（如在 km-console 目录下执行 npm run i 安装过依赖，这步可以省略）：
 
 ```
 npm install
@@ -11,6 +11,8 @@ npm install
 ```
 npm run start
 ```
+
+该应用为子应用，启动后需要到基座应用中查看（需要启动基座应用），地址为 http://localhost:8000
 
 ### 构建：
 
