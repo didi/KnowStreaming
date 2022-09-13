@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Drawer, Form, Input, Space, Button, Checkbox, Utils, Row, Col, IconFont, Divider, message } from 'knowdesign';
 import { useParams } from 'react-router-dom';
 import Api from '@src/api';
@@ -31,6 +31,10 @@ export const ConfigurationEdit = (props: any) => {
     });
   };
 
+  React.useEffect(() => {
+    form.setFieldsValue(props.record);
+  }, [props.record]);
+
   return (
     <Drawer
       title={
@@ -44,6 +48,7 @@ export const ConfigurationEdit = (props: any) => {
       visible={props.visible}
       onClose={() => props.setVisible(false)}
       maskClosable={false}
+      destroyOnClose
       extra={
         <Space>
           <Button size="small" onClick={onClose}>
@@ -70,7 +75,7 @@ export const ConfigurationEdit = (props: any) => {
           {props.record?.documentation || '-'}
         </Col>
       </Row>
-      <Form form={form} layout="vertical" initialValues={props.record}>
+      <Form form={form} layout="vertical">
         <Form.Item name="defaultValue" label="Kafka默认配置">
           <Input disabled />
         </Form.Item>
