@@ -1,29 +1,19 @@
 import moment from 'moment';
 
 export const CHART_COLOR_LIST = [
-  '#657DFC',
-  '#A7B1EB',
-  '#2AC8E4',
-  '#9DDEEB',
-  '#3991FF',
+  '#556ee6',
   '#94BEF2',
+  '#95e7ff',
+  '#9DDEEB',
+  '#A7B1EB',
   '#C2D0E3',
-  '#F5B6B3',
-  '#85C80D',
-  '#C9E795',
-  '#A76CEC',
   '#CCABF1',
-  '#FF9C1B',
-  '#F5C993',
-  '#FFC300',
   '#F9D77B',
-  '#12CA7A',
-  '#8BA3C4',
-  '#FF7066',
+  '#F5C993',
   '#A7E6C7',
   '#F19FC9',
-  '#AEAEAE',
-  '#D1D1D1',
+  '#F5B6B3',
+  '#C9E795',
 ];
 
 export const UNIT_MAP = {

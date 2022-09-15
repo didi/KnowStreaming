@@ -6,6 +6,7 @@ import api, { MetricType } from '@src/api';
 import { useParams } from 'react-router-dom';
 import TagsWithHide from '@src/components/TagsWithHide';
 import SwitchTab from '@src/components/SwitchTab';
+import RenderEmpty from '@src/components/RenderEmpty';
 
 interface PropsType {
   hashData: any;
@@ -86,18 +87,6 @@ function getTranformedBytes(bytes: number) {
   return [outBytes.toFixed(2), unit[i]];
 }
 
-const RenderEmpty = (props: { message: string }) => {
-  const { message } = props;
-  return (
-    <>
-      <div className="empty-panel">
-        <div className="img" />
-        <div className="text">{message}</div>
-      </div>
-    </>
-  );
-};
-
 const PartitionPopoverContent = (props: {
   clusterId: string;
   hashData: any;
@@ -125,18 +114,21 @@ const PartitionPopoverContent = (props: {
         { label: 'LeaderBroker', value: leaderBrokerId },
         {
           label: 'BeginningOffset',
-          value: `${metricsData.LogStartOffset === undefined ? '-' : metricsData.LogStartOffset} ${global.getMetricDefine(type, 'LogStartOffset')?.unit || ''
-            }`,
+          value: `${metricsData.LogStartOffset === undefined ? '-' : metricsData.LogStartOffset} ${
+            global.getMetricDefine(type, 'LogStartOffset')?.unit || ''
+          }`,
         },
         {
           label: 'EndOffset',
-          value: `${metricsData.LogEndOffset === undefined ? '-' : metricsData.LogEndOffset} ${global.getMetricDefine(type, 'LogEndOffset')?.unit || ''
-            }`,
+          value: `${metricsData.LogEndOffset === undefined ? '-' : metricsData.LogEndOffset} ${
+            global.getMetricDefine(type, 'LogEndOffset')?.unit || ''
+          }`,
         },
         {
           label: 'MsgNum',
-          value: `${metricsData.Messages === undefined ? '-' : metricsData.Messages} ${global.getMetricDefine(type, 'Messages')?.unit || ''
-            }`,
+          value: `${metricsData.Messages === undefined ? '-' : metricsData.Messages} ${
+            global.getMetricDefine(type, 'Messages')?.unit || ''
+          }`,
         },
         {
           label: 'LogSize',
@@ -281,13 +273,14 @@ const PartitionCard = (props: { clusterId: string; hashData: any }) => {
                 <div className="broker-container-box-detail">
                   {partitionState.alive ? (
                     partitionState?.replicaList?.length ? (
-                      <div className="partition-list">
+                      <div className={`partition-list ${hoverPartitionId !== -1 ? 'partition-list-hover-state' : ''}`}>
                         {partitionState?.replicaList?.map((partition) => {
                           return (
                             <div
                               key={partition.partitionId}
-                              className={`partition-list-item partition-list-item-${partition.isLeaderReplace ? 'leader' : partition.inSync ? 'isr' : 'osr'
-                                } ${partition.partitionId === hoverPartitionId ? 'partition-active' : ''}`}
+                              className={`partition-list-item partition-list-item-${
+                                partition.isLeaderReplace ? 'leader' : partition.inSync ? 'isr' : 'osr'
+                              } ${partition.partitionId === hoverPartitionId ? 'partition-active' : ''}`}
                               onMouseEnter={() => setHoverPartitionId(partition.partitionId)}
                               onMouseLeave={() => setHoverPartitionId(-1)}
                               onClick={() => setClickPartition(`${partitionState.brokerId}&${partition.partitionId}`)}
@@ -316,10 +309,10 @@ const PartitionCard = (props: { clusterId: string; hashData: any }) => {
                         })}
                       </div>
                     ) : (
-                      <RenderEmpty message="暂无数据" />
+                      <RenderEmpty message="暂无数据" height="unset" />
                     )
                   ) : (
-                    <RenderEmpty message="暂无数据" />
+                    <RenderEmpty message="暂无数据" height="unset" />
                   )}
                 </div>
               </div>

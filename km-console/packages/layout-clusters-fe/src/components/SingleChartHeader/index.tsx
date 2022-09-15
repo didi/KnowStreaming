@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Tooltip, Select, IconFont, Utils, Divider } from 'knowdesign';
+import { Tooltip, Select, IconFont, Utils, Divider, Button } from 'knowdesign';
 import moment from 'moment';
 import { DRangeTime } from 'knowdesign';
 import IndicatorDrawer from './IndicatorDrawer';
@@ -48,7 +48,7 @@ export interface IcustomScope {
 export interface InodeScopeModule {
   customScopeList: IcustomScope[];
   scopeName?: string;
-  showSearch?: boolean;
+  scopeLabel?: string;
   searchPlaceholder?: string;
   change?: () => void;
 }
@@ -138,9 +138,13 @@ const SingleChartHeader = ({
   };
 
   const reloadRangeTime = () => {
-    const timeLen = rangeTime[1] - rangeTime[0] || 0;
-    const curTimeStamp = moment().valueOf();
-    setRangeTime([curTimeStamp - timeLen, curTimeStamp]);
+    if (isRelativeRangeTime) {
+      const timeLen = rangeTime[1] - rangeTime[0] || 0;
+      const curTimeStamp = moment().valueOf();
+      setRangeTime([curTimeStamp - timeLen, curTimeStamp]);
+    } else {
+      setRangeTime([...rangeTime]);
+    }
   };
 
   const openIndicatorDrawer = () => {
@@ -174,12 +178,10 @@ const SingleChartHeader = ({
             {!hideGridSelect && (
               <Select className="grid-select" style={{ width: 70 }} value={gridNum} options={GRID_SIZE_OPTIONS} onChange={sizeChange} />
             )}
-            <Divider type="vertical" style={{ height: 20, top: 0 }} />
-            <Tooltip title="点击指标筛选，可选择指标" placement="bottomRight">
-              <div className="icon-box" onClick={openIndicatorDrawer}>
-                <IconFont className="icon" type="icon-shezhi1" />
-              </div>
-            </Tooltip>
+            {(!hideNodeScope || !hideGridSelect) && <Divider type="vertical" style={{ height: 20, top: 0 }} />}
+            <Button type="primary" onClick={openIndicatorDrawer}>
+              指标筛选
+            </Button>
           </div>
         </div>
       </div>

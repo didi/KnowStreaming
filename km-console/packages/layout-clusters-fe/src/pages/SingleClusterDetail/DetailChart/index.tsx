@@ -14,6 +14,7 @@ import { MetricType } from '@src/api';
 import { getDataNumberUnit, getUnit } from '@src/constants/chartConfig';
 import SingleChartHeader, { KsHeaderOptions } from '@src/components/SingleChartHeader';
 import { MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL } from '@src/constants/common';
+import RenderEmpty from '@src/components/RenderEmpty';
 
 type ChartFilterOptions = Omit<KsHeaderOptions, 'gridNum'>;
 interface MetricInfo {
@@ -64,7 +65,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
   const [messagesInMetricData, setMessagesInMetricData] = useState<MessagesInMetric>({
     name: 'MessagesIn',
     unit: '',
-    data: [],
+    data: undefined,
   });
   const [curHeaderOptions, setCurHeaderOptions] = useState<ChartFilterOptions>();
   const [defaultChartLoading, setDefaultChartLoading] = useState<boolean>(true);
@@ -234,17 +235,19 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           result.forEach((point) => ((point[1] as number) /= unitSize));
         }
 
-        // 补充缺少的图表点
-        const extraMetrics = result[0][2].map((info) => ({
-          ...info,
-          value: 0,
-        }));
-        const supplementaryInterval =
-          (curHeaderOptions.rangeTime[1] - curHeaderOptions.rangeTime[0] > MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL ? 10 : 1) * 60 * 1000;
-        supplementaryPoints([line], curHeaderOptions.rangeTime, supplementaryInterval, (point) => {
-          point.push(extraMetrics as any);
-          return point;
-        });
+        if (result.length) {
+          // 补充缺少的图表点
+          const extraMetrics = result[0][2].map((info) => ({
+            ...info,
+            value: 0,
+          }));
+          const supplementaryInterval =
+            (curHeaderOptions.rangeTime[1] - curHeaderOptions.rangeTime[0] > MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL ? 10 : 1) * 60 * 1000;
+          supplementaryPoints([line], curHeaderOptions.rangeTime, supplementaryInterval, (point) => {
+            point.push(extraMetrics as any);
+            return point;
+          });
+        }
 
         setMessagesInMetricData(line);
         setDefaultChartLoading(false);
@@ -299,10 +302,9 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
 
       <div className="cluster-detail-container-main">
         {/* MessageIn 图表 */}
-        <div className={`header-chart-container ${!messagesInMetricData.data.length ? 'header-chart-container-loading' : ''}`}>
+        <div className="header-chart-container">
           <Spin spinning={defaultChartLoading}>
-            {/* TODO: 暂时通过判断是否有图表数据来修复，有时间可以查找下宽度溢出的原因 */}
-            {messagesInMetricData.data.length ? (
+            {messagesInMetricData.data && (
               <>
                 <div className="chart-box-title">
                   <Tooltip
@@ -322,26 +324,27 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
                     </span>
                   </Tooltip>
                 </div>
-                <SingleChart
-                  chartKey="messagesIn"
-                  chartTypeProp="line"
-                  showHeader={false}
-                  wrapStyle={{
-                    width: 'auto',
-                    height: 210,
-                  }}
-                  connectEventName="clusterChart"
-                  eventBus={busInstance}
-                  propChartData={[messagesInMetricData]}
-                  {...getChartConfig({
-                    // metricName: `${messagesInMetricData.name}{unit|（${messagesInMetricData.unit}）}`,
-                    lineColor: CHART_LINE_COLORS[0],
-                    isDefaultMetric: true,
-                  })}
-                />
+                {messagesInMetricData.data.length ? (
+                  <SingleChart
+                    chartKey="messagesIn"
+                    chartTypeProp="line"
+                    showHeader={false}
+                    wrapStyle={{
+                      width: 'auto',
+                      height: 210,
+                    }}
+                    connectEventName="clusterChart"
+                    eventBus={busInstance}
+                    propChartData={[messagesInMetricData]}
+                    {...getChartConfig({
+                      lineColor: CHART_LINE_COLORS[0],
+                      isDefaultMetric: true,
+                    })}
+                  />
+                ) : (
+                  !defaultChartLoading && <RenderEmpty message="暂无数据" height={200} />
+                )}
               </>
-            ) : (
-              ''
             )}
           </Spin>
         </div>
@@ -408,7 +411,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
                   ) : chartLoading ? (
                     <></>
                   ) : (
-                    <Empty description="请先选择指标或刷新" style={{ width: '100%', height: '100%' }} />
+                    <RenderEmpty message="请先选择指标或刷新" />
                   )}
                 </Row>
               </Spin>

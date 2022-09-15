@@ -12,7 +12,6 @@ import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,19 +21,19 @@ import java.util.stream.Collectors;
 
 
 @Task(name = "SyncKafkaGroupTask",
-        description = "KafkaGroup信息同步到DB,",
+        description = "KafkaGroup信息同步到DB",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class SyncKafkaGroupTask extends AbstractClusterPhyDispatchTask {
+public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
     private static final ILog log = LogFactory.getLog(SyncKafkaGroupTask.class);
 
     @Autowired
     private GroupService groupService;
 
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
         TaskResult tr = TaskResult.SUCCESS;
 
         List<String> groupNameList = groupService.listGroupsFromKafka(clusterPhy.getId());

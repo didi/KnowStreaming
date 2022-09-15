@@ -26,8 +26,8 @@ const OptionsDefault = [
 const NodeScope = ({ nodeScopeModule, change }: propsType) => {
   const {
     customScopeList: customList,
-    scopeName = '自定义节点范围',
-    showSearch = false,
+    scopeName = '',
+    scopeLabel = '自定义范围',
     searchPlaceholder = '输入内容进行搜索',
   } = nodeScopeModule;
   const [topNum, setTopNum] = useState<number>(5);
@@ -70,7 +70,7 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
       change(checkedListTemp, false);
       setIsTop(false);
       setTopNum(null);
-      setInputValue(`已选${checkedListTemp?.length}项`);
+      setInputValue(`${checkedListTemp?.length}项`);
       setPopVisible(false);
     }
   };
@@ -109,7 +109,7 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
       {/* <span>时间：</span> */}
       <div className="flx_con">
         <div className="flx_l">
-          <h6 className="time_title">选择top范围</h6>
+          <h6 className="time_title">选择 top 范围</h6>
           <Radio.Group
             optionType="button"
             buttonStyle="solid"
@@ -128,7 +128,7 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
           </Radio.Group>
         </div>
         <div className="flx_r">
-          <h6 className="time_title">{scopeName}</h6>
+          <h6 className="time_title">{scopeLabel}</h6>
           <div className="custom-scope">
             <div className="check-row">
               <Checkbox className="check-all" indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll}>
@@ -136,9 +136,7 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
               </Checkbox>
               <Input
                 className="search-input"
-                suffix={
-                  <IconFont type="icon-fangdajing" style={{ fontSize: '16px' }} />
-                }
+                suffix={<IconFont type="icon-fangdajing" style={{ fontSize: '16px' }} />}
                 size="small"
                 placeholder={searchPlaceholder}
                 onChange={(e) => setScopeSearchValue(e.target.value)}
@@ -148,7 +146,7 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
               <Checkbox.Group style={{ width: '100%' }} onChange={checkChange} value={checkedListTemp}>
                 <Row gutter={[10, 12]}>
                   {customList
-                    .filter((item) => !showSearch || item.label.includes(scopeSearchValue))
+                    .filter((item) => item.label.includes(scopeSearchValue))
                     .map((item) => (
                       <Col span={12} key={item.value}>
                         <Checkbox value={item.value}>{item.label}</Checkbox>
@@ -180,6 +178,7 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
   return (
     <>
       <div id="d-node-scope">
+        <div className="scope-title">{scopeName}筛选：</div>
         <Popover
           trigger={['click']}
           visible={popVisible}

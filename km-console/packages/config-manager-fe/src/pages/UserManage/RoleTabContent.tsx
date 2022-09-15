@@ -20,7 +20,7 @@ import {
   IconFont,
 } from 'knowdesign';
 import moment from 'moment';
-import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { defaultPagination } from 'constants/common';
 import { RoleProps, PermissionNode, AssignUser, RoleOperate, FormItemPermission } from './config';
 import api from 'api';
@@ -50,11 +50,21 @@ const RoleDetailAndUpdate = forwardRef((props, ref): JSX.Element => {
   useEffect(() => {
     const globalPermissions = global.permissions;
     if (globalPermissions && globalPermissions.length) {
-      const sysPermissions = globalPermissions.map((sys: PermissionNode) => ({
-        id: sys.id,
-        name: sys.permissionName,
-        options: sys.childList.map((node) => ({ label: node.permissionName, value: node.id })),
-      }));
+      const sysPermissions = globalPermissions.map((sys: PermissionNode) => {
+        const result = {
+          id: sys.id,
+          name: sys.permissionName,
+          essentialPermission: undefined,
+          options: [],
+        };
+        result.options = sys.childList.map((node) => {
+          if (node.permissionName === '多集群管理查看' || node.permissionName === '系统管理查看') {
+            result.essentialPermission = { label: node.permissionName, value: node.id };
+          }
+          return { label: node.permissionName, value: node.id };
+        });
+        return result;
+      });
       setPermissions(sysPermissions);
     }
   }, [global]);
@@ -77,10 +87,12 @@ const RoleDetailAndUpdate = forwardRef((props, ref): JSX.Element => {
 
   const onSubmit = () => {
     form.validateFields().then((formData) => {
-      formData.permissionIdList = formData.permissionIdList.filter((l) => l);
       formData.permissionIdList.forEach((arr, i) => {
         // 如果分配的系统下的子权限，自动赋予该系统的权限
-        if (arr !== null && arr.length) {
+        if (!Array.isArray(arr)) {
+          arr = [];
+        }
+        if (arr?.length) {
           arr.push(permissions[i].id);
         }
       });
@@ -210,10 +222,20 @@ const RoleDetailAndUpdate = forwardRef((props, ref): JSX.Element => {
           <Form.Item
             label="分配权限"
             name="permissionIdList"
+            required
             rules={[
               () => ({
                 validator(_, value) {
                   if (Array.isArray(value) && value.some((item) => !!item?.length)) {
+                    const errs = [];
+                    value.forEach((arr, i) => {
+                      if (arr?.length && !arr.includes(permissions[i].essentialPermission.value)) {
+                        errs.push(`[${permissions[i].essentialPermission.label}]`);
+                      }
+                    });
+                    if (errs.length) {
+                      return Promise.reject(`您必须分配 ${errs.join(' 和 ')} 权限`);
+                    }
                     return Promise.resolve();
                   }
                   return Promise.reject(new Error('请为角色至少分配一项权限'));

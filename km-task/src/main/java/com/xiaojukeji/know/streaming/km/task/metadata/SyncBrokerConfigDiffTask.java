@@ -13,7 +13,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerConfigPO;
 import com.xiaojukeji.know.streaming.km.common.enums.config.ConfigDiffTypeEnum;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -25,12 +24,12 @@ import java.util.stream.Collectors;
  * @date 22/02/25
  */
 @Task(name = "SyncBrokerConfigDiffTask",
-        description = "Broker配置的Diff信息同步到DB,",
+        description = "Broker配置的Diff信息同步到DB",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 6 * 60)
-public class SyncBrokerConfigDiffTask extends AbstractClusterPhyDispatchTask {
+public class SyncBrokerConfigDiffTask extends AbstractAsyncMetadataDispatchTask {
     protected static final ILog log = LogFactory.getLog(SyncBrokerConfigDiffTask.class);
 
     @Autowired
@@ -40,7 +39,7 @@ public class SyncBrokerConfigDiffTask extends AbstractClusterPhyDispatchTask {
     private BrokerConfigService brokerConfigService;
 
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
         // <configName, <BrokerId, ConfigValue>>
         Map<String, Map<Integer, String>> allConfigMap = new HashMap<>();
 

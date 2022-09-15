@@ -216,8 +216,8 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
         onChange={ksHeaderChange}
         nodeScopeModule={{
           customScopeList: scopeList,
-          scopeName: `自定义 ${dashboardType === MetricType.Broker ? 'Broker' : 'Topic'} 范围`,
-          showSearch: dashboardType === MetricType.Topic,
+          scopeName: dashboardType === MetricType.Broker ? 'Broker' : 'Topic',
+          scopeLabel: `自定义 ${dashboardType === MetricType.Broker ? 'Broker' : 'Topic'} 范围`,
         }}
         indicatorSelectModule={{
           hide: false,

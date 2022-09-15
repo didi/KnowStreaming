@@ -45,24 +45,57 @@ const HistoryDrawer: React.FC<PropsType> = ({ onClose, visible }) => {
     //   }
     // },
     {
-      title: 'Disk均衡率',
+      title: (
+        <span>
+          Disk<span style={{ fontSize: '12px', color: '#74788D' }}>{'(已均衡丨未均衡)'}</span>
+        </span>
+      ),
       dataIndex: 'disk',
       render: (text: any, row: any) => {
-        return `${row?.sub?.disk?.successNu} (已均衡) / ${row?.sub?.disk?.failedNu} (未均衡)`;
+        // return `${row?.sub?.disk?.successNu} 丨 ${row?.sub?.disk?.failedNu}`;
+        return (
+          <div className="balance-history-column">
+            <span>{row?.sub?.disk?.successNu}</span>
+            <span>丨</span>
+            <span>{row?.sub?.disk?.failedNu}</span>
+          </div>
+        );
       },
     },
     {
-      title: 'BytesIn均衡率',
+      title: (
+        <span>
+          BytesIn<span style={{ fontSize: '12px', color: '#74788D' }}>{'(已均衡丨未均衡)'}</span>
+        </span>
+      ),
       dataIndex: 'bytesIn',
       render: (text: any, row: any) => {
-        return `${row?.sub?.bytesIn?.successNu} (已均衡) / ${row?.sub?.bytesIn?.failedNu} (未均衡)`;
+        // return `${row?.sub?.bytesIn?.successNu} 丨 ${row?.sub?.bytesIn?.failedNu}`;
+        return (
+          <div className="balance-history-column">
+            <span>{row?.sub?.bytesIn?.successNu}</span>
+            <span>丨</span>
+            <span>{row?.sub?.bytesIn?.failedNu}</span>
+          </div>
+        );
       },
     },
     {
-      title: 'BytesOut均衡率',
+      title: (
+        <span>
+          BytesOut<span style={{ fontSize: '12px', color: '#74788D' }}>{'(已均衡丨未均衡)'}</span>
+        </span>
+      ),
       dataIndex: 'bytesOut',
       render: (text: any, row: any) => {
-        return `${row?.sub?.bytesOut?.successNu} (已均衡) / ${row?.sub?.bytesOut?.failedNu} (未均衡)`;
+        // return `${row?.sub?.bytesOut?.successNu} 丨 ${row?.sub?.bytesOut?.failedNu}`;
+        return (
+          <div className="balance-history-column">
+            <span>{row?.sub?.bytesOut?.successNu}</span>
+            <span>丨</span>
+            <span>{row?.sub?.bytesOut?.failedNu}</span>
+          </div>
+        );
       },
     },
     {
@@ -124,7 +157,7 @@ const HistoryDrawer: React.FC<PropsType> = ({ onClose, visible }) => {
   };
 
   const onTableChange = (curPagination: any) => {
-    getList({ page: curPagination.current, size: curPagination.pageSize });
+    getList({ pageNo: curPagination.current, pageSize: curPagination.pageSize });
   };
 
   return (

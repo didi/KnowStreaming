@@ -14,7 +14,7 @@ import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Task(name = "CheckJmxClientTask",
-        description = "检查Jmx客户端,",
+        description = "检查Jmx客户端",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         timeout = 2 * 60,
