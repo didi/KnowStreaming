@@ -1,8 +1,8 @@
 import { Button, Divider, Drawer, Form, Input, InputNumber, message, Radio, Select, Spin, Space, Utils } from 'knowdesign';
 import * as React from 'react';
 import { useIntl } from 'react-intl';
-import api from '../../api';
-import { regClusterName, regUsername } from '../../constants/reg';
+import api from '@src/api';
+import { regClusterName, regUsername } from '@src/constants/reg';
 import { bootstrapServersErrCodes, jmxErrCodes, zkErrCodes } from './config';
 import CodeMirrorFormItem from '@src/components/CodeMirrorFormItem';
 
@@ -21,39 +21,27 @@ word=\\"xxxxxx\\";"
 `;
 
 const AccessClusters = (props: any): JSX.Element => {
+  const { afterSubmitSuccess, clusterInfo, visible } = props;
+
   const intl = useIntl();
   const [form] = Form.useForm();
-
-  const { afterSubmitSuccess, infoLoading, clusterInfo, visible } = props;
   const [loading, setLoading] = React.useState(false);
-  const [security, setSecurity] = React.useState(clusterInfo?.security || 'None');
+  const [curClusterInfo, setCurClusterInfo] = React.useState<any>({});
+  const [security, setSecurity] = React.useState(curClusterInfo?.security || 'None');
   const [extra, setExtra] = React.useState({
     versionExtra: '',
     zooKeeperExtra: '',
     bootstrapExtra: '',
     jmxExtra: '',
   });
-  const [isLowVersion, setIsLowVersion] = React.useState<any>(false);
-  const [zookeeperErrorStatus, setZookeeperErrorStatus] = React.useState<any>(false);
+  const [isLowVersion, setIsLowVersion] = React.useState<boolean>(false);
+  const [zookeeperErrorStatus, setZookeeperErrorStatus] = React.useState<boolean>(false);
 
   const lastFormItemValue = React.useRef({
-    bootstrap: clusterInfo?.bootstrapServers || '',
-    zookeeper: clusterInfo?.zookeeper || '',
-    clientProperties: clusterInfo?.clientProperties || {},
+    bootstrap: curClusterInfo?.bootstrapServers || '',
+    zookeeper: curClusterInfo?.zookeeper || '',
+    clientProperties: curClusterInfo?.clientProperties || {},
   });
-
-  React.useEffect(() => {
-    const showLowVersion = !(clusterInfo?.zookeeper || !clusterInfo?.kafkaVersion || clusterInfo?.kafkaVersion >= lowKafkaVersion);
-    lastFormItemValue.current.bootstrap = clusterInfo?.bootstrapServers || '';
-    lastFormItemValue.current.zookeeper = clusterInfo?.zookeeper || '';
-    lastFormItemValue.current.clientProperties = clusterInfo?.clientProperties || {};
-    setIsLowVersion(showLowVersion);
-    setExtra({
-      ...extra,
-      versionExtra: showLowVersion ? intl.formatMessage({ id: 'access.cluster.low.version.tip' }) : '',
-    });
-    form.setFieldsValue({ ...clusterInfo });
-  }, [clusterInfo]);
 
   const onHandleValuesChange = (value: any, allValues: any) => {
     Object.keys(value).forEach((key) => {
@@ -128,10 +116,10 @@ const AccessClusters = (props: any): JSX.Element => {
         zookeeper: res.zookeeper || '',
       };
       setLoading(true);
-      if (!isNaN(clusterInfo?.id)) {
+      if (!isNaN(curClusterInfo?.id)) {
         Utils.put(api.phyCluster, {
           ...params,
-          id: clusterInfo?.id,
+          id: curClusterInfo?.id,
         })
           .then(() => {
             message.success('编辑成功');
@@ -219,7 +207,11 @@ const AccessClusters = (props: any): JSX.Element => {
         });
 
         // 如果kafkaVersion小于最低版本则提示
-        const showLowVersion = !(clusterInfo?.zookeeper || !clusterInfo?.kafkaVersion || clusterInfo?.kafkaVersion >= lowKafkaVersion);
+        const showLowVersion = !(
+          curClusterInfo?.zookeeper ||
+          !curClusterInfo?.kafkaVersion ||
+          curClusterInfo?.kafkaVersion >= lowKafkaVersion
+        );
         setIsLowVersion(showLowVersion);
         setExtra({
           ...extraMsg,
@@ -231,6 +223,55 @@ const AccessClusters = (props: any): JSX.Element => {
         setLoading(false);
       });
   };
+
+  React.useEffect(() => {
+    const showLowVersion = !(curClusterInfo?.zookeeper || !curClusterInfo?.kafkaVersion || curClusterInfo?.kafkaVersion >= lowKafkaVersion);
+    lastFormItemValue.current = {
+      bootstrap: curClusterInfo?.bootstrapServers || '',
+      zookeeper: curClusterInfo?.zookeeper || '',
+      clientProperties: curClusterInfo?.clientProperties || {},
+    };
+    setIsLowVersion(showLowVersion);
+    setExtra({
+      ...extra,
+      versionExtra: showLowVersion ? intl.formatMessage({ id: 'access.cluster.low.version.tip' }) : '',
+    });
+    form.setFieldsValue({ ...curClusterInfo });
+  }, [curClusterInfo]);
+
+  React.useEffect(() => {
+    if (visible) {
+      if (clusterInfo?.id) {
+        setLoading(true);
+        Utils.request(api.getPhyClusterBasic(clusterInfo.id))
+          .then((res: any) => {
+            let jmxProperties = null;
+            try {
+              jmxProperties = JSON.parse(res?.jmxProperties);
+            } catch (err) {
+              console.error(err);
+            }
+
+            // 转化值对应成表单值
+            if (jmxProperties?.openSSL) {
+              jmxProperties.security = 'Password';
+            }
+
+            if (jmxProperties) {
+              res = Object.assign({}, res || {}, jmxProperties);
+            }
+            setCurClusterInfo(res);
+            setLoading(false);
+          })
+          .catch((err) => {
+            setCurClusterInfo(clusterInfo);
+            setLoading(false);
+          });
+      } else {
+        setCurClusterInfo(clusterInfo);
+      }
+    }
+  }, [visible, clusterInfo]);
 
   return (
     <>
@@ -256,16 +297,8 @@ const AccessClusters = (props: any): JSX.Element => {
         placement="right"
         width={480}
       >
-        <Spin spinning={loading || !!infoLoading}>
-          <Form
-            form={form}
-            initialValues={{
-              security,
-              ...clusterInfo,
-            }}
-            layout="vertical"
-            onValuesChange={onHandleValuesChange}
-          >
+        <Spin spinning={loading}>
+          <Form form={form} layout="vertical" onValuesChange={onHandleValuesChange}>
             <Form.Item
               name="name"
               label="集群名称"
@@ -277,11 +310,9 @@ const AccessClusters = (props: any): JSX.Element => {
                     if (!value) {
                       return Promise.reject('集群名称不能为空');
                     }
-
-                    if (value === clusterInfo?.name) {
+                    if (value === curClusterInfo?.name) {
                       return Promise.resolve();
                     }
-
                     if (value?.length > 128) {
                       return Promise.reject('集群名称长度限制在1～128字符');
                     }
@@ -307,13 +338,7 @@ const AccessClusters = (props: any): JSX.Element => {
             <Form.Item
               name="bootstrapServers"
               label="Bootstrap Servers"
-              extra={
-                extra.bootstrapExtra.includes('连接成功') ? (
-                  <span>{extra.bootstrapExtra}</span>
-                ) : (
-                  <span className="error-extra-info">{extra.bootstrapExtra}</span>
-                )
-              }
+              extra={<span className={extra.bootstrapExtra.includes('连接成功') ? 'error-extra-info' : ''}>{extra.bootstrapExtra}</span>}
               validateTrigger={'onBlur'}
               rules={[
                 {
@@ -349,13 +374,7 @@ const AccessClusters = (props: any): JSX.Element => {
             <Form.Item
               name="zookeeper"
               label="Zookeeper"
-              extra={
-                extra.zooKeeperExtra.includes('连接成功') ? (
-                  <span>{extra.zooKeeperExtra}</span>
-                ) : (
-                  <span className="error-extra-info">{extra.zooKeeperExtra}</span>
-                )
-              }
+              extra={<span className={extra.zooKeeperExtra.includes('连接成功') ? 'error-extra-info' : ''}>{extra.zooKeeperExtra}</span>}
               validateStatus={zookeeperErrorStatus ? 'error' : 'success'}
               validateTrigger={'onBlur'}
               rules={[
@@ -458,7 +477,7 @@ const AccessClusters = (props: any): JSX.Element => {
                   style={{ width: '58%' }}
                   rules={[
                     {
-                      required: security === 'Password' || clusterInfo?.security === 'Password',
+                      required: security === 'Password' || curClusterInfo?.security === 'Password',
                       validator: async (rule: any, value: string) => {
                         if (!value) {
                           return Promise.reject('用户名不能为空');
@@ -483,7 +502,7 @@ const AccessClusters = (props: any): JSX.Element => {
                   style={{ width: '38%', marginRight: 0 }}
                   rules={[
                     {
-                      required: security === 'Password' || clusterInfo?.security === 'Password',
+                      required: security === 'Password' || curClusterInfo?.security === 'Password',
                       validator: async (rule: any, value: string) => {
                         if (!value) {
                           return Promise.reject('密码不能为空');

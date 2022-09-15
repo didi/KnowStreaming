@@ -38,15 +38,17 @@
 
   &-main {
     .header-chart-container {
-      &-loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
       width: 100%;
       height: 244px;
       margin-bottom: 12px;
       .cluster-container-border();
+      .dcloud-spin.dcloud-spin-spinning {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 244px;
+      }
     }
 
     .content {

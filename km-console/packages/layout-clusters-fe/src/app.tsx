@@ -59,6 +59,7 @@ const logout = () => {
   }).then((res) => {
     window.location.href = '/login';
   });
+  localStorage.removeItem('userInfo');
 };
 
 const LicenseLimitModal = () => {
@@ -117,7 +118,7 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
     <DProLayout.Container
       headerProps={{
         title: (
-          <div>
+          <div style={{ cursor: 'pointer' }}>
             <img className="header-logo" src={ksLogo} />
           </div>
         ),

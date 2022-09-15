@@ -1,14 +1,11 @@
 /* eslint-disable react/display-name */
-import { Drawer, Form, Spin, Table, Utils } from 'knowdesign';
+import { Drawer, Spin, Table, Utils } from 'knowdesign';
 import React, { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
-import { useIntl } from 'react-intl';
 import { getDetailColumn } from './config';
 import API from '../../api';
 import { useParams } from 'react-router-dom';
 
 const CheckDetail = forwardRef((props: any, ref): JSX.Element => {
-  const intl = useIntl();
-  const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -28,7 +25,6 @@ const CheckDetail = forwardRef((props: any, ref): JSX.Element => {
   };
 
   const onCancel = () => {
-    form.resetFields();
     setVisible(false);
   };
 

@@ -3,8 +3,13 @@
 @import '~knowdesign/es/basic/style/mixins/index';
 
 #d-node-scope {
+  display: flex;
+  align-items: center;
   position: relative;
-  display: inline-block;
+  .scope-title {
+    font-size: 14px;
+    color: #74788d;
+  }
   .input-span {
     cursor: pointer;
   }
@@ -29,10 +34,10 @@
       box-shadow: none;
     }
     &.relativeTime {
-      width: 160px;
+      width: 200px;
     }
     &.absoluteTime {
-      width: 300px;
+      width: 200px;
     }
 
     input {

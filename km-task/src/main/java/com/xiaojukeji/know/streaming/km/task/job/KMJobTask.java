@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
-        timeout = 6 * 60)
+        timeout = 2 * 60)
 public class KMJobTask extends AbstractAsyncCommonDispatchTask {
 
     @Autowired

@@ -90,7 +90,7 @@ export default () => {
             return (
               <div>
                 <span style={{ display: 'inline-block', marginRight: '8px' }}>Similar Config</span>
-                <Tooltip overlayClassName="rebalance-tooltip" title="所有broker配置是否一致">
+                <Tooltip overlayClassName="rebalance-tooltip" title="所有Broker配置是否一致">
                   <QuestionCircleOutlined />
                 </Tooltip>
               </div>
@@ -111,7 +111,7 @@ export default () => {
       ];
       setCardData(cordRightMap);
     });
-    Promise.all([brokerMetric, brokersState]).then((res) => {
+    Promise.all([brokerMetric, brokersState]).finally(() => {
       setLoading(false);
     });
   }, [routeParams.clusterId]);

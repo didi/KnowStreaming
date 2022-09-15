@@ -91,21 +91,9 @@ const AutoPage = (props: any) => {
       if (metricName === 'HealthScore') {
         return Math.round(orgVal);
       } else if (metricName === 'LogSize') {
-        return Number(Utils.formatAssignSize(orgVal, 'MB')).toString().length > 3 ? (
-          <Tooltip title={Utils.formatAssignSize(orgVal, 'MB')}>
-            {Number(Utils.formatAssignSize(orgVal, 'MB')).toString().slice(0, 3) + '...'}
-          </Tooltip>
-        ) : (
-          Number(Utils.formatAssignSize(orgVal, 'MB'))
-        );
+        return Number(Utils.formatAssignSize(orgVal, 'MB'));
       } else {
-        return Number(Utils.formatAssignSize(orgVal, 'KB')).toString().length > 3 ? (
-          <Tooltip title={Utils.formatAssignSize(orgVal, 'KB')}>
-            {Number(Utils.formatAssignSize(orgVal, 'KB')).toString().slice(0, 3) + '...'}
-          </Tooltip>
-        ) : (
-          Number(Utils.formatAssignSize(orgVal, 'KB'))
-        );
+        return Number(Utils.formatAssignSize(orgVal, 'KB'));
         // return Utils.formatAssignSize(orgVal, 'KB');
       }
     }
@@ -116,15 +104,15 @@ const AutoPage = (props: any) => {
     const points = record.metricLines.find((item: any) => item.metricName === metricName)?.metricPoints || [];
     return (
       <div className="metric-data-wrap">
-        <span className="cur-val">{calcCurValue(record, metricName)}</span>
         <SmallChart
           width={'100%'}
-          height={40}
+          height={30}
           chartData={{
             name: record.metricName,
             data: points.map((item: any) => ({ time: item.timeStamp, value: item.value })),
           }}
         />
+        <span className="cur-val">{calcCurValue(record, metricName)}</span>
       </div>
     );
   };
@@ -268,12 +256,16 @@ const AutoPage = (props: any) => {
 
   const menu = (
     <Menu>
-      <Menu.Item>
-        <a onClick={() => setChangeVisible(true)}>扩缩副本</a>
-      </Menu.Item>
-      <Menu.Item>
-        <a onClick={() => setMoveVisible(true)}>迁移副本</a>
-      </Menu.Item>
+      {global.hasPermission(ClustersPermissionMap.TOPIC_CHANGE_REPLICA) && (
+        <Menu.Item>
+          <a onClick={() => setChangeVisible(true)}>扩缩副本</a>
+        </Menu.Item>
+      )}
+      {global.hasPermission(ClustersPermissionMap.TOPIC_MOVE_REPLICA) && (
+        <Menu.Item>
+          <a onClick={() => setMoveVisible(true)}>迁移副本</a>
+        </Menu.Item>
+      )}
     </Menu>
   );
 
@@ -345,11 +337,14 @@ const AutoPage = (props: any) => {
                 setSearchKeywordsInput(e.target.value);
               }}
             />
-            <Dropdown overlay={menu} trigger={['click']}>
-              <Button className="batch-btn" icon={<DownOutlined />} type="primary" ghost>
-                批量操作
-              </Button>
-            </Dropdown>
+            {(global.hasPermission(ClustersPermissionMap.TOPIC_CHANGE_REPLICA) ||
+              global.hasPermission(ClustersPermissionMap.TOPIC_MOVE_REPLICA)) && (
+              <Dropdown overlay={menu} trigger={['click']}>
+                <Button className="batch-btn" icon={<DownOutlined />} type="primary" ghost>
+                  批量变更
+                </Button>
+              </Dropdown>
+            )}
             {global.hasPermission && global.hasPermission(ClustersPermissionMap.TOPIC_ADD) ? (
               <Create onConfirm={getTopicsList}></Create>
             ) : (

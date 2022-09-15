@@ -61,9 +61,11 @@ const columns: any = [
       const totalSize = r.totalSize ? Number(Utils.formatAssignSize(t, 'MB')) : 0;
       return (
         <div className="message-size">
-          <Tooltip title={(movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0) + '%'}>
+          <Tooltip
+            title={(movedSize === 0 && totalSize === 0 ? 100 : movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0) + '%'}
+          >
             <Progress
-              percent={movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0}
+              percent={movedSize === 0 && totalSize === 0 ? 100 : movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0}
               strokeColor="#556EE6"
               trailColor="#ECECF1"
               showInfo={false}

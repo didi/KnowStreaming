@@ -364,8 +364,12 @@
       .multi-cluster-list-item-btn {
         opacity: 1;
         .icon {
+          width: 24px;
+          background: rgba(33, 37, 41, 0.04);
+          border-radius: 12px;
           color: #74788d;
           font-size: 14px;
+          margin-left: 10px;
         }
 
         .icon:hover {
@@ -375,16 +379,14 @@
     }
 
     .multi-cluster-list-item-btn {
+      display: flex;
       opacity: 0;
       position: absolute;
       right: 20px;
       top: 8px;
       z-index: 10;
       text-align: right;
-      width: 24px;
       height: 24px;
-      background: rgba(33, 37, 41, 0.04);
-      border-radius: 14px;
       text-align: center;
       line-height: 24px;
     }

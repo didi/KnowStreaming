@@ -1,4 +1,59 @@
 
+
+## v3.0.0-beta.2
+
+**文档**
+- 新增登录系统对接文档
+- 优化前端工程打包构建部分文档说明
+- FAQ补充KnowStreaming连接特定JMX IP的说明
+
+
+**Bug修复**
+- 修复logi_security_oplog表字段过短，导致删除Topic等操作无法记录的问题
+- 修复ES查询时，抛java.lang.NumberFormatException: For input string: "{"value":0,"relation":"eq"}" 问题
+- 修复LogStartOffset和LogEndOffset指标单位错误问题
+- 修复进行副本变更时，旧副本数为NULL的问题
+- 修复集群Group列表，在第二页搜索时，搜索时返回的分页信息错误问题
+- 修复重置Offset时，返回的错误信息提示不一致的问题
+- 修复集群查看，系统查看，LoadRebalance等页面权限点缺失问题
+- 修复查询不存在的Topic时，错误信息提示不明显的问题
+- 修复Windows用户打包前端工程报错的问题
+- package-lock.json锁定前端依赖版本号，修复因依赖自动升级导致打包失败等问题
+- 系统管理子应用，补充后端返回的Code码拦截，解决后端接口返回报错不展示的问题
+- 修复用户登出后，依旧可以访问系统的问题
+- 修复巡检任务配置时，数值显示错误的问题
+- 修复Broker/Topic Overview 图表和图表详情问题
+- 修复Job扩缩副本任务明细数据错误的问题
+- 修复重置Offset时，分区ID，Offset数值无限制问题
+- 修复扩缩/迁移副本时，无法选中Kafka系统Topic的问题
+- 修复Topic的Config页面，编辑表单时不能正确回显当前值的问题
+- 修复Broker Card返回数据后依旧展示加载态的问题
+
+
+
+**体验优化**
+- 优化默认用户密码为 admin/admin
+- 缩短新增集群后，集群信息加载的耗时
+- 集群Broker列表，增加Controller角色信息
+- 副本变更任务结束后，增加进行优先副本选举的操作
+- Task模块任务分为Metrics、Common、Metadata三类任务，每类任务配备独立线程池，减少对Job模块的线程池，以及不同类任务之间的相互影响
+- 删除代码中存在的多余无用文件
+- 自动新增ES索引模版及近7天索引，减少用户搭建时需要做的事项
+- 优化前端工程打包流程
+- 优化登录页文案，页面左侧栏内容，单集群详情样式，Topic列表趋势图等
+- 首次进入Broker/Topic图表详情时，进行预缓存数据从而优化体验
+- 优化Topic详情Partition Tab的展示
+- 多集群列表页增加编辑功能
+- 优化副本变更时，迁移时间支持分钟级别粒度
+- logi-security版本升级至2.10.13
+- logi-elasticsearch-client版本升级至1.0.24
+
+
+**能力提升**
+- 支持Ldap登录认证
+
+---
+
 ## v3.0.0-beta.1
 
 **文档**
@@ -35,6 +90,7 @@
 - 增加周期任务，用于主动创建缺少的ES模版及索引的能力，减少额外的脚本操作
 - 增加JMX连接的Broker地址可选择的能力
 
+---
 
 ## v3.0.0-beta.0
 
