@@ -77,7 +77,7 @@ export const getTopicMessagesColmns = () => {
       key: 'partitionId',
     },
     {
-      title: 'offset',
+      title: 'Offset',
       dataIndex: 'offset',
       key: 'offset',
     },

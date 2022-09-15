@@ -1,4 +1,4 @@
-import HomePage from './MutliClusterPage/HomePage';
+import ClusterManage from './MutliClusterPage/HomePage';
 
 import { NoMatch } from '.';
 import CommonRoute from './CommonRoute';
@@ -26,7 +26,7 @@ const pageRoutes = [
   {
     path: '/',
     exact: true,
-    component: HomePage,
+    component: ClusterManage,
     commonRoute: CommonConfig,
     noSider: true,
   },
@@ -37,15 +37,6 @@ const pageRoutes = [
     commonRoute: CommonRoute,
     noSider: false,
     children: [
-      // 负载均衡
-      process.env.BUSINESS_VERSION
-        ? {
-            path: 'cluster/balance',
-            exact: true,
-            component: LoadRebalance,
-            noSider: false,
-          }
-        : undefined,
       {
         path: 'cluster',
         exact: true,
@@ -109,6 +100,21 @@ const pageRoutes = [
         component: Consumers,
         noSider: false,
       },
+      // 负载均衡
+      process.env.BUSINESS_VERSION
+        ? {
+            path: 'operation/balance',
+            exact: true,
+            component: LoadRebalance,
+            noSider: false,
+          }
+        : undefined,
+      {
+        path: 'operation/jobs',
+        exact: true,
+        component: Jobs,
+        noSider: false,
+      },
       {
         path: 'security/acls',
         exact: true,
@@ -119,12 +125,6 @@ const pageRoutes = [
         path: 'security/users',
         exact: true,
         component: SecurityUsers,
-        noSider: false,
-      },
-      {
-        path: 'jobs',
-        exact: true,
-        component: Jobs,
         noSider: false,
       },
       {

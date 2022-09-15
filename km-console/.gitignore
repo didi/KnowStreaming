@@ -9,6 +9,5 @@ build/
 coverage
 versions/
 debug.log
-package-lock.json
 yarn.lock
 target

@@ -46,30 +46,42 @@ export const supplementaryPoints = (
   extraCallback?: (point: [number, 0]) => any[]
 ) => {
   lines.forEach(({ data }) => {
+    // 获取未补点前线条的点的个数
     let len = data.length;
-    for (let i = 0; i < len; i++) {
-      const timestamp = data[i][0] as number;
-      // 数组第一个点和最后一个点单独处理
+    // 记录当前处理到的点的下标值
+    let i = 0;
+
+    for (; i < len; i++) {
       if (i === 0) {
         let firstPointTimestamp = data[0][0] as number;
         while (firstPointTimestamp - interval > timeRange[0]) {
-          const prePointTimestamp = firstPointTimestamp - interval;
-          data.unshift(extraCallback ? extraCallback([prePointTimestamp, 0]) : [prePointTimestamp, 0]);
+          const prevPointTimestamp = firstPointTimestamp - interval;
+          data.unshift(extraCallback ? extraCallback([prevPointTimestamp, 0]) : [prevPointTimestamp, 0]);
+          firstPointTimestamp = prevPointTimestamp;
           len++;
           i++;
-          firstPointTimestamp = prePointTimestamp;
         }
       }
+
       if (i === len - 1) {
-        let lastPointTimestamp = data[len - 1][0] as number;
+        let lastPointTimestamp = data[i][0] as number;
         while (lastPointTimestamp + interval < timeRange[1]) {
-          const next = lastPointTimestamp + interval;
-          data.push(extraCallback ? extraCallback([next, 0]) : [next, 0]);
-          lastPointTimestamp = next;
+          const nextPointTimestamp = lastPointTimestamp + interval;
+          data.push(extraCallback ? extraCallback([nextPointTimestamp, 0]) : [nextPointTimestamp, 0]);
+          lastPointTimestamp = nextPointTimestamp;
         }
-      } else if (timestamp + interval < data[i + 1][0]) {
-        data.splice(i + 1, 0, extraCallback ? extraCallback([timestamp + interval, 0]) : [timestamp + interval, 0]);
-        len++;
+        break;
+      }
+
+      {
+        let timestamp = data[i][0] as number;
+        while (timestamp + interval < data[i + 1][0]) {
+          const nextPointTimestamp = timestamp + interval;
+          data.splice(i + 1, 0, extraCallback ? extraCallback([nextPointTimestamp, 0]) : [nextPointTimestamp, 0]);
+          timestamp = nextPointTimestamp;
+          len++;
+          i++;
+        }
       }
     }
   });
@@ -135,18 +147,37 @@ export const formatChartData = (
 };
 
 const seriesCallback = (lines: { name: string; data: [number, string | number][] }[]) => {
+  const len = CHART_COLOR_LIST.length;
   // series 配置
-  return lines.map((line) => {
+  return lines.map((line, i) => {
     return {
       ...line,
       lineStyle: {
         width: 1.5,
       },
+      connectNulls: false,
       symbol: 'emptyCircle',
       symbolSize: 4,
       smooth: 0.25,
       areaStyle: {
-        opacity: 0.02,
+        color: {
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
+          colorStops: [
+            {
+              offset: 0,
+              color: CHART_COLOR_LIST[i % len] + '10',
+            },
+            {
+              offset: 1,
+              color: 'rgba(255,255,255,0)', // 100% 处的颜色
+            },
+          ],
+          global: false, // 缺省为 false
+        },
       },
     };
   });
@@ -189,6 +220,7 @@ export const getDetailChartConfig = (title: string, sliderPos: readonly [number,
           startValue: sliderPos[0],
           endValue: sliderPos[1],
           zoomOnMouseWheel: false,
+          minValueSpan: 10 * 60 * 1000,
         },
         {
           start: 0,

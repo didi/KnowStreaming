@@ -314,9 +314,13 @@ export const getTaskDetailsColumns = (arg?: any) => {
         const totalSize = r.totalSize ? Number(Utils.formatAssignSize(t, 'MB')) : 0;
         return (
           <div className="message-size">
-            <Tooltip title={(movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0) + '%'}>
+            <Tooltip
+              title={
+                (r.success === r.total && r.total > 0 ? 100 : movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0) + '%'
+              }
+            >
               <Progress
-                percent={movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0}
+                percent={r.success === r.total && r.total > 0 ? 100 : movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0}
                 strokeColor="#556EE6"
                 showInfo={false}
               />
@@ -438,9 +442,13 @@ export const getMoveBalanceColumns = (arg?: any) => {
         const totalSize = r.totalSize ? Number(Utils.formatAssignSize(t, 'MB')) : 0;
         return (
           <div className="message-size">
-            <Tooltip title={(movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0) + '%'}>
+            <Tooltip
+              title={
+                (r.success === r.total && r.total > 0 ? 100 : movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0) + '%'
+              }
+            >
               <Progress
-                percent={movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0}
+                percent={r.success === r.total && r.total > 0 ? 100 : movedSize > 0 && totalSize > 0 ? (movedSize / totalSize) * 100 : 0}
                 strokeColor="#556EE6"
                 showInfo={false}
               />

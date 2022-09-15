@@ -14,19 +14,49 @@ export const getBrokerListColumns = (arg?: any) => {
       // eslint-disable-next-line react/display-name
       render: (t: number, r: any) => {
         return r?.alive ? (
-          <a
-            onClick={() => {
-              window.location.hash = `brokerId=${t || t === 0 ? t : ''}&host=${r.host || ''}`;
-            }}
-          >
-            {t}
-          </a>
+          <>
+            <a
+              onClick={() => {
+                window.location.hash = `brokerId=${t || t === 0 ? t : ''}&host=${r.host || ''}`;
+              }}
+            >
+              {t}
+            </a>
+            {r?.kafkaRoleList?.includes('controller') && (
+              <Tag
+                style={{
+                  color: '#556EE6',
+                  padding: '2px 5px',
+                  background: '#eff1fd',
+                  marginLeft: '4px',
+                  transform: 'scale(0.83,0.83)',
+                }}
+              >
+                Controller
+              </Tag>
+            )}
+          </>
         ) : (
-          <span>{t}</span>
+          <>
+            <span>{t}</span>
+            {r?.kafkaRoleList?.includes('controller') && (
+              <Tag
+                style={{
+                  color: '#556EE6',
+                  padding: '2px 5px',
+                  background: '#eff1fd',
+                  marginLeft: '4px',
+                  transform: 'scale(0.83,0.83)',
+                }}
+              >
+                Controller
+              </Tag>
+            )}
+          </>
         );
       },
       fixed: 'left',
-      width: 120,
+      width: 150,
     },
     // {
     //   title: 'Rack',

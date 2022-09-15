@@ -26,9 +26,13 @@ export const ConfigurationEdit = (props: any) => {
           props.setVisible(false);
           props.genData({ pageNo: 1, pageSize: 10 });
         })
-        .catch((err: any) => { });
+        .catch((err: any) => {});
     });
   };
+
+  React.useEffect(() => {
+    form.setFieldsValue(props.record);
+  }, [props.record]);
 
   return (
     <Drawer
@@ -43,6 +47,7 @@ export const ConfigurationEdit = (props: any) => {
       visible={props.visible}
       onClose={() => props.setVisible(false)}
       maskClosable={false}
+      destroyOnClose
       extra={
         <Space>
           <Button size="small" onClick={onClose}>
@@ -76,7 +81,7 @@ export const ConfigurationEdit = (props: any) => {
           {props.record?.documentation || '-'}
         </Col>
       </Row>
-      <Form form={form} layout={'vertical'} initialValues={props.record}>
+      <Form form={form} layout={'vertical'}>
         <Form.Item name="defaultValue" label="Kafka默认配置">
           <Input disabled />
         </Form.Item>

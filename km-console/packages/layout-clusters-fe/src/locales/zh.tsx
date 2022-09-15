@@ -44,6 +44,10 @@ export default {
   [`menu.${systemKey}.consumer-group.operating-state`]: 'Operating State',
   [`menu.${systemKey}.consumer-group.group-list`]: 'GroupList',
 
+  [`menu.${systemKey}.operation`]: 'Operation',
+  [`menu.${systemKey}.operation.balance`]: 'Load Rebalance',
+  [`menu.${systemKey}.operation.jobs`]: 'Job',
+
   [`menu.${systemKey}.acls`]: 'ACLs',
 
   [`menu.${systemKey}.jobs`]: 'Job',

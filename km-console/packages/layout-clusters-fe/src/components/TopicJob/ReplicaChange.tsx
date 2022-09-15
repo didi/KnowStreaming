@@ -30,8 +30,8 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const jobNameMap: any = {
-  expandAndReduce: '批量扩缩副本',
-  transfer: '批量迁移副本',
+  expandAndReduce: '扩缩副本',
+  transfer: '迁移副本',
 };
 
 interface DefaultConfig {
@@ -325,8 +325,7 @@ export default (props: DefaultConfig) => {
     !jobId &&
       Utils.request(Api.getTopicMetaData(+routeParams.clusterId))
         .then((res: any) => {
-          const filterRes = res.filter((item: any) => item.type !== 1);
-          const topics = (filterRes || []).map((item: any) => {
+          const topics = (res || []).map((item: any) => {
             return {
               label: item.topicName,
               value: item.topicName,

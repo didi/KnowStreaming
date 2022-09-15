@@ -7,6 +7,7 @@ import moment from 'moment';
 import { timeFormat } from '../../constants/common';
 import { DownOutlined } from '@ant-design/icons';
 import { renderToolTipValue } from './config';
+import RenderEmpty from '@src/components/RenderEmpty';
 
 const { Panel } = Collapse;
 
@@ -51,17 +52,6 @@ const ChangeLog = () => {
     );
   }, []);
 
-  const renderEmpty = () => {
-    return (
-      <>
-        <div className="empty-panel">
-          <div className="img" />
-          <div className="text">暂无配置记录</div>
-        </div>
-      </>
-    );
-  };
-
   const getHref = (item: any) => {
     if (item.resTypeName.toLowerCase().includes('topic')) return `/cluster/${clusterId}/topic/list#topicName=${item.resName}`;
     if (item.resTypeName.toLowerCase().includes('broker')) return `/cluster/${clusterId}/broker/list#brokerId=${item.resName}`;
@@ -73,7 +63,7 @@ const ChangeLog = () => {
       <div className="change-log-panel">
         <div className="title">历史变更记录</div>
         {!loading && !data.length ? (
-          renderEmpty()
+          <RenderEmpty message="暂无配置记录" />
         ) : (
           <div id="changelog-scroll-box">
             <Spin spinning={loading} style={{ paddingLeft: '42%', marginTop: 100 }} />
