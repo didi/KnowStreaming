@@ -1,17 +1,16 @@
-esAddrPort=${ES_CLIENT_ADDRESS}
 echo "Wait ElasticSearch Start..."
 while true
 do
-  curl -s --connect-timeout 10 -o /dev/null  http://${esAddrPort}/_cat/nodes >> /dev/null 2>&1
+  curl -s --connect-timeout 10 -o /dev/null  http://${SERVER_ES_ADDRESS}/_cat/nodes >> /dev/null 2>&1
   if [ "$?" != "0" ];then
     sleep 1s
   else
-    echo "ElasticSearch Start Success"
+    echo "ElasticSearch Start Initialize"
     break
   fi
 done
 
-curl -s --connect-timeout 10 -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esAddrPort}/_template/ks_kafka_broker_metric -d '{
+curl -s --connect-timeout 10 -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_broker_metric -d '{
     "order" : 10,
     "index_patterns" : [
       "ks_kafka_broker_metric*"
@@ -113,7 +112,7 @@ curl -s --connect-timeout 10 -o /dev/null -X POST -H 'cache-control: no-cache' -
     "aliases" : { }
   }' 
 
-curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esAddrPort}/_template/ks_kafka_cluster_metric -d '{
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_cluster_metric -d '{
     "order" : 10,
     "index_patterns" : [
       "ks_kafka_cluster_metric*"
@@ -298,9 +297,9 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
       }
     },
     "aliases" : { }
-   }' 
+   }'
 
-curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esAddrPort}/_template/ks_kafka_group_metric -d '{
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_group_metric -d '{
     "order" : 10,
     "index_patterns" : [
       "ks_kafka_group_metric*"
@@ -373,9 +372,9 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
       }
     },
     "aliases" : { }
-  }' 
+  }'
 
-curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esAddrPort}/_template/ks_kafka_partition_metric -d '{
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_partition_metric -d '{
     "order" : 10,
     "index_patterns" : [
       "ks_kafka_partition_metric*"
@@ -439,9 +438,9 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
       }
     },
     "aliases" : { }
-  }' 
+  }'
 
-curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esAddrPort}/_template/ks_kafka_replication_metric -d '{
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_replication_metric -d '{
     "order" : 10,
     "index_patterns" : [
       "ks_kafka_partition_metric*"
@@ -528,9 +527,9 @@ PUT _template/ks_kafka_replication_metric
       }
     },
     "aliases" : { }
-  }' 
+  }'
 
-curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esAddrPort}/_template/ks_kafka_topic_metric -d '{
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_topic_metric -d '{
     "order" : 10,
     "index_patterns" : [
       "ks_kafka_topic_metric*"
@@ -645,17 +644,17 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
       }
     },
     "aliases" : { }
-  }' 
+  }'
 
-for i in `seq 6`;
+for i in {0..6};
 do
     logdate=_$(date -d "${i} day ago" +%Y-%m-%d)
-    curl -s --connect-timeout 10 -o /dev/null -X PUT http://${esAddrPort}/ks_kafka_broker_metric${logdate}  && \
-    curl -s -o /dev/null -X PUT http://${esAddrPort}/ks_kafka_cluster_metric${logdate} && \
-    curl -s -o /dev/null -X PUT http://${esAddrPort}/ks_kafka_group_metric${logdate} && \
-    curl -s -o /dev/null -X PUT http://${esAddrPort}/ks_kafka_partition_metric${logdate} && \
-    curl -s -o /dev/null -X PUT http://${esAddrPort}/ks_kafka_replication_metric${logdate} && \
-    curl -s -o /dev/null -X PUT http://${esAddrPort}/ks_kafka_topic_metric${logdate} || \
+    curl -s --connect-timeout 10 -o /dev/null -X PUT http://${SERVER_ES_ADDRESS}/ks_kafka_broker_metric${logdate}  && \
+    curl -s -o /dev/null -X PUT http://${SERVER_ES_ADDRESS}/ks_kafka_cluster_metric${logdate} && \
+    curl -s -o /dev/null -X PUT http://${SERVER_ES_ADDRESS}/ks_kafka_group_metric${logdate} && \
+    curl -s -o /dev/null -X PUT http://${SERVER_ES_ADDRESS}/ks_kafka_partition_metric${logdate} && \
+    curl -s -o /dev/null -X PUT http://${SERVER_ES_ADDRESS}/ks_kafka_replication_metric${logdate} && \
+    curl -s -o /dev/null -X PUT http://${SERVER_ES_ADDRESS}/ks_kafka_topic_metric${logdate} || \
     exit 2
 done
 
