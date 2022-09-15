@@ -5,11 +5,10 @@ LABEL org.opencontainers.image.authors="haoqi123"
 EXPOSE 80
 
 ENV JAR_FILE=./jar/*.jar
-ENV INIT_ES_FILE=./init/*
+ENV INIT_FILE=./init/*
 ENV CONFIG_FILE=./conf/*
 COPY ${JAR_FILE} /app/app.jar
-COPY ${INIT_ES_FILE} /
+COPY ${INIT_FILE} /
 COPY ${CONFIG_FILE} /conf/
 
 ENTRYPOINT ["/bin/bash","/start.sh"]
-CMD ["/bin/bash","/start.sh"]

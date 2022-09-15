@@ -68,7 +68,18 @@ services:
 #      - /Users/haoqi/Downloads/ks/es/data:/usr/share/elasticsearch/data
     networks:
       - ks
-
+  esinit:
+    image: esinit:1.0
+    container_name: esinit
+    depends_on:
+      - elasticsearch_single
+    links:
+      - elasticsearch_single
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_ES_ADDRESS: elasticsearch_single:9200
+    networks:
+      - ks
 
   kmysql:
     image: ks_mysql:1.0
@@ -84,8 +95,8 @@ services:
       - 3306
 #   数据文件持久化路径
 #   记录添加的集群基本信息
-    volumes:
-      - /Users/haoqi/Downloads/ks/mysql/data:/data/mysql
+#    volumes:
+#      - /Users/haoqi/Downloads/ks/mysql/data:/data/mysql
 
 networks:
   ks:
