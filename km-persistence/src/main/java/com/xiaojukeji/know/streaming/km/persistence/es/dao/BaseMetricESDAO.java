@@ -336,7 +336,10 @@ public class BaseMetricESDAO extends BaseESDAO {
         if(null == response || null == response.getHits()
                 || null ==response.getHits().getUnusedMap()){return -1;}
 
-        return Integer.valueOf(response.getHits().getUnusedMap().getOrDefault(TOTAL, 0).toString());
+        // "total" : {"value": 123 , "relation": "XX "}
+        JSONObject jsonObjectTotal = (JSONObject) response.getHits().getUnusedMap().getOrDefault(TOTAL, 0);
+
+        return Integer.valueOf(jsonObjectTotal.get(VALUE).toString());
     }
 
     protected <T extends BaseMetricESPO> T filterMetrics(T t, List<String> metricNames){
