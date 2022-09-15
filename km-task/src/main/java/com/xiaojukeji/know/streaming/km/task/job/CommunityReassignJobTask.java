@@ -8,7 +8,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignJobService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
+import com.xiaojukeji.know.streaming.km.task.AbstractAsyncCommonDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Task(name = "CommunityReassignJobTask",
@@ -16,15 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
-        timeout = 6 * 60)
-public class CommunityReassignJobTask extends AbstractClusterPhyDispatchTask {
+        timeout = 2 * 60)
+public class CommunityReassignJobTask extends AbstractAsyncCommonDispatchTask {
     private static final ILog log = LogFactory.getLog(CommunityReassignJobTask.class);
 
     @Autowired
     private ReassignJobService reassignJobService;
 
     @Override
-    protected TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
         // 获取迁移中的任务
         Long jobId = reassignJobService.getOneRunningJobId(clusterPhy.getId());
         if (jobId == null) {

@@ -1,13 +1,15 @@
 /* eslint-disable react/display-name */
 import React, { useState } from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button, message, IconFont } from 'knowdesign';
+import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button, message, IconFont, Select } from 'knowdesign';
 import './style/edit-table.less';
 import { CheckOutlined, CloseOutlined, PlusSquareOutlined } from '@ant-design/icons';
 
-const EditableCell = ({ editing, dataIndex, title, inputType, placeholder, record, index, children, ...restProps }: any) => {
+const EditableCell = ({ editing, dataIndex, title, inputType, placeholder, record, index, children, options, ...restProps }: any) => {
   const inputNode =
     inputType === 'number' ? (
-      <InputNumber style={{ width: '130px' }} autoComplete="off" placeholder={placeholder} />
+      <InputNumber min={0} precision={0} style={{ width: '130px' }} autoComplete="off" placeholder={placeholder} />
+    ) : inputType === 'select' ? (
+      <Select style={{ width: '140px' }} options={options || []} placeholder={placeholder} />
     ) : (
       <Input autoComplete="off" placeholder={placeholder} />
     );

@@ -9,6 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.search.*;
 import com.xiaojukeji.know.streaming.km.common.bean.po.BaseESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.BaseMetricESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
+import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.IndexNameUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.BaseESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
@@ -34,6 +35,8 @@ public class BaseMetricESDAO extends BaseESDAO {
     protected static final Long     ONE_HOUR = 60 * ONE_MIN;
     protected static final Long     ONE_DAY  = 24 * ONE_HOUR;
 
+    private static final int        INDEX_DAYS = 7;
+
     /**
      * 不同维度 kafka 监控数据
      */
@@ -45,12 +48,18 @@ public class BaseMetricESDAO extends BaseESDAO {
      */
     @Scheduled(cron = "0 3/5 * * * ?")
     public void checkCurrentDayIndexExist(){
-        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+        try {
+            esOpClient.createIndexTemplateIfNotExist(indexName, indexTemplate);
 
-        if(esOpClient.indexExist(realIndex)){return;}
+            //检查最近7天索引存在不存
+            for(int i = 0; i < INDEX_DAYS; i++){
+                String realIndex = IndexNameUtils.genDailyIndexName(indexName, i);
+                if(esOpClient.indexExist(realIndex)){continue;}
 
-        if(esOpClient.createIndexTemplateIfNotExist(indexName, indexTemplate)){
-            esOpClient.createIndex(realIndex);
+                esOpClient.createIndex(realIndex);
+            }
+        }catch (Exception e){
+            LOGGER.error("method=checkCurrentDayIndexExist||errMsg=exception!", e);
         }
     }
 
@@ -336,7 +345,17 @@ public class BaseMetricESDAO extends BaseESDAO {
         if(null == response || null == response.getHits()
                 || null ==response.getHits().getUnusedMap()){return -1;}
 
-        return Integer.valueOf(response.getHits().getUnusedMap().getOrDefault(TOTAL, 0).toString());
+        try {
+            String total = response.getHits().getUnusedMap().get(TOTAL).toString();
+            if(CommonUtils.isNumeric(total)){
+                return Integer.valueOf(total);
+            }else {
+                return JSON.parseObject(total).getIntValue(VALUE);
+            }
+        }catch (Exception e){
+            LOGGER.error("method=handleESQueryResponseCount||errMsg=exception!", e);
+        }
+        return 0;
     }
 
     protected <T extends BaseMetricESPO> T filterMetrics(T t, List<String> metricNames){
@@ -386,6 +405,10 @@ public class BaseMetricESDAO extends BaseESDAO {
      * 对 metricPointVOS 进行缺点优化
      */
     protected List<MetricPointVO> optimizeMetricPoints(List<MetricPointVO> metricPointVOS){
+//        // 内部测试环境，不进行优化，直接返回
+//        return metricPointVOS;
+
+        // 开源环境，进行指标点优化
         if(CollectionUtils.isEmpty(metricPointVOS)){return metricPointVOS;}
 
         int size = metricPointVOS.size();

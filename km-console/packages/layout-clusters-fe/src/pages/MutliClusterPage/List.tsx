@@ -1,38 +1,51 @@
 import { AppContainer, Divider, Form, IconFont, Input, List, message, Modal, Progress, Spin, Tooltip, Utils } from 'knowdesign';
 import moment from 'moment';
-import React, { useEffect, useMemo, useState, useReducer } from 'react';
+import API from '@src/api';
+import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, useHistory } from 'react-router-dom';
-import { timeFormat } from '../../constants/common';
-import { IMetricPoint, linesMetric } from './config';
+import { timeFormat, oneDayMillims } from '@src/constants/common';
+import { IMetricPoint, linesMetric, pointsMetric } from './config';
 import { useIntl } from 'react-intl';
-import api, { MetricType } from '../../api';
+import api, { MetricType } from '@src/api';
 import { getHealthClassName, getHealthProcessColor, getHealthText } from '../SingleClusterDetail/config';
 import { ClustersPermissionMap } from '../CommonConfig';
 import { getUnit, getDataNumberUnit } from '@src/constants/chartConfig';
 import SmallChart from '@src/components/SmallChart';
+import { SearchParams } from './HomePage';
 
-const ListScroll = (props: { loadMoreData: any; list: any; pagination: any; getPhyClusterState: any }) => {
-  const history = useHistory();
-  const [global] = AppContainer.useGlobalValue();
-  const [form] = Form.useForm();
-  const [list, setList] = useState<[]>(props.list || []);
-  const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const [clusterInfo, setClusterInfo] = useState({} as any);
-  const [pagination, setPagination] = useState(
-    props.pagination || {
-      pageNo: 1,
-      pageSize: 10,
-      total: 0,
-    }
-  );
+const DEFAULT_PAGE_SIZE = 10;
+
+const DeleteCluster = React.forwardRef((_, ref) => {
   const intl = useIntl();
+  const [form] = Form.useForm();
+  const [visible, setVisible] = useState<boolean>(false);
+  const [clusterInfo, setClusterInfo] = useState<any>({});
+  const callback = useRef(() => {
+    return;
+  });
 
-  useEffect(() => {
-    setList(props.list || []);
-    setPagination(props.pagination || {});
-  }, [props.list, props.pagination]);
+  const onFinish = () => {
+    form.validateFields().then(() => {
+      Utils.delete(api.phyCluster, {
+        params: {
+          clusterPhyId: clusterInfo.id,
+        },
+      }).then(() => {
+        message.success('删除成功');
+        callback.current();
+        setVisible(false);
+      });
+    });
+  };
+
+  useImperativeHandle(ref, () => ({
+    onOpen: (clusterInfo: any, cbk: () => void) => {
+      setClusterInfo(clusterInfo);
+      callback.current = cbk;
+      setVisible(true);
+    },
+  }));
 
   useEffect(() => {
     if (visible) {
@@ -40,18 +53,163 @@ const ListScroll = (props: { loadMoreData: any; list: any; pagination: any; getP
     }
   }, [visible]);
 
+  return (
+    <Modal
+      width={570}
+      destroyOnClose={true}
+      centered={true}
+      className="custom-modal"
+      wrapClassName="del-topic-modal delete-modal"
+      title={intl.formatMessage({
+        id: 'delete.cluster.confirm.title',
+      })}
+      visible={visible}
+      onOk={onFinish}
+      okText={intl.formatMessage({
+        id: 'btn.delete',
+      })}
+      cancelText={intl.formatMessage({
+        id: 'btn.cancel',
+      })}
+      onCancel={() => setVisible(false)}
+      okButtonProps={{
+        style: {
+          width: 56,
+        },
+        danger: true,
+        size: 'small',
+      }}
+      cancelButtonProps={{
+        style: {
+          width: 56,
+        },
+        size: 'small',
+      }}
+    >
+      <div className="tip-info">
+        <IconFont type="icon-warning-circle"></IconFont>
+        <span>
+          {intl.formatMessage({
+            id: 'delete.cluster.confirm.tip',
+          })}
+        </span>
+      </div>
+      <Form form={form} className="form" labelCol={{ span: 4 }} wrapperCol={{ span: 16 }} autoComplete="off">
+        <Form.Item label="集群名称" name="name">
+          <span>{clusterInfo.name}</span>
+        </Form.Item>
+        <Form.Item
+          label="集群名称"
+          name="clusterName"
+          rules={[
+            {
+              required: true,
+              message: intl.formatMessage({
+                id: 'delete.cluster.confirm.cluster',
+              }),
+              validator: (rule: any, value: string) => {
+                value = value || '';
+                if (!value.trim() || value.trim() !== clusterInfo.name)
+                  return Promise.reject(
+                    intl.formatMessage({
+                      id: 'delete.cluster.confirm.cluster',
+                    })
+                  );
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+});
+
+const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any; getPhyClusterState: any; getExistKafkaVersion: any }) => {
+  const { searchParams, showAccessCluster, getPhyClusterState, getExistKafkaVersion } = props;
+  const history = useHistory();
+  const [global] = AppContainer.useGlobalValue();
+  const [isReload, setIsReload] = useState<boolean>(false);
+  const [list, setList] = useState<[]>([]);
+  const [clusterLoading, setClusterLoading] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState({
+    pageNo: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0,
+  });
+  const deleteModalRef = useRef(null);
+
+  const getClusterList = (pageNo: number, pageSize: number) => {
+    const endTime = new Date().getTime();
+    const startTime = endTime - oneDayMillims;
+    const params = {
+      metricLines: {
+        endTime,
+        metricsNames: linesMetric,
+        startTime,
+      },
+      latestMetricNames: pointsMetric,
+      pageNo: pageNo,
+      pageSize: pageSize,
+      preciseFilterDTOList: [
+        {
+          fieldName: 'kafkaVersion',
+          fieldValueList: searchParams.checkedKafkaVersions as (string | number)[],
+        },
+      ],
+      rangeFilterDTOList: [
+        {
+          fieldMaxValue: searchParams.healthScoreRange[1],
+          fieldMinValue: searchParams.healthScoreRange[0],
+          fieldName: 'HealthScore',
+        },
+      ],
+      searchKeywords: searchParams.keywords,
+      ...searchParams.sortInfo,
+    };
+
+    if (searchParams.clusterStatus.length === 1) {
+      params.preciseFilterDTOList.push({
+        fieldName: 'Alive',
+        fieldValueList: searchParams.clusterStatus,
+      });
+    }
+    return Utils.post(API.phyClustersDashbord, params);
+  };
+
+  // 重置集群列表
+  const reloadClusterList = (pageSize = DEFAULT_PAGE_SIZE) => {
+    setClusterLoading(true);
+    getClusterList(1, pageSize)
+      .then((res: any) => {
+        setList(res?.bizData || []);
+        setPagination(res.pagination);
+      })
+      .finally(() => setClusterLoading(false));
+  };
+
+  // 加载更多列表
   const loadMoreData = async () => {
-    if (loading) {
+    if (isLoadingMore) {
       return;
     }
-    setLoading(true);
+    setIsLoadingMore(true);
 
-    const res = await props.loadMoreData(pagination.pageNo + 1, pagination.pageSize);
+    const res: any = await getClusterList(pagination.pageNo + 1, pagination.pageSize);
     const _data = list.concat(res.bizData || []) as any;
     setList(_data);
     setPagination(res.pagination);
-    setLoading(false);
+    setIsLoadingMore(false);
   };
+
+  // 重载列表
+  useEffect(
+    () => (searchParams.isReloadAll ? reloadClusterList(pagination.pageNo * pagination.pageSize) : reloadClusterList()),
+    [searchParams]
+  );
 
   const RenderItem = (itemData: any) => {
     itemData = itemData || {};
@@ -160,7 +318,7 @@ const ListScroll = (props: { loadMoreData: any; list: any; pagination: any; getP
                           title={
                             <span>
                               尚未开启 {name} 均衡策略，
-                              <Link to={`/cluster/${itemData.id}/cluster/balance`}>前往开启</Link>
+                              <Link to={`/cluster/${itemData.id}/operation/balance`}>前往开启</Link>
                             </span>
                           }
                         >
@@ -225,11 +383,34 @@ const ListScroll = (props: { loadMoreData: any; list: any; pagination: any; getP
               </div>
             </div>
           </div>
-          {global.hasPermission && global.hasPermission(ClustersPermissionMap.CLUSTER_DEL) ? (
+          {global.hasPermission ? (
             <div className="multi-cluster-list-item-btn">
-              <div className="icon" onClick={(event) => onClickDeleteBtn(event, itemData)}>
-                <IconFont type="icon-shanchu1" />
-              </div>
+              {global.hasPermission(ClustersPermissionMap.CLUSTER_CHANGE_INFO) && (
+                <div
+                  className="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showAccessCluster(itemData);
+                  }}
+                >
+                  <IconFont type="icon-duojiqunbianji" />
+                </div>
+              )}
+              {global.hasPermission(ClustersPermissionMap.CLUSTER_DEL) && (
+                <div
+                  className="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteModalRef.current.onOpen(itemData, () => {
+                      getPhyClusterState();
+                      getExistKafkaVersion(true);
+                      reloadClusterList(pagination.pageNo * pagination.pageSize);
+                    });
+                  }}
+                >
+                  <IconFont type="icon-duojiqunshanchu" />
+                </div>
+              )}
             </div>
           ) : (
             <></>
@@ -239,45 +420,21 @@ const ListScroll = (props: { loadMoreData: any; list: any; pagination: any; getP
     );
   };
 
-  const onFinish = () => {
-    form.validateFields().then((formData) => {
-      Utils.delete(api.phyCluster, {
-        params: {
-          clusterPhyId: clusterInfo.id,
-        },
-      }).then((res) => {
-        message.success('删除成功');
-        setVisible(false);
-        props?.getPhyClusterState();
-        const fliterList: any = list.filter((item: any) => {
-          return item?.id !== clusterInfo.id;
-        });
-        setList(fliterList || []);
-      });
-    });
-  };
-
-  const onClickDeleteBtn = (event: any, clusterInfo: any) => {
-    event.stopPropagation();
-    setClusterInfo(clusterInfo);
-    setVisible(true);
-  };
-
   return (
-    <>
+    <Spin spinning={clusterLoading}>
       {useMemo(
         () => (
           <InfiniteScroll
             dataLength={list.length}
             next={loadMoreData}
             hasMore={list.length < pagination.total}
-            loader={<Spin style={{ paddingLeft: '50%', paddingTop: 15 }} spinning={loading} />}
+            loader={<Spin style={{ paddingLeft: '50%', paddingTop: 15 }} spinning={true} />}
             endMessage={
               !pagination.total ? (
                 ''
               ) : (
                 <Divider className="load-completed-tip" plain>
-                  加载完成 共{pagination.total}条
+                  加载完成 共 {pagination.total} 条
                 </Divider>
               )
             }
@@ -293,81 +450,11 @@ const ListScroll = (props: { loadMoreData: any; list: any; pagination: any; getP
             />
           </InfiniteScroll>
         ),
-        [list, pagination, loading]
+        [list, pagination, isLoadingMore]
       )}
 
-      <Modal
-        width={570}
-        destroyOnClose={true}
-        centered={true}
-        className="custom-modal"
-        wrapClassName="del-topic-modal delete-modal"
-        title={intl.formatMessage({
-          id: 'delete.cluster.confirm.title',
-        })}
-        visible={visible}
-        onOk={onFinish}
-        okText={intl.formatMessage({
-          id: 'btn.delete',
-        })}
-        cancelText={intl.formatMessage({
-          id: 'btn.cancel',
-        })}
-        onCancel={() => setVisible(false)}
-        okButtonProps={{
-          style: {
-            width: 56,
-          },
-          danger: true,
-          size: 'small',
-        }}
-        cancelButtonProps={{
-          style: {
-            width: 56,
-          },
-          size: 'small',
-        }}
-      >
-        <div className="tip-info">
-          <IconFont type="icon-warning-circle"></IconFont>
-          <span>
-            {intl.formatMessage({
-              id: 'delete.cluster.confirm.tip',
-            })}
-          </span>
-        </div>
-        <Form form={form} className="form" labelCol={{ span: 4 }} wrapperCol={{ span: 16 }} autoComplete="off">
-          <Form.Item label="集群名称" name="name" rules={[{ required: false, message: '' }]}>
-            <span>{clusterInfo.name}</span>
-          </Form.Item>
-          <Form.Item
-            label="集群名称"
-            name="clusterName"
-            rules={[
-              {
-                required: true,
-                message: intl.formatMessage({
-                  id: 'delete.cluster.confirm.cluster',
-                }),
-                validator: (rule: any, value: string) => {
-                  value = value || '';
-                  if (!value.trim() || value.trim() !== clusterInfo.name)
-                    return Promise.reject(
-                      intl.formatMessage({
-                        id: 'delete.cluster.confirm.cluster',
-                      })
-                    );
-                  return Promise.resolve();
-                },
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </>
+      <DeleteCluster ref={deleteModalRef} />
+    </Spin>
   );
 };
-
-export default ListScroll;
+export default ClusterList;

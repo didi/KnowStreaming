@@ -267,10 +267,10 @@ export const getHealthySettingColumn = (form: any, data: any, clusterId: string)
                 <InputNumber
                   size="small"
                   min={0}
-                  max={100}
+                  max={1}
                   style={{ width: 86 }}
-                  formatter={(value) => `${value}%`}
-                  parser={(value: any) => value.replace('%', '')}
+                  formatter={(value) => `${value * 100}%`}
+                  parser={(value: any) => parseFloat(value.replace('%', '')) / 100}
                 />
               ) : (
                 <InputNumber style={{ width: 86 }} size="small" {...attrs} />

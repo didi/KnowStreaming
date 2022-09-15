@@ -9,25 +9,24 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 @Task(name = "SyncBrokerTask",
-        description = "Broker信息同步到DB,",
+        description = "Broker信息同步到DB",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class SyncBrokerTask extends AbstractClusterPhyDispatchTask {
+public class SyncBrokerTask extends AbstractAsyncMetadataDispatchTask {
     private static final ILog log = LogFactory.getLog(SyncBrokerTask.class);
 
     @Autowired
     private BrokerService brokerService;
 
     @Override
-    public TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
         Result<List<Broker>> brokersResult = brokerService.listBrokersFromKafka(clusterPhy);
         if (brokersResult.failed()) {
             return new TaskResult(TaskResult.FAIL_CODE, brokersResult.getMessage());

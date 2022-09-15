@@ -170,6 +170,7 @@ public class ReassignConverter {
             detail.setOriginalBrokerIdList(CommonUtils.string2IntList(subJobPO.getOriginalBrokerIds()));
             detail.setReassignBrokerIdList(CommonUtils.string2IntList(subJobPO.getReassignBrokerIds()));
             detail.setStatus(subJobPO.getStatus());
+            detail.setOldReplicaNum(detail.getOriginalBrokerIdList().size());
 
             ReassignSubJobExtendData extendData = ConvertUtil.str2ObjByJson(subJobPO.getExtendData(), ReassignSubJobExtendData.class);
             if (extendData != null) {
@@ -217,6 +218,7 @@ public class ReassignConverter {
 
         topicDetail.setPresentReplicaNum(partitionDetailList.get(0).getPresentReplicaNum());
         topicDetail.setNewReplicaNum(partitionDetailList.get(0).getNewReplicaNum());
+        topicDetail.setOldReplicaNum(partitionDetailList.get(0).getOldReplicaNum());
         topicDetail.setOriginalRetentionTimeUnitMs(partitionDetailList.get(0).getOriginalRetentionTimeUnitMs());
         topicDetail.setReassignRetentionTimeUnitMs(partitionDetailList.get(0).getReassignRetentionTimeUnitMs());
 

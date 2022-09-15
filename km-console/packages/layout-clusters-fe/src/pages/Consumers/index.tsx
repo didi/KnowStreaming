@@ -30,7 +30,7 @@ const AutoPage = (props: any) => {
 
   const searchFn = () => {
     const params: getOperatingStateListParams = {
-      pageNo: pageIndex,
+      pageNo: 1,
       pageSize,
       fuzzySearchDTOList: [],
     };

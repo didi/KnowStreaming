@@ -59,5 +59,6 @@ export enum RoleOperate {
 export interface FormItemPermission {
   id: number;
   name: string;
+  essentialPermission: { label: string; value: number };
   options: { label: string; value: number }[];
 }

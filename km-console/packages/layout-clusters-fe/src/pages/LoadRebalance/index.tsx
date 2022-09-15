@@ -8,6 +8,7 @@ import api from '../../api';
 import './index.less';
 import LoadRebalanceCardBar from '@src/components/CardBar/LoadRebalanceCardBar';
 import { BalanceFilter } from './BalanceFilter';
+import { ClustersPermissionMap } from '../CommonConfig';
 
 const Balance_Status_OPTIONS = [
   {
@@ -288,21 +289,17 @@ const LoadBalance: React.FC = (props: any) => {
     setVisible(false);
   };
 
-  const balanceClick = (val: boolean = false) => {
-    if (val) {
-      Utils.request(api.getBalanceForm(global?.clusterInfo?.id), {
-        method: 'GET',
+  const balanceClick = (val: boolean) => {
+    Utils.request(api.getBalanceForm(global?.clusterInfo?.id), {
+      method: 'GET',
+    })
+      .then((res: any) => {
+        const dataDe = res || {};
+        setCircleFormData(dataDe);
       })
-        .then((res: any) => {
-          const dataDe = res || {};
-          setCircleFormData(dataDe);
-        })
-        .catch(() => {
-          setCircleFormData(null);
-        });
-    } else {
-      setCircleFormData(null);
-    }
+      .catch(() => {
+        setCircleFormData(null);
+      });
     setIsCycle(val);
     setVisible(true);
   };
@@ -365,19 +362,23 @@ const LoadBalance: React.FC = (props: any) => {
                   value: searchValue,
                   onChange: setSearchValue,
                   placeholder: '请输入 Host',
-                  style: { width: '210px' },
+                  style: { width: '248px' },
                   maxLength: 128,
                 }}
               />
               <Button type="primary" ghost onClick={() => setPlanVisible(true)}>
                 均衡历史
               </Button>
-              <Button type="primary" ghost onClick={() => balanceClick(true)}>
-                周期均衡
-              </Button>
-              <Button type="primary" onClick={() => balanceClick(false)}>
-                立即均衡
-              </Button>
+              {global.hasPermission(ClustersPermissionMap.REBALANCE_CYCLE) && (
+                <Button type="primary" ghost onClick={() => balanceClick(true)}>
+                  周期均衡
+                </Button>
+              )}
+              {global.hasPermission(ClustersPermissionMap.REBALANCE_IMMEDIATE) && (
+                <Button type="primary" onClick={() => balanceClick(false)}>
+                  立即均衡
+                </Button>
+              )}
             </div>
           </div>
           {filterList && filterList.length > 0 && (

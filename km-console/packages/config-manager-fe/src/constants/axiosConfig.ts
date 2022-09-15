@@ -35,7 +35,16 @@ serviceInstance.interceptors.request.use(
 // 响应拦截
 serviceInstance.interceptors.response.use(
   (config: any) => {
-    return config.data;
+    const res: { code: number; message: string; data: any } = config.data;
+    if (res.code !== 0 && res.code !== 200) {
+      const desc = res.message;
+      notification.error({
+        message: desc,
+        duration: 3,
+      });
+      throw res;
+    }
+    return res;
   },
   (err: any) => {
     const config = err.config;

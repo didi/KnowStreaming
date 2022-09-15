@@ -19,6 +19,7 @@
       align-items: center;
       > span {
         margin-left: 4px;
+        color: #74788d;
       }
     }
   }
@@ -36,7 +37,7 @@
       width: 120px;
       margin-right: 8px;
     }
-    .batch-btn{
+    .batch-btn {
       margin-right: 8px;
     }
     .add-btn {
@@ -51,44 +52,44 @@
   }
 }
 .metric-data-wrap {
-  display: flex;
-  align-items: center;
+  // display: flex;
+  // align-items: center;
   width: 100%;
   .cur-val {
-    width: 34px;
-    margin-right: 11px;
+    display: block;
+    text-align: right;
   }
-  .dcloud-spin-nested-loading{
+  .dcloud-spin-nested-loading {
     flex: 1;
   }
 }
 .del-topic-modal,
 .cluster-topic-add {
   .tip-info {
-    height: 27px;
-    line-height: 27px;
+    display: flex;
     color: #592d00;
-    padding: 0 14px;
+    padding: 6px 14px;
     font-size: 13px;
     background: #fffae0;
     border-radius: 4px;
     .anticon {
       color: #ffc300;
       margin-right: 4px;
+      margin-top: 3px;
     }
     .test-right-away {
       color: #556ee6;
       cursor: pointer;
     }
-    .dcloud-alert-content{
+    .dcloud-alert-content {
       flex: none;
     }
   }
 }
 .cluster-topic-add {
-  .data-save-time-label{
-    &>.dcloud-form-item-control{
-      &>.dcloud-form-item-explain{
+  .data-save-time-label {
+    & > .dcloud-form-item-control {
+      & > .dcloud-form-item-explain {
         display: none;
       }
     }
@@ -124,11 +125,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #556EE6;
+      color: #556ee6;
       .txt {
         width: 26px;
         margin-right: 4px;
-        color: #556EE6;
+        color: #556ee6;
         font-family: @font-family;
       }
       .anticon {
@@ -226,12 +227,11 @@
   }
 }
 
-
-.create-topic-flex-layout{
+.create-topic-flex-layout {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  .dcloud-form-item{
+  .dcloud-form-item {
     width: 370px;
   }
 }

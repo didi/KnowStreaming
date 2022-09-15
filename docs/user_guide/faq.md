@@ -1,5 +1,4 @@
-
-# FAQ 
+# FAQ
 
 ## 8.1、支持哪些 Kafka 版本？
 
@@ -110,20 +109,60 @@ SECURITY.TRICK_USERS
 
 但是还有一点需要注意，绕过的用户仅能调用他有权限的接口，比如一个普通用户，那么他就只能调用普通的接口，不能去调用运维人员的接口。
 
-##  8.8、Specified key was too long; max key length is 767 bytes 
+## 8.8、Specified key was too long; max key length is 767 bytes
 
-**原因：**不同版本的InoDB引擎，参数‘innodb_large_prefix’默认值不同，即在5.6默认值为OFF，5.7默认值为ON。
+**原因：** 不同版本的 InoDB 引擎，参数‘innodb_large_prefix’默认值不同，即在 5.6 默认值为 OFF，5.7 默认值为 ON。
 
-对于引擎为InnoDB，innodb_large_prefix=OFF，且行格式为Antelope即支持REDUNDANT或COMPACT时，索引键前缀长度最大为 767 字节。innodb_large_prefix=ON，且行格式为Barracuda即支持DYNAMIC或COMPRESSED时，索引键前缀长度最大为3072字节。
+对于引擎为 InnoDB，innodb_large_prefix=OFF，且行格式为 Antelope 即支持 REDUNDANT 或 COMPACT 时，索引键前缀长度最大为 767 字节。innodb_large_prefix=ON，且行格式为 Barracuda 即支持 DYNAMIC 或 COMPRESSED 时，索引键前缀长度最大为 3072 字节。
 
 **解决方案：**
 
-- 减少varchar字符大小低于767/4=191。
-- 将字符集改为latin1（一个字符=一个字节）。
-- 开启‘innodb_large_prefix’，修改默认行格式‘innodb_file_format’为Barracuda，并设置row_format=dynamic。
+- 减少 varchar 字符大小低于 767/4=191。
+- 将字符集改为 latin1（一个字符=一个字节）。
+- 开启‘innodb_large_prefix’，修改默认行格式‘innodb_file_format’为 Barracuda，并设置 row_format=dynamic。
 
-## 8.9、出现ESIndexNotFoundEXception报错
+## 8.9、出现 ESIndexNotFoundEXception 报错
 
-**原因 ：**没有创建ES索引模版
+**原因 ：**没有创建 ES 索引模版
 
-**解决方案：**执行init_es_template.sh脚本，创建ES索引模版即可。 
+**解决方案：**执行 init_es_template.sh 脚本，创建 ES 索引模版即可。
+
+## 8.10、km-console 打包构建失败
+
+首先，**请确保您正在使用最新版本**，版本列表见 [Tags](https://github.com/didi/KnowStreaming/tags)。如果不是最新版本，请升级后再尝试有无问题。
+
+常见的原因是由于工程依赖没有正常安装，导致在打包过程中缺少依赖，造成打包失败。您可以检查是否有以下文件夹，且文件夹内是否有内容
+
+```
+KnowStreaming/km-console/node_modules
+KnowStreaming/km-console/packages/layout-clusters-fe/node_modules
+KnowStreaming/km-console/packages/config-manager-fe/node_modules
+```
+
+如果发现没有对应的 `node_modules` 目录或着目录内容为空，说明依赖没有安装成功。请按以下步骤操作，
+
+1. 手动删除上述三个文件夹（如果有）
+
+2. 如果之前是通过 `mvn install` 打包 `km-console`，请到项目根目录（KnowStreaming）下重新输入该指令进行打包。观察打包过程有无报错。如有报错，请见步骤 4。
+
+3. 如果是通过本地独立构建前端工程的方式（指直接执行 `npm run build`），请进入 `KnowStreaming/km-console` 目录，执行下述步骤（注意：执行时请确保您在使用 `node v12` 版本）
+
+   a. 执行 `npm run i`。如有报错，请见步骤 4。
+
+   b. 执行 `npm run build`。如有报错，请见步骤 4。
+
+4. 麻烦联系我们协助解决。推荐提供以下信息，方面我们快速定位问题，示例如下。
+
+```
+操作系统: Mac
+命令行终端：bash
+Node 版本: v12.22.12
+复现步骤: 1. -> 2.
+错误截图:
+```
+
+## 8.11、在 `km-console` 目录下执行 `npm run start` 时看不到应用构建和热加载过程？如何启动单个应用？
+
+需要到具体的应用中执行 `npm run start`，例如 `cd packages/layout-clusters-fe` 后，执行 `npm run start`。
+
+应用启动后需要到基座应用中查看（需要启动基座应用，即 layout-clusters-fe）。

@@ -215,8 +215,8 @@
         position: relative;
         width: 324px;
         min-height: calc(100% - 66px);
-        margin: 0 0 12px 6px;
-        padding: 22px 20px 0 20px;
+        margin: 0 6px 6px 6px;
+        padding: 12px 12px 0 12px;
         border-radius: 12px;
         background: #ffffff;
         overflow: hidden;
@@ -226,16 +226,16 @@
           flex-flow: row wrap;
           width: 100%;
           &-item {
-            width: 32px;
+            width: 34px;
             height: 16px;
-            margin-bottom: 22px;
+            margin-bottom: 12px;
             border-radius: 4px;
             text-align: center;
             line-height: 16px;
-            transition: all ease 0.2s;
+            transition: all ease-in-out 0.3s;
             cursor: pointer;
-            &:not(&:nth-of-type(5n)) {
-              margin-right: 31px;
+            &:not(&:nth-of-type(8n)) {
+              margin-right: 4px;
             }
             &-leader {
               background: rgba(85, 110, 230, 0.1);
@@ -262,27 +262,21 @@
               }
             }
           }
-        }
-
-        .empty-panel {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 18px;
-          text-align: center;
-
-          .img {
-            width: 51px;
-            height: 34px;
-            margin-bottom: 7px;
-            background-size: cover;
-            background-image: url('../../assets/empty.png');
-          }
-
-          .text {
-            font-size: 10px;
-            color: #919aac;
-            line-height: 20px;
+          &-hover-state {
+            .partition-list-item {
+              &-leader:not(.partition-active) {
+                background-color: #f6f7fd;
+                color: #dbe1f8;
+              }
+              &-isr:not(.partition-active) {
+                background-color: #fcfcfc;
+                color: #c4c6c9;
+              }
+              &-osr:not(.partition-active) {
+                background-color: #fefaf4;
+                color: #f8d6af;
+              }
+            }
           }
         }
       }

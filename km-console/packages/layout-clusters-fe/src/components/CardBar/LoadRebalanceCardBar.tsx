@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CardBar from './index';
-import { IconFont, Tag, Utils, Tooltip, Popover } from 'knowdesign';
+import { IconFont, Tag, Utils, Tooltip, Popover, AppContainer } from 'knowdesign';
 import api from '@src/api';
 import StateChart from './StateChart';
 import ClusterNorms from '@src/pages/LoadRebalance/ClusterNorms';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import { ClustersPermissionMap } from '@src/pages/CommonConfig';
 
 const transUnitTimePro = (ms: number, num = 0) => {
   if (!ms) return '';
@@ -23,6 +24,7 @@ const transUnitTimePro = (ms: number, num = 0) => {
 };
 
 const LoadRebalanceCardBar = (props: any) => {
+  const [global] = AppContainer.useGlobalValue();
   const { clusterId } = useParams<{
     clusterId: string;
   }>();
@@ -53,12 +55,14 @@ const LoadRebalanceCardBar = (props: any) => {
               return (
                 <div style={{ height: '20px' }}>
                   <span style={{ display: 'inline-block', marginRight: '8px' }}>State</span>
-                  <IconFont
-                    className="cutomIcon-config"
-                    style={{ fontSize: '15px' }}
-                    onClick={() => setNormsVisible(true)}
-                    type="icon-shezhi"
-                  ></IconFont>
+                  {global.hasPermission(ClustersPermissionMap.REBALANCE_SETTING) && (
+                    <IconFont
+                      className="cutomIcon-config"
+                      style={{ fontSize: '15px' }}
+                      onClick={() => setNormsVisible(true)}
+                      type="icon-shezhi"
+                    ></IconFont>
+                  )}
                 </div>
               );
             },

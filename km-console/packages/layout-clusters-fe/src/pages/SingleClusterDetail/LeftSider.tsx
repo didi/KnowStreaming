@@ -153,7 +153,7 @@ const LeftSider = () => {
         <Divider />
         <div className="title">
           <div className="name">{renderToolTipValue(clusterInfo?.name, 35)}</div>
-          {global.hasPermission && global.hasPermission(ClustersPermissionMap.CLUSTER_CHANGE_INFO) ? (
+          {!loading && global.hasPermission && global.hasPermission(ClustersPermissionMap.CLUSTER_CHANGE_INFO) ? (
             <div className="edit-icon-box" onClick={() => setVisible(true)}>
               <IconFont className="edit-icon" type="icon-bianji2" />
             </div>
@@ -239,8 +239,7 @@ const LeftSider = () => {
       <AccessClusters
         visible={visible}
         setVisible={setVisible}
-        title={'edit.cluster'}
-        infoLoading={loading}
+        title="edit.cluster"
         afterSubmitSuccess={getPhyClusterInfo}
         clusterInfo={clusterInfo}
         kafkaVersion={Object.keys(kafkaVersion)}

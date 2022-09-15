@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, DatePicker, Drawer, Form, notification, Radio, Utils, Space, Divider } from 'knowdesign';
+import { Button, DatePicker, Drawer, Form, notification, Radio, Utils, Space, Divider, message } from 'knowdesign';
 import { useParams } from 'react-router-dom';
 import EditTable from '../TestingProduce/component/EditTable';
 import Api from '@src/api/index';
@@ -53,10 +53,27 @@ export default (props: any) => {
   const [resetOffsetVisible, setResetOffsetVisible] = useState(false);
   const customFormRef: any = React.createRef();
   const clusterPhyId = Number(routeParams.clusterId);
+  const [partitionIdList, setPartitionIdList] = useState([]);
   useEffect(() => {
     form.setFieldsValue({
       resetType: defaultResetType,
     });
+  }, []);
+
+  useEffect(() => {
+    Utils.request(Api.getTopicsMetaData(record?.topicName, +routeParams.clusterId))
+      .then((res: any) => {
+        const partitionLists = (res?.partitionIdList || []).map((item: any) => {
+          return {
+            label: item,
+            value: item,
+          };
+        });
+        setPartitionIdList(partitionLists);
+      })
+      .catch((err) => {
+        message.error(err);
+      });
   }, []);
   const confirm = () => {
     let tableData;
@@ -160,8 +177,9 @@ export default (props: any) => {
                 colCustomConfigs={[
                   {
                     title: 'PartitionID',
-                    inputType: 'number',
+                    inputType: 'select',
                     placeholder: '请输入Partition',
+                    options: partitionIdList,
                   },
                   {
                     title: 'Offset',

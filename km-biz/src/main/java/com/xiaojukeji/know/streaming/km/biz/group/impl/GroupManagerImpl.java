@@ -20,6 +20,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicOverviewV
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.AggTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.GroupOffsetResetEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -75,7 +76,7 @@ public class GroupManagerImpl implements GroupManager {
         }
 
         if (!paginationResult.hasData()) {
-            return PaginationResult.buildSuc(dto);
+            return PaginationResult.buildSuc(new ArrayList<>(), paginationResult);
         }
 
         // 获取指标
@@ -171,7 +172,7 @@ public class GroupManagerImpl implements GroupManager {
         }
 
         if (!ConsumerGroupState.EMPTY.equals(description.state()) && !ConsumerGroupState.DEAD.equals(description.state())) {
-            return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, String.format("group处于%s, 重置失败(仅Empty情况可重置)", description.state().name()));
+            return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, String.format("group处于%s, 重置失败(仅Empty情况可重置)", GroupStateEnum.getByRawState(description.state()).getState()));
         }
 
         // 获取offset

@@ -1,16 +1,20 @@
 ## 使用说明
 
-### 依赖安装：
+### 依赖安装（如在 km-console 目录下执行 npm run i 安装过依赖，这步可以省略）：
 
 ```
 npm install
 ```
+
+注意，这种方式只会安装当前应用的依赖。如果您不了解，推荐在 km-console 目录下执行 npm run i 安装依赖。
 
 ### 启动：
 
 ```
 npm run start
 ```
+
+启动后访问地址为 http://localhost:8000
 
 ### 构建：
 

@@ -5,7 +5,7 @@ import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.consensual.ConsensualEnum;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.core.service.job.JobService;
-import com.xiaojukeji.know.streaming.km.task.AbstractClusterPhyDispatchTask;
+import com.xiaojukeji.know.streaming.km.task.AbstractAsyncCommonDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Task(name = "kmJobTask",
@@ -13,14 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
-        timeout = 6 * 60)
-public class KMJobTask extends AbstractClusterPhyDispatchTask {
+        timeout = 2 * 60)
+public class KMJobTask extends AbstractAsyncCommonDispatchTask {
 
     @Autowired
     private JobService jobService;
 
     @Override
-    protected TaskResult processSubTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
+    public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
         jobService.scheduleJobByClusterId(clusterPhy.getId());
         return TaskResult.SUCCESS;
     }

@@ -12,20 +12,6 @@ export const leftMenus = (clusterId?: string) => ({
       name: 'cluster',
       path: 'cluster',
       icon: 'icon-Cluster',
-      children: [
-        {
-          name: 'overview',
-          path: '',
-          icon: '#icon-luoji',
-        },
-        process.env.BUSINESS_VERSION
-          ? {
-              name: 'balance',
-              path: 'balance',
-              icon: '#icon-luoji',
-            }
-          : undefined,
-      ].filter((m) => m),
     },
     {
       name: 'broker',
@@ -83,6 +69,25 @@ export const leftMenus = (clusterId?: string) => ({
       //   },
       // ],
     },
+    {
+      name: 'operation',
+      path: 'operation',
+      icon: 'icon-Jobs',
+      children: [
+        process.env.BUSINESS_VERSION
+          ? {
+              name: 'balance',
+              path: 'balance',
+              icon: '#icon-luoji',
+            }
+          : undefined,
+        {
+          name: 'jobs',
+          path: 'jobs',
+          icon: 'icon-Jobs',
+        },
+      ].filter((m) => m),
+    },
     process.env.BUSINESS_VERSION
       ? {
           name: 'produce-consume',
@@ -127,11 +132,6 @@ export const leftMenus = (clusterId?: string) => ({
     //   path: 'acls',
     //   icon: 'icon-wodegongzuotai',
     // },
-    {
-      name: 'jobs',
-      path: 'jobs',
-      icon: 'icon-Jobs',
-    },
   ].filter((m) => m),
 });
 

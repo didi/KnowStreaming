@@ -168,7 +168,6 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
 
   const init = () => {
     if (formData && Object.keys(formData).length > 0) {
-      console.log(formData, '有FormData');
       const tableData = formData?.clusterBalanceIntervalList?.map((item: any) => {
         const finfIndex = BalancedDimensions.findIndex((item1) => item1?.value === item?.type);
         return {
@@ -201,7 +200,6 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
           priority: index + 1,
         };
       });
-      console.log(res, '表单回显立即均衡');
       setTableData(res);
       setDimension(['disk', 'bytesIn', 'bytesOut']);
       setNodeTargetKeys([]);
@@ -220,14 +218,12 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
           throttleUnitB: values?.throttleUnitM * 1024 * 1024,
         };
 
-        if (!isCycle) {
-          if (values?.priority === 'throughput') {
-            params.parallelNum = 0;
-            params.executionStrategy = 1;
-          } else if (values?.priority === 'stability') {
-            params.parallelNum = 1;
-            params.executionStrategy = 2;
-          }
+        if (values?.priority === 'throughput') {
+          params.parallelNum = 0;
+          params.executionStrategy = 1;
+        } else if (values?.priority === 'stability') {
+          params.parallelNum = 1;
+          params.executionStrategy = 2;
         }
 
         if (formData?.jobId) {
@@ -382,6 +378,8 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
 
   const drawerClose = (isArg?: boolean) => {
     isArg ? onClose(isArg) : onClose();
+    setParallelNum(0);
+    setExecutionStrategy(1);
     form.resetFields();
   };
 
@@ -540,17 +538,38 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
           </Form.Item>
 
           <h6 className="form-title">运行配置</h6>
-          {!isCycle && (
-            <Form.Item label="" name="priority" rules={[{ required: true, message: 'Principle 不能为空' }]} initialValue="throughput">
-              <Radio.Group onChange={priorityChange}>
-                <Radio value="throughput">吞吐量优先</Radio>
-                <Radio value="stability">稳定性优先</Radio>
-                <Radio value="custom">自定义</Radio>
-              </Radio.Group>
+          {isCycle && (
+            <Form.Item
+              className="schedule-cron"
+              name="scheduleCron"
+              label="任务周期"
+              rules={[
+                {
+                  required: true,
+                  message: `请输入!`,
+                },
+                {
+                  validator: (_, value) => {
+                    const valArr = value.split(' ');
+                    if (valArr[1] === '*' || valArr[2] === '*') {
+                      return Promise.reject(new Error('任务周期必须指定分钟、小时'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <CronInput />
             </Form.Item>
           )}
-
-          {!isCycle && (
+          <Form.Item label="" name="priority" rules={[{ required: true, message: 'Principle 不能为空' }]} initialValue="throughput">
+            <Radio.Group onChange={priorityChange}>
+              <Radio value="throughput">吞吐量优先</Radio>
+              <Radio value="stability">稳定性优先</Radio>
+              <Radio value="custom">自定义</Radio>
+            </Radio.Group>
+          </Form.Item>
+          {
             <Form.Item dependencies={['priority']} style={{ marginBottom: 0 }}>
               {({ getFieldValue }) =>
                 getFieldValue('priority') === 'custom' ? (
@@ -600,9 +619,9 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
                 ) : null
               }
             </Form.Item>
-          )}
+          }
 
-          {isCycle && (
+          {/* {isCycle && (
             <Form.Item
               name="parallelNum"
               label={
@@ -622,9 +641,9 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
             >
               <InputNumber min={0} max={999} placeholder="请输入任务并行度" style={{ width: '100%' }} />
             </Form.Item>
-          )}
+          )} */}
 
-          {isCycle && (
+          {/* {isCycle && (
             <Form.Item
               className="schedule-cron"
               name="scheduleCron"
@@ -647,9 +666,9 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
             >
               <CronInput />
             </Form.Item>
-          )}
+          )} */}
 
-          {isCycle && (
+          {/* {isCycle && (
             <Form.Item
               name="executionStrategy"
               label={
@@ -672,7 +691,7 @@ const BalanceDrawer: React.FC<PropsType> = ({ onClose, visible, isCycle = false,
                 <Radio value={2}>优先最小副本</Radio>
               </Radio.Group>
             </Form.Item>
-          )}
+          )} */}
 
           <Form.Item
             name="throttleUnitM"

@@ -1,18 +1,20 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { AppContainer, Button, Drawer, IconFont, message, Spin, Table, SingleChart, Utils, Tooltip } from 'knowdesign';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { AppContainer, Drawer, Spin, Table, SingleChart, Utils, Tooltip } from 'knowdesign';
 import moment from 'moment';
 import api, { MetricType } from '@src/api';
 import { useParams } from 'react-router-dom';
 import { debounce } from 'lodash';
 import { MetricDefaultChartDataType, MetricChartDataType, formatChartData, getDetailChartConfig } from './config';
 import { UNIT_MAP } from '@src/constants/chartConfig';
-import { CloseOutlined } from '@ant-design/icons';
+import RenderEmpty from '../RenderEmpty';
 
 interface ChartDetailProps {
   metricType: MetricType;
   metricName: string;
   queryLines: string[];
-  onClose: () => void;
+  setSliderRange: (range: string) => void;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  setDisposeChartInstance: Function;
 }
 
 interface MetricTableInfo {
@@ -22,6 +24,18 @@ interface MetricTableInfo {
   min: number;
   latest: (string | number)[];
   color: string;
+}
+
+interface ChartInfo {
+  chartInstance?: echarts.ECharts;
+  isLoadingAdditionData?: boolean;
+  isLoadedFullData?: boolean;
+  fullTimeRange?: readonly [number, number];
+  curTimeRange?: readonly [number, number];
+  sliderPos?: readonly [number, number];
+  transformUnit?: [string, number];
+  fullMetricData?: MetricChartDataType;
+  oldDataZoomOption?: any;
 }
 
 interface DataZoomEventProps {
@@ -34,8 +48,6 @@ interface DataZoomEventProps {
 
 // 缩放区默认选中范围比例（0.01～1）
 const DATA_ZOOM_DEFAULT_SCALE = 0.25;
-// 选中范围最少展示的时间长度（默认 10 分钟），单位: ms
-const LEAST_SELECTED_TIME_RANGE = 1 * 60 * 1000;
 // 单次向服务器请求数据的范围（默认 6 小时，超过后采集频率间隔会变长），单位: ms
 const DEFAULT_REQUEST_TIME_RANGE = 6 * 60 * 60 * 1000;
 // 采样间隔，影响前端补点逻辑，单位: ms
@@ -47,70 +59,15 @@ const DEFAULT_ENTER_TIME_RANGE = 2 * 60 * 60 * 1000;
 // 预缓存数据阈值，图表展示数据的开始时间处于前端缓存数据的时间范围的前 40% 时，向服务器请求数据
 const PRECACHE_THRESHOLD = 0.4;
 
-// 表格列
-const colunms = [
-  {
-    title: 'Host',
-    dataIndex: 'name',
-    width: 200,
-    render(name: string, record: any) {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ width: 8, height: 2, marginRight: 4, background: record.color }}></div>
-          <span>{name}</span>
-        </div>
-      );
-    },
-  },
-  {
-    title: 'Avg',
-    dataIndex: 'avg',
-    width: 120,
-    render(num: number) {
-      return num.toFixed(2);
-    },
-  },
-  {
-    title: 'Max',
-    dataIndex: 'max',
-    width: 120,
-    render(num: number, record: any) {
-      return (
-        <div>
-          <span>{num.toFixed(2)}</span>
-        </div>
-      );
-    },
-  },
-  {
-    title: 'Min',
-    dataIndex: 'min',
-    width: 120,
-    render(num: number, record: any) {
-      return (
-        <div>
-          <span>{num.toFixed(2)}</span>
-        </div>
-      );
-    },
-  },
-  {
-    title: 'Latest',
-    dataIndex: 'latest',
-    width: 120,
-    render(latest: number[]) {
-      return `${latest[1].toFixed(2)}`;
-    },
-  },
-];
-
 const ChartDetail = (props: ChartDetailProps) => {
   const [global] = AppContainer.useGlobalValue();
   const { clusterId } = useParams<{
     clusterId: string;
   }>();
-  const { metricType, metricName, queryLines, onClose } = props;
+  const { metricType, metricName, queryLines, setSliderRange, setDisposeChartInstance } = props;
 
+  // 初始化拖拽防抖函数
+  const debouncedZoomDrag = useRef(null);
   // 存储图表相关的不需要触发渲染的数据，用于计算图表展示状态并进行操作
   const chartInfo = useRef(
     (() => {
@@ -119,16 +76,16 @@ const ChartDetail = (props: ChartDetailProps) => {
       const curTimeRange = [curTime - DEFAULT_ENTER_TIME_RANGE, curTime] as const;
 
       return {
-        chartInstance: undefined as echarts.ECharts,
+        chartInstance: undefined,
+        isLoadingAdditionData: false,
         isLoadedFullData: false,
         fullTimeRange: curTimeRange,
         fullMetricData: {} as MetricChartDataType,
         curTimeRange,
-        oldDataZoomOption: {} as any,
-        sliderPos: [0, 0] as readonly [number, number],
-        sliderRange: '',
-        transformUnit: undefined as [string, number],
-      };
+        oldDataZoomOption: {},
+        sliderPos: [0, 0],
+        transformUnit: undefined,
+      } as ChartInfo;
     })()
   );
 
@@ -137,8 +94,76 @@ const ChartDetail = (props: ChartDetailProps) => {
   const [curMetricData, setCurMetricData] = useState<MetricChartDataType>();
   // 图表数据的各项计算指标
   const [tableInfo, setTableInfo] = useState<MetricTableInfo[]>([]);
-  // 选中展示的图表
-  const [selectedLines, setSelectedLines] = useState<string[]>([]);
+  const [linesStatus, setLinesStatus] = useState<{
+    [lineName: string]: boolean;
+  }>({});
+
+  // 表格列
+  const colunms = useMemo(
+    () => [
+      {
+        title: metricType === MetricType.Broker ? 'Host' : 'Topic',
+        dataIndex: 'name',
+        width: 200,
+        render(name: string, record: any) {
+          return (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ width: 8, height: 2, marginRight: 4, background: record.color }}></div>
+              <span>{name}</span>
+            </div>
+          );
+        },
+      },
+      {
+        title: 'Avg',
+        dataIndex: 'avg',
+        width: 120,
+        render(num: number) {
+          return num.toFixed(2);
+        },
+      },
+      {
+        title: 'Max',
+        dataIndex: 'max',
+        width: 120,
+        render(num: number, record: any) {
+          return (
+            <div>
+              <span>{num.toFixed(2)}</span>
+            </div>
+          );
+        },
+      },
+      {
+        title: 'Min',
+        dataIndex: 'min',
+        width: 120,
+        render(num: number, record: any) {
+          return (
+            <div>
+              <span>{num.toFixed(2)}</span>
+            </div>
+          );
+        },
+      },
+      {
+        title: 'Latest',
+        dataIndex: 'latest',
+        width: 120,
+        render(latest: number[]) {
+          return `${latest[1].toFixed(2)}`;
+        },
+      },
+    ],
+    [metricType]
+  );
+
+  const updateChartInfo = (changedInfo: ChartInfo) => {
+    chartInfo.current = {
+      ...chartInfo.current,
+      ...changedInfo,
+    };
+  };
 
   // 请求图表数据
   const getMetricChartData = ([startTime, endTime]: readonly [number, number]) => {
@@ -175,11 +200,10 @@ const ChartDetail = (props: ChartDetailProps) => {
 
     // 如果滑块整体拖动，则只更新拖动后滑块的位（保留小数点后三位是防止低位值的干扰）
     if (oldScale.toFixed(3) === newScale.toFixed(3)) {
-      chartInfo.current = {
-        ...chartInfo.current,
+      updateChartInfo({
         sliderPos: [newStartSliderPos, newEndSliderPos],
         oldDataZoomOption: newDataZoomOption,
-      };
+      });
       renderTableInfo();
 
       return false;
@@ -217,23 +241,14 @@ const ChartDetail = (props: ChartDetailProps) => {
       }
     } else {
       // 3. 滑块拖动后缩放比例变小
-      // 判断拖动后选择的时间范围并提示
-      if (newEndSliderPos - newStartSliderPos < LEAST_SELECTED_TIME_RANGE) {
-        // TODO: 补充逻辑
-        updateChartData([oldStartTimestamp, oldEndTimestamp], [oldStartSliderPos, oldEndSliderPos]);
-        message.warning(`当前选择范围小于 ${LEAST_SELECTED_TIME_RANGE / 60 / 1000} 分钟，图表可能无数据`);
-        return true;
-      }
-
       const isOldLarger = oldScale - DATA_ZOOM_DEFAULT_SCALE > 0.01;
       const isNewLarger = newScale - DATA_ZOOM_DEFAULT_SCALE > 0.01;
       if (isOldLarger && isNewLarger) {
         // 如果拖拽前后比例均高于默认比例，则不对图表展示范围进行操作
-        chartInfo.current = {
-          ...chartInfo.current,
+        updateChartInfo({
           sliderPos: [newStartSliderPos, newEndSliderPos],
           oldDataZoomOption: newDataZoomOption,
-        };
+        });
         renderTableInfo();
         return true;
       } else {
@@ -259,79 +274,98 @@ const ChartDetail = (props: ChartDetailProps) => {
   const updateChartData = (timeRange: [number, number], sliderPos: [number, number]) => {
     const {
       fullTimeRange: [fullStartTimestamp, fullEndTimestamp],
-      fullMetricData,
       isLoadedFullData,
     } = chartInfo.current;
-    let leftBoundaryTimestamp = Math.floor(timeRange[0]);
+    const leftBoundaryTimestamp = Math.floor(timeRange[0]);
     const isNeedCacheExtraData = leftBoundaryTimestamp < fullStartTimestamp + (fullEndTimestamp - fullStartTimestamp) * PRECACHE_THRESHOLD;
 
     let isRendered = false;
     // 如果本地存储的数据足够展示或者已经获取到所有数据，则展示数据
     if (leftBoundaryTimestamp > fullStartTimestamp || isLoadedFullData) {
-      chartInfo.current = {
-        ...chartInfo.current,
+      updateChartInfo({
         curTimeRange: [leftBoundaryTimestamp > fullStartTimestamp ? leftBoundaryTimestamp : fullStartTimestamp, timeRange[1]],
         sliderPos,
-      };
+      });
       renderNewMetricData();
       isRendered = true;
     }
 
     if (!isLoadedFullData && isNeedCacheExtraData) {
-      // 向服务器请求新的数据缓存
-      let reqEndTime = fullStartTimestamp;
-      const requestArr: any[] = [];
-      const requestTimeRanges: [number, number][] = [];
-      for (let i = 0; i < DEFAULT_REQUEST_COUNT; i++) {
-        setTimeout(() => {
-          const nextReqEndTime = reqEndTime - DEFAULT_REQUEST_TIME_RANGE;
-          requestArr.unshift(getMetricChartData([nextReqEndTime, reqEndTime]));
-          requestTimeRanges.unshift([nextReqEndTime, reqEndTime]);
-          reqEndTime = nextReqEndTime;
+      getAdditionChartData(!isRendered, leftBoundaryTimestamp, timeRange[1], sliderPos);
+    }
+  };
 
-          // 当最后一次请求发送后，处理返回
-          if (i === DEFAULT_REQUEST_COUNT - 1) {
-            Promise.all(requestArr).then((resList) => {
-              let isSettle = -1;
-              // 填充增量的图表数据
-              resList.forEach((res: MetricDefaultChartDataType[], i) => {
-                // 图表没有返回数据的情况
-                if (!res?.length) {
-                  if (isSettle === -1) {
-                    chartInfo.current = {
-                      ...chartInfo.current,
-                      //  标记数据已经全部加载完毕
-                      isLoadedFullData: true,
-                    };
-                    isSettle = i;
-                  }
-                } else {
-                  resolveAdditionChartData(res, requestTimeRanges[i]);
-                }
-              });
-              // 更新左侧边界为当前已获取到数据的最小边界
-              const curLocalStartTimestamp = Number(fullMetricData.metricLines.map((line) => line.data[0][0]).sort()[0]);
-              if (leftBoundaryTimestamp < curLocalStartTimestamp) {
-                leftBoundaryTimestamp = curLocalStartTimestamp;
-              }
+  // 缓存增量的图表数据
+  const getAdditionChartData = (
+    needRender: boolean,
+    leftBoundaryTimestamp: number,
+    rightBoundaryTimestamp: number,
+    sliderPos?: [number, number]
+  ) => {
+    const {
+      fullTimeRange: [fullStartTimestamp, fullEndTimestamp],
+      fullMetricData,
+      isLoadingAdditionData,
+    } = chartInfo.current;
 
-              chartInfo.current = {
-                ...chartInfo.current,
-                fullTimeRange: [reqEndTime - DEFAULT_REQUEST_TIME_RANGE, fullEndTimestamp],
-                sliderPos,
-              };
-              if (!isRendered) {
-                chartInfo.current = {
-                  ...chartInfo.current,
-                  curTimeRange: [leftBoundaryTimestamp, timeRange[1]],
-                };
-                renderNewMetricData();
+    // 当前有缓存数据的任务时，直接退出
+    if (isLoadingAdditionData) {
+      return false;
+    }
+    updateChartInfo({
+      isLoadingAdditionData: true,
+    });
+
+    let reqEndTime = fullStartTimestamp;
+    const requestArr: any[] = [];
+    const requestTimeRanges: [number, number][] = [];
+    for (let i = 0; i < DEFAULT_REQUEST_COUNT; i++) {
+      setTimeout(() => {
+        const nextReqEndTime = reqEndTime - DEFAULT_REQUEST_TIME_RANGE;
+        requestArr.push(getMetricChartData([nextReqEndTime, reqEndTime]));
+        requestTimeRanges.push([nextReqEndTime, reqEndTime]);
+        reqEndTime = nextReqEndTime;
+
+        // 当最后一次请求发送后，处理返回
+        if (i === DEFAULT_REQUEST_COUNT - 1) {
+          Promise.all(requestArr).then((resList) => {
+            // 填充增量的图表数据
+            resList.forEach((res: MetricDefaultChartDataType[], i) => {
+              // 最后一个请求返回数据为空时，认为已获取到全部图表数据
+              if (!res?.length) {
+                //  标记数据已经全部加载完毕
+                i === resList.length - 1 &&
+                  updateChartInfo({
+                    isLoadedFullData: true,
+                  });
+              } else {
+                // TODO: res 可能为 []，需要处理兼容
+                resolveAdditionChartData(res, requestTimeRanges[i]);
               }
             });
-          }
-        }, i * 10);
-      }
+
+            // 更新左侧边界为当前已获取到数据的最小边界
+            const curLocalStartTimestamp = Number(fullMetricData.metricLines.map((line) => line?.data?.[0]?.[0]).sort()[0]);
+            if (leftBoundaryTimestamp < curLocalStartTimestamp) {
+              leftBoundaryTimestamp = curLocalStartTimestamp;
+            }
+
+            updateChartInfo({
+              fullTimeRange: [reqEndTime - DEFAULT_REQUEST_TIME_RANGE, fullEndTimestamp],
+              ...(sliderPos ? { sliderPos } : {}),
+              isLoadingAdditionData: false,
+            });
+            if (needRender) {
+              updateChartInfo({
+                curTimeRange: [leftBoundaryTimestamp, rightBoundaryTimestamp],
+              });
+              renderNewMetricData();
+            }
+          });
+        }
+      }, i * 10);
     }
+    return true;
   };
 
   // 处理增量图表数据
@@ -362,7 +396,7 @@ const ChartDetail = (props: ChartDetailProps) => {
     });
   };
 
-  // 根据需要展示的时间范围过滤出对应的数据展示
+  // 根据需要展示的时间范围过滤出对应的数据
   const renderNewMetricData = () => {
     const { fullMetricData, curTimeRange } = chartInfo.current;
     const newMetricData = { ...fullMetricData };
@@ -378,12 +412,25 @@ const ChartDetail = (props: ChartDetailProps) => {
       });
       newMetricData.metricLines[i] = line;
     });
+
     // 只过滤出当前时间段有数据点的线条，确保 Table 统一展示
     newMetricData.metricLines = newMetricData.metricLines.filter((line) => line.data.length);
     setCurMetricData(newMetricData);
+
+    setLinesStatus((curStatus) => {
+      // 过滤维持线条选中状态
+      const newLinesStatus = { ...curStatus };
+      const newLineNames = newMetricData.metricLines.map((line) => line.name);
+      newLineNames.forEach((name) => {
+        if (newLinesStatus[name] === undefined) {
+          newLinesStatus[name] = false;
+        }
+      });
+      return newLinesStatus;
+    });
   };
 
-  // 计算当前选中范围
+  // 计算展示当前拖拽轴选中的时间范围
   const calculateSliderRange = () => {
     const { sliderPos } = chartInfo.current;
     let minutes = Number(((sliderPos[1] - sliderPos[0]) / 60 / 1000).toFixed(2));
@@ -398,13 +445,11 @@ const ChartDetail = (props: ChartDetailProps) => {
       hours = Number((hours % 24).toFixed(2));
     }
 
-    chartInfo.current = {
-      ...chartInfo.current,
-      sliderRange: ` 当前选中范围: ${days > 0 ? `${days} 天 ` : ''}${hours > 0 ? `${hours} 小时 ` : ''}${minutes} 分钟`,
-    };
+    const sliderRange = ` 当前选中范围: ${days > 0 ? `${days} 天 ` : ''}${hours > 0 ? `${hours} 小时 ` : ''}${minutes} 分钟`;
+    setSliderRange(sliderRange);
   };
 
-  // 遍历图表，获取需要的指标数据，展示到 Table
+  // 遍历图表，计算得到指标聚合数据展示到表格
   const renderTableInfo = () => {
     const tableData: MetricTableInfo[] = [];
     const { sliderPos, chartInstance } = chartInfo.current;
@@ -447,140 +492,131 @@ const ChartDetail = (props: ChartDetailProps) => {
 
     calculateSliderRange();
     setTableInfo(tableData);
-    setSelectedLines(tableData.map((line) => line.name));
   };
 
   const tableLineChange = (keys: string[]) => {
-    const updatedLines: { [name: string]: boolean } = {};
-    selectedLines.forEach((name) => !keys.includes(name) && (updatedLines[name] = false));
-    keys.forEach((name) => !selectedLines.includes(name) && (updatedLines[name] = true));
+    const newLinesStatus = { ...linesStatus };
 
-    // 更新
-    Object.keys(updatedLines).forEach((name) => {
-      chartInfo.current.chartInstance.dispatchAction({
-        type: 'legendToggleSelect',
-        // 图例名称
-        name: name,
-      });
+    Object.entries(newLinesStatus).forEach(([name, status]) => {
+      if (keys.includes(name)) {
+        !status && (newLinesStatus[name] = true);
+      } else {
+        status && (newLinesStatus[name] = false);
+      }
     });
 
-    setSelectedLines(keys);
+    setLinesStatus(newLinesStatus);
   };
 
+  // 图表数据更新渲染后，更新图表拖拽轴信息并重新计算列表值
   useEffect(() => {
     if (curMetricData) {
       setTimeout(() => {
-        // 新的图表数据渲染后，更新图表拖拽轴信息
         chartInfo.current.oldDataZoomOption = (chartInfo.current.chartInstance.getOption() as any).dataZoom[0];
       });
       renderTableInfo();
     }
   }, [curMetricData]);
 
+  // 更新图例选中状态
+  useEffect(() => {
+    Object.entries(linesStatus).map(([name, status]) => {
+      const type = status ? 'legendSelect' : 'legendUnSelect';
+      chartInfo.current.chartInstance.dispatchAction({
+        type,
+        name,
+      });
+    });
+  }, [linesStatus]);
+
   // 进入详情时，首次获取数据
   useEffect(() => {
     if (metricType && metricName) {
       setLoading(true);
       const { curTimeRange } = chartInfo.current;
-      getMetricChartData(curTimeRange).then((res: any[] | null) => {
-        // 如果图表返回数据
-        if (res?.length) {
-          // 格式化图表需要的数据
-          const formattedMetricData = (
-            formatChartData(
-              res,
-              global.getMetricDefine || {},
-              metricType,
-              curTimeRange,
-              DEFAULT_POINT_INTERVAL,
-              false
-            ) as MetricChartDataType[]
-          )[0];
-          // 填充图表数据
-          let initFullTimeRange = curTimeRange;
-          const pointsOfFirstLine = formattedMetricData.metricLines.find((line) => line.data.length).data;
-          if (pointsOfFirstLine) {
-            initFullTimeRange = [pointsOfFirstLine[0][0] as number, pointsOfFirstLine[pointsOfFirstLine.length - 1][0] as number] as const;
-          }
-
-          // 获取单位保存起来
-          let transformUnit = undefined;
-          Object.entries(UNIT_MAP).forEach((unit) => {
-            if (formattedMetricData.metricUnit.includes(unit[0])) {
-              transformUnit = unit;
+      getMetricChartData(curTimeRange).then(
+        (res: any[] | null) => {
+          // 如果图表返回数据
+          if (res?.length) {
+            // 格式化图表需要的数据
+            const formattedMetricData = (
+              formatChartData(
+                res,
+                global.getMetricDefine || {},
+                metricType,
+                curTimeRange,
+                DEFAULT_POINT_INTERVAL,
+                false
+              ) as MetricChartDataType[]
+            )[0];
+            // 填充图表数据
+            let initFullTimeRange = curTimeRange;
+            const pointsOfFirstLine = formattedMetricData.metricLines.find((line) => line.data.length).data;
+            if (pointsOfFirstLine) {
+              initFullTimeRange = [
+                pointsOfFirstLine[0][0] as number,
+                pointsOfFirstLine[pointsOfFirstLine.length - 1][0] as number,
+              ] as const;
             }
-          });
 
-          chartInfo.current = {
-            ...chartInfo.current,
-            fullMetricData: formattedMetricData,
-            fullTimeRange: [...initFullTimeRange],
-            curTimeRange: [...initFullTimeRange],
-            sliderPos: [
-              initFullTimeRange[1] - (initFullTimeRange[1] - initFullTimeRange[0]) * DATA_ZOOM_DEFAULT_SCALE,
-              initFullTimeRange[1],
-            ],
-            transformUnit,
-          };
-          setCurMetricData(formattedMetricData);
-          setLoading(false);
-        }
-      });
+            // 获取单位保存起来
+            let transformUnit = undefined;
+            Object.entries(UNIT_MAP).forEach((unit) => {
+              if (formattedMetricData.metricUnit.includes(unit[0])) {
+                transformUnit = unit;
+              }
+            });
+
+            updateChartInfo({
+              fullMetricData: formattedMetricData,
+              fullTimeRange: [...initFullTimeRange],
+              curTimeRange: [...initFullTimeRange],
+              sliderPos: [
+                initFullTimeRange[1] - (initFullTimeRange[1] - initFullTimeRange[0]) * DATA_ZOOM_DEFAULT_SCALE,
+                initFullTimeRange[1],
+              ],
+              transformUnit,
+            });
+            setCurMetricData(formattedMetricData);
+            const newLinesStatus: { [lineName: string]: boolean } = {};
+            formattedMetricData.metricLines.forEach((line) => {
+              newLinesStatus[line.name] = true;
+            });
+            setLinesStatus(newLinesStatus);
+            setLoading(false);
+            getAdditionChartData(false, initFullTimeRange[0], initFullTimeRange[1]);
+          }
+        },
+        () => setLoading(false)
+      );
     }
   }, []);
 
-  const debounced = debounce(onDataZoomDrag, 300);
+  debouncedZoomDrag.current = debounce(onDataZoomDrag, 300);
 
   return (
     <Spin spinning={loading}>
       <div className="chart-detail-modal-container">
-        {curMetricData && (
+        {curMetricData ? (
           <>
-            <div className="detail-title">
-              <div className="left">
-                <div className="title">
-                  <Tooltip
-                    placement="bottomLeft"
-                    title={() => {
-                      let content = '';
-                      const metricDefine = global.getMetricDefine(metricType, curMetricData.metricName);
-                      if (metricDefine) {
-                        content = metricDefine.desc;
-                      }
-                      return content;
-                    }}
-                  >
-                    <span style={{ cursor: 'pointer' }}>
-                      <span>{curMetricData.metricName}</span> <span className="unit">({curMetricData.metricUnit}) </span>
-                    </span>
-                  </Tooltip>
-                </div>
-                <div className="info">{chartInfo.current.sliderRange}</div>
-              </div>
-              <div className="right">
-                <Button type="text" size="small" onClick={onClose}>
-                  <CloseOutlined />
-                </Button>
-              </div>
-            </div>
             <SingleChart
               chartTypeProp="line"
               wrapStyle={{
                 width: 'auto',
                 height: 462,
               }}
+              // events 事件只注册一次，所以这里使用 ref 来执行防抖函数
               onEvents={{
-                dataZoom: (record: any) => {
-                  debounced(record);
-                },
+                dataZoom: (record: any) => debouncedZoomDrag?.current(record),
               }}
+              showHeader={false}
               propChartData={curMetricData.metricLines}
               optionMergeProps={{ notMerge: true }}
               getChartInstance={(chartInstance) => {
-                chartInfo.current = {
-                  ...chartInfo.current,
+                setDisposeChartInstance(() => () => chartInstance.dispose());
+                updateChartInfo({
                   chartInstance,
-                };
+                });
               }}
               {...getDetailChartConfig(`${curMetricData.metricName}{unit|（${curMetricData.metricUnit}）}`, chartInfo.current.sliderPos)}
             />
@@ -588,16 +624,10 @@ const ChartDetail = (props: ChartDetailProps) => {
               className="detail-table"
               rowKey="name"
               rowSelection={{
-                // hideSelectAll: true,
                 preserveSelectedRowKeys: true,
-                selectedRowKeys: selectedLines,
-                // getCheckboxProps: (record) => {
-                //   return selectedLines.length <= 1 && selectedLines.includes(record.name)
-                //     ? {
-                //         disabled: true,
-                //       }
-                //     : {};
-                // },
+                selectedRowKeys: Object.entries(linesStatus)
+                  .filter(([, status]) => status)
+                  .map(([name]) => name),
                 selections: [Table.SELECTION_INVERT, Table.SELECTION_NONE],
                 onChange: (keys: string[]) => tableLineChange(keys),
               }}
@@ -610,6 +640,8 @@ const ChartDetail = (props: ChartDetailProps) => {
               pagination={false}
             />
           </>
+        ) : (
+          !loading && <RenderEmpty message="详情加载失败，请重试" height={400} />
         )}
       </div>
     </Spin>
@@ -618,22 +650,46 @@ const ChartDetail = (props: ChartDetailProps) => {
 
 // eslint-disable-next-line react/display-name
 const ChartDrawer = forwardRef((_, ref) => {
+  const [global] = AppContainer.useGlobalValue();
   const [visible, setVisible] = useState(false);
-  const [dashboardType, setDashboardType] = useState<MetricType>();
-  const [metricName, setMetricName] = useState<string>();
   const [queryLines, setQueryLines] = useState<string[]>([]);
+  const [sliderRange, setSliderRange] = useState<string>('');
+  const [disposeChartInstance, setDisposeChartInstance] = useState<() => void>(() => 0);
+  const [metricInfo, setMetricInfo] = useState<{
+    type: MetricType | undefined;
+    name: string;
+    unit: string;
+    desc: string;
+  }>({
+    type: undefined,
+    name: '',
+    unit: '',
+    desc: '',
+  });
 
   const onOpen = (dashboardType: MetricType, metricName: string, queryLines: string[]) => {
-    setDashboardType(dashboardType);
-    setMetricName(metricName);
+    const metricDefine = global.getMetricDefine(dashboardType, metricName);
+    setMetricInfo({
+      type: dashboardType,
+      name: metricName,
+      unit: metricDefine?.unit || '',
+      desc: metricDefine?.desc || '',
+    });
     setQueryLines(queryLines);
     setVisible(true);
   };
 
   const onClose = () => {
     setVisible(false);
-    setDashboardType(undefined);
-    setMetricName(undefined);
+    setSliderRange('');
+    disposeChartInstance();
+    setDisposeChartInstance(() => () => 0);
+    setMetricInfo({
+      type: undefined,
+      name: '',
+      unit: '',
+      desc: '',
+    });
   };
 
   useImperativeHandle(ref, () => ({
@@ -641,9 +697,36 @@ const ChartDrawer = forwardRef((_, ref) => {
   }));
 
   return (
-    <Drawer width={1080} visible={visible} footer={null} closable={false} maskClosable={false} destroyOnClose={true} onClose={onClose}>
-      {dashboardType && metricName && (
-        <ChartDetail metricType={dashboardType} metricName={metricName} queryLines={queryLines} onClose={onClose} />
+    <Drawer
+      className="overview-chart-detail-drawer"
+      width={1080}
+      visible={visible}
+      title={
+        <div className="detail-header">
+          <div className="title">
+            <Tooltip placement="bottomLeft" title={metricInfo.desc}>
+              <span style={{ cursor: 'pointer' }}>
+                <span>{metricInfo.name}</span> <span className="unit">({metricInfo.unit}) </span>
+              </span>
+            </Tooltip>
+          </div>
+          <div className="slider-info">{sliderRange}</div>
+        </div>
+      }
+      footer={null}
+      closable={true}
+      maskClosable={false}
+      destroyOnClose={true}
+      onClose={onClose}
+    >
+      {metricInfo.type && metricInfo.name && (
+        <ChartDetail
+          metricType={metricInfo.type}
+          metricName={metricInfo.name}
+          queryLines={queryLines}
+          setSliderRange={setSliderRange}
+          setDisposeChartInstance={setDisposeChartInstance}
+        />
       )}
     </Drawer>
   );

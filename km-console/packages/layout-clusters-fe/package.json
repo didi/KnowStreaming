@@ -17,7 +17,7 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
-    "build": "rm -rf ../../pub/layout & cross-env NODE_ENV=production webpack --max_old_space_size=8000"
+    "build": "cross-env NODE_ENV=production webpack --max_old_space_size=8000"
   },
   "browserslist": {
     "production": [
@@ -39,6 +39,7 @@
     "@types/react-copy-to-clipboard": "^5.0.2",
     "@types/react-dom": "^17.0.11",
     "@types/react-highlight-words": "^0.16.0",
+    "@types/react-router": "5.1.18",
     "@types/react-router-dom": "^5.3.3",
     "@types/react-transition-group": "^4.2.2",
     "@types/react-virtualized": "^9.21.13",

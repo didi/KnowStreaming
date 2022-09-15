@@ -19,6 +19,7 @@ import {
   Divider,
   Transfer,
   IconFont,
+  Tooltip,
 } from 'knowdesign';
 import './index.less';
 import Api, { MetricType } from '@src/api/index';
@@ -31,8 +32,8 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const jobNameMap: any = {
-  expandAndReduce: '批量扩缩副本',
-  transfer: '批量迁移副本',
+  expandAndReduce: '扩缩副本',
+  transfer: '迁移副本',
 };
 
 interface DefaultConfig {
@@ -56,6 +57,7 @@ export default (props: DefaultConfig) => {
   const [topicNewReplicas, setTopicNewReplicas] = useState([]);
   const [needMovePartitions, setNeedMovePartitions] = useState([]);
   const [moveDataTimeRanges, setMoveDataTimeRanges] = useState([]);
+  const [moveDataTimeRangesType, setMoveDataTimeRangesType] = useState([]);
   const [form] = Form.useForm();
   const [global] = AppContainer.useGlobalValue();
   const [loadingTopic, setLoadingTopic] = useState<boolean>(true);
@@ -142,8 +144,23 @@ export default (props: DefaultConfig) => {
       title: '迁移数据时间范围',
       dataIndex: 'newRetentionMs',
       render: (v: any, r: any, i: number) => {
+        const selectAfter = (
+          <Select
+            onChange={(n: any) => {
+              const moveDataTimeRangesCopyType = JSON.parse(JSON.stringify(moveDataTimeRangesType));
+              moveDataTimeRangesCopyType[i] = n === 'h' ? 1 : 60;
+              setMoveDataTimeRangesType(moveDataTimeRangesCopyType);
+            }}
+            defaultValue="h"
+            style={{ width: 82 }}
+          >
+            <Option value="m">Minute</Option>
+            <Option value="h">Hour</Option>
+          </Select>
+        );
         return (
           <InputNumber
+            width={80}
             min={0}
             max={99999}
             defaultValue={moveDataTimeRanges[i]}
@@ -153,8 +170,10 @@ export default (props: DefaultConfig) => {
               moveDataTimeRangesCopy[i] = n;
               setMoveDataTimeRanges(moveDataTimeRangesCopy);
             }}
-            formatter={(value) => (value ? `${value} h` : '')}
-            parser={(value) => value.replace('h', '')}
+            className={'move-dete-time-tanges'}
+            // formatter={(value) => (value ? `${value} h` : '')}
+            // parser={(value) => value.replace('h', '')}
+            addonAfter={selectAfter}
           ></InputNumber>
         );
       },
@@ -319,8 +338,7 @@ export default (props: DefaultConfig) => {
       drawerVisible &&
       Utils.request(Api.getTopicMetaData(+routeParams.clusterId))
         .then((res: any) => {
-          const filterRes = res.filter((item: any) => item.type !== 1);
-          const topics = (filterRes || []).map((item: any) => {
+          const topics = (res || []).map((item: any) => {
             return {
               label: item.topicName,
               value: item.topicName,
@@ -402,7 +420,7 @@ export default (props: DefaultConfig) => {
               originalBrokerIdList: taskPlanData[index].currentBrokerIdList,
               reassignBrokerIdList: taskPlanData[index].reassignBrokerIdList,
               originalRetentionTimeUnitMs: topicData[index].retentionMs,
-              reassignRetentionTimeUnitMs: moveDataTimeRanges[index] * 60 * 60 * 1000,
+              reassignRetentionTimeUnitMs: (moveDataTimeRanges[index] * 60 * 60 * 1000) / (moveDataTimeRangesType[index] || 1),
               latestDaysAvgBytesInList: topicData[index].latestDaysAvgBytesInList,
               latestDaysMaxBytesInList: topicData[index].latestDaysMaxBytesInList,
               partitionPlanList: taskPlanData[index].partitionPlanList,
@@ -476,6 +494,19 @@ export default (props: DefaultConfig) => {
                       setTopicSelectValue(v);
                     }}
                     options={topicMetaData}
+                    // 点击Tooltip会触发Select的下拉
+                    // maxTagPlaceholder={(v) => {
+                    //   const tooltipValue = v
+                    //     .map((item) => {
+                    //       return item.value;
+                    //     })
+                    //     .join('、');
+                    //   return (
+                    //     <Tooltip visible={true} placement="topLeft" key={tooltipValue} title={tooltipValue}>
+                    //       <span>{'+' + v.length + '...'}</span>
+                    //     </Tooltip>
+                    //   );
+                    // }}
                   ></Select>
                 </Form.Item>
               </Col>

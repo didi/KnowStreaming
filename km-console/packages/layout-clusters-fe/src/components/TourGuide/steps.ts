@@ -70,7 +70,7 @@ const ClusterDetailSteps = {
       },
     },
     {
-      target: '.single-cluster-detail .ks-chart-container-header .header-right .icon-box',
+      target: '.single-cluster-detail .ks-chart-container-header .header-right .dcloud-btn',
       title: '指标筛选',
       content: '点击这里可以对展示的图表进行筛选',
       placement: 'left-start' as const,
