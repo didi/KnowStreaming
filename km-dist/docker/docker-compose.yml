@@ -25,11 +25,12 @@ services:
 
       SERVER_ES_ADDRESS: elasticsearch_single:9200
 
-      JAVA_OPTS: -Xmx1g -Xms1g -Dfile.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom -Duser.timezone=GMT+08
+      JAVA_OPTS: -Xmx1g -Xms1g
     networks:
       - ks
-    volumes:
-      - /Users/haoqi/Downloads/ks/manage/log:/logs
+#    日志文件持久化路径
+#    volumes:
+#      - /Users/haoqi/Downloads/ks/manage/log:/logs
   knowstreaming-ui:
     image: ks_ui:1.0
     container_name: knowstreaming-ui
@@ -61,6 +62,8 @@ services:
       TZ: Asia/Shanghai
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       discovery.type: single-node
+#    数据文件持久化路径
+#    记录实时指标信息
 #    volumes:
 #      - /Users/haoqi/Downloads/ks/es/data:/usr/share/elasticsearch/data
     networks:
@@ -79,6 +82,8 @@ services:
       - ks
     expose:
       - 3306
+#   数据文件持久化路径
+#   记录添加的集群基本信息
     volumes:
       - /Users/haoqi/Downloads/ks/mysql/data:/data/mysql
 
