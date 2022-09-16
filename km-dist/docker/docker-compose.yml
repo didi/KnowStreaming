@@ -3,8 +3,8 @@ version: "3"
 services:
   
   knowstreaming-manager:
-    image: knowstreaming-manager:0.1.0
-    container_name: knowstreaming_manager
+    image: haiti/knowstreaming-manager:0.1.0
+    container_name: knowstreaming-manager
     privileged: true
     restart: always
     depends_on:
@@ -28,14 +28,16 @@ services:
       JAVA_OPTS: -Xmx1g -Xms1g
     networks:
       - ks
+#    extra_hosts:
+#      - "hostname:x.x.x.x"
 #    volumes:
 #      - /Users/haoqi/Downloads/ks/manage/log:/logs
   knowstreaming-ui:
-    image: knowstreaming-ui:0.1.0
-    container_name: knowstreaming_ui
+    image: haiti/knowstreaming-ui:0.1.0
+    container_name: knowstreaming-ui
     restart: always
     ports:
-      - '80:80'
+      - '18092:80'
     environment:
       TZ: Asia/Shanghai
     depends_on:
@@ -44,18 +46,19 @@ services:
       - knowstreaming-manager
     networks:
       - ks
-
+#    extra_hosts:
+#      - "hostname:x.x.x.x"
 
   elasticsearch-single:
     image: docker.io/library/elasticsearch:7.6.2
-    container_name: elasticsearch_single
+    container_name: elasticsearch-single
     restart: always
     expose:
       - 9200
       - 9300
-    ports:
-      - '9200:9200'
-      - '9300:9300'
+#    ports:
+#      - '9200:9200'
+#      - '9300:9300'
     environment:
       TZ: Asia/Shanghai
       ES_JAVA_OPTS: -Xms512m -Xmx512m
@@ -65,7 +68,7 @@ services:
     networks:
       - ks
   knowstreaming-init:
-    image: knowstreaming-init:0.1.0
+    image: haiti/knowstreaming-init:0.1.0
     container_name: knowstreaming_init
     depends_on:
       - elasticsearch-single
@@ -73,13 +76,13 @@ services:
       - elasticsearch-single
     environment:
       TZ: Asia/Shanghai
-      SERVER_ES_ADDRESS: elasticsearch_single:9200
+      SERVER_ES_ADDRESS: elasticsearch-single:9200
     networks:
       - ks
 
   knowstreaming-mysql:
-    image: knowstreaming-mysql:0.1.0
-    container_name: knowstreaming_mysql
+    image: haiti/knowstreaming-mysql:0.1.0
+    container_name: knowstreaming-mysql
     restart: always
     environment:
       TZ: Asia/Shanghai
