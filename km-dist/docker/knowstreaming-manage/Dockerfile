@@ -5,7 +5,7 @@ LABEL maintainer="haoqi123 <1148648445@qq.com>"
 WORKDIR /knowstreaming
 
 ARG VERSION_MAVEN=3.6.3
-ARG VERSION_KM=v3.0.0-beta.2
+ARG VERSION_KM=3.0.0-beta.2
 ARG INIT_FILE=./init/*
 ARG CONFIG_FILE=./conf/*
 
@@ -24,10 +24,10 @@ RUN curl -fsSLO --compressed "https://dlcdn.apache.org/maven/maven-3/${VERSION_M
 #  && curl -fsSLO --compressed https://github.com/didi/KnowStreaming/archive/refs/tags/${VERSION_KM}.zip \
   && git clone https://github.com/didi/KnowStreaming.git \
 #  && unzip -o -q master.zip \
-  && cd KnowStreaming && git checkout ${VERSION_KM} \
+  && cd KnowStreaming && git checkout v${VERSION_KM} \
   && sed -i "/km-console/d" ./pom.xml \
   && mvn -U clean package -Dmaven.test.skip=true \
-  && cd / \
+  && cd / && mkdir /app \
   && mv /knowstreaming/KnowStreaming/km-rest/target/ks-km.jar /app/app.jar \
   && rm -rf /knowstreaming/* /usr/local/bin/mvn \
   && yum erase -y git && yum clean all \

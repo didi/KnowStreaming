@@ -4,8 +4,8 @@ LABEL maintainer="haoqi123 <1148648445@qq.com>"
 
 WORKDIR /knowstreaming
 
-ARG VERSION_NODE=v14.20.0
-ARG VERSION_KM=v3.0.0-beta.2
+ARG VERSION_NODE=14.20.0
+ARG VERSION_KM=3.0.0-beta.2
 
 # SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -59,9 +59,9 @@ RUN echo 'server { \
         } \
     }' > /etc/nginx/conf.d/default.conf
 
-RUN curl -fsSLO --compressed "https://npm.taobao.org/mirrors/node/${VERSION_NODE}/node-${VERSION_NODE}-linux-x64.tar.gz" \
+RUN curl -fsSLO --compressed "https://npm.taobao.org/mirrors/node/v${VERSION_NODE}/node-v${VERSION_NODE}-linux-x64.tar.gz" \
   && mkdir node/ \
-  && tar -zxf "node-${VERSION_NODE}-linux-x64.tar.gz" -C node/ --strip-components=1 --no-same-owner \
+  && tar -zxf "node-v${VERSION_NODE}-linux-x64.tar.gz" -C node/ --strip-components=1 --no-same-owner \
   && rm -rf /knowstreaming/*.tar.gz \
   && ln -s /knowstreaming/node/bin/node /usr/local/bin/node \
   && ln -s /knowstreaming/node/bin/npm /usr/local/bin/npm \
@@ -70,11 +70,11 @@ RUN curl -fsSLO --compressed "https://npm.taobao.org/mirrors/node/${VERSION_NODE
   && npm info underscore \
   && node --version \
   && npm --version \
-  && curl -fsSLO --compressed https://github.com/didi/KnowStreaming/archive/refs/tags/${VERSION_KM}.zip \
-  && unzip -o -q master.zip \
-  && cd KnowStreaming-master/km-console \
+  && curl -fsSLO --compressed https://github.com/didi/KnowStreaming/archive/refs/tags/v${VERSION_KM}.zip \
+  && unzip -o -q v${VERSION_KM}.zip \
+  && cd KnowStreaming-${VERSION_KM}/km-console \
   && npm install -g lerna && npm run i && npm run build \
-  && mv /knowstreaming/KnowStreaming-master/km-rest/src/main/resources/templates /pub \
+  && mv /knowstreaming/KnowStreaming-${VERSION_KM}/km-rest/src/main/resources/templates /pub \
   && npm uninstall -g lerna \
   && cd / \
   && rm -rf /knowstreaming/* /usr/local/bin/node /usr/local/bin/npm \

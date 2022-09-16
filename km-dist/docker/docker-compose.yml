@@ -4,26 +4,26 @@ services:
   
   knowstreaming-manager:
     image: knowstreaming-manager:0.1.0
-    container_name: knowstreaming-manager
+    container_name: knowstreaming_manager
     privileged: true
     restart: always
     depends_on:
-      - elasticsearch_single
-      - knowstreaming_mysql
+      - elasticsearch-single
+      - knowstreaming-mysql
     links:
-      - elasticsearch_single
-      - knowstreaming_mysql
+      - elasticsearch-single
+      - knowstreaming-mysql
     expose:
       - 80
     environment:
       TZ: Asia/Shanghai
 
-      SERVER_MYSQL_ADDRESS: knowstreaming_mysql:3306
+      SERVER_MYSQL_ADDRESS: knowstreaming-mysql:3306
       SERVER_MYSQL_DB: know_streaming
       SERVER_MYSQL_USER: root
       SERVER_MYSQL_PASSWORD: admin2022_
 
-      SERVER_ES_ADDRESS: elasticsearch_single:9200
+      SERVER_ES_ADDRESS: elasticsearch-single:9200
 
       JAVA_OPTS: -Xmx1g -Xms1g
     networks:
@@ -32,7 +32,7 @@ services:
 #      - /Users/haoqi/Downloads/ks/manage/log:/logs
   knowstreaming-ui:
     image: knowstreaming-ui:0.1.0
-    container_name: knowstreaming-ui
+    container_name: knowstreaming_ui
     restart: always
     ports:
       - '80:80'
@@ -46,7 +46,7 @@ services:
       - ks
 
 
-  elasticsearch_single:
+  elasticsearch-single:
     image: docker.io/library/elasticsearch:7.6.2
     container_name: elasticsearch_single
     restart: always
@@ -64,20 +64,20 @@ services:
 #      - /Users/haoqi/Downloads/ks/es/data:/usr/share/elasticsearch/data
     networks:
       - ks
-  knowstreaming_init:
+  knowstreaming-init:
     image: knowstreaming-init:0.1.0
     container_name: knowstreaming_init
     depends_on:
-      - elasticsearch_single
+      - elasticsearch-single
     links:
-      - elasticsearch_single
+      - elasticsearch-single
     environment:
       TZ: Asia/Shanghai
       SERVER_ES_ADDRESS: elasticsearch_single:9200
     networks:
       - ks
 
-  knowstreaming_mysql:
+  knowstreaming-mysql:
     image: knowstreaming-mysql:0.1.0
     container_name: knowstreaming_mysql
     restart: always
