@@ -1,7 +1,10 @@
-FROM centos:7.9.2009
+FROM debian:stable-20220912-slim
 LABEL org.opencontainers.image.authors="haoqi123"
 ARG INIT_ES_FILE=./init/*
 COPY ${INIT_ES_FILE} /
 ENV TZ=Asia/Shanghai
 
-ENTRYPOINT ["/bin/sh","/template.sh","start"]
+RUN apt-get update \
+    && apt-get install -y curl
+
+ENTRYPOINT ["/bin/bash","/template.sh","start"]

@@ -31,6 +31,6 @@ RUN curl -fsSLO --compressed "https://dlcdn.apache.org/maven/maven-3/${VERSION_M
   && mv /knowstreaming/KnowStreaming/km-rest/target/ks-km.jar /app/app.jar \
   && rm -rf /knowstreaming/* /usr/local/bin/mvn \
   && yum erase -y git && yum clean all \
-  && rm -rf `pwd`/.m2 /tmp/*
+  && rm -rf /root/.m2 /tmp/*
 
 ENTRYPOINT ["/bin/bash","/start.sh"]

@@ -1,4 +1,4 @@
-echo "Wait ElasticSearch Start..."
+echo "Wait ElasticSearch Start...${SERVER_ES_ADDRESS}"
 while true
 do
   curl -s --connect-timeout 10 -o /dev/null  http://${SERVER_ES_ADDRESS}/_cat/nodes > /dev/null 2>&1
