@@ -3,7 +3,7 @@ version: "3"
 services:
   
   knowstreaming-manager:
-    image: ks_manage:1.0
+    image: km_manage:1.1
     container_name: knowstreaming-manager
     privileged: true
     restart: always
@@ -32,7 +32,7 @@ services:
 #    volumes:
 #      - /Users/haoqi/Downloads/ks/manage/log:/logs
   knowstreaming-ui:
-    image: ks_ui:1.0
+    image: km:1.0
     container_name: knowstreaming-ui
     restart: always
     ports:
