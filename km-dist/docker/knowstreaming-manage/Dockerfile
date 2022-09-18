@@ -34,3 +34,5 @@ RUN curl -fsSLO --compressed "https://dlcdn.apache.org/maven/maven-3/${VERSION_M
   && rm -rf /root/.m2 /tmp/*
 
 ENTRYPOINT ["/bin/bash","/start.sh"]
+
+HEALTHCHECK --interval=60s --timeout=60s CMD curl -f http://localhost/ks-km/api/v3/open/health || exit 1

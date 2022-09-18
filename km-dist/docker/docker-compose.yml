@@ -10,9 +10,6 @@ services:
     depends_on:
       - elasticsearch-single
       - knowstreaming-mysql
-    links:
-      - elasticsearch-single
-      - knowstreaming-mysql
     expose:
       - 80
     environment:
@@ -26,8 +23,7 @@ services:
       SERVER_ES_ADDRESS: elasticsearch-single:9200
 
       JAVA_OPTS: -Xmx1g -Xms1g
-    networks:
-      - ks
+
 #    extra_hosts:
 #      - "hostname:x.x.x.x"
 #    volumes:
@@ -42,10 +38,6 @@ services:
       TZ: Asia/Shanghai
     depends_on:
       - knowstreaming-manager
-    links:
-      - knowstreaming-manager
-    networks:
-      - ks
 #    extra_hosts:
 #      - "hostname:x.x.x.x"
 
@@ -65,20 +57,16 @@ services:
       discovery.type: single-node
 #    volumes:
 #      - /Users/haoqi/Downloads/ks/es/data:/usr/share/elasticsearch/data
-    networks:
-      - ks
+
   knowstreaming-init:
     image: haiti/knowstreaming-init:0.1.0
     container_name: knowstreaming_init
     depends_on:
       - elasticsearch-single
-    links:
-      - elasticsearch-single
     environment:
       TZ: Asia/Shanghai
       SERVER_ES_ADDRESS: elasticsearch-single:9200
-    networks:
-      - ks
+
 
   knowstreaming-mysql:
     image: haiti/knowstreaming-mysql:0.1.0
@@ -88,13 +76,7 @@ services:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: admin2022_
       MYSQL_DATABASE: know_streaming
-    networks:
-      - ks
     expose:
       - 3306
 #    volumes:
 #      - /Users/haoqi/Downloads/ks/mysql/data:/data/mysql
-
-networks:
-  ks:
-    driver: bridge
