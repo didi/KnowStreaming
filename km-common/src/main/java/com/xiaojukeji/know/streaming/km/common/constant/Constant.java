@@ -64,4 +64,5 @@ public class Constant {
     public static final Float COLLECT_METRICS_ERROR_COST_TIME = -1.0F;
 
     public static final Integer DEFAULT_RETRY_TIME = 3;
+
 }

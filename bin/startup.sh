@@ -9,7 +9,7 @@ error_exit ()
 [ ! -e "$JAVA_HOME/bin/java" ] && unset JAVA_HOME
 
 if [ -z "$JAVA_HOME" ]; then
-  if $darwin; then
+  if [ "Darwin" = "$(uname -s)" ]; then
 
     if [ -x '/usr/libexec/java_home' ] ; then
       export JAVA_HOME=`/usr/libexec/java_home`
