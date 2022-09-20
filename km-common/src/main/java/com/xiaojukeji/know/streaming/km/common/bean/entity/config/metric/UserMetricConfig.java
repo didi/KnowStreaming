@@ -1,12 +1,12 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.config.metric;
 
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class UserMetricConfig {
 
     private int type;
@@ -14,6 +14,22 @@ public class UserMetricConfig {
     private String metric;
 
     private boolean set;
+
+    private int rank;
+
+    public UserMetricConfig(int type, String metric, boolean set, Integer rank) {
+        this.type = type;
+        this.metric = metric;
+        this.set = set;
+        this.rank = rank == null ? Constant.DEFAULT_METRIC_RANK : rank;
+    }
+
+    public UserMetricConfig(int type, String metric, boolean set) {
+        this.type = type;
+        this.metric = metric;
+        this.set = set;
+        this.rank = Constant.DEFAULT_METRIC_RANK;
+    }
 
     @Override
     public int hashCode(){
