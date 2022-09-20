@@ -7,12 +7,14 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.dto.config.ConfigDTO;
 import com.didiglobal.logi.security.service.ConfigService;
 import com.xiaojukeji.know.streaming.km.biz.version.VersionControlManager;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDetailDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.UserMetricConfigDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.metric.UserMetricConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionControlItem;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.config.metric.UserMetricConfigVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.version.VersionItemVO;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.VersionUtil;
@@ -159,6 +161,9 @@ public class VersionControlManagerImpl implements VersionControlManager {
 
             UserMetricConfig umc = userMetricConfigMap.get(itemType + "@" + metric);
             userMetricConfigVO.setSet(null != umc && umc.isSet());
+            if (umc != null) {
+                userMetricConfigVO.setRank(umc.getRank());
+            }
             userMetricConfigVO.setName(itemVO.getName());
             userMetricConfigVO.setType(itemVO.getType());
             userMetricConfigVO.setDesc(itemVO.getDesc());
@@ -178,13 +183,30 @@ public class VersionControlManagerImpl implements VersionControlManager {
     @Override
     public Result<Void> updateUserMetricItem(Long clusterId, Integer type, UserMetricConfigDTO dto, String operator) {
         Map<String, Boolean> metricsSetMap = dto.getMetricsSet();
-        if(null == metricsSetMap || metricsSetMap.isEmpty()){
+
+        //转换metricDetailDTOList
+        List<MetricDetailDTO> metricDetailDTOList = dto.getMetricDetailDTOList();
+        Map<String, MetricDetailDTO> metricDetailMap = new HashMap<>();
+        if (metricDetailDTOList != null && !metricDetailDTOList.isEmpty()) {
+            metricDetailMap = metricDetailDTOList.stream().collect(Collectors.toMap(MetricDetailDTO::getMetric, Function.identity()));
+        }
+
+        //转换metricsSetMap
+        if (metricsSetMap != null && !metricsSetMap.isEmpty()) {
+            for (Map.Entry<String, Boolean> metricAndShowEntry : metricsSetMap.entrySet()) {
+                if (metricDetailMap.containsKey(metricAndShowEntry.getKey())) continue;
+                metricDetailMap.put(metricAndShowEntry.getKey(), new MetricDetailDTO(metricAndShowEntry.getKey(), metricAndShowEntry.getValue(), null));
+            }
+        }
+
+        if (metricDetailMap.isEmpty()) {
             return Result.buildSuc();
         }
 
+
         Set<UserMetricConfig> userMetricConfigs = getUserMetricConfig(operator);
         for(Map.Entry<String, Boolean> metricAndShowEntry : metricsSetMap.entrySet()){
-            UserMetricConfig userMetricConfig = new UserMetricConfig(type, metricAndShowEntry.getKey(), metricAndShowEntry.getValue());
+            UserMetricConfig userMetricConfig = new UserMetricConfig(type, metricAndShowEntry.getKey(), metricAndShowEntry.getValue(), metricDetailMap.get(metricAndShowEntry.getKey()).getRank());
             userMetricConfigs.remove(userMetricConfig);
             userMetricConfigs.add(userMetricConfig);
         }
@@ -228,7 +250,15 @@ public class VersionControlManagerImpl implements VersionControlManager {
             return defaultMetrics;
         }
 
-        return JSON.parseObject(value, new TypeReference<Set<UserMetricConfig>>(){});
+        Set<UserMetricConfig> userMetricConfigs = JSON.parseObject(value, new TypeReference<Set<UserMetricConfig>>() {});
+
+        //补充rank不存在情况
+        for (UserMetricConfig userMetricConfig : userMetricConfigs) {
+            if (userMetricConfig.getRank() == 0) {
+                userMetricConfig.setRank(Constant.DEFAULT_METRIC_RANK);
+            }
+        }
+        return userMetricConfigs;
     }
 
     public static void main(String[] args){
