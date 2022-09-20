@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.common.bean.dto.group;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.partition.PartitionOffsetDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.topic.ClusterTopicDTO;
+import com.xiaojukeji.know.streaming.km.common.enums.OffsetTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -23,7 +24,7 @@ public class GroupOffsetResetDTO extends ClusterTopicDTO {
     private String groupName;
 
     /**
-     * @see com.xiaojukeji.know.streaming.km.common.enums.GroupOffsetResetEnum
+     * @see OffsetTypeEnum
      */
     @NotNull(message = "resetType不允许为空")
     @ApiModelProperty(value = "重置方式", example = "1")

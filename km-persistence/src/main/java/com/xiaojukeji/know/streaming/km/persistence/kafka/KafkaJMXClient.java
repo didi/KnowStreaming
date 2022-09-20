@@ -191,6 +191,10 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
         lambdaQueryWrapper.eq(BrokerPO::getStatus, Constant.ALIVE);
 
         BrokerPO brokerPO = brokerDAO.selectOne(lambdaQueryWrapper);
+        if (brokerPO == null) {
+            return null;
+        }
+
         return Broker.buildFrom(brokerPO);
     }
 }

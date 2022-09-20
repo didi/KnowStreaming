@@ -85,7 +85,8 @@ export const getTopicMessagesColmns = () => {
       title: 'Timestamp',
       dataIndex: 'timestampUnitMs',
       key: 'timestampUnitMs',
-      render: (t: number) => (t ? moment(t).format(timeFormat) : '-'),
+      sorter: true,
+      render: (t: number) => (t ? moment(t).format(timeFormat) + '.' + moment(t).millisecond() : '-'),
     },
     {
       title: 'Key',
