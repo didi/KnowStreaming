@@ -3,7 +3,7 @@ version: "3"
 services:
   
   knowstreaming-manager:
-    image: haiti/knowstreaming-manager:0.1.0
+    image: knowstreaming/knowstreaming-manager:0.2.0-test
     container_name: knowstreaming-manager
     privileged: true
     restart: always
@@ -12,6 +12,9 @@ services:
       - knowstreaming-mysql
     expose:
       - 80
+    command:
+      - /bin/sh
+      - /ks-start.sh
     environment:
       TZ: Asia/Shanghai
 
@@ -27,9 +30,9 @@ services:
 #    extra_hosts:
 #      - "hostname:x.x.x.x"
 #    volumes:
-#      - /Users/haoqi/Downloads/ks/manage/log:/logs
+#      - /ks/manage/log:/logs
   knowstreaming-ui:
-    image: haiti/knowstreaming-ui:0.1.0
+    image: knowstreaming/knowstreaming-ui:0.2.0-test1
     container_name: knowstreaming-ui
     restart: always
     ports:
@@ -56,27 +59,33 @@ services:
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       discovery.type: single-node
 #    volumes:
-#      - /Users/haoqi/Downloads/ks/es/data:/usr/share/elasticsearch/data
+#      - /ks/es/data:/usr/share/elasticsearch/data
 
   knowstreaming-init:
-    image: haiti/knowstreaming-init:0.1.0
+    image: knowstreaming/knowstreaming-manager:0.2.0-test
     container_name: knowstreaming_init
     depends_on:
       - elasticsearch-single
+    command:
+      - /bin/bash
+      - /es_template_create.sh
     environment:
       TZ: Asia/Shanghai
       SERVER_ES_ADDRESS: elasticsearch-single:9200
 
 
   knowstreaming-mysql:
-    image: haiti/knowstreaming-mysql:0.1.0
+    image: knowstreaming/knowstreaming-mysql:0.2.0-test
     container_name: knowstreaming-mysql
     restart: always
     environment:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: admin2022_
       MYSQL_DATABASE: know_streaming
+      MYSQL_ROOT_HOST: '%'
     expose:
       - 3306
+#    ports:
+#      - '3306:3306'
 #    volumes:
-#      - /Users/haoqi/Downloads/ks/mysql/data:/data/mysql
+#      - /ks/mysql/data:/data/mysql
