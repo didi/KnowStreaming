@@ -751,8 +751,8 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     private Result<ClusterMetrics> getMetricFromKafkaByTotalTopics(Long clusterId, String metric, String topicMetric){
         List<Topic> topics = topicService.listTopicsFromCacheFirst(clusterId);
 
-        float metricsSum = 0f;
-        for(Topic topic : topics){
+        float sumMetricValue = 0f;
+        for(Topic topic : topics) {
             Result<List<TopicMetrics>> ret = topicMetricService.collectTopicMetricsFromKafkaWithCacheFirst(
                     clusterId,
                     topic.getTopicName(),
@@ -763,14 +763,15 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
                 continue;
             }
 
-            List<TopicMetrics> topicMetrics = ret.getData();
-            for (TopicMetrics metrics : topicMetrics) {
-                if(metrics.isBBrokerAgg()){
-                    metricsSum += Double.valueOf(metrics.getMetrics().get(topicMetric));
+            for (TopicMetrics metrics : ret.getData()) {
+                if(metrics.isBBrokerAgg()) {
+                    Float metricValue = metrics.getMetric(topicMetric);
+                    sumMetricValue += (metricValue == null? 0f: metricValue);
+                    break;
                 }
             }
         }
 
-        return Result.buildSuc(initWithMetrics(clusterId, metric, metricsSum));
+        return Result.buildSuc(initWithMetrics(clusterId, metric, sumMetricValue));
     }
 }

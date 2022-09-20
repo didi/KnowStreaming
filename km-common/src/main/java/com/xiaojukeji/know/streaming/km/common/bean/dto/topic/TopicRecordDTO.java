@@ -1,8 +1,8 @@
 package com.xiaojukeji.know.streaming.km.common.bean.dto.topic;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.xiaojukeji.know.streaming.km.common.bean.dto.BaseDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
+import com.xiaojukeji.know.streaming.km.common.enums.OffsetTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -36,13 +36,12 @@ public class TopicRecordDTO extends PaginationSortDTO {
     @ApiModelProperty(value = "预览超时时间", example = "10000")
     private Long pullTimeoutUnitMs = 8000L;
 
+    /**
+     * @see OffsetTypeEnum
+     */
     @ApiModelProperty(value = "offset", example = "")
     private Integer filterOffsetReset = 0;
 
     @ApiModelProperty(value = "开始日期时间戳", example = "")
     private Long startTimestampUnitMs;
-
-    @ApiModelProperty(value = "结束日期时间戳", example = "")
-    private Long utilTimestampUnitMs;
-
 }
