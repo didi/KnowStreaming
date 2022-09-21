@@ -202,7 +202,7 @@ const AccessClusters = (props: any): JSX.Element => {
           }
 
           if (modifyKey) {
-            extraMsg[modifyKey] = `连接失败。${message}`;
+            extraMsg[modifyKey] = message;
           }
         });
 
@@ -338,7 +338,7 @@ const AccessClusters = (props: any): JSX.Element => {
             <Form.Item
               name="bootstrapServers"
               label="Bootstrap Servers"
-              extra={<span className={extra.bootstrapExtra.includes('连接成功') ? 'error-extra-info' : ''}>{extra.bootstrapExtra}</span>}
+              extra={<span className={!extra.bootstrapExtra.includes('连接成功') ? 'error-extra-info' : ''}>{extra.bootstrapExtra}</span>}
               validateTrigger={'onBlur'}
               rules={[
                 {
@@ -374,7 +374,7 @@ const AccessClusters = (props: any): JSX.Element => {
             <Form.Item
               name="zookeeper"
               label="Zookeeper"
-              extra={<span className={extra.zooKeeperExtra.includes('连接成功') ? 'error-extra-info' : ''}>{extra.zooKeeperExtra}</span>}
+              extra={<span className={!extra.zooKeeperExtra.includes('连接成功') ? 'error-extra-info' : ''}>{extra.zooKeeperExtra}</span>}
               validateStatus={zookeeperErrorStatus ? 'error' : 'success'}
               validateTrigger={'onBlur'}
               rules={[

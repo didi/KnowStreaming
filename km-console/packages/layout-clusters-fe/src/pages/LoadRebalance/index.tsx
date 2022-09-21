@@ -330,7 +330,7 @@ const LoadBalance: React.FC = (props: any) => {
           breadcrumbs={[
             { label: '多集群管理', aHref: '/' },
             { label: global?.clusterInfo?.name, aHref: `/cluster/${global?.clusterInfo?.id}` },
-            { label: 'Load Rebalance', aHref: `` },
+            { label: 'Rebalance', aHref: `` },
           ]}
         />
       </div>
