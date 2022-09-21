@@ -152,6 +152,7 @@ export const getFormConfig = (params: any) => {
       rules: [{ required: true, message: '请输入' }],
       attrs: {
         min: 0,
+        max: 1000,
         style: { width: 232 },
       },
     },
@@ -391,7 +392,7 @@ export const getTableColumns = () => {
     {
       title: 'time',
       dataIndex: 'costTimeUnitMs',
-      width: 60,
+      width: 100,
     },
   ];
 };
