@@ -15,6 +15,7 @@ import {
   AppContainer,
   Utils,
 } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 // 引入代码编辑器
@@ -431,22 +432,28 @@ export default () => {
       <TypicalListCard title="配置管理">
         <div className="config-manage-page">
           <div className="operate-bar">
-            <Form form={form} layout="inline" onFinish={() => getConfigList({ page: 1 })}>
-              <Form.Item name="valueGroup">
-                <Select style={{ width: 180 }} placeholder="请选择模块" options={configGroupList} />
-              </Form.Item>
-              <Form.Item name="valueName">
-                <Input style={{ width: 180 }} placeholder="请输入配置键" />
-              </Form.Item>
-              <Form.Item name="memo">
-                <Input style={{ width: 180 }} placeholder="请输入描述" />
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" ghost htmlType="submit">
-                  查询
-                </Button>
-              </Form.Item>
-            </Form>
+            <div className="left">
+              <div className="refresh-icon" onClick={() => getConfigList()}>
+                <IconFont className="icon" type="icon-shuaxin1" />
+              </div>
+              <Divider type="vertical" style={{ height: 20, top: 0 }} />
+              <Form form={form} layout="inline" onFinish={() => getConfigList({ page: 1 })}>
+                <Form.Item name="valueGroup">
+                  <Select style={{ width: 180 }} placeholder="请选择模块" options={configGroupList} />
+                </Form.Item>
+                <Form.Item name="valueName">
+                  <Input style={{ width: 180 }} placeholder="请输入配置键" />
+                </Form.Item>
+                <Form.Item name="memo">
+                  <Input style={{ width: 180 }} placeholder="请输入描述" />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" ghost htmlType="submit">
+                    查询
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
             {global.hasPermission && global.hasPermission(ConfigPermissionMap.CONFIG_ADD) ? (
               <Button
                 type="primary"

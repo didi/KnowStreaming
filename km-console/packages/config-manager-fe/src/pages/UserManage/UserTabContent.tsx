@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Form, ProTable, Select, Button, Input, Modal, message, Drawer, Space, Divider, AppContainer, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { defaultPagination } from 'constants/common';
@@ -341,22 +342,29 @@ export default (props: { curTabKey: string }) => {
   return (
     <>
       <div className="operate-bar">
-        <Form form={form} layout="inline" onFinish={() => getUserList({ page: 1 })}>
-          <Form.Item name="userName">
-            <Input placeholder="请输入用户账号" />
-          </Form.Item>
-          <Form.Item name="realName">
-            <Input placeholder="请输入用户实名" />
-          </Form.Item>
-          <Form.Item name="roleId">
-            <Select style={{ width: 190 }} placeholder="选择平台已创建的角色名" options={simpleRoleList} />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" ghost htmlType="submit">
-              查询
-            </Button>
-          </Form.Item>
-        </Form>
+        <div className="left">
+          <div className="refresh-icon" onClick={() => getUserList()}>
+            <IconFont className="icon" type="icon-shuaxin1" />
+          </div>
+          <Divider type="vertical" style={{ height: 20, top: 0 }} />
+
+          <Form form={form} layout="inline" onFinish={() => getUserList({ page: 1 })}>
+            <Form.Item name="userName">
+              <Input placeholder="请输入用户账号" />
+            </Form.Item>
+            <Form.Item name="realName">
+              <Input placeholder="请输入用户实名" />
+            </Form.Item>
+            <Form.Item name="roleId">
+              <Select style={{ width: 190 }} placeholder="选择平台已创建的角色名" options={simpleRoleList} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" ghost htmlType="submit">
+                查询
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
         {global.hasPermission && global.hasPermission(ConfigPermissionMap.USER_ADD) ? (
           <Button
             type="primary"
