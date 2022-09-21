@@ -25,7 +25,6 @@ principal="kafka/dbs-kafka-test-8-53@XXX.XXX.XXX";
 8、重启KS集群后再start.out中看到如下信息，证明Kerberos配置成功
 ![img_3.png](img_3.png)
 ![img_2.png](img_2.png)
-
 9、对于多集群来说如果用的是一样的Kerberos域的话，只需在每个zk中给kafka用户配置crdwa权限即可，这样集群初始化的时候zkclient是都可以认证。
 10、未改进：
     1、需要页面ZK的Kerberos配置化
