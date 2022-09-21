@@ -21,11 +21,9 @@ const SingleClusterDetail = (): JSX.Element => {
         </div>
         <div className="cluster-detail">
           <LeftSider />
-          <div className="chart-panel">
-            <ChartPanel>
-              <ChangeLog />
-            </ChartPanel>
-          </div>
+          <ChartPanel>
+            <ChangeLog />
+          </ChartPanel>
         </div>
       </div>
     </>

@@ -1,53 +1,20 @@
-.cluster-container-border {
-  background: #ffffff;
+.cluster-detail-container-border {
+  background: #fff;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
   border-radius: 12px;
 }
 
 .cluster-detail-container {
-  width: 100%;
-
-  &-header {
-    display: flex;
-    align-items: center;
-    height: 36px;
-
-    .refresh-icon-box {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      cursor: pointer;
-
-      .refresh-icon {
-        font-size: 14px;
-        color: #74788d;
-      }
-
-      &:hover {
-        background: #21252904;
-
-        .refresh-icon {
-          color: #495057;
-        }
-      }
-    }
-  }
-
   &-main {
     .header-chart-container {
-      width: 100%;
       height: 244px;
       margin-bottom: 12px;
-      .cluster-container-border();
+      .cluster-detail-container-border();
       .dcloud-spin.dcloud-spin-spinning {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 100%;
-        height: 244px;
+        height: 100%;
       }
     }
 
@@ -61,7 +28,7 @@
         flex: 1;
         height: 100%;
         overflow: hidden;
-        .cluster-container-border();
+        .cluster-detail-container-border();
         > div {
           width: 100%;
           height: 100%;
@@ -73,65 +40,64 @@
           justify-content: center;
           align-items: center;
         }
-
-        .chart-box {
-          position: relative;
-          width: 100%;
-          height: 244px;
-          background: #f8f9fa;
-          border-radius: 8px;
-
-          .expand-icon-box {
-            position: absolute;
-            z-index: 1000;
-            top: 14px;
-            right: 16px;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: center;
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
-
-            .expand-icon {
-              color: #adb5bc;
-              line-height: 24px;
-            }
-
-            &:hover {
-              background: rgba(33, 37, 41, 0.06);
-              .expand-icon {
-                color: #74788d;
-              }
-            }
-          }
-        }
       }
 
       .config-change-records-container {
         width: 240px;
         height: 100%;
         margin-left: 12px;
-        .cluster-container-border();
+        .cluster-detail-container-border();
       }
     }
   }
+}
 
-  .chart-box-title {
-    padding: 18px 0 0 20px;
-    font-family: @font-family-bold;
-    line-height: 16px;
-    .name {
-      font-size: 14px;
-      color: #212529;
+.cluster-detail-chart-box {
+  position: relative;
+  width: 100%;
+  height: 244px;
+  background: #f8f9fa;
+  border-radius: 8px;
+
+  .expand-icon-box {
+    position: absolute;
+    z-index: 1000;
+    top: 14px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+
+    .expand-icon {
+      color: #adb5bc;
+      line-height: 24px;
     }
-    .unit {
-      font-size: 12px;
-      color: #495057;
+
+    &:hover {
+      background: rgba(33, 37, 41, 0.06);
+      .expand-icon {
+        color: #74788d;
+      }
     }
-    > span {
-      cursor: pointer;
-    }
+  }
+}
+.cluster-detail-chart-box-title {
+  padding: 18px 0 0 20px;
+  font-family: @font-family-bold;
+  line-height: 16px;
+  .name {
+    font-size: 14px;
+    color: #212529;
+  }
+  .unit {
+    font-size: 12px;
+    color: #495057;
+  }
+  > span {
+    cursor: pointer;
   }
 }
