@@ -16,12 +16,19 @@ https://github.com/didi/KnowStreaming/blob/master/docs/install_guide/%E6%BA%90%E
 
 5、可以登录后，配置/opt/zookeeper.jass文件：
 Client {
+
 com.sun.security.auth.module.Krb5LoginModule required
+
 useKeyTab=true
+
 storeKey=false
+
 serviceName="zookeeper"
+
 keyTab="/etc/keytab/zookeeper.keytab"
+
 principal="kafka/dbs-kafka-test-8-53@XXX.XXX.XXX";
+
 };
 
 6、需要配置KDC-Server对KS的机器开通防火墙，并在KS的机器/etc/host/  配置 kdc-server的hostname。并将 krb5.conf 导入到/etc下
