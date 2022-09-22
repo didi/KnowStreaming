@@ -21,9 +21,9 @@ import {
 } from 'knowdesign';
 import moment from 'moment';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { defaultPagination } from 'constants/common';
+import { defaultPagination } from '@src/constants/common';
 import { RoleProps, PermissionNode, AssignUser, RoleOperate, FormItemPermission } from './config';
-import api from 'api';
+import api from '@src/api';
 import CheckboxGroupContainer from './CheckboxGroupContainer';
 import { ConfigPermissionMap } from '../CommonConfig';
 
@@ -611,38 +611,45 @@ export default (props: { curTabKey: string }): JSX.Element => {
 
   return (
     <>
-      <div className="operate-bar-right">
-        <Input
-          className="search-input"
-          suffix={
-            <IconFont
-              type="icon-fangdajing"
-              onClick={(_) => {
-                setSearchKeywords(searchKeywordsInput);
-              }}
-              style={{ fontSize: '16px' }}
-            />
-          }
-          placeholder="请输入角色名称"
-          value={searchKeywordsInput}
-          onPressEnter={(_) => {
-            setSearchKeywords(searchKeywordsInput);
-          }}
-          onChange={(e) => {
-            setSearchKeywordsInput(e.target.value);
-          }}
-        />
-        {global.hasPermission && global.hasPermission(ConfigPermissionMap.ROLE_ADD) ? (
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => detailRef.current.onOpen(true, RoleOperate.Add, getRoleList, undefined)}
-          >
-            新增角色
-          </Button>
-        ) : (
-          <></>
-        )}
+      <div className="operate-bar">
+        <div className="left">
+          <div className="refresh-icon" onClick={() => getRoleList()}>
+            <IconFont className="icon" type="icon-shuaxin1" />
+          </div>
+        </div>
+        <div className="right">
+          <Input
+            className="search-input"
+            suffix={
+              <IconFont
+                type="icon-fangdajing"
+                onClick={(_) => {
+                  setSearchKeywords(searchKeywordsInput);
+                }}
+                style={{ fontSize: '16px' }}
+              />
+            }
+            placeholder="请输入角色名称"
+            value={searchKeywordsInput}
+            onPressEnter={(_) => {
+              setSearchKeywords(searchKeywordsInput);
+            }}
+            onChange={(e) => {
+              setSearchKeywordsInput(e.target.value);
+            }}
+          />
+          {global.hasPermission && global.hasPermission(ConfigPermissionMap.ROLE_ADD) ? (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => detailRef.current.onOpen(true, RoleOperate.Add, getRoleList, undefined)}
+            >
+              新增角色
+            </Button>
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
 
       <ProTable

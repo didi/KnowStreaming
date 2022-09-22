@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Select, ProTable, DatePicker, Utils, Tooltip } from 'knowdesign';
-import api from 'api';
-import { defaultPagination } from 'constants/common';
+import { Button, Form, Input, Select, ProTable, DatePicker, Utils, Tooltip, Divider } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
+import api from '@src/api';
+import { defaultPagination } from '@src/constants/common';
 import TypicalListCard from '../../components/TypicalListCard';
 import './index.less';
 import moment from 'moment';
@@ -119,25 +120,32 @@ export default () => {
     <>
       <TypicalListCard title="操作记录">
         <div className="operate-bar">
-          <Form form={form} layout="inline" onFinish={() => getData({ page: 1 })}>
-            <Form.Item name="targetType">
-              <Select placeholder="请选择模块" options={configGroupList} style={{ width: 160 }} />
-            </Form.Item>
-            <Form.Item name="target">
-              <Input placeholder="请输入操作对象" />
-            </Form.Item>
-            <Form.Item name="detail">
-              <Input placeholder="请输入操作内容" />
-            </Form.Item>
-            <Form.Item name="time">
-              <RangePicker showTime />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" ghost htmlType="submit">
-                查询
-              </Button>
-            </Form.Item>
-          </Form>
+          <div className="left">
+            <div className="refresh-icon" onClick={() => getData()}>
+              <IconFont className="icon" type="icon-shuaxin1" />
+            </div>
+            <Divider type="vertical" style={{ height: 20, top: 0 }} />
+
+            <Form form={form} layout="inline" onFinish={() => getData({ page: 1 })}>
+              <Form.Item name="targetType">
+                <Select placeholder="请选择模块" options={configGroupList} style={{ width: 160 }} />
+              </Form.Item>
+              <Form.Item name="target">
+                <Input placeholder="请输入操作对象" />
+              </Form.Item>
+              <Form.Item name="detail">
+                <Input placeholder="请输入操作内容" />
+              </Form.Item>
+              <Form.Item name="time">
+                <RangePicker showTime />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" ghost htmlType="submit">
+                  查询
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
         </div>
 
         <ProTable

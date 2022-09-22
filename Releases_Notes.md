@@ -1,5 +1,39 @@
 
 
+## v3.0.0-beta.3
+
+**文档**
+- FAQ 补充权限识别失败问题的说明
+- 同步更新文档，保持与官网一致
+
+
+**Bug修复**
+- Offset 信息获取时，过滤掉无 Leader 的分区
+- 升级 oshi-core 版本至 5.6.1 版本，修复 Windows 系统获取系统指标失败问题
+- 修复 JMX 连接被关闭后，未进行重建的问题
+- 修复因 DB 中 Broker 信息不存在导致 TotalLogSize 指标获取时抛空指针问题
+- 修复 dml-logi.sql 中，SQL 注释错误的问题
+- 修复 startup.sh 中，识别操作系统类型错误的问题
+- 修复配置管理页面删除配置失败的问题
+- 修复系统管理应用文件引用路径
+- 修复 Topic Messages 详情提示信息点击跳转 404 的问题
+- 修复扩副本时，当前副本数不显示问题
+
+
+**体验优化**
+- Topic-Messages 页面，增加返回数据的排序以及按照Earliest/Latest的获取方式
+- 优化 GroupOffsetResetEnum 类名为 OffsetTypeEnum，使得类名含义更准确
+- 移动 KafkaZKDAO 类，及 Kafka Znode 实体类的位置，使得 Kafka Zookeeper DAO 更加内聚及便于识别
+- 后端补充 Overview 页面指标排序的功能
+- 前端 Webpack 配置优化
+- Cluster Overview 图表取消放大展示功能
+- 列表页增加手动刷新功能
+- 接入/编辑集群，优化 JMX-PORT，Version 信息的回显，优化JMX信息的展示
+- 提高登录页面图片展示清晰度
+- 部分样式和文案优化
+
+---
+
 ## v3.0.0-beta.2
 
 **文档**

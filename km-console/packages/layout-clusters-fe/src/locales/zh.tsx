@@ -21,7 +21,6 @@ export default {
 
   [`menu.${systemKey}.cluster`]: 'Cluster',
   [`menu.${systemKey}.cluster.overview`]: 'Overview',
-  [`menu.${systemKey}.cluster.balance`]: 'Load Rebalance',
 
   [`menu.${systemKey}.broker`]: 'Broker',
   [`menu.${systemKey}.broker.dashbord`]: 'Overview',
@@ -45,7 +44,7 @@ export default {
   [`menu.${systemKey}.consumer-group.group-list`]: 'GroupList',
 
   [`menu.${systemKey}.operation`]: 'Operation',
-  [`menu.${systemKey}.operation.balance`]: 'Load Rebalance',
+  [`menu.${systemKey}.operation.balance`]: 'Rebalance',
   [`menu.${systemKey}.operation.jobs`]: 'Job',
 
   [`menu.${systemKey}.acls`]: 'ACLs',

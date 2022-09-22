@@ -13,8 +13,8 @@ interface PropsType {
 }
 
 const typeObj: any = {
-  1: '周期均衡',
-  2: '立即均衡',
+  1: '立即均衡',
+  2: '周期均衡',
 };
 
 const { request, post } = Utils;
