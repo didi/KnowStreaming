@@ -14,4 +14,7 @@ import lombok.NoArgsConstructor;
 public class UserMetricConfigVO extends VersionItemVO {
     @ApiModelProperty(value = "该指标用户是否设置展现", example = "true")
     private Boolean set;
+
+    @ApiModelProperty(value = "该指标展示优先级", example = "1")
+    private Integer rank;
 }

@@ -23,7 +23,7 @@ import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.TopicVOConverter;
-import com.xiaojukeji.know.streaming.km.common.enums.GroupOffsetResetEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.OffsetTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
@@ -164,7 +164,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
             Map<TopicPartition, OffsetAndTimestamp> partitionOffsetAndTimestampMap = new HashMap<>();
             // 获取指定时间每个分区的offset（按指定开始时间查询消息时）
-            if (GroupOffsetResetEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
+            if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
                 Map<TopicPartition, Long> timestampsToSearch = new HashMap<>();
                 partitionList.forEach(topicPartition -> {
                     timestampsToSearch.put(topicPartition, dto.getStartTimestampUnitMs());
@@ -173,13 +173,13 @@ public class TopicStateManagerImpl implements TopicStateManager {
             }
 
             for (TopicPartition partition : partitionList) {
-                if (GroupOffsetResetEnum.EARLIEST.getResetType() == dto.getFilterOffsetReset()) {
+                if (OffsetTypeEnum.EARLIEST.getResetType() == dto.getFilterOffsetReset()) {
                     // 重置到最旧
                     kafkaConsumer.seek(partition, beginOffsetsMapResult.getData().get(partition));
-                } else if (GroupOffsetResetEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
+                } else if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
                     // 重置到指定时间
                     kafkaConsumer.seek(partition, partitionOffsetAndTimestampMap.get(partition).offset());
-                } else if (GroupOffsetResetEnum.PRECISE_OFFSET.getResetType() == dto.getFilterOffsetReset()) {
+                } else if (OffsetTypeEnum.PRECISE_OFFSET.getResetType() == dto.getFilterOffsetReset()) {
                     // 重置到指定位置
 
                 } else {
