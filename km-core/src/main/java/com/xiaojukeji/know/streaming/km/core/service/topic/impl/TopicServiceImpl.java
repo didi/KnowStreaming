@@ -23,7 +23,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.topic.TopicDAO;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.zk.TopicsZNode;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.TopicPartitionInfo;

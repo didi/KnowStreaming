@@ -1,4 +1,4 @@
-package com.xiaojukeji.know.streaming.km.common.zookeeper.znode;
+package com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

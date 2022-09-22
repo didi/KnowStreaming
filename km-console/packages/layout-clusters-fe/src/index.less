@@ -280,3 +280,38 @@ li {
     line-height: 20px;
   }
 }
+
+
+// Table Header 布局样式
+.table-header-layout {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  &-left,
+  &-right {
+    display: flex;
+    align-items: center;
+  }
+  &-left  {
+    &-refresh{
+      font-size: 20px;
+      color: #74788d;
+      cursor: pointer;
+    }
+  }
+  
+  &-right{
+    &>*{
+      margin-left: 8px;
+    }
+    
+    .search-input {
+      width: 248px;
+    }
+  } 
+
+  &-divider{
+    height: 20px;
+    top: 0
+  }
+}

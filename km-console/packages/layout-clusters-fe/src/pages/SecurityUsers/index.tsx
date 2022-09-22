@@ -22,6 +22,7 @@ import './index.less';
 import api from '@src/api';
 import { useParams } from 'react-router-dom';
 import { regKafkaPassword } from '@src/constants/reg';
+import { tableHeaderPrefix } from '@src/constants/common';
 
 export const randomString = (len = 32, chars = 'abcdefghijklmnopqrstuvwxyz1234567890'): string => {
   const maxPos = chars.length;
@@ -426,34 +427,41 @@ const SecurityUsers = (): JSX.Element => {
         ]}
       />
       <div className="security-users-page-list">
-        <div className="operate-bar">
-          <Input
-            className="search-input"
-            suffix={
-              <IconFont
-                type="icon-fangdajing"
-                onClick={(_) => {
-                  setSearchKeywords(searchKeywordsInput);
-                }}
-                style={{ fontSize: '16px' }}
-              />
-            }
-            placeholder="请输入 Kafka User"
-            value={searchKeywordsInput}
-            onPressEnter={(_) => {
-              setSearchKeywords(searchKeywordsInput);
-            }}
-            onChange={(e) => {
-              setSearchKeywordsInput(e.target.value);
-            }}
-          />
-          <Button
-            type="primary"
-            // icon={<PlusOutlined />}
-            onClick={() => editDrawerRef.current.onOpen(true, UsersOperate.Add, getKafkaUserList)}
-          >
-            新增KafkaUser
-          </Button>
+        <div className={tableHeaderPrefix}>
+          <div className={`${tableHeaderPrefix}-left`}>
+            <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => getKafkaUserList()}>
+              <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+            </div>
+          </div>
+          <div className={`${tableHeaderPrefix}-right`}>
+            <Input
+              className="search-input"
+              suffix={
+                <IconFont
+                  type="icon-fangdajing"
+                  onClick={(_) => {
+                    setSearchKeywords(searchKeywordsInput);
+                  }}
+                  style={{ fontSize: '16px' }}
+                />
+              }
+              placeholder="请输入 Kafka User"
+              value={searchKeywordsInput}
+              onPressEnter={(_) => {
+                setSearchKeywords(searchKeywordsInput);
+              }}
+              onChange={(e) => {
+                setSearchKeywordsInput(e.target.value);
+              }}
+            />
+            <Button
+              type="primary"
+              // icon={<PlusOutlined />}
+              onClick={() => editDrawerRef.current.onOpen(true, UsersOperate.Add, getKafkaUserList)}
+            >
+              新增KafkaUser
+            </Button>
+          </div>
         </div>
 
         <ProTable

@@ -21,7 +21,7 @@ spec:
         {{- include "ksmysql.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - image: knowstreaming/knowstreaming-mysql:0.1.0
+        - image: knowstreaming/knowstreaming-mysql:0.2.0
           name: {{ .Chart.Name }}
           env:
             - name: MYSQL_DATABASE

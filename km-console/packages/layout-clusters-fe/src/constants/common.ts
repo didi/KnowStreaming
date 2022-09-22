@@ -261,3 +261,6 @@ export const timeFormater = function formatDuring(mss: number) {
     .map((o: any) => `${o.v}${o.unit}`)
     .join();
 };
+
+// 列表页Header布局前缀
+export const tableHeaderPrefix = 'table-header-layout';

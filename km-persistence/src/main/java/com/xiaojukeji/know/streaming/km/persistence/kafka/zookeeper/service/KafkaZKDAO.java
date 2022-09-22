@@ -1,4 +1,4 @@
-package com.xiaojukeji.know.streaming.km.persistence.zk;
+package com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service;
 
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;

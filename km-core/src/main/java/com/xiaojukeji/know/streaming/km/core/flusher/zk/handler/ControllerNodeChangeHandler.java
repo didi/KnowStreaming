@@ -11,7 +11,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.BackoffUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.core.service.change.record.KafkaChangeRecordService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.zk.ControllerZNode;
 import kafka.zookeeper.ZNodeChangeHandler;
 

@@ -9,7 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.change.record.KafkaChangeRecordService;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.zk.BrokerIdsZNode;
 import kafka.zookeeper.ZNodeChildChangeHandler;
 

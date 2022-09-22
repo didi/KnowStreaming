@@ -5,7 +5,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.common.IpPortData;
 import com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerPO;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
-import com.xiaojukeji.know.streaming.km.common.zookeeper.znode.brokers.BrokerMetadata;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -76,20 +75,6 @@ public class Broker implements Serializable {
         metadata.setStartTimestamp(startTimestamp);
         metadata.setRack(node.rack());
         metadata.setStatus(1);
-        return metadata;
-    }
-
-    public static Broker buildFrom(Long clusterPhyId, Integer brokerId, BrokerMetadata brokerMetadata) {
-        Broker metadata = new Broker();
-        metadata.setClusterPhyId(clusterPhyId);
-        metadata.setBrokerId(brokerId);
-        metadata.setHost(brokerMetadata.getHost());
-        metadata.setPort(brokerMetadata.getPort());
-        metadata.setJmxPort(brokerMetadata.getJmxPort());
-        metadata.setStartTimestamp(brokerMetadata.getTimestamp());
-        metadata.setRack(brokerMetadata.getRack());
-        metadata.setStatus(1);
-        metadata.setEndpointMap(brokerMetadata.getEndpointMap());
         return metadata;
     }
 

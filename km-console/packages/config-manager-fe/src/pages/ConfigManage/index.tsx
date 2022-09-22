@@ -15,6 +15,7 @@ import {
   AppContainer,
   Utils,
 } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
 // 引入代码编辑器
@@ -26,8 +27,8 @@ import 'codemirror/addon/selection/active-line';
 import 'codemirror/addon/edit/closebrackets';
 require('codemirror/mode/xml/xml');
 require('codemirror/mode/javascript/javascript');
-import api from 'api';
-import { defaultPagination } from 'constants/common';
+import api from '@src/api';
+import { defaultPagination } from '@src/constants/common';
 import TypicalListCard from '../../components/TypicalListCard';
 import { ConfigPermissionMap } from '../CommonConfig';
 import { ConfigOperate, ConfigProps } from './config';
@@ -384,7 +385,7 @@ export default () => {
   const onDelete = (record: ConfigProps) => {
     confirm({
       title: '确定删除配置吗?',
-      content: `配置⌈${record.valueName}⌋${record.status === 1 ? '为启用状态，无法删除' : ''}`,
+      content: `配置 [${record.valueName}] ${record.status === 1 ? '为启用状态，无法删除' : ''}`,
       centered: true,
       okText: '删除',
       okType: 'primary',
@@ -398,9 +399,11 @@ export default () => {
       },
       maskClosable: true,
       onOk() {
-        return request(api.editConfig, {
-          method: 'POST',
-          data: record.id,
+        return request(api.delConfig, {
+          method: 'DELETE',
+          params: {
+            id: record.id,
+          },
         }).then((_) => {
           message.success('删除成功');
           getConfigList();
@@ -431,22 +434,28 @@ export default () => {
       <TypicalListCard title="配置管理">
         <div className="config-manage-page">
           <div className="operate-bar">
-            <Form form={form} layout="inline" onFinish={() => getConfigList({ page: 1 })}>
-              <Form.Item name="valueGroup">
-                <Select style={{ width: 180 }} placeholder="请选择模块" options={configGroupList} />
-              </Form.Item>
-              <Form.Item name="valueName">
-                <Input style={{ width: 180 }} placeholder="请输入配置键" />
-              </Form.Item>
-              <Form.Item name="memo">
-                <Input style={{ width: 180 }} placeholder="请输入描述" />
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" ghost htmlType="submit">
-                  查询
-                </Button>
-              </Form.Item>
-            </Form>
+            <div className="left">
+              <div className="refresh-icon" onClick={() => getConfigList()}>
+                <IconFont className="icon" type="icon-shuaxin1" />
+              </div>
+              <Divider type="vertical" style={{ height: 20, top: 0 }} />
+              <Form form={form} layout="inline" onFinish={() => getConfigList({ page: 1 })}>
+                <Form.Item name="valueGroup">
+                  <Select style={{ width: 180 }} placeholder="请选择模块" options={configGroupList} />
+                </Form.Item>
+                <Form.Item name="valueName">
+                  <Input style={{ width: 180 }} placeholder="请输入配置键" />
+                </Form.Item>
+                <Form.Item name="memo">
+                  <Input style={{ width: 180 }} placeholder="请输入描述" />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" ghost htmlType="submit">
+                    查询
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
             {global.hasPermission && global.hasPermission(ConfigPermissionMap.CONFIG_ADD) ? (
               <Button
                 type="primary"

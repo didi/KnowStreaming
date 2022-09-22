@@ -10,6 +10,7 @@ const defaultParams: any = {
   maxRecords: 100,
   pullTimeoutUnitMs: 5000,
   // filterPartitionId: 1,
+  filterOffsetReset: 0,
 };
 const defaultpaPagination = {
   current: 1,
@@ -29,11 +30,19 @@ const TopicMessages = (props: any) => {
   const [pagination, setPagination] = useState<any>(defaultpaPagination);
   const [form] = Form.useForm();
 
+  // 获取消息开始位置
+  const offsetResetList = [
+    { label: 'latest', value: 0 },
+    { label: 'earliest', value: 1 },
+  ];
+
   // 默认排序
   const defaultSorter = {
     sortField: 'timestampUnitMs',
     sortType: 'desc',
   };
+
+  const [sorter, setSorter] = useState<any>(defaultSorter);
 
   // 请求接口获取数据
   const genData = async () => {
@@ -49,7 +58,7 @@ const TopicMessages = (props: any) => {
       });
       setPartitionIdList(newPartitionIdList || []);
     });
-    request(Api.getTopicMessagesList(hashData?.topicName, urlParams?.clusterId), { data: { ...params, ...defaultSorter }, method: 'POST' })
+    request(Api.getTopicMessagesList(hashData?.topicName, urlParams?.clusterId), { data: { ...params, ...sorter }, method: 'POST' })
       .then((res: any) => {
         // setPagination({
         //   current: res.pagination?.pageNo,
@@ -87,8 +96,15 @@ const TopicMessages = (props: any) => {
     history.push(`/cluster/${urlParams?.clusterId}/testing/consumer`);
   };
 
-  const onTableChange = (pagination: any, filters: any, sorter: any) => {
+  const onTableChange = (pagination: any, filters: any, sorter: any, extra: any) => {
     setPagination(pagination);
+    // 只有排序事件时，触发重新请求后端数据
+    if (extra.action === 'sort') {
+      setSorter({
+        sortField: sorter.field || '',
+        sortType: sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : '',
+      });
+    }
     // const asc = sorter?.order && sorter?.order === 'ascend' ? true : false;
     // const sortColumn = sorter.field && toLine(sorter.field);
     // genData({ pageNo: pagination.current, pageSize: pagination.pageSize, filters, asc, sortColumn, queryTerm: searchResult, ...allParams });
@@ -96,7 +112,7 @@ const TopicMessages = (props: any) => {
 
   useEffect(() => {
     props.positionType === 'Messages' && genData();
-  }, [props, params]);
+  }, [props, params, sorter]);
 
   return (
     <>
@@ -119,6 +135,15 @@ const TopicMessages = (props: any) => {
         </div>
         <div className="messages-query">
           <Form form={form} layout="inline" onFinish={onFinish}>
+            <Form.Item name="filterOffsetReset">
+              <Select
+                options={offsetResetList}
+                size="small"
+                style={{ width: '120px' }}
+                className={'detail-table-select'}
+                placeholder="请选择offset"
+              />
+            </Form.Item>
             <Form.Item name="filterPartitionId">
               <Select
                 options={partitionIdList}
@@ -147,7 +172,14 @@ const TopicMessages = (props: any) => {
           style={{ margin: '12px 0 4px', padding: '7px 12px', background: '#FFF9E6' }}
           message={
             <div>
-              此处展示Topic最近的100条messages，若想获取其他messages，可前往<a onClick={jumpConsume}>Produce&Consume</a>进行操作
+              此处展示 Topic 最近的 100 条 messages。
+              {process.env.BUSINESS_VERSION ? (
+                <span>
+                  若想获取其他 messages，可前往 <a onClick={jumpConsume}>Produce&Consume</a> 进行操作
+                </span>
+              ) : (
+                ''
+              )}
             </div>
           }
           type="warning"
@@ -158,7 +190,7 @@ const TopicMessages = (props: any) => {
         showQueryForm={false}
         tableProps={{
           showHeader: false,
-          rowKey: 'path',
+          rowKey: 'offset',
           loading: loading,
           columns: getTopicMessagesColmns(),
           dataSource: data,
@@ -169,6 +201,7 @@ const TopicMessages = (props: any) => {
             bordered: false,
             onChange: onTableChange,
             scroll: { x: 'max-content' },
+            sortDirections: ['descend', 'ascend', 'default'],
           },
         }}
       />

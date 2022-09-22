@@ -19,7 +19,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicConsumedD
 import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicOverviewVO;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.AggTypeEnum;
-import com.xiaojukeji.know.streaming.km.common.enums.GroupOffsetResetEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.OffsetTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
@@ -199,12 +199,12 @@ public class GroupManagerImpl implements GroupManager {
             return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getTopicNotExist(dto.getClusterId(), dto.getTopicName()));
         }
 
-        if (GroupOffsetResetEnum.PRECISE_OFFSET.getResetType() == dto.getResetType()
+        if (OffsetTypeEnum.PRECISE_OFFSET.getResetType() == dto.getResetType()
             && ValidateUtils.isEmptyList(dto.getOffsetList())) {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "参数错误，指定offset重置需传offset信息");
         }
 
-        if (GroupOffsetResetEnum.PRECISE_TIMESTAMP.getResetType() == dto.getResetType()
+        if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getResetType()
                 && ValidateUtils.isNull(dto.getTimestamp())) {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "参数错误，指定时间重置需传时间信息");
         }
@@ -213,7 +213,7 @@ public class GroupManagerImpl implements GroupManager {
     }
 
     private Result<Map<TopicPartition, Long>> getPartitionOffset(GroupOffsetResetDTO dto) {
-        if (GroupOffsetResetEnum.PRECISE_OFFSET.getResetType() == dto.getResetType()) {
+        if (OffsetTypeEnum.PRECISE_OFFSET.getResetType() == dto.getResetType()) {
             return Result.buildSuc(dto.getOffsetList().stream().collect(Collectors.toMap(
                     elem -> new TopicPartition(dto.getTopicName(), elem.getPartitionId()),
                     PartitionOffsetDTO::getOffset,
@@ -222,9 +222,9 @@ public class GroupManagerImpl implements GroupManager {
         }
 
         OffsetSpec offsetSpec = null;
-        if (GroupOffsetResetEnum.PRECISE_TIMESTAMP.getResetType() == dto.getResetType()) {
+        if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getResetType()) {
             offsetSpec = OffsetSpec.forTimestamp(dto.getTimestamp());
-        } else if (GroupOffsetResetEnum.EARLIEST.getResetType() == dto.getResetType()) {
+        } else if (OffsetTypeEnum.EARLIEST.getResetType() == dto.getResetType()) {
             offsetSpec = OffsetSpec.earliest();
         } else {
             offsetSpec = OffsetSpec.latest();
