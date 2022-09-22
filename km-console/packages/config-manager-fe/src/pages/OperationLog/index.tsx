@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Select, ProTable, DatePicker, Utils, Tooltip, Divider } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
-import api from 'api';
-import { defaultPagination } from 'constants/common';
+import api from '@src/api';
+import { defaultPagination } from '@src/constants/common';
 import TypicalListCard from '../../components/TypicalListCard';
 import './index.less';
 import moment from 'moment';

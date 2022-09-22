@@ -21,9 +21,9 @@ import {
 } from 'knowdesign';
 import moment from 'moment';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { defaultPagination } from 'constants/common';
+import { defaultPagination } from '@src/constants/common';
 import { RoleProps, PermissionNode, AssignUser, RoleOperate, FormItemPermission } from './config';
-import api from 'api';
+import api from '@src/api';
 import CheckboxGroupContainer from './CheckboxGroupContainer';
 import { ConfigPermissionMap } from '../CommonConfig';
 

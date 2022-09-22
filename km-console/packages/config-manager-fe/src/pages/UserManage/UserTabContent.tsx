@@ -3,11 +3,11 @@ import { Form, ProTable, Select, Button, Input, Modal, message, Drawer, Space, D
 import { IconFont } from '@knowdesign/icons';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import { defaultPagination } from 'constants/common';
+import { defaultPagination } from '@src/constants/common';
 import { UserProps, UserOperate } from './config';
 import CheckboxGroupContainer from './CheckboxGroupContainer';
 import TagsWithHide from '../../components/TagsWithHide/index';
-import api from 'api';
+import api from '@src/api';
 import { ConfigPermissionMap } from '../CommonConfig';
 
 const { confirm } = Modal;
