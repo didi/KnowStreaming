@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
-import { AppContainer, Form, Input, ProTable, Select, Utils } from 'knowdesign';
+import { AppContainer, Divider, Form, IconFont, Input, ProTable, Select, Utils } from 'knowdesign';
 import './index.less';
 import Api from '@src/api/index';
 import { getOperatingStateListParams } from './interface';
@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 import ConsumerGroupDetail from './ConsumerGroupDetail';
 import ConsumerGroupHealthCheck from '@src/components/CardBar/ConsumerGroupHealthCheck';
 import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
-import { hashDataParse } from '@src/constants/common';
+import { hashDataParse, tableHeaderPrefix } from '@src/constants/common';
 
 const { Option } = Select;
 
@@ -181,17 +181,13 @@ const AutoPage = (props: any) => {
       <div className={`operating-state ${scene !== 'topicDetail' && 'clustom-table-content'}`}>
         {/* <CardBar cardColumns={data}></CardBar> */}
         {scene !== 'topicDetail' && (
-          <div className="operation-bar">
-            <div className="left">
-              {/* <Radio.Group
-                options={showModes}
-                optionType="button"
-                onChange={(e) => {
-                  setShowMode(e.target.value);
-                }}
-                value={showMode}
-              /> */}
-              <Form.Item label="">
+          <div className={tableHeaderPrefix}>
+            <div className={`${tableHeaderPrefix}-left`}>
+              <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => searchFn()}>
+                <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+              </div>
+              <Divider type="vertical" className={`${tableHeaderPrefix}-divider`} />
+              <div className="consumers-search">
                 <Input
                   className="search-input-short"
                   placeholder="请输入Consumer Group"
@@ -201,8 +197,6 @@ const AutoPage = (props: any) => {
                   }}
                   onPressEnter={searchFn}
                 />
-              </Form.Item>
-              <Form.Item label="">
                 <Input
                   className="search-input-short"
                   placeholder="请输入Topic name"
@@ -212,12 +206,12 @@ const AutoPage = (props: any) => {
                   }}
                   onPressEnter={searchFn}
                 />
-              </Form.Item>
+              </div>
               {/* <Button type="primary" className="add-btn" onClick={searchFn}>
                 查询
               </Button> */}
             </div>
-            <div className="right"></div>
+            {/* <div className="right"></div> */}
           </div>
         )}
         {/* <Table columns={columns} dataSource={consumerGroupList} scroll={{  x: 1500 }} />

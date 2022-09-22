@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Select, Form, Utils, AppContainer, Input, Button, ProTable, Badge, Tag, SearchInput } from 'knowdesign';
+import { Select, Form, Utils, AppContainer, Input, Button, ProTable, Badge, Tag, SearchInput, IconFont, Divider } from 'knowdesign';
 import BalanceDrawer from './BalanceDrawer';
 import HistoryDrawer from './HistoryDrawer';
 import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
@@ -9,6 +9,7 @@ import './index.less';
 import LoadRebalanceCardBar from '@src/components/CardBar/LoadRebalanceCardBar';
 import { BalanceFilter } from './BalanceFilter';
 import { ClustersPermissionMap } from '../CommonConfig';
+import { tableHeaderPrefix } from '@src/constants/common';
 
 const Balance_Status_OPTIONS = [
   {
@@ -339,7 +340,17 @@ const LoadBalance: React.FC = (props: any) => {
       </div>
       <div className="load-rebalance-container">
         <div className="balance-main clustom-table-content">
-          <div className="header-con">
+          <div className={tableHeaderPrefix}>
+            <div className={`${tableHeaderPrefix}-left`}>
+              <div
+                className={`${tableHeaderPrefix}-left-refresh`}
+                onClick={() => getList({ searchKeywords: searchValue, stateParam: balanceList })}
+              >
+                <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+              </div>
+              <Divider type="vertical" className={`${tableHeaderPrefix}-divider`} />
+              <BalanceFilter title="负载均衡列表筛选" data={[]} getNorms={getNorms} filterList={filterList} />
+            </div>
             {/* <Form form={form} layout="inline" onFinish={resetList}>
               <Form.Item name="status">
                 <Select className="grid-select" placeholder="请选择状态" style={{ width: '180px' }} options={Balance_Status_OPTIONS} />
@@ -354,8 +365,7 @@ const LoadBalance: React.FC = (props: any) => {
                 </Button>
               </Form.Item>
             </Form> */}
-            <BalanceFilter title="负载均衡列表筛选" data={[]} getNorms={getNorms} filterList={filterList} />
-            <div className="float-r">
+            <div className={`${tableHeaderPrefix}-right`}>
               <SearchInput
                 onSearch={hostSearch}
                 attrs={{
