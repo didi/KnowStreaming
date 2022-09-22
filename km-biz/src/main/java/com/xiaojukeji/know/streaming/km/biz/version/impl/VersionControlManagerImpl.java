@@ -49,29 +49,29 @@ public class VersionControlManagerImpl implements VersionControlManager {
     @PostConstruct
     public void init(){
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_HEALTH_SCORE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_TOTAL_PRODUCE_REQUESTS, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_FAILED_FETCH_REQ, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_FAILED_PRODUCE_REQ, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_MESSAGE_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_UNDER_REPLICA_PARTITIONS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_TOTAL_PRODUCE_REQUESTS, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_BYTES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_BYTES_OUT, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_BYTES_REJECTED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_MESSAGE_IN, true));
 
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_HEALTH_SCORE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_REQ_QUEUE_SIZE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_RES_QUEUE_SIZE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_PRODUCE_REQ, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_LOG_SIZE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_CONNECTIONS, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_MESSAGES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_BYTES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_BYTES_OUT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_GROUP_REBALANCES, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_JOB_RUNNING, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_CONNECTIONS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_MESSAGES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_PARTITIONS_NO_LEADER, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_PARTITION_URP, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_LOG_SIZE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_PRODUCE_REQ, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_REQ_QUEUE_SIZE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_RES_QUEUE_SIZE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_GROUP_REBALANCES, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_JOB_RUNNING, true));
 
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_OFFSET_CONSUMED, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_LAG, true));
@@ -79,18 +79,18 @@ public class VersionControlManagerImpl implements VersionControlManager {
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_HEALTH_SCORE, true));
 
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_HEALTH_SCORE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_REQ_QUEUE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_RES_QUEUE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_CONNECTION_COUNT, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_MESSAGE_IN, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_PRODUCE_REQ, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_NETWORK_RPO_AVG_IDLE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_REQ_AVG_IDLE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_CONNECTION_COUNT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_IN, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_OUT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_PARTITIONS_SKEW, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_PRODUCE_REQ, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_REQ_QUEUE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_RES_QUEUE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_LEADERS_SKEW, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_UNDER_REPLICATE_PARTITION, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_PARTITIONS_SKEW, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_IN, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_OUT, true));
     }
 
     @Autowired
@@ -203,10 +203,9 @@ public class VersionControlManagerImpl implements VersionControlManager {
             return Result.buildSuc();
         }
 
-
         Set<UserMetricConfig> userMetricConfigs = getUserMetricConfig(operator);
-        for(Map.Entry<String, Boolean> metricAndShowEntry : metricsSetMap.entrySet()){
-            UserMetricConfig userMetricConfig = new UserMetricConfig(type, metricAndShowEntry.getKey(), metricAndShowEntry.getValue(), metricDetailMap.get(metricAndShowEntry.getKey()).getRank());
+        for (MetricDetailDTO metricDetailDTO : metricDetailMap.values()) {
+            UserMetricConfig userMetricConfig = new UserMetricConfig(type, metricDetailDTO.getMetric(), metricDetailDTO.getSet(), metricDetailDTO.getRank());
             userMetricConfigs.remove(userMetricConfig);
             userMetricConfigs.add(userMetricConfig);
         }
@@ -250,15 +249,7 @@ public class VersionControlManagerImpl implements VersionControlManager {
             return defaultMetrics;
         }
 
-        Set<UserMetricConfig> userMetricConfigs = JSON.parseObject(value, new TypeReference<Set<UserMetricConfig>>() {});
-
-        //补充rank不存在情况
-        for (UserMetricConfig userMetricConfig : userMetricConfigs) {
-            if (userMetricConfig.getRank() == 0) {
-                userMetricConfig.setRank(Constant.DEFAULT_METRIC_RANK);
-            }
-        }
-        return userMetricConfigs;
+        return JSON.parseObject(value, new TypeReference<Set<UserMetricConfig>>() {});
     }
 
     public static void main(String[] args){

@@ -42,7 +42,6 @@ public class Constant {
      */
     public static final Integer DEFAULT_CLUSTER_HEALTH_SCORE = 90;
 
-    public static final Integer DEFAULT_METRIC_RANK = 10000;
 
     public static final String DEFAULT_USER_NAME = "know-streaming-app";
 
