@@ -15,6 +15,7 @@ import { getDataNumberUnit, getUnit } from '@src/constants/chartConfig';
 import SingleChartHeader, { KsHeaderOptions } from '@src/components/SingleChartHeader';
 import { MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL } from '@src/constants/common';
 import RenderEmpty from '@src/components/RenderEmpty';
+import DragGroup from '@src/components/DragGroup';
 
 type ChartFilterOptions = Omit<KsHeaderOptions, 'gridNum'>;
 interface MetricInfo {
@@ -279,7 +280,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
   }, []);
 
   return (
-    <div className="cluster-detail-container">
+    <div className="chart-panel cluster-detail-container">
       <SingleChartHeader
         onChange={ksHeaderChange}
         hideNodeScope={true}
@@ -306,7 +307,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           <Spin spinning={defaultChartLoading}>
             {messagesInMetricData.data && (
               <>
-                <div className="chart-box-title">
+                <div className="cluster-detail-chart-box-title">
                   <Tooltip
                     placement="topLeft"
                     title={() => {
@@ -354,14 +355,25 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           <div className="multiple-chart-container">
             <div className={!metricDataList.length ? 'multiple-chart-container-loading' : ''}>
               <Spin spinning={chartLoading}>
-                <Row gutter={[16, 16]}>
-                  {metricDataList.length ? (
-                    metricDataList.map((data: any, i: number) => {
-                      const { metricName, metricUnit, metricLines } = data;
-                      return (
-                        <Col key={metricName} span={12}>
-                          <div className="chart-box">
-                            <div className="chart-box-title">
+                {metricDataList.length ? (
+                  <div className="no-group-con">
+                    <DragGroup
+                      sortableContainerProps={{
+                        onSortStart: () => 0,
+                        onSortEnd: () => 0,
+                        axis: 'xy',
+                        useDragHandle: false,
+                      }}
+                      gridProps={{
+                        span: 12,
+                        gutter: [16, 16],
+                      }}
+                    >
+                      {metricDataList.map((data: any, i: number) => {
+                        const { metricName, metricUnit, metricLines } = data;
+                        return (
+                          <div key={metricName} className="cluster-detail-chart-box">
+                            <div className="cluster-detail-chart-box-title">
                               <Tooltip
                                 placement="topLeft"
                                 title={() => {
@@ -378,15 +390,6 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
                                   <span className="unit">（{metricUnit}）</span>
                                 </span>
                               </Tooltip>
-                            </div>
-                            <div
-                              className="expand-icon-box"
-                              onClick={() => {
-                                setChartDetail(data);
-                                setShowChartDetailModal(true);
-                              }}
-                            >
-                              <IconFont type="icon-chuangkoufangda" className="expand-icon" />
                             </div>
                             <SingleChart
                               chartKey={metricName}
@@ -405,15 +408,15 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
                               })}
                             />
                           </div>
-                        </Col>
-                      );
-                    })
-                  ) : chartLoading ? (
-                    <></>
-                  ) : (
-                    <RenderEmpty message="请先选择指标或刷新" />
-                  )}
-                </Row>
+                        );
+                      })}
+                    </DragGroup>
+                  </div>
+                ) : chartLoading ? (
+                  <></>
+                ) : (
+                  <RenderEmpty message="请先选择指标或刷新" />
+                )}
               </Spin>
             </div>
           </div>
@@ -421,35 +424,6 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           <div className="config-change-records-container">{props.children}</div>
         </div>
       </div>
-
-      {/* 图表详情 */}
-      <Modal
-        width={1080}
-        visible={showChartDetailModal}
-        centered={true}
-        footer={null}
-        closable={false}
-        onCancel={() => setShowChartDetailModal(false)}
-      >
-        <div className="chart-detail-modal-container">
-          <div className="expand-icon-box" onClick={() => setShowChartDetailModal(false)}>
-            <IconFont type="icon-chuangkousuoxiao" className="expand-icon" />
-          </div>
-          {chartDetail && (
-            <SingleChart
-              chartTypeProp="line"
-              wrapStyle={{
-                width: 'auto',
-                height: 462,
-              }}
-              propChartData={chartDetail.metricLines}
-              {...getChartConfig({
-                metricName: `${chartDetail.metricName}{unit|（${chartDetail.metricUnit}）}`,
-              })}
-            />
-          )}
-        </div>
-      </Modal>
     </div>
   );
 };

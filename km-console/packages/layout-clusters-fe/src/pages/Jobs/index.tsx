@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { ProTable, Drawer, Utils, AppContainer, Form, Select, Input, Button, message, Modal } from 'knowdesign';
+import { ProTable, Drawer, Utils, AppContainer, Form, Select, Input, Button, message, Modal, IconFont, Divider } from 'knowdesign';
 import API from '../../api';
 import { getJobsListColumns, defaultPagination, runningStatus, jobType } from './config';
 import JobsCheck from '@src/components/CardBar/JobsCheck';
@@ -10,6 +10,7 @@ import './index.less';
 import ReplicaChange from '@src/components/TopicJob/ReplicaChange';
 import ReplicaMove from '@src/components/TopicJob/ReplicaMove';
 import BalanceDrawer from '../LoadRebalance/BalanceDrawer';
+import { tableHeaderPrefix } from '@src/constants/common';
 const { request } = Utils;
 
 const JobsList: React.FC = (props: any) => {
@@ -171,35 +172,44 @@ const JobsList: React.FC = (props: any) => {
       </div>
       {/* <Form form={form} layout="inline" onFinish={onFinish}> */}
       <div className="clustom-table-content">
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-          <Form form={form} layout="inline" onFinish={onFinish}>
-            <Form.Item name="type">
-              <Select options={jobType} style={{ width: '190px' }} className={'detail-table-select'} placeholder="选择任务类型" />
-            </Form.Item>
-            <Form.Item name="jobTarget">
-              <Input allowClear style={{ width: '190px' }} placeholder="请输入执行任务对象" />
-            </Form.Item>
-            <Form.Item name="status">
-              <Select
-                mode="multiple"
-                maxTagCount={'responsive'}
-                options={runningStatus}
-                style={{ width: '190px' }}
-                className={'detail-table-select'}
-                placeholder="选择运行状态"
-                showArrow
-                allowClear
-              />
-            </Form.Item>
-          </Form>
-          <div>
-            <Form style={{ justifyContent: 'flex-end' }} form={form} layout="inline" onFinish={onFinish}>
-              <Form.Item style={{ marginRight: 0 }}>
-                <Button type="primary" ghost htmlType="submit">
-                  查询
-                </Button>
+        <div className={tableHeaderPrefix}>
+          <div className={`${tableHeaderPrefix}-left`}>
+            <div
+              className={`${tableHeaderPrefix}-left-refresh`}
+              onClick={() => genData({ pageNo: pagination.current, pageSize: pagination.pageSize })}
+            >
+              <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+            </div>
+            <Divider type="vertical" className={`${tableHeaderPrefix}-divider`} />
+            <Form form={form} layout="inline" onFinish={onFinish}>
+              <Form.Item name="type">
+                <Select options={jobType} style={{ width: '190px' }} className={'detail-table-select'} placeholder="选择任务类型" />
+              </Form.Item>
+              <Form.Item name="jobTarget">
+                <Input allowClear style={{ width: '190px' }} placeholder="请输入执行任务对象" />
+              </Form.Item>
+              <Form.Item name="status">
+                <Select
+                  mode="multiple"
+                  maxTagCount={'responsive'}
+                  options={runningStatus}
+                  style={{ width: '190px' }}
+                  className={'detail-table-select'}
+                  placeholder="选择运行状态"
+                  showArrow
+                  allowClear
+                />
               </Form.Item>
             </Form>
+            <div>
+              <Form style={{ justifyContent: 'flex-end' }} form={form} layout="inline" onFinish={onFinish}>
+                <Form.Item style={{ marginRight: 0 }}>
+                  <Button type="primary" ghost htmlType="submit">
+                    查询
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
           </div>
         </div>
         {/* </Form> */}

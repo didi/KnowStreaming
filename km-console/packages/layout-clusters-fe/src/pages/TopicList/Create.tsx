@@ -218,10 +218,10 @@ export default (props: any) => {
           </Form.Item>
           <div className="create-topic-flex-layout">
             <Form.Item name="partitionNum" label="分区数" rules={[{ required: true, message: '请输入分区数' }]}>
-              <InputNumber min={1} style={{ width: '100%' }} />
+              <InputNumber min={1} style={{ width: '100%' }} addonAfter="个" />
             </Form.Item>
             <Form.Item name="replicaNum" label="副本数" rules={[{ required: true, message: '请输入副本数' }]}>
-              <InputNumber min={1} style={{ width: '100%' }} />
+              <InputNumber min={1} style={{ width: '100%' }} addonAfter="个" />
             </Form.Item>
           </div>
           <Form.Item className="data-save-time-label" name="dataSaveTime">
