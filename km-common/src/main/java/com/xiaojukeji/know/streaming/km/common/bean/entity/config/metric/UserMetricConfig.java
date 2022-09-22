@@ -15,20 +15,20 @@ public class UserMetricConfig {
 
     private boolean set;
 
-    private int rank;
+    private Integer rank;
 
     public UserMetricConfig(int type, String metric, boolean set, Integer rank) {
         this.type = type;
         this.metric = metric;
         this.set = set;
-        this.rank = rank == null ? Constant.DEFAULT_METRIC_RANK : rank;
+        this.rank = rank;
     }
 
     public UserMetricConfig(int type, String metric, boolean set) {
         this.type = type;
         this.metric = metric;
         this.set = set;
-        this.rank = Constant.DEFAULT_METRIC_RANK;
+        this.rank = null;
     }
 
     @Override
