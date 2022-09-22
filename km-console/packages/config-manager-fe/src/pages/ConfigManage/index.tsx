@@ -27,8 +27,8 @@ import 'codemirror/addon/selection/active-line';
 import 'codemirror/addon/edit/closebrackets';
 require('codemirror/mode/xml/xml');
 require('codemirror/mode/javascript/javascript');
-import api from 'api';
-import { defaultPagination } from 'constants/common';
+import api from '@src/api';
+import { defaultPagination } from '@src/constants/common';
 import TypicalListCard from '../../components/TypicalListCard';
 import { ConfigPermissionMap } from '../CommonConfig';
 import { ConfigOperate, ConfigProps } from './config';
@@ -385,7 +385,7 @@ export default () => {
   const onDelete = (record: ConfigProps) => {
     confirm({
       title: '确定删除配置吗?',
-      content: `配置⌈${record.valueName}⌋${record.status === 1 ? '为启用状态，无法删除' : ''}`,
+      content: `配置 [${record.valueName}] ${record.status === 1 ? '为启用状态，无法删除' : ''}`,
       centered: true,
       okText: '删除',
       okType: 'primary',
@@ -399,9 +399,11 @@ export default () => {
       },
       maskClosable: true,
       onOk() {
-        return request(api.editConfig, {
-          method: 'POST',
-          data: record.id,
+        return request(api.delConfig, {
+          method: 'DELETE',
+          params: {
+            id: record.id,
+          },
         }).then((_) => {
           message.success('删除成功');
           getConfigList();
