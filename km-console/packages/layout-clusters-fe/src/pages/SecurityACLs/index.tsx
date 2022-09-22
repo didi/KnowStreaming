@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Select, Modal, message, ProTable, AppContainer, DKSBreadcrumb, Utils } from 'knowdesign';
+import { Button, Form, Input, Select, Modal, message, ProTable, AppContainer, DKSBreadcrumb, Utils, IconFont, Divider } from 'knowdesign';
 import ACLsCardBar from '@src/components/CardBar/ACLsCardBar';
 import api from '@src/api';
+import { tableHeaderPrefix } from '@src/constants/common';
 import { useParams } from 'react-router-dom';
 import AddACLDrawer, {
   ACL_OPERATION,
@@ -205,37 +206,45 @@ const SecurityACLs = (): JSX.Element => {
         <ACLsCardBar />
       </div>
       <div className="security-acls-page-list clustom-table-content">
-        <div className="operate-bar">
-          <Form form={form} layout="inline" onFinish={() => getACLs({ page: 1 })}>
-            <Form.Item name="kafkaUser">
-              <Input placeholder="请输入 Principal" />
-            </Form.Item>
-            <Form.Item name="resourceType">
-              <Select
-                placeholder="选择 ResourceType"
-                options={Object.keys(RESOURCE_TO_OPERATIONS_MAP).map((key) => ({ label: key, value: key }))}
-                mode="multiple"
-                maxTagCount="responsive"
-                allowClear
-                style={{ width: 200 }}
-              />
-            </Form.Item>
-            <Form.Item name="resourceName">
-              <Input placeholder="请输入 Resource" />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" ghost htmlType="submit">
-                查询
-              </Button>
-            </Form.Item>
-          </Form>
-          <Button
-            type="primary"
-            // icon={<PlusOutlined />}
-            onClick={() => editDrawerRef.current.onOpen(true, getACLs)}
-          >
-            新增ACL
-          </Button>
+        <div className={tableHeaderPrefix}>
+          <div className={`${tableHeaderPrefix}-left`}>
+            <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => getACLs()}>
+              <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+            </div>
+            <Divider type="vertical" className={`${tableHeaderPrefix}-divider`} />
+            <Form form={form} layout="inline" onFinish={() => getACLs({ page: 1 })}>
+              <Form.Item name="kafkaUser">
+                <Input placeholder="请输入 Principal" />
+              </Form.Item>
+              <Form.Item name="resourceType">
+                <Select
+                  placeholder="选择 ResourceType"
+                  options={Object.keys(RESOURCE_TO_OPERATIONS_MAP).map((key) => ({ label: key, value: key }))}
+                  mode="multiple"
+                  maxTagCount="responsive"
+                  allowClear
+                  style={{ width: 200 }}
+                />
+              </Form.Item>
+              <Form.Item name="resourceName">
+                <Input placeholder="请输入 Resource" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" ghost htmlType="submit">
+                  查询
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
+          <div className={`${tableHeaderPrefix}-right`}>
+            <Button
+              type="primary"
+              // icon={<PlusOutlined />}
+              onClick={() => editDrawerRef.current.onOpen(true, getACLs)}
+            >
+              新增ACL
+            </Button>
+          </div>
         </div>
         <ProTable
           tableProps={{
