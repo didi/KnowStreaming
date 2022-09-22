@@ -1,4 +1,4 @@
-package com.xiaojukeji.know.streaming.km.persistence.zk.impl;
+package com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.log.ILog;
@@ -11,11 +11,11 @@ import com.xiaojukeji.know.streaming.km.common.enums.topic.TopicTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
-import com.xiaojukeji.know.streaming.km.common.zookeeper.znode.ControllerData;
-import com.xiaojukeji.know.streaming.km.common.zookeeper.znode.brokers.BrokerMetadata;
-import com.xiaojukeji.know.streaming.km.common.zookeeper.znode.brokers.PartitionMap;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.ControllerData;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.BrokerMetadata;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionMap;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.utils.Json;
 import kafka.zk.*;
 import kafka.zookeeper.AsyncResponse;
@@ -46,14 +46,14 @@ public class KafkaZKDAOImpl implements KafkaZKDAO {
     public Broker getBrokerMetadata(String zkAddress) throws KeeperException.NoNodeException, AdminOperateException {
         ZooKeeper zooKeeper = null;
         try {
-            zooKeeper = new ZooKeeper(zkAddress, 1000, watchedEvent -> logger.info(" receive event : " + watchedEvent.getType().name()));
+            zooKeeper = new ZooKeeper(zkAddress, 3000, watchedEvent -> logger.info(" receive event : " + watchedEvent.getType().name()));
             List<String> brokerIdList = this.getChildren(zooKeeper, BrokerIdsZNode.path());
             if (brokerIdList == null || brokerIdList.isEmpty()) {
                 return null;
             }
 
             BrokerMetadata brokerMetadata = this.getData(zooKeeper, BrokerIdZNode.path(Integer.parseInt(brokerIdList.get(0))), false, BrokerMetadata.class);
-            return Broker.buildFrom(null, Integer.valueOf(brokerIdList.get(0)), brokerMetadata);
+            return this.convert2Broker(null, Integer.valueOf(brokerIdList.get(0)), brokerMetadata);
         }  catch (KeeperException.NoNodeException nne) {
             logger.warn("method=getBrokerMetadata||zkAddress={}||errMsg=exception", zkAddress, nne);
             throw nne;
@@ -79,7 +79,7 @@ public class KafkaZKDAOImpl implements KafkaZKDAO {
         try {
             BrokerMetadata metadata = this.getData(kafkaZkClient.currentZooKeeper(), BrokerIdZNode.path(brokerId), false, BrokerMetadata.class);
             BrokerMetadata.parseAndUpdateBrokerMetadata(metadata);
-            return Broker.buildFrom(clusterPhyId, brokerId, metadata);
+            return this.convert2Broker(clusterPhyId, brokerId, metadata);
         } catch (KeeperException ke) {
             logger.error("method=getBrokerMetadata||clusterPhyId={}||brokerId={}||errMsg=exception", clusterPhyId, brokerId, ke);
             throw ke;
@@ -268,5 +268,19 @@ public class KafkaZKDAOImpl implements KafkaZKDAO {
     private <T> T getData(ZooKeeper zooKeeper, String path, boolean addWatch, Class<T> clazz) throws KeeperException, InterruptedException {
         byte[] bytes = zooKeeper.getData(path, addWatch, null);
         return JSON.parseObject(bytes, clazz);
+    }
+
+    private Broker convert2Broker(Long clusterPhyId, Integer brokerId, BrokerMetadata brokerMetadata) {
+        Broker metadata = new Broker();
+        metadata.setClusterPhyId(clusterPhyId);
+        metadata.setBrokerId(brokerId);
+        metadata.setHost(brokerMetadata.getHost());
+        metadata.setPort(brokerMetadata.getPort());
+        metadata.setJmxPort(brokerMetadata.getJmxPort());
+        metadata.setStartTimestamp(brokerMetadata.getTimestamp());
+        metadata.setRack(brokerMetadata.getRack());
+        metadata.setStatus(1);
+        metadata.setEndpointMap(brokerMetadata.getEndpointMap());
+        return metadata;
     }
 }

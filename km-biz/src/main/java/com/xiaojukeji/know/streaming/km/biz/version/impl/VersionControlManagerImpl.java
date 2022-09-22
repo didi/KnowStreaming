@@ -7,12 +7,14 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.dto.config.ConfigDTO;
 import com.didiglobal.logi.security.service.ConfigService;
 import com.xiaojukeji.know.streaming.km.biz.version.VersionControlManager;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDetailDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.UserMetricConfigDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.metric.UserMetricConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionControlItem;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.config.metric.UserMetricConfigVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.version.VersionItemVO;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.VersionUtil;
@@ -47,29 +49,29 @@ public class VersionControlManagerImpl implements VersionControlManager {
     @PostConstruct
     public void init(){
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_HEALTH_SCORE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_TOTAL_PRODUCE_REQUESTS, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_FAILED_FETCH_REQ, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_FAILED_PRODUCE_REQ, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_MESSAGE_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_UNDER_REPLICA_PARTITIONS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_TOTAL_PRODUCE_REQUESTS, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_BYTES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_BYTES_OUT, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_BYTES_REJECTED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_MESSAGE_IN, true));
 
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_HEALTH_SCORE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_REQ_QUEUE_SIZE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_RES_QUEUE_SIZE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_PRODUCE_REQ, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_LOG_SIZE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_CONNECTIONS, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_MESSAGES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_BYTES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_BYTES_OUT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_GROUP_REBALANCES, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_JOB_RUNNING, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_CONNECTIONS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_MESSAGES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_PARTITIONS_NO_LEADER, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_PARTITION_URP, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_LOG_SIZE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_PRODUCE_REQ, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_REQ_QUEUE_SIZE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_TOTAL_RES_QUEUE_SIZE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_GROUP_REBALANCES, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_JOB_RUNNING, true));
 
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_OFFSET_CONSUMED, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_LAG, true));
@@ -77,18 +79,18 @@ public class VersionControlManagerImpl implements VersionControlManager {
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_HEALTH_SCORE, true));
 
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_HEALTH_SCORE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_REQ_QUEUE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_RES_QUEUE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_CONNECTION_COUNT, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_MESSAGE_IN, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_PRODUCE_REQ, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_NETWORK_RPO_AVG_IDLE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_REQ_AVG_IDLE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_CONNECTION_COUNT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_IN, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_OUT, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_PARTITIONS_SKEW, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_PRODUCE_REQ, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_REQ_QUEUE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_TOTAL_RES_QUEUE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_LEADERS_SKEW, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_UNDER_REPLICATE_PARTITION, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_PARTITIONS_SKEW, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_IN, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_OUT, true));
     }
 
     @Autowired
@@ -159,6 +161,9 @@ public class VersionControlManagerImpl implements VersionControlManager {
 
             UserMetricConfig umc = userMetricConfigMap.get(itemType + "@" + metric);
             userMetricConfigVO.setSet(null != umc && umc.isSet());
+            if (umc != null) {
+                userMetricConfigVO.setRank(umc.getRank());
+            }
             userMetricConfigVO.setName(itemVO.getName());
             userMetricConfigVO.setType(itemVO.getType());
             userMetricConfigVO.setDesc(itemVO.getDesc());
@@ -178,13 +183,29 @@ public class VersionControlManagerImpl implements VersionControlManager {
     @Override
     public Result<Void> updateUserMetricItem(Long clusterId, Integer type, UserMetricConfigDTO dto, String operator) {
         Map<String, Boolean> metricsSetMap = dto.getMetricsSet();
-        if(null == metricsSetMap || metricsSetMap.isEmpty()){
+
+        //转换metricDetailDTOList
+        List<MetricDetailDTO> metricDetailDTOList = dto.getMetricDetailDTOList();
+        Map<String, MetricDetailDTO> metricDetailMap = new HashMap<>();
+        if (metricDetailDTOList != null && !metricDetailDTOList.isEmpty()) {
+            metricDetailMap = metricDetailDTOList.stream().collect(Collectors.toMap(MetricDetailDTO::getMetric, Function.identity()));
+        }
+
+        //转换metricsSetMap
+        if (metricsSetMap != null && !metricsSetMap.isEmpty()) {
+            for (Map.Entry<String, Boolean> metricAndShowEntry : metricsSetMap.entrySet()) {
+                if (metricDetailMap.containsKey(metricAndShowEntry.getKey())) continue;
+                metricDetailMap.put(metricAndShowEntry.getKey(), new MetricDetailDTO(metricAndShowEntry.getKey(), metricAndShowEntry.getValue(), null));
+            }
+        }
+
+        if (metricDetailMap.isEmpty()) {
             return Result.buildSuc();
         }
 
         Set<UserMetricConfig> userMetricConfigs = getUserMetricConfig(operator);
-        for(Map.Entry<String, Boolean> metricAndShowEntry : metricsSetMap.entrySet()){
-            UserMetricConfig userMetricConfig = new UserMetricConfig(type, metricAndShowEntry.getKey(), metricAndShowEntry.getValue());
+        for (MetricDetailDTO metricDetailDTO : metricDetailMap.values()) {
+            UserMetricConfig userMetricConfig = new UserMetricConfig(type, metricDetailDTO.getMetric(), metricDetailDTO.getSet(), metricDetailDTO.getRank());
             userMetricConfigs.remove(userMetricConfig);
             userMetricConfigs.add(userMetricConfig);
         }
@@ -228,7 +249,7 @@ public class VersionControlManagerImpl implements VersionControlManager {
             return defaultMetrics;
         }
 
-        return JSON.parseObject(value, new TypeReference<Set<UserMetricConfig>>(){});
+        return JSON.parseObject(value, new TypeReference<Set<UserMetricConfig>>() {});
     }
 
     public static void main(String[] args){

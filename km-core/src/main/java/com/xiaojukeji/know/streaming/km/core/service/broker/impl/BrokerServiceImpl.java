@@ -24,7 +24,6 @@ import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistExcept
 import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.common.zookeeper.znode.brokers.BrokerMetadata;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
@@ -32,8 +31,7 @@ import com.xiaojukeji.know.streaming.km.persistence.jmx.JmxDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerDAO;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
-import kafka.zk.BrokerIdZNode;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.zk.BrokerIdsZNode;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.Node;
@@ -310,9 +308,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
             List<String> brokerIdList = kafkaZKDAO.getChildren(clusterPhy.getId(), BrokerIdsZNode.path(), false);
             for (String brokerId: brokerIdList) {
-                BrokerMetadata metadata = kafkaZKDAO.getData(clusterPhy.getId(), BrokerIdZNode.path(Integer.valueOf(brokerId)), BrokerMetadata.class);
-                BrokerMetadata.parseAndUpdateBrokerMetadata(metadata);
-                brokerList.add(Broker.buildFrom(clusterPhy.getId(), Integer.valueOf(brokerId), metadata));
+                brokerList.add(kafkaZKDAO.getBrokerMetadata(clusterPhy.getId(), Integer.valueOf(brokerId)));
             }
 
             return Result.buildSuc(brokerList);
