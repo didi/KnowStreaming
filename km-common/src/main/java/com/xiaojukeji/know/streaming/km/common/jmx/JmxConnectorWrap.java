@@ -90,6 +90,8 @@ public class JmxConnectorWrap {
         }
         try {
             jmxConnector.close();
+
+            jmxConnector = null;
         } catch (IOException e) {
             LOGGER.warn("close JmxConnector exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
         }
@@ -105,6 +107,11 @@ public class JmxConnectorWrap {
             acquire();
             MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
             return mBeanServerConnection.getAttribute(name, attribute);
+        } catch (IOException ioe) {
+            // 如果是因为连接断开，则进行重新连接，并抛出异常
+            reInitDueIOException();
+
+            throw ioe;
         } finally {
             atomicInteger.incrementAndGet();
         }
@@ -120,6 +127,11 @@ public class JmxConnectorWrap {
             acquire();
             MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
             return mBeanServerConnection.getAttributes(name, attributes);
+        } catch (IOException ioe) {
+            // 如果是因为连接断开，则进行重新连接，并抛出异常
+            reInitDueIOException();
+
+            throw ioe;
         } finally {
             atomicInteger.incrementAndGet();
         }
@@ -131,6 +143,11 @@ public class JmxConnectorWrap {
             acquire();
             MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
             return mBeanServerConnection.queryNames(name, query);
+        } catch (IOException ioe) {
+            // 如果是因为连接断开，则进行重新连接，并抛出异常
+            reInitDueIOException();
+
+            throw ioe;
         } finally {
             atomicInteger.incrementAndGet();
         }
@@ -185,5 +202,27 @@ public class JmxConnectorWrap {
                 // ignore
             }
         }
+    }
+
+    private synchronized void reInitDueIOException() {
+        try {
+            if (jmxConnector == null) {
+                return;
+            }
+
+            // 检查是否正常
+            jmxConnector.getConnectionId();
+
+            // 如果正常则直接返回
+            return;
+        } catch (Exception e) {
+            // ignore
+        }
+
+        // 关闭旧的
+        this.close();
+
+        // 重新创建
+        this.checkJmxConnectionAndInitIfNeed();
     }
 }
