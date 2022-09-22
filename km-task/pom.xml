@@ -43,7 +43,21 @@
         <dependency>
             <groupId>io.github.zqrferrari</groupId>
             <artifactId>logi-job-spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>oshi-core</artifactId>
+                    <groupId>com.github.oshi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <!-- 感谢 linG5821 的反馈，LogiJob中会依赖oshi-core，但是oshi-core使用的版本过低，因此windows系统上会存在问题，因此升级oshi-core版本 -->
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>5.6.1</version>
+        </dependency>
+
         <dependency>
             <groupId>io.github.zqrferrari</groupId>
             <artifactId>logi-security-spring-boot-starter</artifactId>

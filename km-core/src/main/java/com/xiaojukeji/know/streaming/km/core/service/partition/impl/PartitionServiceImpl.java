@@ -21,14 +21,14 @@ import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.common.zookeeper.znode.brokers.PartitionMap;
-import com.xiaojukeji.know.streaming.km.common.zookeeper.znode.brokers.PartitionState;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionMap;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaConsumerClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.partition.PartitionDAO;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.zk.TopicPartitionStateZNode;
 import kafka.zk.TopicPartitionsZNode;
 import kafka.zk.TopicZNode;
@@ -202,9 +202,21 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
     @Override
     public Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafka(Long clusterPhyId, String topicName, OffsetSpec offsetSpec, Long timestamp) {
         Map<TopicPartition, OffsetSpec> topicPartitionOffsets = new HashMap<>();
-        this.listPartitionByTopic(clusterPhyId, topicName)
-                .stream()
+
+        List<Partition> partitionList = this.listPartitionByTopic(clusterPhyId, topicName);
+        if (partitionList == null || partitionList.isEmpty()) {
+            // Topic不存在
+            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getTopicNotExist(clusterPhyId, topicName));
+        }
+
+        partitionList.stream()
+                .filter(item -> !item.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
                 .forEach(elem -> topicPartitionOffsets.put(new TopicPartition(topicName, elem.getPartitionId()), offsetSpec));
+
+        if (topicPartitionOffsets.isEmpty()) {
+            // 所有分区no-leader
+            return Result.buildFromRSAndMsg(ResultStatus.OPERATION_FAILED, MsgConstant.getPartitionNoLeader(clusterPhyId, topicName));
+        }
 
         try {
             return (Result<Map<TopicPartition, Long>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, topicPartitionOffsets, timestamp));

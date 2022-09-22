@@ -1,4 +1,4 @@
-package com.xiaojukeji.know.streaming.km.common.zookeeper.znode.brokers;
+package com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
