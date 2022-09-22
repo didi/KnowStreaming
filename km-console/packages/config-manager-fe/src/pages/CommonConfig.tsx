@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from 'react';
 import { Utils, AppContainer } from 'knowdesign';
-import { goLogin } from 'constants/axiosConfig';
+import { goLogin } from '@src/constants/axiosConfig';
 
 // 权限对应表
 export enum ConfigPermissionMap {

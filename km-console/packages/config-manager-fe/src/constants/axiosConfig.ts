@@ -47,8 +47,8 @@ serviceInstance.interceptors.response.use(
     return res;
   },
   (err: any) => {
-    const config = err.config;
-    if (!config || !config.retryTimes) return dealResponse(err, config.customNotification);
+    const config = err?.config;
+    if (!config || !config.retryTimes) return dealResponse(err);
     const { __retryCount = 0, retryDelay = 300, retryTimes } = config;
     config.__retryCount = __retryCount;
     if (__retryCount >= retryTimes) {
