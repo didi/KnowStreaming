@@ -5,7 +5,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.zk.KafkaZkClient;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -30,7 +30,7 @@ import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import kafka.server.ConfigType;
 import kafka.zk.AdminZkClient;
 import kafka.zk.KafkaZkClient;
