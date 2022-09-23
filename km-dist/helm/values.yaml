@@ -3,7 +3,7 @@ replicaCount: 2
 image:
   repository: knowstreaming/knowstreaming-manager
   pullPolicy: IfNotPresent
-  tag: "0.2.0"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -73,7 +73,7 @@ knowstreaming-web:
     image:
       repository: knowstreaming/knowstreaming-ui
       pullPolicy: IfNotPresent
-      tag: "0.2.0"
+      tag: "latest"
 
     service:
       type: NodePort
