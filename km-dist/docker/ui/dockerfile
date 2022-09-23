@@ -1,0 +1,5 @@
+FROM nginx:1.18
+
+ADD pub.tar /
+ADD knowstreaming.conf /etc/nginx/conf.d/
+RUN rm -rf /etc/nginx/conf.d/default.conf
