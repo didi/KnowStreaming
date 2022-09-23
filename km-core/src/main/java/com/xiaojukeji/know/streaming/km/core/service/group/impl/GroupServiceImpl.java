@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.SERVICE_SEARCH_GROUP;
@@ -121,6 +122,38 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
     }
 
     @Override
+    public void batchReplace(List<GroupMemberPO> newGroupMemberList) {
+        if (newGroupMemberList == null || newGroupMemberList.isEmpty()) {
+            return;
+        }
+
+        Long clusterPhyId = newGroupMemberList.get(0).getClusterPhyId();
+        if (clusterPhyId == null) {
+            return;
+        }
+
+        List<GroupMemberPO> dbGroupMemberList = listGroup(clusterPhyId);
+
+
+        Map<String, GroupMemberPO> dbGroupMemberMap = dbGroupMemberList.stream().collect(Collectors.toMap(elem -> elem.getGroupName() + elem.getTopicName(), Function.identity()));
+        for (GroupMemberPO groupMemberPO : newGroupMemberList) {
+            GroupMemberPO po = dbGroupMemberMap.remove(groupMemberPO.getGroupName() + groupMemberPO.getTopicName());
+            try {
+                if (po != null) {
+                    groupMemberPO.setId(po.getId());
+                    groupMemberDAO.updateById(groupMemberPO);
+                } else {
+                    groupMemberDAO.insert(groupMemberPO);
+                }
+            } catch (Exception e) {
+                log.error("method=batchReplace||clusterPhyId={}||groupName={}||errMsg=exception", clusterPhyId, groupMemberPO.getGroupName(), e);
+            }
+
+        }
+
+    }
+
+    @Override
     public GroupStateEnum getGroupStateFromDB(Long clusterPhyId, String groupName) {
         LambdaQueryWrapper<GroupMemberPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
@@ -139,6 +172,14 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
         LambdaQueryWrapper<GroupMemberPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
         lambdaQueryWrapper.eq(GroupMemberPO::getTopicName, topicName);
+
+        return groupMemberDAO.selectList(lambdaQueryWrapper);
+    }
+
+    @Override
+    public List<GroupMemberPO> listGroup(Long clusterPhyId) {
+        LambdaQueryWrapper<GroupMemberPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
 
         return groupMemberDAO.selectList(lambdaQueryWrapper);
     }
