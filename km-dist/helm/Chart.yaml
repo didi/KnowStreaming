@@ -4,13 +4,13 @@ description: knowstreaming-manager Helm chart
 
 type: application
 
-version: 0.1.4
+version: 0.1.5
 
 maintainers:
 - email: didicloud@didiglobal.com
   name: didicloud
 
-appVersion: "3.0.0-beta.2"
+appVersion: "3.0.0-beta.3"
 
 dependencies:
   - name: knowstreaming-web
