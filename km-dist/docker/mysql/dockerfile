@@ -1,0 +1,4 @@
+FROM mysql/mysql-server:5.7.38
+COPY initsql /docker-entrypoint-initdb.d/
+COPY init.sh /docker-entrypoint-initdb.d/
+ADD my.cnf /etc/
