@@ -1,0 +1,17 @@
+FROM java:8
+
+#维护者
+MAINTAINER wangdongfang <wangdongfang@didiglobal.com>
+
+# 编译好的knowstreaming包
+ADD km-rest.jar /
+# docker启动脚本 helm安装不使用
+ADD ks-start.sh /
+# es初始化脚本 helm安装不使用
+ADD es_template_create.sh /
+
+RUN mkdir /conf
+# {  配置文件  helm安装不使用
+ADD application.yml /conf/
+ADD logback-spring.xml /conf/
+# }
