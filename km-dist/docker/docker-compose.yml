@@ -2,7 +2,7 @@ version: "2"
 services:
   # *不要调整knowstreaming-manager服务名称，ui中会用到
   knowstreaming-manager:
-    image: knowstreaming/knowstreaming-manager:0.2.0-test
+    image: knowstreaming/knowstreaming-manager:latest
     container_name: knowstreaming-manager
     privileged: true
     restart: always
@@ -35,7 +35,7 @@ services:
 #    volumes:
 #      - /ks/manage/log:/logs
   knowstreaming-ui:
-    image: knowstreaming/knowstreaming-ui:0.2.0-test1
+    image: knowstreaming/knowstreaming-ui:latest
     container_name: knowstreaming-ui
     restart: always
     ports:
@@ -69,7 +69,7 @@ services:
   # es初始化服务，与manager使用同一镜像
   # 首次启动es需初始化模版和索引,后续会自动创建
   knowstreaming-init:
-    image: knowstreaming/knowstreaming-manager:0.2.0-test
+    image: knowstreaming/knowstreaming-manager:latest
     container_name: knowstreaming-init
     depends_on:
       - elasticsearch-single
@@ -82,7 +82,7 @@ services:
       SERVER_ES_ADDRESS: elasticsearch-single:9200
 
   knowstreaming-mysql:
-    image: knowstreaming/knowstreaming-mysql:0.2.0-test
+    image: knowstreaming/knowstreaming-mysql:latest
     container_name: knowstreaming-mysql
     restart: always
     environment:
