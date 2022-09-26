@@ -31,6 +31,9 @@ public class ClusterPhyBaseVO extends BaseTimeVO {
     @ApiModelProperty(value="Jmx配置", example = "{}")
     protected String jmxProperties;
 
+    @ApiModelProperty(value="ZK配置", example = "{}")
+    protected String zkProperties;
+
     @ApiModelProperty(value="描述", example = "测试")
     protected String description;
 

@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.common.bean.dto.cluster;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.BaseDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.config.ZKConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -34,4 +35,8 @@ public class ClusterPhyBaseDTO extends BaseDTO {
     @NotNull(message = "jmxProperties不允许为空")
     @ApiModelProperty(value="Jmx配置")
     protected JmxConfig jmxProperties;
+
+    // TODO 前端页面增加时，需要加一个不为空的限制
+    @ApiModelProperty(value="ZK配置")
+    protected ZKConfig zkProperties;
 }

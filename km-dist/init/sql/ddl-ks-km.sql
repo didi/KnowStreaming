@@ -257,6 +257,7 @@ CREATE TABLE `ks_km_physical_cluster` (
   `kafka_version` varchar(32) NOT NULL DEFAULT '' COMMENT 'kafka版本',
   `client_properties` text COMMENT 'Kafka客户端配置',
   `jmx_properties` text COMMENT 'JMX配置',
+  `zk_properties` text COMMENT 'ZK配置',
   `description` text COMMENT '备注',
   `auth_type` int(11) NOT NULL DEFAULT '0' COMMENT '认证类型，-1未知，0:无认证，',
   `run_state` tinyint(4) NOT NULL DEFAULT '1' COMMENT '运行状态, 0表示未监控, 1监控中，有ZK，2:监控中，无ZK',

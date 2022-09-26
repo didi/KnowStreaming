@@ -13,6 +13,7 @@
     <result column="kafka_version"        property="kafkaVersion" />
     <result column="client_properties"    property="clientProperties" />
     <result column="jmx_properties"       property="jmxProperties" />
+    <result column="zk_properties"        property="zkProperties" />
     <result column="auth_type"            property="authType" />
     <result column="run_state"            property="runState" />
     <result column="description"          property="description" />
@@ -23,8 +24,8 @@
           useGeneratedKeys="true"
           keyProperty="id">
     INSERT INTO ks_km_physical_cluster
-        (name, zookeeper, bootstrap_servers, kafka_version, client_properties, jmx_properties, description, auth_type, run_state)
+        (name, zookeeper, bootstrap_servers, kafka_version, client_properties, jmx_properties, zk_properties, description, auth_type, run_state)
     VALUES
-        (#{name}, #{zookeeper}, #{bootstrapServers}, #{kafkaVersion}, #{clientProperties}, #{jmxProperties}, #{description}, #{authType}, #{runState})
+        (#{name}, #{zookeeper}, #{bootstrapServers}, #{kafkaVersion}, #{clientProperties}, #{jmxProperties}, #{zkProperties}, #{description}, #{authType}, #{runState})
   </insert>
 </mapper>
