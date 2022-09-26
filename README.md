@@ -133,6 +133,8 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 **`2、微信群`**
 
 微信加群：添加`mike_zhangliang`、`PenceXie`的微信号备注KnowStreaming加群。
+<br/>
+<img width="116" alt="wx" src="https://user-images.githubusercontent.com/71620349/192257217-c4ebc16c-3ad9-485d-a914-5911d3a4f46b.png">
 
 ## Star History
 
