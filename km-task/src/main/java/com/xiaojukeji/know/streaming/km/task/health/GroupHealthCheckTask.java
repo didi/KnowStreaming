@@ -9,36 +9,38 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
-import com.xiaojukeji.know.streaming.km.common.component.SpringTool;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
+import com.xiaojukeji.know.streaming.km.core.service.health.checker.group.HealthCheckGroupService;
+import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.task.metrics.AbstractAsyncMetricsDispatchTask;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Task(name = "HealthCheckTask",
-        description = "健康检查",
+@Task(name = "GroupHealthCheckTask",
+        description = "Group健康检查",
         cron = "0 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
-public class HealthCheckTask extends AbstractAsyncMetricsDispatchTask {
-    private static final ILog log = LogFactory.getLog(HealthCheckTask.class);
+public class GroupHealthCheckTask extends AbstractAsyncMetricsDispatchTask {
+    private static final ILog log = LogFactory.getLog(GroupHealthCheckTask.class);
 
     @Autowired
     private HealthCheckResultService healthCheckResultService;
 
-    private final List<AbstractHealthCheckService> healthCheckServiceList = new ArrayList<>(
-            SpringTool.getBeansOfType(AbstractHealthCheckService.class).values()
-    );
+    @Autowired
+    private HealthCheckGroupService healthCheckGroupService;
 
     @Override
     public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
@@ -53,25 +55,22 @@ public class HealthCheckTask extends AbstractAsyncMetricsDispatchTask {
         List<HealthCheckResult> resultList = new ArrayList<>();
 
         // 遍历Check-Service
-        for (AbstractHealthCheckService healthCheckService: healthCheckServiceList) {
-            List<ClusterPhyParam> paramList = healthCheckService.getResList(clusterPhy.getId());
-            if (ValidateUtils.isEmptyList(paramList)) {
-                // 当前无该维度的资源，则直接设置为
-                resultList.addAll(this.getNoResResult(clusterPhy.getId(), healthCheckService, healthConfigMap));
-                continue;
-            }
+        List<ClusterPhyParam> paramList = healthCheckGroupService.getResList(clusterPhy.getId());
+        if (ValidateUtils.isEmptyList(paramList)) {
+            // 当前无该维度的资源，则直接设置为
+            resultList.addAll(this.getNoResResult(clusterPhy.getId(), healthCheckGroupService, healthConfigMap));
+        }
 
-            // 遍历资源
-            for (ClusterPhyParam clusterPhyParam: paramList) {
-                resultList.addAll(this.checkAndGetResult(healthCheckService, clusterPhyParam, healthConfigMap));
-            }
+        // 遍历资源
+        for (ClusterPhyParam clusterPhyParam: paramList) {
+            resultList.addAll(this.checkAndGetResult(healthCheckGroupService, clusterPhyParam, healthConfigMap));
         }
 
         for (HealthCheckResult checkResult: resultList) {
             try {
                 healthCheckResultService.replace(checkResult);
             } catch (Exception e) {
-                log.error("method=processSubTask||clusterPhyId={}||checkResult={}||errMsg=exception!", clusterPhy.getId(), checkResult, e);
+                log.error("class=GroupHealthCheckTask||method=processSubTask||clusterPhyId={}||checkResult={}||errMsg=exception!", clusterPhy.getId(), checkResult, e);
             }
         }
 
@@ -79,7 +78,7 @@ public class HealthCheckTask extends AbstractAsyncMetricsDispatchTask {
         try {
             healthCheckResultService.deleteByUpdateTimeBeforeInDB(clusterPhy.getId(), new Date(triggerTimeUnitMs - 10 * 60 * 1000));
         } catch (Exception e) {
-            log.error("method=processSubTask||clusterPhyId={}||errMsg=exception!", clusterPhy.getId(), e);
+            log.error("class=GroupHealthCheckTask||method=processSubTask||clusterPhyId={}||errMsg=exception!", clusterPhy.getId(), e);
         }
 
         return TaskResult.SUCCESS;
