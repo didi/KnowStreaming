@@ -15,6 +15,7 @@ import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,14 +35,9 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
 
     @Override
     public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
-        TaskResult tr = TaskResult.SUCCESS;
 
         List<String> groupNameList = groupService.listGroupsFromKafka(clusterPhy.getId());
-        for (String groupName: groupNameList) {
-            if (!TaskResult.SUCCESS.equals(this.updateGroupMembersTask(clusterPhy, groupName, triggerTimeUnitMs))) {
-                tr = TaskResult.FAIL;
-            }
-        }
+        TaskResult tr = updateGroupMembersTask(clusterPhy, groupNameList, triggerTimeUnitMs);
 
         if (!TaskResult.SUCCESS.equals(tr)) {
             return tr;
@@ -53,19 +49,21 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
         return tr;
     }
 
-    private TaskResult updateGroupMembersTask(ClusterPhy clusterPhy, String groupName, long triggerTimeUnitMs) {
-        try {
-            List<GroupMemberPO> poList = this.getGroupMembers(clusterPhy.getId(), groupName, new Date(triggerTimeUnitMs));
-            for (GroupMemberPO po: poList) {
-                groupService.replaceDBData(po);
+
+    private TaskResult updateGroupMembersTask(ClusterPhy clusterPhy, List<String> groupNameList, long triggerTimeUnitMs) {
+        List<GroupMemberPO> groupMemberPOList = new ArrayList<>();
+        TaskResult tr = TaskResult.SUCCESS;
+        for (String groupName : groupNameList) {
+            try {
+                List<GroupMemberPO> poList = this.getGroupMembers(clusterPhy.getId(), groupName, new Date(triggerTimeUnitMs));
+                groupMemberPOList.addAll(poList);
+            } catch (Exception e) {
+                log.error("method=updateGroupMembersTask||clusterPhyId={}||groupName={}||errMsg=exception", clusterPhy.getId(), groupName, e);
+                tr = TaskResult.FAIL;
             }
-        } catch (Exception e) {
-            log.error("method=updateGroupMembersTask||clusterPhyId={}||groupName={}||errMsg={}", clusterPhy.getId(), groupName, e.getMessage());
-
-            return TaskResult.FAIL;
         }
-
-        return TaskResult.SUCCESS;
+        groupService.batchReplace(groupMemberPOList);
+        return tr;
     }
 
     private List<GroupMemberPO> getGroupMembers(Long clusterPhyId, String groupName, Date updateTime) throws NotExistException, AdminOperateException {

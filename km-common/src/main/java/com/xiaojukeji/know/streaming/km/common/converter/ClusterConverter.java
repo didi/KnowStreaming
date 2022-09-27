@@ -19,6 +19,11 @@ public class ClusterConverter {
         ClusterPhyPO clusterPhyPO = ConvertUtil.obj2Obj(dto, ClusterPhyPO.class);
         clusterPhyPO.setClientProperties(ConvertUtil.obj2Json(dto.getClientProperties()));
         clusterPhyPO.setJmxProperties(ConvertUtil.obj2Json(dto.getJmxProperties()));
+        if (ValidateUtils.isNull(dto.getZkProperties())) {
+            clusterPhyPO.setZkProperties("");
+        } else {
+            clusterPhyPO.setZkProperties(ConvertUtil.obj2Json(dto.getZkProperties()));
+        }
         clusterPhyPO.setRunState(
                 ValidateUtils.isBlank(dto.getZookeeper())?
                         ClusterRunStateEnum.RUN_RAFT.getRunState() :
@@ -32,6 +37,11 @@ public class ClusterConverter {
         ClusterPhyPO clusterPhyPO = ConvertUtil.obj2Obj(dto, ClusterPhyPO.class);
         clusterPhyPO.setClientProperties(ConvertUtil.obj2Json(dto.getClientProperties()));
         clusterPhyPO.setJmxProperties(ConvertUtil.obj2Json(dto.getJmxProperties()));
+        if (ValidateUtils.isNull(dto.getZkProperties())) {
+            clusterPhyPO.setZkProperties("");
+        } else {
+            clusterPhyPO.setZkProperties(ConvertUtil.obj2Json(dto.getZkProperties()));
+        }
         clusterPhyPO.setRunState(
                 ValidateUtils.isBlank(dto.getZookeeper())?
                         ClusterRunStateEnum.RUN_RAFT.getRunState() :
