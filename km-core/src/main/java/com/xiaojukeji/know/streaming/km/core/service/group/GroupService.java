@@ -30,9 +30,13 @@ public interface GroupService {
 
     int replaceDBData(GroupMemberPO groupMemberPO);
 
+    void batchReplace(List<GroupMemberPO> newGroupMemberList);
+
     GroupStateEnum getGroupStateFromDB(Long clusterPhyId, String groupName);
 
     List<GroupMemberPO> listGroupByTopic(Long clusterPhyId, String topicName);
+
+    List<GroupMemberPO> listGroup(Long clusterPhyId);
 
     PaginationResult<GroupMemberPO> pagingGroupMembers(Long clusterPhyId,
                                                        String topicName,

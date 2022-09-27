@@ -53,8 +53,15 @@ public class ClusterPhy implements Comparable<ClusterPhy>, EntifyIdInterface {
 
     /**
      * jmx配置
+     * @see com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig
      */
     private String jmxProperties;
+
+    /**
+     * zk配置
+     * @see com.xiaojukeji.know.streaming.km.common.bean.entity.config.ZKConfig
+     */
+    private String zkProperties;
 
     /**
      * 开启ACL
