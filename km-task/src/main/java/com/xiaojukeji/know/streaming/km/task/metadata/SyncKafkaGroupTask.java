@@ -12,10 +12,10 @@ import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
+import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +32,9 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
 
     @Autowired
     private GroupService groupService;
+
+    @Autowired
+    private TopicService topicService;
 
     @Override
     public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
@@ -53,6 +56,7 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
     private TaskResult updateGroupMembersTask(ClusterPhy clusterPhy, List<String> groupNameList, long triggerTimeUnitMs) {
         List<GroupMemberPO> groupMemberPOList = new ArrayList<>();
         TaskResult tr = TaskResult.SUCCESS;
+        
         for (String groupName : groupNameList) {
             try {
                 List<GroupMemberPO> poList = this.getGroupMembers(clusterPhy.getId(), groupName, new Date(triggerTimeUnitMs));
@@ -62,7 +66,10 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
                 tr = TaskResult.FAIL;
             }
         }
+        
+        groupMemberPOList = this.filterGroupIfTopicNotExist(clusterPhy.getId(), groupMemberPOList);
         groupService.batchReplace(groupMemberPOList);
+        
         return tr;
     }
 
@@ -71,7 +78,7 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
 
         // 获取消费组消费过哪些Topic
         Map<TopicPartition, Long> offsetMap = groupService.getGroupOffset(clusterPhyId, groupName);
-        for (TopicPartition topicPartition: offsetMap.keySet()) {
+        for (TopicPartition topicPartition : offsetMap.keySet()) {
             GroupMemberPO po = groupMap.get(topicPartition.topic());
             if (po == null) {
                 po = new GroupMemberPO(clusterPhyId, topicPartition.topic(), groupName, updateTime);
@@ -94,7 +101,7 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
             }
 
             Set<String> topicNameSet = partitionList.stream().map(elem -> elem.topic()).collect(Collectors.toSet());
-            for (String topicName: topicNameSet) {
+            for (String topicName : topicNameSet) {
                 groupMap.putIfAbsent(topicName, new GroupMemberPO(clusterPhyId, topicName, groupName, updateTime));
 
                 GroupMemberPO po = groupMap.get(topicName);
@@ -111,5 +118,18 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
         }
 
         return new ArrayList<>(groupMap.values());
+    }
+
+    private List<GroupMemberPO> filterGroupIfTopicNotExist(Long clusterPhyId, List<GroupMemberPO> poList) {
+        if (poList.isEmpty()) {
+            return poList;
+        }
+
+        // 集群Topic集合
+        Set<String> dbTopicSet = topicService.listTopicsFromDB(clusterPhyId).stream().map(elem -> elem.getTopicName()).collect(Collectors.toSet());
+        dbTopicSet.add("");   //兼容没有消费Topic的group
+        
+        // 过滤Topic不存在的消费组
+        return poList.stream().filter(elem -> dbTopicSet.contains(elem.getTopicName())).collect(Collectors.toList());
     }
 }
