@@ -19,8 +19,8 @@
 
   <insert id="addAndSetId" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.reassign.ReassignJobPO">
     INSERT INTO ks_km_reassign_job
-        (id, cluster_phy_id, reassignment_json, description, throttle_unit_byte, start_time, finished_time, creator, status)
+        (id, cluster_phy_id, reassignment_json, description, throttle_unit_byte, creator, status)
     VALUES
-        (#{id}, #{clusterPhyId}, #{reassignmentJson}, #{description}, #{throttleUnitByte}, #{startTime}, #{finishedTime}, #{creator}, #{status})
+        (#{id}, #{clusterPhyId}, #{reassignmentJson}, #{description}, #{throttleUnitByte}, #{creator}, #{status})
   </insert>
 </mapper>
