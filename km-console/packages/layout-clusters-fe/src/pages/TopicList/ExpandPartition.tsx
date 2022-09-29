@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AppContainer, Button, Divider, Drawer, Form, InputNumber, notification, SingleChart, Space, Spin, Utils } from 'knowdesign';
 import Api, { MetricType } from '@src/api/index';
 import { getBasicChartConfig, getUnit } from '@src/constants/chartConfig';
-import { formatChartData, MetricDefaultChartDataType } from '@src/components/DashboardDragChart/config';
+import { formatChartData, MetricDefaultChartDataType } from '@src/constants/chartConfig';
 
 const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
   const [global] = AppContainer.useGlobalValue();
@@ -74,8 +74,7 @@ const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
         ],
         global?.getMetricDefine || {},
         MetricType.Topic,
-        [startStamp, endStamp],
-        10 * 60 * 1000
+        [startStamp, endStamp]
       );
 
       setMinByteInOut(minByteInOut < empiricalMinValue ? empiricalMinValue : minByteInOut);
