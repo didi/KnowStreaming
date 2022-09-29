@@ -1,8 +1,9 @@
 import React from 'react';
 import moment from 'moment';
 import { timeFormat } from '../../constants/common';
-import { IconFont, Tooltip } from 'knowdesign';
-
+import { message, Tooltip, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
+import ContentWithCopy from '@src/components/CopyContent';
 const aclOperationType: any = {
   0: 'UNKNOWN',
   1: 'ANY',
@@ -80,6 +81,7 @@ export const getTopicMessagesColmns = () => {
       title: 'Offset',
       dataIndex: 'offset',
       key: 'offset',
+      render: (t: number) => (t ? t.toLocaleString() : '-'),
     },
     {
       title: 'Timestamp',
@@ -100,8 +102,9 @@ export const getTopicMessagesColmns = () => {
       dataIndex: 'value',
       key: 'value',
       width: 280,
-      lineClampTwo: true,
-      needTooltip: true,
+      render: (t: string) => {
+        return t ? <ContentWithCopy content={t} /> : '-';
+      },
     },
     {
       title: 'Header',
