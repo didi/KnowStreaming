@@ -18,9 +18,9 @@ import {
   Space,
   Divider,
   Transfer,
-  IconFont,
   Tooltip,
 } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import './index.less';
 import Api, { MetricType } from '@src/api/index';
 import moment from 'moment';

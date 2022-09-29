@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Tooltip, Select, IconFont, Utils, Divider, Button } from 'knowdesign';
+import { Tooltip, Select, Utils, Divider, Button } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import moment from 'moment';
 import { DRangeTime } from 'knowdesign';
 import IndicatorDrawer from './IndicatorDrawer';

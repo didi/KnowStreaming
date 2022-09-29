@@ -12,10 +12,9 @@ import {
   Transfer,
   Select,
   message,
-  IconFont,
   Tooltip,
 } from 'knowdesign';
-
+import { IconFont } from '@knowdesign/icons';
 import CronInput from './CronInput';
 import BalanceEditTable from './BalanceEditTable';
 import PlanDrawer from './PlanDrawer';

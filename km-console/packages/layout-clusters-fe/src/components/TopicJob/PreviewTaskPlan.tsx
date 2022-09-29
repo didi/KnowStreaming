@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Button, Divider, Drawer, IconFont, Select, Space, Table, Utils } from 'knowdesign';
+import { Button, Divider, Drawer, Select, Space, Table, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import Api, { MetricType } from '@src/api/index';
 
 const { Option } = Select;
