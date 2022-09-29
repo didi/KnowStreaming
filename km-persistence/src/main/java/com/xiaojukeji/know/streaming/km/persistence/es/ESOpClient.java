@@ -392,10 +392,7 @@ public class ESOpClient {
         return false;
     }
 
-    /**
-     * 创建索引模板
-     */
-    public boolean createIndexTemplateIfNotExist(String indexTemplateName, String config) {
+    public boolean templateExist(String indexTemplateName){
         ESClient esClient = null;
 
         try {
@@ -410,6 +407,29 @@ public class ESOpClient {
             if (null != templateConfig) {
                 return true;
             }
+        } catch (Exception e) {
+            LOGGER.warn( "method=templateExist||indexTemplateName={}||msg=exception!",
+                    indexTemplateName, e);
+        } finally {
+            if (esClient != null) {
+                this.returnESClientToPool(esClient);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 创建索引模板
+     */
+    public boolean createIndexTemplateIfNotExist(String indexTemplateName, String config) {
+        ESClient esClient = null;
+
+        try {
+            esClient = this.getESClientFromPool();
+
+            //存在模板就返回，不存在就创建
+            if(templateExist(indexTemplateName)){return true;}
 
             // 创建新的模板
             ESIndicesPutTemplateResponse response = esClient.admin().indices().preparePutTemplate( indexTemplateName )
@@ -417,8 +437,7 @@ public class ESOpClient {
 
             return response.getAcknowledged();
         } catch (Exception e) {
-            LOGGER.warn(
-                    "class=ESOpClient||method=createIndexTemplateIfNotExist||indexTemplateName={}||config={}||msg=exception!",
+            LOGGER.warn( "method=createIndexTemplateIfNotExist||indexTemplateName={}||config={}||msg=exception!",
                     indexTemplateName, config, e
             );
         } finally {
