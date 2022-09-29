@@ -1,4 +1,5 @@
-import { AppContainer, Divider, Form, IconFont, Input, List, message, Modal, Progress, Spin, Tooltip, Utils } from 'knowdesign';
+import { AppContainer, Divider, Form, Input, List, message, Modal, Progress, Spin, Tooltip, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import moment from 'moment';
 import API from '@src/api';
 import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
@@ -15,6 +16,10 @@ import SmallChart from '@src/components/SmallChart';
 import { SearchParams } from './HomePage';
 
 const DEFAULT_PAGE_SIZE = 10;
+
+enum ClusterRunState {
+  Raft = 2,
+}
 
 const DeleteCluster = React.forwardRef((_, ref) => {
   const intl = useIntl();
@@ -245,6 +250,7 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
       metricPoints.push(line);
     });
 
+    const runState = itemData.runState;
     const {
       Brokers: brokers,
       Zookeepers: zks,
@@ -345,18 +351,21 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
                   </div>
                   <div className="indicator-left-item-value">{brokers}</div>
                 </div>
-                <div className="indicator-left-item">
-                  <div className="indicator-left-item-title">
-                    <span
-                      className="indicator-left-item-title-dot"
-                      style={{
-                        background: zookeepersAvailable === -1 ? '#e9e7e7' : zookeepersAvailable === 0 ? '#FF7066' : '#34C38F',
-                      }}
-                    ></span>
-                    ZK
+                {/* 2: raft 模式 无zk */}
+                {runState !== ClusterRunState.Raft && (
+                  <div className="indicator-left-item">
+                    <div className="indicator-left-item-title">
+                      <span
+                        className="indicator-left-item-title-dot"
+                        style={{
+                          background: zookeepersAvailable === -1 ? '#e9e7e7' : zookeepersAvailable === 0 ? '#FF7066' : '#34C38F',
+                        }}
+                      ></span>
+                      ZK
+                    </div>
+                    <div className="indicator-left-item-value">{zookeepersAvailable === -1 ? '-' : zks}</div>
                   </div>
-                  <div className="indicator-left-item-value">{zookeepersAvailable === -1 ? '-' : zks}</div>
-                </div>
+                )}
               </div>
               <div className="indicator-right">
                 {metricPoints.map((row, index) => {

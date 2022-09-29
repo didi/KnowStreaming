@@ -1,5 +1,6 @@
 import React from 'react';
-import { Utils, IconFont, Tooltip } from 'knowdesign';
+import { Utils, Tooltip } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 export const getConfigurationColmns = (arg: any) => {
   const columns: any = [
     {

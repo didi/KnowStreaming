@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Drawer, Button, Space, Divider, AppContainer, ProTable, IconFont } from 'knowdesign';
+import { Drawer, Button, Space, Divider, AppContainer, ProTable } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { IindicatorSelectModule } from './index';
 import './style/indicator-drawer.less';
 import { useLocation } from 'react-router-dom';

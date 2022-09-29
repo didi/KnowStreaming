@@ -1,6 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { ProTable, Drawer, Utils, AppContainer, SearchInput, IconFont } from 'knowdesign';
+import { ProTable, Drawer, Utils, AppContainer, SearchInput } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import API from '../../api';
 import { getBrokerListColumns, defaultPagination } from './config';
 import { tableHeaderPrefix } from '@src/constants/common';

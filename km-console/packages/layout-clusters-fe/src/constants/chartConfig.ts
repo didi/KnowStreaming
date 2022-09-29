@@ -1,5 +1,44 @@
 import moment from 'moment';
+import { MetricType } from '@src/api';
+import { MetricsDefine } from '@src/pages/CommonConfig';
 
+export interface MetricInfo {
+  name: string;
+  desc: string;
+  type: number;
+  set: boolean;
+  rank: number | null;
+  support: boolean;
+}
+
+// 接口返回图表原始数据类型
+export interface MetricDefaultChartDataType {
+  metricName: string;
+  metricLines: {
+    name: string;
+    createTime: number;
+    updateTime: number;
+    metricPoints: {
+      aggType: string;
+      timeStamp: number;
+      value: number;
+      createTime: number;
+      updateTime: number;
+    }[];
+  }[];
+}
+
+// 格式化后图表数据类型
+export interface MetricChartDataType {
+  metricName: string;
+  metricUnit: string;
+  metricLines: {
+    name: string;
+    data: (string | number)[][];
+  }[];
+}
+
+// 图表颜色库
 export const CHART_COLOR_LIST = [
   '#556ee6',
   '#94BEF2',
@@ -16,27 +55,176 @@ export const CHART_COLOR_LIST = [
   '#C9E795',
 ];
 
+// 图表存储单位换算
 export const UNIT_MAP = {
   TB: Math.pow(1024, 4),
   GB: Math.pow(1024, 3),
   MB: Math.pow(1024, 2),
   KB: 1024,
 };
+export const getUnit = (value: number) => Object.entries(UNIT_MAP).find(([, size]) => value / size >= 1) || ['Byte', 1];
 
+// 图表数字单位换算
 export const DATA_NUMBER_MAP = {
   十亿: Math.pow(1000, 3),
   百万: Math.pow(1000, 2),
   千: 1000,
 };
-
-export const getUnit = (value: number) => Object.entries(UNIT_MAP).find(([, size]) => value / size >= 1) || ['Byte', 1];
-
 export const getDataNumberUnit = (value: number) => Object.entries(DATA_NUMBER_MAP).find(([, size]) => value / size >= 1) || ['', 1];
+
+// 图表补点间隔计算
+export const SUPPLEMENTARY_INTERVAL_MAP = {
+  '0': 60 * 1000,
+  // 6 小时：10 分钟间隔
+  '21600000': 10 * 60 * 1000,
+  // 24 小时：1 小时间隔
+  '86400000': 60 * 60 * 1000,
+};
+export const getSupplementaryInterval = (range: number) => {
+  return Object.entries(SUPPLEMENTARY_INTERVAL_MAP)
+    .reverse()
+    .find(([curRange]) => range > Number(curRange))[1];
+};
+
+// 处理图表排序
+export const resolveMetricsRank = (metricList: MetricInfo[]) => {
+  const isRanked = metricList.some(({ rank }) => rank !== null);
+  let shouldUpdate = false;
+  let list: string[] = [];
+  if (isRanked) {
+    const rankedMetrics = metricList.filter(({ rank }) => rank !== null).sort((a, b) => a.rank - b.rank);
+    const unRankedMetrics = metricList.filter(({ rank }) => rank === null);
+    // 如果有新增/删除指标的情况，需要触发更新
+    if (unRankedMetrics.length || rankedMetrics.some(({ rank }, i) => rank !== i)) {
+      shouldUpdate = true;
+    }
+    list = [...rankedMetrics.map(({ name }) => name), ...unRankedMetrics.map(({ name }) => name).sort()];
+  } else {
+    shouldUpdate = true;
+    // 按字母先后顺序初始化指标排序
+    list = metricList.map(({ name }) => name).sort();
+  }
+
+  return {
+    list,
+    listInfo: list.map((metric, rank) => ({ metric, rank, set: metricList.find(({ name }) => metric === name)?.set || false })),
+    shouldUpdate,
+  };
+};
+
+// 补点
+export const supplementaryPoints = (
+  lines: MetricChartDataType['metricLines'],
+  timeRange: readonly [number, number],
+  extraCallback?: (point: [number, 0]) => any[]
+): void => {
+  const interval = getSupplementaryInterval(timeRange[1] - timeRange[0]);
+
+  lines.forEach(({ data }) => {
+    // 获取未补点前线条的点的个数
+    let len = data.length;
+    // 记录当前处理到的点的下标值
+    let i = 0;
+
+    for (; i < len; i++) {
+      if (i === 0) {
+        let firstPointTimestamp = data[0][0] as number;
+        while (firstPointTimestamp - interval > timeRange[0]) {
+          const prevPointTimestamp = firstPointTimestamp - interval;
+          data.unshift(extraCallback ? extraCallback([prevPointTimestamp, 0]) : [prevPointTimestamp, 0]);
+          firstPointTimestamp = prevPointTimestamp;
+          len++;
+          i++;
+        }
+      }
+
+      if (i === len - 1) {
+        let lastPointTimestamp = data[i][0] as number;
+        while (lastPointTimestamp + interval < timeRange[1]) {
+          const nextPointTimestamp = lastPointTimestamp + interval;
+          data.push(extraCallback ? extraCallback([nextPointTimestamp, 0]) : [nextPointTimestamp, 0]);
+          lastPointTimestamp = nextPointTimestamp;
+        }
+        break;
+      }
+
+      {
+        let timestamp = data[i][0] as number;
+        while (timestamp + interval < data[i + 1][0]) {
+          const nextPointTimestamp = timestamp + interval;
+          data.splice(i + 1, 0, extraCallback ? extraCallback([nextPointTimestamp, 0]) : [nextPointTimestamp, 0]);
+          timestamp = nextPointTimestamp;
+          len++;
+          i++;
+        }
+      }
+    }
+  });
+};
+
+// 格式化图表数据
+export const formatChartData = (
+  // 图表源数据
+  metricData: MetricDefaultChartDataType[],
+  // 获取指标单位
+  getMetricDefine: (type: MetricType, metric: string) => MetricsDefine[keyof MetricsDefine],
+  // 指标类型
+  metricType: MetricType,
+  // 图表时间范围，用于补点
+  timeRange: readonly [number, number],
+  transformUnit: [string, number] = undefined
+): MetricChartDataType[] => {
+  return metricData.map(({ metricName, metricLines }) => {
+    const curMetricInfo = (getMetricDefine && getMetricDefine(metricType, metricName)) || null;
+    const isByteUnit = curMetricInfo?.unit?.toLowerCase().includes('byte');
+    let maxValue = -1;
+
+    const PointsMapMethod = ({ timeStamp, value }: { timeStamp: number; value: string | number }) => {
+      let parsedValue: string | number = Number(value);
+
+      if (Number.isNaN(parsedValue)) {
+        parsedValue = value;
+      } else {
+        // 为避免出现过小的数字影响图表展示效果，图表值统一保留小数点后三位
+        parsedValue = parseFloat(parsedValue.toFixed(3));
+        if (maxValue < parsedValue) maxValue = parsedValue;
+      }
+
+      return [timeStamp, parsedValue];
+    };
+
+    // 初始化返回结构
+    const chartData = {
+      metricName,
+      metricUnit: curMetricInfo?.unit || '',
+      metricLines: metricLines
+        .sort((a, b) => Number(a.name < b.name) - 0.5)
+        .map(({ name, metricPoints }) => ({
+          name,
+          data: metricPoints.map(PointsMapMethod),
+        })),
+    };
+    // 按时间先后进行对图表点排序
+    chartData.metricLines.forEach(({ data }) => data.sort((a, b) => (a[0] as number) - (b[0] as number)));
+
+    // 图表值单位转换
+    if (maxValue > 0) {
+      const [unitName, unitSize]: [string, number] = transformUnit || isByteUnit ? getUnit(maxValue) : getDataNumberUnit(maxValue);
+      chartData.metricUnit = isByteUnit
+        ? chartData.metricUnit.toLowerCase().replace('byte', unitName)
+        : `${unitName}${chartData.metricUnit}`;
+      chartData.metricLines.forEach(({ data }) => data.forEach((point: any) => (point[1] /= unitSize)));
+    }
+
+    // 补点
+    supplementaryPoints(chartData.metricLines, timeRange);
+
+    return chartData;
+  });
+};
 
 // 图表 tooltip 基础展示样式
 const tooltipFormatter = (date: any, arr: any, tooltip: any) => {
-  // 从大到小排序
-  // arr = arr.sort((a: any, b: any) => b.value - a.value);
   const str = arr
     .map(
       (item: any) => `<div style="margin: 3px 0;">
@@ -121,9 +309,6 @@ export const getBasicChartConfig = (props: any = {}) => {
       itemWidth: 8,
       itemGap: 8,
       textStyle: {
-        // width: 85,
-        // overflow: 'truncate',
-        // ellipsis: '...',
         fontSize: 11,
         color: '#74788D',
       },

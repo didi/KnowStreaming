@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Input, IconFont } from 'knowdesign';
+import { Input } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import './style/index.less';
 
 interface IObjectProps {

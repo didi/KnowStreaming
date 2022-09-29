@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { arrayMoveImmutable } from 'array-move';
-import { Utils, Empty, IconFont, Spin, AppContainer, SingleChart, Tooltip } from 'knowdesign';
+import { Utils, Empty, Spin, AppContainer, SingleChart, Tooltip } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { useParams } from 'react-router-dom';
 import api, { MetricType } from '@src/api';
+import {
+  MetricInfo,
+  MetricDefaultChartDataType,
+  MetricChartDataType,
+  formatChartData,
+  resolveMetricsRank,
+} from '@src/constants/chartConfig';
 import SingleChartHeader, { KsHeaderOptions } from '../SingleChartHeader';
 import DragGroup from '../DragGroup';
 import ChartDetail from './ChartDetail';
-import { MetricInfo, MetricDefaultChartDataType, MetricChartDataType, formatChartData, getChartConfig } from './config';
+import { getChartConfig } from './config';
 import './index.less';
-import { MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL } from '@src/constants/common';
 
 interface IcustomScope {
   label: string;
@@ -39,8 +46,8 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   const [curHeaderOptions, setCurHeaderOptions] = useState<ChartFilterOptions>();
   const [metricChartData, setMetricChartData] = useState<MetricChartDataType[]>([]); // 指标图表数据列表
   const [gridNum, setGridNum] = useState<number>(12); // 图表列布局
+  const metricRankList = useRef<string[]>([]);
   const chartDetailRef = useRef(null);
-  const chartDragOrder = useRef([]);
   const curFetchingTimestamp = useRef(0);
 
   // 获取节点范围列表
@@ -60,23 +67,33 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
     setScopeList(list);
   };
 
+  // 更新 rank
+  const updateRank = (metricList: MetricInfo[]) => {
+    const { list, listInfo, shouldUpdate } = resolveMetricsRank(metricList);
+    metricRankList.current = list;
+    if (shouldUpdate) {
+      setMetricList(listInfo);
+    }
+  };
+
   // 获取指标列表
   const getMetricList = () => {
     Utils.request(api.getDashboardMetricList(clusterId, dashboardType)).then((res: MetricInfo[] | null) => {
       if (!res) return;
-      const showMetrics = res.filter((metric) => metric.support);
-      const selectedMetrics = showMetrics.filter((metric) => metric.set).map((metric) => metric.name);
-      setMetricsList(showMetrics);
+      const supportMetrics = res.filter((metric) => metric.support);
+      const selectedMetrics = supportMetrics.filter((metric) => metric.set).map((metric) => metric.name);
+      updateRank([...supportMetrics]);
+      setMetricsList(supportMetrics);
       setSelectedMetricNames(selectedMetrics);
     });
   };
 
   // 更新指标
-  const setMetricList = (metricsSet: { [name: string]: boolean }) => {
+  const setMetricList = (metricDetailDTOList: { metric: string; rank: number; set: boolean }[]) => {
     return Utils.request(api.getDashboardMetricList(clusterId, dashboardType), {
       method: 'POST',
       data: {
-        metricsSet,
+        metricDetailDTOList,
       },
     });
   };
@@ -84,10 +101,11 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   // 根据筛选项获取图表信息
   const getMetricChartData = () => {
     !curHeaderOptions.isAutoReload && setLoading(true);
-    const [startTime, endTime] = curHeaderOptions.rangeTime;
 
+    const [startTime, endTime] = curHeaderOptions.rangeTime;
     const curTimestamp = Date.now();
     curFetchingTimestamp.current = curTimestamp;
+
     Utils.post(api.getDashboardMetricChartData(clusterId, dashboardType), {
       startTime,
       endTime,
@@ -108,36 +126,20 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
           setMetricChartData([]);
         } else {
           // 格式化图表需要的数据
-          const supplementaryInterval = (endTime - startTime > MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL ? 10 : 1) * 60 * 1000;
           const formattedMetricData = formatChartData(
             res,
             global.getMetricDefine || {},
             dashboardType,
-            curHeaderOptions.rangeTime,
-            supplementaryInterval,
-            true
+            curHeaderOptions.rangeTime
           ) as MetricChartDataType[];
-          // 处理图表的拖拽顺序
-          if (chartDragOrder.current && chartDragOrder.current.length) {
-            // 根据当前拖拽顺序排列图表数据
-            formattedMetricData.forEach((metric) => {
-              const i = chartDragOrder.current.indexOf(metric.metricName);
-              metric.dragKey = i === -1 ? 999 : i;
-            });
-            formattedMetricData.sort((a, b) => a.dragKey - b.dragKey);
-          }
-          // 更新当前拖拽顺序（处理新增或减少图表的情况）
-          chartDragOrder.current = formattedMetricData.map((data) => data.metricName);
+          // 指标排序
+          formattedMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
 
           setMetricChartData(formattedMetricData);
         }
         setLoading(false);
       },
-      () => {
-        if (curFetchingTimestamp.current === curTimestamp) {
-          setLoading(false);
-        }
-      }
+      () => curFetchingTimestamp.current === curTimestamp && setLoading(false)
     );
   };
 
@@ -163,11 +165,19 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
 
   // 指标选中项更新回调
   const indicatorChangeCallback = (newMetricNames: (string | number)[]) => {
-    const updateMetrics: { [name: string]: boolean } = {};
+    const updateMetrics: { metric: string; set: boolean; rank: number }[] = [];
     // 需要选中的指标
-    newMetricNames.forEach((name) => !selectedMetricNames.includes(name) && (updateMetrics[name] = true));
+    newMetricNames.forEach(
+      (name) =>
+        !selectedMetricNames.includes(name) &&
+        updateMetrics.push({ metric: name as string, set: true, rank: metricsList.find(({ name: metric }) => metric === name)?.rank })
+    );
     // 取消选中的指标
-    selectedMetricNames.forEach((name) => !newMetricNames.includes(name) && (updateMetrics[name] = false));
+    selectedMetricNames.forEach(
+      (name) =>
+        !newMetricNames.includes(name) &&
+        updateMetrics.push({ metric: name as string, set: false, rank: metricsList.find(({ name: metric }) => metric === name)?.rank })
+    );
 
     const requestPromise = Object.keys(updateMetrics).length ? setMetricList(updateMetrics) : Promise.resolve();
     requestPromise.then(
@@ -186,7 +196,11 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   // 拖拽结束回调，更新图表顺序，并触发图表的 onDrag 事件（ 设置为 false ），允许同步展示图表的 tooltip
   const dragEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
     busInstance.emit('onDrag', false);
-    chartDragOrder.current = arrayMoveImmutable(chartDragOrder.current, oldIndex, newIndex);
+    const originFrom = metricRankList.current.indexOf(metricChartData[oldIndex].metricName);
+    const originTarget = metricRankList.current.indexOf(metricChartData[newIndex].metricName);
+    const newList = arrayMoveImmutable(metricRankList.current, originFrom, originTarget);
+    metricRankList.current = newList;
+    setMetricList(newList.map((metric, rank) => ({ metric, rank, set: metricsList.find(({ name }) => metric === name)?.set || false })));
     setMetricChartData(arrayMoveImmutable(metricChartData, oldIndex, newIndex));
   };
 
