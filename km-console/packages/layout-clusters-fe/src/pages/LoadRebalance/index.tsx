@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Select, Form, Utils, AppContainer, Input, Button, ProTable, Badge, Tag, SearchInput, IconFont, Divider } from 'knowdesign';
+import { Select, Form, Utils, AppContainer, Input, Button, ProTable, Badge, Tag, SearchInput, Divider } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import BalanceDrawer from './BalanceDrawer';
 import HistoryDrawer from './HistoryDrawer';
 import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
@@ -133,7 +134,7 @@ const LoadBalance: React.FC = (props: any) => {
       key: 'disk_spec',
       width: '150px',
       render: (text: any, row: any) => {
-        return text !== null ? `${text}GB` : '-';
+        return text !== null ? `${text.toLocaleString()}GB` : '-';
       },
     },
     {
@@ -145,7 +146,10 @@ const LoadBalance: React.FC = (props: any) => {
         return text !== null ? (
           <span>
             <Badge status={row?.disk_status === 0 ? 'success' : 'error'} />
-            {`${getSizeAndUnit(text, 'B').valueWithUnit} (${((row.disk_avg * 100) / Utils.transGBToB(row.disk_spec)).toFixed(2)}%)`}
+            {`${getSizeAndUnit(text, 'B').valueWithUnit.toLocaleString()} (${(
+              (row.disk_avg * 100) /
+              Utils.transGBToB(row.disk_spec)
+            ).toFixed(2)}%)`}
           </span>
         ) : (
           '-'
@@ -158,7 +162,7 @@ const LoadBalance: React.FC = (props: any) => {
       key: 'bytesIn_spec',
       width: '150px',
       render: (text: any, row: any) => {
-        return text !== null ? `${text}MB/s` : '-';
+        return text !== null ? `${text.toLocaleString()}MB/s` : '-';
       },
     },
     {
@@ -170,7 +174,10 @@ const LoadBalance: React.FC = (props: any) => {
         return text !== null ? (
           <span>
             <Badge status={row?.bytesIn_status === 0 ? 'success' : 'error'} />
-            {`${getSizeAndUnit(text, 'B/s').valueWithUnit} (${((row.bytesIn_avg * 100) / (row.bytesIn_spec * 1024 * 1024)).toFixed(2)}%)`}
+            {`${getSizeAndUnit(text, 'B/s').valueWithUnit.toLocaleString()} (${(
+              (row.bytesIn_avg * 100) /
+              (row.bytesIn_spec * 1024 * 1024)
+            ).toFixed(2)}%)`}
           </span>
         ) : (
           '-'
@@ -183,7 +190,7 @@ const LoadBalance: React.FC = (props: any) => {
       key: 'bytesOut_spec',
       width: '150px',
       render: (text: any, row: any) => {
-        return text !== null ? `${text}MB/s` : '-';
+        return text !== null ? `${text.toLocaleString()}MB/s` : '-';
       },
     },
     {
@@ -196,7 +203,10 @@ const LoadBalance: React.FC = (props: any) => {
         return text !== null ? (
           <span>
             <Badge status={row?.bytesOut_status === 0 ? 'success' : 'error'} />
-            {`${getSizeAndUnit(text, 'B/s').valueWithUnit} (${((row.bytesOut_avg * 100) / (row.bytesOut_spec * 1024 * 1024)).toFixed(2)}%)`}
+            {`${getSizeAndUnit(text, 'B/s').valueWithUnit.toLocaleString()} (${(
+              (row.bytesOut_avg * 100) /
+              (row.bytesOut_spec * 1024 * 1024)
+            ).toFixed(2)}%)`}
           </span>
         ) : (
           '-'

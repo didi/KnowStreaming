@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import { AppContainer, Divider, Drawer, IconFont, ProTable, Select, SingleChart, Space, Tooltip, Utils } from 'knowdesign';
+import { AppContainer, Divider, Drawer, ProTable, Select, SingleChart, Space, Tooltip, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { DRangeTime } from 'knowdesign';
 import { CHART_COLOR_LIST, getBasicChartConfig } from '@src/constants/chartConfig';
 import Api from '@src/api/index';
 import { hashDataParse } from '@src/constants/common';
 import { ClustersPermissionMap } from '../CommonConfig';
 import ResetOffsetDrawer from './ResetOffsetDrawer';
-import { CheckCircleFilled } from '@ant-design/icons';
 import SwitchTab from '@src/components/SwitchTab';
+import ContentWithCopy from '@src/components/CopyContent';
 
 const { Option } = Select;
 
@@ -44,33 +44,6 @@ const metricWithType = [
   { metricName: 'Lag', metricType: 102 },
 ];
 
-const ContentWithCopy = (props: { content: string }) => {
-  const { content } = props;
-  const [visible, setVisible] = useState(false);
-  return (
-    <CopyToClipboard text={content}>
-      <div className="content-with-copy">
-        <Tooltip title={content}>
-          <span className="content">{content}</span>
-        </Tooltip>
-        {content && (
-          <Tooltip
-            title={
-              <span>
-                <CheckCircleFilled style={{ color: '#00b365' }} /> 复制成功
-              </span>
-            }
-            visible={visible}
-            onVisibleChange={() => setVisible(false)}
-          >
-            <IconFont className="copy-icon" type="icon-fuzhi" onClick={() => setVisible(true)} />
-          </Tooltip>
-        )}
-      </div>
-    </CopyToClipboard>
-  );
-};
-
 export default (props: any) => {
   const { scene } = props;
   const params = useParams<{
@@ -104,6 +77,9 @@ export default (props: any) => {
       title: 'Topic Partition',
       dataIndex: 'partitionId',
       key: 'partitionId',
+      lineClampOne: true,
+      needTooltip: true,
+      width: 180,
       render: (v: string, record: any) => {
         return `${record.topicName}-${v}`;
       },

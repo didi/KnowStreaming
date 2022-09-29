@@ -1,7 +1,8 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { AppContainer, IconFont, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button, Divider } from 'knowdesign';
+import { AppContainer, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button, Divider } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import Create from './Create';
 import './index.less';
 import Api from '@src/api/index';
@@ -90,11 +91,11 @@ const AutoPage = (props: any) => {
     const orgVal = record?.latestMetrics?.metrics?.[metricName];
     if (orgVal !== undefined) {
       if (metricName === 'HealthScore') {
-        return Math.round(orgVal);
+        return Math.round(orgVal).toLocaleString();
       } else if (metricName === 'LogSize') {
-        return Number(Utils.formatAssignSize(orgVal, 'MB'));
+        return Number(Utils.formatAssignSize(orgVal, 'MB')).toLocaleString();
       } else {
-        return Number(Utils.formatAssignSize(orgVal, 'KB'));
+        return Number(Utils.formatAssignSize(orgVal, 'KB')).toLocaleString();
         // return Utils.formatAssignSize(orgVal, 'KB');
       }
     }
