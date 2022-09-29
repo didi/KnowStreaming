@@ -35,6 +35,7 @@
   "dependencies": {
     "@ant-design/compatible": "^1.0.8",
     "@ant-design/icons": "^4.6.2",
+    "@knowdesign/icons": "^1.0.1",
     "@types/react": "^17.0.39",
     "@types/react-copy-to-clipboard": "^5.0.2",
     "@types/react-dom": "^17.0.11",
@@ -57,10 +58,9 @@
     "react-cron-antd": "^1.1.2",
     "react-dom": "16.12.0",
     "react-intl": "^3.2.1",
-    "react-joyride": "^2.5.0",
+    "react-joyride": "^2.5.3",
     "single-spa": "5.9.3",
     "single-spa-react": "2.14.0",
-    "tree-changes": "0.9.1",
     "webpack-bundle-analyzer": "^4.5.0"
   },
   "devDependencies": {

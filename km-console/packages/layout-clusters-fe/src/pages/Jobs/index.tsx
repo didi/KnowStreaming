@@ -1,6 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { ProTable, Drawer, Utils, AppContainer, Form, Select, Input, Button, message, Modal, IconFont, Divider } from 'knowdesign';
+import { ProTable, Drawer, Utils, AppContainer, Form, Select, Input, Button, message, Modal, Divider } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import API from '../../api';
 import { getJobsListColumns, defaultPagination, runningStatus, jobType } from './config';
 import JobsCheck from '@src/components/CardBar/JobsCheck';

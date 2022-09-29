@@ -2,9 +2,10 @@ import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, use
 import { AppContainer, Drawer, Spin, Table, SingleChart, Utils, Tooltip } from 'knowdesign';
 import moment from 'moment';
 import api, { MetricType } from '@src/api';
+import { MetricDefaultChartDataType, MetricChartDataType, formatChartData } from '@src/constants/chartConfig';
 import { useParams } from 'react-router-dom';
 import { debounce } from 'lodash';
-import { MetricDefaultChartDataType, MetricChartDataType, formatChartData, getDetailChartConfig } from './config';
+import { getDetailChartConfig } from './config';
 import { UNIT_MAP } from '@src/constants/chartConfig';
 import RenderEmpty from '../RenderEmpty';
 
@@ -50,8 +51,6 @@ interface DataZoomEventProps {
 const DATA_ZOOM_DEFAULT_SCALE = 0.25;
 // 单次向服务器请求数据的范围（默认 6 小时，超过后采集频率间隔会变长），单位: ms
 const DEFAULT_REQUEST_TIME_RANGE = 6 * 60 * 60 * 1000;
-// 采样间隔，影响前端补点逻辑，单位: ms
-const DEFAULT_POINT_INTERVAL = 60 * 1000;
 // 向服务器每轮请求的数量
 const DEFAULT_REQUEST_COUNT = 6;
 // 进入详情页默认展示的时间范围
@@ -376,8 +375,6 @@ const ChartDetail = (props: ChartDetailProps) => {
       global.getMetricDefine || {},
       metricType,
       timeRange,
-      DEFAULT_POINT_INTERVAL,
-      false,
       chartInfo.current.transformUnit
     ) as MetricChartDataType[];
     // 增量填充图表数据
@@ -540,14 +537,7 @@ const ChartDetail = (props: ChartDetailProps) => {
           if (res?.length) {
             // 格式化图表需要的数据
             const formattedMetricData = (
-              formatChartData(
-                res,
-                global.getMetricDefine || {},
-                metricType,
-                curTimeRange,
-                DEFAULT_POINT_INTERVAL,
-                false
-              ) as MetricChartDataType[]
+              formatChartData(res, global.getMetricDefine || {}, metricType, curTimeRange) as MetricChartDataType[]
             )[0];
             // 填充图表数据
             let initFullTimeRange = curTimeRange;

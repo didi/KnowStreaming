@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, Input, Popover, Space, Checkbox, Row, Col, Button, IconFont } from 'knowdesign';
+import { Radio, Input, Popover, Space, Checkbox, Row, Col, Button } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { InodeScopeModule } from './index';
 import './style/node-scope.less';
 

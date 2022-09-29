@@ -59,7 +59,7 @@ const EchartsExample = (props: any) => {
             normal: {
               color: (params: any) => {
                 // 定义一个颜色数组colorList
-                const colorList = ['#00C0A2', '#CED4DA', '#FF7066'];
+                const colorList = ['#FF7066', '#00C0A2', '#FF7066'];
                 return colorList[params.dataIndex];
               },
             },

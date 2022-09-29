@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Select, Modal, message, ProTable, AppContainer, DKSBreadcrumb, Utils, IconFont, Divider } from 'knowdesign';
+import { Button, Form, Input, Select, Modal, message, ProTable, AppContainer, DKSBreadcrumb, Utils, Divider } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import ACLsCardBar from '@src/components/CardBar/ACLsCardBar';
 import api from '@src/api';
 import { tableHeaderPrefix } from '@src/constants/common';

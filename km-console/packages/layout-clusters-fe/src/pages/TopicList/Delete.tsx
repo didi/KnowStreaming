@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Form, IconFont, Input, Modal, notification, Utils } from 'knowdesign';
+import { Button, Form, Input, Modal, notification, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import Api from '@src/api/index';
 
 // eslint-disable-next-line react/display-name

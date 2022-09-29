@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Popover, IconFont, Row, Col, Select } from 'knowdesign';
+import { Button, Popover, Row, Col, Select } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { CloseOutlined } from '@ant-design/icons';
 
 const balancePrefix = 'custom-popover-balance';

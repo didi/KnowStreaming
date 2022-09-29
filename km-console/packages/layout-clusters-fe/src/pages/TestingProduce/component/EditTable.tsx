@@ -1,6 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { useState } from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button, message, IconFont, Select } from 'knowdesign';
+import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button, message, Select } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import './style/edit-table.less';
 import { CheckOutlined, CloseOutlined, PlusSquareOutlined } from '@ant-design/icons';
 
