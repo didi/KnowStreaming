@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useEffect, useState } from 'react';
-import { AppContainer, Button, Empty, IconFont, List, Popover, ProTable, Radio, Spin, Utils } from 'knowdesign';
+import { AppContainer, Button, Empty, List, Popover, ProTable, Radio, Spin, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { CloseOutlined } from '@ant-design/icons';
 import api, { MetricType } from '@src/api';
 import { useParams } from 'react-router-dom';

@@ -1,6 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
-import { Alert, Badge, Dropdown, IconFont, ProTable, Space, Table, Utils } from 'knowdesign';
+import { Alert, Badge, Dropdown, ProTable, Space, Table, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { useParams } from 'react-router-dom';
 import Api from '@src/api';
 import { getTaskDetailsColumns, getMoveBalanceColumns } from './config';

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Drawer, Form, Input, Space, Button, Utils, Row, Col, IconFont, Divider, message } from 'knowdesign';
+import { Drawer, Form, Input, Space, Button, Utils, Row, Col, Divider, message } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { useParams } from 'react-router-dom';
 import Api from '@src/api';
 export const ConfigurationEdit = (props: any) => {

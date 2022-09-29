@@ -89,12 +89,9 @@ export const getJobsListColumns = (arg?: any) => {
       title: '任务执行对象',
       dataIndex: 'target',
       key: 'target',
+      width: 232,
       render(t: any, r: any) {
-        return (
-          <div style={{ width: '232px' }}>
-            <TagsWithHide placement="bottom" list={t.split(',')} expandTagContent={(num: any) => `共有${num}个`} />
-          </div>
-        );
+        return <TagsWithHide placement="bottom" list={t.split(',')} expandTagContent={(num: any) => `共有${num}个`} />;
       },
     },
     {

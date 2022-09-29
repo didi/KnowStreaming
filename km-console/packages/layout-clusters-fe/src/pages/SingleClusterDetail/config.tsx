@@ -2,7 +2,8 @@ import moment from 'moment';
 import React from 'react';
 import { timeFormat } from '../../constants/common';
 import TagsWithHide from '../../components/TagsWithHide/index';
-import { Form, IconFont, InputNumber, Tooltip } from 'knowdesign';
+import { Form, InputNumber, Tooltip } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { Link } from 'react-router-dom';
 import { systemKey } from '../../constants/menu';
 

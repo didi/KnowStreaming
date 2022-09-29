@@ -1,6 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
-import { AppContainer, Divider, Form, IconFont, Input, ProTable, Select, Utils } from 'knowdesign';
+import { AppContainer, Divider, Form, Input, ProTable, Select, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import './index.less';
 import Api from '@src/api/index';
 import { getOperatingStateListParams } from './interface';

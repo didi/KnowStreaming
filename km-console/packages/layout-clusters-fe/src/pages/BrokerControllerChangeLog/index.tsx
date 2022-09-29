@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { ProTable, Utils, AppContainer, SearchInput, IconFont } from 'knowdesign';
+import { ProTable, Utils, AppContainer, SearchInput } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import API from '../../api';
 import { getControllerChangeLogListColumns, defaultPagination } from './config';
 import BrokerDetail from '../BrokerDetail';
