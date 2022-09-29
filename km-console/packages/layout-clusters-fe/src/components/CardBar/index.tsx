@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Drawer, IconFont, Select, Spin, Table } from 'knowdesign';
+import { Drawer, Select, Spin, Table } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { Utils, Progress } from 'knowdesign';
 import './index.less';
 import api from '@src/api';
@@ -110,8 +111,8 @@ const CardBar = (props: CardBarProps) => {
     const promise = record
       ? Utils.request(path)
       : Utils.request(path, {
-        params: { dimensionCode: sceneObj.code },
-      });
+          params: { dimensionCode: sceneObj.code },
+        });
     promise.then((data: any[]) => {
       setHealthCheckDetailList(data);
     });

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Slider, Input, Select, Checkbox, Button, Utils, Spin, IconFont, AppContainer } from 'knowdesign';
+import { Slider, Input, Select, Checkbox, Button, Utils, Spin, AppContainer } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import API from '@src/api';
 import TourGuide, { MultiPageSteps } from '@src/components/TourGuide';
 import './index.less';

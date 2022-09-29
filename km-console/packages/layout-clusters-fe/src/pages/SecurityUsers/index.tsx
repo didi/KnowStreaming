@@ -14,9 +14,9 @@ import {
   Utils,
   Checkbox,
   Tooltip,
-  IconFont,
   Alert,
 } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { CloseOutlined, EyeInvisibleOutlined, EyeOutlined, LoadingOutlined } from '@ant-design/icons';
 import './index.less';
 import api from '@src/api';

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CardBar from './index';
-import { IconFont, Tag, Utils, Tooltip, Popover, AppContainer } from 'knowdesign';
+import { Tag, Utils, Tooltip, Popover, AppContainer } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import api from '@src/api';
 import StateChart from './StateChart';
 import ClusterNorms from '@src/pages/LoadRebalance/ClusterNorms';
@@ -138,15 +139,15 @@ const LoadRebalanceCardBar = (props: any) => {
           //           content={
           //             <div style={{ color: '#495057' }}>
           //               <div>
-          //                 <IconFont className="cutomIcon" type="icon-chaoguo" />
+          //                 <IconFont className="cutomIcon cutomIcon-red" type="icon-chaoguo" />
           //                 超过均衡区间的有: {cpu?.bigNu || 0}
           //               </div>
           //               <div style={{ margin: '6px 0' }}>
-          //                 <IconFont className="cutomIcon" type="icon-qujian" />
+          //                 <IconFont className="cutomIcon cutomIcon-green" type="icon-qujian" />
           //                 在均衡区间内的有: {cpu?.betweenNu || 0}
           //               </div>
           //               <div>
-          //                 <IconFont className="cutomIcon" type="icon-diyu" />
+          //                 <IconFont className="cutomIcon cutomIcon-red" type="icon-diyu" />
           //                 低于均衡区间的有: {cpu?.smallNu || 0}
           //               </div>
           //             </div>
@@ -202,15 +203,15 @@ const LoadRebalanceCardBar = (props: any) => {
                     content={
                       <div style={{ color: '#495057' }}>
                         <div>
-                          <IconFont className="cutomIcon" type="icon-chaoguo" />
+                          <IconFont className="cutomIcon cutomIcon-red" type="icon-chaoguo" />
                           超过均衡区间的有: {disk?.bigNu || 0}
                         </div>
                         <div style={{ margin: '6px 0' }}>
-                          <IconFont className="cutomIcon" type="icon-qujian" />
+                          <IconFont className="cutomIcon cutomIcon-green" type="icon-qujian" />
                           在均衡区间内的有: {disk?.betweenNu || 0}
                         </div>
                         <div>
-                          <IconFont className="cutomIcon" type="icon-diyu" />
+                          <IconFont className="cutomIcon cutomIcon-red" type="icon-diyu" />
                           低于均衡区间的有: {disk?.smallNu || 0}
                         </div>
                       </div>
@@ -267,15 +268,15 @@ const LoadRebalanceCardBar = (props: any) => {
                     content={
                       <div style={{ color: '#495057' }}>
                         <div>
-                          <IconFont className="cutomIcon" type="icon-chaoguo" />
+                          <IconFont className="cutomIcon cutomIcon-red" type="icon-chaoguo" />
                           超过均衡区间的有: {bytesIn?.bigNu || 0}
                         </div>
                         <div style={{ margin: '6px 0' }}>
-                          <IconFont className="cutomIcon" type="icon-qujian" />
+                          <IconFont className="cutomIcon cutomIcon-green" type="icon-qujian" />
                           在均衡区间内的有: {bytesIn?.betweenNu || 0}
                         </div>
                         <div>
-                          <IconFont className="cutomIcon" type="icon-diyu" />
+                          <IconFont className="cutomIcon cutomIcon-red" type="icon-diyu" />
                           低于均衡区间的有: {bytesIn?.smallNu || 0}
                         </div>
                       </div>
@@ -332,15 +333,15 @@ const LoadRebalanceCardBar = (props: any) => {
                     content={
                       <div style={{ color: '#495057' }}>
                         <div>
-                          <IconFont className="cutomIcon" type="icon-chaoguo" />
+                          <IconFont className="cutomIcon cutomIcon-red" type="icon-chaoguo" />
                           超过均衡区间的有: {bytesOut?.bigNu || 0}
                         </div>
                         <div style={{ margin: '6px 0' }}>
-                          <IconFont className="cutomIcon" type="icon-qujian" />
+                          <IconFont className="cutomIcon cutomIcon-green" type="icon-qujian" />
                           在均衡区间内的有: {bytesOut?.betweenNu || 0}
                         </div>
                         <div>
-                          <IconFont className="cutomIcon" type="icon-diyu" />
+                          <IconFont className="cutomIcon cutomIcon-red" type="icon-diyu" />
                           低于均衡区间的有: {bytesOut?.smallNu || 0}
                         </div>
                       </div>
