@@ -1,4 +1,5 @@
-import { Col, IconFont, Row } from 'knowdesign';
+import { Col, Row } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import React from 'react';
 import { SortableContainer, SortableContainerProps, SortableHandle, SortableElement, SortableElementProps } from 'react-sortable-hoc';
 import './index.less';

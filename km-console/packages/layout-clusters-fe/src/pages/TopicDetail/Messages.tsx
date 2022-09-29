@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Button, Checkbox, Form, IconFont, Input, ProTable, Select, Tooltip, Utils } from 'knowdesign';
+import { Alert, Button, Checkbox, Form, Input, ProTable, Select, Tooltip, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import Api from '@src/api';
 import { useParams, useHistory } from 'react-router-dom';
 import { getTopicMessagesColmns } from './config';

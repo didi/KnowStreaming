@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Utils, Drawer, Button, Form, Space, Divider, AppContainer, Input, Transfer, message, IconFont, InputNumber } from 'knowdesign';
+import { Utils, Drawer, Button, Form, Space, Divider, AppContainer, Input, Transfer, message, InputNumber } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { CloseOutlined } from '@ant-design/icons';
 import api from '../../api';
 import './style/BalanceDrawer.less';
