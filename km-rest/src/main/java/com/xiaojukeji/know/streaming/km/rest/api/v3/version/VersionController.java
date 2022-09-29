@@ -11,9 +11,11 @@ import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -67,7 +69,7 @@ public class VersionController {
     @PostMapping(value = "clusters/{clusterId}/types/{type}/user-metric-config")
     @ResponseBody
     public Result<Void> updateUserMetricItem(@PathVariable Long clusterId, @PathVariable Integer type,
-                                             @RequestBody  UserMetricConfigDTO userMetricConfigDTO, HttpServletRequest request){
+                                             @Validated @RequestBody UserMetricConfigDTO userMetricConfigDTO, HttpServletRequest request) {
         return versionControlManager.updateUserMetricItem(clusterId, type, userMetricConfigDTO, HttpRequestUtil.getOperator(request));
     }
 }

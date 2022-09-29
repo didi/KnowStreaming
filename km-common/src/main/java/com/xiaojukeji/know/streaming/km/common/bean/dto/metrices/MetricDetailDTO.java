@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+
+
 /**
  * @author didi
  */
@@ -22,6 +25,7 @@ public class MetricDetailDTO extends BaseDTO {
     @ApiModelProperty("指标是否显示")
     private Boolean set;
 
+    @NotNull(message = "MetricDetailDTO的rank字段应不为空")
     @ApiModelProperty("指标优先级")
     private Integer rank;
 
