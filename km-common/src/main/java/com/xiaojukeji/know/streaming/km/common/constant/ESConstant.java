@@ -34,6 +34,8 @@ public class ESConstant {
 
     public static final String TOTAL            = "total";
 
+    public static final Integer DEFAULT_RETRY_TIME = 3;
+
     private ESConstant() {
     }
 }

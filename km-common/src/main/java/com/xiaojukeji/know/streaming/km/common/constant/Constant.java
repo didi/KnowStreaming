@@ -23,8 +23,8 @@ public class Constant {
     public static final Integer YES             = 1;
     public static final Integer NO              = 0;
 
-    public static final Integer ALIVE           = 1;
-    public static final Integer DOWN            = 0;
+    public static final Integer ALIVE                                   = 1;
+    public static final Integer DOWN                                    = 0;
 
     public static final Integer ONE_HUNDRED    = 100;
 
@@ -33,6 +33,7 @@ public class Constant {
     public static final Long B_TO_MB    = 1024L * 1024L;
 
     public static final Integer DEFAULT_SESSION_TIMEOUT_UNIT_MS = 15000;
+    public static final Integer DEFAULT_REQUEST_TIMEOUT_UNIT_MS = 5000;
 
     public static final Float MIN_HEALTH_SCORE = 10f;
 
@@ -66,4 +67,5 @@ public class Constant {
 
     public static final Integer DEFAULT_RETRY_TIME = 3;
 
+    public static final Integer ZK_ALIVE_BUT_4_LETTER_FORBIDDEN         = 11;
 }
