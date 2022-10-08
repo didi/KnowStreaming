@@ -22,6 +22,12 @@ public class JmxAttribute {
 
     public static final String PERCENTILE_99        = "99thPercentile";
 
+    public static final String MAX                  = "Max";
+
+    public static final String MEAN                 = "Mean";
+
+    public static final String MIN                  = "Min";
+
     public static final String VALUE                = "Value";
 
     public static final String CONNECTION_COUNT     = "connection-count";

@@ -40,8 +40,7 @@ public class BaseMetricESDAO extends BaseESDAO {
     /**
      * 不同维度 kafka 监控数据
      */
-    private static Map<String, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps
-            .newConcurrentMap();
+    private static Map<String, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps.newConcurrentMap();
 
     /**
      * 检查 es 索引是否存在，不存在则创建索引

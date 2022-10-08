@@ -9,7 +9,9 @@ public enum VersionItemTypeEnum {
     METRIC_GROUP(102, "group_metric"),
     METRIC_BROKER(103, "broker_metric"),
     METRIC_PARTITION(104, "partition_metric"),
-    METRIC_REPLICATION (105, "replication_metric"),
+    METRIC_REPLICATION(105, "replication_metric"),
+
+    METRIC_ZOOKEEPER(110, "zookeeper_metric"),
 
     /**
      * 服务端查询
