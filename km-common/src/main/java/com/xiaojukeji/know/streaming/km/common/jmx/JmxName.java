@@ -63,6 +63,12 @@ public class JmxName {
     /*********************************************************** cluster ***********************************************************/
     public static final String JMX_CLUSTER_PARTITION_UNDER_REPLICATED   = "kafka.cluster:type=Partition,name=UnderReplicated";
 
+    /*********************************************************** zookeeper ***********************************************************/
+
+    public static final String JMX_ZK_REQUEST_LATENCY_MS                = "kafka.server:type=ZooKeeperClientMetrics,name=ZooKeeperRequestLatencyMs";
+    public static final String JMX_ZK_SYNC_CONNECTS_PER_SEC             = "kafka.server:type=SessionExpireListener,name=ZooKeeperSyncConnectsPerSec";
+    public static final String JMX_ZK_DISCONNECTORS_PER_SEC             = "kafka.server:type=SessionExpireListener,name=ZooKeeperDisconnectsPerSec";
+
     private JmxName() {
     }
 }

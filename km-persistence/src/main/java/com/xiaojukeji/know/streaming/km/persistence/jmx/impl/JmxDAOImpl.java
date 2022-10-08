@@ -19,28 +19,55 @@ public class JmxDAOImpl implements JmxDAO {
 
     @Override
     public Object getJmxValue(String jmxHost, Integer jmxPort, JmxConfig jmxConfig, ObjectName objectName, String attribute) {
-        return this.getJmxValue(null, null, jmxHost, jmxPort, jmxConfig, objectName, attribute);
+        return this.getJmxValue(null, jmxHost, jmxPort, jmxConfig, objectName, attribute);
     }
 
     @Override
-    public Object getJmxValue(Long clusterPhyId, Integer brokerId, String jmxHost, Integer jmxPort, JmxConfig jmxConfig, ObjectName objectName, String attribute) {
+    public Object getJmxValue(Long clusterPhyId, String jmxHost, Integer jmxPort, JmxConfig jmxConfig, ObjectName objectName, String attribute) {
         JmxConnectorWrap jmxConnectorWrap = null;
         try {
-            jmxConnectorWrap = new JmxConnectorWrap(clusterPhyId, brokerId, null, jmxHost, jmxPort, jmxConfig);
+            jmxConnectorWrap = new JmxConnectorWrap(clusterPhyId, null, null, jmxHost, jmxPort, jmxConfig);
             if (!jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
-                log.error("method=getJmxValue||clusterPhyId={}||brokerId={}||jmxHost={}||jmxPort={}||jmxConfig={}||errMgs=create jmx client failed",
-                        clusterPhyId, brokerId, jmxHost, jmxPort, jmxConfig);
+                log.error(
+                        "method=getJmxValue||clusterPhyId={}||jmxHost={}||jmxPort={}||jmxConfig={}||errMgs=create jmx client failed",
+                        clusterPhyId, jmxHost, jmxPort, jmxConfig
+                );
                 return null;
             }
 
             return jmxConnectorWrap.getAttribute(objectName, attribute);
         } catch (Exception e) {
-            log.error("method=getJmxValue||clusterPhyId={}||brokerId={}||jmxHost={}||jmxPort={}||jmxConfig={}||objectName={}||attribute={}||msg=get attribute failed||errMsg={}",
-                    clusterPhyId, brokerId, jmxHost, jmxPort, jmxConfig, objectName, attribute, e);
+            log.error(
+                    "method=getJmxValue||clusterPhyId={}||jmxHost={}||jmxPort={}||jmxConfig={}||objectName={}||attribute={}||msg=get attribute failed||errMsg=exception!",
+                    clusterPhyId, jmxHost, jmxPort, jmxConfig, objectName, attribute, e
+            );
         } finally {
             if (jmxConnectorWrap != null) {
                 jmxConnectorWrap.close();
             }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Long getServerStartTime(Long clusterPhyId, String jmxHost, Integer jmxPort, JmxConfig jmxConfig) {
+        try {
+            Object object = this.getJmxValue(
+                    clusterPhyId,
+                    jmxHost,
+                    jmxPort,
+                    jmxConfig,
+                    new ObjectName("java.lang:type=Runtime"),
+                    "StartTime"
+            );
+
+            return object == null? null: (Long) object;
+        } catch (Exception e) {
+            log.error(
+                    "class=JmxDAOImpl||method=getServerStartTime||clusterPhyId={}||jmxHost={}||jmxPort={}||jmxConfig={}||errMsg=exception!",
+                    clusterPhyId, jmxHost, jmxPort, jmxConfig, e
+            );
         }
 
         return null;

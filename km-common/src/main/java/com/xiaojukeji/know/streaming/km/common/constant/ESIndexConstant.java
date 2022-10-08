@@ -644,4 +644,89 @@ public class ESIndexConstant {
             "    \"aliases\" : { }\n" +
             "  }";
 
+    public final static String ZOOKEEPER_INDEX = "ks_kafka_zookeeper_metric";
+    public final static String ZOOKEEPER_TEMPLATE = "{\n" +
+            "    \"order\" : 10,\n" +
+            "    \"index_patterns\" : [\n" +
+            "      \"ks_kafka_zookeeper_metric*\"\n" +
+            "    ],\n" +
+            "    \"settings\" : {\n" +
+            "      \"index\" : {\n" +
+            "        \"number_of_shards\" : \"10\"\n" +
+            "      }\n" +
+            "    },\n" +
+            "    \"mappings\" : {\n" +
+            "      \"properties\" : {\n" +
+            "        \"routingValue\" : {\n" +
+            "          \"type\" : \"text\",\n" +
+            "          \"fields\" : {\n" +
+            "            \"keyword\" : {\n" +
+            "              \"ignore_above\" : 256,\n" +
+            "              \"type\" : \"keyword\"\n" +
+            "            }\n" +
+            "          }\n" +
+            "        },\n" +
+            "        \"clusterPhyId\" : {\n" +
+            "          \"type\" : \"long\"\n" +
+            "        },\n" +
+            "        \"metrics\" : {\n" +
+            "          \"properties\" : {\n" +
+            "            \"AvgRequestLatency\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"MinRequestLatency\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"MaxRequestLatency\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"OutstandingRequests\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"NodeCount\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"WatchCount\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"NumAliveConnections\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"PacketsReceived\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"PacketsSent\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"EphemeralsCount\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"ApproximateDataSize\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"OpenFileDescriptorCount\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            },\n" +
+            "            \"MaxFileDescriptorCount\" : {\n" +
+            "              \"type\" : \"double\"\n" +
+            "            }\n" +
+            "          }\n" +
+            "        },\n" +
+            "        \"key\" : {\n" +
+            "          \"type\" : \"text\",\n" +
+            "          \"fields\" : {\n" +
+            "            \"keyword\" : {\n" +
+            "              \"ignore_above\" : 256,\n" +
+            "              \"type\" : \"keyword\"\n" +
+            "            }\n" +
+            "          }\n" +
+            "        },\n" +
+            "        \"timestamp\" : {\n" +
+            "          \"format\" : \"yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis\",\n" +
+            "          \"type\" : \"date\"\n" +
+            "        }\n" +
+            "      }\n" +
+            "    },\n" +
+            "    \"aliases\" : { }\n" +
+            "  }";
 }
