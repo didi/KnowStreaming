@@ -137,60 +137,6 @@ public class HealthScoreServiceImpl implements HealthScoreService {
     }
 
     @Override
-    public ClusterMetrics calClusterTopicsHealthScore(Long clusterPhyId) {
-        List<HealthScoreResult> healthScoreResultList = this.getDimensionHealthScoreResult(clusterPhyId, HealthCheckDimensionEnum.TOPIC);
-
-        ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
-        if (ValidateUtils.isEmptyList(healthScoreResultList)) {
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_SCORE_TOPICS, Constant.MIN_HEALTH_SCORE);
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_TOPICS, 0.0f);
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_TOPICS, 0.0f);
-        } else {
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_SCORE_TOPICS, Math.max(this.getDimensionHealthScore(healthScoreResultList), Constant.MIN_HEALTH_SCORE));
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_TOPICS, getHealthCheckPassed(healthScoreResultList));
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_TOPICS, Float.valueOf(healthScoreResultList.size()));
-        }
-
-        return metrics;
-    }
-
-    @Override
-    public ClusterMetrics calClusterBrokersHealthScore(Long clusterPhyId) {
-        List<HealthScoreResult> healthScoreResultList = this.getDimensionHealthScoreResult(clusterPhyId, HealthCheckDimensionEnum.BROKER);
-
-        ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
-        if (ValidateUtils.isEmptyList(healthScoreResultList)) {
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_SCORE_BROKERS, Constant.MIN_HEALTH_SCORE);
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_BROKERS, 0.0f);
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_BROKERS, 0.0f);
-        } else {
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_SCORE_BROKERS, Math.max(this.getDimensionHealthScore(healthScoreResultList), Constant.MIN_HEALTH_SCORE));
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_BROKERS, getHealthCheckPassed(healthScoreResultList));
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_BROKERS, Float.valueOf(healthScoreResultList.size()));
-        }
-
-        return metrics;
-    }
-
-    @Override
-    public ClusterMetrics calClusterGroupsHealthScore(Long clusterPhyId) {
-        List<HealthScoreResult> healthScoreResultList = this.getDimensionHealthScoreResult(clusterPhyId, HealthCheckDimensionEnum.GROUP);
-
-        ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
-        if (ValidateUtils.isEmptyList(healthScoreResultList)) {
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_SCORE_GROUPS, Constant.MIN_HEALTH_SCORE);
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_GROUPS, 0.0f);
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_GROUPS, 0.0f);
-        } else {
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_SCORE_GROUPS, Math.max(this.getDimensionHealthScore(healthScoreResultList), Constant.MIN_HEALTH_SCORE));
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_GROUPS, this.getHealthCheckPassed(healthScoreResultList));
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_GROUPS, Float.valueOf(healthScoreResultList.size()));
-        }
-
-        return metrics;
-    }
-
-    @Override
     public TopicMetrics calTopicHealthScore(Long clusterPhyId, String topicName) {
         List<HealthScoreResult> healthScoreResultList = this.getResHealthScoreResult(clusterPhyId, HealthCheckDimensionEnum.TOPIC.getDimension(), topicName);
 

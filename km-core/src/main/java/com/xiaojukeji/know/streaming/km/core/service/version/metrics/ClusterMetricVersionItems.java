@@ -20,21 +20,34 @@ import static com.xiaojukeji.know.streaming.km.core.service.cluster.impl.Cluster
 @Component
 public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
 
+    /**
+     * 健康分
+     */
     public static final String CLUSTER_METRIC_HEALTH_SCORE                          = "HealthScore";
+    public static final String CLUSTER_METRIC_HEALTH_SCORE_TOPICS                   = "HealthScore_Topics";
+    public static final String CLUSTER_METRIC_HEALTH_SCORE_BROKERS                  = "HealthScore_Brokers";
+    public static final String CLUSTER_METRIC_HEALTH_SCORE_GROUPS                   = "HealthScore_Groups";
+    public static final String CLUSTER_METRIC_HEALTH_SCORE_CLUSTER                  = "HealthScore_Cluster";
+
+    /**
+     * 健康巡检
+     */
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED                   = "HealthCheckPassed";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL                    = "HealthCheckTotal";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_TOPICS                   = "HealthScore_Topics";
+
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_TOPICS            = "HealthCheckPassed_Topics";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_TOPICS             = "HealthCheckTotal_Topics";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_BROKERS                  = "HealthScore_Brokers";
+
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_BROKERS           = "HealthCheckPassed_Brokers";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_BROKERS            = "HealthCheckTotal_Brokers";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_GROUPS                   = "HealthScore_Groups";
+
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_GROUPS            = "HealthCheckPassed_Groups";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_GROUPS             = "HealthCheckTotal_Groups";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_CLUSTER                  = "HealthScore_Cluster";
+
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_CLUSTER           = "HealthCheckPassed_Cluster";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CLUSTER            = "HealthCheckTotal_Cluster";
+
+
 
     public static final String CLUSTER_METRIC_TOTAL_REQ_QUEUE_SIZE                  = "TotalRequestQueueSize";
     public static final String CLUSTER_METRIC_TOTAL_RES_QUEUE_SIZE                  = "TotalResponseQueueSize";
