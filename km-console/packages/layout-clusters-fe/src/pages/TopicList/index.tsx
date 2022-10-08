@@ -1,7 +1,8 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { AppContainer, IconFont, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button } from 'knowdesign';
+import { AppContainer, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button, Divider } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import Create from './Create';
 import './index.less';
 import Api from '@src/api/index';
@@ -16,6 +17,7 @@ import SmallChart from '@src/components/SmallChart';
 import ReplicaMove from '@src/components/TopicJob/ReplicaMove';
 import { formatAssignSize } from '../Jobs/config';
 import { DownOutlined } from '@ant-design/icons';
+import { tableHeaderPrefix } from '@src/constants/common';
 
 const { Option } = Select;
 
@@ -66,6 +68,7 @@ const AutoPage = (props: any) => {
     //   params.sortField = sortObj.sortField;
     //   params.sortType = sortObj.sortType || 'desc';
     // }
+    setTopicListLoading(true);
     Utils.post(Api.getTopicsList(Number(routeParams.clusterId)), params)
       .then((data: any) => {
         setTopicListLoading(false);
@@ -79,7 +82,6 @@ const AutoPage = (props: any) => {
       });
   };
   useEffect(() => {
-    setTopicListLoading(true);
     getTopicsList();
   }, [sortObj, showInternalTopics, searchKeywords, pageIndex, pageSize]);
 
@@ -89,11 +91,11 @@ const AutoPage = (props: any) => {
     const orgVal = record?.latestMetrics?.metrics?.[metricName];
     if (orgVal !== undefined) {
       if (metricName === 'HealthScore') {
-        return Math.round(orgVal);
+        return Math.round(orgVal).toLocaleString();
       } else if (metricName === 'LogSize') {
-        return Number(Utils.formatAssignSize(orgVal, 'MB'));
+        return Number(Utils.formatAssignSize(orgVal, 'MB')).toLocaleString();
       } else {
-        return Number(Utils.formatAssignSize(orgVal, 'KB'));
+        return Number(Utils.formatAssignSize(orgVal, 'KB')).toLocaleString();
         // return Utils.formatAssignSize(orgVal, 'KB');
       }
     }
@@ -285,26 +287,17 @@ const AutoPage = (props: any) => {
         <TopicHealthCheck></TopicHealthCheck>
       </div>
       <div className="clustom-table-content">
-        <div className="operation-bar">
-          <div className="left">
+        <div className={`${tableHeaderPrefix}`}>
+          <div className={`${tableHeaderPrefix}-left`}>
             {/* 批量扩缩副本 */}
             <ReplicaChange drawerVisible={changeVisible} jobId={''} topics={selectedRowKeys} onClose={onclose}></ReplicaChange>
             {/* 批量迁移 */}
             <ReplicaMove drawerVisible={moveVisible} jobId={''} topics={selectedRowKeys} onClose={onclose}></ReplicaMove>
-            {/* <Select style={{ width: 140 }} placeholder="批量操作" value={selectValue} disabled={selectedRowKeys.length <= 0}>
-              <Option value="expandAndReduce">
-                <div onClick={() => setChangeVisible(true)}>批量扩缩副本</div>
-              </Option>
-              <Option value="transfer">
-                <div onClick={() => setMoveVisible(true)}>批量迁移</div>
-              </Option>
-            </Select> */}
-            {/* <Dropdown overlay={menu} disabled={selectedRowKeys.length <= 0} trigger={['click']}>
-              <Button icon={<DownOutlined />} type="primary" ghost disabled={selectedRowKeys.length <= 0}>
-                批量操作
-              </Button>
-            </Dropdown> */}
-            {/* <div className="divider"></div> */}
+
+            <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => getTopicsList()}>
+              <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+            </div>
+            <Divider type="vertical" className={`${tableHeaderPrefix}-divider`} />
             <div className="internal-switch">
               <Switch
                 size="small"
@@ -316,7 +309,7 @@ const AutoPage = (props: any) => {
               <span>展示系统Topic</span>
             </div>
           </div>
-          <div className="right">
+          <div className={`${tableHeaderPrefix}-right`}>
             <Input
               className="search-input"
               suffix={

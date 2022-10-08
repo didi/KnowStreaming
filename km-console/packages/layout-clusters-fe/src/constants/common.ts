@@ -37,9 +37,6 @@ export const SMALL_DRAWER_WIDTH = 480;
 export const MIDDLE_DRAWER_WIDTH = 728;
 export const LARGE_DRAWER_WIDTH = 1080;
 
-// 小间隔（1 分钟）图表点的最大请求时间范围，单位: ms
-export const MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL = 6 * 60 * 60 * 1000;
-
 export const primaryColor = '#556EE6';
 
 export const numberToFixed = (value: number, num = 2) => {
@@ -261,3 +258,6 @@ export const timeFormater = function formatDuring(mss: number) {
     .map((o: any) => `${o.v}${o.unit}`)
     .join();
 };
+
+// 列表页Header布局前缀
+export const tableHeaderPrefix = 'table-header-layout';

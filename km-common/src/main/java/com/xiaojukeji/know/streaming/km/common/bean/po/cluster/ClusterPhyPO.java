@@ -42,6 +42,11 @@ public class ClusterPhyPO extends BasePO {
     private String jmxProperties;
 
     /**
+     * zk配置
+     */
+    private String zkProperties;
+
+    /**
      * 认证类型
      * @see com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterAuthTypeEnum
      */

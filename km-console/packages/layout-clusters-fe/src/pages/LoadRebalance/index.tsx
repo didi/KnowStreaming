@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Select, Form, Utils, AppContainer, Input, Button, ProTable, Badge, Tag, SearchInput } from 'knowdesign';
+import { Select, Form, Utils, AppContainer, Input, Button, ProTable, Badge, Tag, SearchInput, Divider } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import BalanceDrawer from './BalanceDrawer';
 import HistoryDrawer from './HistoryDrawer';
 import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
@@ -9,6 +10,7 @@ import './index.less';
 import LoadRebalanceCardBar from '@src/components/CardBar/LoadRebalanceCardBar';
 import { BalanceFilter } from './BalanceFilter';
 import { ClustersPermissionMap } from '../CommonConfig';
+import { tableHeaderPrefix } from '@src/constants/common';
 
 const Balance_Status_OPTIONS = [
   {
@@ -132,7 +134,7 @@ const LoadBalance: React.FC = (props: any) => {
       key: 'disk_spec',
       width: '150px',
       render: (text: any, row: any) => {
-        return text !== null ? `${text}GB` : '-';
+        return text !== null ? `${text.toLocaleString()}GB` : '-';
       },
     },
     {
@@ -144,7 +146,10 @@ const LoadBalance: React.FC = (props: any) => {
         return text !== null ? (
           <span>
             <Badge status={row?.disk_status === 0 ? 'success' : 'error'} />
-            {`${getSizeAndUnit(text, 'B').valueWithUnit} (${((row.disk_avg * 100) / Utils.transGBToB(row.disk_spec)).toFixed(2)}%)`}
+            {`${getSizeAndUnit(text, 'B').valueWithUnit.toLocaleString()} (${(
+              (row.disk_avg * 100) /
+              Utils.transGBToB(row.disk_spec)
+            ).toFixed(2)}%)`}
           </span>
         ) : (
           '-'
@@ -157,7 +162,7 @@ const LoadBalance: React.FC = (props: any) => {
       key: 'bytesIn_spec',
       width: '150px',
       render: (text: any, row: any) => {
-        return text !== null ? `${text}MB/s` : '-';
+        return text !== null ? `${text.toLocaleString()}MB/s` : '-';
       },
     },
     {
@@ -169,7 +174,10 @@ const LoadBalance: React.FC = (props: any) => {
         return text !== null ? (
           <span>
             <Badge status={row?.bytesIn_status === 0 ? 'success' : 'error'} />
-            {`${getSizeAndUnit(text, 'B/s').valueWithUnit} (${((row.bytesIn_avg * 100) / (row.bytesIn_spec * 1024 * 1024)).toFixed(2)}%)`}
+            {`${getSizeAndUnit(text, 'B/s').valueWithUnit.toLocaleString()} (${(
+              (row.bytesIn_avg * 100) /
+              (row.bytesIn_spec * 1024 * 1024)
+            ).toFixed(2)}%)`}
           </span>
         ) : (
           '-'
@@ -182,7 +190,7 @@ const LoadBalance: React.FC = (props: any) => {
       key: 'bytesOut_spec',
       width: '150px',
       render: (text: any, row: any) => {
-        return text !== null ? `${text}MB/s` : '-';
+        return text !== null ? `${text.toLocaleString()}MB/s` : '-';
       },
     },
     {
@@ -195,7 +203,10 @@ const LoadBalance: React.FC = (props: any) => {
         return text !== null ? (
           <span>
             <Badge status={row?.bytesOut_status === 0 ? 'success' : 'error'} />
-            {`${getSizeAndUnit(text, 'B/s').valueWithUnit} (${((row.bytesOut_avg * 100) / (row.bytesOut_spec * 1024 * 1024)).toFixed(2)}%)`}
+            {`${getSizeAndUnit(text, 'B/s').valueWithUnit.toLocaleString()} (${(
+              (row.bytesOut_avg * 100) /
+              (row.bytesOut_spec * 1024 * 1024)
+            ).toFixed(2)}%)`}
           </span>
         ) : (
           '-'
@@ -330,7 +341,7 @@ const LoadBalance: React.FC = (props: any) => {
           breadcrumbs={[
             { label: '多集群管理', aHref: '/' },
             { label: global?.clusterInfo?.name, aHref: `/cluster/${global?.clusterInfo?.id}` },
-            { label: 'Load Rebalance', aHref: `` },
+            { label: 'Rebalance', aHref: `` },
           ]}
         />
       </div>
@@ -339,7 +350,17 @@ const LoadBalance: React.FC = (props: any) => {
       </div>
       <div className="load-rebalance-container">
         <div className="balance-main clustom-table-content">
-          <div className="header-con">
+          <div className={tableHeaderPrefix}>
+            <div className={`${tableHeaderPrefix}-left`}>
+              <div
+                className={`${tableHeaderPrefix}-left-refresh`}
+                onClick={() => getList({ searchKeywords: searchValue, stateParam: balanceList })}
+              >
+                <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+              </div>
+              <Divider type="vertical" className={`${tableHeaderPrefix}-divider`} />
+              <BalanceFilter title="负载均衡列表筛选" data={[]} getNorms={getNorms} filterList={filterList} />
+            </div>
             {/* <Form form={form} layout="inline" onFinish={resetList}>
               <Form.Item name="status">
                 <Select className="grid-select" placeholder="请选择状态" style={{ width: '180px' }} options={Balance_Status_OPTIONS} />
@@ -354,8 +375,7 @@ const LoadBalance: React.FC = (props: any) => {
                 </Button>
               </Form.Item>
             </Form> */}
-            <BalanceFilter title="负载均衡列表筛选" data={[]} getNorms={getNorms} filterList={filterList} />
-            <div className="float-r">
+            <div className={`${tableHeaderPrefix}-right`}>
               <SearchInput
                 onSearch={hostSearch}
                 attrs={{

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { ProTable, Drawer, Utils, AppContainer } from 'knowdesign';
+import { ProTable, Drawer, Utils, AppContainer, SearchInput } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import API from '../../api';
 import { getBrokerListColumns, defaultPagination } from './config';
-import { dealTableRequestParams } from '../../constants/common';
+import { tableHeaderPrefix } from '@src/constants/common';
 import BrokerDetail from '../BrokerDetail';
 import CardBar from '@src/components/CardBar';
 import BrokerHealthCheck from '@src/components/CardBar/BrokerHealthCheck';
@@ -33,7 +34,6 @@ const BrokerList: React.FC = (props: any) => {
     if (urlParams?.clusterId === undefined) return;
     // filters = filters || filteredInfo;
     setLoading(true);
-    // const params = dealTableRequestParams({ searchKeywords, pageNo, pageSize });
     const params = {
       searchKeywords: searchKeywords.slice(0, 128),
       pageNo,
@@ -99,29 +99,36 @@ const BrokerList: React.FC = (props: any) => {
         <BrokerHealthCheck />
       </div>
       <div className="clustom-table-content">
+        <div className={tableHeaderPrefix}>
+          <div className={`${tableHeaderPrefix}-left`}>
+            <div
+              className={`${tableHeaderPrefix}-left-refresh`}
+              onClick={() => genData({ pageNo: pagination.current, pageSize: pagination.pageSize })}
+            >
+              <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+            </div>
+          </div>
+          <div className={`${tableHeaderPrefix}-right`}>
+            <SearchInput
+              onSearch={setSearchKeywords}
+              attrs={{
+                placeholder: '请输入Broker Host',
+                style: { width: '248px', borderRiadus: '8px' },
+                maxLength: 128,
+              }}
+            />
+          </div>
+        </div>
         <ProTable
           key="brokerTable"
           showQueryForm={false}
           tableProps={{
-            showHeader: true,
+            showHeader: false,
             rowKey: 'broker_list',
             loading: loading,
             columns: getBrokerListColumns(),
             dataSource: data,
             paginationProps: { ...pagination },
-            tableHeaderSearchInput: {
-              // 搜索配置
-              submit: getSearchKeywords,
-              searchInputType: 'search',
-              searchAttr: {
-                placeholder: '请输入Broker Host',
-                maxLength: 128,
-                style: {
-                  width: '248px',
-                  borderRiadus: '8px',
-                },
-              },
-            },
             attrs: {
               onChange: onTableChange,
               scroll: { x: 'max-content', y: 'calc(100vh - 400px)' },

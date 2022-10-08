@@ -13,8 +13,8 @@ import com.xiaojukeji.know.streaming.km.common.enums.valid.ValidateKafkaAddressE
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterValidateService;
 import com.xiaojukeji.know.streaming.km.persistence.jmx.JmxDAO;
-import com.xiaojukeji.know.streaming.km.persistence.zk.KafkaZKDAO;
-import com.xiaojukeji.know.streaming.km.persistence.zk.impl.KafkaZKDAOImpl;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.impl.KafkaZKDAOImpl;
 import kafka.server.KafkaConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;

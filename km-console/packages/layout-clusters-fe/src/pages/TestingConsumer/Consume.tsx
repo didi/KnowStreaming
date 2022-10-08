@@ -1,6 +1,7 @@
 /* eslint-disable no-case-declarations */
 import { DownloadOutlined } from '@ant-design/icons';
-import { AppContainer, Divider, IconFont, message, Tooltip, Utils } from 'knowdesign';
+import { AppContainer, Divider, message, Tooltip, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import * as React from 'react';
 import moment from 'moment';
 import { timeFormat } from '../../constants/common';

@@ -1,29 +1,26 @@
-import { Col, Row, SingleChart, IconFont, Utils, Modal, Spin, Empty, AppContainer, Tooltip } from 'knowdesign';
+import { Col, Row, SingleChart, Utils, Modal, Spin, Empty, AppContainer, Tooltip } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import React, { useEffect, useRef, useState } from 'react';
+import { arrayMoveImmutable } from 'array-move';
 import api from '@src/api';
-import { getChartConfig } from './config';
-import './index.less';
 import { useParams } from 'react-router-dom';
 import {
   MetricDefaultChartDataType,
   MetricChartDataType,
   formatChartData,
   supplementaryPoints,
-} from '@src/components/DashboardDragChart/config';
+  resolveMetricsRank,
+  MetricInfo,
+} from '@src/constants/chartConfig';
 import { MetricType } from '@src/api';
 import { getDataNumberUnit, getUnit } from '@src/constants/chartConfig';
 import SingleChartHeader, { KsHeaderOptions } from '@src/components/SingleChartHeader';
-import { MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL } from '@src/constants/common';
 import RenderEmpty from '@src/components/RenderEmpty';
+import DragGroup from '@src/components/DragGroup';
+import { getChartConfig } from './config';
+import './index.less';
 
 type ChartFilterOptions = Omit<KsHeaderOptions, 'gridNum'>;
-interface MetricInfo {
-  type: number;
-  name: string;
-  desc: string;
-  set: boolean;
-  support: boolean;
-}
 
 interface MessagesInDefaultData {
   aggType: string | null;
@@ -70,8 +67,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
   const [curHeaderOptions, setCurHeaderOptions] = useState<ChartFilterOptions>();
   const [defaultChartLoading, setDefaultChartLoading] = useState<boolean>(true);
   const [chartLoading, setChartLoading] = useState<boolean>(true);
-  const [showChartDetailModal, setShowChartDetailModal] = useState<boolean>(false);
-  const [chartDetail, setChartDetail] = useState<any>();
+  const metricRankList = useRef<string[]>([]);
   const curFetchingTimestamp = useRef({
     messagesIn: 0,
     other: 0,
@@ -90,36 +86,53 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
     });
   };
 
+  // 更新 rank
+  const updateRank = (metricList: MetricInfo[]) => {
+    const { list, listInfo, shouldUpdate } = resolveMetricsRank(metricList);
+    metricRankList.current = list;
+    if (shouldUpdate) {
+      updateMetricList(listInfo);
+    }
+  };
+
   // 获取指标列表
   const getMetricList = () => {
     Utils.request(api.getDashboardMetricList(clusterId, MetricType.Cluster)).then((res: MetricInfo[] | null) => {
       if (!res) return;
-      const showMetrics = res.filter((metric) => metric.support);
-      const selectedMetrics = showMetrics.filter((metric) => metric.set).map((metric) => metric.name);
+      const supportMetrics = res.filter((metric) => metric.support);
+      const selectedMetrics = supportMetrics.filter((metric) => metric.set).map((metric) => metric.name);
       !selectedMetrics.includes(DEFAULT_METRIC) && selectedMetrics.push(DEFAULT_METRIC);
-      setMetricList(showMetrics);
+      updateRank([...supportMetrics]);
+      setMetricList(supportMetrics);
       setSelectedMetricNames(selectedMetrics);
     });
   };
 
   // 更新指标
-  const updateMetricList = (metricsSet: { [name: string]: boolean }) => {
+  const updateMetricList = (metricDetailDTOList: { metric: string; rank: number; set: boolean }[]) => {
     return Utils.request(api.getDashboardMetricList(clusterId, MetricType.Cluster), {
       method: 'POST',
       data: {
-        metricsSet,
+        metricDetailDTOList,
       },
     });
   };
 
   // 指标选中项更新回调
   const indicatorChangeCallback = (newMetricNames: (string | number)[]) => {
-    const updateMetrics: { [name: string]: boolean } = {};
+    const updateMetrics: { metric: string; set: boolean; rank: number }[] = [];
     // 需要选中的指标
-    newMetricNames.forEach((name) => !selectedMetricNames.includes(name) && (updateMetrics[name] = true));
+    newMetricNames.forEach(
+      (name) =>
+        !selectedMetricNames.includes(name) &&
+        updateMetrics.push({ metric: name as string, set: true, rank: metricList.find(({ name: metric }) => metric === name)?.rank })
+    );
     // 取消选中的指标
-    selectedMetricNames.forEach((name) => !newMetricNames.includes(name) && (updateMetrics[name] = false));
-
+    selectedMetricNames.forEach(
+      (name) =>
+        !newMetricNames.includes(name) &&
+        updateMetrics.push({ metric: name as string, set: false, rank: metricList.find(({ name: metric }) => metric === name)?.rank })
+    );
     const requestPromise = Object.keys(updateMetrics).length ? updateMetricList(updateMetrics) : Promise.resolve();
     requestPromise.then(
       () => getMetricList(),
@@ -155,15 +168,16 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           return;
         }
 
-        const supplementaryInterval = (endTime - startTime > MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL ? 10 : 1) * 60 * 1000;
         const formattedMetricData: MetricChartDataType[] = formatChartData(
           res,
           global.getMetricDefine || {},
           MetricType.Cluster,
-          curHeaderOptions.rangeTime,
-          supplementaryInterval
+          curHeaderOptions.rangeTime
         );
         formattedMetricData.forEach((data) => (data.metricLines[0].name = data.metricName));
+        // 指标排序
+        formattedMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
+
         setMetricDataList(formattedMetricData);
         setChartLoading(false);
       },
@@ -241,9 +255,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
             ...info,
             value: 0,
           }));
-          const supplementaryInterval =
-            (curHeaderOptions.rangeTime[1] - curHeaderOptions.rangeTime[0] > MAX_TIME_RANGE_WITH_SMALL_POINT_INTERVAL ? 10 : 1) * 60 * 1000;
-          supplementaryPoints([line], curHeaderOptions.rangeTime, supplementaryInterval, (point) => {
+          supplementaryPoints([line], curHeaderOptions.rangeTime, (point) => {
             point.push(extraMetrics as any);
             return point;
           });
@@ -260,6 +272,22 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
   const observeDashboardWidthChange = () => {
     const targetNode = document.getElementsByClassName('dcd-two-columns-layout-sider-footer')[0];
     targetNode && targetNode.addEventListener('click', () => busInstance.emit('chartResize'));
+  };
+
+  // 拖拽开始回调，触发图表的 onDrag 事件（ 设置为 true ），禁止同步展示图表的 tooltip
+  const dragStart = () => {
+    busInstance.emit('onDrag', true);
+  };
+
+  // 拖拽结束回调，更新图表顺序，并触发图表的 onDrag 事件（ 设置为 false ），允许同步展示图表的 tooltip
+  const dragEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+    busInstance.emit('onDrag', false);
+    const originFrom = metricRankList.current.indexOf(metricDataList[oldIndex].metricName);
+    const originTarget = metricRankList.current.indexOf(metricDataList[newIndex].metricName);
+    const newList = arrayMoveImmutable(metricRankList.current, originFrom, originTarget);
+    metricRankList.current = newList;
+    updateMetricList(newList.map((metric, rank) => ({ metric, rank, set: metricList.find(({ name }) => metric === name)?.set || false })));
+    setMetricDataList(arrayMoveImmutable(metricDataList, oldIndex, newIndex));
   };
 
   useEffect(() => {
@@ -279,7 +307,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
   }, []);
 
   return (
-    <div className="cluster-detail-container">
+    <div className="chart-panel cluster-detail-container">
       <SingleChartHeader
         onChange={ksHeaderChange}
         hideNodeScope={true}
@@ -306,7 +334,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           <Spin spinning={defaultChartLoading}>
             {messagesInMetricData.data && (
               <>
-                <div className="chart-box-title">
+                <div className="cluster-detail-chart-box-title">
                   <Tooltip
                     placement="topLeft"
                     title={() => {
@@ -354,14 +382,25 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           <div className="multiple-chart-container">
             <div className={!metricDataList.length ? 'multiple-chart-container-loading' : ''}>
               <Spin spinning={chartLoading}>
-                <Row gutter={[16, 16]}>
-                  {metricDataList.length ? (
-                    metricDataList.map((data: any, i: number) => {
-                      const { metricName, metricUnit, metricLines } = data;
-                      return (
-                        <Col key={metricName} span={12}>
-                          <div className="chart-box">
-                            <div className="chart-box-title">
+                {metricDataList.length ? (
+                  <div className="no-group-con">
+                    <DragGroup
+                      sortableContainerProps={{
+                        onSortStart: dragStart,
+                        onSortEnd: dragEnd,
+                        axis: 'xy',
+                        useDragHandle: true,
+                      }}
+                      gridProps={{
+                        span: 12,
+                        gutter: [16, 16],
+                      }}
+                    >
+                      {metricDataList.map((data: any, i: number) => {
+                        const { metricName, metricUnit, metricLines } = data;
+                        return (
+                          <div key={metricName} className="cluster-detail-chart-box">
+                            <div className="cluster-detail-chart-box-title">
                               <Tooltip
                                 placement="topLeft"
                                 title={() => {
@@ -378,15 +417,6 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
                                   <span className="unit">（{metricUnit}）</span>
                                 </span>
                               </Tooltip>
-                            </div>
-                            <div
-                              className="expand-icon-box"
-                              onClick={() => {
-                                setChartDetail(data);
-                                setShowChartDetailModal(true);
-                              }}
-                            >
-                              <IconFont type="icon-chuangkoufangda" className="expand-icon" />
                             </div>
                             <SingleChart
                               chartKey={metricName}
@@ -405,15 +435,15 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
                               })}
                             />
                           </div>
-                        </Col>
-                      );
-                    })
-                  ) : chartLoading ? (
-                    <></>
-                  ) : (
-                    <RenderEmpty message="请先选择指标或刷新" />
-                  )}
-                </Row>
+                        );
+                      })}
+                    </DragGroup>
+                  </div>
+                ) : chartLoading ? (
+                  <></>
+                ) : (
+                  <RenderEmpty message="请先选择指标或刷新" />
+                )}
               </Spin>
             </div>
           </div>
@@ -421,35 +451,6 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           <div className="config-change-records-container">{props.children}</div>
         </div>
       </div>
-
-      {/* 图表详情 */}
-      <Modal
-        width={1080}
-        visible={showChartDetailModal}
-        centered={true}
-        footer={null}
-        closable={false}
-        onCancel={() => setShowChartDetailModal(false)}
-      >
-        <div className="chart-detail-modal-container">
-          <div className="expand-icon-box" onClick={() => setShowChartDetailModal(false)}>
-            <IconFont type="icon-chuangkousuoxiao" className="expand-icon" />
-          </div>
-          {chartDetail && (
-            <SingleChart
-              chartTypeProp="line"
-              wrapStyle={{
-                width: 'auto',
-                height: 462,
-              }}
-              propChartData={chartDetail.metricLines}
-              {...getChartConfig({
-                metricName: `${chartDetail.metricName}{unit|（${chartDetail.metricUnit}）}`,
-              })}
-            />
-          )}
-        </div>
-      </Modal>
     </div>
   );
 };

@@ -85,7 +85,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     public static final String CLUSTER_METHOD_GET_TOTAL_LOG_SIZE                            = "getTotalLogSize";
     public static final String CLUSTER_METHOD_GET_PARTITION_SIZE                            = "getPartitionSize";
     public static final String CLUSTER_METHOD_GET_PARTITION_NO_LEADER_SIZE                  = "getPartitionNoLeaderSize";
-    public static final String CLUSTER_METHOD_GET_HEALTH_SCORE                              = "getTopicHealthScore";
+    public static final String CLUSTER_METHOD_GET_HEALTH_SCORE                              = "getClusterHealthScore";
     public static final String CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_BROKERS_JMX    = "getMetricFromKafkaByTotalBrokersJMX";
     public static final String CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_CONTROLLER_JMX       = "getMetricFromKafkaByControllerJMX";
     public static final String CLUSTER_METHOD_GET_ZK_COUNT                                  = "getZKCount";
@@ -188,7 +188,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
         registerVCHandler( CLUSTER_METHOD_GET_PARTITION_SIZE,                           this::getPartitionSize);
         registerVCHandler( CLUSTER_METHOD_GET_PARTITION_NO_LEADER_SIZE,                 this::getPartitionNoLeaderSize);
 
-        registerVCHandler( CLUSTER_METHOD_GET_HEALTH_SCORE,                             this::getTopicHealthScore);
+        registerVCHandler( CLUSTER_METHOD_GET_HEALTH_SCORE,                             this::getClusterHealthScore);
 
         registerVCHandler( CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_BROKERS_JMX,   this::getMetricFromKafkaByTotalBrokersJMX);
         registerVCHandler( CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_CONTROLLER_JMX,      this::getMetricFromKafkaByControllerJMX);
@@ -364,7 +364,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     /**
      * 获取集群的健康分
      */
-    private Result<ClusterMetrics> getTopicHealthScore(VersionItemParam metricParam){
+    private Result<ClusterMetrics> getClusterHealthScore(VersionItemParam metricParam){
         ClusterMetricParam param = (ClusterMetricParam)metricParam;
         ClusterMetrics clusterMetrics = healthScoreService.calClusterHealthScore(param.getClusterId());
         return Result.buildSuc(clusterMetrics);

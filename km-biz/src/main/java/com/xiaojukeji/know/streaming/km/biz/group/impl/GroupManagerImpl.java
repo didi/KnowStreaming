@@ -272,15 +272,11 @@ public class GroupManagerImpl implements GroupManager {
 
 
         // 获取Group指标信息
-        Result<List<GroupMetrics>> groupMetricsResult = groupMetricService.listPartitionLatestMetricsFromES(
-                clusterPhyId,
-                groupName,
-                topicName,
-                latestMetricNames == null? Arrays.asList(): latestMetricNames
-        );
+        Result<List<GroupMetrics>> groupMetricsResult = groupMetricService.collectGroupMetricsFromKafka(clusterPhyId, groupName, latestMetricNames == null ? Arrays.asList() : latestMetricNames);
+
 
         // 转换Group指标
-        List<GroupMetrics> esGroupMetricsList = groupMetricsResult.hasData()? groupMetricsResult.getData(): new ArrayList<>();
+        List<GroupMetrics> esGroupMetricsList = groupMetricsResult.hasData() ? groupMetricsResult.getData().stream().filter(elem -> topicName.equals(elem.getTopic())).collect(Collectors.toList()) : new ArrayList<>();
         Map<Integer, GroupMetrics> esMetricsMap = new HashMap<>();
         for (GroupMetrics groupMetrics: esGroupMetricsList) {
             esMetricsMap.put(groupMetrics.getPartitionId(), groupMetrics);

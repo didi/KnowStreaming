@@ -166,3 +166,19 @@ Node 版本: v12.22.12
 需要到具体的应用中执行 `npm run start`，例如 `cd packages/layout-clusters-fe` 后，执行 `npm run start`。
 
 应用启动后需要到基座应用中查看（需要启动基座应用，即 layout-clusters-fe）。
+
+
+## 8.12、权限识别失败问题
+1、使用admin账号登陆KnowStreaming时，点击系统管理-用户管理-角色管理-新增角色，查看页面是否正常。
+
+<img src="http://img-ys011.didistatic.com/static/dc2img/do1_gwGfjN9N92UxzHU8dfzr" width = "400" >
+
+2、查看'/logi-security/api/v1/permission/tree'接口返回值，出现如下图所示乱码现象。
+![接口返回值](http://img-ys011.didistatic.com/static/dc2img/do1_jTxBkwNGU9vZuYQQbdNw)
+
+3、查看logi_security_permission表，看看是否出现了中文乱码现象。
+
+根据以上几点，我们可以确定是由于数据库乱码造成的权限识别失败问题。
+
++ 原因：由于数据库编码和我们提供的脚本不一致，数据库里的数据发生了乱码，因此出现权限识别失败问题。
++ 解决方案：清空数据库数据，将数据库字符集调整为utf8，最后重新执行[dml-logi.sql](https://github.com/didi/KnowStreaming/blob/master/km-dist/init/sql/dml-logi.sql)脚本导入数据即可。

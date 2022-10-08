@@ -268,6 +268,7 @@ export const getFormConfig = (topicMetaData: any, info = {} as any, partitionLis
       type: FormItemType.inputNumber,
       attrs: {
         min: 1,
+        max: 1000,
       },
       invisible: !info?.needMsgNum,
       rules: [

@@ -1,4 +1,5 @@
-import { AppContainer, Divider, IconFont, Progress, Tooltip, Utils } from 'knowdesign';
+import { AppContainer, Divider, Progress, Tooltip, Utils } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import React, { useEffect, useState } from 'react';
 import AccessClusters from '../MutliClusterPage/AccessCluster';
 import './index.less';

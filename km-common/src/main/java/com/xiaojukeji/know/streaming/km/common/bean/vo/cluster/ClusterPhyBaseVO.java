@@ -31,9 +31,15 @@ public class ClusterPhyBaseVO extends BaseTimeVO {
     @ApiModelProperty(value="Jmx配置", example = "{}")
     protected String jmxProperties;
 
+    @ApiModelProperty(value="ZK配置", example = "{}")
+    protected String zkProperties;
+
     @ApiModelProperty(value="描述", example = "测试")
     protected String description;
 
     @ApiModelProperty(value="集群的kafka版本", example = "2.5.1")
     protected String kafkaVersion;
+
+    @ApiModelProperty(value="集群的运行模式", example = "2：raft模式，其他是ZK模式")
+    private Integer runState;
 }

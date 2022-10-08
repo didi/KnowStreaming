@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { ProTable, Utils, AppContainer } from 'knowdesign';
+import { ProTable, Utils, AppContainer, SearchInput } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import API from '../../api';
 import { getControllerChangeLogListColumns, defaultPagination } from './config';
 import BrokerDetail from '../BrokerDetail';
 import BrokerHealthCheck from '@src/components/CardBar/BrokerHealthCheck';
 import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import './index.less';
+import { tableHeaderPrefix } from '@src/constants/common';
 
 const { request } = Utils;
 const ControllerChangeLogList: React.FC = (props: any) => {
@@ -89,26 +91,35 @@ const ControllerChangeLogList: React.FC = (props: any) => {
         <BrokerHealthCheck />
       </div>
       <div className="clustom-table-content">
+        <div className={tableHeaderPrefix}>
+          <div className={`${tableHeaderPrefix}-left`}>
+            <div
+              className={`${tableHeaderPrefix}-left-refresh`}
+              onClick={() => genData({ pageNo: pagination.current, pageSize: pagination.pageSize })}
+            >
+              <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+            </div>
+          </div>
+          <div className={`${tableHeaderPrefix}-right`}>
+            <SearchInput
+              onSearch={setSearchKeywords}
+              attrs={{
+                placeholder: '请输入Broker Host',
+                style: { width: '248px', borderRiadus: '8px' },
+                maxLength: 128,
+              }}
+            />
+          </div>
+        </div>
         <ProTable
           showQueryForm={false}
           tableProps={{
-            showHeader: true,
+            showHeader: false,
             rowKey: 'path',
             loading: loading,
             columns: getControllerChangeLogListColumns(),
             dataSource: data,
             paginationProps: { ...pagination },
-            tableHeaderSearchInput: {
-              // 搜索配置
-              submit: getSearchKeywords,
-              searchInputType: 'search',
-              searchAttr: {
-                placeholder: '请输入Broker Host',
-                style: {
-                  width: '248px',
-                },
-              },
-            },
             attrs: {
               onChange: onTableChange,
               bordered: false,

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { message, Drawer, Button, Space, Divider, AppContainer, IconFont } from 'knowdesign';
+import { message, Drawer, Button, Space, Divider, AppContainer } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 
 import RebalancePlan from '../Jobs/RebalancePlan';
 interface PropsType extends React.HTMLAttributes<HTMLDivElement> {

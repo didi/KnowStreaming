@@ -1,5 +1,6 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { IconFont, Switch, Tooltip } from 'knowdesign';
+import { Switch, Tooltip } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 import { FormItemType, IFormItem } from 'knowdesign/es/extend/x-form';
 import moment from 'moment';
 import React from 'react';
@@ -152,6 +153,7 @@ export const getFormConfig = (params: any) => {
       rules: [{ required: true, message: '请输入' }],
       attrs: {
         min: 0,
+        max: 1000,
         style: { width: 232 },
       },
     },
@@ -391,7 +393,7 @@ export const getTableColumns = () => {
     {
       title: 'time',
       dataIndex: 'costTimeUnitMs',
-      width: 60,
+      width: 100,
     },
   ];
 };
