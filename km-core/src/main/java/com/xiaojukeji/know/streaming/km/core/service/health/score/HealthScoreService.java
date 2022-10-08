@@ -15,28 +15,8 @@ public interface HealthScoreService {
      * @param clusterPhyId 集群ID
      * @return
      */
+    @Deprecated
     ClusterMetrics calClusterHealthScore(Long clusterPhyId);
-
-    /**
-     * 获取集群Topics健康分指标
-     * @param clusterPhyId 集群ID
-     * @return
-     */
-    ClusterMetrics calClusterTopicsHealthScore(Long clusterPhyId);
-
-    /**
-     * 获取集群Brokers健康分指标
-     * @param clusterPhyId 集群ID
-     * @return
-     */
-    ClusterMetrics calClusterBrokersHealthScore(Long clusterPhyId);
-
-    /**
-     * 获取集群Groups健康分指标
-     * @param clusterPhyId 集群ID
-     * @return
-     */
-    ClusterMetrics calClusterGroupsHealthScore(Long clusterPhyId);
 
     /**
      * 获取集群健康分指标
@@ -44,6 +24,7 @@ public interface HealthScoreService {
      * @param topicName Topic名称
      * @return
      */
+    @Deprecated
     TopicMetrics calTopicHealthScore(Long clusterPhyId, String topicName);
 
     /**
@@ -52,6 +33,7 @@ public interface HealthScoreService {
      * @param brokerId brokerId
      * @return
      */
+    @Deprecated
     BrokerMetrics calBrokerHealthScore(Long clusterPhyId, Integer brokerId);
 
     /**
@@ -60,6 +42,7 @@ public interface HealthScoreService {
      * @param groupName group名称
      * @return
      */
+    @Deprecated
     GroupMetrics calGroupHealthScore(Long clusterPhyId, String groupName);
 
     /**
