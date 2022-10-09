@@ -132,9 +132,9 @@ public class KafkaAdminZKClient extends AbstractClusterLoadedChangedHandler impl
 
             kafkaZkClient = KafkaZkClient.apply(
                     zookeeperAddress,
-//                    false,
+                    false,
 //                    添加支持zk的Kerberos认证
-                    true,
+//                    true,
                     Constant.DEFAULT_SESSION_TIMEOUT_UNIT_MS,
                     Constant.DEFAULT_SESSION_TIMEOUT_UNIT_MS,
                     5,
