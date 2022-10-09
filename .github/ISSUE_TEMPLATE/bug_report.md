@@ -2,7 +2,7 @@
 name: 报告Bug
 about: 报告KnowStreaming的相关Bug
 title: ''
-labels: type/bug
+labels: bug
 assignees: ''
 
 ---
@@ -11,14 +11,19 @@ assignees: ''
 
 ### 环境信息
 
-* KnowStreaming version: xxx
-* Operating System version: xxx
-* Java version: xxx
+* KnowStreaming version :   <font size=4 color =red>   xxx </font>
+* Operating System version :  <font size=4 color =red> xxx </font>
+* Java version : <font size=4 color =red> xxx </font>
 
 ### 重现该问题的步骤
 
 1. xxx
+   
+
+
 2. xxx
+   
+
 3. xxx
 
 
