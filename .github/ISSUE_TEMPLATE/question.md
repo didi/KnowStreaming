@@ -1,5 +1,5 @@
 ---
-name: 问题/Question
+name: 问题
 about: 问KnowStreaming相关问题, 如果没有得到及时回复可以加V: shiyanzu001 , 进交流群
 title: ''
 labels: question
