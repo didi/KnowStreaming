@@ -1,5 +1,5 @@
 ---
-name: 问题
+name: 提个问题
 about: 问KnowStreaming相关问题
 title: ''
 labels: question
