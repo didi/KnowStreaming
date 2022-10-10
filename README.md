@@ -101,7 +101,7 @@
 
 点击 [这里](CONTRIBUTING.md)，了解如何成为 Know Streaming 的贡献者
 
-
+获取KnowStreaming开源社区证书。
 
 ## 加入技术交流群
 
