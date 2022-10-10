@@ -8,8 +8,6 @@ import org.springframework.context.ApplicationEvent;
  */
 @Getter
 public class BaseMetricEvent extends ApplicationEvent {
-
-
     public BaseMetricEvent(Object source) {
         super( source );
     }

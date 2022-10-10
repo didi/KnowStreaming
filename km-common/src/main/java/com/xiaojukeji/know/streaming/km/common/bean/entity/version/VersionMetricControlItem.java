@@ -23,6 +23,8 @@ public class VersionMetricControlItem extends VersionControlItem{
     public static final String CATEGORY_PERFORMANCE = "Performance";
     public static final String CATEGORY_FLOW        = "Flow";
 
+    public static final String CATEGORY_CLIENT      = "Client";
+
     /**
      * 指标单位名称，非指标的没有
      */
