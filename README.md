@@ -101,7 +101,7 @@
 
 点击 [这里](CONTRIBUTING.md)，了解如何成为 Know Streaming 的贡献者
 
-
+获取KnowStreaming开源社区证书。
 
 ## 加入技术交流群
 
@@ -134,6 +134,11 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 微信加群：添加`mike_zhangliang`、`PenceXie`的微信号备注KnowStreaming加群。
 <br/>
+
+加群之前有劳点一下 star，一个小小的 star 是对KnowStreaming作者们努力建设社区的动力。
+
+感谢感谢！！！
+
 <img width="116" alt="wx" src="https://user-images.githubusercontent.com/71620349/192257217-c4ebc16c-3ad9-485d-a914-5911d3a4f46b.png">
 
 ## Star History
