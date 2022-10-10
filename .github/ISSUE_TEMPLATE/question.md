@@ -1,6 +1,6 @@
 ---
-name: 问题/Question
-about: 问KnowStreaming相关问题, 如果没有得到及时回复可以加V: shiyanzu001 , 进交流群
+name: 提个问题
+about: 问KnowStreaming相关问题
 title: ''
 labels: question
 assignees: ''
