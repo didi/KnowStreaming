@@ -81,5 +81,5 @@ public class DslsConstant {
     public static final String COUNT_GROUP_NOT_METRIC_VALUE             = "GroupMetricESDAO/countGroupNotMetricValue";
 
     /**************************************************** Zookeeper ****************************************************/
-    public static final String GET_ZOOKEEPER_AGG_LIST_METRICS              = "ZookeeperMetricESDAO/getAggListZookeeperMetrics";
+    public static final String GET_ZOOKEEPER_AGG_LIST_METRICS           = "ZookeeperMetricESDAO/getAggListZookeeperMetrics";
 }
