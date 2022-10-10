@@ -69,7 +69,7 @@ Fork的源项目,我们称之为：**源仓库**
 
 创建Pull Request时：
 
-1. 请遵循 PR的 [模板](./PULL_REQUEST_TEMPLATE.md)
+1. 请遵循 PR的 [模板](./.github/PULL_REQUEST_TEMPLATE.md)
 2. 请确保 PR 有相应的issue。
 3. 如果您的 PR 包含较大的更改，例如组件重构或新组件，请编写有关其设计和使用的详细文档(在对应的issue中)。
 4. 注意单个 PR 不能太大。如果需要进行大量更改，最好将更改分成几个单独的 PR。
@@ -98,7 +98,7 @@ Commiter将轮流review代码，以确保在合并前至少有一名Commiter
 
 只要成功提交并合并PR , 则为Contributor
 
-名单请看：[开发者名单](../开发者名单.md)
+贡献者名单请看：[贡献者名单](./docs/contributer_guide/开发者名单.md)
 
 ## 尝试成为Commiter
 
