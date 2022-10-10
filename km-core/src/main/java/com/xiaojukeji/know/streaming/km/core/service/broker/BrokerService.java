@@ -67,4 +67,8 @@ public interface BrokerService {
      * 获取总的Broker数
      */
     Integer countAllBrokers();
+
+    boolean allServerDown(Long clusterPhyId);
+
+    boolean existServerDown(Long clusterPhyId);
 }
