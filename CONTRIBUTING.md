@@ -27,6 +27,3 @@ Following information can help us to resolve the issue faster.
 * Screenshots.
 * Steps to reproduce the issue.
 
-0
-1
-4
