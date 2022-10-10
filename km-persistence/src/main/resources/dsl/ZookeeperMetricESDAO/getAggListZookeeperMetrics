@@ -11,13 +11,6 @@
           }
         },
         {
-          "term": {
-            "brokerId": {
-              "value": %d
-            }
-          }
-        },
-        {
           "range": {
             "timestamp": {
               "gte": %d,
