@@ -389,4 +389,16 @@ public class ConvertUtil {
         }
         return null;
     }
+
+    public static Integer float2Integer(Float f) {
+        if (null == f) {
+            return null;
+        }
+        try {
+            return f.intValue();
+        } catch (Exception e) {
+            // ignore exception
+        }
+        return null;
+    }
 }

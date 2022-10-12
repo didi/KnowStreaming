@@ -92,7 +92,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         Table<String, Long, List<MetricPointVO>> table = HashBasedTable.create();
 
         //2、查询指标
-        for(String metric : metricBrokerIds.keySet()){
+        for(String metric : metrics) {
             table.putAll(
                     this.listBrokerMetricsByBrokerIds(
                             clusterPhyId,

@@ -99,7 +99,11 @@
 
 ## 成为社区贡献者
 
-点击 [这里](CONTRIBUTING.md)，了解如何成为 Know Streaming 的贡献者
+1. [贡献源码](https://doc.knowstreaming.com/product/10-contribution) 了解如何成为 Know Streaming 的贡献者
+2. [具体贡献流程](https://doc.knowstreaming.com/product/10-contribution#102-贡献流程)
+3. [开源激励计划](https://doc.knowstreaming.com/product/10-contribution#105-开源激励计划)
+4. [贡献者名单](https://doc.knowstreaming.com/product/10-contribution#106-贡献者名单)
+
 
 获取KnowStreaming开源社区证书。
 

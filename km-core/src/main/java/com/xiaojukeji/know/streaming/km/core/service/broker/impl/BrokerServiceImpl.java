@@ -262,12 +262,30 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
         return version;
     }
 
-
-
     @Override
     public Integer countAllBrokers() {
         LambdaQueryWrapper<BrokerPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         return brokerDAO.selectCount(lambdaQueryWrapper);
+    }
+
+    @Override
+    public boolean allServerDown(Long clusterPhyId) {
+        List<BrokerPO> poList = this.getAllBrokerPOsFromDB(clusterPhyId);
+        if (ValidateUtils.isEmptyList(poList)) {
+            return false;
+        }
+
+        return poList.stream().filter(elem -> elem.getStatus().equals(Constant.DOWN)).count() == poList.size();
+    }
+
+    @Override
+    public boolean existServerDown(Long clusterPhyId) {
+        List<BrokerPO> poList = this.getAllBrokerPOsFromDB(clusterPhyId);
+        if (ValidateUtils.isEmptyList(poList)) {
+            return false;
+        }
+
+        return poList.stream().filter(elem -> elem.getStatus().equals(Constant.DOWN)).count() > 0;
     }
 
     /**************************************************** private method ****************************************************/
