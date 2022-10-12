@@ -37,29 +37,32 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
     @Override
     public void onApplicationEvent(BaseMetricEvent event) {
         executor.execute( () -> {
-            if(event instanceof BrokerMetricEvent){
+            if (event instanceof BrokerMetricEvent) {
                 BrokerMetricEvent brokerMetricEvent = (BrokerMetricEvent)event;
                 sinkMetrics(brokerMetric2SinkPoint(brokerMetricEvent.getBrokerMetrics()));
 
-            }else if(event instanceof ClusterMetricEvent){
+            } else if(event instanceof ClusterMetricEvent) {
                 ClusterMetricEvent clusterMetricEvent = (ClusterMetricEvent)event;
                 sinkMetrics(clusterMetric2SinkPoint(clusterMetricEvent.getClusterMetrics()));
 
-            }else if(event instanceof TopicMetricEvent){
+            } else if(event instanceof TopicMetricEvent) {
                 TopicMetricEvent topicMetricEvent = (TopicMetricEvent)event;
                 sinkMetrics(topicMetric2SinkPoint(topicMetricEvent.getTopicMetrics()));
 
-            }else if(event instanceof PartitionMetricEvent){
+            } else if(event instanceof PartitionMetricEvent) {
                 PartitionMetricEvent   partitionMetricEvent = (PartitionMetricEvent)event;
                 sinkMetrics(partitionMetric2SinkPoint(partitionMetricEvent.getPartitionMetrics()));
 
-            }else if(event instanceof GroupMetricEvent){
+            } else if(event instanceof GroupMetricEvent) {
                 GroupMetricEvent groupMetricEvent = (GroupMetricEvent)event;
                 sinkMetrics(groupMetric2SinkPoint(groupMetricEvent.getGroupMetrics()));
 
-            }else if(event instanceof ReplicaMetricEvent){
+            } else if(event instanceof ReplicaMetricEvent) {
                 ReplicaMetricEvent       replicaMetricEvent = (ReplicaMetricEvent)event;
                 sinkMetrics(replicationMetric2SinkPoint(replicaMetricEvent.getReplicationMetrics()));
+            } else if(event instanceof ZookeeperMetricEvent) {
+                ZookeeperMetricEvent     zookeeperMetricEvent = (ZookeeperMetricEvent)event;
+                sinkMetrics(zookeeperMetric2SinkPoint(zookeeperMetricEvent.getZookeeperMetrics()));
             }
         } );
     }
@@ -72,6 +75,7 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
     public abstract Boolean sinkMetrics(List<MetricSinkPoint> pointList);
 
     /**************************************************** private method ****************************************************/
+
     private List<MetricSinkPoint> brokerMetric2SinkPoint(List<BrokerMetrics> brokerMetrics){
         List<MetricSinkPoint> pointList = new ArrayList<>();
 
@@ -161,8 +165,23 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
         return pointList;
     }
 
-    private List<MetricSinkPoint> genSinkPoint(String metricPre, Map<String, Float> metrics,
-                                               long timeStamp, Map<String, Object> tagsMap){
+    private List<MetricSinkPoint> zookeeperMetric2SinkPoint(List<ZookeeperMetrics> zookeeperMetricsList){
+        List<MetricSinkPoint> pointList = new ArrayList<>();
+
+        for(ZookeeperMetrics z : zookeeperMetricsList){
+            Map<String, Object> tagsMap = new HashMap<>();
+            tagsMap.put(CLUSTER_ID.getName(),     z.getClusterPhyId());
+
+            pointList.addAll(genSinkPoint("Zookeeper", z.getMetrics(), z.getTimestamp(), tagsMap));
+        }
+
+        return pointList;
+    }
+
+    private List<MetricSinkPoint> genSinkPoint(String metricPre,
+                                               Map<String, Float> metrics,
+                                               long timeStamp,
+                                               Map<String, Object> tagsMap) {
         List<MetricSinkPoint> pointList = new ArrayList<>();
 
         for(String metricName : metrics.keySet()){
