@@ -14,6 +14,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper.ZookeeperInfo;
 import com.xiaojukeji.know.streaming.km.common.bean.po.zookeeper.ZookeeperInfoPO;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.zookeeper.FourLetterWordUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.zookeeper.ZookeeperUtils;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperService;
@@ -105,6 +106,28 @@ public class ZookeeperServiceImpl implements ZookeeperService {
         return ConvertUtil.list2List(this.listRawFromDBByCluster(clusterPhyId), ZookeeperInfo.class);
     }
 
+    @Override
+    public boolean allServerDown(Long clusterPhyId) {
+        List<ZookeeperInfo> infoList = this.listFromDBByCluster(clusterPhyId);
+        if (ValidateUtils.isEmptyList(infoList)) {
+            return false;
+        }
+
+        // 所有服务挂掉
+        return infoList.stream().filter(elem -> !elem.alive()).count() == infoList.size();
+    }
+
+    @Override
+    public boolean existServerDown(Long clusterPhyId) {
+        List<ZookeeperInfo> infoList = this.listFromDBByCluster(clusterPhyId);
+        if (ValidateUtils.isEmptyList(infoList)) {
+            // 不存在挂掉的服务
+            return false;
+        }
+
+        // 存在挂掉的服务
+        return infoList.stream().filter(elem -> !elem.alive()).count() > 0;
+    }
 
     /**************************************************** private method ****************************************************/
 
