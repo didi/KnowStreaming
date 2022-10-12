@@ -1,8 +1,11 @@
 server:
   port: 8080 # 服务端口
-  tomcat:
-    accept-count: 1000
-    max-connections: 10000
+  undertow:
+    buffer-size: 512
+    direct-buffers: true
+    threads:
+      io: 8
+      worker: 128
 
 spring:
   application:
