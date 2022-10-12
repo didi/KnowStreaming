@@ -37,7 +37,7 @@
 
 ## 8.4、`Jmx`连接失败如何解决？
 
-- 参看 [Jmx 连接配置&问题解决](./9-attachment#jmx-连接失败问题解决) 说明。
+- 参看 [Jmx 连接配置&问题解决](https://doc.knowstreaming.com/product/9-attachment#91jmx-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3) 说明。
 
 &nbsp;
 
