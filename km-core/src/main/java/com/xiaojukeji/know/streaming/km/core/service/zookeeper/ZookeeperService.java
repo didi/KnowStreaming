@@ -15,4 +15,16 @@ public interface ZookeeperService {
     void batchReplaceDataInDB(Long clusterPhyId, List<ZookeeperInfo> infoList);
 
     List<ZookeeperInfo> listFromDBByCluster(Long clusterPhyId);
+
+    /**
+     * 所有服务挂掉
+     * @return
+     */
+    boolean allServerDown(Long clusterPhyId);
+
+    /**
+     * 存在服务挂掉
+     * @return
+     */
+    boolean existServerDown(Long clusterPhyId);
 }
