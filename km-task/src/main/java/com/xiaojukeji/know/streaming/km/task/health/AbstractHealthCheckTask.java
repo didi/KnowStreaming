@@ -52,12 +52,10 @@ public abstract class AbstractHealthCheckTask extends AbstractAsyncMetricsDispat
             resultList.addAll(this.checkAndGetResult(clusterPhyParam, healthConfigMap));
         }
 
-        for (HealthCheckResult checkResult: resultList) {
-            try {
-                healthCheckResultService.replace(checkResult);
-            } catch (Exception e) {
-                log.error("class=AbstractHealthCheckTask||method=processSubTask||clusterPhyId={}||checkResult={}||errMsg=exception!", clusterPhy.getId(), checkResult, e);
-            }
+        try {
+            healthCheckResultService.batchReplace(resultList);
+        } catch (Exception e) {
+            log.error("class=AbstractHealthCheckTask||method=processSubTask||clusterPhyId={}||checkResultList={}||errMsg=exception!", clusterPhy.getId(), resultList, e);
         }
 
         // 删除10分钟之前的检查结果

@@ -20,4 +20,6 @@ public interface HealthCheckResultService {
     List<HealthCheckResultPO> getResHealthCheckResult(Long clusterPhyId, Integer dimension, String resNme);
 
     Map<String, BaseClusterHealthConfig> getClusterHealthConfig(Long clusterPhyId);
+
+    int batchReplace(List<HealthCheckResult> healthCheckResults);
 }
