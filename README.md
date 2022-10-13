@@ -45,7 +45,14 @@
 
 ## `Know Streaming` 简介
 
-`Know Streaming`是一套云原生的Kafka管控平台，脱胎于众多互联网内部多年的Kafka运营实践经验，专注于Kafka运维管控、监控告警、资源治理、多活容灾等核心场景。在用户体验、监控、运维管控上进行了平台化、可视化、智能化的建设，提供一系列特色的功能，极大地方便了用户和运维人员的日常使用，让普通运维人员都能成为Kafka专家。整体具有以下特点：
+`Know Streaming`是一套云原生的Kafka管控平台，脱胎于众多互联网内部多年的Kafka运营实践经验，专注于Kafka运维管控、监控告警、资源治理、多活容灾等核心场景。在用户体验、监控、运维管控上进行了平台化、可视化、智能化的建设，提供一系列特色的功能，极大地方便了用户和运维人员的日常使用，让普通运维人员都能成为Kafka专家。
+
+我们现在正在收集 Know Streaming 用户信息，以帮助我们进一步改进  Know Streaming。
+请在 [issue#663](https://github.com/didi/KnowStreaming/issues/663) 上提供您的使用信息来支持我们：[谁在使用 Know Streaming](https://github.com/didi/KnowStreaming/issues/663) 
+
+
+
+整体具有以下特点：
 
 - 👀 &nbsp;**零侵入、全覆盖**
   - 无需侵入改造 `Apache Kafka` ，一键便能纳管 `0.10.x` ~ `3.x.x` 众多版本的Kafka，包括 `ZK` 或 `Raft` 运行模式的版本，同时在兼容架构上具备良好的扩展性，帮助您提升集群管理水平；
