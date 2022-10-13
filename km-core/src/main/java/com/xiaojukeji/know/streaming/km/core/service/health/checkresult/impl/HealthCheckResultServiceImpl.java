@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class HealthCheckResultServiceImpl implements HealthCheckResultService {
@@ -87,5 +88,13 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
             }
         }
         return configMap;
+    }
+
+    @Override
+    public int batchReplace(List<HealthCheckResult> healthCheckResults) {
+        List<HealthCheckResultPO> healthCheckResultPos = healthCheckResults.stream().map(healthCheckResult ->
+                ConvertUtil.obj2Obj(healthCheckResult, HealthCheckResultPO.class)).collect(Collectors.toCollection(() ->
+                new ArrayList<>(healthCheckResults.size())));
+        return healthCheckResultDAO.batchReplace(healthCheckResultPos);
     }
 }
