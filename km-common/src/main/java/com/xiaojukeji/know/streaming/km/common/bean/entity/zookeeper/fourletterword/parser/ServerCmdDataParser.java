@@ -54,7 +54,7 @@ public class ServerCmdDataParser implements FourLetterWordDataParser<ServerCmdDa
                     case "Latency min/avg/max":
                         String[] data = elem.getValue().split("/");
                         serverCmdData.setZkMinLatency(Long.valueOf(data[0]));
-                        serverCmdData.setZkAvgLatency(Long.valueOf(data[1]));
+                        serverCmdData.setZkAvgLatency(Float.valueOf(data[1]));
                         serverCmdData.setZkMaxLatency(Long.valueOf(data[2]));
                         break;
                     case "Received":
