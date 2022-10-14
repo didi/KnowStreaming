@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.task.health;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
@@ -52,11 +53,13 @@ public abstract class AbstractHealthCheckTask extends AbstractAsyncMetricsDispat
             resultList.addAll(this.checkAndGetResult(clusterPhyParam, healthConfigMap));
         }
 
-        for (HealthCheckResult checkResult: resultList) {
+        List<List<HealthCheckResult>> healthCheckResultPartitions = Lists.partition(resultList, Constant.PER_BATCH_MAX_VALUE);
+        log.info("class=AbstractHealthCheckTask,method=processSubTask,clusterPhyId={},Process health checks in batches, with a maximum of {} items per batch.", Constant.PER_BATCH_MAX_VALUE);
+        for (List<HealthCheckResult> checkResults : healthCheckResultPartitions) {
             try {
-                healthCheckResultService.replace(checkResult);
+                healthCheckResultService.batchReplace(checkResults);
             } catch (Exception e) {
-                log.error("class=AbstractHealthCheckTask||method=processSubTask||clusterPhyId={}||checkResult={}||errMsg=exception!", clusterPhy.getId(), checkResult, e);
+                log.error("class=AbstractHealthCheckTask||method=processSubTask||clusterPhyId={}||checkResultList={}||errMsg=exception!", clusterPhy.getId(), checkResults, e);
             }
         }
 
