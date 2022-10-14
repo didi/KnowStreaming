@@ -54,7 +54,7 @@ public abstract class AbstractHealthCheckTask extends AbstractAsyncMetricsDispat
         }
 
         List<List<HealthCheckResult>> healthCheckResultPartitions = Lists.partition(resultList, Constant.PER_BATCH_MAX_VALUE);
-        log.info("class=AbstractHealthCheckTask,method=processSubTask,clusterPhyId={},Process health checks in batches, with a maximum of {} items per batch.", Constant.PER_BATCH_MAX_VALUE);
+        log.info("class=AbstractHealthCheckTask,method=processSubTask,clusterPhyId={},Process health checks in batches, with a maximum of {} items per batch.", clusterPhy.getId(), Constant.PER_BATCH_MAX_VALUE);
         for (List<HealthCheckResult> checkResults : healthCheckResultPartitions) {
             try {
                 healthCheckResultService.batchReplace(checkResults);
