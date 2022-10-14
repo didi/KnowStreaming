@@ -3,10 +3,12 @@ package com.xiaojukeji.know.streaming.km.core.service.health.checkresult.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.po.config.PlatformClusterConfigPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.config.ConfigGroupEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -91,9 +93,17 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
     }
 
     @Override
-    public int batchReplace(List<HealthCheckResult> healthCheckResults) {
-        List<HealthCheckResultPO> healthCheckResultPos = healthCheckResults.stream().map(healthCheckResult -> ConvertUtil.obj2Obj(healthCheckResult,
-                HealthCheckResultPO.class)).collect(Collectors.toCollection(() -> new ArrayList<>(healthCheckResults.size())));
-        return healthCheckResultDAO.batchReplace(healthCheckResultPos);
+    public void batchReplace(List<HealthCheckResult> healthCheckResults) {
+        log.info("method=batchReplace,Process health checks in batches, with a maximum of {} items per batch.", Constant.PER_BATCH_MAX_VALUE);
+        List<List<HealthCheckResult>> healthCheckResultPartitions = Lists.partition(healthCheckResults, Constant.PER_BATCH_MAX_VALUE);
+        List<HealthCheckResultPO> healthCheckResultPos = new ArrayList<>(healthCheckResults.size());
+        for (List<HealthCheckResult> checkResultPartition : healthCheckResultPartitions) {
+            try {
+                checkResultPartition.stream().map(healthCheckResult -> ConvertUtil.obj2Obj(healthCheckResult, HealthCheckResultPO.class)).forEach(healthCheckResultPos::add);
+                healthCheckResultDAO.batchReplace(healthCheckResultPos);
+            } catch (Exception e) {
+                log.error("method=batchReplace || checkResultList={} || errMsg=exception!", healthCheckResultPos, e);
+            }
+        }
     }
 }
