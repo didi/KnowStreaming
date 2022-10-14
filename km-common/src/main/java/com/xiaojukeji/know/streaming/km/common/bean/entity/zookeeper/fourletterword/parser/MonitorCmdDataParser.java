@@ -57,7 +57,7 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                         monitorCmdData.setZkVersion(elem.getValue().split("-")[0]);
                         break;
                     case "zk_avg_latency":
-                        monitorCmdData.setZkAvgLatency(Long.valueOf(elem.getValue()));
+                        monitorCmdData.setZkAvgLatency(Float.valueOf(elem.getValue()));
                         break;
                     case "zk_max_latency":
                         monitorCmdData.setZkMaxLatency(Long.valueOf(elem.getValue()));

@@ -17,7 +17,7 @@ import lombok.Data;
 @Data
 public class ServerCmdData extends BaseFourLetterWordCmdData {
     private String zkVersion;
-    private Long zkAvgLatency;
+    private Float zkAvgLatency;
     private Long zkMaxLatency;
     private Long zkMinLatency;
     private Long zkPacketsReceived;
