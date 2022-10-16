@@ -9,8 +9,9 @@ assignees: ''
 
 - [ ] 我已经在 [issues](https://github.com/didi/KnowStreaming/issues) 搜索过相关问题了,并没有重复的。
 
-- [ ] 你是否希望来认领这个Bug。
+ 你是否希望来认领这个Bug。
 
+ 「   Y   /   N  」
 
 ### 环境信息
 
