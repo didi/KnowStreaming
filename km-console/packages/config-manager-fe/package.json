@@ -15,11 +15,6 @@
     "type": "git",
     "url": "git@git.xiaojukeji.com:bigdata-cloud/d1.git"
   },
-  "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1",
-    "start": "cross-env NODE_ENV=development webpack-dev-server",
-    "build": "cross-env NODE_ENV=production webpack --max_old_space_size=8000"
-  },
   "dependencies": {
     "@knowdesign/icons": "^1.0.0",
     "babel-preset-react-app": "^10.0.0",
@@ -86,8 +81,6 @@
     "less-loader": "^4.1.0",
     "lint-staged": "10.5.3",
     "mini-css-extract-plugin": "^1.3.0",
-    "mobx": "4.15.7",
-    "mobx-react": "6.0.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "prettier": "2.3.2",
     "progress-bar-webpack-plugin": "^1.12.1",

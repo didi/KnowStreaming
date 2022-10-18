@@ -5,10 +5,10 @@
 </p>
 
 <p align="center">
-    <a href="https://knowstreaming.com">产品官网</a> | 
-    <a href="https://github.com/didi/KnowStreaming/releases">下载地址</a> | 
-    <a href="https://doc.knowstreaming.com/product">文档资源</a> | 
-    <a href="https://demo.knowstreaming.com">体验环境</a> 
+    <a href="https://knowstreaming.com">产品官网</a> |
+    <a href="https://github.com/didi/KnowStreaming/releases">下载地址</a> |
+    <a href="https://doc.knowstreaming.com/product">文档资源</a> |
+    <a href="https://demo.knowstreaming.com">体验环境</a>
 </p>
 
 <p align="center">
@@ -39,18 +39,14 @@
 
 </p>
 
-
 ---
-
 
 ## `Know Streaming` 简介
 
 `Know Streaming`是一套云原生的Kafka管控平台，脱胎于众多互联网内部多年的Kafka运营实践经验，专注于Kafka运维管控、监控告警、资源治理、多活容灾等核心场景。在用户体验、监控、运维管控上进行了平台化、可视化、智能化的建设，提供一系列特色的功能，极大地方便了用户和运维人员的日常使用，让普通运维人员都能成为Kafka专家。
 
 我们现在正在收集 Know Streaming 用户信息，以帮助我们进一步改进  Know Streaming。
-请在 [issue#663](https://github.com/didi/KnowStreaming/issues/663) 上提供您的使用信息来支持我们：[谁在使用 Know Streaming](https://github.com/didi/KnowStreaming/issues/663) 
-
-
+请在 [issue#663](https://github.com/didi/KnowStreaming/issues/663) 上提供您的使用信息来支持我们：[谁在使用 Know Streaming](https://github.com/didi/KnowStreaming/issues/663)
 
 整体具有以下特点：
 
@@ -65,10 +61,9 @@
 
 - 🚀 &nbsp;**专业能力**
   - 集群管理：支持一键纳管，健康分析、核心组件观测 等功能；
-  - 观测提升：多维度指标观测大盘、观测指标最佳实践 等功能； 
-  - 异常巡检：集群多维度健康巡检、集群多维度健康分 等功能； 
+  - 观测提升：多维度指标观测大盘、观测指标最佳实践 等功能；
+  - 异常巡检：集群多维度健康巡检、集群多维度健康分 等功能；
   - 能力增强：集群负载均衡、Topic扩缩副本、Topic副本迁移 等功能；
-
 
 &nbsp;
 **产品图**
@@ -78,9 +73,6 @@
 <img src="http://img-ys011.didistatic.com/static/dc2img/do1_sPmS4SNLX9m1zlpmHaLJ" width = "768" height = "473" div align=center />
 
 </p>
-
-
-
 
 ## 文档资源
 
@@ -97,12 +89,7 @@
 - [2.x与3.x新旧对比手册](docs/user_guide/新旧对比手册.md)
 - [FAQ](docs/user_guide/faq.md)
 
-
 **点击 [这里](https://doc.knowstreaming.com/product)，也可以从官网获取到更多文档**
-
-
-
-
 
 ## 成为社区贡献者
 
@@ -110,7 +97,6 @@
 2. [具体贡献流程](https://doc.knowstreaming.com/product/10-contribution#102-贡献流程)
 3. [开源激励计划](https://doc.knowstreaming.com/product/10-contribution#105-开源激励计划)
 4. [贡献者名单](https://doc.knowstreaming.com/product/10-contribution#106-贡献者名单)
-
 
 获取KnowStreaming开源社区证书。
 
@@ -120,7 +106,7 @@
 
 <p align="left">
 <img src="https://user-images.githubusercontent.com/71620349/185357284-fdff1dad-c5e9-4ddf-9a82-0be1c970980d.JPG"  height = "180" div align=left />
-</p>       
+</p>
 
 <br/>
 <br/>
