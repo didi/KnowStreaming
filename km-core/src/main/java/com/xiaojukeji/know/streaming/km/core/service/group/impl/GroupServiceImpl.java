@@ -104,7 +104,7 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
 
         try {
             DescribeConsumerGroupsResult describeConsumerGroupsResult = adminClient.describeConsumerGroups(
-                    Arrays.asList(groupName),
+                    Collections.singletonList(groupName),
                     new DescribeConsumerGroupsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).includeAuthorizedOperations(false)
             );
 
