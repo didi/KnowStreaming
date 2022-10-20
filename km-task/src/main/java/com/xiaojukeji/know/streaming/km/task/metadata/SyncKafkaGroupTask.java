@@ -6,15 +6,10 @@ import com.didiglobal.logi.job.core.consensual.ConsensualEnum;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
-import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupMemberPO;
-import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
-import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
-import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.group.Group;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import org.apache.kafka.clients.admin.*;
-import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -38,98 +33,58 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
 
     @Override
     public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
-
+        // 获取集群的Group列表
         List<String> groupNameList = groupService.listGroupsFromKafka(clusterPhy.getId());
-        TaskResult tr = updateGroupMembersTask(clusterPhy, groupNameList, triggerTimeUnitMs);
 
-        if (!TaskResult.SUCCESS.equals(tr)) {
-            return tr;
+        TaskResult allSuccess = TaskResult.SUCCESS;
+
+        // 获取Group详细信息
+        List<Group> groupList = new ArrayList<>();
+        for (String groupName : groupNameList) {
+            try {
+                Group group = groupService.getGroupFromKafka(clusterPhy.getId(), groupName);
+                if (group == null) {
+                    continue;
+                }
+
+                groupList.add(group);
+            } catch (Exception e) {
+                log.error("method=processClusterTask||clusterPhyId={}||groupName={}||errMsg=exception", clusterPhy.getId(), groupName, e);
+                allSuccess = TaskResult.FAIL;
+            }
+        }
+
+        // 过滤掉无效的Topic
+        this.filterTopicIfTopicNotExist(clusterPhy.getId(), groupList);
+
+        // 更新DB中的Group信息
+        groupService.batchReplaceGroupsAndMembers(clusterPhy.getId(), groupList, triggerTimeUnitMs);
+
+        // 如果存在错误，则直接返回
+        if (!TaskResult.SUCCESS.equals(allSuccess)) {
+            return allSuccess;
         }
 
         // 删除历史的Group
         groupService.deleteByUpdateTimeBeforeInDB(clusterPhy.getId(), new Date(triggerTimeUnitMs - 5 * 60 * 1000));
 
-        return tr;
+        return allSuccess;
     }
 
-
-    private TaskResult updateGroupMembersTask(ClusterPhy clusterPhy, List<String> groupNameList, long triggerTimeUnitMs) {
-        List<GroupMemberPO> groupMemberPOList = new ArrayList<>();
-        TaskResult tr = TaskResult.SUCCESS;
-        
-        for (String groupName : groupNameList) {
-            try {
-                List<GroupMemberPO> poList = this.getGroupMembers(clusterPhy.getId(), groupName, new Date(triggerTimeUnitMs));
-                groupMemberPOList.addAll(poList);
-            } catch (Exception e) {
-                log.error("method=updateGroupMembersTask||clusterPhyId={}||groupName={}||errMsg=exception", clusterPhy.getId(), groupName, e);
-                tr = TaskResult.FAIL;
-            }
-        }
-        
-        groupMemberPOList = this.filterGroupIfTopicNotExist(clusterPhy.getId(), groupMemberPOList);
-        groupService.batchReplace(groupMemberPOList);
-        
-        return tr;
-    }
-
-    private List<GroupMemberPO> getGroupMembers(Long clusterPhyId, String groupName, Date updateTime) throws NotExistException, AdminOperateException {
-        Map<String, GroupMemberPO> groupMap = new HashMap<>();
-
-        // 获取消费组消费过哪些Topic
-        Map<TopicPartition, Long> offsetMap = groupService.getGroupOffset(clusterPhyId, groupName);
-        for (TopicPartition topicPartition : offsetMap.keySet()) {
-            GroupMemberPO po = groupMap.get(topicPartition.topic());
-            if (po == null) {
-                po = new GroupMemberPO(clusterPhyId, topicPartition.topic(), groupName, updateTime);
-            }
-            groupMap.put(topicPartition.topic(), po);
-        }
-
-        // 在上面的基础上，补充消费组的详细信息
-        ConsumerGroupDescription consumerGroupDescription = groupService.getGroupDescription(clusterPhyId, groupName);
-        if (consumerGroupDescription == null) {
-            return new ArrayList<>(groupMap.values());
-        }
-
-        groupMap.forEach((key, val) -> val.setState(GroupStateEnum.getByRawState(consumerGroupDescription.state()).getState()));
-
-        for (MemberDescription memberDescription : consumerGroupDescription.members()) {
-            Set<TopicPartition> partitionList = new HashSet<>();
-            if (!ValidateUtils.isNull(memberDescription.assignment().topicPartitions())) {
-                partitionList = memberDescription.assignment().topicPartitions();
-            }
-
-            Set<String> topicNameSet = partitionList.stream().map(elem -> elem.topic()).collect(Collectors.toSet());
-            for (String topicName : topicNameSet) {
-                groupMap.putIfAbsent(topicName, new GroupMemberPO(clusterPhyId, topicName, groupName, updateTime));
-
-                GroupMemberPO po = groupMap.get(topicName);
-                po.setMemberCount(po.getMemberCount() + 1);
-                po.setState(GroupStateEnum.getByRawState(consumerGroupDescription.state()).getState());
-            }
-        }
-
-        // 如果该消费组没有正在消费任何Topic的特殊情况，但是这个Group存在
-        if (groupMap.isEmpty()) {
-            GroupMemberPO po = new GroupMemberPO(clusterPhyId, "", groupName, updateTime);
-            po.setState(GroupStateEnum.getByRawState(consumerGroupDescription.state()).getState());
-            groupMap.put("", po);
-        }
-
-        return new ArrayList<>(groupMap.values());
-    }
-
-    private List<GroupMemberPO> filterGroupIfTopicNotExist(Long clusterPhyId, List<GroupMemberPO> poList) {
-        if (poList.isEmpty()) {
-            return poList;
+    private void filterTopicIfTopicNotExist(Long clusterPhyId, List<Group> groupList) {
+        if (ValidateUtils.isEmptyList(groupList)) {
+            return;
         }
 
         // 集群Topic集合
         Set<String> dbTopicSet = topicService.listTopicsFromDB(clusterPhyId).stream().map(elem -> elem.getTopicName()).collect(Collectors.toSet());
         dbTopicSet.add("");   //兼容没有消费Topic的group
-        
+
         // 过滤Topic不存在的消费组
-        return poList.stream().filter(elem -> dbTopicSet.contains(elem.getTopicName())).collect(Collectors.toList());
+        for (Group group: groupList) {
+            group.setTopicMembers(
+                    group.getTopicMembers().stream().filter(elem -> dbTopicSet.contains(elem.getTopicName())).collect(Collectors.toList())
+            );
+        }
     }
 }

@@ -3,7 +3,6 @@ package com.xiaojukeji.know.streaming.km.common.bean.po.group;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.xiaojukeji.know.streaming.km.common.bean.po.BasePO;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
-import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,12 +22,19 @@ public class GroupMemberPO extends BasePO {
 
     private Integer memberCount;
 
-    public GroupMemberPO(Long clusterPhyId, String topicName, String groupName, Date updateTime) {
+    public GroupMemberPO(Long clusterPhyId, String topicName, String groupName, String state, Integer memberCount) {
         this.clusterPhyId = clusterPhyId;
         this.topicName = topicName;
         this.groupName = groupName;
-        this.state = GroupStateEnum.UNKNOWN.getState();
-        this.memberCount = 0;
+        this.state = state;
+        this.memberCount = memberCount;
+    }
+    public GroupMemberPO(Long clusterPhyId, String topicName, String groupName, String state, Integer memberCount, Date updateTime) {
+        this.clusterPhyId = clusterPhyId;
+        this.topicName = topicName;
+        this.groupName = groupName;
+        this.state = state;
+        this.memberCount = memberCount;
         this.updateTime = updateTime;
     }
 }
