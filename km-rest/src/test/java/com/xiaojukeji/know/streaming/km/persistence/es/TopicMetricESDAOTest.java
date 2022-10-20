@@ -15,7 +15,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class TopicMetricESDAOTest extends KnowStreamApplicationTest {
 
@@ -38,14 +37,20 @@ public class TopicMetricESDAOTest extends KnowStreamApplicationTest {
     @Test
     public void getTopicsAggsMetricsValueTest(){
         Long clusterId          = 2L;
-        String topic            = "know-streaming-test-251";
-        String topic1           = "topic_test01";
-        List<String> metrics    = Arrays.asList("BytesIn", "BytesIn_min_5");
+        List<String> topicList  = Arrays.asList("know-streaming-test-251", "topic_test01");
+        List<String> metrics    = Arrays.asList(
+                "Messages",                         "BytesIn_min_15",       "BytesRejected",
+                "PartitionURP",                     "HealthCheckTotal",     "ReplicationCount",
+                "CollectMetricsCostTimeUnitSec",    "FailedFetchRequests",  "BytesIn_min_5",
+                "HealthScore",                      "LogSize",              "BytesOut",
+                "FailedProduceRequests",            "BytesOut_min_15",      "BytesIn",
+                "BytesOut_min_5",                   "MessagesIn",           "TotalProduceRequests",
+                "HealthCheckPassed");
         Long endTime   = System.currentTimeMillis();
         Long startTime = endTime - 4 * 60 * 60 * 1000;
 
         Table<String/*topics*/, String/*metric*/, MetricPointVO> ret = topicMetricESDAO.getTopicsAggsMetricsValue(
-                clusterId, Arrays.asList(topic, topic1), metrics, "max", startTime, endTime);
+                clusterId, topicList, metrics, "max", startTime, endTime);
         assert null != ret;
     }
 
@@ -90,7 +95,14 @@ public class TopicMetricESDAOTest extends KnowStreamApplicationTest {
         String topic        = "know-streaming-test-251";
         String topic1       = "know-streaming-123";
         String topic2       = "1209test";
-        List<String>   metrics  = Arrays.asList("BytesIn", "BytesIn_min_5");
+        List<String> metrics = Arrays.asList(
+                "Messages",                         "BytesIn_min_15",       "BytesRejected",
+                "PartitionURP",                     "HealthCheckTotal",     "ReplicationCount",
+                "CollectMetricsCostTimeUnitSec",    "FailedFetchRequests",  "BytesIn_min_5",
+                "HealthScore",                      "LogSize",              "BytesOut",
+                "FailedProduceRequests",            "BytesOut_min_15",      "BytesIn",
+                "BytesOut_min_5",                   "MessagesIn",           "TotalProduceRequests",
+                "HealthCheckPassed");
 
 
         List<TopicMetricPO> topicMetricPO = topicMetricESDAO.listTopicLatestMetric(clusterId, Arrays.asList(topic,topic1,topic2), metrics);
@@ -101,7 +113,14 @@ public class TopicMetricESDAOTest extends KnowStreamApplicationTest {
     @Test
     public void listBrokerMetricsByTopicsTest(){
         Long clusterId = 2L;
-        List<String>   metrics  = Arrays.asList("BytesIn", "BytesIn_min_5");
+        List<String>   metrics  = Arrays.asList(
+                "Messages",                         "BytesIn_min_15",       "BytesRejected",
+                "PartitionURP",                     "HealthCheckTotal",     "ReplicationCount",
+                "CollectMetricsCostTimeUnitSec",    "FailedFetchRequests",  "BytesIn_min_5",
+                "HealthScore",                      "LogSize",              "BytesOut",
+                "FailedProduceRequests",            "BytesOut_min_15",      "BytesIn",
+                "BytesOut_min_5",                   "MessagesIn",           "TotalProduceRequests",
+                "HealthCheckPassed");
         List<String>   topics   = Arrays.asList("QAtest_1_13", "__consumer_offsets");
         Long endTime   = System.currentTimeMillis();
         Long startTime = endTime - 4 * 60 * 60 * 1000;

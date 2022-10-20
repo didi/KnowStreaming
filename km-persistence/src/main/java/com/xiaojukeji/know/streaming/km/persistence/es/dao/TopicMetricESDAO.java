@@ -337,12 +337,13 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
                 try {
                     if (null != esBucket.getUnusedMap().get(KEY)) {
                         Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        String  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE).toString();
+                        Object  value  = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
+                        if(value       == null){return;}
 
                         MetricPointVO metricPoint = new MetricPointVO();
                         metricPoint.setAggType(aggType);
                         metricPoint.setTimeStamp(timestamp);
-                        metricPoint.setValue(value);
+                        metricPoint.setValue(value.toString());
                         metricPoint.setName(metric);
 
                         metricPoints.add(metricPoint);
