@@ -24,7 +24,6 @@ import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreSer
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.GroupMetricESDAO;
-import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,7 +182,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
 
         List<GroupMetrics> metricsList = new ArrayList<>();
         try {
-            Map<TopicPartition, Long> groupOffsetMap = groupService.getGroupOffset(clusterId, groupName);
+            Map<TopicPartition, Long> groupOffsetMap = groupService.getGroupOffsetFromKafka(clusterId, groupName);
 
             // 组织 GROUP_METRIC_OFFSET_CONSUMED 指标
             for (Map.Entry<TopicPartition, Long> entry: groupOffsetMap.entrySet()) {

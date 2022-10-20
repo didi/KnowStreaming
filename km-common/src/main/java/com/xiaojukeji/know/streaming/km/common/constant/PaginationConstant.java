@@ -18,4 +18,14 @@ public class PaginationConstant {
      * 默认页大小
      */
     public static final Integer DEFAULT_PAGE_SIZE = 10;
+
+    /**
+     * group列表的默认排序规则
+     */
+    public static final String DEFAULT_GROUP_SORTED_FIELD = "name";
+
+    /**
+     * groupTopic列表的默认排序规则
+     */
+    public static final String DEFAULT_GROUP_TOPIC_SORTED_FIELD = "topicName";
 }

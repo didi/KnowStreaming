@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel(value = "GroupTopic信息")
-public class GroupTopicOverviewVO extends GroupTopicBasicVO{
+public class GroupTopicOverviewVO extends GroupTopicBasicVO {
     @ApiModelProperty(value = "最大Lag", example = "12345678")
     private Long maxLag;
 }
