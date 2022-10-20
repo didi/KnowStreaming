@@ -55,7 +55,7 @@ public class GroupController {
     public Result<GroupMetadataCombineExistVO> getGroupMetadataCombineExist(@PathVariable Long clusterPhyId,
                                                                             @PathVariable String groupName,
                                                                             @PathVariable String topicName) {
-        GroupMemberPO po = groupService.getGroupFromDB(clusterPhyId, groupName, topicName);
+        GroupMemberPO po = groupService.getGroupTopicFromDB(clusterPhyId, groupName, topicName);
         if (po == null) {
             return Result.buildSuc(new GroupMetadataCombineExistVO(clusterPhyId, groupName, topicName, false));
         }

@@ -1,8 +1,10 @@
 package com.xiaojukeji.know.streaming.km.biz.topic;
 
-import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.topic.TopicRecordDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicOverviewVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.TopicBrokersPartitionsSummaryVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.TopicRecordVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.TopicStateVO;
@@ -23,4 +25,6 @@ public interface TopicStateManager {
     Result<List<TopicPartitionVO>> getTopicPartitions(Long clusterPhyId, String topicName, List<String> metricsNames);
 
     Result<TopicBrokersPartitionsSummaryVO> getTopicBrokersPartitionsSummary(Long clusterPhyId, String topicName);
+
+    PaginationResult<GroupTopicOverviewVO> pagingTopicGroupsOverview(Long clusterPhyId, String topicName, String searchGroupName, PaginationBaseDTO dto);
 }
