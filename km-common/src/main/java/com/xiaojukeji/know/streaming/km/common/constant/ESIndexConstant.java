@@ -558,7 +558,7 @@ public class ESIndexConstant {
     public final static String REPLICATION_TEMPLATE = "{\n" +
             "    \"order\" : 10,\n" +
             "    \"index_patterns\" : [\n" +
-            "      \"ks_kafka_partition_metric*\"\n" +
+            "      \"ks_kafka_replication_metric*\"\n" +
             "    ],\n" +
             "    \"settings\" : {\n" +
             "      \"index\" : {\n" +
@@ -610,29 +610,6 @@ public class ESIndexConstant {
             "            }\n" +
             "          }\n" +
             "        },\n" +
-            "        \"timestamp\" : {\n" +
-            "          \"format\" : \"yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis\",\n" +
-            "          \"index\" : true,\n" +
-            "          \"type\" : \"date\",\n" +
-            "          \"doc_values\" : true\n" +
-            "        }\n" +
-            "      }\n" +
-            "    },\n" +
-            "    \"aliases\" : { }\n" +
-            "  }[root@10-255-0-23 template]# cat ks_kafka_replication_metric\n" +
-            "PUT _template/ks_kafka_replication_metric\n" +
-            "{\n" +
-            "    \"order\" : 10,\n" +
-            "    \"index_patterns\" : [\n" +
-            "      \"ks_kafka_replication_metric*\"\n" +
-            "    ],\n" +
-            "    \"settings\" : {\n" +
-            "      \"index\" : {\n" +
-            "        \"number_of_shards\" : \"10\"\n" +
-            "      }\n" +
-            "    },\n" +
-            "    \"mappings\" : {\n" +
-            "      \"properties\" : {\n" +
             "        \"timestamp\" : {\n" +
             "          \"format\" : \"yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis\",\n" +
             "          \"index\" : true,\n" +
