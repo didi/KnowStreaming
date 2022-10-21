@@ -92,7 +92,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         Table<String, Long, List<MetricPointVO>> table = HashBasedTable.create();
 
         //2、查询指标
-        for(String metric : metricBrokerIds.keySet()){
+        for(String metric : metrics) {
             table.putAll(
                     this.listBrokerMetricsByBrokerIds(
                             clusterPhyId,
@@ -207,11 +207,12 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         }
 
         for(String metric : metrics){
-            String value = esAggrMap.get(metric).getUnusedMap().get(VALUE).toString();
+            Object value = esAggrMap.get(metric).getUnusedMap().get(VALUE);
+            if(null      == value){continue;}
 
             MetricPointVO metricPoint = new MetricPointVO();
             metricPoint.setAggType(aggType);
-            metricPoint.setValue(value);
+            metricPoint.setValue(value.toString());
             metricPoint.setName(metric);
 
             metricMap.put(metric, metricPoint);
@@ -243,12 +244,13 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
                 try {
                     if (null != esBucket.getUnusedMap().get(KEY)) {
                         Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        String  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE).toString();
+                        Object  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
+                        if(null           == value){return;}
 
                         MetricPointVO metricPoint = new MetricPointVO();
                         metricPoint.setAggType(aggType);
                         metricPoint.setTimeStamp(timestamp);
-                        metricPoint.setValue(value);
+                        metricPoint.setValue(value.toString());
                         metricPoint.setName(metric);
 
                         metricPoints.add(metricPoint);
@@ -290,13 +292,14 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
                 try {
                     if (null != esBucket.getUnusedMap().get(KEY)) {
                         Long brokerId = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        Double value  = Double.valueOf(esBucket.getAggrMap().get(HIST).getBucketList().get(0).getAggrMap()
-                                .get(metric).getUnusedMap().get(VALUE).toString());
+                        Object value  = esBucket.getAggrMap().get(HIST).getBucketList().get(0).getAggrMap()
+                                .get(metric).getUnusedMap().get(VALUE);
+                        if(null       == value){return;}
 
                         List<Tuple<Long, Double>> brokerValue = (null == metricBrokerValueMap.get(metric)) ?
                                 new ArrayList<>() : metricBrokerValueMap.get(metric);
 
-                        brokerValue.add(new Tuple<>(brokerId, value));
+                        brokerValue.add(new Tuple<>(brokerId, Double.valueOf(value.toString())));
                         metricBrokerValueMap.put(metric, brokerValue);
                     }
                 }catch (Exception e){

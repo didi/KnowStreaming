@@ -45,7 +45,14 @@
 
 ## `Know Streaming` 简介
 
-`Know Streaming`是一套云原生的Kafka管控平台，脱胎于众多互联网内部多年的Kafka运营实践经验，专注于Kafka运维管控、监控告警、资源治理、多活容灾等核心场景。在用户体验、监控、运维管控上进行了平台化、可视化、智能化的建设，提供一系列特色的功能，极大地方便了用户和运维人员的日常使用，让普通运维人员都能成为Kafka专家。整体具有以下特点：
+`Know Streaming`是一套云原生的Kafka管控平台，脱胎于众多互联网内部多年的Kafka运营实践经验，专注于Kafka运维管控、监控告警、资源治理、多活容灾等核心场景。在用户体验、监控、运维管控上进行了平台化、可视化、智能化的建设，提供一系列特色的功能，极大地方便了用户和运维人员的日常使用，让普通运维人员都能成为Kafka专家。
+
+我们现在正在收集 Know Streaming 用户信息，以帮助我们进一步改进  Know Streaming。
+请在 [issue#663](https://github.com/didi/KnowStreaming/issues/663) 上提供您的使用信息来支持我们：[谁在使用 Know Streaming](https://github.com/didi/KnowStreaming/issues/663) 
+
+
+
+整体具有以下特点：
 
 - 👀 &nbsp;**零侵入、全覆盖**
   - 无需侵入改造 `Apache Kafka` ，一键便能纳管 `0.10.x` ~ `3.x.x` 众多版本的Kafka，包括 `ZK` 或 `Raft` 运行模式的版本，同时在兼容架构上具备良好的扩展性，帮助您提升集群管理水平；
@@ -99,9 +106,13 @@
 
 ## 成为社区贡献者
 
-点击 [这里](CONTRIBUTING.md)，了解如何成为 Know Streaming 的贡献者
+1. [贡献源码](https://doc.knowstreaming.com/product/10-contribution) 了解如何成为 Know Streaming 的贡献者
+2. [具体贡献流程](https://doc.knowstreaming.com/product/10-contribution#102-贡献流程)
+3. [开源激励计划](https://doc.knowstreaming.com/product/10-contribution#105-开源激励计划)
+4. [贡献者名单](https://doc.knowstreaming.com/product/10-contribution#106-贡献者名单)
 
 
+获取KnowStreaming开源社区证书。
 
 ## 加入技术交流群
 
@@ -134,6 +145,11 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 微信加群：添加`mike_zhangliang`、`PenceXie`的微信号备注KnowStreaming加群。
 <br/>
+
+加群之前有劳点一下 star，一个小小的 star 是对KnowStreaming作者们努力建设社区的动力。
+
+感谢感谢！！！
+
 <img width="116" alt="wx" src="https://user-images.githubusercontent.com/71620349/192257217-c4ebc16c-3ad9-485d-a914-5911d3a4f46b.png">
 
 ## Star History

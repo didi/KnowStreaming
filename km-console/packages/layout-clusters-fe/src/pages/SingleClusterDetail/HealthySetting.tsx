@@ -1,5 +1,6 @@
 /* eslint-disable react/display-name */
-import { Button, Divider, Drawer, Form, message, ProTable, Table, Utils } from 'knowdesign';
+import { Button, Divider, Drawer, Form, ProTable, Table, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { getHealthySettingColumn } from './config';
@@ -34,8 +35,8 @@ const HealthySetting = React.forwardRef((props: any, ref): JSX.Element => {
             item.configItem.indexOf('Group Re-Balance') > -1
               ? 'ReBalance'
               : item.configItem.includes('副本未同步')
-                ? 'UNDER_REPLICA'
-                : item.configItem;
+              ? 'UNDER_REPLICA'
+              : item.configItem;
 
           values[`weight_${item.configItemName}`] = itemValue?.weight;
           values[`value_${item.configItemName}`] = itemValue?.value;

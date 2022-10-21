@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Button, Form, Input, Select, message, Drawer, Space, Divider, Utils, Radio, AutoComplete, Alert } from 'knowdesign';
+import { Button, Form, Input, Select, Drawer, Space, Divider, Utils, Radio, AutoComplete, Alert } from 'knowdesign';
+import message from '@src/components/Message';
 import api from '@src/api';
 import { useParams } from 'react-router-dom';
 import { UsersProps } from '../SecurityUsers';

@@ -1,4 +1,5 @@
-import { AppContainer, Divider, Form, Input, List, message, Modal, Progress, Spin, Tooltip, Utils } from 'knowdesign';
+import { AppContainer, Divider, Form, Input, List, Modal, Progress, Spin, Tooltip, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import moment from 'moment';
 import API from '@src/api';
@@ -11,7 +12,7 @@ import { useIntl } from 'react-intl';
 import api, { MetricType } from '@src/api';
 import { getHealthClassName, getHealthProcessColor, getHealthText } from '../SingleClusterDetail/config';
 import { ClustersPermissionMap } from '../CommonConfig';
-import { getUnit, getDataNumberUnit } from '@src/constants/chartConfig';
+import { getDataUnit } from '@src/constants/chartConfig';
 import SmallChart from '@src/components/SmallChart';
 import { SearchParams } from './HomePage';
 
@@ -235,14 +236,14 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
 
       // 如果单位是 字节 ，进行单位换算
       if (line.unit.toLowerCase().includes('byte')) {
-        const [unit, size] = getUnit(line.value);
+        const [unit, size] = getDataUnit['Memory'](line.value);
         line.value = Number((line.value / size).toFixed(2));
         line.unit = line.unit.toLowerCase().replace('byte', unit);
       }
 
       // Messages 指标值特殊处理
       if (line.metricName === 'LeaderMessages') {
-        const [unit, size] = getDataNumberUnit(line.value);
+        const [unit, size] = getDataUnit['Num'](line.value);
         line.value = Number((line.value / size).toFixed(2));
         line.unit = unit + line.unit;
       }

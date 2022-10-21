@@ -1,4 +1,5 @@
-import { Button, Divider, Drawer, Form, Input, InputNumber, message, Radio, Select, Spin, Space, Utils } from 'knowdesign';
+import { Button, Divider, Drawer, Form, Input, InputNumber, Radio, Select, Spin, Space, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import * as React from 'react';
 import { useIntl } from 'react-intl';
 import api from '@src/api';

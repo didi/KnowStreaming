@@ -262,12 +262,30 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
         return version;
     }
 
-
-
     @Override
     public Integer countAllBrokers() {
         LambdaQueryWrapper<BrokerPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         return brokerDAO.selectCount(lambdaQueryWrapper);
+    }
+
+    @Override
+    public boolean allServerDown(Long clusterPhyId) {
+        List<BrokerPO> poList = this.getAllBrokerPOsFromDB(clusterPhyId);
+        if (ValidateUtils.isEmptyList(poList)) {
+            return false;
+        }
+
+        return poList.stream().filter(elem -> elem.getStatus().equals(Constant.DOWN)).count() == poList.size();
+    }
+
+    @Override
+    public boolean existServerDown(Long clusterPhyId) {
+        List<BrokerPO> poList = this.getAllBrokerPOsFromDB(clusterPhyId);
+        if (ValidateUtils.isEmptyList(poList)) {
+            return false;
+        }
+
+        return poList.stream().filter(elem -> elem.getStatus().equals(Constant.DOWN)).count() > 0;
     }
 
     /**************************************************** private method ****************************************************/
@@ -343,17 +361,9 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
     private Broker getStartTimeAndBuildBroker(Long clusterPhyId, Node newNode, JmxConfig jmxConfig) {
         try {
-            Object object = jmxDAO.getJmxValue(
-                    clusterPhyId,
-                    newNode.id(),
-                    newNode.host(),
-                    null,
-                    jmxConfig,
-                    new ObjectName("java.lang:type=Runtime"),
-                    "StartTime"
-            );
+            Long startTime = jmxDAO.getServerStartTime(clusterPhyId, newNode.host(), null, jmxConfig);
 
-            return Broker.buildFrom(clusterPhyId, newNode, object != null? (Long) object: null);
+            return Broker.buildFrom(clusterPhyId, newNode, startTime);
         } catch (Exception e) {
             log.error("class=BrokerServiceImpl||method=getStartTimeAndBuildBroker||clusterPhyId={}||brokerNode={}||jmxConfig={}||errMsg=exception!", clusterPhyId, newNode, jmxConfig, e);
         }

@@ -20,4 +20,16 @@
         VALUES
         (#{dimension}, #{configName}, #{clusterPhyId}, #{resName}, #{passed})
   </insert>
+
+  <insert id="batchReplace">
+    insert into ks_km_health_check_result (dimension, config_name, cluster_phy_id, res_name, passed)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.dimension}, #{item.configName}, #{item.clusterPhyId}, #{item.resName}, #{item.passed})
+    </foreach>
+    on duplicate key update
+    dimension = dimension, config_name = config_name, cluster_phy_id = cluster_phy_id,
+    res_name = res_name, passed = passed
+  </insert>
+
 </mapper>

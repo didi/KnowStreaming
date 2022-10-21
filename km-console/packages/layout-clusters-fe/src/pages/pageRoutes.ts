@@ -10,7 +10,7 @@ import BrokerControllerChangeLog from './BrokerControllerChangeLog';
 import TopicBoard from './TopicDashboard';
 import TopicList from './TopicList';
 
-import Consumers from './Consumers/index';
+import Consumers from './ConsumerGroup';
 
 import Jobs from './Jobs';
 

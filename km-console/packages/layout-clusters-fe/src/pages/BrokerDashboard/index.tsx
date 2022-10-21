@@ -1,7 +1,7 @@
 import React from 'react';
 import { MetricType } from '@src/api';
 import BrokerHealthCheck from '@src/components/CardBar/BrokerHealthCheck';
-import DashboardDragChart from '@src/components/DashboardDragChart';
+import DraggableCharts from '@src/components/DraggableCharts';
 import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import { AppContainer } from 'knowdesign';
 
@@ -19,7 +19,7 @@ const BrokerDashboard = (): JSX.Element => {
         />
       </div>
       <BrokerHealthCheck />
-      <DashboardDragChart type={MetricType.Broker} />
+      <DraggableCharts type={MetricType.Broker} />
     </>
   );
 };

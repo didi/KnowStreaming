@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import { DProLayout, AppContainer, RouteGuard, notification, Spin } from 'knowdesign';
+import { DProLayout, AppContainer, RouteGuard, Spin } from 'knowdesign';
+import notification from '@src/components/Notification';
 import { pageRoutes } from './pageRoutes';
 import { leftMenus, systemKey } from '@src/constants/menu';
 import { ClustersPermissionMap } from './CommonConfig';

@@ -1,19 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Utils,
-  Drawer,
-  Button,
-  Form,
-  Space,
-  Divider,
-  AppContainer,
-  Radio,
-  InputNumber,
-  Transfer,
-  Select,
-  message,
-  Tooltip,
-} from 'knowdesign';
+import { Utils, Drawer, Button, Form, Space, Divider, AppContainer, Radio, InputNumber, Transfer, Select, Tooltip } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import CronInput from './CronInput';
 import BalanceEditTable from './BalanceEditTable';

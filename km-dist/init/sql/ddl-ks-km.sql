@@ -355,3 +355,37 @@ CREATE TABLE `ks_km_app_node` (
     PRIMARY KEY (`id`),
     KEY `idx_app_host` (`app_name`,`host_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='km集群部署的node信息';
+
+
+DROP TABLE IF EXISTS `ks_km_zookeeper`;
+CREATE TABLE `ks_km_zookeeper` (
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '物理集群ID',
+    `host` varchar(128) NOT NULL DEFAULT '' COMMENT 'zookeeper主机名',
+    `port` int(16) NOT NULL DEFAULT '-1' COMMENT 'zookeeper端口',
+    `role` varchar(16) NOT NULL DEFAULT '-1' COMMENT '角色, leader follower observer',
+    `version` varchar(128) NOT NULL DEFAULT '' COMMENT 'zookeeper版本',
+    `status` int(16) NOT NULL DEFAULT '0' COMMENT '状态: 1存活，0未存活，11存活但是4字命令使用不了',
+    `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_cluster_phy_id_host_port` (`cluster_phy_id`,`host`, `port`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Zookeeper信息表';
+
+
+DROP TABLE IF EXISTS `ks_km_group`;
+CREATE TABLE `ks_km_group` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群id',
+     `name` varchar(192) COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT 'Group名称',
+     `member_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '成员数',
+     `topic_members` text CHARACTER SET utf8 COMMENT 'group消费的topic列表',
+     `partition_assignor` varchar(255) CHARACTER SET utf8 NOT NULL COMMENT '分配策略',
+     `coordinator_id` int(11) NOT NULL COMMENT 'group协调器brokerId',
+     `type` int(11) NOT NULL COMMENT 'group类型 0：consumer 1：connector',
+     `state` varchar(64) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '状态',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_cluster_phy_id_name` (`cluster_phy_id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Group信息表';

@@ -1,20 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  Switch,
-  Modal,
-  message,
-  ProTable,
-  Drawer,
-  Space,
-  Divider,
-  Tooltip,
-  AppContainer,
-  Utils,
-} from 'knowdesign';
+import { Button, Form, Input, Select, Switch, Modal, ProTable, Drawer, Space, Divider, Tooltip, AppContainer, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import { PlusOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -81,7 +67,7 @@ const EditConfigDrawer = forwardRef((_, ref) => {
         // 如果内容可以格式化为 JSON，进行处理
         config.value = JSON.stringify(JSON.parse(config.value), null, 2);
       } catch (_) {
-        return;
+        //
       }
     }
     form.setFieldsValue({ ...config, status: config.status === 1 });
@@ -476,7 +462,7 @@ export default () => {
               rowKey: 'id',
               dataSource: data,
               paginationProps: pagination,
-              columns,
+              columns: columns as any,
               lineFillColor: true,
               attrs: {
                 onChange: onTableChange,

@@ -24,6 +24,7 @@ import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
+import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,9 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
     @Autowired
     private KafkaControllerService kafkaControllerService;
 
+    @Autowired
+    private KafkaJMXClient kafkaJMXClient;
+
     @Override
     public PaginationResult<ClusterBrokersOverviewVO> getClusterPhyBrokersOverview(Long clusterPhyId, ClusterBrokersOverviewDTO dto) {
         // 获取集群Broker列表
@@ -75,6 +79,10 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
         //获取controller信息
         KafkaController kafkaController = kafkaControllerService.getKafkaControllerFromDB(clusterPhyId);
 
+        //获取jmx状态信息
+        Map<Integer, Boolean> jmxConnectedMap = new HashMap<>();
+        brokerList.forEach(elem -> jmxConnectedMap.put(elem.getBrokerId(), kafkaJMXClient.getClientWithCheck(clusterPhyId, elem.getBrokerId()) != null));
+
         // 格式转换
         return PaginationResult.buildSuc(
                 this.convert2ClusterBrokersOverviewVOList(
@@ -83,7 +91,8 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
                         metricsResult.getData(),
                         groupTopic,
                         transactionTopic,
-                        kafkaController
+                        kafkaController,
+                        jmxConnectedMap
                 ),
                 paginationResult
         );
@@ -165,22 +174,24 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
                                                                                 List<BrokerMetrics> metricsList,
                                                                                 Topic groupTopic,
                                                                                 Topic transactionTopic,
-                                                                                KafkaController kafkaController) {
-        Map<Integer, BrokerMetrics> metricsMap = metricsList == null? new HashMap<>(): metricsList.stream().collect(Collectors.toMap(BrokerMetrics::getBrokerId, Function.identity()));
+                                                                                KafkaController kafkaController,
+                                                                                Map<Integer, Boolean> jmxConnectedMap) {
+        Map<Integer, BrokerMetrics> metricsMap = metricsList == null ? new HashMap<>() : metricsList.stream().collect(Collectors.toMap(BrokerMetrics::getBrokerId, Function.identity()));
 
-        Map<Integer, Broker> brokerMap = brokerList == null? new HashMap<>(): brokerList.stream().collect(Collectors.toMap(Broker::getBrokerId, Function.identity()));
+        Map<Integer, Broker> brokerMap = brokerList == null ? new HashMap<>() : brokerList.stream().collect(Collectors.toMap(Broker::getBrokerId, Function.identity()));
 
         List<ClusterBrokersOverviewVO> voList = new ArrayList<>(pagedBrokerIdList.size());
         for (Integer brokerId : pagedBrokerIdList) {
             Broker broker = brokerMap.get(brokerId);
             BrokerMetrics brokerMetrics = metricsMap.get(brokerId);
+            Boolean jmxConnected = jmxConnectedMap.get(brokerId);
 
-            voList.add(this.convert2ClusterBrokersOverviewVO(brokerId, broker, brokerMetrics, groupTopic, transactionTopic, kafkaController));
+            voList.add(this.convert2ClusterBrokersOverviewVO(brokerId, broker, brokerMetrics, groupTopic, transactionTopic, kafkaController, jmxConnected));
         }
         return voList;
     }
 
-    private ClusterBrokersOverviewVO convert2ClusterBrokersOverviewVO(Integer brokerId, Broker broker, BrokerMetrics brokerMetrics, Topic groupTopic, Topic transactionTopic, KafkaController kafkaController) {
+    private ClusterBrokersOverviewVO convert2ClusterBrokersOverviewVO(Integer brokerId, Broker broker, BrokerMetrics brokerMetrics, Topic groupTopic, Topic transactionTopic, KafkaController kafkaController, Boolean jmxConnected) {
         ClusterBrokersOverviewVO clusterBrokersOverviewVO = new ClusterBrokersOverviewVO();
         clusterBrokersOverviewVO.setBrokerId(brokerId);
         if (broker != null) {
@@ -203,6 +214,7 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
         }
 
         clusterBrokersOverviewVO.setLatestMetrics(brokerMetrics);
+        clusterBrokersOverviewVO.setJmxConnected(jmxConnected);
         return clusterBrokersOverviewVO;
     }
 

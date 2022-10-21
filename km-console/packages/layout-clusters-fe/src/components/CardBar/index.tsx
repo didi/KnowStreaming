@@ -138,7 +138,7 @@ const CardBar = (props: CardBarProps) => {
       dataIndex: 'updateTime',
       key: 'updateTime',
       render: (value: number) => {
-        return moment(value).format('YYYY-MM-DD hh:mm:ss');
+        return moment(value).format('YYYY-MM-DD HH:mm:ss');
       },
     },
     {
