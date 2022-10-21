@@ -11,9 +11,6 @@
   - logback-spring.xml：日志配置
 
 
-- docs：产品相关文档
-
-
 - helm：安装KnowStreaming的Helm相关文件
 
 
