@@ -17,7 +17,6 @@ import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
@@ -77,32 +76,36 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
     }
 
     @Override
-    public Result<ReplicationMetrics> collectReplicaMetricsFromKafkaWithCache(Long clusterPhyId,
-                                                                              String topic,
-                                                                              Integer brokerId,
-                                                                              Integer partitionId,
-                                                                              String metric) {
-        String replicaMetricsKey = CollectedMetricsLocalCache.genReplicaMetricCacheKey(clusterPhyId, brokerId, topic, partitionId, metric);
+    public Result<ReplicationMetrics> collectReplicaMetricsFromKafka(Long clusterId, String topicName, Integer partitionId, Integer brokerId, List<String> metricNameList) {
+        ReplicationMetrics metrics = new ReplicationMetrics(clusterId, topicName, brokerId, partitionId);
+        for (String metricName: metricNameList) {
+            try {
+                if (metrics.getMetrics().containsKey(metricName)) {
+                    continue;
+                }
 
-        Float keyValue = CollectedMetricsLocalCache.getReplicaMetrics(replicaMetricsKey);
-        if(null != keyValue){
-            ReplicationMetrics replicationMetrics = new ReplicationMetrics(clusterPhyId, topic, partitionId, brokerId);
-            replicationMetrics.putMetric(metric, keyValue);
-            return Result.buildSuc(replicationMetrics);
+                Result<ReplicationMetrics> ret = this.collectReplicaMetricsFromKafka(
+                        clusterId,
+                        metrics.getTopic(),
+                        metrics.getBrokerId(),
+                        metrics.getPartitionId(),
+                        metricName
+                );
+
+                if (null == ret || ret.failed() || null == ret.getData()) {
+                    continue;
+                }
+
+                metrics.putMetric(ret.getData().getMetrics());
+            } catch (Exception e) {
+                LOGGER.error(
+                        "method=collectReplicaMetricsFromKafka||clusterPhyId={}||topicName={}||partition={}||brokerId={}||metricName={}||errMsg=exception!",
+                        clusterId, topicName, partitionId, brokerId, e
+                );
+            }
         }
 
-        Result<ReplicationMetrics> ret = collectReplicaMetricsFromKafka(clusterPhyId, topic, partitionId, brokerId, metric);
-        if(null == ret || ret.failed() || null == ret.getData()){return ret;}
-
-        // 更新cache
-        ret.getData().getMetrics().entrySet().stream().forEach(
-                metricNameAndValueEntry -> CollectedMetricsLocalCache.putReplicaMetrics(
-                        replicaMetricsKey,
-                        metricNameAndValueEntry.getValue()
-                )
-        );
-
-        return ret;
+        return Result.buildSuc(metrics);
     }
 
     @Override
@@ -167,8 +170,8 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
         Integer     brokerId    = metricParam.getBrokerId();
         Integer     partitionId = metricParam.getPartitionId();
 
-        Result<ReplicationMetrics> endRet   = this.collectReplicaMetricsFromKafkaWithCache(clusterId, topic, brokerId, partitionId, REPLICATION_METRIC_LOG_END_OFFSET);
-        Result<ReplicationMetrics> startRet = this.collectReplicaMetricsFromKafkaWithCache(clusterId, topic, brokerId, partitionId, REPLICATION_METRIC_LOG_START_OFFSET);
+        Result<ReplicationMetrics> endRet   = this.collectReplicaMetricsFromKafka(clusterId, topic, brokerId, partitionId, REPLICATION_METRIC_LOG_END_OFFSET);
+        Result<ReplicationMetrics> startRet = this.collectReplicaMetricsFromKafka(clusterId, topic, brokerId, partitionId, REPLICATION_METRIC_LOG_START_OFFSET);
 
         ReplicationMetrics replicationMetrics = new ReplicationMetrics(clusterId, topic, brokerId, partitionId);
         if(null != endRet && endRet.successful() && null != startRet && startRet.successful()){
