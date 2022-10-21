@@ -91,7 +91,7 @@ public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationM
                     continue;
                 }
 
-                Result<ReplicationMetrics> ret = replicaMetricService.collectReplicaMetricsFromKafkaWithCache(
+                Result<ReplicationMetrics> ret = replicaMetricService.collectReplicaMetricsFromKafka(
                         clusterPhyId,
                         metrics.getTopic(),
                         metrics.getBrokerId(),
