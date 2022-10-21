@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Form, Input, Modal, notification, Utils } from 'knowdesign';
+import { Button, Form, Input, Modal, Utils } from 'knowdesign';
+import notification from '@src/components/Notification';
 import { IconFont } from '@knowdesign/icons';
 import Api from '@src/api/index';
 

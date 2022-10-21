@@ -45,7 +45,7 @@ const metricWithType = [
 ];
 
 export default (props: any) => {
-  const { scene } = props;
+  const { scene, visible, setVisible, hashData } = props;
   const params = useParams<{
     clusterId: string;
   }>();
@@ -63,14 +63,22 @@ export default (props: any) => {
   const [pageIndex, setPageIndex] = useState(1);
   const [pageTotal, setPageTotal] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [consumerListLoading, setConsumerListLoading] = useState(false);
+  const [consumerListLoading, setConsumerListLoading] = useState(true);
   const [consumerChartLoading, setConsumerChartLoading] = useState(false);
-  const [hashData, setHashData] = useState<HashData>({ groupName: '', topicName: '' });
-  const [visible, setVisible] = useState(false);
+  // const [hashData, setHashData] = useState<HashData>({ groupName: '', topicName: '' });
+  // const [visible, setVisible] = useState(false);
   const [sortObj, setSortObj] = useState<{
     sortField: string;
     sortType: 'desc' | 'asc' | '';
   }>({ sortField: '', sortType: '' });
+  const [pagination, setPagination] = useState<any>({
+    current: 1,
+    pageSize: 10,
+    position: 'bottomRight',
+    showSizeChanger: true,
+    pageSizeOptions: ['10', '20', '50', '100', '200', '500'],
+    showTotal: (total: number) => `共 ${total} 条目`,
+  });
   const clusterId = Number(params.clusterId);
   const columns = [
     {
@@ -158,18 +166,28 @@ export default (props: any) => {
       width: 200,
     },
   ];
-  const getTopicGroupMetric = (hashData: HashData) => {
+  const getTopicGroupMetric = ({
+    hashData,
+    pagination = { current: 1, pageSize: 10 },
+    sorter = {},
+  }: {
+    hashData: HashData;
+    pagination?: any;
+    sorter?: any;
+  }) => {
     setConsumerListLoading(true);
     const params: any = {
       // metricRealTimes: metricWithType,
       latestMetricNames: metricConsts,
-      pageNo: pageIndex,
-      pageSize,
+      pageNo: pagination.current,
+      pageSize: pagination.pageSize,
+      sortField: sorter.field || undefined,
+      sortType: sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : undefined,
     };
-    if (sortObj.sortField && sortObj.sortType) {
-      params.sortField = sortObj.sortField;
-      params.sortType = sortObj.sortType;
-    }
+    // if (sorter.sortField && sorter.sortType) {
+    //   params.sortField = sorter.sortField;
+    //   params.sortType = sorter.sortType;
+    // }
     return Utils.post(
       Api.getTopicGroupMetric({
         clusterId,
@@ -177,14 +195,20 @@ export default (props: any) => {
         topicName: hashData.topicName,
       }),
       params
-    ).then((data: any) => {
-      if (!data) return;
-      setConsumerListLoading(false);
-      setConsumerList(data?.bizData);
-      setPageIndex(data?.pagination?.pageNo);
-      setPageSize(data?.pagination?.pageSize);
-      setPageTotal(data?.pagination?.total);
-    });
+    )
+      .then((data: any) => {
+        if (!data) return;
+
+        setPagination({
+          current: data.pagination?.pageNo,
+          pageSize: data.pagination?.pageSize,
+          total: data.pagination?.total,
+        });
+        setConsumerList(data?.bizData);
+      })
+      .finally(() => {
+        setConsumerListLoading(false);
+      });
   };
   const getTopicGroupPartitionsHistory = (hashData: HashData) => {
     return Utils.request(Api.getTopicGroupPartitionsHistory(clusterId, hashData.groupName), {
@@ -197,8 +221,8 @@ export default (props: any) => {
   const getTopicGroupMetricHistory = (partitions: Array<any>, hashData: HashData) => {
     const params = {
       aggType: 'sum',
-      groupTopics: partitions.map((p) => ({
-        partition: p.partition,
+      groupTopics: partitions?.map((p) => ({
+        partition: p.value,
         topic: hashData.topicName,
       })),
       group: hashData.groupName,
@@ -214,6 +238,11 @@ export default (props: any) => {
   const getConsumersMetadata = (hashData: HashData) => {
     return Utils.request(Api.getConsumersMetadata(clusterId, hashData.groupName, hashData.topicName));
   };
+
+  const getTopicsMetaData = (hashData: HashData) => {
+    return Utils.request(Api.getTopicsMetaData(hashData.topicName, clusterId));
+  };
+
   const onClose = () => {
     setVisible(false);
     setSortObj({
@@ -221,9 +250,15 @@ export default (props: any) => {
       sortType: '',
     });
     // clean hash'
-    scene === 'topicDetail' && history.goBack();
-    scene !== 'topicDetail' && window.history.pushState('', '', location.pathname);
+    // scene === 'topicDetail' && history.goBack();
+    // scene !== 'topicDetail' && window.history.pushState('', '', location.pathname);
   };
+
+  const onTableChange = (pagination: any, filters: any, sorter: any) => {
+    getTopicGroupMetric({ hashData, pagination, sorter });
+    // setPageIndex(pagination.current);
+  };
+
   useEffect(() => {
     if (curPartition === '' || allGroupMetricsData.length === 0) return;
     const filteredData = allGroupMetricsData.map((item) => {
@@ -259,44 +294,52 @@ export default (props: any) => {
     });
     setGroupMetricsData(filteredData);
   }, [curPartition, allGroupMetricsData]);
+
   useEffect(() => {
-    visible && getTopicGroupMetric(hashData);
-  }, [sortObj]);
-  useEffect(() => {
-    const hashData = hashDataParse(location.hash);
+    // const hashData = hashDataParse(location.hash);
     if (!hashData.groupName || !hashData.topicName) return;
-    setHashData(hashData);
+    // setHashData(hashData);
     // 获取分区列表 为图表模式做准备
-    getConsumersMetadata(hashData).then((res: any) => {
-      if (!res.exist) {
-        setVisible(false);
-        history.push(`/cluster/${params?.clusterId}/consumers`);
-        return;
-      }
-      setVisible(true);
-      getTopicGroupPartitionsHistory(hashData)
-        .then((data: any) => {
-          if (data.length > 0) {
-            setCurPartition(data[0].partition);
-          }
-          setPartitionList(data);
-          return data;
-        })
-        .then((data) => {
-          getTopicGroupMetricHistory(data, hashData);
-        })
-        .catch((e) => {
-          history.push(`/cluster/${params?.clusterId}/consumers`);
+    visible &&
+      getConsumersMetadata(hashData).then((res: any) => {
+        if (!res.exist) {
           setVisible(false);
-        });
-      // 获取Consumer列表 表格模式
-      getTopicGroupMetric(hashData);
-    });
-  }, [hashDataParse(location.hash).groupName]);
+          // history.push(`/cluster/${params?.clusterId}/consumers`);
+          return;
+        }
+        getTopicsMetaData(hashData)
+          // .then((data: any) => {
+          //   if (data.length > 0) {
+          //     setCurPartition(data[0].partition);
+          //   }
+          //   setPartitionList(data);
+          //   return data;
+          // })
+          .then((data: any) => {
+            const partitionLists = (data?.partitionIdList || []).map((item: any) => {
+              return {
+                label: item,
+                value: item,
+              };
+            });
+            setCurPartition(partitionLists?.[0]?.value);
+            setPartitionList(partitionLists);
+            getTopicGroupMetricHistory(partitionLists, hashData);
+          })
+          .catch((e) => {
+            // history.push(`/cluster/${params?.clusterId}/consumers`);
+            setVisible(false);
+          });
+        // 获取Consumer列表 表格模式
+        getTopicGroupMetric({ hashData: hashData as HashData });
+      });
+  }, [visible]);
+
   useEffect(() => {
     if (partitionList.length === 0) return;
     getTopicGroupMetricHistory(partitionList, hashData);
   }, [timeRange]);
+
   return (
     <Drawer
       push={false}
@@ -320,7 +363,7 @@ export default (props: any) => {
     >
       <div className="consumer-group-detail">
         <div className="title-and-mode">
-          <div className="title-and-mode-header">Consumer列表</div>
+          <div className="title-and-mode-header"></div>
           <div className="right">
             {showMode === 'chart' && (
               <Select
@@ -333,8 +376,8 @@ export default (props: any) => {
               >
                 <Option value={'__all__'}>全部Partition</Option>
                 {partitionList.map((partition) => (
-                  <Option key={partition.partition} value={partition.partition}>
-                    {partition.partition}
+                  <Option key={partition.value} value={partition.value}>
+                    {partition.value}
                   </Option>
                 ))}
               </Select>
@@ -391,25 +434,12 @@ export default (props: any) => {
               rowKey: 'partitionId',
               columns: columns,
               dataSource: consumerList,
-              paginationProps:
-                pageTotal > 0
-                  ? {
-                      current: pageIndex,
-                      total: pageTotal,
-                      pageSize: pageSize,
-                    }
-                  : null,
+              paginationProps: { ...pagination },
               attrs: {
                 sortDirections: ['descend', 'ascend', 'default'],
                 scroll: { x: 1032 },
                 // className: 'frameless-table', // 纯无边框表格类名
-                onChange: (pagination: any, filters: any, sorter: any) => {
-                  setSortObj({
-                    sortField: sorter.field || '',
-                    sortType: sorter.order ? sorter.order.substring(0, sorter.order.indexOf('end')) : '',
-                  });
-                  setPageIndex(pagination.current);
-                },
+                onChange: onTableChange,
                 bordered: false,
               },
             }}

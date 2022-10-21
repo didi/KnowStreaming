@@ -11,7 +11,6 @@ import {
   Transfer,
   Row,
   Col,
-  message,
   Tooltip,
   Spin,
   AppContainer,
@@ -19,6 +18,7 @@ import {
   Popover,
   IconFont,
 } from 'knowdesign';
+import message from '@src/components/Message';
 import moment from 'moment';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { defaultPagination } from '@src/constants/common';

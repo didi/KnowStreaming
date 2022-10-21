@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Button, DatePicker, Drawer, Form, Radio, Utils, Space, Divider } from 'knowdesign';
-import notification from '@src/components/Notification';
-
-import message from '@src/components/Message';
+import { Button, DatePicker, Drawer, Form, notification, Radio, Utils, Space, Divider, message } from 'knowdesign';
 import { useParams } from 'react-router-dom';
 import EditTable from '../TestingProduce/component/EditTable';
 import Api from '@src/api/index';
 import moment from 'moment';
 
-const CustomSelectResetTime = (props: { value?: string; onChange?: (val: number | string) => void }) => {
+const CustomSelectResetTime = (props: { value?: string; onChange?: (val: Number | String) => void }) => {
   const { value, onChange } = props;
   const [timeSetMode, setTimeSetMode] = useState('newest');
   useEffect(() => {
@@ -46,14 +43,13 @@ const CustomSelectResetTime = (props: { value?: string; onChange?: (val: number 
 };
 
 export default (props: any) => {
-  const { record } = props;
+  const { record, visible, setVisible } = props;
   const routeParams = useParams<{
     clusterId: string;
   }>();
   const [form] = Form.useForm();
   const defaultResetType = 'assignedTime';
   const [resetType, setResetType] = useState(defaultResetType);
-  const [resetOffsetVisible, setResetOffsetVisible] = useState(false);
   const customFormRef: any = React.createRef();
   const clusterPhyId = Number(routeParams.clusterId);
   const [partitionIdList, setPartitionIdList] = useState([]);
@@ -64,27 +60,28 @@ export default (props: any) => {
   }, []);
 
   useEffect(() => {
-    Utils.request(Api.getTopicsMetaData(record?.topicName, +routeParams.clusterId))
-      .then((res: any) => {
-        const partitionLists = (res?.partitionIdList || []).map((item: any) => {
-          return {
-            label: item,
-            value: item,
-          };
+    visible &&
+      Utils.request(Api.getTopicsMetaData(record?.topicName, +routeParams.clusterId))
+        .then((res: any) => {
+          const partitionLists = (res?.partitionIdList || []).map((item: any) => {
+            return {
+              label: item,
+              value: item,
+            };
+          });
+          setPartitionIdList(partitionLists);
+        })
+        .catch((err) => {
+          message.error(err);
         });
-        setPartitionIdList(partitionLists);
-      })
-      .catch((err) => {
-        message.error(err);
-      });
-  }, []);
+  }, [visible]);
   const confirm = () => {
     let tableData;
     if (customFormRef.current) {
       tableData = customFormRef.current.getTableData();
     }
     const formData = form.getFieldsValue();
-    const resetParams: any = {
+    let resetParams: any = {
       clusterId: clusterPhyId,
       createIfNotExist: false,
       groupName: record.groupName,
@@ -107,31 +104,21 @@ export default (props: any) => {
         notification.success({
           message: '重置offset成功',
         });
-        setResetOffsetVisible(false);
+        setVisible(false);
       } else {
         notification.error({
           message: '重置offset失败',
         });
-        setResetOffsetVisible(false);
+        setVisible(false);
       }
     });
   };
   return (
     <>
-      <Button
-        size="small"
-        type="primary"
-        onClick={(_) => {
-          setResetOffsetVisible(true);
-        }}
-      >
-        重置Offset
-      </Button>
-
       <Drawer
         title="重置Offset"
         width={480}
-        visible={resetOffsetVisible}
+        visible={visible}
         maskClosable={false}
         extra={
           <Space>
@@ -139,7 +126,7 @@ export default (props: any) => {
               size="small"
               style={{ marginRight: 8 }}
               onClick={(_) => {
-                setResetOffsetVisible(false);
+                setVisible(false);
               }}
             >
               取消
@@ -152,7 +139,7 @@ export default (props: any) => {
         }
         className="cluster-detail-consumer-resetoffset"
         onClose={(_) => {
-          setResetOffsetVisible(false);
+          setVisible(false);
         }}
       >
         <Form form={form} labelCol={{ span: 5 }} layout="vertical" className="reset-offset-form">

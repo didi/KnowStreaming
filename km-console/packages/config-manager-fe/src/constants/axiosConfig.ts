@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
-import { notification, Utils } from 'knowdesign';
+import { Utils } from 'knowdesign';
+import notification from '@src/components/Notification';
 
 export const goLogin = () => {
   if (!window.location.pathname.toLowerCase().startsWith('/login')) {
@@ -37,10 +38,9 @@ serviceInstance.interceptors.response.use(
   (config: any) => {
     const res: { code: number; message: string; data: any } = config.data;
     if (res.code !== 0 && res.code !== 200) {
-      const desc = res.message;
       notification.error({
-        message: desc,
-        duration: 3,
+        message: '错误信息',
+        description: res.message,
       });
       throw res;
     }

@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Button, DatePicker, Drawer, Form, Radio, Utils, Space, Divider } from 'knowdesign';
-import notification from '@src/components/Notification';
-
-import message from '@src/components/Message';
+import { Button, DatePicker, Drawer, Form, notification, Radio, Utils, Space, Divider, message } from 'knowdesign';
 import { useParams } from 'react-router-dom';
 import EditTable from '../TestingProduce/component/EditTable';
 import Api from '@src/api/index';
 import moment from 'moment';
 
-const CustomSelectResetTime = (props: { value?: string; onChange?: (val: number | string) => void }) => {
+const CustomSelectResetTime = (props: { value?: string; onChange?: (val: Number | String) => void }) => {
   const { value, onChange } = props;
   const [timeSetMode, setTimeSetMode] = useState('newest');
   useEffect(() => {
@@ -84,7 +81,7 @@ export default (props: any) => {
       tableData = customFormRef.current.getTableData();
     }
     const formData = form.getFieldsValue();
-    const resetParams: any = {
+    let resetParams: any = {
       clusterId: clusterPhyId,
       createIfNotExist: false,
       groupName: record.groupName,

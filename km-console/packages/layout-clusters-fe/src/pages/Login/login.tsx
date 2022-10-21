@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Button, Input, Row, InputNumber, Utils, message } from 'knowdesign';
+import { Form, Button, Input, Row, InputNumber, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import { FormMap } from './config';
 import Api from '../../api';
 import { useHistory } from 'react-router-dom';

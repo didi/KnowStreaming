@@ -11,6 +11,7 @@
 @select-item-selected-font-weight: normal;
 @btn-danger-bg: #F5483B;
 @btn-danger-border: #F5483B;
+@notification-icon-size: 20px;
 // 自定义变量
 // Input
 @input-bg: rgba(33, 37, 41, 0.06);
@@ -655,4 +656,110 @@
 
 .@{ant-prefix}-empty-img-default{
   width: 100% !important;
+}
+
+// message 样式覆盖
+.@{message-prefix-cls} {
+  &-notice-content {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    background: #fff;
+  }
+  &-success,
+  &-info,
+  &-warning,
+  &-error,
+  &-loading {
+    margin: unset;
+    padding: unset;
+    color: #000;
+    border-style: unset;
+    border-width: unset;
+    border-radius: unset;
+  }
+
+  &-success {
+    background-color: unset;
+    border-color: unset;
+  }
+
+  &-info,
+  &-loading {
+    background-color: unset;
+    border-color: unset;
+  }
+
+  &-warning {
+    background-color: unset;
+    border-color: unset;
+  }
+
+  &-error {
+    background-color: unset;
+    border-color: unset;
+  }
+
+  .@{iconfont-css-prefix} {
+    top: 2px;
+    color: unset;
+  }
+}
+
+// Notification 样式覆盖
+.@{notification-prefix-cls} {
+  &-notice {
+    width: 348px;
+    color: #000;
+    background-color: #fff;
+    border: unset;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.02), 0 4px 6px 6px rgba(0,0,0,0.02), 0 4px 6px 0 rgba(0,0,0,0.06);
+    &-message {
+      font-family: @font-family-bold;
+      font-size: 16px;
+      color: #000;
+    }
+    &-description {
+      font-size: 14px;
+      color: rgba(0,0,0,0.60);
+    }
+    &-with-icon &-message {
+      font-size: 16px;
+      margin-left: 26px;
+    }
+    &-with-icon &-description {
+      font-size: 14px;
+      margin-left: 26px;
+    }
+    &-icon {
+      top: 18px;
+      font-size: @notification-icon-size;
+      line-height: @notification-icon-size;
+    }
+    .@{iconfont-css-prefix}&-icon {
+      color: @notification-content-color !important;
+    }
+    &-success {
+      background-color: #fff;
+      border: unset;
+    }
+    &-warning {
+      background-color: #fff;
+      border: unset;
+    }
+    &-error {
+      background-color: #fff;
+      border: unset;
+    }
+    &-close {
+      color: rgba(0,0,0,0.60);
+
+      &:hover {
+        & when not (@theme = dark) {
+          color: shade(@white, 30%);
+        }
+      }
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, Button, Checkbox, Divider, Drawer, Form, Input, InputNumber, Modal, notification, Select, Utils } from 'knowdesign';
+import { Alert, Button, Checkbox, Divider, Drawer, Form, Input, InputNumber, Modal, Select, Utils } from 'knowdesign';
+import notification from '@src/components/Notification';
 import { PlusOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import Api from '@src/api/index';
 

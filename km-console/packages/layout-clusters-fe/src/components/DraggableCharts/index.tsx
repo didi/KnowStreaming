@@ -4,17 +4,11 @@ import { Utils, Empty, Spin, AppContainer, SingleChart, Tooltip } from 'knowdesi
 import { IconFont } from '@knowdesign/icons';
 import { useParams } from 'react-router-dom';
 import api, { MetricType } from '@src/api';
-import {
-  MetricInfo,
-  MetricDefaultChartDataType,
-  MetricChartDataType,
-  formatChartData,
-  resolveMetricsRank,
-} from '@src/constants/chartConfig';
-import SingleChartHeader, { KsHeaderOptions } from '../SingleChartHeader';
+import { MetricInfo, OriginMetricData, FormattedMetricData, formatChartData, resolveMetricsRank } from '@src/constants/chartConfig';
+import ChartOperateBar, { KsHeaderOptions } from '../ChartOperateBar';
 import DragGroup from '../DragGroup';
-import ChartDetail from './ChartDetail';
-import { getChartConfig } from './config';
+import ChartDetail from './Detail';
+import { getChartConfig, getMetricDashboardReq } from './config';
 import './index.less';
 
 interface IcustomScope {
@@ -33,7 +27,7 @@ const busInstance = new EventBus();
 
 const DRAG_GROUP_GUTTER_NUM: [number, number] = [16, 16];
 
-const DashboardDragChart = (props: PropsType): JSX.Element => {
+const DraggableCharts = (props: PropsType): JSX.Element => {
   const [global] = AppContainer.useGlobalValue();
   const { type: dashboardType } = props;
   const { clusterId } = useParams<{
@@ -44,7 +38,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   const [metricsList, setMetricsList] = useState<MetricInfo[]>([]); // 指标列表
   const [selectedMetricNames, setSelectedMetricNames] = useState<(string | number)[]>([]); // 默认选中的指标的列表
   const [curHeaderOptions, setCurHeaderOptions] = useState<ChartFilterOptions>();
-  const [metricChartData, setMetricChartData] = useState<MetricChartDataType[]>([]); // 指标图表数据列表
+  const [metricChartData, setMetricChartData] = useState<FormattedMetricData[]>([]); // 指标图表数据列表
   const [gridNum, setGridNum] = useState<number>(12); // 图表列布局
   const metricRankList = useRef<string[]>([]);
   const chartDetailRef = useRef(null);
@@ -85,6 +79,9 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
       updateRank([...supportMetrics]);
       setMetricsList(supportMetrics);
       setSelectedMetricNames(selectedMetrics);
+      if (!selectedMetrics.length) {
+        setLoading(false);
+      }
     });
   };
 
@@ -106,16 +103,24 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
     const curTimestamp = Date.now();
     curFetchingTimestamp.current = curTimestamp;
 
-    Utils.post(api.getDashboardMetricChartData(clusterId, dashboardType), {
-      startTime,
-      endTime,
-      metricsNames: selectedMetricNames,
-      topNu: curHeaderOptions?.scopeData?.isTop ? curHeaderOptions.scopeData.data : null,
-      [dashboardType === MetricType.Broker ? 'brokerIds' : 'topics']: curHeaderOptions?.scopeData?.isTop
-        ? null
-        : curHeaderOptions.scopeData.data,
-    }).then(
-      (res: MetricDefaultChartDataType[] | null) => {
+    const reqBody = Object.assign(
+      {
+        startTime,
+        endTime,
+        metricsNames: selectedMetricNames,
+        topNu: curHeaderOptions?.scopeData?.isTop ? curHeaderOptions.scopeData.data : null,
+      },
+      dashboardType === MetricType.Broker || dashboardType === MetricType.Topic
+        ? {
+            [dashboardType === MetricType.Broker ? 'brokerIds' : 'topics']: curHeaderOptions?.scopeData?.isTop
+              ? null
+              : curHeaderOptions.scopeData.data,
+          }
+        : {}
+    );
+
+    Utils.post(getMetricDashboardReq(clusterId, dashboardType as any), reqBody).then(
+      (res: OriginMetricData[] | null) => {
         // 如果当前请求不是最新请求，则不做任何操作
         if (curFetchingTimestamp.current !== curTimestamp) {
           return;
@@ -131,7 +136,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
             global.getMetricDefine || {},
             dashboardType,
             curHeaderOptions.rangeTime
-          ) as MetricChartDataType[];
+          ) as FormattedMetricData[];
           // 指标排序
           formattedMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
 
@@ -164,7 +169,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   };
 
   // 指标选中项更新回调
-  const indicatorChangeCallback = (newMetricNames: (string | number)[]) => {
+  const metricSelectCallback = (newMetricNames: (string | number)[]) => {
     const updateMetrics: { metric: string; set: boolean; rank: number }[] = [];
     // 需要选中的指标
     newMetricNames.forEach(
@@ -218,7 +223,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
 
   useEffect(() => {
     // 初始化页面，获取 scope 和 metric 信息
-    getScopeList();
+    (dashboardType === MetricType.Broker || dashboardType === MetricType.Topic) && getScopeList();
     getMetricList();
 
     setTimeout(() => observeDashboardWidthChange());
@@ -226,19 +231,22 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
 
   return (
     <div id="dashboard-drag-chart" className="topic-dashboard">
-      <SingleChartHeader
+      <ChartOperateBar
         onChange={ksHeaderChange}
         nodeScopeModule={{
+          hasCustomScope: !(dashboardType === MetricType.Zookeeper),
           customScopeList: scopeList,
-          scopeName: dashboardType === MetricType.Broker ? 'Broker' : 'Topic',
-          scopeLabel: `自定义 ${dashboardType === MetricType.Broker ? 'Broker' : 'Topic'} 范围`,
+          scopeName: dashboardType === MetricType.Broker ? 'Broker' : dashboardType === MetricType.Topic ? 'Topic' : 'Zookeeper',
+          scopeLabel: `自定义 ${
+            dashboardType === MetricType.Broker ? 'Broker' : dashboardType === MetricType.Topic ? 'Topic' : 'Zookeeper'
+          } 范围`,
         }}
-        indicatorSelectModule={{
+        metricSelect={{
           hide: false,
           metricType: dashboardType,
           tableData: metricsList,
           selectedRows: selectedMetricNames,
-          submitCallback: indicatorChangeCallback,
+          submitCallback: metricSelectCallback,
         }}
       />
       <div className="topic-dashboard-container">
@@ -258,7 +266,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
                 }}
               >
                 {metricChartData.map((data) => {
-                  const { metricName, metricUnit, metricLines } = data;
+                  const { metricName, metricUnit, metricLines, showLegend } = data;
 
                   return (
                     <div key={metricName} className="dashboard-drag-item-box">
@@ -301,7 +309,7 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
                         eventBus={busInstance}
                         propChartData={metricLines}
                         optionMergeProps={{ replaceMerge: curHeaderOptions.isAutoReload ? ['xAxis'] : ['series'] }}
-                        {...getChartConfig(`${metricName}{unit|（${metricUnit}）}`, metricLines.length)}
+                        {...getChartConfig(`${metricName}{unit|（${metricUnit}）}`, metricLines.length, showLegend)}
                       />
                     </div>
                   );
@@ -321,4 +329,4 @@ const DashboardDragChart = (props: PropsType): JSX.Element => {
   );
 };
 
-export default DashboardDragChart;
+export default DraggableCharts;
