@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Tabs, Utils, Drawer, Tag, AppContainer, SearchInput, notification } from 'knowdesign';
+import { Tabs, Utils, Drawer, Tag, AppContainer, SearchInput } from 'knowdesign';
+import notification from '@src/components/Notification';
+
 import Api from '@src/api';
 import BrokersDetail from './BrokersDetail';
 import Messages from './Messages';
 import ConsumerGroups from './ConsumerGroups';
 import ACLs from './ACLs';
 import Configuration from './Configuration';
-import Consumers from '@src/pages/Consumers';
+import Consumers from './ConsumerGroups';
+// import Consumers from '@src/pages/Consumers';
 import './index.less';
 import TopicDetailHealthCheck from '@src/components/CardBar/TopicDetailHealthCheck';
 import { hashDataParse } from '@src/constants/common';
@@ -115,35 +118,34 @@ const TopicDetail = (props: any) => {
   useEffect(() => {
     global?.clusterInfo?.id && hashDataParse(location.hash).topicName
       ? Utils.request(Api.getTopicMetadata(+global?.clusterInfo?.id, hashDataParse(location.hash)?.topicName), {
-        init: {
-          errorNoTips: true,
-        },
-      })
-        .then((topicData: any) => {
-          if (topicData?.exist && !hashDataParse(location.hash).groupName) {
-            setHashData(topicData);
-            setVisible(true);
-          } else {
+          init: {
+            errorNoTips: true,
+          },
+        })
+          .then((topicData: any) => {
+            if (topicData?.exist && !hashDataParse(location.hash).groupName) {
+              setHashData(topicData);
+              setVisible(true);
+            } else {
+              history.replace(`/cluster/${urlParams?.clusterId}/topic/list`);
+              // history.push(`/`);
+              setVisible(false);
+            }
+          })
+          .catch((err) => {
             history.replace(`/cluster/${urlParams?.clusterId}/topic/list`);
-            // history.push(`/`);
             setVisible(false);
-          }
-        })
-        .catch((err) => {
-          history.replace(`/cluster/${urlParams?.clusterId}/topic/list`);
-          setVisible(false);
-          notification.error({
-            message: '错误',
-            duration: 3,
-            description: `${'Topic不存在或Topic名称有误'}`,
-          });
-        })
+            notification.error({
+              message: '错误',
+              description: 'Topic不存在或Topic名称有误',
+            });
+          })
       : setVisible(false);
   }, [hashDataParse(location.hash).topicName, global?.clusterInfo]);
 
   return (
     <Drawer
-      push={false}
+      // push={false}
       title={
         <span>
           <span style={{ fontSize: '18px', fontFamily: 'PingFangSC-Semibold', color: '#495057' }}>{hashData?.topicName}</span>
@@ -192,12 +194,9 @@ const TopicDetail = (props: any) => {
           {positionType === 'Messages' && <Messages searchKeywords={searchKeywords} positionType={positionType} hashData={hashData} />}
         </TabPane>
         <TabPane tab="ConsumerGroups" key="ConsumerGroups">
-          <Consumers
-            scene="topicDetail"
-            detailParams={{
-              searchKeywords,
-            }}
-          ></Consumers>
+          {positionType === 'ConsumerGroups' && (
+            <Consumers searchKeywords={searchKeywords} positionType={positionType} hashData={hashData} />
+          )}
         </TabPane>
         <TabPane tab="ACLs" key="ACLs">
           {positionType === 'ACLs' && <ACLs searchKeywords={searchKeywords} positionType={positionType} hashData={hashData} />}

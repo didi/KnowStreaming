@@ -14,6 +14,7 @@ export enum MetricType {
   Broker = 103,
   Partition = 104,
   Replication = 105,
+  Zookeeper = 110,
   Controls = 901,
 }
 
@@ -61,6 +62,8 @@ const api = {
   phyClusterState: getApi(`/physical-clusters/state`),
 
   getOperatingStateList: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/groups-overview`),
+  getGroupTopicList: (clusterPhyId: number, groupName: string) => getApi(`/clusters/${clusterPhyId}/groups/${groupName}/topics-overview`),
+
   // 物理集群接口
   phyCluster: getApi(`/physical-clusters`),
   getPhyClusterBasic: (clusterPhyId: number) => getApi(`/physical-clusters/${clusterPhyId}/basic`),
@@ -127,6 +130,7 @@ const api = {
     getApi(`/clusters/${clusterPhyId}/topics/${topicName}/brokers-partitions-summary`),
   getTopicPartitionsDetail: (clusterPhyId: string, topicName: string) => getApi(`/clusters/${clusterPhyId}/topics/${topicName}/partitions`),
   getTopicMessagesList: (topicName: string, clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/topics/${topicName}/records`), // Messages列表
+  getTopicGroupList: (topicName: string, clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/topics/${topicName}/groups-overview`), // Consumers列表
   getTopicMessagesMetadata: (topicName: string, clusterPhyId: number) => getApi(`/clusters//${clusterPhyId}/topics/${topicName}/metadata`), // Messages列表
   getTopicACLsList: (topicName: string, clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/topics/${topicName}/acl-Bindings`), // ACLs列表
   getTopicConfigs: (topicName: string, clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/config-topics/${topicName}/configs`), // Configuration列表

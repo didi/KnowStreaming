@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Drawer, Button, Space, Divider, AppContainer, ProTable } from 'knowdesign';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { Drawer, Button, Space, Divider, AppContainer, ProTable, Utils } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
-import { IindicatorSelectModule } from './index';
+import { MetricSelect } from './index';
 import './style/indicator-drawer.less';
 import { useLocation } from 'react-router-dom';
 
 interface PropsType extends React.HTMLAttributes<HTMLDivElement> {
-  onClose: () => void;
-  visible: boolean;
-  isGroup?: boolean; // 是否分组
-  indicatorSelectModule: IindicatorSelectModule;
+  metricSelect: MetricSelect;
 }
 
 interface MetricInfo {
@@ -27,25 +24,25 @@ type CategoryData = {
   metrics: MetricInfo[];
 };
 
-const ExpandedRow = ({ metrics, category, selectedMetrics, selectedMetricChange }: any) => {
-  const innerColumns = [
-    {
-      title: '指标名称',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: '单位',
-      dataIndex: 'unit',
-      key: 'unit',
-    },
-    {
-      title: '描述',
-      dataIndex: 'desc',
-      key: 'desc',
-    },
-  ];
+const expandedRowColumns = [
+  {
+    title: '指标名称',
+    dataIndex: 'name',
+    key: 'name',
+  },
+  {
+    title: '单位',
+    dataIndex: 'unit',
+    key: 'unit',
+  },
+  {
+    title: '描述',
+    dataIndex: 'desc',
+    key: 'desc',
+  },
+];
 
+const ExpandedRow = ({ metrics, category, selectedMetrics, selectedMetricChange }: any) => {
   return (
     <div
       style={{
@@ -62,7 +59,7 @@ const ExpandedRow = ({ metrics, category, selectedMetrics, selectedMetricChange 
           showHeader: false,
           noPagination: true,
           rowKey: 'name',
-          columns: innerColumns,
+          columns: expandedRowColumns,
           dataSource: metrics,
           attrs: {
             rowSelection: {
@@ -79,13 +76,14 @@ const ExpandedRow = ({ metrics, category, selectedMetrics, selectedMetricChange 
   );
 };
 
-const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType) => {
+const MetricSelect = forwardRef(({ metricSelect }: PropsType, ref) => {
   const [global] = AppContainer.useGlobalValue();
   const { pathname } = useLocation();
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
   const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [childrenSelectedRowKeys, setChildrenSelectedRowKeys] = useState<SelectedMetrics>({});
+  const [visible, setVisible] = useState<boolean>(false);
 
   const columns = [
     {
@@ -96,13 +94,13 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
   ];
 
   const formateTableData = () => {
-    const tableData = indicatorSelectModule.tableData;
+    const tableData = metricSelect.tableData;
     const categoryData: {
       [category: string]: MetricInfo[];
     } = {};
 
     tableData.forEach(({ name, desc }) => {
-      const metricDefine = global.getMetricDefine(indicatorSelectModule?.metricType, name);
+      const metricDefine = global.getMetricDefine(metricSelect?.metricType, name);
       const returnData = {
         name,
         desc,
@@ -125,12 +123,12 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
   };
 
   const formateSelectedKeys = () => {
-    const newKeys = indicatorSelectModule.selectedRows;
+    const newKeys = metricSelect.selectedRows;
     const result: SelectedMetrics = {};
     const selectedCategories: string[] = [];
 
     newKeys.forEach((name: string) => {
-      const metricDefine = global.getMetricDefine(indicatorSelectModule?.metricType, name);
+      const metricDefine = global.getMetricDefine(metricSelect?.metricType, name);
       if (metricDefine) {
         if (!result[metricDefine.category]) {
           result[metricDefine.category] = [name];
@@ -217,10 +215,10 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
     const allRowKeys: string[] = [];
     Object.entries(childrenSelectedRowKeys).forEach(([, arr]) => allRowKeys.push(...arr));
 
-    indicatorSelectModule.submitCallback(allRowKeys).then(
+    metricSelect.submitCallback(allRowKeys).then(
       () => {
         setConfirmLoading(false);
-        onClose();
+        setVisible(false);
       },
       () => {
         setConfirmLoading(false);
@@ -231,7 +229,7 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
   const rowSelection = {
     selectedRowKeys: selectedCategories,
     onChange: rowChange,
-    // getCheckboxProps: (record: any) => indicatorSelectModule.checkboxProps && indicatorSelectModule.checkboxProps(record),
+    // getCheckboxProps: (record: any) => metricSelect.checkboxProps && metricSelect.checkboxProps(record),
     getCheckboxProps: (record: CategoryData) => {
       const isAllSelected = record.metrics.length === childrenSelectedRowKeys[record.category]?.length;
       const isNotCheck = !childrenSelectedRowKeys[record.category] || childrenSelectedRowKeys[record.category]?.length === 0;
@@ -241,25 +239,33 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
     },
   };
 
-  useEffect(formateTableData, [indicatorSelectModule.tableData]);
+  useEffect(formateTableData, [metricSelect.tableData]);
 
   useEffect(() => {
     visible && formateSelectedKeys();
-  }, [visible, indicatorSelectModule.selectedRows]);
+  }, [visible, metricSelect.selectedRows]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: () => setVisible(true),
+    }),
+    []
+  );
 
   return (
     <>
       <Drawer
         className="indicator-drawer"
-        title={indicatorSelectModule.drawerTitle || '指标筛选'}
+        title={metricSelect.drawerTitle || '指标筛选'}
         width="868px"
         forceRender={true}
-        onClose={onClose}
+        onClose={() => setVisible(false)}
         visible={visible}
         maskClosable={false}
         extra={
           <Space>
-            <Button size="small" onClick={onClose}>
+            <Button size="small" onClick={() => setVisible(false)}>
               取消
             </Button>
             <Button
@@ -281,6 +287,7 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
             rowKey: 'category',
             columns: columns,
             dataSource: categoryData,
+            noPagination: true,
             attrs: {
               rowSelection: rowSelection,
               expandable: {
@@ -319,6 +326,6 @@ const IndicatorDrawer = ({ onClose, visible, indicatorSelectModule }: PropsType)
       </Drawer>
     </>
   );
-};
+});
 
-export default IndicatorDrawer;
+export default MetricSelect;

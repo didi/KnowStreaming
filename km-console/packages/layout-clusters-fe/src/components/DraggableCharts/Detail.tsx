@@ -2,11 +2,10 @@ import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, use
 import { AppContainer, Drawer, Spin, Table, SingleChart, Utils, Tooltip } from 'knowdesign';
 import moment from 'moment';
 import api, { MetricType } from '@src/api';
-import { MetricDefaultChartDataType, MetricChartDataType, formatChartData } from '@src/constants/chartConfig';
+import { OriginMetricData, FormattedMetricData, formatChartData } from '@src/constants/chartConfig';
 import { useParams } from 'react-router-dom';
 import { debounce } from 'lodash';
 import { getDetailChartConfig } from './config';
-import { UNIT_MAP } from '@src/constants/chartConfig';
 import RenderEmpty from '../RenderEmpty';
 
 interface ChartDetailProps {
@@ -35,7 +34,7 @@ interface ChartInfo {
   curTimeRange?: readonly [number, number];
   sliderPos?: readonly [number, number];
   transformUnit?: [string, number];
-  fullMetricData?: MetricChartDataType;
+  fullMetricData?: FormattedMetricData;
   oldDataZoomOption?: any;
 }
 
@@ -79,7 +78,7 @@ const ChartDetail = (props: ChartDetailProps) => {
         isLoadingAdditionData: false,
         isLoadedFullData: false,
         fullTimeRange: curTimeRange,
-        fullMetricData: {} as MetricChartDataType,
+        fullMetricData: {} as FormattedMetricData,
         curTimeRange,
         oldDataZoomOption: {},
         sliderPos: [0, 0],
@@ -90,7 +89,7 @@ const ChartDetail = (props: ChartDetailProps) => {
 
   const [loading, setLoading] = useState(false);
   // 当前展示的图表数据
-  const [curMetricData, setCurMetricData] = useState<MetricChartDataType>();
+  const [curMetricData, setCurMetricData] = useState<FormattedMetricData>();
   // 图表数据的各项计算指标
   const [tableInfo, setTableInfo] = useState<MetricTableInfo[]>([]);
   const [linesStatus, setLinesStatus] = useState<{
@@ -329,7 +328,7 @@ const ChartDetail = (props: ChartDetailProps) => {
         if (i === DEFAULT_REQUEST_COUNT - 1) {
           Promise.all(requestArr).then((resList) => {
             // 填充增量的图表数据
-            resList.forEach((res: MetricDefaultChartDataType[], i) => {
+            resList.forEach((res: OriginMetricData[], i) => {
               // 最后一个请求返回数据为空时，认为已获取到全部图表数据
               if (!res?.length) {
                 //  标记数据已经全部加载完毕
@@ -368,7 +367,7 @@ const ChartDetail = (props: ChartDetailProps) => {
   };
 
   // 处理增量图表数据
-  const resolveAdditionChartData = (res: MetricDefaultChartDataType[], timeRange: [number, number]) => {
+  const resolveAdditionChartData = (res: OriginMetricData[], timeRange: [number, number]) => {
     // 格式化图表需要的数据
     const formattedMetricData = formatChartData(
       res,
@@ -376,7 +375,7 @@ const ChartDetail = (props: ChartDetailProps) => {
       metricType,
       timeRange,
       chartInfo.current.transformUnit
-    ) as MetricChartDataType[];
+    ) as FormattedMetricData[];
     // 增量填充图表数据
     const additionMetricPoints = formattedMetricData[0].metricLines;
     Object.values(additionMetricPoints).forEach((additionLine) => {
@@ -536,9 +535,7 @@ const ChartDetail = (props: ChartDetailProps) => {
           // 如果图表返回数据
           if (res?.length) {
             // 格式化图表需要的数据
-            const formattedMetricData = (
-              formatChartData(res, global.getMetricDefine || {}, metricType, curTimeRange) as MetricChartDataType[]
-            )[0];
+            const formattedMetricData = formatChartData(res, global.getMetricDefine || {}, metricType, curTimeRange)[0];
             // 填充图表数据
             let initFullTimeRange = curTimeRange;
             const pointsOfFirstLine = formattedMetricData.metricLines.find((line) => line.data.length).data;
@@ -549,14 +546,6 @@ const ChartDetail = (props: ChartDetailProps) => {
               ] as const;
             }
 
-            // 获取单位保存起来
-            let transformUnit = undefined;
-            Object.entries(UNIT_MAP).forEach((unit) => {
-              if (formattedMetricData.metricUnit.includes(unit[0])) {
-                transformUnit = unit;
-              }
-            });
-
             updateChartInfo({
               fullMetricData: formattedMetricData,
               fullTimeRange: [...initFullTimeRange],
@@ -565,7 +554,7 @@ const ChartDetail = (props: ChartDetailProps) => {
                 initFullTimeRange[1] - (initFullTimeRange[1] - initFullTimeRange[0]) * DATA_ZOOM_DEFAULT_SCALE,
                 initFullTimeRange[1],
               ],
-              transformUnit,
+              transformUnit: formattedMetricData.targetUnit,
             });
             setCurMetricData(formattedMetricData);
             const newLinesStatus: { [lineName: string]: boolean } = {};

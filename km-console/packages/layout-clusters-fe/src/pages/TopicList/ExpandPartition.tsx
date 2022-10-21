@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AppContainer, Button, Divider, Drawer, Form, InputNumber, notification, SingleChart, Space, Spin, Utils } from 'knowdesign';
+import { AppContainer, Button, Divider, Drawer, Form, InputNumber, SingleChart, Space, Spin, Tooltip, Utils } from 'knowdesign';
+import notification from '@src/components/Notification';
 import Api, { MetricType } from '@src/api/index';
-import { getBasicChartConfig, getUnit } from '@src/constants/chartConfig';
-import { formatChartData, MetricDefaultChartDataType } from '@src/constants/chartConfig';
+import { getBasicChartConfig, getDataUnit } from '@src/constants/chartConfig';
+import { formatChartData, OriginMetricData } from '@src/constants/chartConfig';
 
 const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
   const [global] = AppContainer.useGlobalValue();
@@ -60,7 +61,7 @@ const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
       );
       const empiricalMinValue = 10 * 1024 * record.partitionNum;
 
-      const lines = data.map((metric: MetricDefaultChartDataType) => {
+      const lines = data.map((metric: OriginMetricData) => {
         const child = metric.metricLines[0];
         child.name = metric.metricName;
         return child;
@@ -87,7 +88,7 @@ const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
     });
   }, [expandPartitionsVisible]);
   const formattedMinBytesInOut = (v: number) => {
-    const [unit, size] = getUnit(v);
+    const [unit, size] = getDataUnit['Memory'](v);
     return `${(v / size).toFixed(2)}${unit}/s`;
   };
   return (
@@ -130,11 +131,15 @@ const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
         <div className="brief-info">
           <div className="item">
             <span className="field">Topic名称 :</span>
-            <span className="val">{record.topicName}</span>
+            <Tooltip title={record.topicName}>
+              <span className="val">{record.topicName}</span>
+            </Tooltip>
           </div>
           <div className="item">
             <span className="field desc-field">描述 :</span>
-            <span className="val desc-val">{record.description}</span>
+            <Tooltip title={record.description || '-'}>
+              <span className="desc-val">{record.description || '-'}</span>
+            </Tooltip>
           </div>
         </div>
         <Spin spinning={loading}>

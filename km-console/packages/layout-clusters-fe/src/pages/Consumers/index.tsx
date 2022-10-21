@@ -108,11 +108,13 @@ const AutoPage = (props: any) => {
         title: 'Max Lag',
         dataIndex: 'maxLag',
         key: 'maxLag',
+        render: (t: number) => (t ? t.toLocaleString() : '-'),
       },
       {
         title: 'Member数',
         dataIndex: 'memberCount',
         key: 'memberCount',
+        render: (t: number) => (t ? t.toLocaleString() : '-'),
       },
     ];
 

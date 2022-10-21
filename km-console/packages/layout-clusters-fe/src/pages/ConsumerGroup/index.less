@@ -1,0 +1,186 @@
+.brokerList {
+  .d-table-box-header {
+    padding: 0 0 12px 0;
+  }
+  .tag-success,
+  .tag-error {
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+  .tag-success {
+    background: #f1faf2;
+    color: #73d380;
+  }
+  .tag-error {
+    background: #fff0ef;
+    color: #ff7066;
+  }
+}
+
+.operating-state {
+  .consumers-search {
+    display: contents;
+    .search-input-short {
+      margin-right: 8px;
+    }
+  }
+  .pro-table-wrap {
+    // padding: 17px 24px;
+    background: #fff;
+    border-radius: 12px;
+  }
+}
+.consumer-group-detail-drawer {
+  &-table {
+    .dcloud-table-cell {
+      padding: 7px 16px 8px 2px !important;
+    }
+    .dcloud-table-row-expand-icon-cell {
+      padding: 7px 7px 5px 24px !important;
+    }
+
+    .dcloud-table-expanded-row-fixed {
+      padding: 16px 20px !important;
+      .dcloud-table-cell {
+        font-size: 12px !important;
+      }
+    }
+  }
+
+  .dcloud-drawer-extra {
+    button {
+      width: 90px;
+    }
+    .divider {
+      width: 1px;
+      height: 17px;
+      margin: 0 16px;
+      background: rgba(206, 212, 218, 0.6);
+    }
+  }
+  .dcloud-drawer-body {
+    padding-top: 2px !important;
+  }
+}
+
+.consumer-group-detail {
+  // border: 1px solid #EFF2F7;
+  // border-radius: 8px;
+  // padding: 12px 16px;
+  .title-and-mode {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    &-header {
+      font-family: @font-family-bold;
+      font-size: 13px;
+    }
+    h4 {
+      font-family: PingFangSC-Semibold;
+    }
+    .right {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .d-range-time-input {
+        height: 27px !important;
+        padding: 0 11px;
+        input {
+          line-height: 100%;
+        }
+      }
+      .divider {
+        width: 1px;
+        height: 20px;
+        background: rgba(206, 212, 218, 0.6);
+        margin: 0 8px;
+      }
+      .switch-mode {
+        .dcloud-radio-button-wrapper {
+          font-size: 14px;
+          width: 34px;
+          height: 23px;
+          padding: 0;
+          line-height: 22px;
+          text-align: center;
+        }
+      }
+    }
+  }
+  .single-chart,
+  .table {
+    background: #f8f9fa;
+    // margin-top: 12px;
+    border-radius: 8px;
+    .dcloud-table {
+      height: 210px;
+      overflow: auto;
+      background-color: transparent;
+      .dcloud-table-content .dcloud-table-cell {
+        background-color: transparent;
+      }
+    }
+    .dcloud-pagination {
+      height: 32px;
+      margin-bottom: 0;
+      margin-top: 8px;
+    }
+  }
+  .single-chart {
+    padding: 16px 22px 4px;
+    .single-chart-header {
+      display: none;
+    }
+  }
+  .content-with-copy {
+    display: flex;
+    align-items: center;
+    .content {
+      flex: 1;
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      word-break: break-all;
+    }
+    .copy-icon {
+      width: 20px;
+      height: 20px;
+      padding-top: 2px;
+      border-radius: 50%;
+      margin-left: 4px;
+      font-size: 16px;
+      color: #adb5bc;
+      opacity: 0;
+      &:hover {
+        background: rgba(33, 37, 41, 0.04);
+        color: #74788d;
+      }
+    }
+  }
+  .dcloud-table-cell-row-hover {
+    .copy-icon {
+      opacity: 1;
+    }
+  }
+}
+.cluster-detail-consumer-resetoffset {
+  .reset-offset-form {
+    .dcloud-radio-wrapper {
+      width: 154px;
+    }
+  }
+  .operate-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .operate-btns-divider {
+      width: 1px;
+      height: 17px;
+      background: rgba(0, 0, 0, 0.13);
+      margin: 0 16px;
+    }
+  }
+}

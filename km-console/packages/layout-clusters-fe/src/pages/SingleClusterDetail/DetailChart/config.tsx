@@ -14,7 +14,7 @@ const messagesInTooltipFormatter = (date: any, arr: any) => {
     <div style="display:flex;align-items:center;">
       <div style="margin-right:4px;width:8px;height:2px;background-color:${params.color};"></div>
       <div style="flex:1;display:flex;justify-content:space-between;align-items:center;overflow: hidden;">
-        <span style="flex: 1;font-size:12px;color:#74788D;pointer-events:auto;margin-left:2px;line-height: 18px;font-family: HelveticaNeue;overflow: hidden; text-overflow: ellipsis; white-space: no-wrap;">
+        <span style="flex: 1;font-size:12px;color:#74788D;pointer-events:auto;margin-left:2px;line-height: 18px;font-family: HelveticaNeue;overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
           ${params.seriesName}
         </span>
         <span style="font-size:12px;color:#212529;line-height:18px;font-family:HelveticaNeue-Medium;margin-left: 10px;">
@@ -55,7 +55,7 @@ const messagesInTooltipFormatter = (date: any, arr: any) => {
 };
 
 export const getChartConfig = (props: any) => {
-  const { metricName, lineColor, isDefaultMetric = false } = props;
+  const { lineColor, isDefaultMetric = false } = props;
   return {
     option: getBasicChartConfig({
       // TODO: time 轴图表联动有问题，先切换为 category
@@ -63,7 +63,6 @@ export const getChartConfig = (props: any) => {
       title: { show: false },
       legend: { show: false },
       grid: { top: 24, bottom: 12 },
-      lineColor: [lineColor],
       tooltip: isDefaultMetric
         ? {
             formatter: function (params: any) {
@@ -87,6 +86,7 @@ export const getChartConfig = (props: any) => {
           smooth: 0.25,
           symbol: 'emptyCircle',
           symbolSize: 4,
+          color: '#556ee6',
           // 面积图样式
           areaStyle: {
             color: lineColor,
