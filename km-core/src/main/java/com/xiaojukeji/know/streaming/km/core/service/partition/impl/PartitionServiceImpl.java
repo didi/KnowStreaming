@@ -21,6 +21,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionMap;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
@@ -96,6 +97,17 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
         }
 
         return this.getPartitionsFromAdminClient(clusterPhy);
+    }
+
+    @Override
+    public List<Partition> listPartitionFromKafkaByClusterTopicName(Long clusterPhyId, String topicName) {
+        ClusterPhy clusterPhy = LoadedClusterPhyCache.getByPhyId(clusterPhyId);
+        if (clusterPhy.getRunState().equals(ClusterRunStateEnum.RUN_ZK.getRunState())) {
+            return this.getPartitionsFromZKClientByClusterTopicName(clusterPhy,topicName);
+        }
+
+        return this.getPartitionsFromAdminClientByClusterTopicName(clusterPhy,topicName);
+
     }
 
     @Override
@@ -442,6 +454,48 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
             log.error("class=PartitionServiceImpl||method=getPartitionsFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
+        }
+    }
+
+
+    private List<Partition> getPartitionsFromAdminClientByClusterTopicName(ClusterPhy clusterPhy, String topicName) {
+
+        try {
+            AdminClient adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
+            DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(
+                    Arrays.asList(topicName),
+                    new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
+            );
+            TopicDescription description = describeTopicsResult.all().get().get(topicName);
+            return PartitionConverter.convert2PartitionList(clusterPhy.getId(), description);
+        }catch (Exception e) {
+            log.error("class=PartitionServiceImpl||method=getPartitionsFromAdminClientByClusterTopicName||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(),topicName, e);
+
+            return new ArrayList<>();
+        }
+    }
+
+    private List<Partition> getPartitionsFromZKClientByClusterTopicName(ClusterPhy clusterPhy, String topicName) {
+        try {
+                PartitionMap zkPartitionMap = kafkaZKDAO.getData(clusterPhy.getId(), TopicZNode.path(topicName), PartitionMap.class);
+                List<Partition> partitionList = new ArrayList<>();
+                List<String> partitionIdList = kafkaZKDAO.getChildren(clusterPhy.getId(), TopicPartitionsZNode.path(topicName), false);
+                for (String partitionId: partitionIdList) {
+                    PartitionState partitionState = kafkaZKDAO.getData(clusterPhy.getId(), TopicPartitionStateZNode.path(new TopicPartition(topicName, Integer.valueOf(partitionId))), PartitionState.class);
+                    Partition partition = new Partition();
+                    partition.setClusterPhyId(clusterPhy.getId());
+                    partition.setTopicName(topicName);
+                    partition.setPartitionId(Integer.valueOf(partitionId));
+                    partition.setLeaderBrokerId(partitionState.getLeader());
+                    partition.setInSyncReplicaList(partitionState.getIsr());
+                    partition.setAssignReplicaList(zkPartitionMap.getPartitionAssignReplicas(Integer.valueOf(partitionId)));
+                    partitionList.add(partition);
+                }
+            return partitionList;
+        } catch (Exception e) {
+            log.error("class=PartitionServiceImpl||method=getPartitionsFromZKClientByClusterTopicName||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(),topicName, e);
+
+            return new ArrayList<>();
         }
     }
 

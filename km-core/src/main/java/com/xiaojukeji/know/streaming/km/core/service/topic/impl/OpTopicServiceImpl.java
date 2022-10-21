@@ -7,6 +7,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemPara
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicCreateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicPartitionExpandParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
@@ -18,6 +19,7 @@ import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
+import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.OpTopicService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
@@ -69,6 +71,9 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
 
     @Autowired
     private KafkaZKDAO kafkaZKDAO;
+
+    @Autowired
+    private PartitionService partitionService;
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -122,6 +127,23 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
             log.error("method=createTopic||param={}||operator={}||msg=add topic to db failed||errMsg=exception", createParam, operator, e);
 
             return Result.buildFromRSAndMsg(ResultStatus.MYSQL_OPERATE_FAILED, "Topic创建成功，但记录到DB中失败，将缺少部分业务数据");
+        }
+
+        try{
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    List<Partition> partitions = partitionService.listPartitionFromKafkaByClusterTopicName(createParam.getClusterPhyId(), createParam.getTopicName());
+                    if (!partitions.isEmpty()){
+                        partitionService.updatePartitions(createParam.getClusterPhyId(), createParam.getTopicName(), partitions,  new ArrayList<>());
+                    }
+                }
+            },3000);
+        }catch (Exception e) {
+            log.error("method=createTopic||param={}||operator={}||msg=add partition to db failed||errMsg=exception", createParam, operator, e);
+
+            return Result.buildFromRSAndMsg(ResultStatus.MYSQL_OPERATE_FAILED, "Topic创建成功，但记录Partition到DB中失败，等待定时任务同步partition信息");
         }
 
         return rv;
