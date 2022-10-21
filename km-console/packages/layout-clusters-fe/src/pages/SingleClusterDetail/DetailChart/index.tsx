@@ -5,16 +5,16 @@ import { arrayMoveImmutable } from 'array-move';
 import api from '@src/api';
 import { useParams } from 'react-router-dom';
 import {
-  MetricDefaultChartDataType,
-  MetricChartDataType,
+  OriginMetricData,
+  FormattedMetricData,
   formatChartData,
   supplementaryPoints,
   resolveMetricsRank,
   MetricInfo,
 } from '@src/constants/chartConfig';
 import { MetricType } from '@src/api';
-import { getDataNumberUnit, getUnit } from '@src/constants/chartConfig';
-import SingleChartHeader, { KsHeaderOptions } from '@src/components/SingleChartHeader';
+import { getDataUnit } from '@src/constants/chartConfig';
+import ChartOperateBar, { KsHeaderOptions } from '@src/components/ChartOperateBar';
 import RenderEmpty from '@src/components/RenderEmpty';
 import DragGroup from '@src/components/DragGroup';
 import { getChartConfig } from './config';
@@ -162,13 +162,13 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
         metricsNames: selectedMetricNames.filter((name) => name !== DEFAULT_METRIC),
       },
     }).then(
-      (res: MetricDefaultChartDataType[]) => {
+      (res: OriginMetricData[]) => {
         // 如果当前请求不是最新请求，则不做任何操作
         if (curFetchingTimestamp.current.messagesIn !== curTimestamp) {
           return;
         }
 
-        const formattedMetricData: MetricChartDataType[] = formatChartData(
+        const formattedMetricData: FormattedMetricData[] = formatChartData(
           res,
           global.getMetricDefine || {},
           MetricType.Cluster,
@@ -224,7 +224,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
             let valueWithUnit = Number(value);
             let unit = ((global.getMetricDefine && global.getMetricDefine(MetricType.Cluster, key)?.unit) || '') as string;
             if (unit.toLowerCase().includes('byte')) {
-              const [unitName, unitSize]: [string, number] = getUnit(Number(value));
+              const [unitName, unitSize]: [string, number] = getDataUnit['Memory'](Number(value));
               unit = unit.toLowerCase().replace('byte', unitName);
               valueWithUnit /= unitSize;
             }
@@ -235,7 +235,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
             };
             return returnValue;
           });
-          return [timeStamp, values.MessagesIn || '0', valuesWithUnit] as [number, number | string, typeof valuesWithUnit];
+          return [timeStamp, parsedValue || '0', valuesWithUnit] as [number, number | string, typeof valuesWithUnit];
         });
         result.sort((a, b) => (a[0] as number) - (b[0] as number));
         const line = {
@@ -244,9 +244,9 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
           data: result as any,
         };
         if (maxValue > 0) {
-          const [unitName, unitSize]: [string, number] = getDataNumberUnit(maxValue);
+          const [unitName, unitSize]: [string, number] = getDataUnit['Num'](maxValue);
           line.unit = `${unitName}${line.unit}`;
-          result.forEach((point) => ((point[1] as number) /= unitSize));
+          result.forEach((point) => parseFloat(((point[1] as number) /= unitSize).toFixed(3)));
         }
 
         if (result.length) {
@@ -308,11 +308,11 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
 
   return (
     <div className="chart-panel cluster-detail-container">
-      <SingleChartHeader
+      <ChartOperateBar
         onChange={ksHeaderChange}
         hideNodeScope={true}
         hideGridSelect={true}
-        indicatorSelectModule={{
+        metricSelect={{
           hide: false,
           metricType: MetricType.Cluster,
           tableData: metricList,

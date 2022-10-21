@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Tooltip, Select, Utils, Divider, Button } from 'knowdesign';
+import React, { useEffect, useRef, useState } from 'react';
+import { Select, Divider, Button } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import moment from 'moment';
 import { DRangeTime } from 'knowdesign';
-import IndicatorDrawer from './IndicatorDrawer';
+import MetricSelect from './MetricSelect';
 import NodeScope from './NodeScope';
 
 import './style/index.less';
@@ -24,8 +24,8 @@ export interface KsHeaderOptions {
     data: number | number[];
   };
 }
-export interface IindicatorSelectModule {
-  metricType?: MetricType;
+export interface MetricSelect {
+  metricType: MetricType;
   hide?: boolean;
   drawerTitle?: string;
   selectedRows: (string | number)[];
@@ -47,18 +47,25 @@ export interface IcustomScope {
 }
 
 export interface InodeScopeModule {
+  hasCustomScope: boolean;
   customScopeList: IcustomScope[];
   scopeName?: string;
   scopeLabel?: string;
   searchPlaceholder?: string;
   change?: () => void;
 }
+
 interface PropsType {
-  indicatorSelectModule?: IindicatorSelectModule;
+  metricSelect?: MetricSelect;
   hideNodeScope?: boolean;
   hideGridSelect?: boolean;
   nodeScopeModule?: InodeScopeModule;
   onChange: (options: KsHeaderOptions) => void;
+}
+
+interface ScopeData {
+  isTop: boolean;
+  data: any;
 }
 
 // 列布局选项
@@ -77,15 +84,17 @@ const GRID_SIZE_OPTIONS = [
   },
 ];
 
-const SingleChartHeader = ({
-  indicatorSelectModule,
+const MetricOperateBar = ({
+  metricSelect,
   nodeScopeModule = {
+    hasCustomScope: false,
     customScopeList: [],
   },
   hideNodeScope = false,
   hideGridSelect = false,
   onChange: onChangeCallback,
 }: PropsType): JSX.Element => {
+  const metricSelectRef = useRef(null);
   const [gridNum, setGridNum] = useState<number>(GRID_SIZE_OPTIONS[1].value);
   const [rangeTime, setRangeTime] = useState<[number, number]>(() => {
     const curTimeStamp = moment().valueOf();
@@ -93,15 +102,34 @@ const SingleChartHeader = ({
   });
   const [isRelativeRangeTime, setIsRelativeRangeTime] = useState(true);
   const [isAutoReload, setIsAutoReload] = useState(false);
-  const [indicatorDrawerVisible, setIndicatorDrawerVisible] = useState(false);
-
-  const [scopeData, setScopeData] = useState<{
-    isTop: boolean;
-    data: any;
-  }>({
+  const [scopeData, setScopeData] = useState<ScopeData>({
     isTop: true,
     data: 5,
   });
+
+  const sizeChange = (value: number) => setGridNum(value);
+
+  const timeChange = (curRangeTime: [number, number], isRelative: boolean) => {
+    setRangeTime([...curRangeTime]);
+    setIsRelativeRangeTime(isRelative);
+  };
+
+  const reloadRangeTime = () => {
+    if (isRelativeRangeTime) {
+      const timeLen = rangeTime[1] - rangeTime[0] || 0;
+      const curTimeStamp = moment().valueOf();
+      setRangeTime([curTimeStamp - timeLen, curTimeStamp]);
+    } else {
+      setRangeTime([...rangeTime]);
+    }
+  };
+
+  const nodeScopeChange = (data: any, isTop?: any) => {
+    setScopeData({
+      isTop,
+      data,
+    });
+  };
 
   useEffect(() => {
     onChangeCallback({
@@ -129,68 +157,37 @@ const SingleChartHeader = ({
     };
   }, [isRelativeRangeTime, rangeTime]);
 
-  const sizeChange = (value: number) => {
-    setGridNum(value);
-  };
-
-  const timeChange = (curRangeTime: [number, number], isRelative: boolean) => {
-    setRangeTime([...curRangeTime]);
-    setIsRelativeRangeTime(isRelative);
-  };
-
-  const reloadRangeTime = () => {
-    if (isRelativeRangeTime) {
-      const timeLen = rangeTime[1] - rangeTime[0] || 0;
-      const curTimeStamp = moment().valueOf();
-      setRangeTime([curTimeStamp - timeLen, curTimeStamp]);
-    } else {
-      setRangeTime([...rangeTime]);
-    }
-  };
-
-  const openIndicatorDrawer = () => {
-    setIndicatorDrawerVisible(true);
-  };
-
-  const closeIndicatorDrawer = () => {
-    setIndicatorDrawerVisible(false);
-  };
-
-  const nodeScopeChange = (data: any, isTop?: any) => {
-    setScopeData({
-      isTop,
-      data,
-    });
-  };
-
   return (
     <>
       <div className="ks-chart-container">
         <div className="ks-chart-container-header">
           <div className="header-left">
+            {/* 刷新 */}
             <div className="icon-box" onClick={reloadRangeTime}>
               <IconFont className="icon" type="icon-shuaxin1" />
             </div>
             <Divider type="vertical" style={{ height: 20, top: 0 }} />
+            {/* 时间选择 */}
             <DRangeTime timeChange={timeChange} rangeTimeArr={rangeTime} />
           </div>
           <div className="header-right">
+            {/* 节点范围 */}
             {!hideNodeScope && <NodeScope nodeScopeModule={nodeScopeModule} change={nodeScopeChange} />}
+            {/* 分栏 */}
             {!hideGridSelect && (
               <Select className="grid-select" style={{ width: 70 }} value={gridNum} options={GRID_SIZE_OPTIONS} onChange={sizeChange} />
             )}
             {(!hideNodeScope || !hideGridSelect) && <Divider type="vertical" style={{ height: 20, top: 0 }} />}
-            <Button type="primary" onClick={openIndicatorDrawer}>
+            <Button type="primary" onClick={() => metricSelectRef.current.open()}>
               指标筛选
             </Button>
           </div>
         </div>
       </div>
-      {!indicatorSelectModule?.hide && (
-        <IndicatorDrawer visible={indicatorDrawerVisible} onClose={closeIndicatorDrawer} indicatorSelectModule={indicatorSelectModule} />
-      )}
+      {/* 指标筛选 */}
+      {!metricSelect?.hide && <MetricSelect ref={metricSelectRef} metricSelect={metricSelect} />}
     </>
   );
 };
 
-export default SingleChartHeader;
+export default MetricOperateBar;

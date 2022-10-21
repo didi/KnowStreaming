@@ -26,6 +26,7 @@ const OptionsDefault = [
 
 const NodeScope = ({ nodeScopeModule, change }: propsType) => {
   const {
+    hasCustomScope,
     customScopeList: customList,
     scopeName = '',
     scopeLabel = '自定义范围',
@@ -128,51 +129,53 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
             </Space>
           </Radio.Group>
         </div>
-        <div className="flx_r">
-          <h6 className="time_title">{scopeLabel}</h6>
-          <div className="custom-scope">
-            <div className="check-row">
-              <Checkbox className="check-all" indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll}>
-                全选
-              </Checkbox>
-              <Input
-                className="search-input"
-                suffix={<IconFont type="icon-fangdajing" style={{ fontSize: '16px' }} />}
-                size="small"
-                placeholder={searchPlaceholder}
-                onChange={(e) => setScopeSearchValue(e.target.value)}
-              />
-            </div>
-            <div className="fixed-height">
-              <Checkbox.Group style={{ width: '100%' }} onChange={checkChange} value={checkedListTemp}>
-                <Row gutter={[10, 12]}>
-                  {customList
-                    .filter((item) => item.label.includes(scopeSearchValue))
-                    .map((item) => (
-                      <Col span={12} key={item.value}>
-                        <Checkbox value={item.value}>{item.label}</Checkbox>
-                      </Col>
-                    ))}
-                </Row>
-              </Checkbox.Group>
-            </div>
+        {hasCustomScope && (
+          <div className="flx_r">
+            <h6 className="time_title">{scopeLabel}</h6>
+            <div className="custom-scope">
+              <div className="check-row">
+                <Checkbox className="check-all" indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll}>
+                  全选
+                </Checkbox>
+                <Input
+                  className="search-input"
+                  suffix={<IconFont type="icon-fangdajing" style={{ fontSize: '16px' }} />}
+                  size="small"
+                  placeholder={searchPlaceholder}
+                  onChange={(e) => setScopeSearchValue(e.target.value)}
+                />
+              </div>
+              <div className="fixed-height">
+                <Checkbox.Group style={{ width: '100%' }} onChange={checkChange} value={checkedListTemp}>
+                  <Row gutter={[10, 12]}>
+                    {customList
+                      .filter((item) => item.label.includes(scopeSearchValue))
+                      .map((item) => (
+                        <Col span={12} key={item.value}>
+                          <Checkbox value={item.value}>{item.label}</Checkbox>
+                        </Col>
+                      ))}
+                  </Row>
+                </Checkbox.Group>
+              </div>
 
-            <div className="btn-con">
-              <Button
-                type="primary"
-                size="small"
-                className="btn-sure"
-                onClick={customSure}
-                disabled={checkedListTemp?.length > 0 ? false : true}
-              >
-                确定
-              </Button>
-              <Button size="small" onClick={customCancel}>
-                取消
-              </Button>
+              <div className="btn-con">
+                <Button
+                  type="primary"
+                  size="small"
+                  className="btn-sure"
+                  onClick={customSure}
+                  disabled={checkedListTemp?.length > 0 ? false : true}
+                >
+                  确定
+                </Button>
+                <Button size="small" onClick={customCancel}>
+                  取消
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -185,7 +188,7 @@ const NodeScope = ({ nodeScopeModule, change }: propsType) => {
           visible={popVisible}
           content={clickContent}
           placement="bottomRight"
-          overlayClassName="d-node-scope-popover"
+          overlayClassName={`d-node-scope-popover ${hasCustomScope ? 'large-size' : ''}`}
           onVisibleChange={visibleChange}
         >
           <span className="input-span">
