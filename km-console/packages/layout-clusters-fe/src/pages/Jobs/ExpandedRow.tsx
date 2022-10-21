@@ -153,6 +153,7 @@ export const ExpandedRow: any = ({ record, data, loading }: any) => {
       <ProTable
         // bordered
         tableProps={{
+          isCustomPg: false,
           showHeader: false,
           loading: loading[record.key],
           rowKey: 'key',

@@ -98,7 +98,7 @@ export default (props: any) => {
       dataIndex: 'OffsetConsumed',
       key: 'OffsetConsumed',
       render: (v: any, record: any) => {
-        return record?.latestMetrics?.metrics?.OffsetConsumed;
+        return record?.latestMetrics?.metrics?.OffsetConsumed.toLocaleString();
       },
       sorter: true,
       // sorter: {
@@ -115,7 +115,7 @@ export default (props: any) => {
       dataIndex: 'LogEndOffset',
       key: 'LogEndOffset',
       render: (v: any, record: any) => {
-        return record?.latestMetrics?.metrics?.LogEndOffset;
+        return record?.latestMetrics?.metrics?.LogEndOffset.toLocaleString();
       },
       sorter: true,
       // sorter: {
@@ -132,7 +132,7 @@ export default (props: any) => {
       dataIndex: 'Lag',
       key: 'Lag',
       render: (v: any, record: any) => {
-        return record?.latestMetrics?.metrics?.Lag;
+        return record?.latestMetrics?.metrics?.Lag.toLocaleString();
       },
       sorter: true,
       // sorter: {
