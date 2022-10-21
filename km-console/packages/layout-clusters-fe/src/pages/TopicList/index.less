@@ -142,6 +142,7 @@
           color: #74788d;
         }
         .desc-field {
+          flex-shrink: 0;
           width: 34px;
         }
         .val,
@@ -149,17 +150,28 @@
           color: #495057;
           letter-spacing: 0;
           font-weight: 400;
-        }
-        .val {
-          width: 105px;
           margin-left: 12px;
         }
-        .desc-val {
-          width: 809px;
-          height: 36px;
+        .val {
+          max-width: 208px;
           overflow: hidden;
-          -webkit-box-orient: vertical;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .desc-val {
+          height: 36px;
+          display: -webkit-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
           -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          word-break: break-all;
+        }
+        &:first-child {
+          margin-right: 40px;
+        }
+        &:last-child {
+          flex: 1;
         }
       }
     }
