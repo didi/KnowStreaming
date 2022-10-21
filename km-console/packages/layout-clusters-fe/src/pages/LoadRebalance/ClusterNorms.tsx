@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Utils, Drawer, Button, Form, Space, Divider, AppContainer, Input, Transfer, message, InputNumber } from 'knowdesign';
+import { Utils, Drawer, Button, Form, Space, Divider, AppContainer, Input, Transfer, InputNumber } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import { CloseOutlined } from '@ant-design/icons';
 import api from '../../api';

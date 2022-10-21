@@ -1,4 +1,6 @@
-import { notification, Utils } from 'knowdesign';
+import { Utils } from 'knowdesign';
+import notification from '@src/components/Notification';
+
 const { EventBus } = Utils;
 export const licenseEventBus = new EventBus();
 
@@ -42,8 +44,8 @@ serviceInstance.interceptors.response.use(
         licenseEventBus.emit('licenseError', desc);
       } else {
         notification.error({
-          message: desc,
-          duration: 3,
+          message: '错误信息',
+          description: desc,
         });
       }
       throw res;
@@ -83,36 +85,31 @@ const dealResponse = (error: any) => {
       case 405:
         notification.error({
           message: '错误',
-          duration: 3,
           description: `${error.response.data.message || '请求方式错误'}`,
         });
         break;
       case 500:
         notification.error({
           message: '错误',
-          duration: 3,
           description: '服务错误，请重试！',
         });
         break;
       case 502:
         notification.error({
           message: '错误',
-          duration: 3,
           description: '网络错误，请重试！',
         });
         break;
       default:
         notification.error({
           message: '连接出错',
-          duration: 3,
           description: `${error.response.status}`,
         });
     }
   } else {
     notification.error({
+      message: '连接超时!',
       description: '请重试或检查服务',
-      message: '连接超时!  ',
-      duration: 3,
     });
   }
   return Promise.reject(error);

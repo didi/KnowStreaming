@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
-import { Button, Drawer, Utils, Descriptions, Tabs, Input, message, Spin, InputNumber } from 'knowdesign';
+import { Button, Drawer, Utils, Descriptions, Tabs, Input, Spin, InputNumber } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import TaskDetails from './TeskDetails';
 import NodeTraffic from './NodeTraffic';
