@@ -111,7 +111,11 @@ public class VersionControlManagerImpl implements VersionControlManager {
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(WEB_OP.getCode()), VersionItemVO.class));
 
         Map<String, VersionItemVO> map = allVersionItemVO.stream().collect(
-                Collectors.toMap(u -> u.getType() + "@" + u.getName(), Function.identity() ));
+                Collectors.toMap(
+                        u -> u.getType() + "@" + u.getName(),
+                        Function.identity(),
+                        (v1, v2) -> v1)
+        );
 
         return Result.buildSuc(map);
     }

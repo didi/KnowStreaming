@@ -24,11 +24,6 @@ public class CollectedMetricsLocalCache {
             .maximumSize(10000)
             .build();
 
-    private static final Cache<String, Float> replicaMetricsValueCache = Caffeine.newBuilder()
-            .expireAfterWrite(90, TimeUnit.SECONDS)
-            .maximumSize(20000)
-            .build();
-
     public static Float getBrokerMetrics(String brokerMetricKey) {
         return brokerMetricsCache.getIfPresent(brokerMetricKey);
     }
@@ -62,17 +57,6 @@ public class CollectedMetricsLocalCache {
             return;
         }
         partitionMetricsCache.put(partitionMetricsKey, metricsList);
-    }
-
-    public static Float getReplicaMetrics(String replicaMetricsKey) {
-        return replicaMetricsValueCache.getIfPresent(replicaMetricsKey);
-    }
-
-    public static void putReplicaMetrics(String replicaMetricsKey, Float value) {
-        if (value == null) {
-            return;
-        }
-        replicaMetricsValueCache.put(replicaMetricsKey, value);
     }
 
     public static String genBrokerMetricKey(Long clusterPhyId, Integer brokerId, String metricName) {
