@@ -10,14 +10,18 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicCreateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicPartitionExpandParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
+import com.xiaojukeji.know.streaming.km.common.utils.BackoffUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.kafka.KafkaReplicaAssignUtil;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.OpTopicService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import kafka.admin.AdminUtils;
@@ -52,6 +56,9 @@ public class OpTopicManagerImpl implements OpTopicManager {
     @Autowired
     private ClusterPhyService clusterPhyService;
 
+    @Autowired
+    private PartitionService partitionService;
+
     @Override
     public Result<Void> createTopic(TopicCreateDTO dto, String operator) {
         log.info("method=createTopic||param={}||operator={}.", dto, operator);
@@ -80,7 +87,7 @@ public class OpTopicManagerImpl implements OpTopicManager {
                 );
 
         // 创建Topic
-        return opTopicService.createTopic(
+        Result<Void> createTopicRes = opTopicService.createTopic(
                 new TopicCreateParam(
                         dto.getClusterId(),
                         dto.getTopicName(),
@@ -90,6 +97,21 @@ public class OpTopicManagerImpl implements OpTopicManager {
                 ),
                 operator
         );
+        if (createTopicRes.successful()){
+            try{
+                FutureUtil.quickStartupFutureUtil.submitTask(() -> {
+                    BackoffUtils.backoff(3000);
+                    Result<List<Partition>> partitionsResult = partitionService.listPartitionsFromKafka(clusterPhy, dto.getTopicName());
+                    if (partitionsResult.successful()){
+                        partitionService.updatePartitions(clusterPhy.getId(), dto.getTopicName(), partitionsResult.getData(),  new ArrayList<>());
+                    }
+                });
+            }catch (Exception e) {
+                log.error("method=createTopic||param={}||operator={}||msg=add partition to db failed||errMsg=exception", dto, operator, e);
+                return Result.buildFromRSAndMsg(ResultStatus.MYSQL_OPERATE_FAILED, "Topic创建成功，但记录Partition到DB中失败，等待定时任务同步partition信息");
+            }
+        }
+        return createTopicRes;
     }
 
     @Override
