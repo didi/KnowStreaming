@@ -14,6 +14,8 @@ import java.util.Set;
 public interface PartitionService {
     Result<Map<String, List<Partition>>> listPartitionsFromKafka(ClusterPhy clusterPhy);
 
+    Result<List<Partition>> listPartitionsFromKafka(ClusterPhy clusterPhy, String topicName);
+
     List<Partition> listPartitionByCluster(Long clusterPhyId);
     List<PartitionPO> listPartitionPOByCluster(Long clusterPhyId);
 
