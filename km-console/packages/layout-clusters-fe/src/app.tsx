@@ -141,6 +141,9 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
         ],
         isFixed: false,
         userDropMenuItems: [
+          <Menu.Item key={0}>
+            <a href="https://github.com/didi/KnowStreaming/releases" target="_blank">版本说明</a>
+          </Menu.Item>,
           <Menu.Item key={0} onClick={logout}>
             登出
           </Menu.Item>,
