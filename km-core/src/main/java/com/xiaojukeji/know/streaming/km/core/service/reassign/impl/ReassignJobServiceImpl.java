@@ -384,18 +384,20 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         }
 
         // 更新任务状态
-         Result<Void> result = this.checkAndSetSuccessIfFinished(jobPO, rrr.getData());
-        if (!result.hasData()){
-            return Result.buildFromIgnoreData(result);
+        rv = this.checkAndSetSuccessIfFinished(jobPO, rrr.getData());
+        if (rv.successful()){
+            return Result.buildFromIgnoreData(rv);
         }
 
         //已完成
         rv = this.preferredReplicaElection(jobId);
+
+
         if (rv.failed()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
 
-        return Result.buildSuc();
+        return Result.buildFromIgnoreData(rv);
     }
 
     @Override
@@ -562,8 +564,14 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         long now = System.currentTimeMillis();
 
         boolean existNotFinished = false;
+        boolean unNeedPreferredReplicaElection = true;
         List<ReassignSubJobPO> subJobPOList = this.getSubJobsByJobId(jobPO.getId());
+
         for (ReassignSubJobPO subJobPO: subJobPOList) {
+            if (!reassignmentResult.checkPreferredReplicaElectionUnNeed(subJobPO.getReassignBrokerIds(),subJobPO.getOriginalBrokerIds())) {
+                unNeedPreferredReplicaElection = false;
+            }
+
             if (!reassignmentResult.checkPartitionFinished(subJobPO.getTopicName(), subJobPO.getPartitionId())) {
                 existNotFinished = true;
                 continue;
@@ -587,7 +595,7 @@ public class ReassignJobServiceImpl implements ReassignJobService {
             reassignJobDAO.updateById(newJobPO);
         }
 
-        return Result.buildSuc();
+        return Result.build(unNeedPreferredReplicaElection);
     }
 
     private Result<List<ReassignSubJobPO>> setJobInRunning(ReassignJobPO jobPO) {
