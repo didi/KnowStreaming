@@ -99,6 +99,15 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
     }
 
     @Override
+    public Result<List<Partition>> listPartitionsFromKafka(ClusterPhy clusterPhy, String topicName) {
+        if (clusterPhy.getRunState().equals(ClusterRunStateEnum.RUN_ZK.getRunState())) {
+            return this.getPartitionsFromZKClientByClusterTopicName(clusterPhy,topicName);
+        }
+        return this.getPartitionsFromAdminClientByClusterTopicName(clusterPhy,topicName);
+
+    }
+
+    @Override
     public List<Partition> listPartitionByCluster(Long clusterPhyId) {
         LambdaQueryWrapper<PartitionPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(PartitionPO::getClusterPhyId, clusterPhyId);
@@ -392,14 +401,12 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
             // 获取Topic列表
             ListTopicsResult listTopicsResult = adminClient.listTopics(new ListTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).listInternal(true));
             for (String topicName: listTopicsResult.names().get()) {
-                DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(
-                        Arrays.asList(topicName),
-                        new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
-                );
-
-                TopicDescription description = describeTopicsResult.all().get().get(topicName);
-
-                partitionMap.put(topicName, PartitionConverter.convert2PartitionList(clusterPhy.getId(), description));
+                Result<List<Partition>> partitionListRes = this.getPartitionsFromAdminClientByClusterTopicName(clusterPhy, topicName);
+                if (partitionListRes.successful()){
+                    partitionMap.put(topicName, partitionListRes.getData());
+                }else {
+                    return Result.buildFromIgnoreData(partitionListRes);
+                }
             }
 
             return Result.buildSuc(partitionMap);
@@ -416,13 +423,42 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
         try {
             List<String> topicNameList = kafkaZKDAO.getChildren(clusterPhy.getId(), TopicsZNode.path(), false);
             for (String topicName: topicNameList) {
-                PartitionMap zkPartitionMap = kafkaZKDAO.getData(clusterPhy.getId(), TopicZNode.path(topicName), PartitionMap.class);
+                Result<List<Partition>> partitionListRes = this.getPartitionsFromZKClientByClusterTopicName(clusterPhy, topicName);
+                if (partitionListRes.successful()){
+                    partitionMap.put(topicName, partitionListRes.getData());
+                }
+            }
+            return Result.buildSuc(partitionMap);
+        } catch (Exception e) {
+            log.error("class=PartitionServiceImpl||method=getPartitionsFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
+            return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
+        }
+    }
+
+    private Result<List<Partition>> getPartitionsFromAdminClientByClusterTopicName(ClusterPhy clusterPhy, String topicName) {
+
+        try {
+            AdminClient adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
+            DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(
+                    Arrays.asList(topicName),
+                    new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
+            );
+            TopicDescription description = describeTopicsResult.all().get().get(topicName);
+            return Result.buildSuc(PartitionConverter.convert2PartitionList(clusterPhy.getId(), description));
+        }catch (Exception e) {
+            log.error("class=PartitionServiceImpl||method=getPartitionsFromAdminClientByClusterTopicName||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(),topicName, e);
+            return Result.buildFailure(ResultStatus.KAFKA_OPERATE_FAILED);
+        }
+    }
+
+    private Result<List<Partition>> getPartitionsFromZKClientByClusterTopicName(ClusterPhy clusterPhy, String topicName) {
+        try {
+                PartitionMap zkPartitionMap = kafkaZKDAO.getData(clusterPhy.getId(), TopicZNode.path(topicName), PartitionMap.class);
                 List<Partition> partitionList = new ArrayList<>();
                 List<String> partitionIdList = kafkaZKDAO.getChildren(clusterPhy.getId(), TopicPartitionsZNode.path(topicName), false);
                 for (String partitionId: partitionIdList) {
                     PartitionState partitionState = kafkaZKDAO.getData(clusterPhy.getId(), TopicPartitionStateZNode.path(new TopicPartition(topicName, Integer.valueOf(partitionId))), PartitionState.class);
-
                     Partition partition = new Partition();
                     partition.setClusterPhyId(clusterPhy.getId());
                     partition.setTopicName(topicName);
@@ -430,17 +466,11 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
                     partition.setLeaderBrokerId(partitionState.getLeader());
                     partition.setInSyncReplicaList(partitionState.getIsr());
                     partition.setAssignReplicaList(zkPartitionMap.getPartitionAssignReplicas(Integer.valueOf(partitionId)));
-
                     partitionList.add(partition);
                 }
-
-                partitionMap.put(topicName, partitionList);
-            }
-
-            return Result.buildSuc(partitionMap);
+            return Result.buildSuc(partitionList);
         } catch (Exception e) {
-            log.error("class=PartitionServiceImpl||method=getPartitionsFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
-
+            log.error("class=PartitionServiceImpl||method=getPartitionsFromZKClientByClusterTopicName||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(),topicName, e);
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
     }
