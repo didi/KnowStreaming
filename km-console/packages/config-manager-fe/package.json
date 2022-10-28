@@ -21,7 +21,7 @@
     "build": "cross-env NODE_ENV=production webpack --max_old_space_size=8000"
   },
   "dependencies": {
-    "@knowdesign/icons": "^1.0.0",
+    "@knowdesign/icons": "^1.0.2",
     "babel-preset-react-app": "^10.0.0",
     "classnames": "^2.2.6",
     "dotenv": "^16.0.1",

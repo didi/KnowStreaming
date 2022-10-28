@@ -51,6 +51,10 @@ export default {
 
   [`menu.${systemKey}.jobs`]: 'Job',
 
+  [`menu.${systemKey}.zookeeper`]: 'Zookeeper',
+  [`menu.${systemKey}.zookeeper.dashboard`]: 'Overview',
+  [`menu.${systemKey}.zookeeper.servers`]: 'Servers',
+
   'access.cluster': '接入集群',
   'access.cluster.low.version.tip': '监测到当前Version较低，建议维护Zookeeper信息以便得到更好的产品体验',
   'edit.cluster': '编辑集群',
