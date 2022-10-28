@@ -10,48 +10,15 @@
     height: 88px;
     width: 100%;
     display: flex;
-    // justify-content: space-between;
     align-items: center;
     .card-bar-health {
       width: 240px;
       height: 70px;
       display: flex;
       align-items: center;
-      // justify-content: space-between;
       .card-bar-health-process {
-        height: 100%;
-        margin-right: 24px;
-        .dcloud-progress-inner {
-          border-radius: 50%;
-        }
-        .dcloud-progress-status-normal {
-          .dcloud-progress-inner {
-            background: rgba(85, 110, 230, 0.03);
-          }
-          .dcloud-progress-inner:not(.dcloud-progress-circle-gradient) .dcloud-progress-circle-path {
-            stroke: rgb(85, 110, 230);
-          }
-        }
-        .dcloud-progress-status-success {
-          .dcloud-progress-inner {
-            background: rgba(0, 192, 162, 0.03);
-          }
-          .dcloud-progress-inner:not(.dcloud-progress-circle-gradient) .dcloud-progress-circle-path {
-            stroke: rgb(0, 192, 162);
-          }
-        }
-        .dcloud-progress-status-exception {
-          .dcloud-progress-inner {
-            background: rgba(255, 112, 102, 0.03);
-          }
-          .dcloud-progress-inner:not(.dcloud-progress-circle-gradient) .dcloud-progress-circle-path {
-            stroke: rgb(255, 112, 102);
-          }
-        }
-        .dcloud-progress-inner {
-          font-family: DIDIFD-Regular;
-          font-size: 40px !important;
-        }
+        padding-top: 30px;
+        margin-right: 20px;
       }
       .state {
         font-size: 13px;
@@ -61,20 +28,6 @@
         line-height: 20px;
         display: flex;
         align-items: center;
-        .health-status-image {
-          width: 15px;
-          height: 15px;
-          background-size: cover;
-        }
-        .health-status-image-success {
-          background-image: url('../../assets/health-status-success.png');
-        }
-        .health-status-image-exception {
-          background-image: url('../../assets/health-status-exception.png');
-        }
-        .health-status-image-normal {
-          background-image: url('../../assets/health-status-normal.png');
-        }
       }
       .value-bar {
         display: flex;
