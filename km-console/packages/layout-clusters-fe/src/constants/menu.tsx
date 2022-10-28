@@ -1,9 +1,10 @@
+import React from 'react';
 import { ClustersPermissionMap } from '@src/pages/CommonConfig';
-
+import { ClusterRunState } from '@src/pages/MutliClusterPage/List';
 const pkgJson = require('../../package');
 export const systemKey = pkgJson.ident;
 
-export const leftMenus = (clusterId?: string) => ({
+export const leftMenus = (clusterId?: string, clusterRunState?: number) => ({
   name: `${systemKey}`,
   icon: 'icon-jiqun',
   path: `cluster/${clusterId}`,
@@ -11,12 +12,12 @@ export const leftMenus = (clusterId?: string) => ({
     {
       name: 'cluster',
       path: 'cluster',
-      icon: 'icon-Cluster',
+      icon: 'icon-Cluster1',
     },
     {
       name: 'broker',
       path: 'broker',
-      icon: 'icon-Brokers',
+      icon: 'icon-Brokers1',
       children: [
         {
           name: 'dashbord',
@@ -38,7 +39,7 @@ export const leftMenus = (clusterId?: string) => ({
     {
       name: 'topic',
       path: 'topic',
-      icon: 'icon-Topics',
+      icon: 'icon-Topics1',
       children: [
         {
           name: 'dashbord',
@@ -52,10 +53,36 @@ export const leftMenus = (clusterId?: string) => ({
         },
       ],
     },
+    clusterRunState && clusterRunState !== ClusterRunState.Raft
+      ? {
+          name: (intl: any) => {
+            return (
+              <div className="menu-item-with-beta-tag">
+                <span>{intl.formatMessage({ id: 'menu.cluster.zookeeper' })}</span>
+                <div className="beta-tag"></div>
+              </div>
+            );
+          },
+          path: 'zookeeper',
+          icon: 'icon-Zookeeper',
+          children: [
+            {
+              name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.zookeeper.dashboard' })}</span>,
+              path: '',
+              icon: '#icon-luoji',
+            },
+            {
+              name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.zookeeper.servers' })}</span>,
+              path: 'servers',
+              icon: 'icon-Jobs',
+            },
+          ],
+        }
+      : undefined,
     {
       name: 'consumer-group',
       path: 'consumers',
-      icon: 'icon-ConsumerGroups',
+      icon: 'icon-Consumer',
       // children: [
       //   {
       //     name: 'operating-state',
@@ -72,7 +99,7 @@ export const leftMenus = (clusterId?: string) => ({
     {
       name: 'operation',
       path: 'operation',
-      icon: 'icon-Jobs',
+      icon: 'icon-Operation',
       children: [
         process.env.BUSINESS_VERSION
           ? {
@@ -92,7 +119,7 @@ export const leftMenus = (clusterId?: string) => ({
       ? {
           name: 'produce-consume',
           path: 'testing',
-          icon: 'icon-a-ProduceConsume',
+          icon: 'icon-Message',
           permissionPoint: [ClustersPermissionMap.TEST_CONSUMER, ClustersPermissionMap.TEST_PRODUCER],
           children: [
             {
@@ -113,7 +140,7 @@ export const leftMenus = (clusterId?: string) => ({
     {
       name: 'security',
       path: 'security',
-      icon: 'icon-ACLs',
+      icon: 'icon-Security',
       children: [
         {
           name: 'acls',

@@ -47,7 +47,6 @@ export interface IcustomScope {
 }
 
 export interface InodeScopeModule {
-  hasCustomScope: boolean;
   customScopeList: IcustomScope[];
   scopeName?: string;
   scopeLabel?: string;
@@ -87,7 +86,6 @@ const GRID_SIZE_OPTIONS = [
 const MetricOperateBar = ({
   metricSelect,
   nodeScopeModule = {
-    hasCustomScope: false,
     customScopeList: [],
   },
   hideNodeScope = false,
