@@ -3,12 +3,13 @@ import '@babel/polyfill';
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { BrowserRouter, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import { get as lodashGet } from 'lodash';
-import { DProLayout, AppContainer, Menu, Utils, Page403, Page404, Page500, Modal } from 'knowdesign';
+import { DProLayout, AppContainer, Menu, Utils, Page500, Modal } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import dantdZhCN from 'knowdesign/es/locale/zh_CN';
 import dantdEnUS from 'knowdesign/es/locale/en_US';
 import { DotChartOutlined } from '@ant-design/icons';
 import { licenseEventBus } from './constants/axiosConfig';
+import { Page403, Page404, NoLicense } from './pages/ErrorPages';
 import intlZhCN from './locales/zh';
 import intlEnUS from './locales/en';
 import registerApps from '../config/registerApps';
@@ -18,11 +19,19 @@ import { Login } from './pages/Login';
 import { getLicenseInfo } from './constants/common';
 import api from './api';
 import ClusterContainer from './pages/index';
-import NoLicense from './pages/NoLicense';
 import ksLogo from './assets/ks-logo.png';
 
 interface ILocaleMap {
   [index: string]: any;
+}
+
+interface VersionInfo {
+  'git.branch': string;
+  'git.build.itme': string;
+  'git.build.version': string;
+  'git.commit.id': string;
+  'git.commit.id.abbrev': string;
+  'git.commit.time': string;
 }
 
 const localeMap: ILocaleMap = {
@@ -106,6 +115,7 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
   const history = useHistory();
   const userInfo = localStorage.getItem('userInfo');
   const [curActiveAppName, setCurActiveAppName] = useState('');
+  const [versionInfo, setVersionInfo] = useState<VersionInfo>();
 
   useEffect(() => {
     if (pathname.startsWith('/config')) {
@@ -114,6 +124,13 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
       setCurActiveAppName('cluster');
     }
   }, [pathname]);
+
+  // 获取版本信息
+  useEffect(() => {
+    Utils.request(api.getVersionInfo()).then((res: VersionInfo) => {
+      setVersionInfo(res);
+    });
+  }, []);
 
   return (
     <DProLayout.Container
@@ -142,7 +159,9 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
         isFixed: false,
         userDropMenuItems: [
           <Menu.Item key={0}>
-            <a href="https://github.com/didi/KnowStreaming/releases" target="_blank">版本说明</a>
+            <a href="https://github.com/didi/KnowStreaming/releases" rel="noreferrer" target="_blank">
+              版本: {versionInfo?.['git.build.version']}
+            </a>
           </Menu.Item>,
           <Menu.Item key={1} onClick={logout}>
             登出
