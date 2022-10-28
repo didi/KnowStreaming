@@ -32,7 +32,6 @@ const LoadRebalanceCardBar = (props: any) => {
   const [loading, setLoading] = useState(false);
   const [cardData, setCardData] = useState([]);
   const [normsVisible, setNormsVisible] = useState(null);
-  const cardItems = ['AclEnable', 'Acls', 'AclUsers', 'AclTopics', 'AclGroups'];
   const onClose = () => {
     setNormsVisible(false);
   };
@@ -45,11 +44,9 @@ const LoadRebalanceCardBar = (props: any) => {
     // 获取右侧状态
     getCartInfo()
       .then((res: any) => {
-        // const { AclEnable, Acls, AclUsers, AclTopics, AclGroups } = res.metrics;
         const { next, sub, status } = res;
         const { cpu, disk, bytesIn, bytesOut } = sub;
         const newNextDate: any = transUnitTimePro(moment(next).valueOf() - moment().valueOf());
-        // const newNextDate = parseInt(`${transUnitTimePro(moment(next).valueOf() - moment().valueOf())}`);
         const cardMap = [
           {
             title() {
@@ -80,20 +77,15 @@ const LoadRebalanceCardBar = (props: any) => {
                     >
                       {!status ? '已均衡' : '未均衡'}
                     </Tag>
-                    {/* <Tag style={{ padding: '2px 4px', backgroundColor: 'rgba(85,110,230,0.10)', color: '#556EE6' }}>已均衡</Tag> */}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>
                       周期均衡 <IconFont className="cutomIcon" type={`${!status ? 'icon-zhengchang' : 'icon-warning'}`} />
                     </span>
-                    {/* <span>
-                        周期均衡 <IconFont  className="cutomIcon" type="icon-zhengchang" />
-                      </span> */}
                     <span>
                       距下次均衡还剩{newNextDate?.value || 0}
                       {newNextDate?.unit || '分钟'}
                     </span>
-                    {/* {<span>距下次均衡还剩{1}小时</span>} */}
                   </div>
                 </div>
               );
@@ -106,73 +98,6 @@ const LoadRebalanceCardBar = (props: any) => {
               padding: '12px 12px 8px 12px',
             },
           },
-          // {
-          //   // title: 'CPU avg',
-          //   title() {
-          //     return (
-          //       <div>
-          //         <span style={{ display: 'inline-block', marginRight: '8px' }}>CPU AVG</span>
-          //         {!cpu?.interval && cpu?.interval !== 0 && (
-          //           <Tooltip overlayClassName="rebalance-tooltip" title="未设置均衡策略">
-          //             <QuestionCircleOutlined />
-          //           </Tooltip>
-          //         )}
-          //         {/* <IconFont className="cutomIcon" onClick={() => setNormsVisible(true)} type="icon-shezhi"></IconFont> */}
-          //       </div>
-          //     );
-          //   },
-          //   value(visibleType: boolean) {
-          //     return (
-          //       <div id="CPU" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          //         <div style={{ display: 'inline-block' }}>
-          //           <div style={{ margin: '5px 0', fontFamily: 'DIDIFD-Medium' }}>
-          //             <span style={{ fontSize: '24px' }}>{cpu?.avg || 0}</span>
-          //             <span style={{ fontSize: '14px', display: 'inline-block', marginLeft: '4px' }}>%</span>
-          //           </div>
-          //           <div style={{ marginTop: '-4px', display: 'flex', justifyContent: 'space-between' }}>
-          //             <span>均衡区间: ±{cpu?.interval || 0}%</span>
-          //           </div>
-          //         </div>
-          //         <Popover
-          //           // visible={visibleType} // 修改为hover柱状图
-          //           overlayClassName="custom-popover"
-          //           content={
-          //             <div style={{ color: '#495057' }}>
-          //               <div>
-          //                 <IconFont className="cutomIcon cutomIcon-red" type="icon-chaoguo" />
-          //                 超过均衡区间的有: {cpu?.bigNu || 0}
-          //               </div>
-          //               <div style={{ margin: '6px 0' }}>
-          //                 <IconFont className="cutomIcon cutomIcon-green" type="icon-qujian" />
-          //                 在均衡区间内的有: {cpu?.betweenNu || 0}
-          //               </div>
-          //               <div>
-          //                 <IconFont className="cutomIcon cutomIcon-red" type="icon-diyu" />
-          //                 低于均衡区间的有: {cpu?.smallNu || 0}
-          //               </div>
-          //             </div>
-          //           }
-          //           getPopupContainer={(triggerNode: any) => {
-          //             return triggerNode;
-          //           }}
-          //           color="#ffffff"
-          //         >
-          //           <div style={{ width: '44px', height: '30px' }}>
-          //             <StateChart
-          //               data={[
-          //                 { name: 'bigNu', value: cpu?.bigNu || 0 },
-          //                 { name: 'betweenNu', value: cpu?.betweenNu || 0 },
-          //                 { name: 'smallNu', value: cpu?.smallNu || 0 },
-          //               ]}
-          //             />
-          //           </div>
-          //         </Popover>
-          //       </div>
-          //     );
-          //   },
-          //   className: 'custom-card-bar',
-          //   valueClassName: 'custom-card-bar-value',
-          // },
           {
             title() {
               return (

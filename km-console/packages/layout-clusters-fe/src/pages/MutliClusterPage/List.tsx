@@ -10,15 +10,15 @@ import { timeFormat, oneDayMillims } from '@src/constants/common';
 import { IMetricPoint, linesMetric, pointsMetric } from './config';
 import { useIntl } from 'react-intl';
 import api, { MetricType } from '@src/api';
-import { getHealthClassName, getHealthProcessColor, getHealthText } from '../SingleClusterDetail/config';
 import { ClustersPermissionMap } from '../CommonConfig';
 import { getDataUnit } from '@src/constants/chartConfig';
 import SmallChart from '@src/components/SmallChart';
+import HealthState, { HealthStateEnum } from '@src/components/HealthState';
 import { SearchParams } from './HomePage';
 
 const DEFAULT_PAGE_SIZE = 10;
 
-enum ClusterRunState {
+export enum ClusterRunState {
   Raft = 2,
 }
 
@@ -165,12 +165,9 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
           fieldName: 'kafkaVersion',
           fieldValueList: searchParams.checkedKafkaVersions as (string | number)[],
         },
-      ],
-      rangeFilterDTOList: [
         {
-          fieldMaxValue: searchParams.healthScoreRange[1],
-          fieldMinValue: searchParams.healthScoreRange[0],
-          fieldName: 'HealthScore',
+          fieldName: 'HealthState',
+          fieldValueList: searchParams.healthState,
         },
       ],
       searchKeywords: searchParams.keywords,
@@ -257,7 +254,7 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
       Zookeepers: zks,
       HealthCheckPassed: healthCheckPassed,
       HealthCheckTotal: healthCheckTotal,
-      HealthScore: healthScore,
+      HealthState: healthState,
       ZookeepersAvailable: zookeepersAvailable,
       LoadReBalanceCpu: loadReBalanceCpu,
       LoadReBalanceDisk: loadReBalanceDisk,
@@ -272,28 +269,16 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
           history.push(`/cluster/${itemData.id}/cluster`);
         }}
       >
-        <div className={'multi-cluster-list-item'}>
+        <div className="multi-cluster-list-item">
           <div className="multi-cluster-list-item-healthy">
-            <Progress
-              type="circle"
-              status={!itemData.alive ? 'exception' : healthScore >= 90 ? 'success' : 'normal'}
-              strokeWidth={4}
-              // className={healthScore > 90 ? 'green-circle' : ''}
-              className={+itemData.alive <= 0 ? 'red-circle' : +healthScore < 90 ? 'blue-circle' : 'green-circle'}
-              strokeColor={getHealthProcessColor(healthScore, itemData.alive)}
-              percent={itemData.alive ? healthScore : 100}
-              format={() => (
-                <div className={`healthy-percent ${getHealthClassName(healthScore, itemData?.alive)}`}>
-                  {getHealthText(healthScore, itemData?.alive)}
-                </div>
-              )}
-              width={70}
-            />
-            <div className="healthy-degree">
-              <span className="healthy-degree-status">通过</span>
-              <span className="healthy-degree-proportion">
-                {healthCheckPassed}/{healthCheckTotal}
-              </span>
+            <div className="healthy-box">
+              <HealthState state={healthState} width={70} height={70} />
+              <div className="healthy-degree">
+                <span className="healthy-degree-status">通过</span>
+                <span className="healthy-degree-proportion">
+                  {healthCheckPassed}/{healthCheckTotal}
+                </span>
+              </div>
             </div>
           </div>
           <div className="multi-cluster-list-item-right">
