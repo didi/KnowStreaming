@@ -16,9 +16,10 @@ import static com.xiaojukeji.know.streaming.km.core.service.topic.impl.TopicMetr
 @Component
 public class TopicMetricVersionItems extends BaseMetricVersionMetric {
 
-    public static final String TOPIC_METRIC_HEALTH_SCORE                            = "HealthScore";
+    public static final String TOPIC_METRIC_HEALTH_STATE                            = "HealthState";
     public static final String TOPIC_METRIC_HEALTH_CHECK_PASSED                     = "HealthCheckPassed";
     public static final String TOPIC_METRIC_HEALTH_CHECK_TOTAL                      = "HealthCheckTotal";
+
     public static final String TOPIC_METRIC_TOTAL_PRODUCE_REQUESTS                  = "TotalProduceRequests";
     public static final String TOPIC_METRIC_BYTES_REJECTED                          = "BytesRejected";
     public static final String TOPIC_METRIC_FAILED_FETCH_REQ                        = "FailedFetchRequests";
@@ -47,7 +48,7 @@ public class TopicMetricVersionItems extends BaseMetricVersionMetric {
 
         // HealthScore 指标
         itemList.add(buildAllVersionsItem()
-                .name(TOPIC_METRIC_HEALTH_SCORE).unit("分").desc("健康分").category(CATEGORY_HEALTH)
+                .name(TOPIC_METRIC_HEALTH_STATE).unit("0:好 1:中 2:差 3:宕机").desc("健康状态(0:好 1:中 2:差 3:宕机)").category(CATEGORY_HEALTH)
                 .extendMethod( TOPIC_METHOD_GET_HEALTH_SCORE ));
 
         itemList.add(buildAllVersionsItem()

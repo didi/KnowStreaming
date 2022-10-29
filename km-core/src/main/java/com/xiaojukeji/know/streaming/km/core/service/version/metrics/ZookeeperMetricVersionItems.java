@@ -15,6 +15,12 @@ import static com.xiaojukeji.know.streaming.km.core.service.zookeeper.impl.Zooke
 
 @Component
 public class ZookeeperMetricVersionItems extends BaseMetricVersionMetric {
+    /**
+     * 健康状态
+     */
+    public static final String ZOOKEEPER_METRIC_HEALTH_STATE                        = "HealthState";
+    public static final String ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED                 = "HealthCheckPassed";
+    public static final String ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL                  = "HealthCheckTotal";
 
     /**
      * 性能
@@ -23,7 +29,7 @@ public class ZookeeperMetricVersionItems extends BaseMetricVersionMetric {
     public static final String ZOOKEEPER_METRIC_MIN_REQUEST_LATENCY                 = "MinRequestLatency";
     public static final String ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY                 = "MaxRequestLatency";
     public static final String ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS                = "OutstandingRequests";
-    public static final String ZOOKEEPER_METRIC_NODE_COUNT                          = "NodeCount";
+    public static final String ZOOKEEPER_METRIC_NODE_COUNT                          = "ZnodeCount";
     public static final String ZOOKEEPER_METRIC_WATCH_COUNT                         = "WatchCount";
     public static final String ZOOKEEPER_METRIC_NUM_ALIVE_CONNECTIONS               = "NumAliveConnections";
     public static final String ZOOKEEPER_METRIC_PACKETS_RECEIVED                    = "PacketsReceived";
@@ -51,6 +57,20 @@ public class ZookeeperMetricVersionItems extends BaseMetricVersionMetric {
     @Override
     public List<VersionMetricControlItem> init(){
         List<VersionMetricControlItem> items = new ArrayList<>();
+
+        // 健康状态
+        items.add(buildAllVersionsItem()
+                .name(ZOOKEEPER_METRIC_HEALTH_STATE).unit("0:好 1:中 2:差 3:宕机").desc("健康状态(0:好 1:中 2:差 3:宕机)").category(CATEGORY_HEALTH)
+                .extendMethod(ZOOKEEPER_METHOD_GET_METRIC_FROM_HEALTH_SERVICE));
+
+        items.add(buildAllVersionsItem()
+                .name(ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED).unit("个").desc("健康巡检通过数").category(CATEGORY_HEALTH)
+                .extendMethod(ZOOKEEPER_METHOD_GET_METRIC_FROM_HEALTH_SERVICE));
+
+        items.add(buildAllVersionsItem()
+                .name(ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL).unit("个").desc("健康巡检总数").category(CATEGORY_HEALTH)
+                .extendMethod(ZOOKEEPER_METHOD_GET_METRIC_FROM_HEALTH_SERVICE));
+
 
         // 性能指标
         items.add(buildAllVersionsItem()

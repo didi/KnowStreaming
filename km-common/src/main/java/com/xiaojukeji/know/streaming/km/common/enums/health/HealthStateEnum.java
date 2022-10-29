@@ -16,7 +16,7 @@ public enum HealthStateEnum {
 
     POOR(2, "差"),
 
-    DEAD(3, "宕机"),
+    DEAD(3, "Down"),
 
     ;
 
