@@ -29,6 +29,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ZookeeperMetricPO
 import com.xiaojukeji.know.streaming.km.common.utils.zookeeper.FourLetterWordUtil;
 import com.xiaojukeji.know.streaming.km.core.cache.ZookeeperLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperService;
@@ -68,6 +69,9 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
     @Autowired
     private KafkaJMXClient kafkaJMXClient;
 
+    @Autowired
+    private HealthStateService healthStateService;
+
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
         return VersionItemTypeEnum.METRIC_ZOOKEEPER;
@@ -84,6 +88,7 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
         registerVCHandler( ZOOKEEPER_METHOD_GET_METRIC_FROM_MONITOR_CMD,          this::getMetricFromMonitorCmd);
         registerVCHandler( ZOOKEEPER_METHOD_GET_METRIC_FROM_SERVER_CMD,           this::getMetricFromServerCmd);
         registerVCHandler( ZOOKEEPER_METHOD_GET_METRIC_FROM_KAFKA_BY_JMX,         this::getMetricFromKafkaByJMX);
+        registerVCHandler( ZOOKEEPER_METHOD_GET_METRIC_FROM_HEALTH_SERVICE,       this::getMetricFromHealthService);
     }
 
     @Override
@@ -301,5 +306,14 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
         } catch (Exception e) {
             return Result.buildFailure(VC_JMX_CONNECT_ERROR);
         }
+    }
+
+    private Result<ZookeeperMetrics> getMetricFromHealthService(VersionItemParam metricParam) {
+        ZookeeperMetricParam param = (ZookeeperMetricParam)metricParam;
+
+        String      metricName              = param.getMetricName();
+        Long        clusterPhyId            = param.getClusterPhyId();
+
+        return Result.buildSuc(healthStateService.calZookeeperHealthMetrics(clusterPhyId));
     }
 }

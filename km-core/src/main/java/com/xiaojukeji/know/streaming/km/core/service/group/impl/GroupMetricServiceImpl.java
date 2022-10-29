@@ -20,7 +20,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
-import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
+import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.GroupMetricESDAO;
@@ -64,7 +64,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     private GroupService groupService;
 
     @Autowired
-    private HealthScoreService healthScoreService;
+    private HealthStateService healthStateService;
 
     @Autowired
     private PartitionService partitionService;
@@ -265,8 +265,8 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     private Result<List<GroupMetrics>> getMetricHealthScore(VersionItemParam param) {
         GroupMetricParam groupMetricParam = (GroupMetricParam)param;
 
-        return Result.buildSuc(Arrays.asList(healthScoreService.calGroupHealthScore(
-                groupMetricParam.getClusterPhyId(), groupMetricParam.getGroupName()))
+        return Result.buildSuc(Arrays.asList(
+                healthStateService.calGroupHealthMetrics(groupMetricParam.getClusterPhyId(), groupMetricParam.getGroupName()))
         );
     }
 }

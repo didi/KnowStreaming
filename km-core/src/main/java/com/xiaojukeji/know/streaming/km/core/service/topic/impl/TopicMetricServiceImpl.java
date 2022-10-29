@@ -31,7 +31,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
-import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
+import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
@@ -69,7 +69,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
     public static final String TOPIC_METHOD_GET_REPLICAS_COUNT                                      = "getReplicasCount";
 
     @Autowired
-    private HealthScoreService healthScoreService;
+    private HealthStateService healthStateService;
 
     @Autowired
     private KafkaJMXClient kafkaJMXClient;
@@ -394,7 +394,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         String      topic       = topicMetricParam.getTopic();
         Long        clusterId   = topicMetricParam.getClusterId();
 
-        TopicMetrics topicMetric = healthScoreService.calTopicHealthScore(clusterId, topic);
+        TopicMetrics topicMetric = healthStateService.calTopicHealthMetrics(clusterId, topic);
         return Result.buildSuc(Arrays.asList(topicMetric));
     }
 
