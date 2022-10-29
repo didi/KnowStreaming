@@ -6,6 +6,7 @@ import { healthDataProps } from '.';
 import { Tag, Tooltip, Utils } from 'knowdesign';
 import api from '@src/api';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { HealthStateEnum } from '../HealthState';
 
 export default () => {
   const routeParams = useParams<{
@@ -14,26 +15,21 @@ export default () => {
   const [loading, setLoading] = useState(false);
   const [cardData, setCardData] = useState([]);
   const [healthData, setHealthData] = useState<healthDataProps>({
-    score: 0,
+    state: HealthStateEnum.UNKNOWN,
     passed: 0,
     total: 0,
-    alive: 0,
   });
-  const cardItems = ['Partitions', 'PartitionsSkew', 'Leaders', 'LeadersSkew', 'LogSize'];
-  const healthItems = ['HealthScore_Brokers', 'HealthCheckPassed_Brokers', 'HealthCheckTotal_Brokers', 'Alive'];
+  const healthItems = ['HealthCheckPassed_Brokers', 'HealthCheckTotal_Brokers', 'HealthState'];
+
   useEffect(() => {
     setLoading(true);
     // 获取左侧健康度
     const brokerMetric = Utils.post(api.getBrokerMetricPoints(Number(routeParams.clusterId)), healthItems).then((data: any) => {
-      const healthResData: any = {};
-      // healthResData.score = data?.find((item:any) => item.metricName === 'HealthScore_Brokers')?.value || 0;
-      // healthResData.passed = data?.find((item:any) => item.metricName === 'HealthCheckPassed_Brokers')?.value || 0;
-      // healthResData.total = data?.find((item:any) => item.metricName === 'HealthCheckTotal_Brokers')?.value || 0;
-      healthResData.score = data?.metrics?.['HealthScore_Brokers'] || 0;
-      healthResData.passed = data?.metrics?.['HealthCheckPassed_Brokers'] || 0;
-      healthResData.total = data?.metrics?.['HealthCheckTotal_Brokers'] || 0;
-      healthResData.alive = data?.metrics?.['Alive'] || 0;
-      setHealthData(healthResData);
+      setHealthData({
+        state: data?.metrics?.['HealthState'],
+        passed: data?.metrics?.['HealthCheckPassed_Brokers'] || 0,
+        total: data?.metrics?.['HealthCheckTotal_Brokers'] || 0,
+      });
     });
     // 获取右侧状态
     const brokersState = Utils.request(api.getBrokersState(routeParams?.clusterId)).then((data) => {
@@ -115,6 +111,6 @@ export default () => {
       setLoading(false);
     });
   }, [routeParams.clusterId]);
-  // console.log('cardData', cardData, healthData);
+
   return <CardBar scene="broker" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
 };

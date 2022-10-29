@@ -1,5 +1,6 @@
 package com.xiaojukeji.know.streaming.km.biz.cluster;
 
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhysHealthState;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhysState;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.MultiClusterDashboardDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
@@ -14,6 +15,8 @@ public interface MultiClusterPhyManager {
      * @return
      */
     ClusterPhysState getClusterPhysState();
+
+    ClusterPhysHealthState getClusterPhysHealthState();
 
     /**
      * 查询多集群大盘

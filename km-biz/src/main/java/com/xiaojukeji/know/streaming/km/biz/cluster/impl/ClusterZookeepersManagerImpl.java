@@ -5,9 +5,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.biz.cluster.ClusterZookeepersManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.ClusterZookeepersOverviewDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.config.ZKConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ZookeeperMetrics;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.metric.ZookeeperMetricParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
@@ -20,7 +18,6 @@ import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.zookeeper.ZKRoleEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
-import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ZookeeperMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZnodeService;
@@ -30,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -55,11 +51,6 @@ public class ClusterZookeepersManagerImpl implements ClusterZookeepersManager {
         if (clusterPhy == null) {
             return Result.buildFromRSAndMsg(ResultStatus.CLUSTER_NOT_EXIST, MsgConstant.getClusterPhyNotExist(clusterPhyId));
         }
-
-//        // TODO
-//        private Integer healthState;
-//        private Integer healthCheckPassed;
-//        private Integer healthCheckTotal;
 
         List<ZookeeperInfo> infoList = zookeeperService.listFromDBByCluster(clusterPhyId);
 
@@ -90,12 +81,17 @@ public class ClusterZookeepersManagerImpl implements ClusterZookeepersManager {
             }
         }
 
-        Result<ZookeeperMetrics> metricsResult = zookeeperMetricService.collectMetricsFromZookeeper(new ZookeeperMetricParam(
+        // 指标获取
+        Result<ZookeeperMetrics> metricsResult = zookeeperMetricService.batchCollectMetricsFromZookeeper(
                 clusterPhyId,
-                infoList.stream().filter(elem -> elem.alive()).map(item -> new Tuple<String, Integer>(item.getHost(), item.getPort())).collect(Collectors.toList()),
-                ConvertUtil.str2ObjByJson(clusterPhy.getZkProperties(), ZKConfig.class),
-                ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_WATCH_COUNT
-        ));
+                Arrays.asList(
+                        ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_WATCH_COUNT,
+                        ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_HEALTH_STATE,
+                        ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED,
+                        ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL
+                )
+
+        );
         if (metricsResult.failed()) {
             LOGGER.error(
                     "class=ClusterZookeepersManagerImpl||method=getClusterPhyZookeepersState||clusterPhyId={}||errMsg={}",
@@ -103,8 +99,12 @@ public class ClusterZookeepersManagerImpl implements ClusterZookeepersManager {
             );
             return Result.buildSuc(vo);
         }
-        Float watchCount = metricsResult.getData().getMetric(ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_WATCH_COUNT);
-        vo.setWatchCount(watchCount != null? watchCount.intValue(): null);
+
+        ZookeeperMetrics metrics = metricsResult.getData();
+        vo.setWatchCount(ConvertUtil.float2Integer(metrics.getMetrics().get(ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_WATCH_COUNT)));
+        vo.setHealthState(ConvertUtil.float2Integer(metrics.getMetrics().get(ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_HEALTH_STATE)));
+        vo.setHealthCheckPassed(ConvertUtil.float2Integer(metrics.getMetrics().get(ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED)));
+        vo.setHealthCheckTotal(ConvertUtil.float2Integer(metrics.getMetrics().get(ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL)));
 
         return Result.buildSuc(vo);
     }

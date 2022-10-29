@@ -16,7 +16,7 @@ public class ZookeeperUtils {
      * 解析ZK地址
      * @see ConnectStringParser
      */
-    public static List<Tuple<String, Integer>> connectStringParser(String connectString) throws Exception {
+    public static List<Tuple<String, Integer>> connectStringParser(String connectString) {
         List<Tuple<String, Integer>> ipPortList = new ArrayList<>();
 
         if (connectString == null) {
@@ -53,6 +53,15 @@ public class ZookeeperUtils {
         }
 
         return ipPortList;
+    }
+
+    public static String getNamespace(String zookeeperAddress) {
+        int index = zookeeperAddress.indexOf('/');
+        String namespace = "/";
+        if (index != -1) {
+            namespace = zookeeperAddress.substring(index);
+        }
+        return namespace;
     }
 
 

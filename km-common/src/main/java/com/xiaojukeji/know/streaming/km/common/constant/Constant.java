@@ -35,14 +35,9 @@ public class Constant {
     public static final Integer DEFAULT_SESSION_TIMEOUT_UNIT_MS = 15000;
     public static final Integer DEFAULT_REQUEST_TIMEOUT_UNIT_MS = 5000;
 
-    public static final Float MIN_HEALTH_SCORE = 10f;
-
-
     /**
      * 指标相关
      */
-    public static final Integer DEFAULT_CLUSTER_HEALTH_SCORE = 90;
-
     public static final Integer PER_BATCH_MAX_VALUE = 100;
 
     public static final String DEFAULT_USER_NAME = "know-streaming-app";

@@ -10,13 +10,15 @@ import lombok.Getter;
 public enum HealthCheckDimensionEnum {
     UNKNOWN(-1, "未知"),
 
-    CLUSTER(0, "Cluster维度"),
+    CLUSTER(0, "Cluster"),
 
-    BROKER(1, "Broker维度"),
+    BROKER(1, "Broker"),
 
-    TOPIC(2, "Topic维度"),
+    TOPIC(2, "Topic"),
 
-    GROUP(3, "消费组维度"),
+    GROUP(3, "Group"),
+
+    ZOOKEEPER(4, "Zookeeper"),
 
     ;
 

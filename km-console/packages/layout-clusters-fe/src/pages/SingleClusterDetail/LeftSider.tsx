@@ -1,4 +1,4 @@
-import { AppContainer, Divider, Progress, Tooltip, Utils } from 'knowdesign';
+import { AppContainer, Divider, Tooltip, Utils } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import React, { useEffect, useState } from 'react';
 import AccessClusters from '../MutliClusterPage/AccessCluster';
@@ -7,8 +7,9 @@ import API from '../../api';
 import HealthySetting from './HealthySetting';
 import CheckDetail from './CheckDetail';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { getHealthClassName, getHealthProcessColor, getHealthState, getHealthText, renderToolTipValue } from './config';
+import { renderToolTipValue } from './config';
 import { ClustersPermissionMap } from '../CommonConfig';
+import HealthState, { getHealthStateDesc, getHealthStateEmoji } from '@src/components/HealthState';
 
 const LeftSider = () => {
   const [global] = AppContainer.useGlobalValue();
@@ -40,6 +41,7 @@ const LeftSider = () => {
     return Utils.post(
       API.getPhyClusterMetrics(+clusterId),
       [
+        'HealthState',
         'HealthScore',
         'HealthCheckPassed',
         'HealthCheckTotal',
@@ -102,23 +104,12 @@ const LeftSider = () => {
     <>
       <div className="left-sider">
         <div className="state-card">
-          <Progress
-            type="circle"
-            status="active"
-            strokeWidth={4}
-            strokeColor={getHealthProcessColor(clusterMetrics?.HealthScore, clusterMetrics?.Alive)}
-            percent={clusterMetrics?.HealthScore ?? '-'}
-            className={+clusterMetrics.Alive <= 0 ? 'red-circle' : +clusterMetrics?.HealthScore < 90 ? 'blue-circle' : 'green-circle'}
-            format={() => (
-              <div className={`healthy-percent ${getHealthClassName(clusterMetrics?.HealthScore, clusterMetrics?.Alive)}`}>
-                {getHealthText(clusterMetrics?.HealthScore, clusterMetrics?.Alive)}
-              </div>
-            )}
-            width={75}
-          />
+          <HealthState state={clusterMetrics?.HealthState} width={74} height={74} />
           <div className="healthy-state">
             <div className="healthy-state-status">
-              <span>{getHealthState(clusterMetrics?.HealthScore, clusterMetrics?.Alive)}</span>
+              <span>
+                {getHealthStateEmoji(clusterMetrics?.HealthState)} 集群{getHealthStateDesc(clusterMetrics?.HealthState)}
+              </span>
               {/* 健康分设置 */}
               {global.hasPermission && global.hasPermission(ClustersPermissionMap.CLUSTER_CHANGE_HEALTHY) ? (
                 <span

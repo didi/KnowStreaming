@@ -108,10 +108,10 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
         startTime,
         endTime,
         metricsNames: selectedMetricNames,
-        topNu: curHeaderOptions?.scopeData?.isTop ? curHeaderOptions.scopeData.data : null,
       },
       dashboardType === MetricType.Broker || dashboardType === MetricType.Topic
         ? {
+            topNu: curHeaderOptions?.scopeData?.isTop ? curHeaderOptions.scopeData.data : null,
             [dashboardType === MetricType.Broker ? 'brokerIds' : 'topics']: curHeaderOptions?.scopeData?.isTop
               ? null
               : curHeaderOptions.scopeData.data,
@@ -233,8 +233,8 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
     <div id="dashboard-drag-chart" className="topic-dashboard">
       <ChartOperateBar
         onChange={ksHeaderChange}
+        hideNodeScope={dashboardType === MetricType.Zookeeper}
         nodeScopeModule={{
-          hasCustomScope: !(dashboardType === MetricType.Zookeeper),
           customScopeList: scopeList,
           scopeName: dashboardType === MetricType.Broker ? 'Broker' : dashboardType === MetricType.Topic ? 'Topic' : 'Zookeeper',
           scopeLabel: `自定义 ${
