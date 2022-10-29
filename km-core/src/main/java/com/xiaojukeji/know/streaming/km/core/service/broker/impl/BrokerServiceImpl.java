@@ -134,7 +134,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
             newBrokerPO.setId(inDBBrokerPO.getId());
             newBrokerPO.setStatus(Constant.ALIVE);
             newBrokerPO.setCreateTime(inDBBrokerPO.getCreateTime());
-            newBrokerPO.setUpdateTime(inDBBrokerPO.getUpdateTime());
+            newBrokerPO.setUpdateTime(new Date());
             if (newBrokerPO.getStartTimestamp() == null) {
                 // 如果当前broker获取不到启动时间
                 // 如果DB中的broker状态为down，则使用当前时间，否则使用db中已有broker的时间
@@ -363,11 +363,11 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
         try {
             Long startTime = jmxDAO.getServerStartTime(clusterPhyId, newNode.host(), null, jmxConfig);
 
-            return Broker.buildFrom(clusterPhyId, newNode, startTime);
+            return Broker.buildFrom(clusterPhyId, newNode, startTime, jmxConfig);
         } catch (Exception e) {
             log.error("class=BrokerServiceImpl||method=getStartTimeAndBuildBroker||clusterPhyId={}||brokerNode={}||jmxConfig={}||errMsg=exception!", clusterPhyId, newNode, jmxConfig, e);
         }
 
-        return Broker.buildFrom(clusterPhyId, newNode, null);
+        return Broker.buildFrom(clusterPhyId, newNode, null, jmxConfig);
     }
 }

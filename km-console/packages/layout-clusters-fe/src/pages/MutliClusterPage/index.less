@@ -1,5 +1,17 @@
 @error-color: #f46a6a;
 
+.cluster-health-state-tooltip {
+  .dcloud-tooltip-arrow,
+  .dcloud-tooltip-inner {
+    margin-bottom: -10px;
+  }
+  .dcloud-tooltip-inner {
+    padding: 2px 4px;
+    min-height: 25px;
+    border-radius: 4px;
+  }
+}
+
 .multi-cluster-page {
   position: absolute;
   left: 0;
@@ -229,6 +241,9 @@
             &-slider {
               width: 298px;
               padding-right: 20px;
+              .dcloud-slider-mark {
+                left: -27px;
+              }
             }
 
             &-title {
@@ -404,58 +419,28 @@
       transition: 0.5s all;
 
       &-healthy {
+        display: flex;
+        align-items: center;
         margin-right: 24px;
-        .dcloud-progress-inner {
-          border-radius: 50%;
-        }
-        .green-circle {
-          .dcloud-progress-inner {
-            background: #f5fdfc;
-          }
-        }
-        .red-circle {
-          .dcloud-progress-inner {
-            background: #fffafa;
-          }
-        }
-        .healthy-percent {
-          font-family: DIDIFD-Regular;
-          font-size: 40px;
-          text-align: center;
-          line-height: 36px;
-          color: #00c0a2;
-
-          &.less-90 {
-            color: @primary-color;
-          }
-
-          &.no-info {
-            color: #e9e7e7;
-          }
-
-          &.down {
-            font-family: @font-family-bold;
-            font-size: 22px;
-            color: #ff7066;
-            text-align: center;
-            line-height: 30px;
-          }
+        .healthy-box {
+          position: relative;
+          height: 70px;
+          margin-top: 2px;
         }
 
         .healthy-degree {
+          position: absolute;
+          bottom: 0;
+          width: 100%;
           font-family: @font-family-bold;
           font-size: 12px;
           color: #495057;
-          line-height: 15px;
-          margin-top: 6px;
+          line-height: 1;
           text-align: center;
 
           &-status {
             margin-right: 6px;
             color: #74788d;
-          }
-
-          &-proportion {
           }
         }
       }

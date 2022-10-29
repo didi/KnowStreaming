@@ -7,6 +7,7 @@ import { leftMenus, systemKey } from '@src/constants/menu';
 import { ClustersPermissionMap } from './CommonConfig';
 import { getLicenseInfo } from '@src/constants/common';
 import { licenseEventBus } from '@src/constants/axiosConfig';
+import { ClusterRunState } from './MutliClusterPage/List';
 
 export const NoMatch = <Redirect to="/404" />;
 
@@ -34,6 +35,13 @@ const LayoutContainer = () => {
   const hasNoSiderPage = noSiderPages.findIndex((item) => item.path === getCurrentPathname(pathname)) > -1;
   const [showSider, setShowSider] = useState<boolean>(!(notCurrentSystemKey || hasNoSiderPage));
   const [handledLeftMenus, setHandledLeftMenus] = useState(leftMenus());
+
+  const forbidenPaths = (path: string) => {
+    // Raft 模式运行的集群没有 ZK 页面
+    if (path.includes('zookeeper') && global.clusterInfo?.runState === ClusterRunState.Raft) {
+      history.replace('/404');
+    }
+  };
 
   const isShowMenu = useCallback(
     (nodes: ClustersPermissionMap | ClustersPermissionMap[]) => {
@@ -67,6 +75,7 @@ const LayoutContainer = () => {
       if (permissionNode) {
         // 判断用户是否有当前页面的权限
         if (global.hasPermission(permissionNode)) {
+          forbidenPaths(path);
           return Promise.resolve(true);
         } else {
           // 用户没有当前页面权限，跳转到多集群首页
@@ -77,6 +86,7 @@ const LayoutContainer = () => {
           return Promise.reject(false);
         }
       }
+      forbidenPaths(path);
       return Promise.resolve(true);
     },
     [global.clusterInfo, global.hasPermission, global.getMetricDefine]
@@ -86,12 +96,14 @@ const LayoutContainer = () => {
     const notCurrentSystemKey = window.location.pathname.split('/')?.[1] !== systemKey;
     const hasNoSiderPage = noSiderPages.findIndex((item) => item.path === getCurrentPathname(pathname)) > -1;
     setShowSider(notCurrentSystemKey || hasNoSiderPage ? false : true);
+
     if (pathname.startsWith('/cluster') || pathname === '/') {
       const items = pathname.split('/');
       const clusterId = items[2];
-      setHandledLeftMenus(leftMenus(clusterId));
+      clusterId !== global.clusterInfo?.id &&
+        setHandledLeftMenus(leftMenus(clusterId, pathname === '/' ? undefined : global.clusterInfo?.runState));
     }
-  }, [pathname]);
+  }, [pathname, global.clusterInfo]);
 
   return (
     <div id="sub-system" style={{ display: 'flex' }}>

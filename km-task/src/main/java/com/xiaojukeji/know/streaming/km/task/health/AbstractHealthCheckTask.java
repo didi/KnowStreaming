@@ -60,7 +60,7 @@ public abstract class AbstractHealthCheckTask extends AbstractAsyncMetricsDispat
 
         // 删除10分钟之前的检查结果
         try {
-            healthCheckResultService.deleteByUpdateTimeBeforeInDB(clusterPhy.getId(), new Date(triggerTimeUnitMs - 10 * 60 * 1000));
+            healthCheckResultService.deleteByUpdateTimeBeforeInDB(clusterPhy.getId(), new Date(triggerTimeUnitMs - 20 * 60 * 1000));
         } catch (Exception e) {
             log.error("class=AbstractHealthCheckTask||method=processSubTask||clusterPhyId={}||errMsg=exception!", clusterPhy.getId(), e);
         }

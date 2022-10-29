@@ -19,35 +19,40 @@ import static com.xiaojukeji.know.streaming.km.core.service.cluster.impl.Cluster
  */
 @Component
 public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
-
     /**
-     * 健康分
+     * 整体的健康指标
      */
-    public static final String CLUSTER_METRIC_HEALTH_SCORE                          = "HealthScore";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_TOPICS                   = "HealthScore_Topics";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_BROKERS                  = "HealthScore_Brokers";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_GROUPS                   = "HealthScore_Groups";
-    public static final String CLUSTER_METRIC_HEALTH_SCORE_CLUSTER                  = "HealthScore_Cluster";
-
-    /**
-     * 健康巡检
-     */
+    public static final String CLUSTER_METRIC_HEALTH_STATE                          = "HealthState";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED                   = "HealthCheckPassed";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL                    = "HealthCheckTotal";
 
+    /**
+     * Topics健康指标
+     */
+    public static final String CLUSTER_METRIC_HEALTH_STATE_TOPICS                   = "HealthState_Topics";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_TOPICS            = "HealthCheckPassed_Topics";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_TOPICS             = "HealthCheckTotal_Topics";
 
+    /**
+     * Brokers健康指标
+     */
+    public static final String CLUSTER_METRIC_HEALTH_STATE_BROKERS                  = "HealthState_Brokers";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_BROKERS           = "HealthCheckPassed_Brokers";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_BROKERS            = "HealthCheckTotal_Brokers";
 
+    /**
+     * Groups健康指标
+     */
+    public static final String CLUSTER_METRIC_HEALTH_STATE_GROUPS                   = "HealthState_Groups";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_GROUPS            = "HealthCheckPassed_Groups";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_GROUPS             = "HealthCheckTotal_Groups";
 
+    /**
+     * Cluster健康指标
+     */
+    public static final String CLUSTER_METRIC_HEALTH_STATE_CLUSTER                  = "HealthState_Cluster";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_PASSED_CLUSTER           = "HealthCheckPassed_Cluster";
     public static final String CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CLUSTER            = "HealthCheckTotal_Cluster";
-
-
 
     public static final String CLUSTER_METRIC_TOTAL_REQ_QUEUE_SIZE                  = "TotalRequestQueueSize";
     public static final String CLUSTER_METRIC_TOTAL_RES_QUEUE_SIZE                  = "TotalResponseQueueSize";
@@ -113,64 +118,64 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
 
         // HealthScore 指标
         itemList.add(buildAllVersionsItem()
-                .name(CLUSTER_METRIC_HEALTH_SCORE).unit("分").desc("集群总体的健康分").category(CATEGORY_HEALTH)
-                .extendMethod(CLUSTER_METHOD_GET_HEALTH_SCORE));
+                .name(CLUSTER_METRIC_HEALTH_STATE).unit("0:好 1:中 2:差 3:宕").desc("集群健康状态(0:好 1:中 2:差 3:宕)").category(CATEGORY_HEALTH)
+                .extendMethod(CLUSTER_METHOD_GET_HEALTH_METRICS));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_PASSED).unit("个").desc("集群总体健康检查通过数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_TOTAL).unit("个").desc("集群总体健康检查总数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
-                .name(CLUSTER_METRIC_HEALTH_SCORE_TOPICS).unit("分").desc("集群Topics的健康分").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .name(CLUSTER_METRIC_HEALTH_STATE_TOPICS).unit("0:好 1:中 2:差 3:宕机").desc("集群Topics健康状态").category(CATEGORY_HEALTH)
+                .extendMethod(CLUSTER_METHOD_GET_HEALTH_METRICS));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_PASSED_TOPICS).unit("个").desc("集群Topics健康检查通过数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_TOPICS).unit("个").desc("集群Topics健康检查总数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
-                .name(CLUSTER_METRIC_HEALTH_SCORE_BROKERS).unit("分").desc("集群Brokers的健康分").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .name(CLUSTER_METRIC_HEALTH_STATE_BROKERS).unit("0:好 1:中 2:差 3:宕机").desc("集群Brokers健康状态").category(CATEGORY_HEALTH)
+                .extendMethod(CLUSTER_METHOD_GET_HEALTH_METRICS));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_PASSED_BROKERS).unit("个").desc("集群Brokers健康检查通过数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_BROKERS).unit("个").desc("集群Brokers健康检查总数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
-                .name(CLUSTER_METRIC_HEALTH_SCORE_GROUPS).unit("分").desc("集群Groups的健康分").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .name(CLUSTER_METRIC_HEALTH_STATE_GROUPS).unit("0:好 1:中 2:差 3:宕机").desc("集群Groups健康状态").category(CATEGORY_HEALTH)
+                .extendMethod(CLUSTER_METHOD_GET_HEALTH_METRICS));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_PASSED_GROUPS).unit("个").desc("集群Groups健康检查通过数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_GROUPS).unit("个").desc("集群Groups健康检查总数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
-                .name(CLUSTER_METRIC_HEALTH_SCORE_CLUSTER).unit("分").desc("集群自身的健康分").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .name(CLUSTER_METRIC_HEALTH_STATE_CLUSTER).unit("0:好 1:中 2:差 3:宕机").desc("集群自身健康状态").category(CATEGORY_HEALTH)
+                .extendMethod(CLUSTER_METHOD_GET_HEALTH_METRICS));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CLUSTER).unit("个").desc("集群自身健康检查通过数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CLUSTER).unit("个").desc("集群自身健康检查总数").category(CATEGORY_HEALTH)
-                .extendMethod( CLUSTER_METHOD_GET_HEALTH_SCORE ));
+                .extendMethod( CLUSTER_METHOD_GET_HEALTH_METRICS ));
 
         // TotalRequestQueueSize 指标
         itemList.add(buildAllVersionsItem()

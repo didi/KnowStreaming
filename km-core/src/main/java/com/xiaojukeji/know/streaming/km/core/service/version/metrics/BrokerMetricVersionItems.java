@@ -16,7 +16,7 @@ import static com.xiaojukeji.know.streaming.km.core.service.broker.impl.BrokerMe
 @Component
 public class BrokerMetricVersionItems extends BaseMetricVersionMetric {
 
-    public static final String BROKER_METRIC_HEALTH_SCORE                           = "HealthScore";
+    public static final String BROKER_METRIC_HEALTH_STATE                           = "HealthState";
     public static final String BROKER_METRIC_HEALTH_CHECK_PASSED                    = "HealthCheckPassed";
     public static final String BROKER_METRIC_HEALTH_CHECK_TOTAL                     = "HealthCheckTotal";
     public static final String BROKER_METRIC_TOTAL_REQ_QUEUE                        = "TotalRequestQueueSize";
@@ -57,8 +57,8 @@ public class BrokerMetricVersionItems extends BaseMetricVersionMetric {
 
         // HealthScore 指标
         items.add(buildAllVersionsItem()
-                .name(BROKER_METRIC_HEALTH_SCORE).unit("分").desc("健康分").category(CATEGORY_HEALTH)
-                .extendMethod(BROKER_METHOD_GET_HEALTH_SCORE));
+                .name(BROKER_METRIC_HEALTH_STATE).unit("0:好 1:中 2:差 3:宕机").desc("健康状态(0:好 1:中 2:差 3:宕机)").category(CATEGORY_HEALTH)
+                .extendMethod( BROKER_METHOD_GET_HEALTH_SCORE ));
 
         items.add(buildAllVersionsItem()
                 .name(BROKER_METRIC_HEALTH_CHECK_PASSED ).unit("个").desc("健康检查通过数").category(CATEGORY_HEALTH)

@@ -7,13 +7,14 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMetricControlItem.CATEGORY_HEALTH;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.METRIC_GROUP;
 import static com.xiaojukeji.know.streaming.km.core.service.group.impl.GroupMetricServiceImpl.*;
 
 @Component
 public class GroupMetricVersionItems extends BaseMetricVersionMetric {
 
-    public static final String GROUP_METRIC_HEALTH_SCORE                  = "HealthScore";
+    public static final String GROUP_METRIC_HEALTH_STATE                  = "HealthState";
     public static final String GROUP_METRIC_HEALTH_CHECK_PASSED           = "HealthCheckPassed";
     public static final String GROUP_METRIC_HEALTH_CHECK_TOTAL            = "HealthCheckTotal";
     public static final String GROUP_METRIC_OFFSET_CONSUMED               = "OffsetConsumed";
@@ -33,15 +34,15 @@ public class GroupMetricVersionItems extends BaseMetricVersionMetric {
 
         // HealthScore 指标
         itemList.add(buildAllVersionsItem()
-                .name(GROUP_METRIC_HEALTH_SCORE).unit("分").desc("健康分")
+                .name(GROUP_METRIC_HEALTH_STATE).unit("0:好 1:中 2:差 3:宕机").desc("健康状态(0:好 1:中 2:差 3:宕机)").category(CATEGORY_HEALTH)
                 .extendMethod( GROUP_METHOD_GET_HEALTH_SCORE ));
 
         itemList.add(buildAllVersionsItem()
-                .name(GROUP_METRIC_HEALTH_CHECK_PASSED ).unit("个").desc("健康检查通过数")
+                .name(GROUP_METRIC_HEALTH_CHECK_PASSED ).unit("个").desc("健康检查通过数").category(CATEGORY_HEALTH)
                 .extendMethod( GROUP_METHOD_GET_HEALTH_SCORE ));
 
         itemList.add(buildAllVersionsItem()
-                .name(GROUP_METRIC_HEALTH_CHECK_TOTAL ).unit("个").desc("健康检查总数")
+                .name(GROUP_METRIC_HEALTH_CHECK_TOTAL ).unit("个").desc("健康检查总数").category(CATEGORY_HEALTH)
                 .extendMethod( GROUP_METHOD_GET_HEALTH_SCORE ));
 
         // OffsetConsumed 指标

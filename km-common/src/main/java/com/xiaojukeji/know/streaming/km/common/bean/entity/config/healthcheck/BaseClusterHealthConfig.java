@@ -13,9 +13,4 @@ public class BaseClusterHealthConfig extends BaseClusterConfigValue {
      * 健康检查名称
      */
     protected HealthCheckNameEnum checkNameEnum;
-
-    /**
-     * 权重
-     */
-    protected Float weight;
 }

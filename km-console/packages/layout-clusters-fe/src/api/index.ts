@@ -24,6 +24,7 @@ const api = {
   logout: `${securityPrefix}/account/logout`,
 
   // 全局信息
+  getVersionInfo: () => getApi('/self/version'),
   getUserInfo: (userId: number) => `${securityPrefix}/user/${userId}`,
   getPermissionTree: `${securityPrefix}/permission/tree`,
   getKafkaVersionItems: () => getApi('/kafka-versions-items'),
@@ -60,6 +61,7 @@ const api = {
   phyClustersDashbord: getApi(`/physical-clusters/dashboard`),
   supportKafkaVersion: getApi(`/support-kafka-versions`),
   phyClusterState: getApi(`/physical-clusters/state`),
+  phyClusterHealthState: getApi(`/physical-clusters/health-state`),
 
   getOperatingStateList: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/groups-overview`),
   getGroupTopicList: (clusterPhyId: number, groupName: string) => getApi(`/clusters/${clusterPhyId}/groups/${groupName}/topics-overview`),
@@ -201,6 +203,14 @@ const api = {
   getJobsTaskData: (clusterPhyId: string, jobId: string | number) => getApi(`/clusters/${clusterPhyId}/jobs/${jobId}/modify-detail`),
   //编辑任务
   putJobsTaskData: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/jobs`),
+
+  // Zookeeper 接口
+  getZookeeperState: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/zookeepers-state`),
+  getZookeeperList: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/zookeepers-overview`),
+  getZookeeperNodeChildren: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/znode-children`),
+  getZookeeperNodeData: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/znode-data`),
+  getZookeeperMetricsInfo: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/zookeeper-latest-metrics`),
+  getZookeeperMetrics: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/zookeeper-metrics`),
 };
 
 export default api;

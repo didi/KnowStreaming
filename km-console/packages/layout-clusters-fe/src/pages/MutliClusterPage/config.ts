@@ -1,3 +1,4 @@
+import { HealthStateEnum } from '@src/components/HealthState';
 import { FormItemType, IFormItem } from 'knowdesign/es/extend/x-form';
 
 export const bootstrapServersErrCodes = [10, 11, 12];
@@ -21,8 +22,8 @@ export const sortFieldList = [
     value: 'createTime',
   },
   {
-    label: '健康分',
-    value: 'HealthScore',
+    label: '健康状态',
+    value: 'HealthState',
   },
   {
     label: 'Messages',
@@ -71,18 +72,41 @@ export const metricNameMap = {
   [key: string]: string;
 };
 
+export const sliderValueMap = {
+  1: {
+    code: HealthStateEnum.GOOD,
+    key: 'goodCount',
+    name: '好',
+  },
+  2: {
+    code: HealthStateEnum.MEDIUM,
+    key: 'mediumCount',
+    name: '中',
+  },
+  3: {
+    code: HealthStateEnum.POOR,
+    key: 'poorCount',
+    name: '差',
+  },
+  4: {
+    code: HealthStateEnum.DOWN,
+    key: 'deadCount',
+    name: 'Down',
+  },
+  5: {
+    code: HealthStateEnum.UNKNOWN,
+    key: 'unknownCount',
+    name: 'Unknown',
+  },
+};
+
 export const healthSorceList = {
-  0: 0,
-  10: '',
-  20: 20,
-  30: '',
-  40: 40,
-  50: '',
-  60: 60,
-  70: '',
-  80: 80,
-  90: '',
-  100: 100,
+  0: '',
+  1: '好',
+  2: '中',
+  3: '差',
+  4: 'Down',
+  5: 'Unknown',
 };
 
 export interface IMetricPoint {
