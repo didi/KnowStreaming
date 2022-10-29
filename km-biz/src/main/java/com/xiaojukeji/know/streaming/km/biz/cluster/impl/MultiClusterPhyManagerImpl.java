@@ -5,6 +5,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.biz.cluster.MultiClusterPhyManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricsClusterPhyDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhysHealthState;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhysState;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.MultiClusterDashboardDTO;
@@ -16,6 +17,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyDashboa
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.converter.ClusterVOConverter;
+import com.xiaojukeji.know.streaming.km.common.enums.health.HealthStateEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationMetricsUtil;
@@ -69,6 +71,32 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
             } else {
                 // 其他情况都设置为alive
                 physState.setLiveCount(physState.getLiveCount() + 1);
+            }
+        }
+
+        return physState;
+    }
+
+    @Override
+    public ClusterPhysHealthState getClusterPhysHealthState() {
+        List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
+
+        ClusterPhysHealthState physState = new ClusterPhysHealthState(clusterPhyList.size());
+        for (ClusterPhy clusterPhy: clusterPhyList) {
+            ClusterMetrics metrics = clusterMetricService.getLatestMetricsFromCache(clusterPhy.getId());
+            Integer state = metrics.getMetric(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_STATE).intValue();
+            if (state == null) {
+                physState.setUnknownCount(physState.getUnknownCount() + 1);
+            } else if (state.equals(HealthStateEnum.GOOD.getDimension())) {
+                physState.setGoodCount(physState.getGoodCount() + 1);
+            } else if (state.equals(HealthStateEnum.MEDIUM.getDimension())) {
+                physState.setMediumCount(physState.getMediumCount() + 1);
+            } else if (state.equals(HealthStateEnum.POOR.getDimension())) {
+                physState.setPoorCount(physState.getPoorCount() + 1);
+            } else if (state.equals(HealthStateEnum.DEAD.getDimension())) {
+                physState.setDeadCount(physState.getDeadCount() + 1);
+            } else {
+                physState.setUnknownCount(physState.getUnknownCount() + 1);
             }
         }
 
@@ -148,16 +176,7 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
         // 获取所有的metrics
         List<ClusterMetrics> metricsList = new ArrayList<>();
         for (ClusterPhyDashboardVO vo: voList) {
-            ClusterMetrics clusterMetrics = clusterMetricService.getLatestMetricsFromCache(vo.getId());
-            if (!clusterMetrics.getMetrics().containsKey(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_SCORE)) {
-                Float alive = clusterMetrics.getMetrics().get(ClusterMetricVersionItems.CLUSTER_METRIC_ALIVE);
-                // 如果集群没有健康分，则设置一个默认的健康分数值
-                clusterMetrics.putMetric(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_SCORE,
-                        (alive != null && alive <= 0)? 0.0f: Constant.DEFAULT_CLUSTER_HEALTH_SCORE.floatValue()
-                );
-            }
-
-            metricsList.add(clusterMetrics);
+            metricsList.add(clusterMetricService.getLatestMetricsFromCache(vo.getId()));
         }
 
         // 范围搜索
