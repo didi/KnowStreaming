@@ -76,6 +76,6 @@ public class ZnodeServiceImpl implements ZnodeService {
             return Result.buildFromRSAndMsg(ResultStatus.ZK_OPERATE_FAILED, "ZK操作失败");
         }
 
-        return Result.buildSuc(ZnodeConverter.convert2Znode(dataAndStat, path));
+        return Result.buildSuc(ZnodeConverter.convert2Znode(clusterPhy, dataAndStat, path));
     }
 }
