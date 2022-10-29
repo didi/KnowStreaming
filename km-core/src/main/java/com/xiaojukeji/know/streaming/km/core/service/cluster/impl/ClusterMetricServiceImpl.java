@@ -39,7 +39,7 @@ import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
-import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
+import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.job.JobService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
@@ -85,7 +85,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     public static final String CLUSTER_METHOD_GET_TOTAL_LOG_SIZE                            = "getTotalLogSize";
     public static final String CLUSTER_METHOD_GET_PARTITION_SIZE                            = "getPartitionSize";
     public static final String CLUSTER_METHOD_GET_PARTITION_NO_LEADER_SIZE                  = "getPartitionNoLeaderSize";
-    public static final String CLUSTER_METHOD_GET_HEALTH_SCORE                              = "getClusterHealthScore";
+    public static final String CLUSTER_METHOD_GET_HEALTH_METRICS                            = "getClusterHealthMetrics";
     public static final String CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_BROKERS_JMX    = "getMetricFromKafkaByTotalBrokersJMX";
     public static final String CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_CONTROLLER_JMX       = "getMetricFromKafkaByControllerJMX";
     public static final String CLUSTER_METHOD_GET_ZK_COUNT                                  = "getZKCount";
@@ -114,7 +114,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     public static final String CLUSTER_METHOD_GET_JOBS_FAILED                                = "getJobsFailed";
 
     @Autowired
-    private HealthScoreService healthScoreService;
+    private HealthStateService healthStateService;
 
     @Autowired
     private BrokerService brokerService;
@@ -188,7 +188,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
         registerVCHandler( CLUSTER_METHOD_GET_PARTITION_SIZE,                           this::getPartitionSize);
         registerVCHandler( CLUSTER_METHOD_GET_PARTITION_NO_LEADER_SIZE,                 this::getPartitionNoLeaderSize);
 
-        registerVCHandler( CLUSTER_METHOD_GET_HEALTH_SCORE,                             this::getClusterHealthScore);
+        registerVCHandler( CLUSTER_METHOD_GET_HEALTH_METRICS,                           this::getClusterHealthMetrics);
 
         registerVCHandler( CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_BROKERS_JMX,   this::getMetricFromKafkaByTotalBrokersJMX);
         registerVCHandler( CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_CONTROLLER_JMX,      this::getMetricFromKafkaByControllerJMX);
@@ -361,14 +361,12 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     }
 
 
-    /**
-     * 获取集群的健康分
-     */
-    private Result<ClusterMetrics> getClusterHealthScore(VersionItemParam metricParam){
+    private Result<ClusterMetrics> getClusterHealthMetrics(VersionItemParam metricParam){
         ClusterMetricParam param = (ClusterMetricParam)metricParam;
-        ClusterMetrics clusterMetrics = healthScoreService.calClusterHealthScore(param.getClusterId());
+        ClusterMetrics clusterMetrics = healthStateService.calClusterHealthMetrics(param.getClusterId());
         return Result.buildSuc(clusterMetrics);
     }
+
 
     /**
      * 获取集群的 totalLogSize

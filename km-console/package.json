@@ -22,7 +22,7 @@
     "prettier": "2.3.2"
   },
   "scripts": {
-    "i": "npm install && lerna bootstrap",
+    "i": "npm config set registry https://registry.npmmirror.com/ && npm install && lerna bootstrap",
     "clean": "rm -rf node_modules package-lock.json packages/*/node_modules packages/*/package-lock.json",
     "start": "lerna run start",
     "build": "lerna run build",

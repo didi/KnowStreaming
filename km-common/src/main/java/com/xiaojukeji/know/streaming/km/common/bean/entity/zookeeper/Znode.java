@@ -16,4 +16,7 @@ public class Znode {
 
     @ApiModelProperty(value = "节点属性", example = "")
     private Stat stat;
+
+    @ApiModelProperty(value = "节点路径", example = "")
+    private String namespace;
 }

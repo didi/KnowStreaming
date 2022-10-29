@@ -19,4 +19,7 @@ public class ZnodeVO {
     @ApiModelProperty(value = "节点属性", example = "")
     private ZnodeStatVO stat;
 
+    @ApiModelProperty(value = "节点路径", example = "/cluster")
+    private String namespace;
+
 }

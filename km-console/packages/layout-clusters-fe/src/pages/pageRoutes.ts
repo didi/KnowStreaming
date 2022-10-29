@@ -22,6 +22,9 @@ import SecurityACLs from './SecurityACLs';
 import SecurityUsers from './SecurityUsers';
 import LoadRebalance from './LoadRebalance';
 
+import Zookeeper from './Zookeeper';
+import ZookeeperDashboard from './ZookeeperDashboard';
+
 const pageRoutes = [
   {
     path: '/',
@@ -113,6 +116,18 @@ const pageRoutes = [
         path: 'operation/jobs',
         exact: true,
         component: Jobs,
+        noSider: false,
+      },
+      {
+        path: 'zookeeper',
+        exact: true,
+        component: ZookeeperDashboard,
+        noSider: false,
+      },
+      {
+        path: 'zookeeper/servers',
+        exact: true,
+        component: Zookeeper,
         noSider: false,
       },
       {

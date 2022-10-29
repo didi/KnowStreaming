@@ -28,7 +28,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
-import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
+import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
@@ -82,7 +82,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     private ReplicaMetricService replicaMetricService;
 
     @Autowired
-    private HealthScoreService healthScoreService;
+    private HealthStateService healthStateService;
 
     @Autowired
     private KafkaJMXClient kafkaJMXClient;
@@ -108,7 +108,6 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
         registerVCHandler( BROKER_METHOD_GET_HEALTH_SCORE,                        this::getMetricHealthScore);
         registerVCHandler( BROKER_METHOD_GET_PARTITIONS_SKEW,                     this::getPartitionsSkew);
         registerVCHandler( BROKER_METHOD_GET_LEADERS_SKEW,                        this::getLeadersSkew);
-//        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE,                            this::getLogSize);
 
         registerVCHandler( BROKER_METHOD_GET_LOG_SIZE,     V_0_10_0_0, V_1_0_0, "getLogSizeFromJmx",          this::getLogSizeFromJmx);
         registerVCHandler( BROKER_METHOD_GET_LOG_SIZE,     V_1_0_0, V_MAX,      "getLogSizeFromClient",       this::getLogSizeFromClient);
@@ -318,7 +317,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
         Long        clusterId   = param.getClusterId();
         Integer     brokerId    = param.getBrokerId();
 
-        BrokerMetrics brokerMetrics = healthScoreService.calBrokerHealthScore(clusterId, brokerId);
+        BrokerMetrics brokerMetrics = healthStateService.calBrokerHealthMetrics(clusterId, brokerId);
         return Result.buildSuc(brokerMetrics);
     }
 

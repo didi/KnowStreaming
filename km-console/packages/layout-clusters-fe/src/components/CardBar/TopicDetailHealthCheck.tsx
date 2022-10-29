@@ -5,8 +5,10 @@ import { healthDataProps } from '.';
 import { Utils } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import api from '@src/api';
-import { healthScoreCondition } from './const';
 import { hashDataParse } from '@src/constants/common';
+import { HealthStateEnum } from '../HealthState';
+
+const healthItems = ['HealthCheckPassed', 'HealthCheckTotal', 'HealthState'];
 
 const renderValue = (v: string | number | ((visibleType?: boolean) => JSX.Element), visibleType?: boolean) => {
   return typeof v === 'function' ? v(visibleType) : v;
@@ -19,14 +21,12 @@ export default (props: { record: any }) => {
   const [loading, setLoading] = useState(false);
   const [cardData, setCardData] = useState([]);
   const [healthData, setHealthData] = useState<healthDataProps>({
-    score: 0,
+    state: HealthStateEnum.UNKNOWN,
     passed: 0,
     total: 0,
-    alive: 0,
   });
-  const [healthDetail, setHealthDetail] = useState([]);
   const [clusterAlive, setClusterAlive] = useState(0);
-  const healthItems = ['HealthScore', 'HealthCheckPassed', 'HealthCheckTotal', 'alive'];
+
   const getNumAndSubTitles = (cardColumnsItemData: any) => {
     return (
       <div style={{ width: '100%', display: 'flex', alignItems: 'end' }}>
@@ -40,21 +40,21 @@ export default (props: { record: any }) => {
       </div>
     );
   };
+
   useEffect(() => {
     setLoading(true);
     const topicName = hashDataParse(location.hash)['topicName'];
-    let detailHealthPromise = Utils.post(api.getTopicMetricPointsLatest(Number(routeParams.clusterId), topicName), healthItems).then(
+    const detailHealthPromise = Utils.post(api.getTopicMetricPointsLatest(Number(routeParams.clusterId), topicName), healthItems).then(
       (data: any) => {
-        let healthResData: any = {};
-        healthResData.score = data.metrics['HealthScore'] || 0;
-        healthResData.passed = data.metrics['HealthCheckPassed'] || 0;
-        healthResData.total = data.metrics['HealthCheckTotal'] || 0;
-        // healthResData.alive = data.metrics['alive'] || 0
-        setHealthData(healthResData);
+        setHealthData({
+          state: data.metrics['HealthState'],
+          passed: data.metrics['HealthCheckPassed'] || 0,
+          total: data.metrics['HealthCheckTotal'] || 0,
+        });
       }
     );
 
-    let detailStatePromise = Utils.request(api.getTopicState(Number(routeParams.clusterId), topicName)).then((topicHealthState: any) => {
+    const detailStatePromise = Utils.request(api.getTopicState(Number(routeParams.clusterId), topicName)).then((topicHealthState: any) => {
       setCardData([
         {
           title: 'Partitions',
@@ -87,13 +87,12 @@ export default (props: { record: any }) => {
       ]);
     });
     // 获取集群维度的指标信息
-    let clusterStatePromise = Utils.post(api.getMetricPointsLatest(Number(routeParams.clusterId)), ['Alive']).then(
+    const clusterStatePromise = Utils.post(api.getMetricPointsLatest(Number(routeParams.clusterId)), ['Alive']).then(
       (clusterHealthState: any) => {
-        let clusterAlive = clusterHealthState?.metrics?.Alive || 0;
-        setClusterAlive(clusterAlive);
+        setClusterAlive(clusterHealthState?.metrics?.Alive || 0);
       }
     );
-    Promise.all([detailHealthPromise, detailStatePromise, clusterStatePromise]).then((res) => {
+    Promise.all([detailHealthPromise, detailStatePromise, clusterStatePromise]).then(() => {
       setLoading(false);
     });
   }, []);
@@ -101,7 +100,7 @@ export default (props: { record: any }) => {
     <CardBar
       record={record}
       scene="topic"
-      healthData={{ ...healthData, alive: clusterAlive }}
+      healthData={{ ...healthData, state: clusterAlive ? healthData.state : HealthStateEnum.DOWN }}
       cardColumns={cardData}
       showCardBg={false}
       loading={loading}
