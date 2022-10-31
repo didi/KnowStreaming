@@ -84,16 +84,16 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
         ClusterPhysHealthState physState = new ClusterPhysHealthState(clusterPhyList.size());
         for (ClusterPhy clusterPhy: clusterPhyList) {
             ClusterMetrics metrics = clusterMetricService.getLatestMetricsFromCache(clusterPhy.getId());
-            Integer state = metrics.getMetric(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_STATE).intValue();
+            Float state = metrics.getMetric(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_STATE);
             if (state == null) {
                 physState.setUnknownCount(physState.getUnknownCount() + 1);
-            } else if (state.equals(HealthStateEnum.GOOD.getDimension())) {
+            } else if (state.intValue() == HealthStateEnum.GOOD.getDimension()) {
                 physState.setGoodCount(physState.getGoodCount() + 1);
-            } else if (state.equals(HealthStateEnum.MEDIUM.getDimension())) {
+            } else if (state.intValue() == HealthStateEnum.MEDIUM.getDimension()) {
                 physState.setMediumCount(physState.getMediumCount() + 1);
-            } else if (state.equals(HealthStateEnum.POOR.getDimension())) {
+            } else if (state.intValue() == HealthStateEnum.POOR.getDimension()) {
                 physState.setPoorCount(physState.getPoorCount() + 1);
-            } else if (state.equals(HealthStateEnum.DEAD.getDimension())) {
+            } else if (state.intValue() == HealthStateEnum.DEAD.getDimension()) {
                 physState.setDeadCount(physState.getDeadCount() + 1);
             } else {
                 physState.setUnknownCount(physState.getUnknownCount() + 1);
