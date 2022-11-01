@@ -7,7 +7,7 @@ import { Tag, Tooltip, Utils } from 'knowdesign';
 import api from '@src/api';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { HealthStateEnum } from '../HealthState';
-
+import './index.less';
 export default () => {
   const routeParams = useParams<{
     clusterId: string;
@@ -87,7 +87,7 @@ export default () => {
               <div>
                 <span style={{ display: 'inline-block', marginRight: '8px' }}>Similar Config</span>
                 <Tooltip overlayClassName="rebalance-tooltip" title="所有Broker配置是否一致">
-                  <QuestionCircleOutlined />
+                  <span className='rebalance-tooltip-bg'><QuestionCircleOutlined /></span>
                 </Tooltip>
               </div>
             );
