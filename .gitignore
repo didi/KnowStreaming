@@ -110,3 +110,7 @@ dist/
 dist/*
 km-rest/src/main/resources/templates/
 *dependency-reduced-pom*
+#filter flattened xml
+*/.flattened-pom.xml
+.flattened-pom.xml
+*/*/.flattened-pom.xml
