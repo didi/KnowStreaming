@@ -25,8 +25,8 @@ public class OpLogWrapServiceImpl implements OpLogWrapService {
             ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (null == servletRequestAttributes) {
                 servletRequestAttributes = new ServletRequestAttributes(new MockHttpServletRequest());
+                RequestContextHolder.setRequestAttributes(servletRequestAttributes, true);
             }
-            RequestContextHolder.setRequestAttributes(servletRequestAttributes, true);
             return oplogService.saveOplog(oplogDTO);
         } catch (Exception e) {
             log.error("method=saveOplogAndIgnoreException||oplogDTO={}||errMsg=exception.", oplogDTO, e);
