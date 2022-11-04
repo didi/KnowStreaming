@@ -1,34 +1,48 @@
 {
-  "size": 0,
-  "query": {
-    "bool": {
-      "must": [
-        {
-          "term": {
-            "clusterPhyId": {
-              "value": %d
-            }
-          }
-        },
-        {
-          "term": {
-            "brokerId": {
-              "value": %d
-            }
-          }
-        },
-        {
-          "range": {
-            "timestamp": {
-              "gte": %d,
-              "lte": %d
-            }
-          }
+    "size":0,
+    "query":{
+        "bool":{
+            "must":[
+                {
+                    "term":{
+                        "clusterPhyId":{
+                            "value":%d
+                        }
+                    }
+                },
+                {
+                    "term":{
+                        "brokerId":{
+                            "value":%d
+                        }
+                    }
+                },
+                {
+                    "term":{
+                        "topic":{
+                            "value":"%s"
+                        }
+                    }
+                },
+                {
+                    "term":{
+                        "partitionId":{
+                            "value":%d
+                        }
+                    }
+                },
+                {
+                    "range":{
+                        "timestamp":{
+                            "gte":%d,
+                            "lte":%d
+                        }
+                    }
+                }
+            ]
         }
-      ]
-    }
-  },
-  "aggs": {
-      %s
+    },
+    "aggs":{
+         %s
     }
 }
