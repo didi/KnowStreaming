@@ -25,7 +25,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ClusterMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

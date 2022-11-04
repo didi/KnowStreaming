@@ -34,7 +34,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.PartitionMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.PartitionMetricVersionItems.*;
 
 /**
  * @author didi

@@ -17,7 +17,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.BrokerMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
