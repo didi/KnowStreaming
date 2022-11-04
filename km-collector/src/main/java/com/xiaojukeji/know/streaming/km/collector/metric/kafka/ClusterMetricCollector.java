@@ -1,7 +1,8 @@
-package com.xiaojukeji.know.streaming.km.collector.metric;
+package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
