@@ -6,8 +6,8 @@ import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.didiglobal.logi.security.service.OplogService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
