@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
-import { AppContainer, Divider, Form, Input, ProTable, Select, Utils } from 'knowdesign';
+import { AppContainer, Divider, Tooltip, Input, ProTable, Select, Utils } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import './index.less';
 import Api from '@src/api/index';
@@ -186,9 +186,11 @@ const AutoPage = (props: any) => {
         {scene !== 'topicDetail' && (
           <div className={tableHeaderPrefix}>
             <div className={`${tableHeaderPrefix}-left`}>
-              <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => searchFn()}>
-                <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
-              </div>
+              <Tooltip placement="topLeft" arrowPointAtCenter title='数据刷新间隔为1min，可能会有延迟'>
+                <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => searchFn()}>
+                  <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
+                </div>
+              </Tooltip>
               <Divider type="vertical" className={`${tableHeaderPrefix}-divider`} />
               <div className="consumers-search">
                 <Input

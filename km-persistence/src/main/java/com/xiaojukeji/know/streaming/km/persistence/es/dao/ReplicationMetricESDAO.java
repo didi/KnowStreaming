@@ -61,7 +61,7 @@ public class ReplicationMetricESDAO extends BaseMetricESDAO {
         String aggDsl   = buildAggsDSL(metrics, aggType);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_REPLICATION_AGG_SINGLE_METRICS, clusterPhyId, topic, brokerId, partitionId, startTime, endTime, aggDsl);
+                DslsConstant.GET_REPLICATION_AGG_SINGLE_METRICS, clusterPhyId, brokerId,topic, partitionId, startTime, endTime, aggDsl);
 
         return esOpClient.performRequestWithRouting(String.valueOf(brokerId), realIndex, dsl,
                 s -> handleSingleESQueryResponse(s, metrics, aggType), 3);
