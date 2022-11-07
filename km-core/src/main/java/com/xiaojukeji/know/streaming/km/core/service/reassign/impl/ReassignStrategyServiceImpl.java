@@ -11,7 +11,7 @@ import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignStrategyService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ReplicaMetricVersionItems;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

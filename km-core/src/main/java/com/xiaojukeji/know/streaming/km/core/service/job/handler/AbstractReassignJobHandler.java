@@ -21,7 +21,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.job.JobHandler;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignJobService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
