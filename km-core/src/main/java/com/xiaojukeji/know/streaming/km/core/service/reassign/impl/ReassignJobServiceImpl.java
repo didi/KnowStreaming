@@ -38,7 +38,7 @@ import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ReplicaMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.reassign.ReassignJobDAO;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.reassign.ReassignSubJobDAO;
 import org.apache.kafka.common.TopicPartition;
