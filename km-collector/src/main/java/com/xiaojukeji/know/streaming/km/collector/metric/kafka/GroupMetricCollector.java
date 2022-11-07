@@ -1,8 +1,9 @@
-package com.xiaojukeji.know.streaming.km.collector.metric;
+package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
 import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.GroupMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
