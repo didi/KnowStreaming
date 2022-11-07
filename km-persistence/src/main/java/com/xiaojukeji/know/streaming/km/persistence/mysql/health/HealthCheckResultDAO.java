@@ -11,4 +11,5 @@ public interface HealthCheckResultDAO extends BaseMapper<HealthCheckResultPO> {
     int replace(HealthCheckResultPO healthCheckResultPO);
 
     int batchReplace(List<HealthCheckResultPO> healthCheckResultPos);
+
 }

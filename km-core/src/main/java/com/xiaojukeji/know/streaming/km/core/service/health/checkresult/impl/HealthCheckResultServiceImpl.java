@@ -3,12 +3,10 @@ package com.xiaojukeji.know.streaming.km.core.service.health.checkresult.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.po.config.PlatformClusterConfigPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
-import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.config.ConfigGroupEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -19,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class HealthCheckResultServiceImpl implements HealthCheckResultService {
@@ -92,15 +92,37 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
     }
 
     @Override
-    public void batchReplace(Long clusterPhyId, List<HealthCheckResult> healthCheckResults) {
-        List<List<HealthCheckResult>> healthCheckResultPartitions = Lists.partition(healthCheckResults, Constant.PER_BATCH_MAX_VALUE);
-        for (List<HealthCheckResult> checkResultPartition : healthCheckResultPartitions) {
-            List<HealthCheckResultPO> healthCheckResultPos = ConvertUtil.list2List(checkResultPartition, HealthCheckResultPO.class);
-            try {
-                healthCheckResultDAO.batchReplace(healthCheckResultPos);
-            } catch (Exception e) {
-                log.error("method=batchReplace||clusterPhyId={}||checkResultList={}||errMsg=exception!", clusterPhyId, healthCheckResultPos, e);
+    public void batchReplace(Long clusterPhyId, List<HealthCheckResult> healthCheckResults, int dimension) {
+        Map<String, HealthCheckResult> presentHealthPoMap = healthCheckResults.stream().collect(Collectors.toMap(o -> o.getClusterPhyId() + o.getDimension() + o.getConfigName() + o.getResName(), Function.identity()));
+        List<HealthCheckResultPO> dbHealthsPoList = getHealthsFromDB(clusterPhyId,dimension);
+        for (HealthCheckResultPO healthCheckResultPO : dbHealthsPoList) {
+            String key = healthCheckResultPO.getClusterPhyId() + healthCheckResultPO.getDimension() + healthCheckResultPO.getConfigName() + healthCheckResultPO.getResName();
+            if (presentHealthPoMap.containsKey(key)){
+                presentHealthPoMap.remove(key);
+                healthCheckResultDAO.updateById(healthCheckResultPO);
             }
         }
+        for (HealthCheckResult healthCheckResult : presentHealthPoMap.values()) {
+            try {
+                // 新增
+                healthCheckResultDAO.insert(this.convert2HealthCheckPo(healthCheckResult));
+            } catch (Exception e) {
+                log.error("method=batchReplace||clusterPhyId={}||checkResultList={}||errMsg=exception!", clusterPhyId, healthCheckResult, e);
+            }
+        }
+    }
+
+    private  List<HealthCheckResultPO> getHealthsFromDB(Long clusterPhyId, int dimension) {
+        LambdaQueryWrapper<HealthCheckResultPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(HealthCheckResultPO::getClusterPhyId, clusterPhyId);
+        lambdaQueryWrapper.eq(HealthCheckResultPO::getDimension, dimension);
+        return healthCheckResultDAO.selectList(lambdaQueryWrapper);
+    }
+
+    private HealthCheckResultPO convert2HealthCheckPo(HealthCheckResult healthCheckResult) {
+        if (healthCheckResult == null) {
+            return null;
+        }
+        return ConvertUtil.obj2Obj(healthCheckResult, HealthCheckResultPO.class);
     }
 }

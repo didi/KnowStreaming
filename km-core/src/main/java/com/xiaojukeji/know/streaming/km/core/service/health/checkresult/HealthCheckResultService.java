@@ -21,5 +21,5 @@ public interface HealthCheckResultService {
 
     Map<String, BaseClusterHealthConfig> getClusterHealthConfig(Long clusterPhyId);
 
-    void batchReplace(Long clusterPhyId, List<HealthCheckResult> healthCheckResults);
+    void batchReplace(Long clusterPhyId, List<HealthCheckResult> healthCheckResults, int dimension);
 }

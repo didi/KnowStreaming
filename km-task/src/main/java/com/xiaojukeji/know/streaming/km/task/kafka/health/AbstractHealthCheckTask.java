@@ -52,9 +52,9 @@ public abstract class AbstractHealthCheckTask extends AbstractAsyncMetricsDispat
         for (ClusterParam clusterParam: paramList) {
             resultList.addAll(this.checkAndGetResult(clusterParam, healthConfigMap));
         }
-
+        int dimension = this.getCheckService().getHealthCheckDimensionEnum().getDimension();
         try {
-            healthCheckResultService.batchReplace(clusterPhy.getId(), resultList);
+            healthCheckResultService.batchReplace(clusterPhy.getId(), resultList, dimension);
         } catch (Exception e) {
             log.error("class=AbstractHealthCheckTask||method=processSubTask||clusterPhyId={}||errMsg=exception!", clusterPhy.getId(), e);
         }
