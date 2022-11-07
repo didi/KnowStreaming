@@ -5,7 +5,7 @@ import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.consensual.ConsensualEnum;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.collector.metric.ClusterMetricCollector;
+import com.xiaojukeji.know.streaming.km.collector.metric.kafka.ClusterMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import org.springframework.beans.factory.annotation.Autowired;
 

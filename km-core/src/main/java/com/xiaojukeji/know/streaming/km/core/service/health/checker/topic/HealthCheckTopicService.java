@@ -27,7 +27,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems.TOPIC_METRIC_UNDER_REPLICA_PARTITIONS;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems.TOPIC_METRIC_UNDER_REPLICA_PARTITIONS;
 
 @Service
 public class HealthCheckTopicService extends AbstractHealthCheckService {

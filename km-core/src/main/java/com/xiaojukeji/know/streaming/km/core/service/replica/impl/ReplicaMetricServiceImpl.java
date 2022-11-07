@@ -33,8 +33,8 @@ import java.util.Map;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.METRIC_REPLICATION;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems.REPLICATION_METRIC_LOG_END_OFFSET;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems.REPLICATION_METRIC_LOG_START_OFFSET;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ReplicaMetricVersionItems.REPLICATION_METRIC_LOG_END_OFFSET;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ReplicaMetricVersionItems.REPLICATION_METRIC_LOG_START_OFFSET;
 
 /**
  * @author didi
