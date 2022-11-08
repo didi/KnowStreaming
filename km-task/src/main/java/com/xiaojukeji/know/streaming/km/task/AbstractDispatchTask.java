@@ -7,7 +7,7 @@ import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.EntifyIdInterface;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.EntityIdInterface;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminTaskCodeException;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class AbstractDispatchTask<E extends Comparable & EntifyIdInterface> implements Job {
+public abstract class AbstractDispatchTask<E extends Comparable & EntityIdInterface> implements Job {
     private static final ILog LOGGER = LogFactory.getLog(AbstractDispatchTask.class);
 
     /**
