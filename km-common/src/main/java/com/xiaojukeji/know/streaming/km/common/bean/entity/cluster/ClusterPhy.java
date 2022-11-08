@@ -1,6 +1,6 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.cluster;
 
-import com.xiaojukeji.know.streaming.km.common.bean.entity.EntifyIdInterface;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.EntityIdInterface;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterPhy implements Comparable<ClusterPhy>, EntifyIdInterface {
+public class ClusterPhy implements Comparable<ClusterPhy>, EntityIdInterface {
     /**
      * 主键
      */
