@@ -6,6 +6,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.Ba
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthCompareValueConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthDetectedInLatestMinutesConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
@@ -49,8 +50,8 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
-        List<ClusterPhyParam> paramList = new ArrayList<>();
+    public List<ClusterParam> getResList(Long clusterPhyId) {
+        List<ClusterParam> paramList = new ArrayList<>();
         for (Topic topic: topicService.listTopicsFromDB(clusterPhyId)) {
             paramList.add(new TopicParam(clusterPhyId, topic.getTopicName()));
         }
@@ -65,7 +66,7 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
     /**
      * 检查Topic长期未同步
      */
-    private HealthCheckResult checkTopicUnderReplicatedPartition(Tuple<ClusterPhyParam, BaseClusterHealthConfig> paramTuple) {
+    private HealthCheckResult checkTopicUnderReplicatedPartition(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {
         TopicParam param = (TopicParam) paramTuple.getV1();
         HealthDetectedInLatestMinutesConfig singleConfig = (HealthDetectedInLatestMinutesConfig) paramTuple.getV2();
 
@@ -97,7 +98,7 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
     /**
      * 检查NoLeader
      */
-    private HealthCheckResult checkTopicNoLeader(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkTopicNoLeader(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         TopicParam param = (TopicParam) singleConfigSimpleTuple.getV1();
         List<Partition> partitionList = partitionService.listPartitionFromCacheFirst(param.getClusterPhyId(), param.getTopicName());
 

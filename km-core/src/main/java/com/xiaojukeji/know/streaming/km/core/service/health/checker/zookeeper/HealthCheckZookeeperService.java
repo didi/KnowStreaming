@@ -9,6 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.He
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthCompareValueConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ZookeeperMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.metric.ZookeeperMetricParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.zookeeper.ZookeeperParam;
@@ -58,7 +59,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
+    public List<ClusterParam> getResList(Long clusterPhyId) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(clusterPhyId);
         if (clusterPhy == null) {
             return new ArrayList<>();
@@ -82,7 +83,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         return HealthCheckDimensionEnum.ZOOKEEPER;
     }
 
-    private HealthCheckResult checkBrainSplit(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkBrainSplit(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         ZookeeperParam param = (ZookeeperParam) singleConfigSimpleTuple.getV1();
         HealthCompareValueConfig valueConfig = (HealthCompareValueConfig) singleConfigSimpleTuple.getV2();
 
@@ -100,7 +101,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         return checkResult;
     }
 
-    private HealthCheckResult checkOutstandingRequests(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkOutstandingRequests(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         ZookeeperParam param = (ZookeeperParam) singleConfigSimpleTuple.getV1();
         HealthAmountRatioConfig valueConfig = (HealthAmountRatioConfig) singleConfigSimpleTuple.getV2();
 
@@ -135,7 +136,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         return checkResult;
     }
 
-    private HealthCheckResult checkWatchCount(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkWatchCount(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         ZookeeperParam param = (ZookeeperParam) singleConfigSimpleTuple.getV1();
         HealthAmountRatioConfig valueConfig = (HealthAmountRatioConfig) singleConfigSimpleTuple.getV2();
 
@@ -171,7 +172,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         return checkResult;
     }
 
-    private HealthCheckResult checkAliveConnections(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkAliveConnections(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         ZookeeperParam param = (ZookeeperParam) singleConfigSimpleTuple.getV1();
         HealthAmountRatioConfig valueConfig = (HealthAmountRatioConfig) singleConfigSimpleTuple.getV2();
 
@@ -207,7 +208,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         return checkResult;
     }
 
-    private HealthCheckResult checkApproximateDataSize(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkApproximateDataSize(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         ZookeeperParam param = (ZookeeperParam) singleConfigSimpleTuple.getV1();
         HealthAmountRatioConfig valueConfig = (HealthAmountRatioConfig) singleConfigSimpleTuple.getV2();
 
@@ -243,7 +244,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         return checkResult;
     }
 
-    private HealthCheckResult checkSentRate(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkSentRate(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         ZookeeperParam param = (ZookeeperParam) singleConfigSimpleTuple.getV1();
         HealthAmountRatioConfig valueConfig = (HealthAmountRatioConfig) singleConfigSimpleTuple.getV2();
 
