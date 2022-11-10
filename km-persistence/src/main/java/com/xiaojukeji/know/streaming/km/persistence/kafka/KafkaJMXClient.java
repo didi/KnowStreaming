@@ -45,10 +45,6 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
 
     public JmxConnectorWrap getClient(Long clusterPhyId, Integer brokerId) {
         Map<Integer, JmxConnectorWrap> jmxMap = JMX_MAP.getOrDefault(clusterPhyId, new ConcurrentHashMap<>());
-        if (jmxMap == null) {
-            // 集群不存在, 直接返回null
-            return null;
-        }
 
         JmxConnectorWrap jmxConnectorWrap = jmxMap.get(brokerId);
         if (jmxConnectorWrap != null) {
@@ -107,7 +103,8 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
     protected void modify(ClusterPhy newClusterPhy, ClusterPhy oldClusterPhy) {
         if (newClusterPhy.getClientProperties().equals(oldClusterPhy.getClientProperties())
                 && newClusterPhy.getZookeeper().equals(oldClusterPhy.getZookeeper())
-                && newClusterPhy.getBootstrapServers().equals(oldClusterPhy.getBootstrapServers())) {
+                && newClusterPhy.getBootstrapServers().equals(oldClusterPhy.getBootstrapServers())
+                && newClusterPhy.getJmxProperties().equals(oldClusterPhy.getJmxProperties())) {
             // 集群信息虽然变化，但是相关没有变化，则直接返回
             return;
         }
