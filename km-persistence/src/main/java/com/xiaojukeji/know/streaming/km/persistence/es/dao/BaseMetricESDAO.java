@@ -10,10 +10,12 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.BaseESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.BaseMetricESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.IndexNameUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.BaseESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
@@ -43,6 +45,12 @@ public class BaseMetricESDAO extends BaseESDAO {
     private static Map<String, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps.newConcurrentMap();
 
     /**
+     * es 地址
+     */
+    @Value("${es.index.expire:60}")
+    private int indexExpireDays;
+
+    /**
      * 检查 es 索引是否存在，不存在则创建索引
      */
     @Scheduled(cron = "0 3/5 * * * ?")
@@ -59,6 +67,25 @@ public class BaseMetricESDAO extends BaseESDAO {
             }
         }catch (Exception e){
             LOGGER.error("method=checkCurrentDayIndexExist||errMsg=exception!", e);
+        }
+    }
+
+    @Scheduled(cron = "0 30/45 * * * ?")
+    public void delExpireIndex(){
+        List<String> indexList = esOpClient.listIndexByName(indexName);
+        if(CollectionUtils.isEmpty(indexList)){return;}
+
+        indexList.sort((o1, o2) -> -o1.compareTo(o2));
+
+        int size = indexList.size();
+        if(size > indexExpireDays){
+            if(!EnvUtil.isOnline()){
+                LOGGER.info("method=delExpireIndex||indexExpireDays={}||delIndex={}",
+                        indexExpireDays, indexList.subList(indexExpireDays, size));
+            }
+
+            indexList.subList(indexExpireDays, size).stream().forEach(
+                    s -> esOpClient.delIndexByName(s));
         }
     }
 

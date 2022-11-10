@@ -11,6 +11,9 @@ import com.didiglobal.logi.elasticsearch.client.request.batch.ESBatchRequest;
 import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
 import com.didiglobal.logi.elasticsearch.client.response.batch.ESBatchResponse;
 import com.didiglobal.logi.elasticsearch.client.response.batch.IndexResultItemNode;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.deleteindex.ESIndicesDeleteIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.gettemplate.ESIndicesGetTemplateResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.putindex.ESIndicesPutIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.puttemplate.ESIndicesPutTemplateResponse;
@@ -37,6 +40,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class ESOpClient {
@@ -76,6 +80,8 @@ public class ESOpClient {
      *  更新es数据的客户端连接队列
      */
     private LinkedBlockingQueue<ESClient>   esClientPool;
+
+    private static final Integer ES_OPERATE_TIMEOUT               = 30;
 
     @PostConstruct
     public void init(){
@@ -380,7 +386,7 @@ public class ESOpClient {
         if (client != null) {
             try {
                 ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).execute()
-                        .actionGet(30, TimeUnit.SECONDS);
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
                 return response.getAcknowledged();
             } catch (Exception e){
                 LOGGER.warn( "msg=create index fail||indexName={}", indexName, e);
@@ -400,7 +406,7 @@ public class ESOpClient {
 
             // 获取es中原来index template的配置
             ESIndicesGetTemplateResponse getTemplateResponse =
-                    esClient.admin().indices().prepareGetTemplate( indexTemplateName ).execute().actionGet( 30, TimeUnit.SECONDS );
+                    esClient.admin().indices().prepareGetTemplate( indexTemplateName ).execute().actionGet( ES_OPERATE_TIMEOUT, TimeUnit.SECONDS );
 
             TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
@@ -433,13 +439,68 @@ public class ESOpClient {
 
             // 创建新的模板
             ESIndicesPutTemplateResponse response = esClient.admin().indices().preparePutTemplate( indexTemplateName )
-                    .setTemplateConfig( config ).execute().actionGet( 30, TimeUnit.SECONDS );
+                    .setTemplateConfig( config ).execute().actionGet( ES_OPERATE_TIMEOUT, TimeUnit.SECONDS );
 
             return response.getAcknowledged();
         } catch (Exception e) {
             LOGGER.warn( "method=createIndexTemplateIfNotExist||indexTemplateName={}||config={}||msg=exception!",
                     indexTemplateName, config, e
             );
+        } finally {
+            if (esClient != null) {
+                this.returnESClientToPool(esClient);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 根据索引模板获取所有的索引
+     * @param indexName
+     * @return
+     */
+    public List<String> listIndexByName(String indexName){
+        ESClient esClient = null;
+
+        try {
+            esClient = this.getESClientFromPool();
+
+            ESIndicesCatIndicesResponse response = esClient.admin().indices().prepareCatIndices(indexName + "*").execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            if(null != response){
+                return response.getCatIndexResults().stream().map(CatIndexResult::getIndex).collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            LOGGER.warn( "method=listIndexByTemplate||indexName={}||msg=exception!",
+                    indexName, e);
+        } finally {
+            if (esClient != null) {
+                this.returnESClientToPool(esClient);
+            }
+        }
+
+        return new ArrayList<>();
+    }
+
+    /**
+     * 删除索引
+     * @param indexRealName
+     * @return
+     */
+    public boolean delIndexByName(String indexRealName){
+        ESClient esClient = null;
+
+        try {
+            esClient = this.getESClientFromPool();
+
+            ESIndicesDeleteIndexResponse response = esClient.admin().indices().prepareDeleteIndex(indexRealName).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            LOGGER.warn( "method=delIndexByName||indexRealName={}||msg=exception!",
+                    indexRealName, e);
         } finally {
             if (esClient != null) {
                 this.returnESClientToPool(esClient);

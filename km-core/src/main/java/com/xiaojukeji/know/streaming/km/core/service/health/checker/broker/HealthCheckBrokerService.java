@@ -8,6 +8,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.He
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.broker.BrokerParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
@@ -45,8 +46,8 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
-        List<ClusterPhyParam> paramList = new ArrayList<>();
+    public List<ClusterParam> getResList(Long clusterPhyId) {
+        List<ClusterParam> paramList = new ArrayList<>();
         for (Broker broker: brokerService.listAliveBrokersFromDB(clusterPhyId)) {
             paramList.add(new BrokerParam(clusterPhyId, broker.getBrokerId()));
         }
@@ -61,7 +62,7 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
     /**
      * Broker网络处理线程平均值过低
      */
-    private HealthCheckResult checkBrokerNetworkProcessorAvgIdleTooLow(Tuple<ClusterPhyParam, BaseClusterHealthConfig> paramTuple) {
+    private HealthCheckResult checkBrokerNetworkProcessorAvgIdleTooLow(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {
         BrokerParam param = (BrokerParam) paramTuple.getV1();
         HealthCompareValueConfig singleConfig = (HealthCompareValueConfig) paramTuple.getV2();
 
@@ -96,7 +97,7 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
     /**
      * Broker请求队列满
      */
-    private HealthCheckResult checkBrokerRequestQueueFull(Tuple<ClusterPhyParam, BaseClusterHealthConfig> paramTuple) {
+    private HealthCheckResult checkBrokerRequestQueueFull(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {
         BrokerParam param = (BrokerParam) paramTuple.getV1();
         HealthCompareValueConfig singleConfig = (HealthCompareValueConfig) paramTuple.getV2();
 

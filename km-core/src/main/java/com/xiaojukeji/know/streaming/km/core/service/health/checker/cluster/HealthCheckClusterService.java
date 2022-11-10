@@ -6,6 +6,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.Ba
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthCompareValueConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
@@ -34,7 +35,7 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
+    public List<ClusterParam> getResList(Long clusterPhyId) {
         return Arrays.asList(new ClusterPhyParam(clusterPhyId));
     }
 
@@ -46,8 +47,8 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
     /**
      * 检查NoController
      */
-    private HealthCheckResult checkClusterNoController(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
-        ClusterPhyParam param = singleConfigSimpleTuple.getV1();
+    private HealthCheckResult checkClusterNoController(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+        ClusterPhyParam param =(ClusterPhyParam) singleConfigSimpleTuple.getV1();
         HealthCompareValueConfig valueConfig = (HealthCompareValueConfig) singleConfigSimpleTuple.getV2();
 
         Result<ClusterMetrics> clusterMetricsResult = clusterMetricService.getLatestMetricsFromES(param.getClusterPhyId(), Arrays.asList(ClusterMetricVersionItems.CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT));

@@ -5,6 +5,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthDetectedInLatestMinutesConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.group.GroupParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -43,7 +44,7 @@ public class HealthCheckGroupService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
+    public List<ClusterParam> getResList(Long clusterPhyId) {
         return groupService.getGroupsFromDB(clusterPhyId).stream().map(elem -> new GroupParam(clusterPhyId, elem)).collect(Collectors.toList());
     }
 
@@ -55,7 +56,7 @@ public class HealthCheckGroupService extends AbstractHealthCheckService {
     /**
      * 检查Group re-balance太频繁
      */
-    private HealthCheckResult checkReBalanceTooFrequently(Tuple<ClusterPhyParam, BaseClusterHealthConfig> paramTuple) {
+    private HealthCheckResult checkReBalanceTooFrequently(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {
         GroupParam param = (GroupParam) paramTuple.getV1();
         HealthDetectedInLatestMinutesConfig singleConfig = (HealthDetectedInLatestMinutesConfig) paramTuple.getV2();
 
