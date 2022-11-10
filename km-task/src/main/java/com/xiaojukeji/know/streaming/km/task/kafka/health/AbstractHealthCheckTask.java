@@ -6,6 +6,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
@@ -41,15 +42,15 @@ public abstract class AbstractHealthCheckTask extends AbstractAsyncMetricsDispat
         List<HealthCheckResult> resultList = new ArrayList<>();
 
         // 遍历Check-Service
-        List<ClusterPhyParam> paramList = this.getCheckService().getResList(clusterPhy.getId());
+        List<ClusterParam> paramList = this.getCheckService().getResList(clusterPhy.getId());
         if (ValidateUtils.isEmptyList(paramList)) {
             // 当前无该维度的资源，则直接设置为
             resultList.addAll(this.getNoResResult(clusterPhy.getId(), this.getCheckService(), healthConfigMap));
         }
 
         // 遍历资源
-        for (ClusterPhyParam clusterPhyParam: paramList) {
-            resultList.addAll(this.checkAndGetResult(clusterPhyParam, healthConfigMap));
+        for (ClusterParam clusterParam: paramList) {
+            resultList.addAll(this.checkAndGetResult(clusterParam, healthConfigMap));
         }
 
         try {
@@ -93,13 +94,13 @@ public abstract class AbstractHealthCheckTask extends AbstractAsyncMetricsDispat
         return resultList;
     }
 
-    private List<HealthCheckResult> checkAndGetResult(ClusterPhyParam clusterPhyParam,
+    private List<HealthCheckResult> checkAndGetResult(ClusterParam clusterParam,
                                                       Map<String, BaseClusterHealthConfig> healthConfigMap) {
         List<HealthCheckResult> resultList = new ArrayList<>();
 
         // 进行检查
         for (BaseClusterHealthConfig clusterHealthConfig: healthConfigMap.values()) {
-            HealthCheckResult healthCheckResult = this.getCheckService().checkAndGetResult(clusterPhyParam, clusterHealthConfig);
+            HealthCheckResult healthCheckResult = this.getCheckService().checkAndGetResult(clusterParam, clusterHealthConfig);
             if (healthCheckResult == null) {
                 continue;
             }
