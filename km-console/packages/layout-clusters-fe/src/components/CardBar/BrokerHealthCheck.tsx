@@ -7,7 +7,6 @@ import { Tag, Tooltip, Utils } from 'knowdesign';
 import api from '@src/api';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { HealthStateEnum } from '../HealthState';
-
 export default () => {
   const routeParams = useParams<{
     clusterId: string;

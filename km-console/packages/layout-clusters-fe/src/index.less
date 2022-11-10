@@ -308,11 +308,18 @@ li {
     align-items: center;
   }
   &-left  {
-    &-refresh{
-      font-size: 20px;
-      color: #74788d;
-      cursor: pointer;
-    }
+    &-refresh {
+        font-size: 20px;
+        color: #74788d;
+        cursor: pointer;
+        &-icon {
+          border-radius: 50%;
+          padding: 3px;
+        }
+        &-icon:hover {
+          background: rgba(33, 37, 41, 0.04);
+        }
+      }
   }
   
   &-right{

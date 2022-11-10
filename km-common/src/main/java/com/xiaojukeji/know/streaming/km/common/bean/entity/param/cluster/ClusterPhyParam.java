@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterPhyParam extends VersionItemParam {
+public class ClusterPhyParam extends ClusterParam {
     protected Long clusterPhyId;
 }
