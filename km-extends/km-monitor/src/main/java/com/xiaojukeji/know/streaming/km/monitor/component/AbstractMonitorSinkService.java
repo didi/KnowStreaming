@@ -139,11 +139,21 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
 
         for(GroupMetrics g : groupMetrics){
             if(g.isBGroupMetric()){
+                // Group 指标
                 Map<String, Object> tagsMap = new HashMap<>();
                 tagsMap.put(CLUSTER_ID.getName(),     g.getClusterPhyId());
                 tagsMap.put(CONSUMER_GROUP.getName(), g.getGroup());
 
                 pointList.addAll(genSinkPoint("Group", g.getMetrics(), g.getTimestamp(), tagsMap));
+            } else {
+                // Group + Topic + Partition指标
+                Map<String, Object> tagsMap = new HashMap<>();
+                tagsMap.put(CLUSTER_ID.getName(),       g.getClusterPhyId());
+                tagsMap.put(CONSUMER_GROUP.getName(),   g.getGroup());
+                tagsMap.put(TOPIC.getName(),            g.getTopic());
+                tagsMap.put(PARTITION_ID.getName(),     g.getPartitionId());
+
+                pointList.addAll(genSinkPoint("Group_Topic_Partition", g.getMetrics(), g.getTimestamp(), tagsMap));
             }
         }
 
