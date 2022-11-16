@@ -157,13 +157,13 @@ const AutoPage = (props: any) => {
         width: 95,
       },
       {
-        title: '健康分',
-        dataIndex: 'HealthScore',
-        key: 'HealthScore',
-        sorter: true,
+        title: '健康状态',
+        dataIndex: 'healthState',
+        key: 'healthState',
+        //sorter: true,
         // 设计图上量出来的是144，但做的时候发现写144 header部分的sort箭头不出来，所以临时调大些
-        width: 170,
-        render: (value: any, record: any) => renderLine(record, 'HealthScore'),
+        width: 170
+        //render: (value: any, record: any) => renderLine(record, 'HealthState'),
       },
       // {
       //   title: '创建时间',

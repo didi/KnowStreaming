@@ -26,6 +26,9 @@ public class ClusterPhyTopicsOverviewVO extends BaseTimeVO {
     @ApiModelProperty(value = "分区数", example = "3")
     private Integer partitionNum;
 
+    @ApiModelProperty(value = "监控状态", example = "好")
+    private String healthState;
+
     @ApiModelProperty(value = "保存时间(ms)", example = "172800000")
     private Long retentionTimeUnitMs;
 
