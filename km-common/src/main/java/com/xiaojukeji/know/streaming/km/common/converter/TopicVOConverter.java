@@ -1,5 +1,6 @@
 package com.xiaojukeji.know.streaming.km.common.converter;
 
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BaseMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.PartitionMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
@@ -12,9 +13,8 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricLineVO
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.TopicRecordVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.partition.TopicPartitionVO;
-import com.xiaojukeji.know.streaming.km.common.constant.Constant;
-import com.xiaojukeji.know.streaming.km.common.enums.health.HealthStateEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 
@@ -91,24 +91,7 @@ public class TopicVOConverter {
             vo.setDescription(topic.getDescription());
             vo.setCreateTime(new Date(topic.getCreateTime()));
             vo.setUpdateTime(new Date(topic.getUpdateTime()));
-            if (metricsMap.get(topic.getTopicName()) != null) {
-                Float state = metricsMap.get(topic.getTopicName()).getMetrics().get(Constant.TOPIC_METRIC_HEALTH_STATE);
-                if (state == null) {
-                    vo.setHealthState(HealthStateEnum.UNKNOWN.getMessage());
-                } else if (state.intValue() == HealthStateEnum.GOOD.getDimension()) {
-                    vo.setHealthState(HealthStateEnum.GOOD.getMessage());
-                } else if (state.intValue() == HealthStateEnum.MEDIUM.getDimension()) {
-                    vo.setHealthState(HealthStateEnum.MEDIUM.getMessage());
-                } else if (state.intValue() == HealthStateEnum.POOR.getDimension()) {
-                    vo.setHealthState(HealthStateEnum.POOR.getMessage());
-                } else if (state.intValue() == HealthStateEnum.DEAD.getDimension()) {
-                    vo.setHealthState(HealthStateEnum.DEAD.getMessage());
-                } else {
-                    vo.setHealthState(HealthStateEnum.UNKNOWN.getMessage());
-                }
-            } else {
-                vo.setHealthState(HealthStateEnum.UNKNOWN.getMessage());
-            }
+
             vo.setLatestMetrics(metricsMap.getOrDefault(topic.getTopicName(), new TopicMetrics(topic.getTopicName(), topic.getClusterPhyId())));
 
             voList.add(vo);

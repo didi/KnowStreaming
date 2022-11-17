@@ -8,8 +8,6 @@ public class Constant {
 
     private Constant() {}
 
-    public static final String TOPIC_METRIC_HEALTH_STATE    ="HealthState";
-
     public static final String  ONE             = "1";
     public static final String  ZERO            = "0";
 

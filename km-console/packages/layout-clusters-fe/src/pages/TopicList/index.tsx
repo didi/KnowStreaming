@@ -18,6 +18,7 @@ import ReplicaMove from '@src/components/TopicJob/ReplicaMove';
 import { formatAssignSize } from '../Jobs/config';
 import { DownOutlined } from '@ant-design/icons';
 import { tableHeaderPrefix } from '@src/constants/common';
+import {sliderValueMap} from "@src/pages/MutliClusterPage/config";
 
 const { Option } = Select;
 
@@ -90,8 +91,9 @@ const AutoPage = (props: any) => {
     // return item?.value || '';
     const orgVal = record?.latestMetrics?.metrics?.[metricName];
     if (orgVal !== undefined) {
-      if (metricName === 'HealthScore') {
-        return Math.round(orgVal).toLocaleString();
+      if (metricName === 'HealthState') {
+        const val = sliderValueMap[(orgVal) as keyof typeof sliderValueMap];
+        return  val.name;
       } else if (metricName === 'LogSize') {
         return Number(Utils.formatAssignSize(orgVal, 'MB')).toLocaleString();
       } else {
@@ -158,12 +160,14 @@ const AutoPage = (props: any) => {
       },
       {
         title: '健康状态',
-        dataIndex: 'healthState',
-        key: 'healthState',
-        //sorter: true,
+        dataIndex: 'HealthState',
+        key: 'HealthState',
+        sorter: true,
         // 设计图上量出来的是144，但做的时候发现写144 header部分的sort箭头不出来，所以临时调大些
-        width: 170
-        //render: (value: any, record: any) => renderLine(record, 'HealthState'),
+        width: 170,
+        render: (value: any, record: any) => {
+          return calcCurValue(record, "HealthState")
+        },
       },
       // {
       //   title: '创建时间',
