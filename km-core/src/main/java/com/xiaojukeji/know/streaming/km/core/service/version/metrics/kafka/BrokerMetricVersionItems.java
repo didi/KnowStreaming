@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMetricControlItem.*;
+import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.*;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.METRIC_BROKER;
 import static com.xiaojukeji.know.streaming.km.common.jmx.JmxAttribute.*;
 import static com.xiaojukeji.know.streaming.km.common.jmx.JmxName.*;
@@ -186,9 +187,12 @@ public class BrokerMetricVersionItems extends BaseMetricVersionMetric {
                         .jmxObjectName( JMX_SERVER_PARTITIONS ).jmxAttribute(VALUE)));
 
         // LogSize 指标
-        items.add(buildAllVersionsItem()
+        items.add(buildItem().minVersion(V_0_10_0_0).maxVersion(V_1_0_0)
                 .name(BROKER_METRIC_LOG_SIZE).unit("byte").desc("Broker上的消息容量大小").category(CATEGORY_PARTITION)
-                .extendMethod(BROKER_METHOD_GET_LOG_SIZE));
+                .extendMethod(BROKER_METHOD_GET_LOG_SIZE_FROM_JMX));
+        items.add(buildItem().minVersion(V_1_0_0).maxVersion(V_MAX)
+                .name(BROKER_METRIC_LOG_SIZE).unit("byte").desc("Broker上的消息容量大小").category(CATEGORY_PARTITION)
+                .extendMethod(BROKER_METHOD_GET_LOG_SIZE_FROM_CLIENT));
 
         // ActiveControllerCount 指标
         items.add(buildAllVersionsItem(BROKER_METRIC_ACTIVE_CONTROLLER_COUNT, "个").desc("Broker是否为controller").category(CATEGORY_PERFORMANCE)
