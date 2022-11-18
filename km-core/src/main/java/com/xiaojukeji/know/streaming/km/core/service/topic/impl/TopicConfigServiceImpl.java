@@ -98,9 +98,9 @@ public class TopicConfigServiceImpl extends BaseVersionControlService implements
         registerVCHandler(GET_TOPIC_CONFIG,     V_0_10_0_0, V_0_11_0_0, "getTopicConfigByZKClient",            this::getTopicConfigByZKClient);
         registerVCHandler(GET_TOPIC_CONFIG,     V_0_11_0_0, V_MAX,      "getTopicConfigByKafkaClient",         this::getTopicConfigByKafkaClient);
 
-        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_0_0, V_0_10_2_0, "modifyTopicConfigByZKClientAndNodeVersionV1",       this::modifyTopicConfigByZKClientAndNodeVersionV1);
-        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_2_0, V_0_11_0_3, "modifyTopicConfigByZKClientAndNodeVersionV2",       this::modifyTopicConfigByZKClientAndNodeVersionV2);
-        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_11_0_3, V_MAX,      "modifyTopicConfigByKafkaClient",                    this::modifyTopicConfigByKafkaClient);
+        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_0_0, V_0_10_2_0,  "modifyTopicConfigByZKClientAndNodeVersionV1",       this::modifyTopicConfigByZKClientAndNodeVersionV1);
+        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_2_0, V_2_3_0,     "modifyTopicConfigByZKClientAndNodeVersionV2",       this::modifyTopicConfigByZKClientAndNodeVersionV2);
+        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_2_3_0, V_MAX,          "modifyTopicConfigByKafkaClient",                    this::modifyTopicConfigByKafkaClient);
     }
 
     @Override
