@@ -70,8 +70,8 @@ public class BrokerConfigServiceImpl extends BaseVersionControlService implement
         registerVCHandler(GET_BROKER_CONFIG,     V_0_10_1_0, V_0_11_0_0, "getBrokerConfigByZKClient",       this::getBrokerConfigByZKClient);
         registerVCHandler(GET_BROKER_CONFIG,     V_0_11_0_0, V_MAX,      "getBrokerConfigByKafkaClient",    this::getBrokerConfigByKafkaClient);
 
-        registerVCHandler(MODIFY_BROKER_CONFIG,     V_0_10_1_0, V_0_11_0_0, "modifyBrokerConfigByZKClient",       this::modifyBrokerConfigByZKClient);
-        registerVCHandler(MODIFY_BROKER_CONFIG,     V_0_11_0_0, V_MAX,      "modifyBrokerConfigByKafkaClient",    this::modifyBrokerConfigByKafkaClient);
+        registerVCHandler(MODIFY_BROKER_CONFIG,     V_0_10_1_0, V_2_3_0, "modifyBrokerConfigByZKClient",       this::modifyBrokerConfigByZKClient);
+        registerVCHandler(MODIFY_BROKER_CONFIG,     V_2_3_0, V_MAX,      "modifyBrokerConfigByKafkaClient",    this::modifyBrokerConfigByKafkaClient);
     }
 
     @Override
