@@ -102,11 +102,12 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
 
     private HealthCheckResult checkOutstandingRequests(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         ZookeeperParam param = (ZookeeperParam) singleConfigSimpleTuple.getV1();
+        Long clusterPhyId = param.getClusterPhyId();
         HealthAmountRatioConfig valueConfig = (HealthAmountRatioConfig) singleConfigSimpleTuple.getV2();
 
         Result<ZookeeperMetrics> metricsResult = zookeeperMetricService.collectMetricsFromZookeeper(
                 new ZookeeperMetricParam(
-                        param.getClusterPhyId(),
+                        clusterPhyId,
                         param.getZkAddressList(),
                         param.getZkConfig(),
                         ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS
@@ -114,8 +115,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         );
         if (metricsResult.failed() || !metricsResult.hasData()) {
             log.error(
-                    "class=HealthCheckZookeeperService||method=checkOutstandingRequests||param={}||config={}||result={}||errMsg=get metrics failed",
-                    param, valueConfig, metricsResult
+                    "class=HealthCheckZookeeperService||method=checkOutstandingRequests||clusterPhyId={}||param={}||config={}||result={}||errMsg=get metrics failed",clusterPhyId ,param, valueConfig, metricsResult
             );
             return null;
         }
@@ -128,9 +128,21 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         );
 
         Float value = metricsResult.getData().getMetric(ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS);
+        if(null == value){
+            log.error("class=HealthCheckZookeeperService||method=checkOutstandingRequests||clusterPhyId={}|| errMsg=get OutstandingRequests metric failed, may be collect failed or zk mntr command not in whitelist.", clusterPhyId);
+            return null;
+        }
+        
+        Integer amount = valueConfig.getAmount();
+        Double ratio = valueConfig.getRatio();
+        if (null == amount || null == ratio) {
+            log.error("class=HealthCheckZookeeperService||method=checkOutstandingRequests||clusterPhyId={}||result={}||errMsg=get valueConfig amount/ratio config failed", clusterPhyId,valueConfig);
+            return null;
+        }
 
+        double configValue = amount.doubleValue() * ratio;
 
-        checkResult.setPassed(value.intValue() <= valueConfig.getAmount().doubleValue() * valueConfig.getRatio().doubleValue() ? Constant.YES : Constant.NO);
+        checkResult.setPassed(value.doubleValue() <= configValue ? Constant.YES : Constant.NO);
 
         return checkResult;
     }
