@@ -66,7 +66,8 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     public static final String BROKER_METHOD_GET_HEALTH_SCORE                       = "getMetricHealthScore";
     public static final String BROKER_METHOD_GET_PARTITIONS_SKEW                    = "getPartitionsSkew";
     public static final String BROKER_METHOD_GET_LEADERS_SKEW                       = "getLeadersSkew";
-    public static final String BROKER_METHOD_GET_LOG_SIZE                           = "getLogSize";
+    public static final String BROKER_METHOD_GET_LOG_SIZE_FROM_CLIENT               = "getLogSizeFromClient";
+    public static final String BROKER_METHOD_GET_LOG_SIZE_FROM_JMX                  = "getLogSizeFromJmx";
     public static final String BROKER_METHOD_IS_BROKER_ALIVE                        = "isBrokerAlive";
 
     @Autowired
@@ -109,8 +110,8 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
         registerVCHandler( BROKER_METHOD_GET_PARTITIONS_SKEW,                     this::getPartitionsSkew);
         registerVCHandler( BROKER_METHOD_GET_LEADERS_SKEW,                        this::getLeadersSkew);
 
-        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE,     V_0_10_0_0, V_1_0_0, "getLogSizeFromJmx",          this::getLogSizeFromJmx);
-        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE,     V_1_0_0, V_MAX,      "getLogSizeFromClient",       this::getLogSizeFromClient);
+        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE_FROM_JMX,                   this::getLogSizeFromJmx);
+        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE_FROM_CLIENT,                this::getLogSizeFromClient);
 
         registerVCHandler( BROKER_METHOD_IS_BROKER_ALIVE,                         this::isBrokerAlive);
     }
