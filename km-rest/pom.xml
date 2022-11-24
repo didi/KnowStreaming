@@ -18,7 +18,7 @@
         <log4j2.version>2.16.0</log4j2.version>
 
         <springboot.version>2.3.7.RELEASE</springboot.version>
-        <spring.version>5.3.18</spring.version>
+        <spring.version>5.3.19</spring.version>
     </properties>
 
     <dependencies>
