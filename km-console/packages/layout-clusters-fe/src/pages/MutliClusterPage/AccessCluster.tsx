@@ -144,7 +144,7 @@ const AccessClusters = (props: any): JSX.Element => {
     return Utils.post(api.kafkaValidator, {
       bootstrapServers: bootstrapServers || '',
       zookeeper: zookeeper || '',
-      clientProperties,
+      clientProperties: clientProperties || {},
     })
       .then(
         (res: {
