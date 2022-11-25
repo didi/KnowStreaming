@@ -173,7 +173,7 @@ const TopicMessages = (props: any) => {
           style={{ margin: '12px 0 4px', padding: '7px 12px', background: '#FFF9E6' }}
           message={
             <div>
-              此处展示 Topic 最近的 100 条 messages。
+              此处展示 Topic 的 100 条 messages。
               {process.env.BUSINESS_VERSION ? (
                 <span>
                   若想获取其他 messages，可前往 <a onClick={jumpConsume}>Produce&Consume</a> 进行操作
