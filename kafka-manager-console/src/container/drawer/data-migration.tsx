@@ -173,8 +173,8 @@ class DataMigrationFormTable extends React.Component<IFormTableProps> {
       const throttleArr = [] as any[];
       infoData.beginTime = +moment(infoData.beginTime).format('x');
       Object.getOwnPropertyNames(tableResult).forEach(key => {
-        const throttleIndex = Number(key.slice(0, 1));
-        const throttleKey = key.slice(2);
+        const throttleIndex = Number(key.split("-")[0]);
+        const throttleKey = key.split("-")[1];
         const throttleName = tableResult[key];
         if (!throttleArr[throttleIndex]) {
           throttleArr[throttleIndex] = {};
