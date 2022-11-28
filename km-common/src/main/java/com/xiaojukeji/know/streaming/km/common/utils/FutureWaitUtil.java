@@ -23,7 +23,7 @@ public class FutureWaitUtil<T> {
     private FutureWaitUtil() {
     }
 
-    public static <T> FutureWaitUtil<T> init(String name, int corePoolSize, int maxPoolSize, int queueSize) {
+    public static <T> FutureWaitUtil<T> init(String threadPoolName, int corePoolSize, int maxPoolSize, int queueSize) {
         FutureWaitUtil<T> futureUtil = new FutureWaitUtil<>();
 
         futureUtil.executor = new ThreadPoolExecutor(
@@ -32,7 +32,7 @@ public class FutureWaitUtil<T> {
                 300,
                 TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(queueSize),
-                new NamedThreadFactory("FutureWaitUtil-" + name),
+                new NamedThreadFactory(threadPoolName),
                 new ThreadPoolExecutor.DiscardOldestPolicy() //对拒绝任务不抛弃，而是抛弃队列里面等待最久的一个线程，然后把拒绝任务加到队列。
         );
         futureUtil.executor.allowCoreThreadTimeOut(true);
