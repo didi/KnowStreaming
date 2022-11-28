@@ -85,7 +85,7 @@ es:
   client:
     address: 127.0.0.1:8091,127.0.0.1:8061,127.0.0.1:8061
     pass:                         # ES账号密码，如果有账号密码，按照 username:password 的格式填写，没有则不需要填写
-    client-cnt: 10                # 创建的ES客户端数
+    client-cnt: 2                 # 创建的ES客户端数
     io-thread-cnt: 2
     max-retry-cnt: 5
   index:
