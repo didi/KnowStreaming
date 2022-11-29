@@ -61,7 +61,7 @@ public class GroupMetricCollector extends AbstractMetricCollector<List<GroupMetr
 
         List<VersionControlItem> items = versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
 
-        FutureWaitUtil<Void> future = getFutureUtilByClusterPhyId(clusterPhyId);
+        FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 
         Map<String, List<GroupMetrics>> metricsMap = new ConcurrentHashMap<>();
         for(String groupName : groups) {

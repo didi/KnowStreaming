@@ -116,15 +116,16 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public List<String> listRecentUpdateTopicNamesFromDB(Long clusterPhyId, Integer time) {
-        Date updateTime = DateUtils.getBeforeSeconds(new Date(), time);
         LambdaQueryWrapper<TopicPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(TopicPO::getClusterPhyId, clusterPhyId);
-        lambdaQueryWrapper.ge(TopicPO::getUpdateTime, updateTime);
-        List<TopicPO>  topicPOS = topicDAO.selectList(lambdaQueryWrapper);
-        if (topicPOS.isEmpty()){
+        lambdaQueryWrapper.ge(TopicPO::getClusterPhyId, clusterPhyId);
+        lambdaQueryWrapper.ge(TopicPO::getUpdateTime, DateUtils.getBeforeSeconds(new Date(), time));
+
+        List<TopicPO> poList = topicDAO.selectList(lambdaQueryWrapper);
+        if (poList.isEmpty()){
             return new ArrayList<>();
         }
-        return topicPOS.stream().map(TopicPO::getTopicName).collect(Collectors.toList());
+
+        return poList.stream().map(elem -> elem.getTopicName()).collect(Collectors.toList());
     }
 
     @Override
