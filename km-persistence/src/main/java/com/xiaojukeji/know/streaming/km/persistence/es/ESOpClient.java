@@ -37,7 +37,6 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -61,7 +60,7 @@ public class ESOpClient {
     /**
      * 客户端个数
      */
-    @Value("${es.client.client-cnt:10}")
+    @Value("${es.client.client-cnt:2}")
     private Integer                         clientCnt;
 
     /**
@@ -79,13 +78,13 @@ public class ESOpClient {
     /**
      *  更新es数据的客户端连接队列
      */
-    private LinkedBlockingQueue<ESClient>   esClientPool;
+    private List<ESClient>                  esClientPool;
 
-    private static final Integer ES_OPERATE_TIMEOUT               = 30;
+    private static final Integer            ES_OPERATE_TIMEOUT  = 30;
 
     @PostConstruct
     public void init(){
-        esClientPool = new LinkedBlockingQueue<>( clientCnt );
+        esClientPool = new ArrayList<>(clientCnt);
 
         for (int i = 0; i < clientCnt; ++i) {
             ESClient esClient = this.buildEsClient(esAddress, esPass, "", "");
@@ -102,37 +101,15 @@ public class ESOpClient {
      * @return
      */
     public ESClient getESClientFromPool() {
-        ESClient esClient = null;
-        int retryCount = 0;
-
-        // 如果esClient为空或者重试次数小于5次，循环获取
-        while (esClient == null && retryCount < 5) {
-            try {
-                ++retryCount;
-                esClient = esClientPool.poll(3, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
-        if (esClient == null) {
-            LOGGER.error( "class=ESOpClient||method=getESClientFromPool||errMsg=fail to get es client from pool");
-        }
-
-        return esClient;
+        return esClientPool.get((int)(System.currentTimeMillis() % clientCnt));
     }
 
     /**
      * 归还到es http 客户端连接池
-     *
      * @param esClient
      */
     public void returnESClientToPool(ESClient esClient) {
-        try {
-            this.esClientPool.put(esClient);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        // 已不需要进行归还，后续再删除该代码
     }
 
     /**
