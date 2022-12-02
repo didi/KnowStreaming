@@ -35,7 +35,7 @@ public class CommunityReassignJobTask extends AbstractAsyncCommonDispatchTask {
         // 更新任务的状态
         Result<Void> rv = reassignJobService.verifyAndUpdateStatue(jobId);
         if (rv != null && rv.failed()) {
-            log.error("class=CommunityReassignJobTask||method=processSubTask||jobId={}||result={}||msg=verify and update task status failed", jobId, rv);
+            log.error("method=processSubTask||jobId={}||result={}||msg=verify and update task status failed", jobId, rv);
         }
 
         // 更新同步进度信息

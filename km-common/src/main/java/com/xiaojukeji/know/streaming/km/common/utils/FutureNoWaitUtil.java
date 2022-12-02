@@ -23,7 +23,7 @@ public class FutureNoWaitUtil<T> {
     private FutureNoWaitUtil() {
     }
 
-    public static <T> FutureNoWaitUtil<T> init(String name, int corePoolSize, int maxPoolSize, int queueSize) {
+    public static <T> FutureNoWaitUtil<T> init(String threadPoolName, int corePoolSize, int maxPoolSize, int queueSize) {
         FutureNoWaitUtil<T> futureUtil = new FutureNoWaitUtil<>();
 
         // 创建任务线程池
@@ -33,7 +33,7 @@ public class FutureNoWaitUtil<T> {
                 300,
                 TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(queueSize),
-                new NamedThreadFactory("KS-KM-FutureNoWaitUtil-" + name),
+                new NamedThreadFactory(threadPoolName),
                 new ThreadPoolExecutor.DiscardOldestPolicy() //对拒绝任务不抛弃，而是抛弃队列里面等待最久的一个线程，然后把拒绝任务加到队列。
         );
         futureUtil.executor.allowCoreThreadTimeOut(true);
@@ -41,7 +41,7 @@ public class FutureNoWaitUtil<T> {
         futureUtil.delayQueueData = new DelayQueue<>();
 
         // 创建检查延迟队列的线程并启动
-        futureUtil.checkDelayQueueThread = new Thread(() -> futureUtil.runCheck(), "KS-KM-FutureNoWaitUtil-CheckDelayQueueData-" + name);
+        futureUtil.checkDelayQueueThread = new Thread(() -> futureUtil.runCheck(), threadPoolName + "-CheckTaskTimeout");
         futureUtil.checkDelayQueueThread.setDaemon(true);
         futureUtil.checkDelayQueueThread.start();
 
@@ -64,7 +64,7 @@ public class FutureNoWaitUtil<T> {
         while (true) {
             FutureTaskDelayQueueData<T> data = null;
             try {
-                LOGGER.debug("class=FutureNoWaitUtil||method=runCheck||delayQueueSize={}", delayQueueData.size());
+                LOGGER.debug("method=runCheck||delayQueueSize={}", delayQueueData.size());
 
                 while (true) {
                     data = delayQueueData.take();
@@ -81,7 +81,7 @@ public class FutureNoWaitUtil<T> {
                 // 停1000ms
                 Thread.sleep(1000);
             } catch (Exception e) {
-                LOGGER.error("class=FutureNoWaitUtil||method=runCheck||taskName={}||errMsg=exception!", data == null? "": data.getTaskName(), e);
+                LOGGER.error("method=runCheck||taskName={}||errMsg=exception!", data == null? "": data.getTaskName(), e);
             }
         }
     }

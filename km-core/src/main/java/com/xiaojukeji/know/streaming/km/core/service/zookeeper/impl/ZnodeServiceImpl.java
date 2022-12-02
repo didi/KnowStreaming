@@ -43,10 +43,10 @@ public class ZnodeServiceImpl implements ZnodeService {
         try {
             children = kafkaZKDAO.getChildren(clusterPhyId, path, false);
         } catch (NotExistException e) {
-            LOGGER.error("class=ZnodeServiceImpl||method=listZnodeChildren||clusterPhyId={}||errMsg={}", clusterPhyId, "create ZK client create failed");
+            LOGGER.error("method=listZnodeChildren||clusterPhyId={}||errMsg={}", clusterPhyId, "create ZK client create failed");
             return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, "ZK客户端创建失败");
         } catch (Exception e) {
-            LOGGER.error("class=ZnodeServiceImpl||method=listZnodeChildren||clusterPhyId={}||errMsg={}", clusterPhyId, "ZK operate failed");
+            LOGGER.error("method=listZnodeChildren||clusterPhyId={}||errMsg={}", clusterPhyId, "ZK operate failed");
             return Result.buildFromRSAndMsg(ResultStatus.ZK_OPERATE_FAILED, "ZK操作失败");
         }
 
@@ -69,10 +69,10 @@ public class ZnodeServiceImpl implements ZnodeService {
         try {
             dataAndStat = kafkaZKDAO.getDataAndStat(clusterPhyId, path);
         } catch (NotExistException e) {
-            LOGGER.error("class=ZnodeServiceImpl||method=getZnode||clusterPhyId={}||errMsg={}", clusterPhyId, "create ZK client create failed");
+            LOGGER.error("method=getZnode||clusterPhyId={}||errMsg={}", clusterPhyId, "create ZK client create failed");
             return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, "ZK客户端创建失败");
         } catch (Exception e) {
-            LOGGER.error("class=ZnodeServiceImpl||method=getZnode||clusterPhyId={}||errMsg={}", clusterPhyId, "ZK operate failed");
+            LOGGER.error("method=getZnode||clusterPhyId={}||errMsg={}", clusterPhyId, "ZK operate failed");
             return Result.buildFromRSAndMsg(ResultStatus.ZK_OPERATE_FAILED, "ZK操作失败");
         }
 

@@ -49,7 +49,7 @@ public class SyncPartitionTask extends AbstractAsyncMetadataDispatchTask {
             try {
                 partitionService.updatePartitions(clusterPhy.getId(), entry.getKey(), entry.getValue(), dbPartitionMap.getOrDefault(entry.getKey(), new ArrayList<>()));
             } catch (Exception e) {
-                log.error("class=SyncPartitionTask||method=processSubTask||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(), entry.getKey(), e);
+                log.error("method=processSubTask||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(), entry.getKey(), e);
             }
         }
 

@@ -4,14 +4,14 @@ public enum VersionItemTypeEnum {
     /**
      * 指标
      */
-    METRIC_TOPIC(100, "topic_metric"),
-    METRIC_CLUSTER(101, "cluster_metric"),
-    METRIC_GROUP(102, "group_metric"),
-    METRIC_BROKER(103, "broker_metric"),
-    METRIC_PARTITION(104, "partition_metric"),
-    METRIC_REPLICATION(105, "replication_metric"),
+    METRIC_TOPIC(100, "TopicMetric"),
+    METRIC_CLUSTER(101, "ClusterMetric"),
+    METRIC_GROUP(102, "GroupMetric"),
+    METRIC_BROKER(103, "BrokerMetric"),
+    METRIC_PARTITION(104, "PartitionMetric"),
+    METRIC_REPLICATION(105, "ReplicaMetric"),
 
-    METRIC_ZOOKEEPER(110, "zookeeper_metric"),
+    METRIC_ZOOKEEPER(110, "ZookeeperMetric"),
 
     /**
      * 服务端查询

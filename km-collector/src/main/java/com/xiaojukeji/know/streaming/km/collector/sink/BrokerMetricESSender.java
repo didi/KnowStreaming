@@ -14,11 +14,11 @@ import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.B
 
 @Component
 public class BrokerMetricESSender extends AbstractMetricESSender implements ApplicationListener<BrokerMetricEvent> {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    private static final ILog  LOGGER = LogFactory.getLog(BrokerMetricESSender.class);
 
     @PostConstruct
     public void init(){
-        LOGGER.info("class=BrokerMetricESSender||method=init||msg=init finished");
+        LOGGER.info("method=init||msg=init finished");
     }
 
     @Override

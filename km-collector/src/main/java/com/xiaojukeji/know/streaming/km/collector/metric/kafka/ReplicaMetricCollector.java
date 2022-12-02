@@ -1,6 +1,5 @@
 package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
-import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
@@ -12,7 +11,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionContro
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.ReplicaMetricEvent;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
-import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
@@ -30,7 +28,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  */
 @Component
 public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationMetrics> {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    protected static final ILog  LOGGER = LogFactory.getLog(ReplicaMetricCollector.class);
 
     @Autowired
     private VersionControlService versionControlService;
@@ -42,12 +40,10 @@ public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationM
     private PartitionService partitionService;
 
     @Override
-    public void collectMetrics(ClusterPhy clusterPhy) {
-        Long        startTime           =   System.currentTimeMillis();
+    public List<ReplicationMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long        clusterPhyId        =   clusterPhy.getId();
         List<VersionControlItem> items  =   versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
-
-        List<Partition> partitions = partitionService.listPartitionByCluster(clusterPhyId);
+        List<Partition> partitions      =   partitionService.listPartitionFromCacheFirst(clusterPhyId);
 
         FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 
@@ -55,10 +51,11 @@ public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationM
         for(Partition partition : partitions) {
             for (Integer brokerId: partition.getAssignReplicaList()) {
                 ReplicationMetrics metrics = new ReplicationMetrics(clusterPhyId, partition.getTopicName(), brokerId, partition.getPartitionId());
+                metrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, Constant.COLLECT_METRICS_ERROR_COST_TIME);
                 metricsList.add(metrics);
 
                 future.runnableTask(
-                        String.format("method=ReplicaMetricCollector||clusterPhyId=%d||brokerId=%d||topicName=%s||partitionId=%d",
+                        String.format("class=ReplicaMetricCollector||clusterPhyId=%d||brokerId=%d||topicName=%s||partitionId=%d",
                                 clusterPhyId, brokerId, partition.getTopicName(), partition.getPartitionId()),
                         30000,
                         () -> collectMetrics(clusterPhyId, metrics, items)
@@ -70,8 +67,7 @@ public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationM
 
         publishMetric(new ReplicaMetricEvent(this, metricsList));
 
-        LOGGER.info("method=ReplicaMetricCollector||clusterPhyId={}||startTime={}||costTime={}||msg=collect finished.",
-                clusterPhyId, startTime, System.currentTimeMillis() - startTime);
+        return metricsList;
     }
 
     @Override
@@ -83,8 +79,6 @@ public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationM
 
     private ReplicationMetrics collectMetrics(Long clusterPhyId, ReplicationMetrics metrics, List<VersionControlItem> items) {
         long startTime = System.currentTimeMillis();
-
-        metrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, Constant.COLLECT_METRICS_ERROR_COST_TIME);
 
         for(VersionControlItem v : items) {
             try {
@@ -105,15 +99,11 @@ public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationM
                 }
 
                 metrics.putMetric(ret.getData().getMetrics());
-
-                if (!EnvUtil.isOnline()) {
-                    LOGGER.info("method=ReplicaMetricCollector||clusterPhyId={}||topicName={}||partitionId={}||metricName={}||metricValue={}",
-                            clusterPhyId, metrics.getTopic(), metrics.getPartitionId(), v.getName(), JSON.toJSONString(ret.getData().getMetrics()));
-                }
-
             } catch (Exception e) {
-                LOGGER.error("method=ReplicaMetricCollector||clusterPhyId={}||topicName={}||partition={}||metricName={}||errMsg=exception!",
-                        clusterPhyId, metrics.getTopic(), metrics.getPartitionId(), v.getName(), e);
+                LOGGER.error(
+                        "method=collectMetrics||clusterPhyId={}||topicName={}||partition={}||metricName={}||errMsg=exception!",
+                        clusterPhyId, metrics.getTopic(), metrics.getPartitionId(), v.getName(), e
+                );
             }
         }
 

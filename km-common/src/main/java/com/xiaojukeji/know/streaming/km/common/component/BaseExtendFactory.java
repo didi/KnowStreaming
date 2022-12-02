@@ -24,7 +24,7 @@ public abstract class BaseExtendFactory {
         try {
             handler = doGet(classNamePre, clazz);
         } catch (NotFindSubclassException e) {
-            LOGGER.error("class=BaseExtendFactory||method=getByClassNamePer||handleNamePre={}||msg={}", classNamePre,
+            LOGGER.error("method=getByClassNamePer||handleNamePre={}||msg={}", classNamePre,
                 e.getMessage());
         }
 
@@ -36,7 +36,7 @@ public abstract class BaseExtendFactory {
         try {
             beans = SpringTool.getBeansOfType(clazz);
         } catch (BeansException e) {
-            LOGGER.error("class=BaseExtendFactory||method=findFromSpringContext||handleNamePre={}||msg={}",
+            LOGGER.error("method=findFromSpringContext||handleNamePre={}||msg={}",
                 classNamePre, e.getMessage());
         }
 

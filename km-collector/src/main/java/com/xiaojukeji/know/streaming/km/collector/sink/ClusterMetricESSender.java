@@ -15,11 +15,11 @@ import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.C
 
 @Component
 public class ClusterMetricESSender extends AbstractMetricESSender implements ApplicationListener<ClusterMetricEvent> {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    private static final ILog  LOGGER = LogFactory.getLog(ClusterMetricESSender.class);
 
     @PostConstruct
     public void init(){
-        LOGGER.info("class=ClusterMetricESSender||method=init||msg=init finished");
+        LOGGER.info("method=init||msg=init finished");
     }
 
     @Override

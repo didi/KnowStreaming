@@ -191,7 +191,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
             }
         } else {
             LOGGER.warn(
-                    "class=PartitionMetricServiceImpl||method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||resultMsg={}||msg=get begin offset failed",
+                    "method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||resultMsg={}||msg=get begin offset failed",
                     clusterPhyId, topicName, beginOffsetMapResult.getMessage()
             );
         }
@@ -211,7 +211,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
             }
         } else {
             LOGGER.warn(
-                    "class=PartitionMetricServiceImpl||method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||resultMsg={}||msg=get end offset failed",
+                    "method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||resultMsg={}||msg=get end offset failed",
                     clusterPhyId, topicName, endOffsetMapResult.getMessage()
             );
         }
@@ -235,7 +235,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
             }
         } else {
             LOGGER.warn(
-                    "class=PartitionMetricServiceImpl||method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||endResultMsg={}||beginResultMsg={}||msg=get messages failed",
+                    "method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||endResultMsg={}||beginResultMsg={}||msg=get messages failed",
                     clusterPhyId, topicName, endOffsetMapResult.getMessage(), beginOffsetMapResult.getMessage()
             );
         }
@@ -286,7 +286,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
                 continue;
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=PartitionMetricServiceImpl||method=getMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
+                        "method=getMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
                         clusterPhyId, topicName, partition.getPartitionId(), partition.getLeaderBrokerId(), metricName, e.getClass().getName()
                 );
             }
@@ -341,7 +341,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
                 continue;
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=PartitionMetricServiceImpl||method=getTopicAvgMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
+                        "method=getTopicAvgMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
                         clusterPhyId, topicName, partition.getPartitionId(), partition.getLeaderBrokerId(), metricName, e.getClass().getName()
                 );
             }

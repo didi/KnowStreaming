@@ -61,7 +61,7 @@ public class CommonUtils {
             //转换为16进制
             return new BigInteger(1, digest).toString(16);
         } catch (Exception e) {
-            LOGGER.error("class=CommonUtils||method=getMD5||msg=获取文件的md5失败:{}", e.getMessage());
+            LOGGER.error("method=getMD5||msg=获取文件的md5失败:{}", e.getMessage());
         }
         return null;
     }

@@ -59,7 +59,7 @@ public class ZookeeperMetricESDAO extends BaseMetricESDAO {
                     ESConstant.DEFAULT_RETRY_TIME
             );
         } catch (Exception e){
-            LOGGER.error("class=ZookeeperMetricESDAO||method=listMetricsByClusterPhyId||clusterPhyId={}||errMsg=exception!",
+            LOGGER.error("method=listMetricsByClusterPhyId||clusterPhyId={}||errMsg=exception!",
                     clusterPhyId, e
             );
         }
