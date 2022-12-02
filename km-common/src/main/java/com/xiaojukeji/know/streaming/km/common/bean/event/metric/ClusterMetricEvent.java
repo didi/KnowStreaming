@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public class ClusterMetricEvent extends BaseMetricEvent{
 
-    private List<ClusterMetrics> clusterMetrics;
+    private final List<ClusterMetrics> clusterMetrics;
 
     public ClusterMetricEvent(Object source, List<ClusterMetrics> clusterMetrics) {
         super( source );

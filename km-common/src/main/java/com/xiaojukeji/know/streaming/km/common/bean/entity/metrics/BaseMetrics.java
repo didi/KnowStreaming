@@ -36,7 +36,7 @@ public abstract class BaseMetrics implements Serializable {
         return metrics.get(key);
     }
 
-    public BaseMetrics(Long clusterPhyId){
+    protected BaseMetrics(Long clusterPhyId) {
         this.clusterPhyId = clusterPhyId;
     }
 
