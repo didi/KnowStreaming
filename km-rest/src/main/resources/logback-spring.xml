@@ -209,6 +209,9 @@
         <appender-ref ref="logIJobLogger" />
     </logger>
 
+    <!-- ILog中存在重复打印error日志的logger，不明确具体用途，当前先将其关闭  -->
+    <logger name="errorLogger" level="OFF"> </logger>
+
     <logger name="org.apache.zookeeper" level="WARN" additivity="false" />
     <logger name="org.apache.ibatis" level="INFO" additivity="false" />
     <logger name="org.mybatis.spring" level="INFO" additivity="false" />
