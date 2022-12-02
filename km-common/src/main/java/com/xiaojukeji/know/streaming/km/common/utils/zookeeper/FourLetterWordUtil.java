@@ -56,7 +56,7 @@ public class FourLetterWordUtil {
             return Result.buildSuc(dataParser.parseAndInitData(clusterPhyId, host, port, cmdData));
         } catch (Exception e) {
             LOGGER.error(
-                    "class=FourLetterWordUtil||method=executeFourLetterCmd||clusterPhyId={}||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
+                    "method=executeFourLetterCmd||clusterPhyId={}||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
                     clusterPhyId, host, port, dataParser.getCmd(), secure, timeout, e
             );
 
@@ -124,7 +124,7 @@ public class FourLetterWordUtil {
                     outputStream.close();
                 } catch (IOException e) {
                     LOGGER.error(
-                            "class=FourLetterWordUtil||method=send4LetterWord||clusterPhyId={}||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
+                            "method=send4LetterWord||clusterPhyId={}||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
                             host, port, cmd, secure, timeout, e
                     );
                 }
@@ -135,7 +135,7 @@ public class FourLetterWordUtil {
                     bufferedReader.close();
                 } catch (IOException e) {
                     LOGGER.error(
-                            "class=FourLetterWordUtil||method=send4LetterWord||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
+                            "method=send4LetterWord||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
                             host, port, cmd, secure, timeout, e
                     );
                 }
@@ -146,7 +146,7 @@ public class FourLetterWordUtil {
                     socket.close();
                 } catch (IOException e) {
                     LOGGER.error(
-                            "class=FourLetterWordUtil||method=send4LetterWord||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
+                            "method=send4LetterWord||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
                             host, port, cmd, secure, timeout, e
                     );
                 }

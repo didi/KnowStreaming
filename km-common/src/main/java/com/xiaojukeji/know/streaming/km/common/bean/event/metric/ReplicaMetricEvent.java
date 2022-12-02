@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public class ReplicaMetricEvent extends BaseMetricEvent{
 
-    private List<ReplicationMetrics> replicationMetrics;
+    private final List<ReplicationMetrics> replicationMetrics;
 
     public ReplicaMetricEvent(Object source, List<ReplicationMetrics> replicationMetrics) {
         super( source );

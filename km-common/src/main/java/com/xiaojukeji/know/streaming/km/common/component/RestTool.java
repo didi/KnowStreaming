@@ -131,7 +131,7 @@ public class RestTool {
                     new HttpEntity<>(null, getJsonContentHeaders(headers)), String.class);
             return JSON.parseObject(result.getBody(), resultType);
         } catch (Exception e){
-            LOGGER.error("class=RestTool||method=getForObject||url={}||msg=exception!", url, e);
+            LOGGER.error("method=getForObject||url={}||msg=exception!", url, e);
         }
 
         return null;
@@ -151,7 +151,7 @@ public class RestTool {
                     new HttpEntity<>(null, headers), String.class);
             return JSON.parseObject(result.getBody(), resultType);
         } catch (Exception e){
-            LOGGER.error("class=RestTool||method=getForObject||url={}||msg=exception!", url, e);
+            LOGGER.error("method=getForObject||url={}||msg=exception!", url, e);
         }
 
         return null;

@@ -10,7 +10,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMethod
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
-import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.util.CollectionUtils;
@@ -25,7 +24,7 @@ import java.util.function.Function;
  */
 @DependsOn("versionControlService")
 public abstract class BaseVersionControlService {
-    protected static final ILog LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    protected static final ILog LOGGER = LogFactory.getLog(BaseVersionControlService.class);
 
     @Autowired
     protected VersionControlService versionControlService;
@@ -61,10 +60,11 @@ public abstract class BaseVersionControlService {
         String methodName = getMethodName(clusterPhyId, action);
         Object ret = versionControlService.doHandler(getVersionItemType(), methodName, param);
 
-        if(!EnvUtil.isOnline()){
-            LOGGER.info("method=doVCHandler||clusterId={}||action={}||methodName={}||type={}param={}||ret={}}!",
-                    clusterPhyId, action, methodName, getVersionItemType().getMessage(), JSON.toJSONString(param), JSON.toJSONString(ret));
-        }
+        LOGGER.debug(
+                "method=doVCHandler||clusterId={}||action={}||methodName={}||type={}param={}||ret={}!",
+                clusterPhyId, action, methodName, getVersionItemType().getMessage(), JSON.toJSONString(param), JSON.toJSONString(ret)
+        );
+
         return ret;
     }
 

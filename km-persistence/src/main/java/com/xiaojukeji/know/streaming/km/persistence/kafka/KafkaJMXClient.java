@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
-    private static final ILog log = LogFactory.getLog(KafkaAdminZKClient.class);
+    private static final ILog log = LogFactory.getLog(KafkaJMXClient.class);
 
     @Autowired
     private BrokerDAO brokerDAO;

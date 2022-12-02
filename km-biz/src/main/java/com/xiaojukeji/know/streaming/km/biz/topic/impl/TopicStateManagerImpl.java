@@ -307,7 +307,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
         if (metricsResult.failed()) {
             // 仅打印错误日志，但是不直接返回错误
             log.error(
-                    "class=TopicStateManagerImpl||method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
+                    "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
                     clusterPhyId, topicName, metricsResult
             );
         }

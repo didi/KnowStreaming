@@ -41,7 +41,7 @@ public class ZookeeperServiceImpl implements ZookeeperService {
             addressList = ZookeeperUtils.connectStringParser(zookeeperAddress);
         } catch (Exception e) {
             LOGGER.error(
-                    "class=ZookeeperServiceImpl||method=listFromZookeeperCluster||clusterPhyId={}||zookeeperAddress={}||errMsg=exception!",
+                    "method=listFromZookeeperCluster||clusterPhyId={}||zookeeperAddress={}||errMsg=exception!",
                     clusterPhyId, zookeeperAddress, e
             );
 
@@ -87,7 +87,7 @@ public class ZookeeperServiceImpl implements ZookeeperService {
                     zookeeperDAO.updateById(newInfo);
                 }
             } catch (Exception e) {
-                LOGGER.error("class=ZookeeperServiceImpl||method=batchReplaceDataInDB||clusterPhyId={}||newInfo={}||errMsg=exception", clusterPhyId, newInfo, e);
+                LOGGER.error("method=batchReplaceDataInDB||clusterPhyId={}||newInfo={}||errMsg=exception", clusterPhyId, newInfo, e);
             }
         }
 
@@ -96,7 +96,7 @@ public class ZookeeperServiceImpl implements ZookeeperService {
             try {
                 zookeeperDAO.deleteById(entry.getValue().getId());
             } catch (Exception e) {
-                LOGGER.error("class=ZookeeperServiceImpl||method=batchReplaceDataInDB||clusterPhyId={}||expiredInfo={}||errMsg=exception", clusterPhyId, entry.getValue(), e);
+                LOGGER.error("method=batchReplaceDataInDB||clusterPhyId={}||expiredInfo={}||errMsg=exception", clusterPhyId, entry.getValue(), e);
             }
         });
     }

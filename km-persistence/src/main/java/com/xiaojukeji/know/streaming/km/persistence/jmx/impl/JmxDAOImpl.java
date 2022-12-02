@@ -65,7 +65,7 @@ public class JmxDAOImpl implements JmxDAO {
             return object == null? null: (Long) object;
         } catch (Exception e) {
             log.error(
-                    "class=JmxDAOImpl||method=getServerStartTime||clusterPhyId={}||jmxHost={}||jmxPort={}||jmxConfig={}||errMsg=exception!",
+                    "method=getServerStartTime||clusterPhyId={}||jmxHost={}||jmxPort={}||jmxConfig={}||errMsg=exception!",
                     clusterPhyId, jmxHost, jmxPort, jmxConfig, e
             );
         }

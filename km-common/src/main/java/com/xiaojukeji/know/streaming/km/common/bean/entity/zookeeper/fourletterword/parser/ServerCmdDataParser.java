@@ -80,13 +80,13 @@ public class ServerCmdDataParser implements FourLetterWordDataParser<ServerCmdDa
                         break;
                     default:
                         LOGGER.warn(
-                                "class=ServerCmdDataParser||method=parseAndInitData||name={}||value={}||msg=data not parsed!",
+                                "method=parseAndInitData||name={}||value={}||msg=data not parsed!",
                                 elem.getKey(), elem.getValue()
                         );
                 }
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=ServerCmdDataParser||method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
+                        "method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
                         clusterPhyId, host, port, elem.getKey(), elem.getValue(), e
                 );
             }

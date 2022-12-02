@@ -11,8 +11,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionContro
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.TopicMetricEvent;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
-import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
-import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
@@ -32,8 +30,8 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Component
-public class TopicMetricCollector extends AbstractMetricCollector<List<TopicMetrics>> {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+public class TopicMetricCollector extends AbstractMetricCollector<TopicMetrics> {
+    protected static final ILog  LOGGER = LogFactory.getLog(TopicMetricCollector.class);
 
     @Autowired
     private VersionControlService versionControlService;
@@ -47,8 +45,7 @@ public class TopicMetricCollector extends AbstractMetricCollector<List<TopicMetr
     private static final Integer AGG_METRICS_BROKER_ID = -10000;
 
     @Override
-    public void collectMetrics(ClusterPhy clusterPhy) {
-        Long        startTime           =   System.currentTimeMillis();
+    public List<TopicMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long        clusterPhyId        =   clusterPhy.getId();
         List<Topic> topics              =   topicService.listTopicsFromCacheFirst(clusterPhyId);
         List<VersionControlItem> items  =   versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
@@ -65,7 +62,7 @@ public class TopicMetricCollector extends AbstractMetricCollector<List<TopicMetr
             allMetricsMap.put(topic.getTopicName(), metricsMap);
 
             future.runnableTask(
-                    String.format("method=TopicMetricCollector||clusterPhyId=%d||topicName=%s", clusterPhyId, topic.getTopicName()),
+                    String.format("class=TopicMetricCollector||clusterPhyId=%d||topicName=%s", clusterPhyId, topic.getTopicName()),
                     30000,
                     () -> collectMetrics(clusterPhyId, topic.getTopicName(), metricsMap, items)
             );
@@ -78,8 +75,7 @@ public class TopicMetricCollector extends AbstractMetricCollector<List<TopicMetr
 
         this.publishMetric(new TopicMetricEvent(this, metricsList));
 
-        LOGGER.info("method=TopicMetricCollector||clusterPhyId={}||startTime={}||costTime={}||msg=collect finished.",
-                clusterPhyId, startTime, System.currentTimeMillis() - startTime);
+        return metricsList;
     }
 
     @Override
@@ -119,14 +115,9 @@ public class TopicMetricCollector extends AbstractMetricCollector<List<TopicMetr
                         metricsMap.get(metrics.getBrokerId()).putMetric(metrics.getMetrics());
                     }
                 });
-
-                if (!EnvUtil.isOnline()) {
-                    LOGGER.info("method=TopicMetricCollector||clusterPhyId={}||topicName={}||metricName={}||metricValue={}.",
-                            clusterPhyId, topicName, v.getName(), ConvertUtil.obj2Json(ret.getData())
-                    );
-                }
             } catch (Exception e) {
-                LOGGER.error("method=TopicMetricCollector||clusterPhyId={}||topicName={}||metricName={}||errMsg=exception!",
+                LOGGER.error(
+                        "method=collectMetrics||clusterPhyId={}||topicName={}||metricName={}||errMsg=exception!",
                         clusterPhyId, topicName, v.getName(), e
                 );
             }

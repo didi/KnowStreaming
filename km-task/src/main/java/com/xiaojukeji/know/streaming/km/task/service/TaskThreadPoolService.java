@@ -52,21 +52,21 @@ public class TaskThreadPoolService {
     @PostConstruct
     private void init() {
         metricsTaskThreadPool = FutureNoWaitUtil.init(
-                "metricsTaskThreadPool",
+                "MetricsTaskTP",
                 metricsTaskThreadNum,
                 metricsTaskThreadNum,
                 metricsTaskQueueSize
         );
 
         metadataTaskThreadPool = FutureNoWaitUtil.init(
-                "metadataTaskThreadPool",
+                "MetadataTaskTP",
                 metadataTaskThreadNum,
                 metadataTaskThreadNum,
                 metadataTaskQueueSize
         );
 
         commonTaskThreadPool = FutureNoWaitUtil.init(
-                "commonTaskThreadPool",
+                "CommonTaskTP",
                 commonTaskThreadNum,
                 commonTaskThreadNum,
                 commonTaskQueueSize

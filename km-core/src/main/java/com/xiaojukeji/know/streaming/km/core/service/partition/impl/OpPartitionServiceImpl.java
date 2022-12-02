@@ -84,7 +84,7 @@ public class OpPartitionServiceImpl extends BaseVersionControlService implements
             return Result.buildSuc();
         } catch (Exception e) {
             LOGGER.error(
-                    "class=OpPartitionServiceImpl||method=preferredReplicaElectionByZKClient||clusterPhyId={}||errMsg=exception",
+                    "method=preferredReplicaElectionByZKClient||clusterPhyId={}||errMsg=exception",
                     partitionParam.getClusterPhyId(), e
             );
 
@@ -109,7 +109,7 @@ public class OpPartitionServiceImpl extends BaseVersionControlService implements
             return Result.buildSuc();
         } catch (Exception e) {
             LOGGER.error(
-                    "class=OpPartitionServiceImpl||method=preferredReplicaElectionByKafkaClient||clusterPhyId={}||errMsg=exception",
+                    "method=preferredReplicaElectionByKafkaClient||clusterPhyId={}||errMsg=exception",
                     partitionParam.getClusterPhyId(), e
             );
 
