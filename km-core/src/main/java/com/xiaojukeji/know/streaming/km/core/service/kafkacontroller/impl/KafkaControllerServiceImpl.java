@@ -140,7 +140,7 @@ public class KafkaControllerServiceImpl implements KafkaControllerService {
         try {
             adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
         } catch (Exception e) {
-            log.error("class=KafkaControllerServiceImpl||method=getControllerFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getControllerFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             // 集群已经加载进来，但是创建admin-client失败，则设置无controller
             return Result.buildSuc();
@@ -178,7 +178,7 @@ public class KafkaControllerServiceImpl implements KafkaControllerService {
                 ));
             } catch (Exception e) {
                 log.error(
-                        "class=KafkaControllerServiceImpl||method=getControllerFromAdminClient||clusterPhyId={}||tryTime={}||errMsg=exception",
+                        "method=getControllerFromAdminClient||clusterPhyId={}||tryTime={}||errMsg=exception",
                         clusterPhy.getId(), i, e
                 );
             }
@@ -192,7 +192,7 @@ public class KafkaControllerServiceImpl implements KafkaControllerService {
         try {
             return Result.buildSuc(kafkaZKDAO.getKafkaController(clusterPhy.getId(), false));
         } catch (Exception e) {
-            log.error("class=KafkaControllerServiceImpl||method=getControllerFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getControllerFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }

@@ -94,7 +94,7 @@ public class ClusterZookeepersManagerImpl implements ClusterZookeepersManager {
         );
         if (metricsResult.failed()) {
             LOGGER.error(
-                    "class=ClusterZookeepersManagerImpl||method=getClusterPhyZookeepersState||clusterPhyId={}||errMsg={}",
+                    "method=getClusterPhyZookeepersState||clusterPhyId={}||errMsg={}",
                     clusterPhyId, metricsResult.getMessage()
             );
             return Result.buildSuc(vo);

@@ -140,7 +140,7 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
                 metrics.putMetric(ret.getData().getMetrics());
             } catch (Exception e){
                 LOGGER.error(
-                        "class=ZookeeperMetricServiceImpl||method=collectMetricsFromZookeeper||clusterPhyId={}||metricName={}||errMsg=exception!",
+                        "method=collectMetricsFromZookeeper||clusterPhyId={}||metricName={}||errMsg=exception!",
                         clusterPhyId, metricName, e
                 );
             }

@@ -29,10 +29,7 @@ import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.Clust
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,7 +54,6 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
                 false
         );
 
-        // TODO 后续产品上，看是否需要增加一个未知的状态，否则新接入的集群，因为新接入的集群，数据存在延迟
         ClusterPhysState physState = new ClusterPhysState(0, 0, clusterPhyList.size());
         for (ClusterPhy clusterPhy: clusterPhyList) {
             KafkaController kafkaController = controllerMap.get(clusterPhy.getId());
@@ -111,7 +107,6 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
         // 转为vo格式，方便后续进行分页筛选等
         List<ClusterPhyDashboardVO> voList = ConvertUtil.list2List(clusterPhyList, ClusterPhyDashboardVO.class);
 
-        // TODO 后续产品上，看是否需要增加一个未知的状态，否则新接入的集群，因为新接入的集群，数据存在延迟
         // 获取集群controller信息并补充到vo中,
         Map<Long, KafkaController> controllerMap = kafkaControllerService.getKafkaControllersFromDB(clusterPhyList.stream().map(elem -> elem.getId()).collect(Collectors.toList()), false);
         for (ClusterPhyDashboardVO vo: voList) {

@@ -94,12 +94,12 @@ public class RetryExecutor {
                 }
             } catch (Exception e) {
                 if (!handler.needRetry(e) || tryCount == retryCount) {
-                    LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
+                    LOGGER.warn("method=execute||errMsg={}||handlerName={}||tryCount={}",
                         e.getMessage(), name, tryCount, e);
                     throw e;
                 }
 
-                LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
+                LOGGER.warn("method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount,retryCount);
             }
         } while (tryCount++ < retryCount);

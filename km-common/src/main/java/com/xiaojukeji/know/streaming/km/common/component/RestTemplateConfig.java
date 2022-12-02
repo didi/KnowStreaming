@@ -90,7 +90,7 @@ public class RestTemplateConfig {
                 try {
                     traceResponse(request, response, exe, subFlag, beginNano);
                 } catch (Exception e) {
-                    SYSTEM_LOGGER.warn("class=LogHttpRequestInterceptor||method=intercept||msg={}", e.getMessage());
+                    SYSTEM_LOGGER.warn("method=intercept||msg={}", e.getMessage());
                 }
                 throw new ThirdPartRemoteException("rest-template: " + exe.getMessage(), exe,
                         ResultStatus.HTTP_REQ_ERROR);
@@ -98,7 +98,7 @@ public class RestTemplateConfig {
         }
 
         private void traceRequest(HttpRequest request, String subFlag, byte[] body) throws IOException {
-            REQ_LOGGER.info("class=LogHttpRequestInterceptor||method=traceRequest||remoteRequest||url={}||method={}||headers={}||body={}||subFlag={}",
+            REQ_LOGGER.info("method=traceRequest||remoteRequest||url={}||method={}||headers={}||body={}||subFlag={}",
                     request.getURI(), request.getMethod(), JSON.toJSONString(request.getHeaders()), new String(body, "UTF-8"), subFlag);
         }
 
@@ -108,7 +108,7 @@ public class RestTemplateConfig {
             StringBuilder inputStringBuilder = new StringBuilder();
             if (response == null) {
                 RESP_LOGGER.warn(
-                    "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code=-1||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
+                    "method=traceResponse||remoteResponse||code=-1||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
                         url, null, null, null, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 return;
             }
@@ -131,7 +131,7 @@ public class RestTemplateConfig {
                 }
             } catch (Exception e) {
                 RESP_LOGGER.warn(
-                    "class=remoteResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
+                    "method=traceResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
                     response.getStatusCode(), url, response.getStatusText(), response.getHeaders(),
                     inputStringBuilder.toString(), e, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 if (!response.getStatusCode().is2xxSuccessful()) {
@@ -144,12 +144,12 @@ public class RestTemplateConfig {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 if (exception == null) {
                     RESP_LOGGER.warn(
-                        "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
+                        "method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
                         response.getStatusCode(), url, response.getStatusText(), response.getHeaders(), responseString,
                         (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 } else {
                     RESP_LOGGER.warn(
-                        "remoteResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
+                        "method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
                         response.getStatusCode(), url, response.getStatusText(), response.getHeaders(), responseString,
                         exception, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 }
@@ -158,12 +158,12 @@ public class RestTemplateConfig {
 
             if (exception == null) {
                 RESP_LOGGER.info(
-                    "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||timeCost={}||subFlag={}",
+                    "method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||timeCost={}||subFlag={}",
                     response.getStatusCode(), url, response.getStatusText(), response.getHeaders(), responseString,
                     (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
             } else {
                 RESP_LOGGER.warn(
-                    "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||error={}||timeCost={}||subFlag={}",
+                    "method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||responseBody={}||error={}||timeCost={}||subFlag={}",
                     response.getStatusCode(), url, response.getStatusText(), response.getHeaders(), responseString,
                     exception, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
             }

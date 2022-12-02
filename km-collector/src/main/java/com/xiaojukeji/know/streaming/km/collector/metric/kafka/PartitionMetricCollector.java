@@ -10,8 +10,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionControlItem;
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.PartitionMetricEvent;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
-import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
-import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
@@ -29,7 +27,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  */
 @Component
 public class PartitionMetricCollector extends AbstractMetricCollector<PartitionMetrics> {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    protected static final ILog  LOGGER = LogFactory.getLog(PartitionMetricCollector.class);
 
     @Autowired
     private VersionControlService versionControlService;
@@ -41,13 +39,10 @@ public class PartitionMetricCollector extends AbstractMetricCollector<PartitionM
     private TopicService topicService;
 
     @Override
-    public void collectMetrics(ClusterPhy clusterPhy) {
-        Long        startTime           =   System.currentTimeMillis();
+    public List<PartitionMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long        clusterPhyId        =   clusterPhy.getId();
         List<Topic> topicList           =   topicService.listTopicsFromCacheFirst(clusterPhyId);
         List<VersionControlItem> items  =   versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
-
-        // 获取集群所有分区
 
         FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 
@@ -56,9 +51,9 @@ public class PartitionMetricCollector extends AbstractMetricCollector<PartitionM
             metricsMap.put(topic.getTopicName(), new ConcurrentHashMap<>());
 
             future.runnableTask(
-                    String.format("method=PartitionMetricCollector||clusterPhyId=%d||topicName=%s", clusterPhyId, topic.getTopicName()),
+                    String.format("class=PartitionMetricCollector||clusterPhyId=%d||topicName=%s", clusterPhyId, topic.getTopicName()),
                     30000,
-                    () -> collectMetrics(clusterPhyId, topic.getTopicName(), metricsMap.get(topic.getTopicName()), items)
+                    () -> this.collectMetrics(clusterPhyId, topic.getTopicName(), metricsMap.get(topic.getTopicName()), items)
             );
         }
 
@@ -69,10 +64,7 @@ public class PartitionMetricCollector extends AbstractMetricCollector<PartitionM
 
         this.publishMetric(new PartitionMetricEvent(this, metricsList));
 
-        LOGGER.info(
-                "method=PartitionMetricCollector||clusterPhyId={}||startTime={}||costTime={}||msg=collect finished.",
-                clusterPhyId, startTime, System.currentTimeMillis() - startTime
-        );
+        return metricsList;
     }
 
     @Override
@@ -110,17 +102,9 @@ public class PartitionMetricCollector extends AbstractMetricCollector<PartitionM
                     PartitionMetrics allMetrics = metricsMap.get(subMetrics.getPartitionId());
                     allMetrics.putMetric(subMetrics.getMetrics());
                 }
-
-                if (!EnvUtil.isOnline()) {
-                    LOGGER.info(
-                            "class=PartitionMetricCollector||method=collectMetrics||clusterPhyId={}||topicName={}||metricName={}||metricValue={}!",
-                            clusterPhyId, topicName, v.getName(), ConvertUtil.obj2Json(ret.getData())
-                    );
-                }
-
             } catch (Exception e) {
                 LOGGER.info(
-                        "class=PartitionMetricCollector||method=collectMetrics||clusterPhyId={}||topicName={}||metricName={}||errMsg=exception",
+                        "method=collectMetrics||clusterPhyId={}||topicName={}||metricName={}||errMsg=exception",
                         clusterPhyId, topicName, v.getName(), e
                 );
             }
