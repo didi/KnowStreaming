@@ -1,6 +1,5 @@
 package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
-import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
@@ -12,7 +11,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionContro
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.BrokerMetricEvent;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
-import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
@@ -30,7 +28,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  */
 @Component
 public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics> {
-    protected static final ILog LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    private static final ILog LOGGER = LogFactory.getLog(BrokerMetricCollector.class);
 
     @Autowired
     private VersionControlService versionControlService;
@@ -42,8 +40,7 @@ public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics
     private BrokerService brokerService;
 
     @Override
-    public void collectMetrics(ClusterPhy clusterPhy) {
-        Long startTime     = System.currentTimeMillis();
+    public List<BrokerMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long clusterPhyId  = clusterPhy.getId();
 
         List<Broker>             brokers = brokerService.listAliveBrokersFromDB(clusterPhy.getId());
@@ -51,23 +48,23 @@ public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics
 
         FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 
-        List<BrokerMetrics> brokerMetrics = new ArrayList<>();
+        List<BrokerMetrics> metricsList = new ArrayList<>();
         for(Broker broker : brokers) {
             BrokerMetrics metrics = new BrokerMetrics(clusterPhyId, broker.getBrokerId(), broker.getHost(), broker.getPort());
-            brokerMetrics.add(metrics);
+            metrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, Constant.COLLECT_METRICS_ERROR_COST_TIME);
+            metricsList.add(metrics);
 
             future.runnableTask(
-                    String.format("method=BrokerMetricCollector||clusterPhyId=%d||brokerId=%d", clusterPhyId, broker.getBrokerId()),
+                    String.format("class=BrokerMetricCollector||clusterPhyId=%d||brokerId=%d", clusterPhyId, broker.getBrokerId()),
                     30000,
                     () -> collectMetrics(clusterPhyId, metrics, items)
             );
         }
 
         future.waitExecute(30000);
-        this.publishMetric(new BrokerMetricEvent(this, brokerMetrics));
+        this.publishMetric(new BrokerMetricEvent(this, metricsList));
 
-        LOGGER.info("method=BrokerMetricCollector||clusterPhyId={}||startTime={}||costTime={}||msg=collect finished.",
-                clusterPhyId, startTime, System.currentTimeMillis() - startTime);
+        return metricsList;
     }
 
     @Override
@@ -79,7 +76,6 @@ public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics
 
     private void collectMetrics(Long clusterPhyId, BrokerMetrics metrics, List<VersionControlItem> items) {
         long startTime = System.currentTimeMillis();
-        metrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, Constant.COLLECT_METRICS_ERROR_COST_TIME);
 
         for(VersionControlItem v : items) {
             try {
@@ -93,14 +89,11 @@ public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics
                 }
 
                 metrics.putMetric(ret.getData().getMetrics());
-
-                if(!EnvUtil.isOnline()){
-                    LOGGER.info("method=BrokerMetricCollector||clusterId={}||brokerId={}||metric={}||metric={}!",
-                            clusterPhyId, metrics.getBrokerId(), v.getName(), JSON.toJSONString(ret.getData().getMetrics()));
-                }
             } catch (Exception e){
-                LOGGER.error("method=BrokerMetricCollector||clusterId={}||brokerId={}||metric={}||errMsg=exception!",
-                        clusterPhyId, metrics.getBrokerId(), v.getName(), e);
+                LOGGER.error(
+                        "method=collectMetrics||clusterPhyId={}||brokerId={}||metricName={}||errMsg=exception!",
+                        clusterPhyId, metrics.getBrokerId(), v.getName(), e
+                );
             }
         }
 

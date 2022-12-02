@@ -14,11 +14,11 @@ import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.R
 
 @Component
 public class ReplicaMetricESSender extends AbstractMetricESSender implements ApplicationListener<ReplicaMetricEvent> {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    private static final ILog  LOGGER = LogFactory.getLog(ReplicaMetricESSender.class);
 
     @PostConstruct
     public void init(){
-        LOGGER.info("class=GroupMetricESSender||method=init||msg=init finished");
+        LOGGER.info("method=init||msg=init finished");
     }
 
     @Override
