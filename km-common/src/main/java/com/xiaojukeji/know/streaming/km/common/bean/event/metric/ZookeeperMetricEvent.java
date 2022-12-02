@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public class ZookeeperMetricEvent extends BaseMetricEvent {
 
-    private List<ZookeeperMetrics> zookeeperMetrics;
+    private final List<ZookeeperMetrics> zookeeperMetrics;
 
     public ZookeeperMetricEvent(Object source, List<ZookeeperMetrics> zookeeperMetrics) {
         super( source );
