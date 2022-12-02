@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public class PartitionMetricEvent extends BaseMetricEvent{
 
-    private List<PartitionMetrics> partitionMetrics;
+    private final List<PartitionMetrics> partitionMetrics;
 
     public PartitionMetricEvent(Object source, List<PartitionMetrics> partitionMetrics) {
         super( source );
