@@ -260,7 +260,7 @@ public class TopicServiceImpl implements TopicService {
 
             return Result.buildSuc(topicList);
         } catch (Exception e) {
-            log.error("class=TopicServiceImpl||method=getTopicsFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getTopicsFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
@@ -278,7 +278,7 @@ public class TopicServiceImpl implements TopicService {
 
             return Result.buildSuc(topicList);
         } catch (Exception e) {
-            log.error("class=TopicServiceImpl||method=getTopicsFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getTopicsFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
