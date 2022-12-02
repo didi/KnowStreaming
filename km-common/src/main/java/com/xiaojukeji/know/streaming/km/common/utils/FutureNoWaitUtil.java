@@ -64,7 +64,7 @@ public class FutureNoWaitUtil<T> {
         while (true) {
             FutureTaskDelayQueueData<T> data = null;
             try {
-                LOGGER.debug("class=FutureNoWaitUtil||method=runCheck||delayQueueSize={}", delayQueueData.size());
+                LOGGER.debug("method=runCheck||delayQueueSize={}", delayQueueData.size());
 
                 while (true) {
                     data = delayQueueData.take();
@@ -81,7 +81,7 @@ public class FutureNoWaitUtil<T> {
                 // 停1000ms
                 Thread.sleep(1000);
             } catch (Exception e) {
-                LOGGER.error("class=FutureNoWaitUtil||method=runCheck||taskName={}||errMsg=exception!", data == null? "": data.getTaskName(), e);
+                LOGGER.error("method=runCheck||taskName={}||errMsg=exception!", data == null? "": data.getTaskName(), e);
             }
         }
     }

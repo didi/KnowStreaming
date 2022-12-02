@@ -100,13 +100,13 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                         break;
                     default:
                         LOGGER.warn(
-                                "class=MonitorCmdDataParser||method=parseAndInitData||name={}||value={}||msg=data not parsed!",
+                                "method=parseAndInitData||name={}||value={}||msg=data not parsed!",
                                 elem.getKey(), elem.getValue()
                         );
                 }
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=MonitorCmdDataParser||method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
+                        "method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
                         clusterPhyId, host, port, elem.getKey(), elem.getValue(), e
                 );
             }

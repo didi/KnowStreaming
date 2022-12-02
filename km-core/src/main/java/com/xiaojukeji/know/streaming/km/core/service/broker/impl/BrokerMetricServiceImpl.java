@@ -58,7 +58,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
  */
 @Service
 public class BrokerMetricServiceImpl extends BaseMetricService implements BrokerMetricService {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    protected static final ILog  LOGGER = LogFactory.getLog(BrokerMetricServiceImpl.class);
 
     public static final String BROKER_METHOD_DO_NOTHING                             = "doNothing";
     public static final String BROKER_METHOD_GET_METRIC_FROM_KAFKA_BY_JMX           = "getMetricFromKafkaByJMX";

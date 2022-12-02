@@ -31,12 +31,12 @@ public abstract class AbstractAsyncCommonDispatchTask extends AbstractClusterPhy
                     try {
                         TaskResult tr = this.processClusterTask(clusterPhy, triggerTimeUnitMs);
                         if (TaskResult.SUCCESS_CODE != tr.getCode()) {
-                            log.error("class=AbstractAsyncCommonDispatchTask||taskName={}||clusterPhyId={}||taskResult={}||msg=failed", this.taskName, clusterPhy.getId(), tr);
+                            log.error("method=asyncProcessSubTask||taskName={}||clusterPhyId={}||taskResult={}||msg=failed", this.taskName, clusterPhy.getId(), tr);
                         } else {
-                            log.debug("class=AbstractAsyncCommonDispatchTask||taskName={}||clusterPhyId={}||msg=success", this.taskName, clusterPhy.getId());
+                            log.debug("method=asyncProcessSubTask||taskName={}||clusterPhyId={}||msg=success", this.taskName, clusterPhy.getId());
                         }
                     } catch (Exception e) {
-                        log.error("class=AbstractAsyncCommonDispatchTask||taskName={}||clusterPhyId={}||errMsg=exception", this.taskName, clusterPhy.getId(), e);
+                        log.error("method=asyncProcessSubTask||taskName={}||clusterPhyId={}||errMsg=exception", this.taskName, clusterPhy.getId(), e);
                     }
                 }
         );

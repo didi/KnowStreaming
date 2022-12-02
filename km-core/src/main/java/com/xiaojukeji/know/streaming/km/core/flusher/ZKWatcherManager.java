@@ -43,14 +43,14 @@ public class ZKWatcherManager extends AbstractClusterLoadedChangedHandler {
                 try {
                     FutureUtil.quickStartupFutureUtil.submitTask(
                             () -> {
-                                log.debug("class={}||method=scheduledTriggerFlush||clusterPhyId={}||msg=flush task start"
+                                log.debug("runClass={}||method=scheduledTriggerFlush||clusterPhyId={}||msg=flush task start"
                                         , abstractZKWatcher.getClass().getSimpleName(), clusterPhy.getId());
 
                                 long startTime = System.currentTimeMillis();
 
                                 abstractZKWatcher.flush(clusterPhy);
 
-                                log.info("class={}||method=scheduledTriggerFlush||clusterPhyId={}||costTime={}ms||msg=flush task finished"
+                                log.info("runClass={}||method=scheduledTriggerFlush||clusterPhyId={}||costTime={}ms||msg=flush task finished"
                                         , abstractZKWatcher.getClass().getSimpleName(), clusterPhy.getId(), System.currentTimeMillis() - startTime);
                             });
                 } catch (Exception e) {

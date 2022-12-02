@@ -163,7 +163,7 @@ public class PaginationMetricsUtil {
         try {
             Field defaultField = FieldUtils.getField(allDataList.get(0).getClass(), defaultSortField, true);
             if(ValidateUtils.anyNull(defaultField)) {
-                log.debug("class=PaginationMetricsUtil||method=sortMetrics||className={}||metricName={}||defaultFieldName={}||metricSortType={}||msg=default field not exist.",
+                log.debug("method=sortMetrics||className={}||metricName={}||defaultFieldName={}||metricSortType={}||msg=default field not exist.",
                         allDataList.get(0).getClass().getSimpleName(), metricName, defaultSortField, sortType);
 
                 // 字段不存在，则排序失效，直接返回
@@ -172,7 +172,7 @@ public class PaginationMetricsUtil {
 
             Collections.sort(allDataList, (a1, a2) -> sortMetricsObject(a1, a2, metricName, defaultField));
         } catch (Exception e) {
-            log.debug("class=PaginationMetricsUtil||method=sortMetrics||className={}||metricName={}||defaultFieldName={}||metricSortType={}||errMsg=exception.",
+            log.debug("method=sortMetrics||className={}||metricName={}||defaultFieldName={}||metricSortType={}||errMsg=exception.",
                     allDataList.get(0).getClass().getSimpleName(), metricName, defaultSortField, sortType, e);
         }
 
@@ -214,7 +214,7 @@ public class PaginationMetricsUtil {
 
             return 0;
         } catch (Exception e) {
-            log.debug("class=PaginationMetricsUtil||method=sortMetricsObject||metricsA={}||metricsB={}||metricName={}||defaultFieldName={}||errMsg=exception.",
+            log.debug("method=sortMetricsObject||metricsA={}||metricsB={}||metricName={}||defaultFieldName={}||errMsg=exception.",
                     a1, a2, metricName, defaultField.getName(), e);
         }
 

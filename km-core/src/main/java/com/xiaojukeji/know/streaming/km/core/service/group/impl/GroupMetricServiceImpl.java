@@ -221,7 +221,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
 
             return Result.buildSuc(metricsList);
         } catch (Exception e) {
-            LOGGER.error("class=GroupMetricServiceImpl||method=getLagFromAdminClient||clusterPhyId={}||groupName={}||metrics={}||msg=exception", clusterId, groupName, metric, e);
+            LOGGER.error("method=getLagFromAdminClient||clusterPhyId={}||groupName={}||metrics={}||msg=exception", clusterId, groupName, metric, e);
             return Result.buildFailure(VC_KAFKA_CLIENT_ERROR);
         }
     }
