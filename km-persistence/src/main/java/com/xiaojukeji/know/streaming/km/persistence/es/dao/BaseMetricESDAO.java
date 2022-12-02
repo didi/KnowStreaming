@@ -65,7 +65,7 @@ public class BaseMetricESDAO extends BaseESDAO {
 
                 esOpClient.createIndex(realIndex);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("method=checkCurrentDayIndexExist||errMsg=exception!", e);
         }
     }

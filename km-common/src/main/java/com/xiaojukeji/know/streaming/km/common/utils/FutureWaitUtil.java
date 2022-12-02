@@ -123,11 +123,11 @@ public class FutureWaitUtil<T> {
                 }
 
                 // 达到超时时间，但是任务未完成，则打印日志并强制取消
-                LOGGER.error("class=FutureUtil||method=waitExecute||taskName={}||msg=cancel task", queueData.getTaskName());
+                LOGGER.error("method=waitExecute||taskName={}||msg=cancel task", queueData.getTaskName());
 
                 queueData.getFutureTask().cancel(true);
             } catch (Exception e) {
-                LOGGER.error("class=FutureUtil||method=waitExecute||msg=exception", e);
+                LOGGER.error("method=waitExecute||msg=exception", e);
             }
         }
 
@@ -155,7 +155,7 @@ public class FutureWaitUtil<T> {
             return queueData.getFutureTask().get(stepWaitTimeUnitMs, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             // 达到超时时间，但是任务未完成，则打印日志并强制取消
-            LOGGER.error("class=FutureUtil||method=stepWaitResult||taskName={}||errMsg=exception", queueData.getTaskName(), e);
+            LOGGER.error("method=stepWaitResult||taskName={}||errMsg=exception", queueData.getTaskName(), e);
         }
 
         return null;

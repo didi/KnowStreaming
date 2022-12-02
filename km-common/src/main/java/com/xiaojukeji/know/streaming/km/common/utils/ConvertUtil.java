@@ -210,7 +210,7 @@ public class ConvertUtil {
             BeanUtils.copyProperties(srcObj, tgt);
             consumer.accept(tgt);
         } catch (Exception e) {
-            LOGGER.warn("class=ConvertUtil||method=obj2Obj||msg={}", e.getMessage());
+            LOGGER.warn("method=obj2Obj||msg={}", e.getMessage());
         }
 
         return tgt;
@@ -236,7 +236,7 @@ public class ConvertUtil {
             try {
                 map.put(field.getName(), field.get(obj));
             } catch (IllegalAccessException e) {
-                LOGGER.warn("class=ConvertUtil||method=Obj2Map||msg={}", e.getMessage(), e);
+                LOGGER.warn("method=Obj2Map||msg={}", e.getMessage(), e);
             }
         }
         return map;
@@ -256,7 +256,7 @@ public class ConvertUtil {
                 field.set(obj, map.get(field.getName()));
             }
         } catch (Exception e) {
-            LOGGER.warn("class=ConvertUtil||method=map2Obj||msg={}", e.getMessage(), e);
+            LOGGER.warn("method=map2Obj||msg={}", e.getMessage(), e);
         }
 
         return obj;

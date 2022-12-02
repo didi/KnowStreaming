@@ -1,7 +1,7 @@
 package com.xiaojukeji.know.streaming.km.persistence.es;
 
 import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.common.utils.LoggerUtil;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslLoaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 直接操作es集群的dao
  */
 public abstract class BaseESDAO {
-    protected static final ILog      LOGGER = LogFactory.getLog("ES_LOGGER");
+    protected static final ILog LOGGER = LoggerUtil.getESLogger();
 
     /**
      * 加载查询语句工具类

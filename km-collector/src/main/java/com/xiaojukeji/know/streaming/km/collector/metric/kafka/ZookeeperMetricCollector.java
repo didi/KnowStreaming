@@ -15,10 +15,8 @@ import com.xiaojukeji.know.streaming.km.common.bean.event.metric.ZookeeperMetric
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
-import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper.ZookeeperInfo;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ZookeeperMetrics;
-import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ZookeeperMetricPO;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.core.service.version.VersionControlService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperMetricService;
@@ -26,7 +24,7 @@ import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +34,8 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Component
-public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperMetricPO> {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperMetrics> {
+    protected static final ILog  LOGGER = LogFactory.getLog(ZookeeperMetricCollector.class);
 
     @Autowired
     private VersionControlService versionControlService;
@@ -52,7 +50,7 @@ public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperM
     private KafkaControllerService kafkaControllerService;
 
     @Override
-    public void collectMetrics(ClusterPhy clusterPhy) {
+    public List<ZookeeperMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long        startTime           =   System.currentTimeMillis();
         Long        clusterPhyId        =   clusterPhy.getId();
         List<VersionControlItem> items  =   versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
@@ -62,11 +60,11 @@ public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperM
                 .collect(Collectors.toList());
         KafkaController kafkaController =   kafkaControllerService.getKafkaControllerFromDB(clusterPhyId);
 
-        ZookeeperMetrics metrics = ZookeeperMetrics.initWithMetric(clusterPhyId, Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, (float)Constant.INVALID_CODE);
+        ZookeeperMetrics metrics = ZookeeperMetrics.initWithMetric(clusterPhyId, Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, Constant.COLLECT_METRICS_ERROR_COST_TIME);
         if (ValidateUtils.isEmptyList(aliveZKList)) {
             // 没有存活的ZK时，发布事件，然后直接返回
-            publishMetric(new ZookeeperMetricEvent(this, Arrays.asList(metrics)));
-            return;
+            publishMetric(new ZookeeperMetricEvent(this, Collections.singletonList(metrics)));
+            return Collections.singletonList(metrics);
         }
 
         // 构造参数
@@ -83,6 +81,7 @@ public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperM
                 if(null != metrics.getMetrics().get(v.getName())) {
                     continue;
                 }
+
                 param.setMetricName(v.getName());
 
                 Result<ZookeeperMetrics> ret = zookeeperMetricService.collectMetricsFromZookeeper(param);
@@ -91,16 +90,9 @@ public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperM
                 }
 
                 metrics.putMetric(ret.getData().getMetrics());
-
-                if(!EnvUtil.isOnline()){
-                    LOGGER.info(
-                            "class=ZookeeperMetricCollector||method=collectMetrics||clusterPhyId={}||metricName={}||metricValue={}",
-                            clusterPhyId, v.getName(), ConvertUtil.obj2Json(ret.getData().getMetrics())
-                    );
-                }
             } catch (Exception e){
                 LOGGER.error(
-                        "class=ZookeeperMetricCollector||method=collectMetrics||clusterPhyId={}||metricName={}||errMsg=exception!",
+                        "method=collectMetrics||clusterPhyId={}||metricName={}||errMsg=exception!",
                         clusterPhyId, v.getName(), e
                 );
             }
@@ -108,12 +100,9 @@ public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperM
 
         metrics.putMetric(Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME, (System.currentTimeMillis() - startTime) / 1000.0f);
 
-        publishMetric(new ZookeeperMetricEvent(this, Arrays.asList(metrics)));
+        this.publishMetric(new ZookeeperMetricEvent(this, Collections.singletonList(metrics)));
 
-        LOGGER.info(
-                "class=ZookeeperMetricCollector||method=collectMetrics||clusterPhyId={}||startTime={}||costTime={}||msg=msg=collect finished.",
-                clusterPhyId, startTime, System.currentTimeMillis() - startTime
-        );
+        return Collections.singletonList(metrics);
     }
 
     @Override

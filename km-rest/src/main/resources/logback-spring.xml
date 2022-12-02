@@ -149,14 +149,14 @@
     </appender>
 
     <!-- Metrics信息收集日志 -->
-    <appender name="METRIC_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.path}/metric/metrics.log</file>
+    <appender name="METRIC_COLLECTED_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/metric/metric_collected.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/metric/metrics_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${log.path}/metric/metric_collected_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -197,8 +197,8 @@
         <appender-ref ref="ES_LOGGER"/>
     </logger>
 
-    <logger name="METRIC_LOGGER" level="ERROR" additivity="false">
-        <appender-ref ref="METRIC_LOGGER"/>
+    <logger name="METRIC_COLLECTED_LOGGER" level="ERROR" additivity="false">
+        <appender-ref ref="METRIC_COLLECTED_LOGGER"/>
     </logger>
 
     <logger name="TASK_LOGGER" level="ERROR" additivity="false">
