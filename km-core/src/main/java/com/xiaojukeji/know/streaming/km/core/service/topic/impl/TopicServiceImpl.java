@@ -101,7 +101,15 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public List<Topic> listTopicsFromDB(Long clusterPhyId) {
-        return TopicConverter.convert2TopicList(this.getTopicsFromDB(clusterPhyId));
+        return TopicConverter.convert2TopicList(this.listTopicPOsFromDB(clusterPhyId));
+    }
+
+    @Override
+    public List<TopicPO> listTopicPOsFromDB(Long clusterPhyId) {
+        LambdaQueryWrapper<TopicPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(TopicPO::getClusterPhyId, clusterPhyId);
+
+        return topicDAO.selectList(lambdaQueryWrapper);
     }
 
     @Override
@@ -182,39 +190,46 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public void batchReplaceMetadata(Long clusterPhyId, List<Topic> presentTopicList) {
-        Map<String, Topic> presentTopicMap = presentTopicList.stream().collect(Collectors.toMap(Topic::getTopicName, Function.identity()));
-
-        List<TopicPO> dbTopicPOList = this.getTopicsFromDB(clusterPhyId);
+        Map<String, TopicPO> inDBMap = this.listTopicPOsFromDB(clusterPhyId).stream().collect(Collectors.toMap(TopicPO::getTopicName, Function.identity()));
 
         // 新旧合并
-        for (TopicPO dbTopicPO: dbTopicPOList) {
-            Topic topic = presentTopicMap.remove(dbTopicPO.getTopicName());
-            if (topic == null) {
-                topicDAO.deleteById(dbTopicPO.getId());
-                continue;
-            }
-
-            topicDAO.updateById(TopicConverter.mergeAndOnlyMetadata2NewTopicPO(topic, dbTopicPO));
-        }
-
-        // DB中没有的则插入DB
-        for (Topic topic: presentTopicMap.values()) {
+        for (Topic presentTopic: presentTopicList) {
             try {
-                topicDAO.insert(TopicConverter.mergeAndOnlyMetadata2NewTopicPO(topic, null));
+                TopicPO inDBTopicPO = inDBMap.remove(presentTopic.getTopicName());
+
+                TopicPO newTopicPO = TopicConverter.mergeAndOnlyMetadata2NewTopicPO(presentTopic, inDBTopicPO);
+                if (inDBTopicPO == null) {
+                    topicDAO.insert(newTopicPO);
+                } else if (!newTopicPO.equals(inDBTopicPO)) {
+                    // 有变化时，则进行更新
+                    if (presentTopic.getUpdateTime() == null) {
+                        // 如果原数据的更新时间为null，则修改为当前时间
+                        newTopicPO.setUpdateTime(new Date());
+                    }
+                    topicDAO.updateById(newTopicPO);
+                }
+
+                // 无变化时，直接忽略更新
             } catch (DuplicateKeyException dke) {
                 // 忽略key冲突错误，多台KM可能同时做insert，所以可能出现key冲突
             }
         }
+
+        // DB中没有的则进行删除
+        inDBMap.values().forEach(elem -> topicDAO.deleteById(elem.getId()));
     }
 
     @Override
-    public int batchReplaceConfig(Long clusterPhyId, List<TopicConfig> topicConfigList) {
+    public int batchReplaceChangedConfig(Long clusterPhyId, List<TopicConfig> changedConfigList) {
         int effectRow = 0;
-        for (TopicConfig config: topicConfigList) {
+        for (TopicConfig config: changedConfigList) {
             try {
-                effectRow += topicDAO.updateConfig(ConvertUtil.obj2Obj(config, TopicPO.class));
+                effectRow += topicDAO.updateConfigById(ConvertUtil.obj2Obj(config, TopicPO.class));
             } catch (Exception e) {
-                log.error("method=batchReplaceConfig||config={}||errMsg=exception!", config, e);
+                log.error(
+                        "method=batchReplaceConfig||clusterPhyId={}||topicName={}||retentionMs={}||errMsg=exception!",
+                        config.getClusterPhyId(), config.getTopicName(), config.getRetentionMs(), e
+                );
             }
         }
 
@@ -298,12 +313,5 @@ public class TopicServiceImpl implements TopicService {
         lambdaQueryWrapper.eq(TopicPO::getTopicName, topicName);
 
         return topicDAO.selectOne(lambdaQueryWrapper);
-    }
-
-    private List<TopicPO> getTopicsFromDB(Long clusterPhyId) {
-        LambdaQueryWrapper<TopicPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(TopicPO::getClusterPhyId, clusterPhyId);
-
-        return topicDAO.selectList(lambdaQueryWrapper);
     }
 }
