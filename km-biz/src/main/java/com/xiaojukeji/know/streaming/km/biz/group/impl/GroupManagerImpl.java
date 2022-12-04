@@ -12,6 +12,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.group.Group;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.GroupTopic;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.GroupTopicMember;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.GroupMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
@@ -42,7 +43,6 @@ import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.Group
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.GroupMetricESDAO;
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.MemberDescription;
-import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,16 +274,16 @@ public class GroupManagerImpl implements GroupManager {
             )));
         }
 
-        OffsetSpec offsetSpec = null;
+        KSOffsetSpec offsetSpec = null;
         if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getResetType()) {
-            offsetSpec = OffsetSpec.forTimestamp(dto.getTimestamp());
+            offsetSpec = KSOffsetSpec.forTimestamp(dto.getTimestamp());
         } else if (OffsetTypeEnum.EARLIEST.getResetType() == dto.getResetType()) {
-            offsetSpec = OffsetSpec.earliest();
+            offsetSpec = KSOffsetSpec.earliest();
         } else {
-            offsetSpec = OffsetSpec.latest();
+            offsetSpec = KSOffsetSpec.latest();
         }
 
-        return partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), offsetSpec, dto.getTimestamp());
+        return partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), offsetSpec);
     }
 
     private List<GroupTopicOverviewVO> convert2GroupTopicOverviewVOList(List<GroupMemberPO> poList, List<GroupMetrics> metricsList) {

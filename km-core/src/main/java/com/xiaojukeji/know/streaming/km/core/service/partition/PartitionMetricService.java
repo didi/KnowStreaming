@@ -26,6 +26,5 @@ public interface PartitionMetricService {
      * 从ES获取指标
      */
     PartitionMetrics getLatestMetricsFromES(Long clusterPhyId, String topic, Integer brokerId, Integer partitionId, List<String> metricNameList);
-
     Result<List<PartitionMetrics>> getLatestMetricsFromES(Long clusterPhyId, String topicName, List<String> metricNameList);
 }
