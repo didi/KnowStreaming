@@ -43,7 +43,7 @@ public class ReplicaMetricCollector extends AbstractMetricCollector<ReplicationM
     public List<ReplicationMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long        clusterPhyId        =   clusterPhy.getId();
         List<VersionControlItem> items  =   versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
-        List<Partition> partitions      =   partitionService.listPartitionByCluster(clusterPhyId);
+        List<Partition> partitions      =   partitionService.listPartitionFromCacheFirst(clusterPhyId);
 
         FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 
