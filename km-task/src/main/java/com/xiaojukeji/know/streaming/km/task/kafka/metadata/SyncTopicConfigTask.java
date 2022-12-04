@@ -7,8 +7,8 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.TopicConfig;
+import com.xiaojukeji.know.streaming.km.common.bean.po.topic.TopicPO;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
@@ -44,18 +44,25 @@ public class SyncTopicConfigTask extends AbstractAsyncMetadataDispatchTask {
     public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) {
         boolean success = true;
 
-        List<TopicConfig> topicConfigList = new ArrayList<>();
-        for (Topic topic: topicService.listTopicsFromDB(clusterPhy.getId())) {
-            Result<TopicConfig> configResult = this.getTopicConfig(clusterPhy.getId(), topic.getTopicName());
+        List<TopicConfig> changedConfigList = new ArrayList<>();
+        for (TopicPO topicPO: topicService.listTopicPOsFromDB(clusterPhy.getId())) {
+            Result<TopicConfig> configResult = this.getTopicConfig(clusterPhy.getId(), topicPO.getTopicName());
             if (configResult.failed()) {
                 success = false;
                 continue;
             }
 
-            topicConfigList.add(configResult.getData());
+            TopicConfig config = configResult.getData();
+            if (topicPO.getRetentionMs().equals(config.getRetentionMs())) {
+                // 数据无变化，不需要加入待更新列表中
+                continue;
+            }
+
+            config.setId(topicPO.getId());
+            changedConfigList.add(configResult.getData());
         }
 
-        topicService.batchReplaceConfig(clusterPhy.getId(), topicConfigList);
+        topicService.batchReplaceChangedConfig(clusterPhy.getId(), changedConfigList);
 
         return success? TaskResult.SUCCESS: TaskResult.FAIL;
     }

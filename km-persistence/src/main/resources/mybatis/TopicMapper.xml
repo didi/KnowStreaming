@@ -25,8 +25,8 @@
             (#{clusterPhyId}, #{topicName}, #{replicaNum}, #{partitionNum}, #{brokerIds}, #{partitionMap}, #{retentionMs}, #{type}, #{description})
     </insert>
 
-    <update id="updateConfig" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.topic.TopicPO">
-        UPDATE ks_km_topic SET retention_ms = #{retentionMs} WHERE cluster_phy_id = #{clusterPhyId} AND topic_name = #{topicName}
+    <update id="updateConfigById" parameterType="com.xiaojukeji.know.streaming.km.common.bean.po.topic.TopicPO">
+        UPDATE ks_km_topic SET retention_ms = #{retentionMs} WHERE id=#{id}
     </update>
 
 </mapper>
