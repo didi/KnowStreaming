@@ -47,7 +47,7 @@ public class ClusterMetricCollector extends AbstractMetricCollector<ClusterMetri
 
         for(VersionControlItem v : items) {
             future.runnableTask(
-                    String.format("class=ClusterMetricCollector||clusterPhyId=%d", clusterPhyId),
+                    String.format("class=ClusterMetricCollector||clusterPhyId=%d||metricName=%s", clusterPhyId, v.getName()),
                     30000,
                     () -> {
                         try {
