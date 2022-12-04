@@ -33,7 +33,7 @@ public class KafkaConstant {
 
     public static final Integer DATA_VERSION_ONE = 1;
 
-    public static final Integer ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS = 5000;
+    public static final Integer ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS = 10000;
 
     public static final Integer KAFKA_SASL_SCRAM_ITERATIONS = 8192;
 
