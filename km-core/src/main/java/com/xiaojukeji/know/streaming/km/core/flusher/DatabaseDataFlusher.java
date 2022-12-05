@@ -4,13 +4,18 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
+import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
+import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
+import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,10 +23,18 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class DatabaseDataFlusher {
     private static final ILog LOGGER  = LogFactory.getLog(DatabaseDataFlusher.class);
+
+    @Autowired
+    private TopicService topicService;
+
+    @Autowired
+    private TopicMetricService topicMetricService;
 
     @Autowired
     private ClusterPhyService clusterPhyService;
@@ -37,6 +50,8 @@ public class DatabaseDataFlusher {
         this.flushPartitionsCache();
 
         this.flushClusterLatestMetricsCache();
+
+        this.flushTopicLatestMetricsCache();
     }
 
     @Scheduled(cron="0 0/1 * * * ?")
@@ -78,6 +93,29 @@ public class DatabaseDataFlusher {
                 }
 
                 DataBaseDataLocalCache.putClusterLatestMetrics(clusterPhy.getId(), new ClusterMetrics(clusterPhy.getId()));
+            });
+        }
+    }
+
+    @Scheduled(cron = "0 0/1 * * * ?")
+    private void flushTopicLatestMetricsCache() {
+        for (ClusterPhy clusterPhy: LoadedClusterPhyCache.listAll().values()) {
+            FutureUtil.quickStartupFutureUtil.submitTask(() -> {
+                try {
+
+                    List<String> topicNameList = topicService.listTopicsFromCacheFirst(clusterPhy.getId()).stream().map(Topic::getTopicName).collect(Collectors.toList());
+
+                    List<TopicMetrics> metricsList = topicMetricService.listTopicLatestMetricsFromES(clusterPhy.getId(), topicNameList, Collections.emptyList());
+
+                    Map<String, TopicMetrics> metricsMap = metricsList
+                            .stream()
+                            .collect(Collectors.toMap(TopicMetrics::getTopic, Function.identity()));
+
+                    DataBaseDataLocalCache.putTopicMetrics(clusterPhy.getId(), metricsMap);
+
+                } catch (Exception e) {
+                    LOGGER.error("method=flushTopicLatestMetricsCache||clusterPhyId={}||errMsg=exception!",  clusterPhy.getId(), e);
+                }
             });
         }
     }
