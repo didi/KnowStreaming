@@ -78,6 +78,9 @@ public class ServerCmdDataParser implements FourLetterWordDataParser<ServerCmdDa
                     case "Zxid":
                         serverCmdData.setZkZxid(Long.parseUnsignedLong(elem.getValue().trim().substring(2), 16));
                         break;
+                    case "Proposal sizes last/min/max":
+                        // zk的leader特有的数据，数据例子：Proposal sizes last/min/max||value=32/32/976165
+                        break;
                     default:
                         LOGGER.warn(
                                 "method=parseAndInitData||name={}||value={}||msg=data not parsed!",
