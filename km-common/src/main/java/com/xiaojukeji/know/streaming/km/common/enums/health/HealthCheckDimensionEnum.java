@@ -20,6 +20,8 @@ public enum HealthCheckDimensionEnum {
 
     ZOOKEEPER(4, "Zookeeper"),
 
+    MAX_VAL(100, "所有的dimension的值需要小于MAX_VAL")
+
     ;
 
     private final int dimension;

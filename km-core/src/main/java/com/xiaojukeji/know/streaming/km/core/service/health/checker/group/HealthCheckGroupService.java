@@ -6,7 +6,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.Ba
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthDetectedInLatestMinutesConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.group.GroupParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchTerm;
@@ -17,7 +16,6 @@ import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.GROUP_METRIC_STATE;
 
-@Data
 @Service
 public class HealthCheckGroupService extends AbstractHealthCheckService {
     private static final ILog log = LogFactory.getLog(HealthCheckGroupService.class);
