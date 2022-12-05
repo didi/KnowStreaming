@@ -98,6 +98,10 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                     case "zk_max_file_descriptor_count":
                         monitorCmdData.setZkMaxFileDescriptorCount(Long.valueOf(elem.getValue()));
                         break;
+                    case "Proposal sizes last/min/max":
+                    case "zk_fsync_threshold_exceed_count":
+                        // 忽略该指标的解析
+                        break;
                     default:
                         LOGGER.warn(
                                 "method=parseAndInitData||name={}||value={}||msg=data not parsed!",
