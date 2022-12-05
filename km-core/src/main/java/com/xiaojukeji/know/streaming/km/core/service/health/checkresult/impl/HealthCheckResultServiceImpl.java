@@ -3,26 +3,28 @@ package com.xiaojukeji.know.streaming.km.core.service.health.checkresult.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckAggResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.po.config.PlatformClusterConfigPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
-import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.config.ConfigGroupEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
+import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.config.PlatformClusterConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.health.HealthCheckResultDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class HealthCheckResultServiceImpl implements HealthCheckResultService {
-    private static final ILog log = LogFactory.getLog(HealthCheckResultServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(HealthCheckResultServiceImpl.class);
 
     @Autowired
     private HealthCheckResultDAO healthCheckResultDAO;
@@ -31,40 +33,69 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
     private PlatformClusterConfigService platformClusterConfigService;
 
     @Override
-    public int replace(HealthCheckResult healthCheckResult) {
-        return healthCheckResultDAO.replace(ConvertUtil.obj2Obj(healthCheckResult, HealthCheckResultPO.class));
+    public List<HealthCheckAggResult> getHealthCheckAggResult(Long clusterPhyId, HealthCheckDimensionEnum dimensionEnum, String resNme) {
+        List<HealthCheckResultPO> poList = this.listCheckResultFromCache(clusterPhyId, dimensionEnum, resNme);
+
+        return this.convert2HealthCheckAggResultList(poList, dimensionEnum.getDimension());
     }
 
     @Override
-    public int deleteByUpdateTimeBeforeInDB(Long clusterPhyId, Date beforeTime) {
-        LambdaQueryWrapper<HealthCheckResultPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(HealthCheckResultPO::getClusterPhyId, clusterPhyId);
-        lambdaQueryWrapper.le(HealthCheckResultPO::getUpdateTime, beforeTime);
-        return healthCheckResultDAO.delete(lambdaQueryWrapper);
+    public List<HealthCheckAggResult> getHealthCheckAggResult(Long clusterPhyId, HealthCheckDimensionEnum dimensionEnum) {
+        List<HealthCheckResultPO> poList = this.listCheckResultFromCache(clusterPhyId, dimensionEnum);
+
+        return this.convert2HealthCheckAggResultList(poList, dimensionEnum.getDimension());
     }
 
     @Override
-    public List<HealthCheckResultPO> getClusterHealthCheckResult(Long clusterPhyId) {
+    public List<HealthCheckResultPO> listAll() {
+        return healthCheckResultDAO.selectList(null);
+    }
+
+    @Override
+    public List<HealthCheckResultPO> listCheckResult(Long clusterPhyId) {
         LambdaQueryWrapper<HealthCheckResultPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(HealthCheckResultPO::getClusterPhyId, clusterPhyId);
+
         return healthCheckResultDAO.selectList(lambdaQueryWrapper);
     }
 
     @Override
-    public List<HealthCheckResultPO> getClusterResourcesHealthCheckResult(Long clusterPhyId, Integer resDimension) {
+    public List<HealthCheckResultPO> listCheckResult(Long clusterPhyId, Integer resDimension) {
         LambdaQueryWrapper<HealthCheckResultPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(HealthCheckResultPO::getDimension, resDimension);
         lambdaQueryWrapper.eq(HealthCheckResultPO::getClusterPhyId, clusterPhyId);
+
         return healthCheckResultDAO.selectList(lambdaQueryWrapper);
     }
 
     @Override
-    public List<HealthCheckResultPO> getResHealthCheckResult(Long clusterPhyId, Integer resDimension, String resNme) {
+    public List<HealthCheckResultPO> listCheckResult(Long clusterPhyId, Integer resDimension, String resNme) {
         LambdaQueryWrapper<HealthCheckResultPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(HealthCheckResultPO::getDimension, resDimension);
         lambdaQueryWrapper.eq(HealthCheckResultPO::getClusterPhyId, clusterPhyId);
         lambdaQueryWrapper.eq(HealthCheckResultPO::getResName, resNme);
+
         return healthCheckResultDAO.selectList(lambdaQueryWrapper);
+    }
+
+    @Override
+    public List<HealthCheckResultPO> listCheckResultFromCache(Long clusterPhyId, HealthCheckDimensionEnum dimensionEnum) {
+        Map<String, List<HealthCheckResultPO>> poMap = DataBaseDataLocalCache.getHealthCheckResults(clusterPhyId, dimensionEnum);
+        if (poMap != null) {
+            return poMap.values().stream().collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
+        }
+
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<HealthCheckResultPO> listCheckResultFromCache(Long clusterPhyId, HealthCheckDimensionEnum dimensionEnum, String resNme) {
+        Map<String, List<HealthCheckResultPO>> poMap = DataBaseDataLocalCache.getHealthCheckResults(clusterPhyId, dimensionEnum);
+        if (poMap != null) {
+            return poMap.getOrDefault(resNme, new ArrayList<>());
+        }
+
+        return new ArrayList<>();
     }
 
     @Override
@@ -76,7 +107,7 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
             try {
                 HealthCheckNameEnum nameEnum = HealthCheckNameEnum.getByName(po.getValueName());
                 if (HealthCheckNameEnum.UNKNOWN.equals(nameEnum)) {
-                    log.warn("method=getClusterHealthConfig||config={}||errMsg=config name illegal", po);
+                    LOGGER.warn("method=getClusterHealthConfig||config={}||errMsg=config name illegal", po);
                     continue;
                 }
 
@@ -85,22 +116,59 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
                 healthConfig.setClusterPhyId(clusterPhyId);
                 configMap.put(po.getValueName(), healthConfig);
             } catch (Exception e) {
-                log.error("method=getClusterHealthConfig||config={}||errMsg=exception!", po, e);
+                LOGGER.error("method=getClusterHealthConfig||config={}||errMsg=exception!", po, e);
             }
         }
         return configMap;
     }
 
     @Override
-    public void batchReplace(Long clusterPhyId, List<HealthCheckResult> healthCheckResults) {
-        List<List<HealthCheckResult>> healthCheckResultPartitions = Lists.partition(healthCheckResults, Constant.PER_BATCH_MAX_VALUE);
-        for (List<HealthCheckResult> checkResultPartition : healthCheckResultPartitions) {
-            List<HealthCheckResultPO> healthCheckResultPos = ConvertUtil.list2List(checkResultPartition, HealthCheckResultPO.class);
+    public void batchReplace(Long clusterPhyId, Integer dimension, List<HealthCheckResult> healthCheckResults) {
+        List<HealthCheckResultPO> inDBList = this.listCheckResult(clusterPhyId, dimension);
+
+        // list 转 map
+        Map<String, HealthCheckResultPO> inDBMap = new HashMap<>(inDBList.size());
+        inDBList.forEach(elem -> inDBMap.put(elem.getConfigName() + elem.getResName(), elem));
+
+        for (HealthCheckResult checkResult: healthCheckResults) {
+            HealthCheckResultPO inDB = inDBMap.remove(checkResult.getConfigName() + checkResult.getResName());
+
             try {
-                healthCheckResultDAO.batchReplace(healthCheckResultPos);
-            } catch (Exception e) {
-                log.error("method=batchReplace||clusterPhyId={}||checkResultList={}||errMsg=exception!", clusterPhyId, healthCheckResultPos, e);
+                HealthCheckResultPO newPO = ConvertUtil.obj2Obj(checkResult, HealthCheckResultPO.class);
+                if (inDB == null) {
+                    healthCheckResultDAO.insert(newPO);
+                } else {
+                    newPO.setId(inDB.getId());
+                    newPO.setUpdateTime(new Date());
+                    healthCheckResultDAO.updateById(newPO);
+                }
+            } catch (DuplicateKeyException dke) {
+                // ignore
             }
         }
+
+        inDBMap.values().forEach(elem -> {
+            if (System.currentTimeMillis() - elem.getUpdateTime().getTime() <= 1200000) {
+                // 20分钟之内的数据，不进行删除
+                return;
+            }
+
+            healthCheckResultDAO.deleteById(elem.getId());
+        });
+    }
+
+    private List<HealthCheckAggResult> convert2HealthCheckAggResultList(List<HealthCheckResultPO> poList, Integer dimensionCode) {
+        Map<String /*检查名*/, List<HealthCheckResultPO> /*检查结果列表*/> groupByCheckNamePOMap = new HashMap<>();
+        for (HealthCheckResultPO po: poList) {
+            groupByCheckNamePOMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
+            groupByCheckNamePOMap.get(po.getConfigName()).add(po);
+        }
+
+        List<HealthCheckAggResult> stateList = new ArrayList<>();
+        for (HealthCheckNameEnum nameEnum: HealthCheckNameEnum.getByDimensionCode(dimensionCode)) {
+            stateList.add(new HealthCheckAggResult(nameEnum, groupByCheckNamePOMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>())));
+        }
+
+        return stateList;
     }
 }

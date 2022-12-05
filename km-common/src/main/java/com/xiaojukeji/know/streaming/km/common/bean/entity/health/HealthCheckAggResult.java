@@ -14,16 +14,16 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 public class HealthCheckAggResult {
-    private HealthCheckNameEnum checkNameEnum;
+    protected HealthCheckNameEnum checkNameEnum;
 
-    private List<HealthCheckResultPO> poList;
+    protected List<HealthCheckResultPO> poList;
 
-    private Boolean passed;
+    protected Boolean passed;
 
     public HealthCheckAggResult(HealthCheckNameEnum checkNameEnum, List<HealthCheckResultPO> poList) {
         this.checkNameEnum = checkNameEnum;
         this.poList = poList;
-        if (!ValidateUtils.isEmptyList(poList) && poList.stream().filter(elem -> elem.getPassed() <= 0).count() <= 0) {
+        if (ValidateUtils.isEmptyList(poList) || poList.stream().filter(elem -> elem.getPassed() <= 0).count() <= 0) {
             passed = true;
         } else {
             passed = false;
@@ -45,24 +45,12 @@ public class HealthCheckAggResult {
         return (int) (poList.stream().filter(elem -> elem.getPassed() > 0).count());
     }
 
-    /**
-     * 计算当前检查的健康分
-     * 比如：计算集群Broker健康检查中的某一项的健康分
-     */
-    public Integer calRawHealthScore() {
-        if (poList == null || poList.isEmpty()) {
-            return 100;
-        }
-
-        return 100 * this.getPassedCount() / this.getTotalCount();
-    }
-
     public List<String> getNotPassedResNameList() {
         if (poList == null) {
             return new ArrayList<>();
         }
 
-        return poList.stream().filter(elem -> elem.getPassed() <= 0).map(elem -> elem.getResName()).collect(Collectors.toList());
+        return poList.stream().filter(elem -> elem.getPassed() <= 0 && !ValidateUtils.isBlank(elem.getResName())).map(elem -> elem.getResName()).collect(Collectors.toList());
     }
 
     public Date getCreateTime() {
