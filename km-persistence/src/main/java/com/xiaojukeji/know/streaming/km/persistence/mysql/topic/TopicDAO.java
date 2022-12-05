@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface TopicDAO extends BaseMapper<TopicPO> {
     int replaceAll(TopicPO topicPO);
 
-    int updateConfig(TopicPO topicPO);
+    int updateConfigById(TopicPO topicPO);
 }

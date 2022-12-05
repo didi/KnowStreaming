@@ -55,10 +55,6 @@ public class TopicConverter {
      * 仅合并Topic的元信息部分，业务信息和配置信息部分不合并
      */
     public static TopicPO mergeAndOnlyMetadata2NewTopicPO(Topic newTopicData, TopicPO oldDBTopicPO) {
-        if (newTopicData == null) {
-            return null;
-        }
-
         TopicPO newTopicPO = new TopicPO();
         newTopicPO.setId(oldDBTopicPO != null? oldDBTopicPO.getId(): null);
 
@@ -68,6 +64,7 @@ public class TopicConverter {
         newTopicPO.setReplicaNum(newTopicData.getReplicaNum());
         newTopicPO.setBrokerIds(CommonUtils.intList2String(new ArrayList<>(newTopicData.getBrokerIdSet())));
         newTopicPO.setType(newTopicData.getType());
+        newTopicPO.setPartitionMap(ConvertUtil.obj2Json(newTopicData.getPartitionMap()));
 
         if (newTopicData.getCreateTime() != null) {
             newTopicPO.setCreateTime(new Date(newTopicData.getCreateTime()));
@@ -77,8 +74,8 @@ public class TopicConverter {
             newTopicPO.setUpdateTime(oldDBTopicPO != null? oldDBTopicPO.getUpdateTime(): new Date());
         }
 
-        newTopicPO.setPartitionMap(ConvertUtil.obj2Json(newTopicData.getPartitionMap()));
-
+        newTopicPO.setDescription(oldDBTopicPO != null? oldDBTopicPO.getDescription(): null);
+        newTopicPO.setRetentionMs(oldDBTopicPO != null? oldDBTopicPO.getRetentionMs(): null);
         return newTopicPO;
     }
 

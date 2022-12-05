@@ -147,7 +147,7 @@ const ZKDetailMenu = (props: DetailMenuType) => {
       <SearchInput
         onSearch={searchChange}
         attrs={{
-          placeholder: '在当前节点进行搜索',
+          placeholder: '选中节点后进行搜索',
           //   onChange: searchChange,
           size: 'small',
           style: {

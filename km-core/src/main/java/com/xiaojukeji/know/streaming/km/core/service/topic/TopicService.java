@@ -22,6 +22,7 @@ public interface TopicService {
      * 从DB获取数据
      */
     List<Topic> listTopicsFromDB(Long clusterPhyId);
+    List<TopicPO> listTopicPOsFromDB(Long clusterPhyId);
     Topic getTopic(Long clusterPhyId, String topicName);
     List<String> listRecentUpdateTopicNamesFromDB(Long clusterPhyId, Integer time); // 获取集群最近新增Topic的topic名称：time单位为秒
 
@@ -39,6 +40,6 @@ public interface TopicService {
     int addNewTopic2DB(TopicPO po);
     int deleteTopicInDB(Long clusterPhyId, String topicName);
     void batchReplaceMetadata(Long clusterPhyId, List<Topic> presentTopicList);
-    int batchReplaceConfig(Long clusterPhyId, List<TopicConfig> topicConfigList);
+    int batchReplaceChangedConfig(Long clusterPhyId, List<TopicConfig> topicConfigList);
     Result<Void> updatePartitionNum(Long clusterPhyId, String topicName, Integer partitionNum);
 }
