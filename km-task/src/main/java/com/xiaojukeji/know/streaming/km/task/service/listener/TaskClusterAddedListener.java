@@ -22,7 +22,7 @@ public class TaskClusterAddedListener implements ApplicationListener<ClusterPhyA
 
     @Override
     public void onApplicationEvent(ClusterPhyAddedEvent event) {
-        LOGGER.info("class=TaskClusterAddedListener||method=onApplicationEvent||clusterPhyId={}||msg=listened new cluster", event.getClusterPhyId());
+        LOGGER.info("method=onApplicationEvent||clusterPhyId={}||msg=listened new cluster", event.getClusterPhyId());
         Long now = System.currentTimeMillis();
 
         // 交由KS自定义的线程池，异步执行任务

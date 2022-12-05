@@ -207,17 +207,27 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
     /**
      * 获取每个 metric 的 topN 个 topic 的指标，如果获取不到 topN 的topics, 则默认返回 defaultTopics 的指标
      */
-    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopN(Long clusterPhyId, List<String> defaultTopics,
-                                                                                                 List<String> metrics, String aggType, int topN,
-                                                                                                 Long startTime, Long endTime){
+    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopN(Long clusterPhyId,
+                                                                                                 List<String> defaultTopics,
+                                                                                                 List<String> metrics,
+                                                                                                 String aggType,
+                                                                                                 int topN,
+                                                                                                 Long startTime,
+                                                                                                 Long endTime){
         //1、获取topN要查询的topic，每一个指标的topN的topic可能不一样
-        Map<String, List<String>> metricTopics = getTopNTopics(clusterPhyId, metrics, aggType, topN, startTime, endTime);
+        Map<String, List<String>> metricTopics = this.getTopNTopics(clusterPhyId, metrics, aggType, topN, startTime, endTime);
 
         Table<String, String, List<MetricPointVO>> table = HashBasedTable.create();
 
-        for(String metric : metrics){
-            table.putAll(listTopicMetricsByTopics(clusterPhyId, Arrays.asList(metric),
-                    aggType, metricTopics.getOrDefault(metric, defaultTopics), startTime, endTime));
+        for(String metric : metrics) {
+            table.putAll(this.listTopicMetricsByTopics(
+                    clusterPhyId,
+                    Arrays.asList(metric),
+                    aggType,
+                    metricTopics.getOrDefault(metric, defaultTopics),
+                    startTime,
+                    endTime)
+            );
         }
 
         return table;
@@ -226,9 +236,12 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
     /**
      * 获取每个 metric 指定个 topic 的指标
      */
-    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopics(Long clusterPhyId, List<String> metrics,
-                                                                                                      String aggType, List<String> topics,
-                                                                                                      Long startTime, Long endTime){
+    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopics(Long clusterPhyId,
+                                                                                                   List<String> metrics,
+                                                                                                   String aggType,
+                                                                                                   List<String> topics,
+                                                                                                   Long startTime,
+                                                                                                   Long endTime){
         //1、获取需要查下的索引
         String realIndex = realIndex(startTime, endTime);
 

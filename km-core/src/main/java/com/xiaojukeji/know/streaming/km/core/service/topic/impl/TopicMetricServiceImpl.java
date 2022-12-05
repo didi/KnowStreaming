@@ -2,13 +2,10 @@ package com.xiaojukeji.know.streaming.km.core.service.topic.impl;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Table;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricsTopicDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.PartitionMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
@@ -30,25 +27,22 @@ import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
+import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
-import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.TopicMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
@@ -58,8 +52,7 @@ import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafk
  */
 @Service
 public class TopicMetricServiceImpl extends BaseMetricService implements TopicMetricService {
-
-    private static final ILog LOGGER = LogFactory.getLog( TopicMetricServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(TopicMetricServiceImpl.class);
 
     public static final String TOPIC_METHOD_DO_NOTHING                                              = "doNothing";
     public static final String TOPIC_METHOD_GET_HEALTH_SCORE                                        = "getMetricHealthScore";
@@ -85,18 +78,6 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
 
     @Autowired
     private TopicMetricESDAO topicMetricESDAO;
-
-    private final Cache<Long, Map<String, TopicMetrics>> topicLatestMetricsCache = Caffeine.newBuilder()
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .maximumSize(200)
-            .build();
-
-    @Scheduled(cron = "0 0/2 * * * ?")
-    private void flushClusterLatestMetricsCache() {
-        for (ClusterPhy clusterPhy: LoadedClusterPhyCache.listAll().values()) {
-            this.updateCacheAndGetMetrics(clusterPhy.getId());
-        }
-    }
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -152,13 +133,13 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
     }
 
     @Override
-    public Map<String, TopicMetrics> getLatestMetricsFromCacheFirst(Long clusterPhyId) {
-        Map<String, TopicMetrics> metricsMap = topicLatestMetricsCache.getIfPresent(clusterPhyId);
-        if (metricsMap != null) {
-            return metricsMap;
+    public Map<String, TopicMetrics> getLatestMetricsFromCache(Long clusterPhyId) {
+        Map<String, TopicMetrics> metricsMap = DataBaseDataLocalCache.getTopicMetrics(clusterPhyId);
+        if (metricsMap == null) {
+            return new HashMap<>();
         }
 
-        return this.updateCacheAndGetMetrics(clusterPhyId);
+        return metricsMap;
     }
 
     @Override
@@ -308,19 +289,8 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         return Result.buildSuc(count);
     }
 
+
     /**************************************************** private method ****************************************************/
-    private Map<String, TopicMetrics> updateCacheAndGetMetrics(Long clusterPhyId) {
-        List<String> topicNames = topicService.listTopicsFromDB(clusterPhyId)
-                .stream().map(Topic::getTopicName).collect(Collectors.toList());
-
-        List<TopicMetrics> metrics = listTopicLatestMetricsFromES(clusterPhyId, topicNames, Arrays.asList());
-
-        Map<String, TopicMetrics> metricsMap = metrics.stream()
-                .collect(Collectors.toMap(TopicMetrics::getTopic, Function.identity()));
-
-        topicLatestMetricsCache.put(clusterPhyId, metricsMap);
-        return metricsMap;
-    }
 
 
     private List<String> listTopNTopics(Long clusterId, int topN){
