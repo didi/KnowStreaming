@@ -5,6 +5,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
+import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
+import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,11 @@ public class DataBaseDataLocalCache {
     private static final Cache<Long, Map<String, List<Partition>>> partitionsCache = Caffeine.newBuilder()
             .expireAfterWrite(60, TimeUnit.SECONDS)
             .maximumSize(500)
+            .build();
+
+    private static final Cache<Long, Map<String, List<HealthCheckResultPO>>> healthCheckResultCache = Caffeine.newBuilder()
+            .expireAfterWrite(90, TimeUnit.SECONDS)
+            .maximumSize(1000)
             .build();
 
     public static Map<String, TopicMetrics> getTopicMetrics(Long clusterPhyId) {
@@ -48,6 +55,22 @@ public class DataBaseDataLocalCache {
 
     public static void putPartitions(Long clusterPhyId, Map<String, List<Partition>> partitionMap) {
         partitionsCache.put(clusterPhyId, partitionMap);
+    }
+
+    public static Map<String, List<HealthCheckResultPO>> getHealthCheckResults(Long clusterId, HealthCheckDimensionEnum dimensionEnum) {
+        return healthCheckResultCache.getIfPresent(getHealthCheckCacheKey(clusterId, dimensionEnum.getDimension()));
+    }
+
+    public static void putHealthCheckResults(Long cacheKey, Map<String, List<HealthCheckResultPO>> poMap) {
+        healthCheckResultCache.put(cacheKey, poMap);
+    }
+
+    public static void putHealthCheckResults(Long clusterId, HealthCheckDimensionEnum dimensionEnum, Map<String, List<HealthCheckResultPO>> poMap) {
+        healthCheckResultCache.put(getHealthCheckCacheKey(clusterId, dimensionEnum.getDimension()), poMap);
+    }
+
+    public static Long getHealthCheckCacheKey(Long clusterId, Integer dimensionCode) {
+        return clusterId * HealthCheckDimensionEnum.MAX_VAL.getDimension() + dimensionCode;
     }
 
     /**************************************************** private method ****************************************************/
