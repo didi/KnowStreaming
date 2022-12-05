@@ -7,7 +7,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.He
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthDetectedInLatestMinutesConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -32,7 +31,7 @@ import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafk
 
 @Service
 public class HealthCheckTopicService extends AbstractHealthCheckService {
-    private static final ILog log = LogFactory.getLog(HealthCheckTopicService.class);
+    private static final ILog LOGGER = LogFactory.getLog(HealthCheckTopicService.class);
 
     @Autowired
     private TopicService topicService;
@@ -52,7 +51,7 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
     @Override
     public List<ClusterParam> getResList(Long clusterPhyId) {
         List<ClusterParam> paramList = new ArrayList<>();
-        for (Topic topic: topicService.listTopicsFromDB(clusterPhyId)) {
+        for (Topic topic: topicService.listTopicsFromCacheFirst(clusterPhyId)) {
             paramList.add(new TopicParam(clusterPhyId, topic.getTopicName()));
         }
         return paramList;
@@ -86,12 +85,12 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
         );
 
         if (countResult.failed() || !countResult.hasData()) {
-            log.error("method=checkTopicUnderReplicatedPartition||param={}||config={}||result={}||errMsg=get metrics failed",
+            LOGGER.error("method=checkTopicUnderReplicatedPartition||param={}||config={}||result={}||errMsg=get metrics failed",
                     param, singleConfig, countResult);
             return null;
         }
 
-        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes()? 0: 1);
+        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes()? Constant.NO: Constant.YES);
         return checkResult;
     }
 

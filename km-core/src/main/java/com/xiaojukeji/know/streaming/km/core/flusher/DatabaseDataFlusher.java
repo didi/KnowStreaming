@@ -8,10 +8,12 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
+import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
@@ -43,6 +45,9 @@ public class DatabaseDataFlusher {
     private ClusterMetricService clusterMetricService;
 
     @Autowired
+    private HealthCheckResultService healthCheckResultService;
+
+    @Autowired
     private PartitionService partitionService;
 
     @PostConstruct
@@ -52,6 +57,8 @@ public class DatabaseDataFlusher {
         this.flushClusterLatestMetricsCache();
 
         this.flushTopicLatestMetricsCache();
+
+        this.flushHealthCheckResultCache();
     }
 
     @Scheduled(cron="0 0/1 * * * ?")
@@ -74,6 +81,28 @@ public class DatabaseDataFlusher {
                 }
             });
         }
+    }
+
+    @Scheduled(cron="0 0/1 * * * ?")
+    public void flushHealthCheckResultCache() {
+        FutureUtil.quickStartupFutureUtil.submitTask(() -> {
+            List<HealthCheckResultPO> poList = healthCheckResultService.listAll();
+
+            Map<Long, Map<String, List<HealthCheckResultPO>>> newPOMap = new ConcurrentHashMap<>();
+
+            // 更新缓存
+            poList.forEach(po -> {
+                Long cacheKey = DataBaseDataLocalCache.getHealthCheckCacheKey(po.getClusterPhyId(), po.getDimension());
+
+                newPOMap.putIfAbsent(cacheKey, new ConcurrentHashMap<>());
+                newPOMap.get(cacheKey).putIfAbsent(po.getResName(), new ArrayList<>());
+                newPOMap.get(cacheKey).get(po.getResName()).add(po);
+            });
+
+            for (Map.Entry<Long, Map<String, List<HealthCheckResultPO>>> entry: newPOMap.entrySet()) {
+                DataBaseDataLocalCache.putHealthCheckResults(entry.getKey(), entry.getValue());
+            }
+        });
     }
 
     @Scheduled(cron = "0 0/1 * * * ?")

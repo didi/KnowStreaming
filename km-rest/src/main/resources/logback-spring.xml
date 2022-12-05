@@ -30,7 +30,7 @@
         <file>${log.path}/log_debug.log</file>
         <!--日志文件输出格式-->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level class=%logger{50}||%msg%n</pattern>
             <charset>UTF-8</charset> <!-- 设置字符集 -->
         </encoder>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -58,7 +58,7 @@
         <file>${log.path}/log_info.log</file>
         <!--日志文件输出格式-->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level class=%logger{50}||%msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -85,7 +85,7 @@
         <file>${log.path}/log_warn.log</file>
         <!--日志文件输出格式-->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level class=%logger{50}||%msg%n</pattern>
             <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -112,7 +112,7 @@
         <file>${log.path}/log_error.log</file>
         <!--日志文件输出格式-->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level class=%logger{50}||%msg%n</pattern>
             <charset>UTF-8</charset> <!-- 此处设置字符集 -->
         </encoder>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
@@ -136,7 +136,7 @@
     <appender name="ES_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${log.path}/es/es.log</file>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level class=%logger{50}||%msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -152,7 +152,7 @@
     <appender name="METRIC_COLLECTED_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${log.path}/metric/metric_collected.log</file>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level class=%logger{50}||%msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -168,7 +168,7 @@
     <appender name="TASK_LOGGER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${log.path}/task/task.log</file>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level class=%logger{50}||%msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -193,11 +193,12 @@
         </encoder>
     </appender>
 
-    <logger name="ES_LOGGER" level="ERROR" additivity="false">
+    <logger name="ES_LOGGER" level="WARN" additivity="false">
         <appender-ref ref="ES_LOGGER"/>
     </logger>
 
-    <logger name="METRIC_COLLECTED_LOGGER" level="ERROR" additivity="false">
+    <!-- 采集到的metrics数据, level调整为DEBUG后便可打印出来 -->
+    <logger name="METRIC_COLLECTED_LOGGER" level="INFO" additivity="false">
         <appender-ref ref="METRIC_COLLECTED_LOGGER"/>
     </logger>
 

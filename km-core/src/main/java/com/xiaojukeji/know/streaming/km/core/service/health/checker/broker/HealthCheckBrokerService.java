@@ -9,7 +9,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckRes
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.broker.BrokerParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
@@ -19,7 +18,6 @@ import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Data
 @Service
 public class HealthCheckBrokerService extends AbstractHealthCheckService {
     private static final ILog log = LogFactory.getLog(HealthCheckBrokerService.class);
@@ -48,9 +45,10 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
     @Override
     public List<ClusterParam> getResList(Long clusterPhyId) {
         List<ClusterParam> paramList = new ArrayList<>();
-        for (Broker broker: brokerService.listAliveBrokersFromDB(clusterPhyId)) {
+        for (Broker broker: brokerService.listAliveBrokersFromCacheFirst(clusterPhyId)) {
             paramList.add(new BrokerParam(clusterPhyId, broker.getBrokerId()));
         }
+
         return paramList;
     }
 
@@ -73,8 +71,11 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
                 String.valueOf(param.getBrokerId())
         );
 
-        Result<BrokerMetrics> metricsResult = brokerMetricService.getLatestMetricsFromES(
-                param.getClusterPhyId(), param.getBrokerId());
+        Result<BrokerMetrics> metricsResult = brokerMetricService.collectBrokerMetricsFromKafka(
+                param.getClusterPhyId(),
+                param.getBrokerId(),
+                BrokerMetricVersionItems.BROKER_METRIC_NETWORK_RPO_AVG_IDLE
+        );
 
         if (metricsResult.failed()) {
             log.error("method=checkBrokerNetworkProcessorAvgIdleTooLow||param={}||config={}||result={}||errMsg=get metrics failed",
@@ -82,14 +83,14 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
             return null;
         }
 
-        Float avgIdle = metricsResult.getData().getMetrics().get( BrokerMetricVersionItems.BROKER_METRIC_NETWORK_RPO_AVG_IDLE);
+        Float avgIdle = metricsResult.getData().getMetrics().get(BrokerMetricVersionItems.BROKER_METRIC_NETWORK_RPO_AVG_IDLE);
         if (avgIdle == null) {
             log.error("method=checkBrokerNetworkProcessorAvgIdleTooLow||param={}||config={}||result={}||errMsg=get metrics failed",
                     param, singleConfig, metricsResult);
             return null;
         }
 
-        checkResult.setPassed(avgIdle >= singleConfig.getValue()? 1: 0);
+        checkResult.setPassed(avgIdle >= singleConfig.getValue()? Constant.YES: Constant.NO);
 
         return checkResult;
     }
@@ -111,7 +112,7 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
         Result<BrokerMetrics> metricsResult = brokerMetricService.collectBrokerMetricsFromKafka(
                 param.getClusterPhyId(),
                 param.getBrokerId(),
-                Arrays.asList( BrokerMetricVersionItems.BROKER_METRIC_TOTAL_REQ_QUEUE)
+                Arrays.asList(BrokerMetricVersionItems.BROKER_METRIC_TOTAL_REQ_QUEUE)
         );
 
         if (metricsResult.failed()) {
@@ -120,7 +121,7 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
             return null;
         }
 
-        Float queueSize = metricsResult.getData().getMetrics().get( BrokerMetricVersionItems.BROKER_METRIC_TOTAL_REQ_QUEUE);
+        Float queueSize = metricsResult.getData().getMetrics().get(BrokerMetricVersionItems.BROKER_METRIC_TOTAL_REQ_QUEUE);
         if (queueSize == null) {
             log.error("method=checkBrokerRequestQueueFull||param={}||config={}||result={}||errMsg=get metrics failed",
                     param, singleConfig, metricsResult);
