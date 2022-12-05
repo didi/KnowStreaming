@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public class GroupMetricEvent extends BaseMetricEvent{
 
-    private List<GroupMetrics> groupMetrics;
+    private final List<GroupMetrics> groupMetrics;
 
     public GroupMetricEvent(Object source, List<GroupMetrics> groupMetrics) {
         super( source );

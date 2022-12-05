@@ -10,6 +10,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.PartitionMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -46,7 +47,6 @@ import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.TopicConfig;
@@ -143,12 +143,12 @@ public class TopicStateManagerImpl implements TopicStateManager {
         }
 
         // 获取分区beginOffset
-        Result<Map<TopicPartition, Long>> beginOffsetsMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, dto.getFilterPartitionId(), OffsetSpec.earliest(), null);
+        Result<Map<TopicPartition, Long>> beginOffsetsMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, dto.getFilterPartitionId(), KSOffsetSpec.earliest());
         if (beginOffsetsMapResult.failed()) {
             return Result.buildFromIgnoreData(beginOffsetsMapResult);
         }
         // 获取分区endOffset
-        Result<Map<TopicPartition, Long>> endOffsetsMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, dto.getFilterPartitionId(), OffsetSpec.latest(), null);
+        Result<Map<TopicPartition, Long>> endOffsetsMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, dto.getFilterPartitionId(), KSOffsetSpec.latest());
         if (endOffsetsMapResult.failed()) {
             return Result.buildFromIgnoreData(endOffsetsMapResult);
         }
@@ -307,7 +307,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
         if (metricsResult.failed()) {
             // 仅打印错误日志，但是不直接返回错误
             log.error(
-                    "class=TopicStateManagerImpl||method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
+                    "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
                     clusterPhyId, topicName, metricsResult
             );
         }

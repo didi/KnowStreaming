@@ -5,6 +5,8 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.BasePO;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
 @TableName(Constant.MYSQL_TABLE_NAME_PREFIX + "topic")
 public class TopicPO extends BasePO {
@@ -52,4 +54,35 @@ public class TopicPO extends BasePO {
      * 备注信息
      */
     private String description;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        TopicPO topicPO = (TopicPO) o;
+        return Objects.equals(clusterPhyId, topicPO.clusterPhyId)
+                && Objects.equals(topicName, topicPO.topicName)
+                && Objects.equals(replicaNum, topicPO.replicaNum)
+                && Objects.equals(partitionNum, topicPO.partitionNum)
+                && Objects.equals(brokerIds, topicPO.brokerIds)
+                && Objects.equals(partitionMap, topicPO.partitionMap)
+                && Objects.equals(retentionMs, topicPO.retentionMs)
+                && Objects.equals(type, topicPO.type)
+                && Objects.equals(description, topicPO.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), clusterPhyId, topicName, replicaNum, partitionNum, brokerIds, partitionMap, retentionMs, type, description);
+    }
 }

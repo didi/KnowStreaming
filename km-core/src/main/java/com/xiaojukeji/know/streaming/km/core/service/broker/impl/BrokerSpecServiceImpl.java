@@ -1,5 +1,7 @@
 package com.xiaojukeji.know.streaming.km.core.service.broker.impl;
 
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.BrokerSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.po.config.PlatformClusterConfigPO;
 import com.xiaojukeji.know.streaming.km.common.enums.config.ConfigGroupEnum;
@@ -15,10 +17,10 @@ import java.util.Map;
 
 @Service
 public class BrokerSpecServiceImpl implements BrokerSpecService {
+    private static final ILog LOGGER = LogFactory.getLog(BrokerSpecServiceImpl.class);
 
     @Autowired
     private PlatformClusterConfigService platformClusterConfigService;
-
 
     @Override
     public Map<Integer, BrokerSpec> getBrokerSpecMap(Long clusterPhyId) {
@@ -37,6 +39,4 @@ public class BrokerSpecServiceImpl implements BrokerSpecService {
         }
         return brokerSpecMap;
     }
-
-
 }

@@ -52,6 +52,10 @@ public class MsgConstant {
 
     /**************************************************** Partition ****************************************************/
 
+    public static String getPartitionNoLeader(Long clusterPhyId) {
+        return String.format("集群ID:[%d] 所有分区NoLeader", clusterPhyId);
+    }
+
     public static String getPartitionNoLeader(Long clusterPhyId, String topicName) {
         return String.format("集群ID:[%d] Topic名称:[%s] 所有分区NoLeader", clusterPhyId, topicName);
     }

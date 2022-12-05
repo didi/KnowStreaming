@@ -5,7 +5,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
@@ -30,7 +29,7 @@ public abstract class AbstractHealthCheckService {
     public abstract HealthCheckDimensionEnum getHealthCheckDimensionEnum();
 
     public HealthCheckResult checkAndGetResult(ClusterParam clusterParam, BaseClusterHealthConfig clusterHealthConfig) {
-        if (ValidateUtils.anyNull( clusterParam, clusterHealthConfig)) {
+        if (ValidateUtils.anyNull(clusterParam, clusterHealthConfig)) {
             return null;
         }
 
@@ -48,8 +47,10 @@ public abstract class AbstractHealthCheckService {
         try {
             return function.apply(new Tuple<>(clusterParam, clusterHealthConfig));
         } catch (Exception e) {
-            log.error("method=checkAndGetResult||clusterPhyParam={}||clusterHealthConfig={}||errMsg=exception!",
-                    clusterParam, clusterHealthConfig, e);
+            log.error(
+                    "method=checkAndGetResult||clusterParam={}||clusterHealthConfig={}||errMsg=exception!",
+                    clusterParam, clusterHealthConfig, e
+            );
         }
 
         return null;

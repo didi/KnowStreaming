@@ -44,7 +44,7 @@ public class ClusterTopicsManagerImpl implements ClusterTopicsManager {
         List<Topic> topicList = topicService.listTopicsFromDB(clusterPhyId);
 
         // 获取集群所有Topic的指标
-        Map<String, TopicMetrics> metricsMap = topicMetricService.getLatestMetricsFromCacheFirst(clusterPhyId);
+        Map<String, TopicMetrics> metricsMap = topicMetricService.getLatestMetricsFromCache(clusterPhyId);
 
         // 转换成vo
         List<ClusterPhyTopicsOverviewVO> voList = TopicVOConverter.convert2ClusterPhyTopicsOverviewVOList(topicList, metricsMap);

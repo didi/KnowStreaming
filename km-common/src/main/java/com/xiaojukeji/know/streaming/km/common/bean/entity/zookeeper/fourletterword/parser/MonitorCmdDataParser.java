@@ -98,15 +98,19 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                     case "zk_max_file_descriptor_count":
                         monitorCmdData.setZkMaxFileDescriptorCount(Long.valueOf(elem.getValue()));
                         break;
+                    case "Proposal sizes last/min/max":
+                    case "zk_fsync_threshold_exceed_count":
+                        // 忽略该指标的解析
+                        break;
                     default:
                         LOGGER.warn(
-                                "class=MonitorCmdDataParser||method=parseAndInitData||name={}||value={}||msg=data not parsed!",
+                                "method=parseAndInitData||name={}||value={}||msg=data not parsed!",
                                 elem.getKey(), elem.getValue()
                         );
                 }
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=MonitorCmdDataParser||method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
+                        "method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
                         clusterPhyId, host, port, elem.getKey(), elem.getValue(), e
                 );
             }
