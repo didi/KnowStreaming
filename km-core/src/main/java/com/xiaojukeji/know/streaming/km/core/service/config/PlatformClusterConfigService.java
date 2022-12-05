@@ -17,4 +17,5 @@ public interface PlatformClusterConfigService {
 
     Map<String, PlatformClusterConfigPO> getByClusterAndGroupWithoutDefault(Long clusterPhyId, String group);
 
+    Map<Long, Map<String, PlatformClusterConfigPO>> listByGroup(String groupName);
 }

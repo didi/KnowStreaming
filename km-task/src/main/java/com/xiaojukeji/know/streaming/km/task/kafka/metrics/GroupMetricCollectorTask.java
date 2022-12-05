@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Task(name = "GroupMetricCollectorTask",
         description = "Group指标采集任务",
-        cron = "0 0/1 * * * ? *",
+        cron = "40 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
