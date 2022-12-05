@@ -23,7 +23,7 @@ public interface TopicMetricService {
     /**
      * 优先从本地缓存获取metrics信息
      */
-    Map<String, TopicMetrics> getLatestMetricsFromCacheFirst(Long clusterPhyId);
+    Map<String, TopicMetrics> getLatestMetricsFromCache(Long clusterPhyId);
 
     /**
      * 获取Topic在具体Broker上最新的一个指标
