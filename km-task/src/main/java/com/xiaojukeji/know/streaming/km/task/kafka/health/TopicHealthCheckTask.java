@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @AllArgsConstructor
 @Task(name = "TopicHealthCheckTask",
         description = "Topic健康检查",
-        cron = "0 0/1 * * * ? *",
+        cron = "30 0/1 * * * ? *",
         autoRegister = true,
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
