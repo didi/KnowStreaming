@@ -1,7 +1,8 @@
-package com.xiaojukeji.know.streaming.km.collector.sink;
+package com.xiaojukeji.know.streaming.km.collector.sink.kafka;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.collector.sink.AbstractMetricESSender;
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.ClusterMetricEvent;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ClusterMetricPO;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -10,8 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.CLUSTER_INDEX;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.CLUSTER_INDEX;
 
 @Component
 public class ClusterMetricESSender extends AbstractMetricESSender implements ApplicationListener<ClusterMetricEvent> {
