@@ -13,9 +13,9 @@ package com.xiaojukeji.know.streaming.km.persistence.es.dsls;
  * 在dslFiles目录下新建以类名为名称的文件夹，以方法名为名称的文件名
  *
  */
-public class DslsConstant {
+public class DslConstant {
 
-    private DslsConstant() {}
+    private DslConstant() {}
 
     /**************************************************** Base ****************************************************/
     public static final String GET_LATEST_METRIC_TIME                   = "BaseMetricESDAO/getLatestMetricTime";
@@ -82,4 +82,18 @@ public class DslsConstant {
 
     /**************************************************** Zookeeper ****************************************************/
     public static final String GET_ZOOKEEPER_AGG_LIST_METRICS           = "ZookeeperMetricESDAO/getAggListZookeeperMetrics";
+
+    /**************************************************** Connect-Cluster ****************************************************/
+    public static final String GET_CONNECT_CLUSTER_AGG_LIST_METRICS     = "ConnectClusterMetricESDAO/getAggListConnectClusterMetrics";
+
+    public static final String GET_CONNECT_CLUSTER_AGG_TOP_METRICS      = "ConnectClusterMetricESDAO/getAggTopMetricsConnectClusters";
+
+    /**************************************************** Connect-Connector ****************************************************/
+    public static final String GET_CONNECTOR_LATEST_METRICS             = "ConnectorMetricESDAO/getConnectorLatestMetric";
+
+    public static final String GET_CONNECTOR_AGG_LIST_METRICS           = "ConnectorMetricESDAO/getConnectorAggListMetric";
+
+    public static final String GET_CONNECTOR_AGG_TOP_METRICS            = "ConnectorMetricESDAO/getConnectorAggTopMetric";
+
+
 }

@@ -1,0 +1,194 @@
+{
+    "order" : 10,
+    "index_patterns" : [
+      "ks_kafka_connect_connector_metric*"
+    ],
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "2"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "connectClusterId" : {
+          "type" : "long"
+        },
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "connectorName" : {
+          "type" : "keyword"
+        },
+        "connectorNameAndClusterId" : {
+          "type" : "keyword"
+        },
+        "clusterPhyId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "HealthState" : {
+              "type" : "float"
+            },
+            "ConnectorTotalTaskCount" : {
+              "type" : "float"
+            },
+            "HealthCheckPassed" : {
+              "type" : "float"
+            },
+            "HealthCheckTotal" : {
+              "type" : "float"
+            },
+            "ConnectorRunningTaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorPausedTaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorFailedTaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorUnassignedTaskCount" : {
+              "type" : "float"
+            },
+            "BatchSizeAvg" : {
+              "type" : "float"
+            },
+            "BatchSizeMax" : {
+              "type" : "float"
+            },
+            "OffsetCommitAvgTimeMs" : {
+              "type" : "float"
+            },
+            "OffsetCommitMaxTimeMs" : {
+              "type" : "float"
+            },
+             "OffsetCommitFailurePercentage" : {
+               "type" : "float"
+             },
+             "OffsetCommitSuccessPercentage" : {
+               "type" : "float"
+             },
+             "PollBatchAvgTimeMs" : {
+               "type" : "float"
+             },
+             "PollBatchMaxTimeMs" : {
+               "type" : "float"
+             },
+             "SourceRecordActiveCount" : {
+               "type" : "float"
+             },
+             "SourceRecordActiveCountAvg" : {
+               "type" : "float"
+             },
+             "SourceRecordActiveCountMax" : {
+               "type" : "float"
+             },
+             "SourceRecordPollRate" : {
+               "type" : "float"
+             },
+             "SourceRecordPollTotal" : {
+               "type" : "float"
+             },
+             "SourceRecordWriteRate" : {
+               "type" : "float"
+             },
+             "SourceRecordWriteTotal" : {
+               "type" : "float"
+             },
+           "OffsetCommitCompletionRate" : {
+             "type" : "float"
+           },
+           "OffsetCommitCompletionTotal" : {
+             "type" : "float"
+           },
+           "OffsetCommitSkipRate" : {
+             "type" : "float"
+           },
+           "OffsetCommitSkipTotal" : {
+             "type" : "float"
+           },
+           "PartitionCount" : {
+             "type" : "float"
+           },
+           "PutBatchAvgTimeMs" : {
+             "type" : "float"
+           },
+           "PutBatchMaxTimeMs" : {
+             "type" : "float"
+           },
+           "SinkRecordActiveCount" : {
+             "type" : "float"
+           },
+           "SinkRecordActiveCountAvg" : {
+             "type" : "float"
+           },
+           "SinkRecordActiveCountMax" : {
+             "type" : "float"
+           },
+           "SinkRecordLagMax" : {
+             "type" : "float"
+           },
+           "SinkRecordReadRate" : {
+             "type" : "float"
+           },
+           "SinkRecordReadTotal" : {
+             "type" : "float"
+           },
+           "SinkRecordSendRate" : {
+             "type" : "float"
+           },
+           "SinkRecordSendTotal" : {
+             "type" : "float"
+           },
+           "DeadletterqueueProduceFailures" : {
+             "type" : "float"
+           },
+           "DeadletterqueueProduceRequests" : {
+             "type" : "float"
+           },
+           "LastErrorTimestamp" : {
+             "type" : "float"
+           },
+           "TotalErrorsLogged" : {
+             "type" : "float"
+           },
+           "TotalRecordErrors" : {
+             "type" : "float"
+           },
+           "TotalRecordFailures" : {
+             "type" : "float"
+           },
+           "TotalRecordsSkipped" : {
+             "type" : "float"
+           },
+           "TotalRetries" : {
+             "type" : "float"
+           }
+          }
+        },
+        "key" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "timestamp" : {
+          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+          "index" : true,
+          "type" : "date",
+          "doc_values" : true
+        }
+      }
+    },
+    "aliases" : { }
+  }

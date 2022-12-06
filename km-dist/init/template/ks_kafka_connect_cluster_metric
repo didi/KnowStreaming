@@ -1,19 +1,16 @@
 {
     "order" : 10,
     "index_patterns" : [
-      "ks_kafka_group_metric*"
+      "ks_kafka_connect_cluster_metric*"
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "2"
       }
     },
     "mappings" : {
       "properties" : {
-        "group" : {
-          "type" : "keyword"
-        },
-        "partitionId" : {
+        "connectClusterId" : {
           "type" : "long"
         },
         "routingValue" : {
@@ -28,30 +25,45 @@
         "clusterPhyId" : {
           "type" : "long"
         },
-        "topic" : {
-          "type" : "keyword"
-        },
         "metrics" : {
           "properties" : {
-            "HealthScore" : {
+            "ConnectorCount" : {
               "type" : "float"
             },
-            "Lag" : {
+            "TaskCount" : {
               "type" : "float"
             },
-            "OffsetConsumed" : {
+            "ConnectorStartupAttemptsTotal" : {
               "type" : "float"
             },
-            "HealthCheckTotal" : {
+            "ConnectorStartupFailurePercentage" : {
               "type" : "float"
             },
-            "HealthCheckPassed" : {
+            "ConnectorStartupFailureTotal" : {
+              "type" : "float"
+            },
+            "ConnectorStartupSuccessPercentage" : {
+              "type" : "float"
+            },
+            "ConnectorStartupSuccessTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupAttemptsTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupFailurePercentage" : {
+              "type" : "float"
+            },
+            "TaskStartupFailureTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupSuccessPercentage" : {
+              "type" : "float"
+            },
+            "TaskStartupSuccessTotal" : {
               "type" : "float"
             }
           }
-        },
-        "groupMetric" : {
-          "type" : "keyword"
         },
         "key" : {
           "type" : "text",
