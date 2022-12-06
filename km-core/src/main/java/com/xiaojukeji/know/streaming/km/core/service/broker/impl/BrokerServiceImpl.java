@@ -8,8 +8,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.broker.BrokerParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.broker.BrokerParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
@@ -26,12 +26,12 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.jmx.JmxDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
-import com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerDAO;
 import kafka.zk.BrokerIdsZNode;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.Node;
@@ -54,7 +54,7 @@ import static com.xiaojukeji.know.streaming.km.common.jmx.JmxAttribute.VERSION;
 import static com.xiaojukeji.know.streaming.km.common.jmx.JmxName.JMX_SERVER_APP_INFO;
 
 @Service
-public class BrokerServiceImpl extends BaseVersionControlService implements BrokerService {
+public class BrokerServiceImpl extends BaseKafkaVersionControlService implements BrokerService {
     private static final ILog log = LogFactory.getLog(BrokerServiceImpl.class);
 
     private static final String BROKER_LOG_DIR = "getLogDir";

@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.PartitionMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -26,7 +25,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Component
-public class PartitionMetricCollector extends AbstractMetricCollector<PartitionMetrics> {
+public class PartitionMetricCollector extends AbstractKafkaMetricCollector<PartitionMetrics> {
     protected static final ILog  LOGGER = LogFactory.getLog(PartitionMetricCollector.class);
 
     @Autowired
@@ -42,7 +41,7 @@ public class PartitionMetricCollector extends AbstractMetricCollector<PartitionM
     public List<PartitionMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long        clusterPhyId        =   clusterPhy.getId();
         List<Topic> topicList           =   topicService.listTopicsFromCacheFirst(clusterPhyId);
-        List<VersionControlItem> items  =   versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
+        List<VersionControlItem> items  =   versionControlService.listVersionControlItem(this.getClusterVersion(clusterPhy), collectorType().getCode());
 
         FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 

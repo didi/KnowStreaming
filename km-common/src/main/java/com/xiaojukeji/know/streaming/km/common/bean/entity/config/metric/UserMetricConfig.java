@@ -1,7 +1,5 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.config.metric;
 
-import com.xiaojukeji.know.streaming.km.common.constant.Constant;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

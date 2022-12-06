@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.ZKConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
@@ -34,7 +33,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Component
-public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperMetrics> {
+public class ZookeeperMetricCollector extends AbstractKafkaMetricCollector<ZookeeperMetrics> {
     protected static final ILog  LOGGER = LogFactory.getLog(ZookeeperMetricCollector.class);
 
     @Autowired
@@ -53,7 +52,7 @@ public class ZookeeperMetricCollector extends AbstractMetricCollector<ZookeeperM
     public List<ZookeeperMetrics> collectKafkaMetrics(ClusterPhy clusterPhy) {
         Long        startTime           =   System.currentTimeMillis();
         Long        clusterPhyId        =   clusterPhy.getId();
-        List<VersionControlItem> items  =   versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
+        List<VersionControlItem> items  =   versionControlService.listVersionControlItem(this.getClusterVersion(clusterPhy), collectorType().getCode());
         List<ZookeeperInfo> aliveZKList =   zookeeperService.listFromDBByCluster(clusterPhyId)
                 .stream()
                 .filter(elem -> Constant.ALIVE.equals(elem.getStatus()))

@@ -131,13 +131,22 @@ public class RestTemplateConfig {
                 }
             } catch (Exception e) {
                 RESP_LOGGER.warn(
-                    "method=traceResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
-                    response.getStatusCode(), url, response.getStatusText(), response.getHeaders(),
-                    inputStringBuilder.toString(), e, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
+                    "method=traceResponse||remoteResponse||code={}||url={}||text={}||headers={}||body={}||error={}||timeCost={}||subFlag={}",
+                    response.getStatusCode(),
+                        url,
+                        response.getStatusText(),
+                        response.getHeaders(),
+                        inputStringBuilder.toString(),
+                        e,
+                        (System.nanoTime() - nanoTime) / 1000 / 1000,
+                        subFlag
+                );
+
                 if (!response.getStatusCode().is2xxSuccessful()) {
-                    throw new ThirdPartRemoteException(e.getMessage(), e, ResultStatus.HTTP_REQ_ERROR);
+                    throw new ThirdPartRemoteException(getResponseBodyAndIgnoreException(response), e, ResultStatus.HTTP_REQ_ERROR);
                 }
             }
+
             String responseString = inputStringBuilder.toString().replace("\n", "");
             responseString = responseString.substring(0, Math.min(responseString.length(), 5000));
 
@@ -170,6 +179,19 @@ public class RestTemplateConfig {
 
         }
 
+    }
+
+    private String getResponseBodyAndIgnoreException(ClientHttpResponse response) {
+        try {
+            byte[] bytes = new byte[response.getBody().available()];
+            response.getBody().read(bytes);
+
+            return new String(bytes);
+        } catch (Exception e) {
+            // ignore
+        }
+
+        return "";
     }
 
     private static String simpleUrl(HttpRequest request) {

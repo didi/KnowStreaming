@@ -20,7 +20,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistExcept
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.OpTopicService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
@@ -48,7 +48,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Service
-public class OpTopicServiceImpl extends BaseVersionControlService implements OpTopicService {
+public class OpTopicServiceImpl extends BaseKafkaVersionControlService implements OpTopicService {
     private static final ILog log = LogFactory.getLog(TopicConfigServiceImpl.class);
 
     private static final String TOPIC_CREATE    = "createTopic";

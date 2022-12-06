@@ -109,7 +109,7 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
                 param.getTopicName()
         );
 
-        checkResult.setPassed(partitionList.stream().filter(elem -> elem.getLeaderBrokerId().equals(Constant.INVALID_CODE)).count() >= valueConfig.getValue()? 0: 1);
+        checkResult.setPassed(partitionList.stream().filter(elem -> elem.getLeaderBrokerId().equals(Constant.INVALID_CODE)).count() >= valueConfig.getValue() ? Constant.NO : Constant.YES);
 
         return checkResult;
     }

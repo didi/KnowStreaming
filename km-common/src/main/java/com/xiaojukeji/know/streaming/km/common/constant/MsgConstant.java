@@ -95,4 +95,19 @@ public class MsgConstant {
     public static String getJobNotExist(Long jobId) {
         return String.format("jobId:[%d] 不存在", jobId);
     }
+
+
+    /**************************************************** Connect-Cluster ****************************************************/
+
+    public static String getConnectClusterBizStr(Long clusterId, String clusterName){
+        return String.format("Connect集群ID:[%d] 集群名称:[%s]", clusterId, clusterName);
+    }
+
+    public static String getConnectClusterNotExist(Long clusterId) {
+        return String.format("Connect集群ID:[%d] 不存在或者未加载", clusterId);
+    }
+
+    public static String getConnectorBizStr(Long clusterPhyId, String topicName) {
+        return String.format("Connect集群ID:[%d] Connector名称:[%s]", clusterPhyId, topicName);
+    }
 }
