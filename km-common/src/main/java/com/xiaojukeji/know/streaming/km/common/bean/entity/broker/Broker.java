@@ -66,13 +66,13 @@ public class Broker implements Serializable {
      */
     private Map<String, IpPortData> endpointMap;
 
-    public static Broker buildFrom(Long clusterPhyId, Node node, Long startTimestamp, JmxConfig jmxConfig) {
+    public static Broker buildFrom(Long clusterPhyId, Node node, Long startTimestamp) {
         Broker metadata = new Broker();
         metadata.setClusterPhyId(clusterPhyId);
         metadata.setBrokerId(node.id());
         metadata.setHost(node.host());
         metadata.setPort(node.port());
-        metadata.setJmxPort(jmxConfig != null ? jmxConfig.getJmxPort() : -1);
+        metadata.setJmxPort(-1);
         metadata.setStartTimestamp(startTimestamp);
         metadata.setRack(node.rack());
         metadata.setStatus(1);
