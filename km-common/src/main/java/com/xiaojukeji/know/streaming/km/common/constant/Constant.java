@@ -45,6 +45,7 @@ public class Constant {
     public static final int INVALID_CODE = -1;
 
     public static final String MYSQL_TABLE_NAME_PREFIX = "ks_km_";
+    public static final String MYSQL_KC_TABLE_NAME_PREFIX = "ks_kc_";
 
     public static final String SWAGGER_API_TAG_PREFIX = "KS-KM-";
 

@@ -100,6 +100,13 @@ public class Result<T> extends BaseResult {
         return result;
     }
 
+    public static <T> Result<T> buildFrom(Result ret) {
+        Result<T> result = new Result<>();
+        result.setCode(ret.getCode());
+        result.setMessage(ret.getMessage());
+        return result;
+    }
+
     public static <T> Result<T> buildFrom(ValidateKafkaAddressErrorEnum errorEnum, String msg) {
         Result<T> result = new Result<>();
         result.setCode(errorEnum.getCode());

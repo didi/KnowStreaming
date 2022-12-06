@@ -8,19 +8,23 @@ import lombok.Getter;
  */
 @Getter
 public enum HealthCheckDimensionEnum {
-    UNKNOWN(-1, "未知"),
+    UNKNOWN(-1, "未知", "未知"),
 
-    CLUSTER(0, "Cluster"),
+    CLUSTER(0, "Cluster", "Cluster"),
 
-    BROKER(1, "Broker"),
+    BROKER(1, "Broker", "Broker"),
 
-    TOPIC(2, "Topic"),
+    TOPIC(2, "Topic", "Topic"),
 
-    GROUP(3, "Group"),
+    GROUP(3, "Group", "Group"),
 
-    ZOOKEEPER(4, "Zookeeper"),
+    ZOOKEEPER(4, "Zookeeper", "Zookeeper"),
 
-    MAX_VAL(100, "所有的dimension的值需要小于MAX_VAL")
+    CONNECT_CLUSTER(5, "ConnectCluster", "Connect"),
+
+    CONNECTOR(6, "Connector", "Connect"),
+
+    MAX_VAL(100, "所有的dimension的值需要小于MAX_VAL", "Ignore")
 
     ;
 
@@ -28,9 +32,12 @@ public enum HealthCheckDimensionEnum {
 
     private final String message;
 
-    HealthCheckDimensionEnum(int dimension, String message) {
+    private final String dimensionDisplayName;
+
+    HealthCheckDimensionEnum(int dimension, String message, String dimensionDisplayName) {
         this.dimension = dimension;
         this.message = message;
+        this.dimensionDisplayName=dimensionDisplayName;
     }
 
     public static HealthCheckDimensionEnum getByCode(Integer dimension) {

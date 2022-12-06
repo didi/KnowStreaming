@@ -24,4 +24,6 @@ public interface HealthCheckResultService {
     Map<String, BaseClusterHealthConfig> getClusterHealthConfig(Long clusterPhyId);
 
     void batchReplace(Long clusterPhyId, Integer dimension, List<HealthCheckResult> healthCheckResults);
+
+    List<HealthCheckResultPO> getConnectorHealthCheckResult(Long clusterPhyId);
 }

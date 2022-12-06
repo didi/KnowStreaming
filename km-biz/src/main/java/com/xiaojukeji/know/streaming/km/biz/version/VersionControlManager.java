@@ -20,7 +20,7 @@ public interface VersionControlManager {
      * 获取当前ks所有支持的kafka版本
      * @return
      */
-    Result<Map<String, Long>> listAllVersions();
+    Result<Map<String, Long>> listAllKafkaVersions();
 
     /**
      * 获取全部集群 clusterId 中类型为 type 的指标，不论支持不支持
@@ -28,7 +28,7 @@ public interface VersionControlManager {
      * @param type
      * @return
      */
-    Result<List<VersionItemVO>> listClusterVersionControlItem(Long clusterId, Integer type);
+    Result<List<VersionItemVO>> listKafkaClusterVersionControlItem(Long clusterId, Integer type);
 
     /**
      * 获取当前用户设置的用于展示的指标配置

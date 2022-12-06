@@ -6,7 +6,6 @@ import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -45,11 +44,11 @@ public interface VersionControlService {
 
     /**
      * 获取对应集群的版本兼容项
-     * @param clusterId
+     * @param version
      * @param type
      * @return
      */
-    List<VersionControlItem> listVersionControlItem(Long clusterId, Integer type);
+    List<VersionControlItem> listVersionControlItem(String version, Integer type);
 
     /**
      * 获取对应type所有的的版本兼容项
@@ -68,27 +67,18 @@ public interface VersionControlService {
 
     /**
      * 查询对应指标的版本兼容项
-     * @param clusterId
+     * @param version
      * @param type
      * @param itemName
      * @return
      */
-    VersionControlItem getVersionControlItem(Long clusterId, Integer type, String itemName);
+    VersionControlItem getVersionControlItem(String version, Integer type, String itemName);
 
     /**
      * 判断 item 是否被 clusterId 对应的版本支持
-     * @param clusterId
+     * @param version
      * @param item
      * @return
      */
-    boolean isClusterSupport(Long clusterId, VersionControlItem item);
-
-    /**
-     * 查询对应指标的版本兼容项
-     * @param clusterId
-     * @param type
-     * @param itemNames
-     * @return
-     */
-    Map<String, VersionControlItem> getVersionControlItems(Long clusterId, Integer type, List<String> itemNames);
+    boolean isClusterSupport(String version, VersionControlItem item);
 }

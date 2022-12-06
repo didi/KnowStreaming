@@ -3,7 +3,6 @@ package com.xiaojukeji.know.streaming.km.core.service.partition.impl;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.PartitionMetrics;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.metric.TopicMetricParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;

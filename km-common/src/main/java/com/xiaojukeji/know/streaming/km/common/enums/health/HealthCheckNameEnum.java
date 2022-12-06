@@ -132,6 +132,33 @@ public enum HealthCheckNameEnum {
             false
     ),
 
+    CONNECT_CLUSTER_TASK_STARTUP_FAILURE_PERCENTAGE(
+            HealthCheckDimensionEnum.CONNECT_CLUSTER,
+            "TaskStartupFailurePercentage",
+            Constant.HC_CONFIG_NAME_PREFIX+"CONNECT_CLUSTER_TASK_STARTUP_FAILURE_PERCENTAGE",
+            "connect集群任务启动失败概率",
+            HealthCompareValueConfig.class,
+            false
+    ),
+
+    CONNECTOR_FAILED_TASK_COUNT(
+            HealthCheckDimensionEnum.CONNECTOR,
+            "ConnectorFailedTaskCount",
+            Constant.HC_CONFIG_NAME_PREFIX+"CONNECTOR_FAILED_TASK_COUNT",
+            "connector失败状态的任务数量",
+            HealthCompareValueConfig.class,
+            false
+    ),
+
+    CONNECTOR_UNASSIGNED_TASK_COUNT(
+            HealthCheckDimensionEnum.CONNECTOR,
+            "ConnectorUnassignedTaskCount",
+            Constant.HC_CONFIG_NAME_PREFIX+"CONNECTOR_UNASSIGNED_TASK_COUNT",
+            "connector未被分配的任务数量",
+            HealthCompareValueConfig.class,
+            false
+    )
+
 
 
     ;

@@ -16,7 +16,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.*;
 
 @Component
-public class TopicConfigManagerImpl extends BaseVersionControlService implements TopicConfigManager {
+public class TopicConfigManagerImpl extends BaseKafkaVersionControlService implements TopicConfigManager {
     private static final ILog log = LogFactory.getLog(TopicConfigManagerImpl.class);
 
     private static final String GET_DEFAULT_TOPIC_CONFIG       = "getDefaultTopicConfig";
