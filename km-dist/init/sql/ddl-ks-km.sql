@@ -389,3 +389,77 @@ CREATE TABLE `ks_km_group` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uniq_cluster_phy_id_name` (`cluster_phy_id`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Group信息表';
+
+
+DROP TABLE IF EXISTS `ks_kc_connect_cluster`;
+CREATE TABLE `ks_kc_connect_cluster` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Connect集群ID',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `name` varchar(128) NOT NULL DEFAULT '' COMMENT '集群名称',
+     `group_name` varchar(128) NOT NULL DEFAULT '' COMMENT '集群Group名称',
+     `cluster_url` varchar(1024) NOT NULL DEFAULT '' COMMENT '集群地址',
+     `member_leader_url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'URL地址',
+     `version` varchar(64) NOT NULL DEFAULT '' COMMENT 'connect版本',
+     `jmx_properties` text COMMENT 'JMX配置',
+     `state` tinyint(4) NOT NULL DEFAULT '1' COMMENT '集群使用的消费组状态，也表示集群状态:-1 Unknown,0 ReBalance,1 Active,2 Dead,3 Empty',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '接入时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_id_group_name` (`id`,`group_name`),
+     UNIQUE KEY `uniq_name_kafka_cluster` (`name`,`kafka_cluster_phy_id`),
+     KEY `idx_kafka_cluster_phy_id` (`kafka_cluster_phy_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connect集群信息表';
+
+
+DROP TABLE IF EXISTS `ks_kc_connector`;
+CREATE TABLE `ks_kc_connector` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `connect_cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Connect集群ID',
+     `connector_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Connector名称',
+     `connector_class_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Connector类',
+     `connector_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'Connector类型',
+     `state` varchar(45) NOT NULL DEFAULT '' COMMENT '状态',
+     `topics` text COMMENT '访问过的Topics',
+     `task_count` int(11) NOT NULL DEFAULT '0' COMMENT '任务数',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_connect_cluster_id_connector_name` (`connect_cluster_id`,`connector_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connector信息表';
+
+
+DROP TABLE IF EXISTS `ks_kc_worker`;
+CREATE TABLE `ks_kc_worker` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `connect_cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Connect集群ID',
+     `member_id` varchar(512) NOT NULL DEFAULT '' COMMENT '成员ID',
+     `host` varchar(128) NOT NULL DEFAULT '' COMMENT '主机名',
+     `jmx_port` int(16) NOT NULL DEFAULT '-1' COMMENT 'Jmx端口',
+     `url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'URL信息',
+     `leader_url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'leaderURL信息',
+     `leader` int(16) NOT NULL DEFAULT '0' COMMENT '状态: 1是leader，0不是leader',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     `worker_id` varchar(128) NOT NULL COMMENT 'worker地址',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_cluster_id_member_id` (`connect_cluster_id`,`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='worker信息表';
+
+
+DROP TABLE IF EXISTS `ks_kc_worker_connector`;
+CREATE TABLE `ks_kc_worker_connector` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `connect_cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Connect集群ID',
+     `connector_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Connector名称',
+     `worker_member_id` varchar(256) NOT NULL DEFAULT '',
+     `task_id` int(16) NOT NULL DEFAULT '-1' COMMENT 'Task的ID',
+     `state` varchar(128) DEFAULT NULL COMMENT '任务状态',
+     `worker_id` varchar(128) DEFAULT NULL COMMENT 'worker信息',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_relation` (`connect_cluster_id`,`connector_name`,`task_id`,`worker_member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Worker和Connector关系表';
