@@ -168,7 +168,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
             allBrokerList = this.listAllBrokersAndUpdateCache(clusterPhyId);
         }
 
-        return allBrokerList.stream().filter( elem -> elem.alive()).collect(Collectors.toList());
+        return allBrokerList.stream().filter(elem -> elem.alive()).collect(Collectors.toList());
     }
 
     @Override
@@ -234,11 +234,10 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
     @Override
     public String getBrokerVersionFromKafka(Long clusterId, Integer brokerId) {
-        JmxConnectorWrap jmxConnectorWrap = kafkaJMXClient.getClient(clusterId, brokerId);
-        if (ValidateUtils.isNull(jmxConnectorWrap) || !jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
+        JmxConnectorWrap jmxConnectorWrap = kafkaJMXClient.getClientWithCheck(clusterId, brokerId);
+        if (jmxConnectorWrap == null) {
             return "";
         }
-
         try {
             return (String) jmxConnectorWrap.getAttribute(new ObjectName(JMX_SERVER_APP_INFO + ",id=" + brokerId), VERSION);
         } catch (Exception e) {
@@ -331,7 +330,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
             return Result.buildSuc(brokerList);
         } catch (Exception e) {
-            log.error("class=BrokerServiceImpl||method=getBrokersFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getBrokersFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.ZK_OPERATE_FAILED, e.getMessage());
         }
@@ -353,7 +352,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
             return Result.buildSuc(newBrokerList);
         } catch (Exception e) {
-            log.error("class=BrokerServiceImpl||method=getBrokersFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getBrokersFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
@@ -361,13 +360,13 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
     private Broker getStartTimeAndBuildBroker(Long clusterPhyId, Node newNode, JmxConfig jmxConfig) {
         try {
-            Long startTime = jmxDAO.getServerStartTime(clusterPhyId, newNode.host(), null, jmxConfig);
+            Long startTime = jmxDAO.getServerStartTime(clusterPhyId, newNode.host(), jmxConfig.getJmxPort(), jmxConfig);
 
-            return Broker.buildFrom(clusterPhyId, newNode, startTime, jmxConfig);
+            return Broker.buildFrom(clusterPhyId, newNode, startTime);
         } catch (Exception e) {
-            log.error("class=BrokerServiceImpl||method=getStartTimeAndBuildBroker||clusterPhyId={}||brokerNode={}||jmxConfig={}||errMsg=exception!", clusterPhyId, newNode, jmxConfig, e);
+            log.error("method=getStartTimeAndBuildBroker||clusterPhyId={}||brokerNode={}||jmxConfig={}||errMsg=exception!", clusterPhyId, newNode, jmxConfig, e);
         }
 
-        return Broker.buildFrom(clusterPhyId, newNode, null, jmxConfig);
+        return Broker.buildFrom(clusterPhyId, newNode, null);
     }
 }
