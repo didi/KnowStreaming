@@ -75,7 +75,6 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
     public static final String CLUSTER_METRIC_PARTITION_MIN_ISR_E                   = "PartitionMinISR_E";
     public static final String CLUSTER_METRIC_PARTITION_URP                         = "PartitionURP";
     public static final String CLUSTER_METRIC_MESSAGES_IN                           = "MessagesIn";
-    public static final String CLUSTER_METRIC_MESSAGES                              = "Messages";
     public static final String CLUSTER_METRIC_LEADER_MESSAGES                       = "LeaderMessages";
     public static final String CLUSTER_METRIC_BYTES_IN                              = "BytesIn";
     public static final String CLUSTER_METRIC_BYTES_IN_5_MIN                        = "BytesIn_min_5";
@@ -291,11 +290,6 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
         // LeaderMessages 指标
         itemList.add( buildAllVersionsItem()
                 .name(CLUSTER_METRIC_LEADER_MESSAGES).unit("条").desc("集群中leader总的消息条数").category(CATEGORY_CLUSTER)
-                .extend( buildMethodExtend( CLUSTER_METHOD_GET_MESSAGE_SIZE )));
-
-        // Messages 指标
-        itemList.add( buildAllVersionsItem()
-                .name(CLUSTER_METRIC_MESSAGES).unit("条").desc("集群总的消息条数").category(CATEGORY_CLUSTER)
                 .extend( buildMethodExtend( CLUSTER_METHOD_GET_MESSAGE_SIZE )));
 
         // BytesInPerSec 指标

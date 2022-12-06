@@ -78,7 +78,8 @@ client-pool:
     max-idle-client-num: 20       # 最大空闲客户端数
     max-total-client-num: 20      # 最大客户端数
     borrow-timeout-unit-ms: 5000  # 租借超时时间，单位秒
-
+  kafka-admin:
+    client-cnt: 1                 # 每个Kafka集群创建的KafkaAdminClient数
 
 # ES客户端配置
 es:
