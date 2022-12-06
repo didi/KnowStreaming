@@ -13,7 +13,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPoint
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -22,17 +22,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.TOPIC_INDEX;
 
 @Component
 public class TopicMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName     = TOPIC_INDEX;
-        super.indexTemplate = TOPIC_TEMPLATE;
+        super.indexName = TOPIC_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register(this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("TopicMetricESDAO", 4,8, 500);
@@ -47,7 +46,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
             String sortDsl   = buildSortDsl(sort, SearchSort.DEFAULT);
 
             String dsl   = dslLoaderUtil.getFormatDslByFileName(
-                    DslsConstant.GET_TOPIC_MAX_OR_MIN_SINGLE_METRIC, clusterPhyId, startTime, endTime, topic, sortDsl);
+                    DslConstant.GET_TOPIC_MAX_OR_MIN_SINGLE_METRIC, clusterPhyId, startTime, endTime, topic, sortDsl);
             TopicMetricPO topicMetricPO = esOpClient.performRequestAndTakeFirst(topic, realIndex, dsl, TopicMetricPO.class);
             ret.add(topicMetricPO);
         }
@@ -74,7 +73,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_AGG_SINGLE_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString(), aggDsl);
+                DslConstant.GET_TOPIC_AGG_SINGLE_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString(), aggDsl);
 
         return esOpClient.performRequest(realIndex, dsl,
                 s -> handleSingleESQueryResponse(s, metrics, aggType), 3);
@@ -112,7 +111,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         String realIndex = realIndex(startTime, latestMetricTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.LIST_TOPIC_WITH_LATEST_METRICS, clusterId, latestMetricTime, appendQueryDsl.toString(), sortDsl);
+                DslConstant.LIST_TOPIC_WITH_LATEST_METRICS, clusterId, latestMetricTime, appendQueryDsl.toString(), sortDsl);
 
         return esOpClient.performRequest(realIndex, dsl, TopicMetricPO.class);
     }
@@ -126,8 +125,8 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         String termDsl   = buildTermsDsl(Arrays.asList(term));
 
         String dsl = term.isEqual()
-                ? dslLoaderUtil.getFormatDslByFileName(DslsConstant.COUNT_TOPIC_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl)
-                : dslLoaderUtil.getFormatDslByFileName(DslsConstant.COUNT_TOPIC_NOT_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl);
+                ? dslLoaderUtil.getFormatDslByFileName( DslConstant.COUNT_TOPIC_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl)
+                : dslLoaderUtil.getFormatDslByFileName( DslConstant.COUNT_TOPIC_NOT_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl);
 
         return esOpClient.performRequestWithRouting(topic, realIndex, dsl,
                 s -> handleESQueryResponseCount(s), 3);
@@ -141,7 +140,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         Long startTime  = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_BROKER_LATEST_METRICS, clusterPhyId, topic, brokerId, startTime, endTime);
+                DslConstant.GET_TOPIC_BROKER_LATEST_METRICS, clusterPhyId, topic, brokerId, startTime, endTime);
 
         TopicMetricPO topicMetricPO = esOpClient.performRequestAndTakeFirst(topic, realIndex(startTime, endTime), dsl, TopicMetricPO.class);
 
@@ -165,7 +164,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
+                DslConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
 
         //topicMetricPOS 已经按照 timeStamp 倒序排好序了
         List<TopicMetricPO> topicMetricPOS = esOpClient.performRequest(realIndex(startTime, endTime), dsl, TopicMetricPO.class);
@@ -197,7 +196,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
+                DslConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
 
         TopicMetricPO topicMetricPO = esOpClient.performRequestAndTakeFirst(topic, realIndex(startTime, endTime), dsl, TopicMetricPO.class);
 
@@ -262,7 +261,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
                         3000,
                         () -> {
                             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                                    DslsConstant.GET_TOPIC_AGG_LIST_METRICS, clusterPhyId, topic, startTime, endTime, interval, aggDsl);
+                                    DslConstant.GET_TOPIC_AGG_LIST_METRICS, clusterPhyId, topic, startTime, endTime, interval, aggDsl);
 
                             Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequestWithRouting(topic, realIndex, dsl,
                                     s -> handleListESQueryResponse(s, metrics, aggType), 3);
@@ -299,7 +298,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
 
         //4、查询es
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+                DslConstant.GET_TOPIC_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
 
         return esOpClient.performRequest(realIndex, dsl,
                 s -> handleTopTopicESQueryResponse(s, metrics, topN), 3);

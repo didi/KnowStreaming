@@ -1,0 +1,39 @@
+{
+  "size":1000,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "connectClusterId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "connectorName": {
+              "value": "%s"
+            }
+          }
+        },
+         {
+           "range": {
+             "timestamp": {
+               "gte": %d,
+               "lte": %d
+             }
+           }
+         }
+         %s
+      ]
+    }
+  },
+  "sort": [
+      {
+        "timestamp": {
+          "order": "desc"
+        }
+      }
+    ]
+}
