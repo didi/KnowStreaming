@@ -130,20 +130,31 @@ public class DatabaseDataFlusher {
     private void flushTopicLatestMetricsCache() {
         for (ClusterPhy clusterPhy: LoadedClusterPhyCache.listAll().values()) {
             FutureUtil.quickStartupFutureUtil.submitTask(() -> {
-                try {
+                List<String> topicNameList = topicService.listTopicsFromCacheFirst(clusterPhy.getId()).stream().map(Topic::getTopicName).collect(Collectors.toList());
 
-                    List<String> topicNameList = topicService.listTopicsFromCacheFirst(clusterPhy.getId()).stream().map(Topic::getTopicName).collect(Collectors.toList());
+                for (int i = 0; i < 3; ++i) {
+                    try {
+                        List<TopicMetrics> metricsList = topicMetricService.listTopicLatestMetricsFromES(
+                                clusterPhy.getId(),
+                                topicNameList,
+                                Collections.emptyList()
+                        );
 
-                    List<TopicMetrics> metricsList = topicMetricService.listTopicLatestMetricsFromES(clusterPhy.getId(), topicNameList, Collections.emptyList());
+                        if (!topicNameList.isEmpty() && metricsList.isEmpty()) {
+                            // 没有指标时，重试
+                            continue;
+                        }
 
-                    Map<String, TopicMetrics> metricsMap = metricsList
-                            .stream()
-                            .collect(Collectors.toMap(TopicMetrics::getTopic, Function.identity()));
+                        Map<String, TopicMetrics> metricsMap = metricsList
+                                .stream()
+                                .collect(Collectors.toMap(TopicMetrics::getTopic, Function.identity()));
 
-                    DataBaseDataLocalCache.putTopicMetrics(clusterPhy.getId(), metricsMap);
+                        DataBaseDataLocalCache.putTopicMetrics(clusterPhy.getId(), metricsMap);
 
-                } catch (Exception e) {
-                    LOGGER.error("method=flushTopicLatestMetricsCache||clusterPhyId={}||errMsg=exception!",  clusterPhy.getId(), e);
+                        break;
+                    } catch (Exception e) {
+                        LOGGER.error("method=flushTopicLatestMetricsCache||clusterPhyId={}||errMsg=exception!",  clusterPhy.getId(), e);
+                    }
                 }
             });
         }

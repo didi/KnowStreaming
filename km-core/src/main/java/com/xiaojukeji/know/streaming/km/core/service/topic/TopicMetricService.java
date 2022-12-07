@@ -37,12 +37,9 @@ public interface TopicMetricService {
 
     /**
      * 获取Topic维度最新的一条指标
-     * @param clusterPhyId
-     * @param topicNames
-     * @param metricNameList
-     * @return
      */
     List<TopicMetrics> listTopicLatestMetricsFromES(Long clusterPhyId, List<String> topicNames, List<String> metricNameList);
+
     /**
      * 获取Topic维度最新的一条指标
      * @param clusterPhyId
