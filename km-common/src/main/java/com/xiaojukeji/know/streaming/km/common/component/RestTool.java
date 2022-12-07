@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +23,6 @@ import java.util.Map;
  */
 @Component
 public class RestTool {
-
     private static final ILog LOGGER  = LogFactory.getLog(RestTool.class);
 
     @Autowired
@@ -38,39 +38,38 @@ public class RestTool {
      * @return
      */
     public <T> T postObjectWithRawContent(String url, Object postBody, HttpHeaders headers, Class<T> resultType) {
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(postBody, headers),
-            String.class);
+        ResponseEntity<String> result = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                new HttpEntity<>(postBody, headers),
+                String.class
+        );
+
         return ConvertUtil.toObj(result.getBody(), resultType);
     }
 
     /**
      * POST请求
      * @param url 请求地址
-     * @param request 请求内容
-     * @param responseType 期望返回的类型
+     * @param postBody 请求内容
+     * @param resultType 期望返回的类型
      * @param <T> 泛型T
      * @return T 
      */
-    public <T> T postObjectWithJsonContent(String url, Object request, Type responseType) {
-        HttpHeaders jsonHead = getJsonContentHeaders();
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST,
-            new HttpEntity<Object>( ConvertUtil.obj2Json(request), jsonHead), String.class);
-        return ConvertUtil.toObj(result.getBody(), responseType);
+    public <T> T postObjectWithJsonContent(String url, Object postBody, Class<T> resultType) {
+        return this.postObjectWithRawContent(url, postBody, this.getJsonContentHeaders(), resultType);
     }
 
     /**
      * POST请求
      * @param url 请求地址
-     * @param request 请求内容
-     * @param responseType 期望返回的类型
+     * @param postBody 请求内容
+     * @param resultType 期望返回的类型
      * @param <T> 泛型T
      * @return T
      */
-    public <T> T postObjectWithJsonContentAndHeader(String url, Map<String, String> headers, Object request,
-                                                    Type responseType) {
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.POST,
-            new HttpEntity<Object>(ConvertUtil.obj2Json(request), getJsonContentHeaders(headers)), String.class);
-        return ConvertUtil.toObj(result.getBody(), responseType);
+    public <T> T postObjectWithJsonContentAndHeader(String url, Map<String, String> headers, Object postBody, Class<T> resultType) {
+        return this.postObjectWithRawContent(url, postBody, this.getJsonContentHeaders(headers), resultType);
     }
 
     /**
@@ -81,8 +80,15 @@ public class RestTool {
      * @param <T> 泛型T
      * @return T
      */
-    public <T> T getObjectWithJsonContent(String url, Map<String, ?> params, Type resultType) {
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, null, String.class, params);
+    public <T> T getObjectWithJsonContent(String url, Map<String, ?> params, Class<T> resultType) {
+        ResponseEntity<String> result = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                String.class,
+                params
+        );
+
         return ConvertUtil.toObj(result.getBody(), resultType);
     }
 
@@ -95,8 +101,13 @@ public class RestTool {
      * @return T
      */
     public <T> T getForObject(String url, HttpHeaders headers, Type resultType) {
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(null, headers),
-            String.class);
+        ResponseEntity<String> result = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                new HttpEntity<>(null, headers),
+                String.class
+        );
+
         return ConvertUtil.toObj(result.getBody(), resultType);
     }
 
@@ -170,6 +181,26 @@ public class RestTool {
     }
 
     /**
+     * GET请求
+     * @param url 请求地址
+     * @param params 请求参数
+     * @param resultType 返回类型
+     * @param <T> 泛型T
+     * @return T
+     */
+    public <T> List<T> getArrayObjectWithJsonContent(String url, Map<String, ?> params, Class<T> resultType) {
+        ResponseEntity<String> result = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                String.class,
+                params
+        );
+
+        return ConvertUtil.str2ObjArrayByJson(result.getBody(), resultType);
+    }
+
+    /**
      * 根据map中的参数构建url+queryString
      * @param url 请求地址
      * @param params 请求参数
@@ -180,7 +211,6 @@ public class RestTool {
             return url;
         }
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
-
 
         return builder.toUriString();
     }

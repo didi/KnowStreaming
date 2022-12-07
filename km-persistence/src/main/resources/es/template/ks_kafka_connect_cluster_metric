@@ -1,0 +1,86 @@
+{
+    "order" : 10,
+    "index_patterns" : [
+      "ks_kafka_connect_cluster_metric*"
+    ],
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "2"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "connectClusterId" : {
+          "type" : "long"
+        },
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "clusterPhyId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "ConnectorCount" : {
+              "type" : "float"
+            },
+            "TaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorStartupAttemptsTotal" : {
+              "type" : "float"
+            },
+            "ConnectorStartupFailurePercentage" : {
+              "type" : "float"
+            },
+            "ConnectorStartupFailureTotal" : {
+              "type" : "float"
+            },
+            "ConnectorStartupSuccessPercentage" : {
+              "type" : "float"
+            },
+            "ConnectorStartupSuccessTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupAttemptsTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupFailurePercentage" : {
+              "type" : "float"
+            },
+            "TaskStartupFailureTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupSuccessPercentage" : {
+              "type" : "float"
+            },
+            "TaskStartupSuccessTotal" : {
+              "type" : "float"
+            }
+          }
+        },
+        "key" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "timestamp" : {
+          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+          "index" : true,
+          "type" : "date",
+          "doc_values" : true
+        }
+      }
+    },
+    "aliases" : { }
+  }

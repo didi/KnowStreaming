@@ -26,7 +26,7 @@ public class JmxDAOImpl implements JmxDAO {
     public Object getJmxValue(Long clusterPhyId, String jmxHost, Integer jmxPort, JmxConfig jmxConfig, ObjectName objectName, String attribute) {
         JmxConnectorWrap jmxConnectorWrap = null;
         try {
-            jmxConnectorWrap = new JmxConnectorWrap(clusterPhyId, null, null, jmxHost, jmxPort, jmxConfig);
+            jmxConnectorWrap = new JmxConnectorWrap("clusterPhyId: " + clusterPhyId, null, jmxHost, jmxPort, jmxConfig);
             if (!jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
                 log.error(
                         "method=getJmxValue||clusterPhyId={}||jmxHost={}||jmxPort={}||jmxConfig={}||errMgs=create jmx client failed",

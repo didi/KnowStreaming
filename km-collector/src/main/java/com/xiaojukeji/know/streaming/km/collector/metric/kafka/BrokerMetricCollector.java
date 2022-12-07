@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BrokerMetrics;
@@ -27,7 +26,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Component
-public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics> {
+public class BrokerMetricCollector extends AbstractKafkaMetricCollector<BrokerMetrics> {
     private static final ILog LOGGER = LogFactory.getLog(BrokerMetricCollector.class);
 
     @Autowired
@@ -44,7 +43,7 @@ public class BrokerMetricCollector extends AbstractMetricCollector<BrokerMetrics
         Long clusterPhyId  = clusterPhy.getId();
 
         List<Broker>             brokers = brokerService.listAliveBrokersFromDB(clusterPhy.getId());
-        List<VersionControlItem> items   = versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
+        List<VersionControlItem> items   = versionControlService.listVersionControlItem(this.getClusterVersion(clusterPhy), collectorType().getCode());
 
         FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 

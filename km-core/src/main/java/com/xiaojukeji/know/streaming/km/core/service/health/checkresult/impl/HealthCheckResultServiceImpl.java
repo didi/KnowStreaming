@@ -7,20 +7,26 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.Ba
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckAggResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.po.config.PlatformClusterConfigPO;
+import com.xiaojukeji.know.streaming.km.common.bean.po.connect.ConnectClusterPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
 import com.xiaojukeji.know.streaming.km.common.enums.config.ConfigGroupEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.config.PlatformClusterConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
+import com.xiaojukeji.know.streaming.km.persistence.mysql.connect.ConnectClusterDAO;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.health.HealthCheckResultDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum.CONNECTOR;
 
 @Service
 public class HealthCheckResultServiceImpl implements HealthCheckResultService {
@@ -28,6 +34,9 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
 
     @Autowired
     private HealthCheckResultDAO healthCheckResultDAO;
+
+    @Autowired
+    private ConnectClusterDAO connectClusterDAO;
 
     @Autowired
     private PlatformClusterConfigService platformClusterConfigService;
@@ -120,6 +129,25 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
             }
         }
         return configMap;
+    }
+
+    @Override
+    public List<HealthCheckResultPO> getConnectorHealthCheckResult(Long clusterPhyId) {
+        List<HealthCheckResultPO> resultPOList = new ArrayList<>();
+
+        //查找connect集群
+        LambdaQueryWrapper<ConnectClusterPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ConnectClusterPO::getKafkaClusterPhyId, clusterPhyId);
+        List<Long> connectClusterIdList = connectClusterDAO.selectList(lambdaQueryWrapper).stream().map(elem -> elem.getId()).collect(Collectors.toList());
+        if (ValidateUtils.isEmptyList(connectClusterIdList)) {
+            return resultPOList;
+        }
+
+        LambdaQueryWrapper<HealthCheckResultPO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(HealthCheckResultPO::getDimension, CONNECTOR.getDimension());
+        wrapper.in(HealthCheckResultPO::getClusterPhyId, connectClusterIdList);
+        resultPOList.addAll(healthCheckResultDAO.selectList(wrapper));
+        return resultPOList;
     }
 
     @Override

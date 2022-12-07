@@ -12,7 +12,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPoint
 import com.xiaojukeji.know.streaming.km.common.enums.AggTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -23,17 +23,16 @@ import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.Constant.ZERO;
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.GROUP_INDEX;
 
 @Component
 public class GroupMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName     = GROUP_INDEX;
-        super.indexTemplate = GROUP_TEMPLATE;
+        super.indexName = GROUP_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register(this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("GroupMetricESDAO", 4,8, 500);
@@ -59,7 +58,7 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
                         String topic = groupTopic.getTopicName();
                         try {
                             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                                    DslsConstant.LIST_GROUP_LATEST_METRICS_BY_GROUP_TOPIC, clusterPhyId, group, topic,
+                                    DslConstant.LIST_GROUP_LATEST_METRICS_BY_GROUP_TOPIC, clusterPhyId, group, topic,
                                     startTime, latestTime, aggDsl);
 
                             String routing = routing(clusterPhyId, group);
@@ -86,7 +85,7 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
         String realIndex = realIndex(startTime, latestTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.LIST_GROUP_LATEST_METRICS_OF_PARTITION, clusterPhyId, group, topic, latestTime);
+                DslConstant.LIST_GROUP_LATEST_METRICS_OF_PARTITION, clusterPhyId, group, topic, latestTime);
 
         List<GroupMetricPO> groupMetricPOS = esOpClient.performRequest(realIndex, dsl, GroupMetricPO.class);
         return filterMetrics(groupMetricPOS, metrics);
@@ -101,8 +100,8 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
         String matchDsl  = buildTermsDsl(Arrays.asList(match));
 
         String dsl = match.isEqual()
-                ? dslLoaderUtil.getFormatDslByFileName(DslsConstant.COUNT_GROUP_METRIC_VALUE, clusterPhyId, groupName, startTime, endTime, matchDsl)
-                : dslLoaderUtil.getFormatDslByFileName(DslsConstant.COUNT_GROUP_NOT_METRIC_VALUE, clusterPhyId, groupName, startTime, endTime, matchDsl);
+                ? dslLoaderUtil.getFormatDslByFileName( DslConstant.COUNT_GROUP_METRIC_VALUE, clusterPhyId, groupName, startTime, endTime, matchDsl)
+                : dslLoaderUtil.getFormatDslByFileName( DslConstant.COUNT_GROUP_NOT_METRIC_VALUE, clusterPhyId, groupName, startTime, endTime, matchDsl);
 
         return esOpClient.performRequestWithRouting(clusterPhyId.toString() + "@" + groupName, realIndex, dsl,
                 s -> handleESQueryResponseCount(s), 3);
@@ -127,7 +126,7 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
             Integer partition   = tp.getPartition();
 
             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                    DslsConstant.LIST_GROUP_METRICS, clusterId, groupName, topic, partition, startTime, endTime, interval, aggDsl);
+                    DslConstant.LIST_GROUP_METRICS, clusterId, groupName, topic, partition, startTime, endTime, interval, aggDsl);
 
             Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequest(realIndex, dsl,
                     s -> handleGroupMetrics(s, aggType, metrics), 3);
@@ -148,7 +147,7 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
         String realIndex = realIndex(startTime, endTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_GROUP_TOPIC_PARTITION, clusterPhyId, groupName, startTime, endTime);
+                DslConstant.GET_GROUP_TOPIC_PARTITION, clusterPhyId, groupName, startTime, endTime);
 
         List<GroupMetricPO> groupMetricPOS =  esOpClient.performRequestWithRouting(routing(clusterPhyId, groupName), realIndex, dsl, GroupMetricPO.class);
         return groupMetricPOS.stream().map(g -> new TopicPartitionKS(g.getTopic(), g.getPartitionId().intValue())).collect( Collectors.toSet());

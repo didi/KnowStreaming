@@ -4,7 +4,7 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResp
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ReplicationMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.VALUE;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.REPLICATION_INDEX;
 
 /**
  * @author didi
@@ -24,10 +24,9 @@ public class ReplicationMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName     = REPLICATION_INDEX;
-        super.indexTemplate = REPLICATION_TEMPLATE;
+        super.indexName = REPLICATION_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register(this);
     }
 
     /**
@@ -39,7 +38,7 @@ public class ReplicationMetricESDAO extends BaseMetricESDAO {
         Long startTime = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_REPLICATION_LATEST_METRICS, clusterPhyId, brokerId, topic, partitionId, startTime, endTime);
+                DslConstant.GET_REPLICATION_LATEST_METRICS, clusterPhyId, brokerId, topic, partitionId, startTime, endTime);
 
         ReplicationMetricPO replicationMetricPO = esOpClient.performRequestAndTakeFirst(
                 realIndex(startTime, endTime), dsl, ReplicationMetricPO.class);
@@ -61,7 +60,7 @@ public class ReplicationMetricESDAO extends BaseMetricESDAO {
         String aggDsl   = buildAggsDSL(metrics, aggType);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_REPLICATION_AGG_SINGLE_METRICS, clusterPhyId, brokerId,topic, partitionId, startTime, endTime, aggDsl);
+                DslConstant.GET_REPLICATION_AGG_SINGLE_METRICS, clusterPhyId, brokerId,topic, partitionId, startTime, endTime, aggDsl);
 
         return esOpClient.performRequestWithRouting(String.valueOf(brokerId), realIndex, dsl,
                 s -> handleSingleESQueryResponse(s, metrics, aggType), 3);

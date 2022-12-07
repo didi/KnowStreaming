@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.collector.metric.kafka;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.collector.metric.AbstractMetricCollector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.GroupMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -28,7 +27,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Component
-public class GroupMetricCollector extends AbstractMetricCollector<GroupMetrics> {
+public class GroupMetricCollector extends AbstractKafkaMetricCollector<GroupMetrics> {
     protected static final ILog  LOGGER = LogFactory.getLog(GroupMetricCollector.class);
 
     @Autowired
@@ -46,7 +45,7 @@ public class GroupMetricCollector extends AbstractMetricCollector<GroupMetrics> 
 
         List<String> groupNameList = new ArrayList<>();
         try {
-            groupNameList = groupService.listGroupsFromKafka(clusterPhyId);
+            groupNameList = groupService.listGroupsFromKafka(clusterPhy);
         } catch (Exception e) {
             LOGGER.error("method=collectKafkaMetrics||clusterPhyId={}||msg=exception!", clusterPhyId, e);
         }
@@ -55,7 +54,7 @@ public class GroupMetricCollector extends AbstractMetricCollector<GroupMetrics> 
             return Collections.emptyList();
         }
 
-        List<VersionControlItem> items = versionControlService.listVersionControlItem(clusterPhyId, collectorType().getCode());
+        List<VersionControlItem> items = versionControlService.listVersionControlItem(this.getClusterVersion(clusterPhy), collectorType().getCode());
 
         FutureWaitUtil<Void> future = this.getFutureUtilByClusterPhyId(clusterPhyId);
 

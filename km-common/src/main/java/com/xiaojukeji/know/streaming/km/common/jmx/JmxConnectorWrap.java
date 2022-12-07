@@ -28,9 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JmxConnectorWrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(JmxConnectorWrap.class);
 
-    private final Long physicalClusterId;
-
-    private final Integer brokerId;
+    //jmx打印日志时的附带信息
+    private final String clientLogIdent;
 
     private final Long brokerStartupTime;
 
@@ -44,9 +43,8 @@ public class JmxConnectorWrap {
 
     private JmxConfig jmxConfig;
 
-    public JmxConnectorWrap(Long physicalClusterId, Integer brokerId, Long brokerStartupTime, String host, Integer port, JmxConfig jmxConfig) {
-        this.physicalClusterId = physicalClusterId;
-        this.brokerId = brokerId;
+    public JmxConnectorWrap(String clientLogIdent, Long brokerStartupTime, String host, Integer port, JmxConfig jmxConfig) {
+        this.clientLogIdent=clientLogIdent;
         this.brokerStartupTime = brokerStartupTime;
         this.host = host;
 
@@ -93,7 +91,7 @@ public class JmxConnectorWrap {
 
             jmxConnector = null;
         } catch (IOException e) {
-            LOGGER.warn("close JmxConnector exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
+            LOGGER.warn("close JmxConnector exception, clientLogIdent:{} host:{} port:{}.", clientLogIdent, host, port, e);
         }
     }
 
@@ -176,12 +174,12 @@ public class JmxConnectorWrap {
             }
 
             jmxConnector = JMXConnectorFactory.connect(new JMXServiceURL(jmxUrl), environment);
-            LOGGER.info("JMX connect success, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port);
+            LOGGER.info("JMX connect success, clientLogIdent:{} host:{} port:{}.", clientLogIdent, host, port);
             return true;
         } catch (MalformedURLException e) {
-            LOGGER.error("JMX url exception, physicalClusterId:{} brokerId:{} host:{} port:{} jmxUrl:{}", physicalClusterId, brokerId, host, port, jmxUrl, e);
+            LOGGER.error("JMX url exception, clientLogIdent:{} host:{} port:{} jmxUrl:{}", clientLogIdent, host, port, jmxUrl, e);
         } catch (Exception e) {
-            LOGGER.error("JMX connect exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
+            LOGGER.error("JMX connect exception, clientLogIdent:{} host:{} port:{}.", clientLogIdent, host, port, e);
         }
         return false;
     }

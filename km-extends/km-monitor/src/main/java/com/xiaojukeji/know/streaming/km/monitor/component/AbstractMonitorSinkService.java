@@ -4,7 +4,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.*;
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.*;
-import com.xiaojukeji.know.streaming.km.common.utils.NamedThreadFactory;
+import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.monitor.common.MetricSinkPoint;
 import org.springframework.context.ApplicationListener;
 
@@ -12,9 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static com.xiaojukeji.know.streaming.km.monitor.common.MonitorSinkTagEnum.*;
 
@@ -23,10 +20,12 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
 
     private static final int    STEP       = 60;
 
-    private ThreadPoolExecutor executor = new ThreadPoolExecutor(5, 10, 6000, TimeUnit.MILLISECONDS,
-            new LinkedBlockingDeque<>(1000),
-            new NamedThreadFactory("KM-Monitor-Sink-" + monitorName()),
-            (r, e) -> LOGGER.warn("class=AbstractMonitorSinkService||msg=Deque is blocked, taskCount:{}" + e.getTaskCount()));
+    private FutureUtil<Void> sinkTP = FutureUtil.init(
+            "SinkMetricsTP",
+            5,
+            5,
+            10000
+    );
 
     /**
      * monitor 服务的名称
@@ -36,7 +35,7 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
 
     @Override
     public void onApplicationEvent(BaseMetricEvent event) {
-        executor.execute( () -> {
+        sinkTP.submitTask(() -> {
             if (event instanceof BrokerMetricEvent) {
                 BrokerMetricEvent brokerMetricEvent = (BrokerMetricEvent)event;
                 sinkMetrics(brokerMetric2SinkPoint(brokerMetricEvent.getBrokerMetrics()));
@@ -194,10 +193,10 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
                                                Map<String, Object> tagsMap) {
         List<MetricSinkPoint> pointList = new ArrayList<>();
 
-        for(String metricName : metrics.keySet()){
+        for(Map.Entry<String, Float> entry: metrics.entrySet()){
             MetricSinkPoint metricSinkPoint = new MetricSinkPoint();
-            metricSinkPoint.setName(metricPre + "_" + metricName);
-            metricSinkPoint.setValue(metrics.get(metricName));
+            metricSinkPoint.setName(metricPre + "_" + entry.getKey());
+            metricSinkPoint.setValue(entry.getValue());
             metricSinkPoint.setTimestamp(timeStamp);
             metricSinkPoint.setStep(STEP);
             metricSinkPoint.setTagsMap(tagsMap);

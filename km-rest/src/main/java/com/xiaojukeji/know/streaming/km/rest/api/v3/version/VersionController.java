@@ -35,7 +35,19 @@ public class VersionController {
     @GetMapping(value = "support-kafka-versions")
     @ResponseBody
     public Result<SortedMap<String, Long>> listAllVersions() {
-        Result<Map<String, Long>> rm = versionControlManager.listAllVersions();
+        Result<Map<String, Long>> rm = versionControlManager.listAllKafkaVersions();
+        if (rm.failed()) {
+            return Result.buildFromIgnoreData(rm);
+        }
+
+        return Result.buildSuc(new TreeMap<>(rm.getData()));
+    }
+
+    @ApiOperation(value = "支持的kafka-Connect版本列表", notes = "")
+    @GetMapping(value = "support-kafka-connect-versions")
+    @ResponseBody
+    public Result<SortedMap<String, Long>> listAllConnectVersions() {
+        Result<Map<String, Long>> rm = versionControlManager.listAllKafkaVersions();
         if (rm.failed()) {
             return Result.buildFromIgnoreData(rm);
         }
@@ -54,7 +66,7 @@ public class VersionController {
     @GetMapping(value = "clusters/{clusterId}/types/{type}/support-kafka-versions")
     @ResponseBody
     public Result<List<VersionItemVO>> listClusterVersionControlItem(@PathVariable Long clusterId, @PathVariable Integer type) {
-        return versionControlManager.listClusterVersionControlItem(clusterId, type);
+        return versionControlManager.listKafkaClusterVersionControlItem(clusterId, type);
     }
 
     @ApiOperation(value = "用户设置的指标显示项", notes = "")

@@ -159,8 +159,7 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
             }
 
             JmxConnectorWrap jmxConnectorWrap = new JmxConnectorWrap(
-                    clusterPhy.getId(),
-                    brokerId,
+                    "clusterPhyId: " + clusterPhy.getId() + " brokerId: " + brokerId,
                     broker.getStartTimestamp(),
                     jmxConfig != null ? broker.getJmxHost(jmxConfig.getUseWhichEndpoint()) : broker.getHost(),
                     broker.getJmxPort() != null ? broker.getJmxPort() : jmxConfig.getJmxPort(),

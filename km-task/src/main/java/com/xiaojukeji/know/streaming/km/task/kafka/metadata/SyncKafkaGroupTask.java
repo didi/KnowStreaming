@@ -34,7 +34,7 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
     @Override
     public TaskResult processClusterTask(ClusterPhy clusterPhy, long triggerTimeUnitMs) throws Exception {
         // 获取集群的Group列表
-        List<String> groupNameList = groupService.listGroupsFromKafka(clusterPhy.getId());
+        List<String> groupNameList = groupService.listGroupsFromKafka(clusterPhy);
 
         TaskResult allSuccess = TaskResult.SUCCESS;
 
@@ -42,7 +42,7 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
         List<Group> groupList = new ArrayList<>();
         for (String groupName : groupNameList) {
             try {
-                Group group = groupService.getGroupFromKafka(clusterPhy.getId(), groupName);
+                Group group = groupService.getGroupFromKafka(clusterPhy, groupName);
                 if (group == null) {
                     continue;
                 }

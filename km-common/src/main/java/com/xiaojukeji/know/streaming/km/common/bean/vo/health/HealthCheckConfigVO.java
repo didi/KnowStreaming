@@ -20,6 +20,9 @@ public class HealthCheckConfigVO {
     @ApiModelProperty(value="检查维度名称", example = "Broker")
     private String dimensionName;
 
+    @ApiModelProperty(value="检查维度前端展示名称", example = "Connector")
+    private String dimensionDisplayName;
+
     @ApiModelProperty(value="配置组", example = "HEALTH")
     private String configGroup;
 
