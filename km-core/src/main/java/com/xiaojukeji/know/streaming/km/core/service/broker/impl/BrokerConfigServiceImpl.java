@@ -22,6 +22,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistExcept
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
@@ -42,7 +43,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 
 
 @Service
-public class BrokerConfigServiceImpl extends BaseVersionControlService implements BrokerConfigService {
+public class BrokerConfigServiceImpl extends BaseKafkaVersionControlService implements BrokerConfigService {
     private static final ILog log = LogFactory.getLog(BrokerConfigServiceImpl.class);
 
     private static final String GET_BROKER_CONFIG      = "getBrokerConfig";

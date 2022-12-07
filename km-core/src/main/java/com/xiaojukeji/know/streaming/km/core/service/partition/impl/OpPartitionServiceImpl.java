@@ -10,7 +10,7 @@ import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.core.service.partition.OpPartitionService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import kafka.zk.KafkaZkClient;
@@ -36,7 +36,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Service
-public class OpPartitionServiceImpl extends BaseVersionControlService implements OpPartitionService {
+public class OpPartitionServiceImpl extends BaseKafkaVersionControlService implements OpPartitionService {
     private static final ILog LOGGER = LogFactory.getLog(OpPartitionServiceImpl.class);
 
     @Autowired

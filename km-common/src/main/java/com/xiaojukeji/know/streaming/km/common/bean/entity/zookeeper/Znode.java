@@ -1,7 +1,5 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper;
 
-
-import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.zookeeper.data.Stat;

@@ -69,6 +69,20 @@ public class JmxName {
     public static final String JMX_ZK_SYNC_CONNECTS_PER_SEC             = "kafka.server:type=SessionExpireListener,name=ZooKeeperSyncConnectsPerSec";
     public static final String JMX_ZK_DISCONNECTORS_PER_SEC             = "kafka.server:type=SessionExpireListener,name=ZooKeeperDisconnectsPerSec";
 
+    /*********************************************************** connect ***********************************************************/
+    public static final String JMX_CONNECT_WORKER_METRIC                = "kafka.connect:type=connect-worker-metrics";
+
+    public static final String JMX_CONNECT_WORKER_CONNECTOR_METRIC      = "kafka.connect:type=connect-worker-metrics,connector=%s";
+
+    public static final String JMX_CONNECTOR_TASK_CONNECTOR_METRIC      = "kafka.connect:type=connector-task-metrics,connector=%s,task=%s";
+
+    public static final String JMX_CONNECTOR_SOURCE_TASK_METRICS        = "kafka.connect:type=source-task-metrics,connector=%s,task=%s";
+
+    public static final String JMX_CONNECTOR_SINK_TASK_METRICS          = "kafka.connect:type=sink-task-metrics,connector=%s,task=%s";
+
+    public static final String JMX_CONNECTOR_TASK_ERROR_METRICS         = "kafka.connect:type=task-error-metrics,connector=%s,task=%s";
+
+
     private JmxName() {
     }
 }

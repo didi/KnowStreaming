@@ -19,7 +19,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import kafka.admin.ReassignPartitionsCommand;
@@ -42,7 +42,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.SERVICE_OP_REASSIGNMENT;
 
 @Service
-public class ReassignServiceImpl extends BaseVersionControlService implements ReassignService {
+public class ReassignServiceImpl extends BaseKafkaVersionControlService implements ReassignService {
     private static final ILog log = LogFactory.getLog(ReassignServiceImpl.class);
 
     private static final String EXECUTE_TASK                = "executeTask";

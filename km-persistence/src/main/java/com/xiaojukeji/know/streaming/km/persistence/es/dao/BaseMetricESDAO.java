@@ -13,8 +13,10 @@ import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.IndexNameUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.BaseESDAO;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateLoaderUtil;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
@@ -29,8 +31,7 @@ public class BaseMetricESDAO extends BaseESDAO {
     /**
      * 操作的索引名称
      */
-    protected String            indexName;
-    protected String            indexTemplate;
+    protected String                indexName;
 
     protected static final Long     ONE_MIN =  60 * 1000L;
     protected static final Long     FIVE_MIN = 5  * ONE_MIN;
@@ -44,6 +45,9 @@ public class BaseMetricESDAO extends BaseESDAO {
      */
     private static Map<String, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps.newConcurrentMap();
 
+    @Autowired
+    private TemplateLoaderUtil templateLoaderUtil;
+
     /**
      * es 地址
      */
@@ -56,6 +60,7 @@ public class BaseMetricESDAO extends BaseESDAO {
     @Scheduled(cron = "0 3/5 * * * ?")
     public void checkCurrentDayIndexExist(){
         try {
+            String indexTemplate = templateLoaderUtil.getContextByFileName(indexName);
             esOpClient.createIndexTemplateIfNotExist(indexName, indexTemplate);
 
             //检查最近7天索引存在不存
@@ -101,6 +106,15 @@ public class BaseMetricESDAO extends BaseESDAO {
      */
     public static void register(String statsType, BaseMetricESDAO baseAriusStatsEsDao) {
         ariusStatsEsDaoMap.put(statsType, baseAriusStatsEsDao);
+    }
+
+    /**
+     * 注册不同维度数据对应操作的es类
+     *
+     * @param baseAriusStatsEsDao
+     */
+    public void register(BaseMetricESDAO baseAriusStatsEsDao) {
+        BaseMetricESDAO.register(indexName, baseAriusStatsEsDao);
     }
 
     /**
@@ -416,7 +430,7 @@ public class BaseMetricESDAO extends BaseESDAO {
         Long endTime    = System.currentTimeMillis();
         Long startTime  = endTime - 12 * ONE_HOUR;
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_LATEST_METRIC_TIME, startTime, endTime, appendQueryDsl);
+        String dsl = dslLoaderUtil.getFormatDslByFileName( DslConstant.GET_LATEST_METRIC_TIME, startTime, endTime, appendQueryDsl);
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         return esOpClient.performRequest(

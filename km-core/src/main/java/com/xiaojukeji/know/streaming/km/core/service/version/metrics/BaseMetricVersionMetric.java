@@ -1,8 +1,10 @@
 package com.xiaojukeji.know.streaming.km.core.service.version.metrics;
 
+import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionConnectJmxInfo;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMetricControlItem;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMethodInfo;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionJmxInfo;
+import com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectorTypeEnum;
 import com.xiaojukeji.know.streaming.km.core.service.version.VersionControlMetricService;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.V_0_10_0_0;
@@ -57,5 +59,18 @@ public abstract class BaseMetricVersionMetric implements VersionControlMetricSer
         VersionJmxInfo jmxExtendInfo =  new VersionJmxInfo();
         jmxExtendInfo.setMethodName(methodName);
         return jmxExtendInfo;
+    }
+
+    protected VersionConnectJmxInfo buildConnectJMXMethodExtend(String methodName) {
+        VersionConnectJmxInfo connectorJmxInfo = new VersionConnectJmxInfo();
+        connectorJmxInfo.setMethodName(methodName);
+        return connectorJmxInfo;
+    }
+
+    protected VersionConnectJmxInfo buildConnectJMXMethodExtend(String methodName, ConnectorTypeEnum type) {
+        VersionConnectJmxInfo connectorJmxInfo = new VersionConnectJmxInfo();
+        connectorJmxInfo.setMethodName(methodName);
+        connectorJmxInfo.setType(type);
+        return connectorJmxInfo;
     }
 }

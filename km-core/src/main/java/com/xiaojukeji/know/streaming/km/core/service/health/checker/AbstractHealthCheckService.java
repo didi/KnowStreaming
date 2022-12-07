@@ -24,7 +24,7 @@ public abstract class AbstractHealthCheckService {
             Function<Tuple<ClusterParam, BaseClusterHealthConfig>, HealthCheckResult>
             > functionMap = new ConcurrentHashMap<>();
 
-    public abstract List<ClusterParam> getResList(Long clusterPhyId);
+    public abstract List<ClusterParam> getResList(Long clusterId);
 
     public abstract HealthCheckDimensionEnum getHealthCheckDimensionEnum();
 

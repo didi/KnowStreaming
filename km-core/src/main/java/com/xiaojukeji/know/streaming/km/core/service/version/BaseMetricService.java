@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * @author didi
  */
-public abstract class BaseMetricService extends BaseVersionControlService {
+public abstract class BaseMetricService extends BaseKafkaVersionControlService {
     private static final ILog LOGGER  = LogFactory.getLog(BaseMetricService.class);
 
     private List<String> metricNames  = new ArrayList<>();

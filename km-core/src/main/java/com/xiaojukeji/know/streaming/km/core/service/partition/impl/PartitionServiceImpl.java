@@ -26,7 +26,7 @@ import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionMap;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaConsumerClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.partition.PartitionDAO;
@@ -57,7 +57,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Service
-public class PartitionServiceImpl extends BaseVersionControlService implements PartitionService {
+public class PartitionServiceImpl extends BaseKafkaVersionControlService implements PartitionService {
     private static final ILog log = LogFactory.getLog(PartitionServiceImpl.class);
 
     private static final String PARTITION_OFFSET_GET    = "getPartitionOffset";

@@ -17,6 +17,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistExcept
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.acl.KafkaAclService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
@@ -47,7 +48,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 
 
 @Service
-public class KafkaAclServiceImpl extends BaseVersionControlService implements KafkaAclService {
+public class KafkaAclServiceImpl extends BaseKafkaVersionControlService implements KafkaAclService {
     private static final ILog log = LogFactory.getLog(KafkaAclServiceImpl.class);
 
     private static final String ACL_GET_FROM_KAFKA    = "getAclFromKafka";

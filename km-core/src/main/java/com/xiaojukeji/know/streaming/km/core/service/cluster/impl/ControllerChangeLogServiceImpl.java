@@ -4,7 +4,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSor
 import com.xiaojukeji.know.streaming.km.common.bean.po.ControllerChangeLogPO;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ControllerChangeLogService;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.ControllerChangeLogDAO;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Service
 public class ControllerChangeLogServiceImpl implements ControllerChangeLogService {
 

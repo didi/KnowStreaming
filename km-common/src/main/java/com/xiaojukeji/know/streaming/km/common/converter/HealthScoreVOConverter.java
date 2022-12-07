@@ -21,6 +21,7 @@ public class HealthScoreVOConverter {
             HealthScoreResultDetailVO vo = new HealthScoreResultDetailVO();
             vo.setDimension(healthScoreResult.getCheckNameEnum().getDimensionEnum().getDimension());
             vo.setDimensionName(healthScoreResult.getCheckNameEnum().getDimensionEnum().getMessage());
+            vo.setDimensionDisplayName(healthScoreResult.getCheckNameEnum().getDimensionEnum().getDimensionDisplayName());
             vo.setConfigName(healthScoreResult.getCheckNameEnum().getConfigName());
             vo.setConfigItem(healthScoreResult.getCheckNameEnum().getConfigItem());
             vo.setConfigDesc(healthScoreResult.getCheckNameEnum().getConfigDesc());
@@ -63,6 +64,7 @@ public class HealthScoreVOConverter {
     public static HealthCheckConfigVO convert2HealthCheckConfigVO(String groupName, BaseClusterHealthConfig config) {
         HealthCheckConfigVO vo = new HealthCheckConfigVO();
         vo.setDimensionCode(config.getCheckNameEnum().getDimensionEnum().getDimension());
+        vo.setDimensionDisplayName(config.getCheckNameEnum().getDimensionEnum().getDimensionDisplayName());
         vo.setDimensionName(config.getCheckNameEnum().getDimensionEnum().name());
         vo.setConfigGroup(groupName);
         vo.setConfigName(config.getCheckNameEnum().getConfigName());
