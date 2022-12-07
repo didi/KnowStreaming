@@ -43,6 +43,8 @@ public class KafkaConstant {
 
     public static final String CONTROLLER_ROLE = "controller";
 
+    public static final String DEFAULT_CONNECT_VERSION = "2.5.0";
+
     public static final Map<String, ConfigDef.ConfigKey> KAFKA_ALL_CONFIG_DEF_MAP = new ConcurrentHashMap<>();
 
     static {

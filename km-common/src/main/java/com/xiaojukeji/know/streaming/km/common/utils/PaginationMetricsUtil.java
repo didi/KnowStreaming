@@ -37,6 +37,11 @@ public class PaginationMetricsUtil {
         return allDataList;
     }
 
+    //比较metricNameList中第一个不为空的metric值。
+    public static <T> void sortMetrics(List<T> allDataList, String metricField, List<String> metricNameList, String defaultSortField, String sortType) {
+        sortMetricList(allDataList, metricField, metricNameList, defaultSortField, sortType);
+    }
+
     public static List<? extends BaseMetrics> sortMetrics(List<? extends BaseMetrics> allDataList, String metricName, String defaultSortField, String sortType) {
         sortMetricList(allDataList, metricName, defaultSortField, sortType);
 
@@ -150,6 +155,102 @@ public class PaginationMetricsUtil {
         }
         return allDataList;
     }
+
+    private static <T> List<T> sortMetricList(List<T> allDataList, String metricFieldName, List<String> metricNameList, String defaultFieldName, String sortType) {
+        if (ValidateUtils.anyBlank(defaultFieldName, sortType) || ValidateUtils.isEmptyList(allDataList)||ValidateUtils.isEmptyList(metricNameList)) {
+            return allDataList;
+        }
+
+        try {
+            Field metricField = FieldUtils.getField(allDataList.get(0).getClass(), metricFieldName, true);
+            Field defaultField = FieldUtils.getField(allDataList.get(0).getClass(), defaultFieldName, true);
+            if(ValidateUtils.anyNull(defaultField, metricField)) {
+                log.debug("method=sortMetrics||className={}||metricFieldName={}||metricNameList={}||defaultFieldName={}||metricSortType={}||msg=field not exist.",
+                        allDataList.get(0).getClass().getSimpleName(), metricFieldName, metricNameList, defaultFieldName, sortType);
+
+                // 字段不存在，则排序失效，直接返回
+                return allDataList;
+            }
+
+            Collections.sort(allDataList, (a1, a2) -> {
+                try {
+                    Object m1 = FieldUtils.readField(a1, metricField.getName(), true);
+                    Object m2 = FieldUtils.readField(a2, metricField.getName(), true);
+
+                    return compareFirstNotNullMetricValue((BaseMetrics)m1, (BaseMetrics)m2, metricNameList, defaultField);
+                } catch (Exception e) {
+                    log.error("method=sortMetrics||className={}||metricFieldName={}||metricNameList={}||defaultFieldName={}||metricSortType={}||errMsg=exception.",
+                            allDataList.get(0).getClass().getSimpleName(), metricFieldName, metricNameList, defaultFieldName, sortType, e);
+                }
+
+                return 0;
+            });
+        } catch (Exception e) {
+            log.error("method=sortMetrics||className={}||metricFieldName={}||metricNameList={}||defaultFieldName={}||metricSortType={}||errMsg=exception.",
+                    allDataList.get(0).getClass().getSimpleName(), metricFieldName, metricNameList, defaultFieldName, sortType, e);
+        }
+
+        if (!SortTypeEnum.DESC.getSortType().equals(sortType)) {
+            Collections.reverse(allDataList);
+        }
+        return allDataList;
+    }
+
+    private static int compareFirstNotNullMetricValue(BaseMetrics a1, BaseMetrics a2, List<String> metricNameList, Field defaultField) {
+        try {
+            // 指标数据排序
+            Float m1 = null;
+            Float m2 = null;
+
+            //获取第一个非空指标
+            for (String metric : metricNameList) {
+                m1 = a1.getMetric(metric);
+                if (m1 != null) {
+                    break;
+                }
+            }
+            for (String metric : metricNameList) {
+                m2 = a2.getMetric(metric);
+                if (m2 != null) {
+                    break;
+                }
+            }
+
+            if (m1 != null && m2 == null) {
+                return -1;
+            } else if (m1 == null && m2 != null) {
+                return 1;
+            } else if (m1 != null && m2 != null) {
+                // 两个都不为空，则进行大小比较
+                int val = compareObject(m2, m1);
+                if (val != 0) {
+                    return val;
+                }
+            }
+
+            // 默认字段排序
+            Object f1 = FieldUtils.readField(a1, defaultField.getName(), true);
+            Object f2 = FieldUtils.readField(a2, defaultField.getName(), true);
+            if (f1 != null && f2 != null) {
+                // 两个都不为空，则进行大小比较
+                return compareObject(f2, f1);
+            }
+            if (f1 != null) {
+                return -1;
+            } else if (f2 != null) {
+                return 1;
+            }
+
+            return 0;
+        } catch (Exception e) {
+            log.debug("method=sortMetricsObject||metricsA={}||metricsB={}||metricNameList={}||defaultFieldName={}||errMsg=exception.",
+                    a1, a2, metricNameList, defaultField.getName(), e);
+        }
+
+        return 0;
+    }
+
+
 
     private static List<? extends BaseMetrics> sortMetricList(List<? extends BaseMetrics> allDataList, String metricName, String defaultSortField, String sortType) {
         if (ValidateUtils.anyBlank(metricName, defaultSortField, sortType) || ValidateUtils.isEmptyList(allDataList)) {

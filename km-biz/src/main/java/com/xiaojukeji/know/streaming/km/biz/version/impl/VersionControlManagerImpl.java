@@ -17,6 +17,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.version.VersionItemVO;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.VersionUtil;
+import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.version.VersionControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,9 @@ public class VersionControlManagerImpl implements VersionControlManager {
     }
 
     @Autowired
+    private ClusterPhyService clusterPhyService;
+
+    @Autowired
     private VersionControlService versionControlService;
 
     @Autowired
@@ -107,7 +111,13 @@ public class VersionControlManagerImpl implements VersionControlManager {
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_BROKER.getCode()), VersionItemVO.class));
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_PARTITION.getCode()), VersionItemVO.class));
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_REPLICATION.getCode()), VersionItemVO.class));
+
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_ZOOKEEPER.getCode()), VersionItemVO.class));
+
+        allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_CONNECT_CLUSTER.getCode()), VersionItemVO.class));
+        allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_CONNECT_CONNECTOR.getCode()), VersionItemVO.class));
+        allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_CONNECT_MIRROR_MAKER.getCode()), VersionItemVO.class));
+
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(WEB_OP.getCode()), VersionItemVO.class));
 
         Map<String, VersionItemVO> map = allVersionItemVO.stream().collect(
@@ -121,18 +131,20 @@ public class VersionControlManagerImpl implements VersionControlManager {
     }
 
     @Override
-    public Result<Map<String, Long>> listAllVersions() {
+    public Result<Map<String, Long>> listAllKafkaVersions() {
         return Result.buildSuc(VersionEnum.allVersionsWithOutMax());
     }
 
     @Override
-    public Result<List<VersionItemVO>> listClusterVersionControlItem(Long clusterId, Integer type) {
+    public Result<List<VersionItemVO>> listKafkaClusterVersionControlItem(Long clusterId, Integer type) {
         List<VersionControlItem> allItem   = versionControlService.listVersionControlItem(type);
         List<VersionItemVO> versionItemVOS = new ArrayList<>();
 
+        String versionStr  = clusterPhyService.getVersionFromCacheFirst(clusterId);
+
         for (VersionControlItem item : allItem){
             VersionItemVO itemVO = ConvertUtil.obj2Obj(item, VersionItemVO.class);
-            boolean      support = versionControlService.isClusterSupport(clusterId, item);
+            boolean      support = versionControlService.isClusterSupport(versionStr, item);
 
             itemVO.setSupport(support);
             itemVO.setDesc(itemSupportDesc(item, support));
@@ -145,7 +157,7 @@ public class VersionControlManagerImpl implements VersionControlManager {
 
     @Override
     public Result<List<UserMetricConfigVO>> listUserMetricItem(Long clusterId, Integer type, String operator) {
-        Result<List<VersionItemVO>> ret = listClusterVersionControlItem(clusterId, type);
+        Result<List<VersionItemVO>> ret = listKafkaClusterVersionControlItem(clusterId, type);
         if(null == ret || ret.failed()){
             return Result.buildFail();
         }

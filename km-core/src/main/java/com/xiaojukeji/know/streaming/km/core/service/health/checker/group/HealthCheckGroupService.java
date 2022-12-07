@@ -9,6 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.Cluster
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.group.GroupParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchTerm;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
@@ -78,7 +79,7 @@ public class HealthCheckGroupService extends AbstractHealthCheckService {
             return null;
         }
 
-        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes()? 0: 1);
+        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes() ? Constant.NO : Constant.YES);
 
         return checkResult;
     }

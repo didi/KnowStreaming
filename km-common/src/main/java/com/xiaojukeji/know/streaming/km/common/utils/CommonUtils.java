@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -250,5 +251,14 @@ public class CommonUtils {
         }
 
         return true;
+    }
+
+    public static String getWorkerId(String url){
+        try {
+            URI uri = new URI(url);
+            return uri.getHost() + ":" + uri.getPort();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

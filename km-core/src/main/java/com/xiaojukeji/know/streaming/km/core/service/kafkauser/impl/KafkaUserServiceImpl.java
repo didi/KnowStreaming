@@ -27,6 +27,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkauser.KafkaUserService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
@@ -54,7 +55,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 
 
 @Service
-public class KafkaUserServiceImpl extends BaseVersionControlService implements KafkaUserService {
+public class KafkaUserServiceImpl extends BaseKafkaVersionControlService implements KafkaUserService {
     private static final ILog log  = LogFactory.getLog(KafkaUserServiceImpl.class);
 
     private static final String KAFKA_USER_REPLACE                  = "replaceKafkaUser";

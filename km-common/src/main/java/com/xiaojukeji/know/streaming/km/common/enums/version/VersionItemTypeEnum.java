@@ -13,6 +13,10 @@ public enum VersionItemTypeEnum {
 
     METRIC_ZOOKEEPER(110, "ZookeeperMetric"),
 
+    METRIC_CONNECT_CLUSTER(120, "ConnectClusterMetric"),
+    METRIC_CONNECT_CONNECTOR(121, "ConnectConnectorMetric"),
+    METRIC_CONNECT_MIRROR_MAKER(122, "ConnectMirrorMakerMetric"),
+
     /**
      * 服务端查询
      */
@@ -37,6 +41,9 @@ public enum VersionItemTypeEnum {
 
     SERVICE_OP_REASSIGNMENT(330, "service_reassign_operation"),
 
+    SERVICE_OP_CONNECT_CLUSTER(400, "service_connect_cluster_operation"),
+    SERVICE_OP_CONNECT_CONNECTOR(401, "service_connect_connector_operation"),
+    SERVICE_OP_CONNECT_PLUGIN(402, "service_connect_plugin_operation"),
 
     /**
      * 前端操作
