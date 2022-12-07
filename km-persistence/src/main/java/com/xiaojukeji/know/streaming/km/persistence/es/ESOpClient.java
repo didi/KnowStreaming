@@ -150,8 +150,7 @@ public class ESOpClient {
     }
 
     public <T> List<T> performRequest(String indexName, String queryDsl, Class<T> clzz) {
-        ESQueryResponse esQueryResponse = doQuery(
-                new ESQueryRequest().indices(indexName).source(queryDsl).clazz(clzz));
+        ESQueryResponse esQueryResponse = this.doQuery(new ESQueryRequest().indices(indexName).source(queryDsl).clazz(clzz));
         if (esQueryResponse == null) {
             return new ArrayList<>();
         }
@@ -447,8 +446,13 @@ public class ESOpClient {
 
             return response;
         } catch (Exception e) {
-            LOGGER.error( "method=doQuery||indexName={}||queryDsl={}||errMsg=query error. ",
-                    request.indices(), bytesReferenceConvertDsl(request.source()), e);
+            LOGGER.error(
+                    "method=doQuery||indexName={}||queryDsl={}||errMsg=query error. ",
+                    request.indices(),
+                    bytesReferenceConvertDsl(request.source()),
+                    e
+            );
+
             return null;
         }
     }
