@@ -1,12 +1,12 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.group;
 
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSGroupDescription;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,14 +61,14 @@ public class Group {
      */
     private int coordinatorId;
 
-    public Group(Long clusterPhyId, String groupName, ConsumerGroupDescription groupDescription) {
+    public Group(Long clusterPhyId, String groupName, KSGroupDescription groupDescription) {
         this.clusterPhyId = clusterPhyId;
-        this.type = groupDescription.isSimpleConsumerGroup()? GroupTypeEnum.CONSUMER: GroupTypeEnum.CONNECTOR;
+        this.type = GroupTypeEnum.getTypeByProtocolType(groupDescription.protocolType());
         this.name = groupName;
         this.state = GroupStateEnum.getByRawState(groupDescription.state());
-        this.memberCount = groupDescription.members() == null? 0: groupDescription.members().size();
+        this.memberCount = groupDescription.members() == null ? 0 : groupDescription.members().size();
         this.topicMembers = new ArrayList<>();
         this.partitionAssignor = groupDescription.partitionAssignor();
-        this.coordinatorId = groupDescription.coordinator() == null? Constant.INVALID_CODE: groupDescription.coordinator().id();
+        this.coordinatorId = groupDescription.coordinator() == null ? Constant.INVALID_CODE : groupDescription.coordinator().id();
     }
 }

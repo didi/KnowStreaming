@@ -5,7 +5,7 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.constant.ESConstant;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -15,18 +15,16 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.ZOOKEEPER_INDEX;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.ZOOKEEPER_TEMPLATE;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.ZOOKEEPER_INDEX;
 
 @Component
 public class ZookeeperMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName     = ZOOKEEPER_INDEX;
-        super.indexTemplate = ZOOKEEPER_TEMPLATE;
+        super.indexName = ZOOKEEPER_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register(this);
     }
 
     /**
@@ -49,7 +47,7 @@ public class ZookeeperMetricESDAO extends BaseMetricESDAO {
         //4、构造dsl查询条件，开始查询
         try {
             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                    DslsConstant.GET_ZOOKEEPER_AGG_LIST_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+                    DslConstant.GET_ZOOKEEPER_AGG_LIST_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
 
             return esOpClient.performRequestWithRouting(
                     String.valueOf(clusterPhyId),

@@ -26,7 +26,7 @@ import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
@@ -46,7 +46,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 
 
 @Service
-public class TopicConfigServiceImpl extends BaseVersionControlService implements TopicConfigService {
+public class TopicConfigServiceImpl extends BaseKafkaVersionControlService implements TopicConfigService {
     private static final ILog log = LogFactory.getLog(TopicConfigServiceImpl.class);
 
     private static final String GET_TOPIC_CONFIG                    = "getTopicConfig";

@@ -30,6 +30,8 @@ public enum OperationEnum {
 
     CANCEL(10, "取消"),
 
+    RESTART(11, "重启"),
+
     ;
 
     OperationEnum(int code, String desc) {

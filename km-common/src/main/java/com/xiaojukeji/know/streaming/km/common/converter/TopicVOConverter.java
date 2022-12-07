@@ -1,6 +1,5 @@
 package com.xiaojukeji.know.streaming.km.common.converter;
 
-import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BaseMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.PartitionMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
@@ -14,7 +13,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiL
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.TopicRecordVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.partition.TopicPartitionVO;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import io.swagger.annotations.ApiModelProperty;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Header;
 

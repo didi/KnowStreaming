@@ -21,6 +21,9 @@ public class HealthScoreBaseResultVO extends BaseTimeVO {
     @ApiModelProperty(value="检查维度名称", example = "cluster")
     private String dimensionName;
 
+    @ApiModelProperty(value="检查维度前端显示名称", example = "cluster")
+    private String dimensionDisplayName;
+
     @ApiModelProperty(value="检查名称", example = "Group延迟")
     private String configName;
 

@@ -3,7 +3,6 @@ package com.xiaojukeji.know.streaming.km.common.bean.entity.broker;
 
 import com.alibaba.fastjson.TypeReference;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.common.IpPortData;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerPO;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import lombok.AllArgsConstructor;

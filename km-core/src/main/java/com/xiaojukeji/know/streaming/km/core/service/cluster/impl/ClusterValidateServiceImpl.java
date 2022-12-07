@@ -16,7 +16,6 @@ import com.xiaojukeji.know.streaming.km.persistence.jmx.JmxDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.impl.KafkaZKDAOImpl;
 import kafka.server.KafkaConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -35,7 +34,6 @@ import java.util.*;
  * @author zengqiao
  * @date 22/02/28
  */
-@Slf4j
 @Service
 public class ClusterValidateServiceImpl implements ClusterValidateService {
     private static final ILog logger = LogFactory.getLog(KafkaZKDAOImpl.class);

@@ -12,7 +12,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ClusterMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -23,17 +23,16 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.CLUSTER_INDEX;
 
 @Component
 public class ClusterMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName     = CLUSTER_INDEX;
-        super.indexTemplate = CLUSTER_TEMPLATE;
+        super.indexName = CLUSTER_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register(this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("ClusterMetricESDAO", 4,8, 500);
@@ -46,7 +45,7 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
         Long startTime = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_CLUSTER_LATEST_METRICS, clusterId, startTime, endTime);
+                DslConstant.GET_CLUSTER_LATEST_METRICS, clusterId, startTime, endTime);
 
         ClusterMetricPO clusterMetricPO = esOpClient.performRequestAndTakeFirst(
                 clusterId.toString(), realIndex(startTime, endTime), dsl, ClusterMetricPO.class);
@@ -67,7 +66,7 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
         String aggDsl   = buildAggsDSL(metrics, aggType);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_CLUSTER_AGG_SINGLE_METRICS, clusterPhyId, startTime, endTime, aggDsl);
+                DslConstant.GET_CLUSTER_AGG_SINGLE_METRICS, clusterPhyId, startTime, endTime, aggDsl);
 
         return esOpClient.performRequestWithRouting(String.valueOf(clusterPhyId), realIndex, dsl,
                 s -> handleSingleESQueryResponse(s, metrics, aggType), 3);
@@ -103,7 +102,7 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
         }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.LIST_CLUSTER_WITH_LATEST_METRICS, latestMetricTime, appendQueryDsl.toString(), sortDsl);
+                DslConstant.LIST_CLUSTER_WITH_LATEST_METRICS, latestMetricTime, appendQueryDsl.toString(), sortDsl);
 
         return esOpClient.performRequest(realIndex, dsl, ClusterMetricPO.class);
     }
@@ -133,7 +132,7 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
                         5000,
                         () -> {
                             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                                    DslsConstant.GET_CLUSTER_AGG_LIST_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+                                    DslConstant.GET_CLUSTER_AGG_LIST_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
 
                             Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequestWithRouting(
                                     String.valueOf(clusterPhyId), realIndex, dsl,

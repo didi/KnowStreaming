@@ -9,7 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPoint
 import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -18,16 +18,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.BROKER_INDEX;
 
 @Component
 public class BrokerMetricESDAO extends BaseMetricESDAO {
     @PostConstruct
     public void init() {
-        super.indexName     = BROKER_INDEX;
-        super.indexTemplate = BROKER_TEMPLATE;
+        super.indexName = BROKER_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register( this);
     }
 
     protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("BrokerMetricESDAO", 4,8, 500);
@@ -40,7 +39,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         Long startTime = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_BROKER_LATEST_METRICS, clusterId, brokerId, startTime, endTime);
+                DslConstant.GET_BROKER_LATEST_METRICS, clusterId, brokerId, startTime, endTime);
 
         BrokerMetricPO brokerMetricPO = esOpClient.performRequestAndTakeFirst(
                 brokerId.toString(),
@@ -68,7 +67,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         String aggDsl   = buildAggsDSL(metrics, aggType);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_BROKER_AGG_SINGLE_METRICS, clusterPhyId, brokerId, startTime, endTime, aggDsl);
+                DslConstant.GET_BROKER_AGG_SINGLE_METRICS, clusterPhyId, brokerId, startTime, endTime, aggDsl);
 
         return esOpClient.performRequestWithRouting(
                 String.valueOf(brokerId),
@@ -132,7 +131,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         for(Long brokerId : brokerIds){
             try {
                 String dsl = dslLoaderUtil.getFormatDslByFileName(
-                        DslsConstant.GET_BROKER_AGG_LIST_METRICS,
+                        DslConstant.GET_BROKER_AGG_LIST_METRICS,
                         clusterPhyId,
                         brokerId,
                         startTime,
@@ -154,8 +153,8 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
                             );
 
                             synchronized (table) {
-                                for(String metric : metricMap.keySet()){
-                                    table.put(metric, brokerId, metricMap.get(metric));
+                                for(Map.Entry<String, List<MetricPointVO>> entry: metricMap.entrySet()){
+                                    table.put(entry.getKey(), brokerId, entry.getValue());
                                 }
                             }
                         });
@@ -187,7 +186,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
 
         //4、查询es
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_BROKER_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+                DslConstant.GET_BROKER_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
 
         return esOpClient.performRequest(realIndex, dsl,
                 s -> handleTopBrokerESQueryResponse(s, metrics, topN), 3);
