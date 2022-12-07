@@ -18,6 +18,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionJmxInf
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.TopicMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
+import com.xiaojukeji.know.streaming.km.common.constant.ESConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.AggTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
@@ -152,9 +153,17 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
 
     @Override
     public List<TopicMetrics> listTopicLatestMetricsFromES(Long clusterPhyId, List<String> topicNames, List<String> metricNames) {
-        List<TopicMetricPO> topicMetricPOs = topicMetricESDAO.listTopicLatestMetric(clusterPhyId, topicNames, metricNames);
+        List<TopicMetricPO> poList = new ArrayList<>();
 
-        return ConvertUtil.list2List(topicMetricPOs, TopicMetrics.class);
+        for (int i = 0; i < topicNames.size(); i += ESConstant.SEARCH_LATEST_TOPIC_METRIC_CNT_PER_REQUEST) {
+            poList.addAll(topicMetricESDAO.listTopicLatestMetric(
+                    clusterPhyId,
+                    topicNames.subList(i, Math.min(i + ESConstant.SEARCH_LATEST_TOPIC_METRIC_CNT_PER_REQUEST, topicNames.size())),
+                    Collections.emptyList())
+            );
+        }
+
+        return ConvertUtil.list2List(poList, TopicMetrics.class);
     }
 
     @Override
