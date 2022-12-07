@@ -18,7 +18,7 @@ import ReplicaMove from '@src/components/TopicJob/ReplicaMove';
 import { formatAssignSize } from '../Jobs/config';
 import { DownOutlined } from '@ant-design/icons';
 import { tableHeaderPrefix } from '@src/constants/common';
-import {sliderValueMap} from "@src/pages/MutliClusterPage/config";
+import { HealthStateMap } from './config';
 
 const { Option } = Select;
 
@@ -92,8 +92,7 @@ const AutoPage = (props: any) => {
     const orgVal = record?.latestMetrics?.metrics?.[metricName];
     if (orgVal !== undefined) {
       if (metricName === 'HealthState') {
-        const val = sliderValueMap[(orgVal) as keyof typeof sliderValueMap];
-        return  val.name;
+        return HealthStateMap[orgVal] || '-';
       } else if (metricName === 'LogSize') {
         return Number(Utils.formatAssignSize(orgVal, 'MB')).toLocaleString();
       } else {
@@ -165,8 +164,8 @@ const AutoPage = (props: any) => {
         sorter: true,
         // 设计图上量出来的是144，但做的时候发现写144 header部分的sort箭头不出来，所以临时调大些
         width: 170,
-        render: (value: any, record: any) =>{
-          return calcCurValue(record, "HealthState")
+        render: (value: any, record: any) => {
+          return calcCurValue(record, 'HealthState');
         },
       },
       // {
