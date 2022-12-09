@@ -50,7 +50,6 @@ logging:
 thread-pool:
   scheduled:
     thread-num: 2 # @Scheduled任务的线程池大小，默认是一个
-
   collector:                        # 采集模块的配置
     future-util:                    # 采集模块线程池配置
       num: 3                        # 线程池个数
@@ -58,7 +57,6 @@ thread-pool:
       queue-size: 10000             # 每个线程池队列大小
       select-suitable-enable: true  # 任务是否自动选择合适的线程池，非主要，可不修改
       suitable-queue-size: 1000     # 线程池理想的队列大小，非主要，可不修改
-
   task:                             # 任务模块的配置
     metrics:                        # metrics采集任务配置
       thread-num: 18                # metrics采集任务线程池核心线程数
@@ -69,6 +67,10 @@ thread-pool:
     common:                         # 剩余其他任务配置
       thread-num: 15                # 剩余其他任务线程池核心线程数
       queue-size: 150               # 剩余其他任务线程池队列大小
+  es:
+    search:                         # es查询线程池
+      thread-num: 10                # 线程池大小
+      queue-size: 5000              # 队列大小
 
 
 # 客户端池大小相关配置
