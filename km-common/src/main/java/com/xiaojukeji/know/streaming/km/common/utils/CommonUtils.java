@@ -261,4 +261,20 @@ public class CommonUtils {
             return null;
         }
     }
+
+
+    /**
+     * 校验两个list的第一个元素是否相等,以","分隔元素。
+     * @param str1
+     * @param str2
+     * @return
+     */
+    public static boolean checkFirstElementIsEquals(String str1, String str2) {
+        if (ValidateUtils.anyBlank(str1, str2)) {
+            return false;
+        }
+        Integer targetLeader = CommonUtils.string2IntList(str1).get(0);
+        Integer originalLeader = CommonUtils.string2IntList(str2).get(0);
+        return originalLeader.equals(targetLeader);
+    }
 }
