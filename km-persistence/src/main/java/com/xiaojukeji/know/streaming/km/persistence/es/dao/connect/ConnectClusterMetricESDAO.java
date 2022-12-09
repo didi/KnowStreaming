@@ -5,13 +5,11 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
-import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.BaseMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -28,8 +26,6 @@ public class ConnectClusterMetricESDAO extends BaseMetricESDAO {
         checkCurrentDayIndexExist();
         register( this);
     }
-
-    protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("ConnectClusterMetricESDAO", 4,8, 500);
 
     /**
      * 获取集群 clusterPhyId 中每个 metric 的 topN 的 connectCluster 在指定时间[startTime、endTime]区间内所有的指标
@@ -97,7 +93,7 @@ public class ConnectClusterMetricESDAO extends BaseMetricESDAO {
                         aggDsl
                 );
 
-                queryFuture.runnableTask(
+                esTPService.submitSearchTask(
                         String.format("class=ConnectClusterMetricESDAO||method=listMetricsByConnectClusterIdList||ClusterPhyId=%d", clusterPhyId),
                         5000,
                         () -> {
@@ -106,24 +102,24 @@ public class ConnectClusterMetricESDAO extends BaseMetricESDAO {
                                     realIndex,
                                     dsl,
                                     s -> handleListESQueryResponse(s, metricNameList, aggType),
-                                    3
+                                    DEFAULT_RETRY_TIME
                             );
 
                             synchronized (table) {
-                                for(String metric : metricMap.keySet()){
-                                    table.put(metric, connectClusterId, metricMap.get(metric));
+                                for(Map.Entry<String, List<MetricPointVO>> entry : metricMap.entrySet()){
+                                    table.put(entry.getKey(), connectClusterId, entry.getValue());
                                 }
                             }
                         });
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=ConnectClusterMetricESDAO||method=listMetricsByConnectClusterIdList||clusterPhyId={}||connectClusterId{}||errMsg=exception!",
+                        "method=listMetricsByConnectClusterIdList||clusterPhyId={}||connectClusterId={}||errMsg=exception!",
                         clusterPhyId, connectClusterId, e
                 );
             }
         }
 
-        queryFuture.waitExecute();
+        esTPService.waitExecute();
 
         return table;
     }
@@ -167,107 +163,89 @@ public class ConnectClusterMetricESDAO extends BaseMetricESDAO {
 
     /**************************************************** private method ****************************************************/
 
-    private Map<String, List<MetricPointVO>> handleListESQueryResponse(ESQueryResponse response, List<String> metrics, String aggType){
+    private Map<String, List<MetricPointVO>> handleListESQueryResponse(ESQueryResponse response, List<String> metricNameList, String aggType){
         Map<String, List<MetricPointVO>> metricMap = new HashMap<>();
 
-        if(null == response || null == response.getAggs()){
+        Map<String, ESAggr> esAggrMap = this.checkBucketsAndHitsOfResponseAggs(response);
+        if(null == esAggrMap) {
             return metricMap;
         }
 
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null == esAggrMap || null == esAggrMap.get(HIST)) {
-            return metricMap;
-        }
-
-        if(CollectionUtils.isEmpty(esAggrMap.get(HIST).getBucketList())){
-            return metricMap;
-        }
-
-        for(String metric : metrics){
+        for(String metricName : metricNameList){
             List<MetricPointVO> metricPoints = new ArrayList<>();
 
-            esAggrMap.get(HIST).getBucketList().forEach( esBucket -> {
+            esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
                 try {
                     if (null != esBucket.getUnusedMap().get(KEY)) {
                         Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        Object  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
-                        if(null           == value){return;}
+                        Object  value     = esBucket.getAggrMap().get(metricName).getUnusedMap().get(VALUE);
+                        if(null == value) {
+                            return;
+                        }
 
-                        MetricPointVO metricPoint = new MetricPointVO();
-                        metricPoint.setAggType(aggType);
-                        metricPoint.setTimeStamp(timestamp);
-                        metricPoint.setValue(value.toString());
-                        metricPoint.setName(metric);
-
-                        metricPoints.add(metricPoint);
-                    }else {
-                        LOGGER.info("");
+                        metricPoints.add(new MetricPointVO(metricName, timestamp, value.toString(), aggType));
                     }
                 }catch (Exception e){
-                    LOGGER.error("metric={}||errMsg=exception!", metric, e);
+                    LOGGER.error("method=handleListESQueryResponse||metricName={}||errMsg=exception!", metricName, e);
                 }
             } );
 
-            metricMap.put(metric, optimizeMetricPoints(metricPoints));
+            metricMap.put(metricName, optimizeMetricPoints(metricPoints));
         }
 
         return metricMap;
     }
 
-    private Map<String, List<Long>> handleTopConnectClusterESQueryResponse(ESQueryResponse response, List<String> metrics, int topN){
+    private Map<String, List<Long>> handleTopConnectClusterESQueryResponse(ESQueryResponse response, List<String> metricNameList, int topN){
         Map<String, List<Long>> ret = new HashMap<>();
 
-        if(null == response || null == response.getAggs()){
+        Map<String, ESAggr> esAggrMap = this.checkBucketsAndHitsOfResponseAggs(response);
+        if(null == esAggrMap) {
             return ret;
         }
 
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null == esAggrMap || null == esAggrMap.get(HIST)) {
-            return ret;
-        }
-
-        if(CollectionUtils.isEmpty(esAggrMap.get(HIST).getBucketList())){
-            return ret;
-        }
-
-        Map<String, List<Tuple<Long, Double>>> metricBrokerValueMap = new HashMap<>();
+        Map<String, List<Tuple<Long, Double>>> metricConnectClusterValueMap = new HashMap<>();
 
         //1、先获取每个指标对应的所有brokerIds以及指标的值
-        for(String metric : metrics) {
-            esAggrMap.get(HIST).getBucketList().forEach( esBucket -> {
+        for(String metricName : metricNameList) {
+            esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
                 try {
-                    if (null != esBucket.getUnusedMap().get(KEY)) {
-                        Long connectorClusterId = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        Object           value  = esBucket.getAggrMap().get(HIST).getBucketList()
-                                                    .get(0).getAggrMap().get(metric).getUnusedMap().get(VALUE);
-
-                        if(null == value){return;}
-
-                        List<Tuple<Long, Double>> connectorClusterValue = (null == metricBrokerValueMap.get(metric)) ?
-                                new ArrayList<>() : metricBrokerValueMap.get(metric);
-
-                        connectorClusterValue.add(new Tuple<>(connectorClusterId, Double.valueOf(value.toString())));
-                        metricBrokerValueMap.put(metric, connectorClusterValue);
+                    if (null == esBucket.getUnusedMap().get(KEY)) {
+                        return;
                     }
+
+                    Long connectorClusterId = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
+                    Object value = esBucket.getAggrMap().get(HIST).getBucketList().get(0).getAggrMap().get(metricName).getUnusedMap().get(VALUE);
+                    if(null == value) {
+                        return;
+                    }
+
+                    metricConnectClusterValueMap.putIfAbsent(metricName, new ArrayList<>());
+                    metricConnectClusterValueMap.get(metricName).add(new Tuple<>(connectorClusterId, Double.valueOf(value.toString())));
                 }catch (Exception e){
-                    LOGGER.error("metric={}||errMsg=exception!", metric, e);
+                    LOGGER.error("method=handleTopConnectClusterESQueryResponse||metricName={}||errMsg=exception!", metricName, e);
                 }
             } );
         }
 
-        //2、对每个指标的broker按照指标值排序，并截取前topN个brokerIds
-        for(String metric : metricBrokerValueMap.keySet()){
-            List<Tuple<Long, Double>> connectorClusterValue = metricBrokerValueMap.get(metric);
+        //2、对每个指标的connect按照指标值排序，并截取前topN个connectIds
+        for(Map.Entry<String, List<Tuple<Long, Double>>> entry : metricConnectClusterValueMap.entrySet()){
 
-            connectorClusterValue.sort((o1, o2) -> {
-                if(null == o1 || null == o2){return 0;}
+            entry.getValue().sort((o1, o2) -> {
+                if(null == o1 || null == o2) {
+                    return 0;
+                }
+
                 return o2.getV2().compareTo(o1.getV2());
-            } );
+            });
 
-            List<Tuple<Long, Double>> temp = (connectorClusterValue.size() > topN) ? connectorClusterValue.subList(0, topN) : connectorClusterValue;
-            List<Long> connectorClusterIds = temp.stream().map(t -> t.getV1()).collect(Collectors.toList());
+            List<Long> connectorClusterIdList = entry.getValue()
+                    .subList(0, Math.min(entry.getValue().size(), topN))
+                    .stream()
+                    .map(t -> t.getV1())
+                    .collect(Collectors.toList());
 
-            ret.put(metric, connectorClusterIds);
+            ret.put(entry.getKey(), connectorClusterIdList);
         }
 
         return ret;
