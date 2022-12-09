@@ -10,7 +10,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchRange;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchSort;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ClusterMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
-import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
@@ -34,8 +33,6 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
         checkCurrentDayIndexExist();
         register(this);
     }
-
-    protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("ClusterMetricESDAO", 4,8, 500);
 
     /**
      * 获取集群 clusterId 最新的统计指标
@@ -127,30 +124,39 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
         //4、构造dsl查询条件，开始查询
         for(Long clusterPhyId : clusterPhyIds){
             try {
-                queryFuture.runnableTask(
+                esTPService.submitSearchTask(
                         String.format("class=ClusterMetricESDAO||method=listClusterMetricsByClusterIds||ClusterPhyId=%d", clusterPhyId),
                         5000,
                         () -> {
                             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                                    DslConstant.GET_CLUSTER_AGG_LIST_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+                                    DslConstant.GET_CLUSTER_AGG_LIST_METRICS,
+                                    clusterPhyId,
+                                    startTime,
+                                    endTime,
+                                    interval,
+                                    aggDsl
+                            );
 
                             Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequestWithRouting(
-                                    String.valueOf(clusterPhyId), realIndex, dsl,
-                                    s -> handleListESQueryResponse(s, metrics, aggType), 3);
+                                    String.valueOf(clusterPhyId),
+                                    realIndex,
+                                    dsl,
+                                    s -> handleListESQueryResponse(s, metrics, aggType),
+                                    DEFAULT_RETRY_TIME
+                            );
 
                             synchronized (table){
-                                for(String metric : metricMap.keySet()){
-                                    table.put(metric, clusterPhyId, metricMap.get(metric));
+                                for(Map.Entry<String/*metric*/, List<MetricPointVO>> entry : metricMap.entrySet()){
+                                    table.put(entry.getKey(), clusterPhyId, entry.getValue());
                                 }
                             }
                         });
             }catch (Exception e){
-                LOGGER.error("method=listClusterMetricsByClusterIds||clusterPhyId={}||errMsg=exception!",
-                        clusterPhyId, e);
+                LOGGER.error("method=listClusterMetricsByClusterIds||clusterPhyId={}||errMsg=exception!", clusterPhyId, e);
             }
         }
 
-        queryFuture.waitExecute();
+        esTPService.waitExecute();
         return table;
     }
 
@@ -182,35 +188,33 @@ public class ClusterMetricESDAO extends BaseMetricESDAO {
         return metricMap;
     }
 
-    private Map<String, List<MetricPointVO>> handleListESQueryResponse(ESQueryResponse response, List<String> metrics, String aggType){
-        Map<String, ESAggr> esAggrMap = checkBucketsAndHitsOfResponseAggs(response);
-        if(null == esAggrMap){return new HashMap<>();}
+    private Map<String, List<MetricPointVO>> handleListESQueryResponse(ESQueryResponse response, List<String> metricNameList, String aggType){
+        Map<String, ESAggr> esAggrMap = this.checkBucketsAndHitsOfResponseAggs(response);
+        if(null == esAggrMap) {
+            return new HashMap<>();
+        }
 
         Map<String, List<MetricPointVO>> metricMap = new HashMap<>();
-        for(String metric : metrics){
+        for(String metricName : metricNameList) {
             List<MetricPointVO> metricPoints = new ArrayList<>();
 
             esAggrMap.get(HIST).getBucketList().forEach( esBucket -> {
                 try {
                     if (null != esBucket.getUnusedMap().get(KEY)) {
                         Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        Object  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
-                        if(null           == value){return;}
+                        Object  value     = esBucket.getAggrMap().get(metricName).getUnusedMap().get(VALUE);
+                        if(null == value) {
+                            return;
+                        }
 
-                        MetricPointVO metricPoint = new MetricPointVO();
-                        metricPoint.setAggType(aggType);
-                        metricPoint.setTimeStamp(timestamp);
-                        metricPoint.setValue(value.toString());
-                        metricPoint.setName(metric);
-
-                        metricPoints.add(metricPoint);
+                        metricPoints.add(new MetricPointVO(metricName, timestamp, value.toString(), aggType));
                     }
-                }catch (Exception e){
-                    LOGGER.error("method=handleESQueryResponse||metric={}||errMsg=exception!", metric, e);
+                } catch (Exception e){
+                    LOGGER.error("method=handleListESQueryResponse||metricName={}||errMsg=exception!", metricName, e);
                 }
             } );
 
-            metricMap.put(metric, optimizeMetricPoints(metricPoints));
+            metricMap.put(metricName, optimizeMetricPoints(metricPoints));
         }
 
         return metricMap;

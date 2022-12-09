@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +10,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @ApiModel(description = "指标点")
 public class MetricPointVO implements Comparable<MetricPointVO> {
     @ApiModelProperty(value = "指标名", example = "HealthScore")
@@ -25,6 +23,13 @@ public class MetricPointVO implements Comparable<MetricPointVO> {
 
     @ApiModelProperty(value = "指标值聚合方式：avg、max、min、sum")
     private String  aggType;
+
+    public MetricPointVO(String name, Long timeStamp, String value, String aggType) {
+        this.name = name;
+        this.timeStamp = timeStamp;
+        this.value = value;
+        this.aggType = aggType;
+    }
 
     @Override
     public int compareTo(MetricPointVO o) {
