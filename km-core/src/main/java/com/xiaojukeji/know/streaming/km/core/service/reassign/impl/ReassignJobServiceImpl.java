@@ -508,8 +508,9 @@ public class ReassignJobServiceImpl implements ReassignJobService {
             }
         });
 
-        if (!topicPartitions.isEmpty()){
-            return opPartitionService.preferredReplicaElection(jobPO.getClusterPhyId(), topicPartitions);
+        //无论优先副本选举是否成功，都返回成功，以保证job的数据更新
+        if (!topicPartitions.isEmpty()) {
+            opPartitionService.preferredReplicaElection(jobPO.getClusterPhyId(), topicPartitions);
         }
 
         return Result.buildSuc();
