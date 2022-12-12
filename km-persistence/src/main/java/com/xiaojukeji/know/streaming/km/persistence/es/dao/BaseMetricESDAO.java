@@ -12,7 +12,9 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPoint
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.IndexNameUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.BaseESDAO;
+import com.xiaojukeji.know.streaming.km.persistence.es.ESTPService;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateLoaderUtil;
 import lombok.NoArgsConstructor;
@@ -47,6 +49,9 @@ public class BaseMetricESDAO extends BaseESDAO {
 
     @Autowired
     private TemplateLoaderUtil templateLoaderUtil;
+
+    @Autowired
+    protected ESTPService esTPService;
 
     /**
      * es 地址
@@ -364,21 +369,16 @@ public class BaseMetricESDAO extends BaseESDAO {
         sb.append(str, 1, str.length() - 1);
     }
 
-    protected Map<String, ESAggr> checkBucketsAndHitsOfResponseAggs(ESQueryResponse response){
-        if(null == response || null == response.getAggs()){
+    protected Map<String, ESAggr> checkBucketsAndHitsOfResponseAggs(ESQueryResponse response) {
+        if(null == response
+                || null == response.getAggs()
+                || null == response.getAggs().getEsAggrMap()
+                || null == response.getAggs().getEsAggrMap().get(HIST)
+                || ValidateUtils.isEmptyList(response.getAggs().getEsAggrMap().get(HIST).getBucketList())) {
             return null;
         }
 
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null == esAggrMap || null == esAggrMap.get(HIST)) {
-            return null;
-        }
-
-        if(CollectionUtils.isEmpty(esAggrMap.get(HIST).getBucketList())){
-            return null;
-        }
-
-        return esAggrMap;
+        return response.getAggs().getEsAggrMap();
     }
 
     protected int handleESQueryResponseCount(ESQueryResponse response){

@@ -10,7 +10,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.TopicPartitionK
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.GroupMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.enums.AggTypeEnum;
-import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
@@ -35,8 +34,6 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
         register(this);
     }
 
-    protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("GroupMetricESDAO", 4,8, 500);
-
     public List<GroupMetricPO> listLatestMetricsAggByGroupTopic(Long clusterPhyId, List<GroupTopic> groupTopicList, List<String> metrics, AggTypeEnum aggType){
         Long latestTime = getLatestMetricTime();
         Long startTime  = latestTime - FIVE_MIN;
@@ -49,7 +46,7 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
 
         List<GroupMetricPO> groupMetricPOS = new CopyOnWriteArrayList<>();
         for(GroupTopic groupTopic : groupTopicList){
-            queryFuture.runnableTask(
+            esTPService.submitSearchTask(
                     String.format("class=GroupMetricESDAO||method=listLatestMetricsAggByGroupTopic||ClusterPhyId=%d||groupName=%s||topicName=%s",
                             clusterPhyId, groupTopic.getGroupName(), groupTopic.getTopicName()),
                     5000,
@@ -73,7 +70,7 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
                     });
         }
 
-        queryFuture.waitExecute();
+        esTPService.waitExecute();
         return groupMetricPOS;
     }
 
@@ -126,13 +123,26 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
             Integer partition   = tp.getPartition();
 
             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                    DslConstant.LIST_GROUP_METRICS, clusterId, groupName, topic, partition, startTime, endTime, interval, aggDsl);
+                    DslConstant.LIST_GROUP_METRICS,
+                    clusterId,
+                    groupName,
+                    topic,
+                    partition,
+                    startTime,
+                    endTime,
+                    interval,
+                    aggDsl
+            );
 
-            Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequest(realIndex, dsl,
-                    s -> handleGroupMetrics(s, aggType, metrics), 3);
+            Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequest(
+                    realIndex,
+                    dsl,
+                    s -> handleGroupMetrics(s, aggType, metrics),
+                    DEFAULT_RETRY_TIME
+            );
 
-            for(String metric : metricMap.keySet()){
-                table.put(metric, topic + "&" + partition, metricMap.get(metric));
+            for(Map.Entry<String/*metric*/, List<MetricPointVO>> entry: metricMap.entrySet()){
+                table.put(entry.getKey(), topic + "&" + partition, entry.getValue());
             }
         }
 
@@ -188,23 +198,27 @@ public class GroupMetricESDAO extends BaseMetricESDAO {
         for(String metric : metrics){
             List<MetricPointVO> metricPoints = new ArrayList<>();
 
-            esAggrMap.get(HIST).getBucketList().forEach( esBucket -> {
+            esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
                 try {
-                    if (null != esBucket.getUnusedMap().get(KEY)) {
-                        Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        Object  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
-                        if(value          == null){return;}
-
-                        MetricPointVO metricPoint = new MetricPointVO();
-                        metricPoint.setAggType(aggType);
-                        metricPoint.setTimeStamp(timestamp);
-                        metricPoint.setValue(value.toString());
-                        metricPoint.setName(metric);
-
-                        metricPoints.add(metricPoint);
+                    if (null == esBucket.getUnusedMap().get(KEY)) {
+                        return;
                     }
+
+                    Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
+                    Object  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
+                    if(value == null) {
+                        return;
+                    }
+
+                    MetricPointVO metricPoint = new MetricPointVO();
+                    metricPoint.setAggType(aggType);
+                    metricPoint.setTimeStamp(timestamp);
+                    metricPoint.setValue(value.toString());
+                    metricPoint.setName(metric);
+
+                    metricPoints.add(metricPoint);
                 }catch (Exception e){
-                    LOGGER.error("method=handleESQueryResponse||metric={}||errMsg=exception!", metric, e);
+                    LOGGER.error("method=handleGroupMetrics||metric={}||errMsg=exception!", metric, e);
                 }
             } );
 
