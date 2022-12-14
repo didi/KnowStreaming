@@ -65,4 +65,9 @@ public class Constant {
     public static final Integer DEFAULT_RETRY_TIME = 3;
 
     public static final Integer ZK_ALIVE_BUT_4_LETTER_FORBIDDEN         = 11;
+
+    public static final String CONNECTOR_CONFIG_ACTION_RELOAD_NAME      = "config.action.reload";
+
+    public static final String CONNECTOR_CONFIG_ERRORS_TOLERANCE_NAME   = "errors.tolerance";
+
 }
