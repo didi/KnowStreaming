@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 import org.apache.kafka.connect.runtime.rest.entities.ConfigInfo;
 import org.apache.kafka.connect.runtime.rest.entities.ConfigInfos;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static com.xiaojukeji.know.streaming.km.common.constant.Constant.CONNECTOR_CONFIG_ACTION_RELOAD_NAME;
+import static com.xiaojukeji.know.streaming.km.common.constant.Constant.CONNECTOR_CONFIG_ERRORS_TOLERANCE_NAME;
 
 /**
  * @see ConfigInfos
@@ -17,6 +19,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConnectConfigInfos {
+
+    private static final Map<String, List<String>> recommendValuesMap = new HashMap<>();
+
+    static {
+        recommendValuesMap.put(CONNECTOR_CONFIG_ACTION_RELOAD_NAME, Arrays.asList("none", "restart"));
+        recommendValuesMap.put(CONNECTOR_CONFIG_ERRORS_TOLERANCE_NAME, Arrays.asList("none", "all"));
+    }
     private String name;
 
     private int errorCount;
@@ -48,7 +57,7 @@ public class ConnectConfigInfos {
             ConnectConfigValueInfo value = new ConnectConfigValueInfo();
             value.setName(configInfo.configValue().name());
             value.setValue(configInfo.configValue().value());
-            value.setRecommendedValues(configInfo.configValue().recommendedValues());
+            value.setRecommendedValues(recommendValuesMap.getOrDefault(configInfo.configValue().name(), configInfo.configValue().recommendedValues()));
             value.setErrors(configInfo.configValue().errors());
             value.setVisible(configInfo.configValue().visible());
 

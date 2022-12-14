@@ -392,13 +392,13 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
     }
 
     private List<Tuple<Long, String>> listTopNConnectorList(Long clusterPhyId, Integer topN) {
-        List<ConnectorPO> connectorPOS = connectorService.listByKafkaClusterIdFromDB(clusterPhyId);
+        List<ConnectorPO> poList = connectorService.listByKafkaClusterIdFromDB(clusterPhyId);
 
-        if (CollectionUtils.isEmpty(connectorPOS)) {
+        if (CollectionUtils.isEmpty(poList)) {
             return new ArrayList<>();
         }
 
-        return connectorPOS.subList(0, Math.min(topN, connectorPOS.size()))
+        return poList.subList(0, Math.min(topN, poList.size()))
                 .stream()
                 .map( c -> new Tuple<>(c.getId(), c.getConnectorName()) )
                 .collect(Collectors.toList());
