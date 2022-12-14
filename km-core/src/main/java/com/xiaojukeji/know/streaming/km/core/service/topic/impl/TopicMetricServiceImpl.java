@@ -185,7 +185,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> retTable;
         if(CollectionUtils.isEmpty(topics)) {
             //如果 es 中获取不到topN的topic就使用从数据库中获取的topics
-            List<String> defaultTopics = listTopNTopics(clusterId, topN);
+            List<String> defaultTopics = this.listTopNTopics(clusterId, topN);
             retTable = topicMetricESDAO.listTopicMetricsByTopN(clusterId, defaultTopics, metrics, aggType, topN, startTime, endTime );
         }else {
             retTable = topicMetricESDAO.listTopicMetricsByTopics(clusterId, metrics, aggType, topics, startTime, endTime);
