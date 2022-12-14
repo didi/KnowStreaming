@@ -93,7 +93,7 @@ es:
     io-thread-cnt: 2
     max-retry-cnt: 5
   index:
-    expire: 60                    # 索引过期天数，60表示超过60天的索引会被KS过期删除
+    expire: 15                    # 索引过期天数，15表示超过15天的索引会被KS过期删除
 
 # 普罗米修斯指标导出相关配置
 management:
