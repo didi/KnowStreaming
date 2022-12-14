@@ -119,7 +119,7 @@ public class ClusterConnectsController {
     @PostMapping(value = "clusters/{clusterPhyId}/connectors-metrics")
     @ResponseBody
     public Result<List<MetricMultiLinesVO>> getClusterPhyMetrics(@PathVariable Long clusterPhyId,
-                                                                          @Validated @RequestBody MetricsConnectorsDTO dto) {
+                                                                 @Validated @RequestBody MetricsConnectorsDTO dto) {
         return connectorMetricService.listConnectClusterMetricsFromES(clusterPhyId, dto);
     }
 
