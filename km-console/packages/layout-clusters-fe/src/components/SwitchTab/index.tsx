@@ -2,7 +2,8 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import './index.less';
 
 interface SwitchTabProps {
-  defaultKey: string;
+  defaultKey?: string;
+  activeKey?: string | number;
   onChange: (key: string) => void;
   children: any;
 }
@@ -18,9 +19,9 @@ const TabItem = (props: TabItemProps) => {
 };
 
 const SwitchTab = (props: SwitchTabProps) => {
-  const { defaultKey, onChange, children } = props;
+  const { defaultKey, activeKey, onChange, children } = props;
   const tabRef = useRef();
-  const [activeKey, setActiveKey] = useState<string>(defaultKey);
+  const [active, setActive] = useState<string | number>(activeKey || defaultKey);
   const [pos, setPos] = useState({
     left: 0,
     width: 0,
@@ -39,6 +40,10 @@ const SwitchTab = (props: SwitchTabProps) => {
         return false;
       });
     }
+  }, [active]);
+
+  useLayoutEffect(() => {
+    activeKey && setActive(activeKey);
   }, [activeKey]);
 
   return (
@@ -48,9 +53,10 @@ const SwitchTab = (props: SwitchTabProps) => {
         return (
           <div
             key={key}
-            className={`d-switch-tab-content d-switch-tab-content-${activeKey === key ? 'active' : ''}`}
+            className={`d-switch-tab-content d-switch-tab-content-${active === key ? 'active' : ''}`}
             onClick={() => {
-              setActiveKey(key);
+              // 受控模式下不自动更新状态
+              !activeKey && setActive(key);
               onChange(key);
             }}
           >

@@ -32,6 +32,14 @@ export const dimensionMap = {
     label: 'Zookeeper',
     href: '/zookeeper',
   },
+  5: {
+    label: 'Connect',
+    href: '/connect',
+  },
+  6: {
+    label: 'Connector',
+    href: '/connect/connectors',
+  },
 } as any;
 
 const toLowerCase = (name = '') => {
@@ -77,6 +85,15 @@ const CONFIG_ITEM_DETAIL_DESC = {
   },
   SentRate: (valueGroup: any) => {
     return `Zookeeper 首发包数小于 ${valueGroup?.ratio * 100}% 总容量`;
+  },
+  TaskStartupFailurePercentage: (valueGroup: any) => {
+    return `任务启动失败概率 小于 ${valueGroup?.value * 100}%`;
+  },
+  ConnectorFailedTaskCount: (valueGroup: any) => {
+    return `失败状态的任务数量 小于 ${valueGroup?.value}`;
+  },
+  ConnectorUnassignedTaskCount: (valueGroup: any) => {
+    return `未被分配的任务数量 小于 ${valueGroup?.value}`;
   },
 };
 
@@ -145,9 +162,9 @@ export const getDetailColumn = (clusterId: number) => [
     // eslint-disable-next-line react/display-name
     render: (text: number, record: any) => {
       return dimensionMap[text] ? (
-        <Link to={`/${systemKey}/${clusterId}${dimensionMap[text]?.href}`}>{toLowerCase(record?.dimensionName)}</Link>
+        <Link to={`/${systemKey}/${clusterId}${dimensionMap[text]?.href}`}>{record?.dimensionDisplayName}</Link>
       ) : (
-        toLowerCase(record?.dimensionName)
+        record?.dimensionDisplayName
       );
     },
   },
@@ -219,9 +236,9 @@ export const getHealthySettingColumn = (form: any, data: any, clusterId: string)
       // eslint-disable-next-line react/display-name
       render: (text: number, record: any) => {
         return dimensionMap[text] ? (
-          <Link to={`/${systemKey}/${clusterId}${dimensionMap[text]?.href}`}>{toLowerCase(record?.dimensionName)}</Link>
+          <Link to={`/${systemKey}/${clusterId}${dimensionMap[text]?.href}`}>{record?.dimensionDisplayName}</Link>
         ) : (
-          toLowerCase(record?.dimensionName)
+          record?.dimensionDisplayName
         );
       },
     },
@@ -361,6 +378,33 @@ export const getHealthySettingColumn = (form: any, data: any, clusterId: string)
                     return Promise.resolve('');
                   },
                 })}
+                <span className="right-text">则不通过</span>
+              </div>
+            );
+          }
+          case 'TaskStartupFailurePercentage': {
+            return (
+              <div className="table-form-item">
+                <span className="left-text">{'>'}</span>
+                {getFormItem({ configItem, percent: true })}
+                <span className="right-text">则不通过</span>
+              </div>
+            );
+          }
+          case 'ConnectorFailedTaskCount': {
+            return (
+              <div className="table-form-item">
+                <span className="left-text">{'>'}</span>
+                {getFormItem({ configItem, attrs: { min: 0, max: 99998 } })}
+                <span className="right-text">则不通过</span>
+              </div>
+            );
+          }
+          case 'ConnectorUnassignedTaskCount': {
+            return (
+              <div className="table-form-item">
+                <span className="left-text">{'>'}</span>
+                {getFormItem({ configItem, attrs: { min: 0, max: 99998 } })}
                 <span className="right-text">则不通过</span>
               </div>
             );

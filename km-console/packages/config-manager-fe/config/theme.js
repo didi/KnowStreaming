@@ -1,7 +1,7 @@
 const themeConfig = {
-  primaryColor: '#556ee6',
+  primaryColor: '#5664FF',
   theme: {
-    'primary-color': '#556ee6',
+    'primary-color': '#5664FF',
     'border-radius-base': '2px',
     'border-radius-sm': '2px',
     'font-size-base': '12px',

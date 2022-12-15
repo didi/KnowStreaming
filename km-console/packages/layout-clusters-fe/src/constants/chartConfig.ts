@@ -38,6 +38,7 @@ export interface OriginMetricData {
 export interface FormattedMetricData {
   metricName: string;
   metricUnit: string;
+  metricType: MetricType;
   metricLines: {
     name: string;
     data: (string | number)[][];
@@ -240,6 +241,7 @@ export const formatChartData = (
     // 初始化返回结构
     const chartData: FormattedMetricData = {
       metricName,
+      metricType,
       metricUnit: curMetricInfo?.unit || '',
       metricLines: metricLines
         .sort((a, b) => Number(a.name < b.name) - 0.5)

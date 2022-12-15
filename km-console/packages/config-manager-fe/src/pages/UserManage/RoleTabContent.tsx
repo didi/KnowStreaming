@@ -423,7 +423,7 @@ export default (props: { curTabKey: string }): JSX.Element => {
       dataIndex: 'authedUserCnt',
       width: 100,
       render(cnt: Pick<RoleProps, 'authedUserCnt'>, record: RoleProps) {
-        return (
+        return cnt ? (
           <Popover
             placement="right"
             overlayClassName="tags-with-hide-popover"
@@ -441,6 +441,10 @@ export default (props: { curTabKey: string }): JSX.Element => {
               {cnt}
             </Button>
           </Popover>
+        ) : (
+          <Button size="small" type="link">
+            {cnt}
+          </Button>
         );
       },
     },

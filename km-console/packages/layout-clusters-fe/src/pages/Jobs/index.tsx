@@ -173,7 +173,7 @@ const JobsList: React.FC = (props: any) => {
         <JobsCheck />
       </div>
       {/* <Form form={form} layout="inline" onFinish={onFinish}> */}
-      <div className="clustom-table-content">
+      <div className="custom-table-content jobs-self">
         <div className={tableHeaderPrefix}>
           <div className={`${tableHeaderPrefix}-left`}>
             <div

@@ -181,12 +181,12 @@ const AutoPage = (props: any) => {
           <ConsumerGroupHealthCheck></ConsumerGroupHealthCheck>
         </div>
       )}
-      <div className={`operating-state ${scene !== 'topicDetail' && 'clustom-table-content'}`}>
+      <div className={`operating-state ${scene !== 'topicDetail' && 'custom-table-content'}`}>
         {/* <CardBar cardColumns={data}></CardBar> */}
         {scene !== 'topicDetail' && (
           <div className={tableHeaderPrefix}>
             <div className={`${tableHeaderPrefix}-left`}>
-              <Tooltip placement="topLeft" arrowPointAtCenter title='数据刷新间隔为1min，可能会有延迟'>
+              <Tooltip placement="topLeft" arrowPointAtCenter title="数据刷新间隔为1min，可能会有延迟">
                 <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => searchFn()}>
                   <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
                 </div>
