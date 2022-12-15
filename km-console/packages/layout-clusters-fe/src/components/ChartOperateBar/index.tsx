@@ -3,16 +3,8 @@ import { Select, Divider, Button } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import moment from 'moment';
 import { DRangeTime } from 'knowdesign';
-import MetricSelect from './MetricSelect';
-import NodeScope from './NodeScope';
-
+import NodeSelect from './NodeSelect';
 import './style/index.less';
-import { MetricType } from 'src/api';
-
-export interface Inode {
-  name: string;
-  desc: string;
-}
 
 export interface KsHeaderOptions {
   rangeTime: [number, number];
@@ -21,17 +13,8 @@ export interface KsHeaderOptions {
   gridNum?: number;
   scopeData?: {
     isTop: boolean;
-    data: number | number[];
+    data: any;
   };
-}
-export interface MetricSelect {
-  metricType: MetricType;
-  hide?: boolean;
-  drawerTitle?: string;
-  selectedRows: (string | number)[];
-  checkboxProps?: (record: any) => { [props: string]: any };
-  tableData?: Inode[];
-  submitCallback?: (value: (string | number)[]) => Promise<any>;
 }
 
 export interface IfilterData {
@@ -41,25 +24,15 @@ export interface IfilterData {
   agent?: string;
 }
 
-export interface IcustomScope {
-  label: string;
-  value: string | number;
-}
-
-export interface InodeScopeModule {
-  customScopeList: IcustomScope[];
-  scopeName?: string;
-  scopeLabel?: string;
-  searchPlaceholder?: string;
-  change?: () => void;
-}
-
 interface PropsType {
-  metricSelect?: MetricSelect;
   hideNodeScope?: boolean;
   hideGridSelect?: boolean;
-  nodeScopeModule?: InodeScopeModule;
+  nodeSelect?: {
+    name?: string;
+    customContent?: React.ReactElement<any>;
+  };
   onChange: (options: KsHeaderOptions) => void;
+  openMetricFilter: () => void;
 }
 
 interface ScopeData {
@@ -84,15 +57,12 @@ const GRID_SIZE_OPTIONS = [
 ];
 
 const MetricOperateBar = ({
-  metricSelect,
-  nodeScopeModule = {
-    customScopeList: [],
-  },
+  nodeSelect = {},
   hideNodeScope = false,
   hideGridSelect = false,
   onChange: onChangeCallback,
+  openMetricFilter,
 }: PropsType): JSX.Element => {
-  const metricSelectRef = useRef(null);
   const [gridNum, setGridNum] = useState<number>(GRID_SIZE_OPTIONS[1].value);
   const [rangeTime, setRangeTime] = useState<[number, number]>(() => {
     const curTimeStamp = moment().valueOf();
@@ -170,20 +140,22 @@ const MetricOperateBar = ({
           </div>
           <div className="header-right">
             {/* 节点范围 */}
-            {!hideNodeScope && <NodeScope nodeScopeModule={nodeScopeModule} change={nodeScopeChange} />}
+            {!hideNodeScope && (
+              <NodeSelect name={nodeSelect.name || ''} onChange={nodeScopeChange}>
+                {nodeSelect.customContent}
+              </NodeSelect>
+            )}
             {/* 分栏 */}
             {!hideGridSelect && (
               <Select className="grid-select" style={{ width: 70 }} value={gridNum} options={GRID_SIZE_OPTIONS} onChange={sizeChange} />
             )}
             {(!hideNodeScope || !hideGridSelect) && <Divider type="vertical" style={{ height: 20, top: 0 }} />}
-            <Button type="primary" onClick={() => metricSelectRef.current.open()}>
+            <Button type="primary" onClick={() => openMetricFilter()}>
               指标筛选
             </Button>
           </div>
         </div>
       </div>
-      {/* 指标筛选 */}
-      {!metricSelect?.hide && <MetricSelect ref={metricSelectRef} metricSelect={metricSelect} />}
     </>
   );
 };

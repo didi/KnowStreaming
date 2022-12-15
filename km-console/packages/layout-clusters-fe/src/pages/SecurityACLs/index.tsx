@@ -207,7 +207,7 @@ const SecurityACLs = (): JSX.Element => {
       <div className="card-bar">
         <ACLsCardBar />
       </div>
-      <div className="security-acls-page-list clustom-table-content">
+      <div className="security-acls-page-list custom-table-content">
         <div className={tableHeaderPrefix}>
           <div className={`${tableHeaderPrefix}-left`}>
             <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => getACLs()}>

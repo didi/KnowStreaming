@@ -111,5 +111,5 @@ export default () => {
     });
   }, [routeParams.clusterId]);
 
-  return <CardBar scene="broker" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
+  return <CardBar scene="brokers" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
 };

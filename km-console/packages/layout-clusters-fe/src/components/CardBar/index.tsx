@@ -18,7 +18,7 @@ export interface CardBarProps {
   cardColumns?: any[];
   healthData?: healthDataProps;
   showCardBg?: boolean;
-  scene: 'topic' | 'broker' | 'group' | 'zookeeper';
+  scene: 'topics' | 'brokers' | 'topic' | 'broker' | 'group' | 'zookeeper' | 'connect' | 'connector';
   record?: any;
   loading?: boolean;
   needProgress?: boolean;
@@ -27,15 +27,25 @@ const renderValue = (v: string | number | ((visibleType?: boolean) => JSX.Elemen
   return typeof v === 'function' ? v(visibleType) : v;
 };
 const sceneCodeMap = {
-  broker: {
+  brokers: {
     code: 1,
     fieldName: 'brokerId',
     alias: 'Brokers',
   },
-  topic: {
+  broker: {
+    code: 1,
+    fieldName: 'brokerId',
+    alias: 'Broker',
+  },
+  topics: {
     code: 2,
     fieldName: 'topicName',
     alias: 'Topics',
+  },
+  topic: {
+    code: 2,
+    fieldName: 'topicName',
+    alias: 'Topic',
   },
   group: {
     code: 3,
@@ -46,6 +56,16 @@ const sceneCodeMap = {
     code: 4,
     fieldName: 'zookeeperId',
     alias: 'Zookeeper',
+  },
+  connect: {
+    code: 5,
+    fieldName: 'connectClusterId',
+    alias: 'Connect',
+  },
+  connector: {
+    code: 6,
+    fieldName: 'connectorName',
+    alias: 'Connector',
   },
 };
 const CardColumnsItem: any = (cardItem: any) => {
@@ -87,12 +107,17 @@ const CardBar = (props: CardBarProps) => {
   useEffect(() => {
     const sceneObj = sceneCodeMap[scene];
     const path = record
-      ? api.getResourceHealthDetail(Number(routeParams.clusterId), sceneObj.code, record[sceneObj.fieldName])
+      ? api.getResourceHealthDetail(
+          scene === 'connector' ? Number(record?.connectClusterId) : Number(routeParams.clusterId),
+          sceneObj.code,
+          record[sceneObj.fieldName]
+        )
       : api.getResourceListHealthDetail(Number(routeParams.clusterId));
     const promise = record
       ? Utils.request(path)
       : Utils.request(path, {
-          params: { dimensionCode: sceneObj.code },
+          method: 'POST',
+          data: scene === 'connect' ? JSON.parse(JSON.stringify([5, 6])) : JSON.parse(JSON.stringify([sceneObj.code])),
         });
     promise.then((data: any[]) => {
       setHealthCheckDetailList(data);
@@ -102,6 +127,7 @@ const CardBar = (props: CardBarProps) => {
     {
       title: '检查项',
       dataIndex: 'checkConfig',
+      width: '40%',
       render(config: any, record: any) {
         let valueGroup = {};
         try {
@@ -109,7 +135,12 @@ const CardBar = (props: CardBarProps) => {
         } catch (e) {
           //
         }
-        return getConfigItemDetailDesc(record.configItem, valueGroup) || record.configDesc || '-';
+        return (
+          getConfigItemDetailDesc(record.configItem, valueGroup) ||
+          getConfigItemDetailDesc(config.configItem, valueGroup) ||
+          record.configDesc ||
+          '-'
+        );
       },
     },
     // {
@@ -119,13 +150,15 @@ const CardBar = (props: CardBarProps) => {
     {
       title: '检查时间',
       dataIndex: 'updateTime',
+      width: '30%',
       render: (value: number) => {
-        return moment(value).format('YYYY-MM-DD HH:mm:ss');
+        return value ? moment(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       },
     },
     {
       title: '检查结果',
       dataIndex: 'passed',
+      width: '30%',
       render(value: boolean, record: any) {
         const icon = value ? <IconFont type="icon-zhengchang"></IconFont> : <IconFont type="icon-yichang"></IconFont>;
         const txt = value ? '已通过' : '未通过';
@@ -145,7 +178,7 @@ const CardBar = (props: CardBarProps) => {
     <Spin spinning={loading}>
       <div className="card-bar-container">
         <div className="card-bar-content">
-          {!loading && healthData && needProgress && (
+          {healthData && needProgress && (
             <div className="card-bar-health">
               <div className="card-bar-health-process">
                 <HealthState state={healthData?.state} width={74} height={74} />
@@ -181,7 +214,7 @@ const CardBar = (props: CardBarProps) => {
         onClose={(_) => setDetailDrawerVisible(false)}
         visible={detailDrawerVisible}
       >
-        <Table rowKey={'topicName'} columns={columns} dataSource={healthCheckDetailList} pagination={false} />
+        <Table rowKey={'configName'} columns={columns} dataSource={healthCheckDetailList} pagination={false} />
       </Drawer>
     </Spin>
   );
