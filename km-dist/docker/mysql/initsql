@@ -1,3 +1,107 @@
+-- KS-KM自身的SQL，KS-KM依赖 Logi-Job 和 Logi-Security，因此另外两个ddl sql文件也需要执行
+DROP TABLE IF EXISTS `ks_kc_connect_cluster`;
+CREATE TABLE `ks_kc_connect_cluster` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Connect集群ID',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `name` varchar(128) NOT NULL DEFAULT '' COMMENT '集群名称',
+     `group_name` varchar(128) NOT NULL DEFAULT '' COMMENT '集群Group名称',
+     `cluster_url` varchar(1024) NOT NULL DEFAULT '' COMMENT '集群地址',
+     `member_leader_url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'URL地址',
+     `version` varchar(64) NOT NULL DEFAULT '' COMMENT 'connect版本',
+     `jmx_properties` text COMMENT 'JMX配置',
+     `state` tinyint(4) NOT NULL DEFAULT '1' COMMENT '集群使用的消费组状态，也表示集群状态:-1 Unknown,0 ReBalance,1 Active,2 Dead,3 Empty',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '接入时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_id_group_name` (`id`,`group_name`),
+     UNIQUE KEY `uniq_name_kafka_cluster` (`name`,`kafka_cluster_phy_id`),
+     KEY `idx_kafka_cluster_phy_id` (`kafka_cluster_phy_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connect集群信息表';
+
+DROP TABLE IF EXISTS `ks_kc_connector`;
+CREATE TABLE `ks_kc_connector` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `connect_cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Connect集群ID',
+     `connector_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Connector名称',
+     `connector_class_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Connector类',
+     `connector_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'Connector类型',
+     `state` varchar(45) NOT NULL DEFAULT '' COMMENT '状态',
+     `topics` text COMMENT '访问过的Topics',
+     `task_count` int(11) NOT NULL DEFAULT '0' COMMENT '任务数',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_connect_cluster_id_connector_name` (`connect_cluster_id`,`connector_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connector信息表';
+
+DROP TABLE IF EXISTS `ks_kc_worker`;
+CREATE TABLE `ks_kc_worker` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `connect_cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Connect集群ID',
+     `member_id` varchar(512) NOT NULL DEFAULT '' COMMENT '成员ID',
+     `host` varchar(128) NOT NULL DEFAULT '' COMMENT '主机名',
+     `jmx_port` int(16) NOT NULL DEFAULT '-1' COMMENT 'Jmx端口',
+     `url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'URL信息',
+     `leader_url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'leaderURL信息',
+     `leader` int(16) NOT NULL DEFAULT '0' COMMENT '状态: 1是leader，0不是leader',
+     `worker_id` varchar(128) NOT NULL COMMENT 'worker地址',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_cluster_id_member_id` (`connect_cluster_id`,`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='worker信息表';
+
+DROP TABLE IF EXISTS `ks_kc_worker_connector`;
+CREATE TABLE `ks_kc_worker_connector` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `kafka_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Kafka集群ID',
+     `connect_cluster_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT 'Connect集群ID',
+     `connector_name` varchar(512) NOT NULL DEFAULT '' COMMENT 'Connector名称',
+     `worker_member_id` varchar(256) NOT NULL DEFAULT '',
+     `task_id` int(16) NOT NULL DEFAULT '-1' COMMENT 'Task的ID',
+     `state` varchar(128) DEFAULT NULL COMMENT '任务状态',
+     `worker_id` varchar(128) DEFAULT NULL COMMENT 'worker信息',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `uniq_relation` (`connect_cluster_id`,`connector_name`,`task_id`,`worker_member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Worker和Connector关系表';
+
+DROP TABLE IF EXISTS `ks_km_zookeeper`;
+CREATE TABLE `ks_km_zookeeper` (
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '物理集群ID',
+    `host` varchar(128) NOT NULL DEFAULT '' COMMENT 'zookeeper主机名',
+    `port` int(16) NOT NULL DEFAULT '-1' COMMENT 'zookeeper端口',
+    `role` varchar(16) NOT NULL DEFAULT '' COMMENT '角色, leader follower observer',
+    `version` varchar(128) NOT NULL DEFAULT '' COMMENT 'zookeeper版本',
+    `status` int(16) NOT NULL DEFAULT '0' COMMENT '状态: 1存活，0未存活，11存活但是4字命令使用不了',
+    `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_cluster_phy_id_host_port` (`cluster_phy_id`,`host`, `port`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Zookeeper信息表';
+
+
+DROP TABLE IF EXISTS `ks_km_group`;
+CREATE TABLE `ks_km_group` (
+     `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+     `cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '集群id',
+     `name` varchar(192) COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT 'Group名称',
+     `member_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '成员数',
+     `topic_members` text CHARACTER SET utf8 COMMENT 'group消费的topic列表',
+     `partition_assignor` varchar(255) CHARACTER SET utf8 NOT NULL COMMENT '分配策略',
+     `coordinator_id` int(11) NOT NULL COMMENT 'group协调器brokerId',
+     `type` int(11) NOT NULL COMMENT 'group类型 0：consumer 1：connector',
+     `state` varchar(64) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT '状态',
+     `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_cluster_phy_id_name` (`cluster_phy_id`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Group信息表';
+
 DROP TABLE IF EXISTS `ks_km_broker`;
 CREATE TABLE `ks_km_broker` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -255,6 +359,7 @@ CREATE TABLE `ks_km_physical_cluster` (
   `kafka_version` varchar(32) NOT NULL DEFAULT '' COMMENT 'kafka版本',
   `client_properties` text COMMENT 'Kafka客户端配置',
   `jmx_properties` text COMMENT 'JMX配置',
+  `zk_properties` text COMMENT 'ZK配置',
   `description` text COMMENT '备注',
   `auth_type` int(11) NOT NULL DEFAULT '0' COMMENT '认证类型，-1未知，0:无认证，',
   `run_state` tinyint(4) NOT NULL DEFAULT '1' COMMENT '运行状态, 0表示未监控, 1监控中，有ZK，2:监控中，无ZK',
@@ -352,7 +457,6 @@ CREATE TABLE `ks_km_app_node` (
     PRIMARY KEY (`id`),
     KEY `idx_app_host` (`app_name`,`host_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='km集群部署的node信息';
-
 -- Logi-Job模块的sql，安装KS-KM需要执行该sql
 
 
@@ -677,13 +781,21 @@ CREATE TABLE `logi_security_config`
     KEY `idx_group_name` (`value_group`,`value_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1592 DEFAULT CHARSET=utf8 COMMENT='logi配置项';
 
-
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_CONNECTOR_FAILED_TASK_COUNT', '{\"value\" : 1}', 'connector失败状态的任务数量', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_CONNECTOR_UNASSIGNED_TASK_COUNT', '{\"value\" : 1}', 'connector未被分配的任务数量', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_CONNECT_CLUSTER_TASK_STARTUP_FAILURE_PERCENTAGE', '{\"value\" : 0.05}', 'Connect集群任务启动失败概率', 'admin');
 INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_CLUSTER_NO_CONTROLLER','{  \"value\": 1,   \"weight\": 30 } ','集群Controller数正常','know-streaming');
 INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_BROKER_REQUEST_QUEUE_FULL','{  \"value\": 10,  \"weight\": 20 } ','Broker-RequestQueueSize指标','know-streaming');
 INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_BROKER_NETWORK_PROCESSOR_AVG_IDLE_TOO_LOW','{  \"value\": 0.8,   \"weight\": 20 } ','Broker-NetworkProcessorAvgIdlePercent指标','know-streaming');
 INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_GROUP_RE_BALANCE_TOO_FREQUENTLY','{\n  \"latestMinutes\": 10,\n  \"detectedTimes\": 8,\n \"weight\": 10\n}\n','Group的re-balance频率','know-streaming');
 INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_TOPIC_NO_LEADER','{  \"value\": 1,   \"weight\": 10 } ','Topic 无Leader数','know-stream');
 INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_TOPIC_UNDER_REPLICA_TOO_LONG','{   \"latestMinutes\": 10,  \"detectedTimes\": 8,   \"weight\": 10 } ','Topic 未同步持续时间','know-streaming');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_BRAIN_SPLIT', '{ 	\"value\": 1} ', 'ZK 脑裂', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_OUTSTANDING_REQUESTS', '{ 	\"amount\": 100, \"ratio\":0.8} ', 'ZK Outstanding 请求堆积数', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_WATCH_COUNT', '{ 	\"amount\": 100000, 	\"ratio\": 0.8 } ', 'ZK WatchCount 数', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_ALIVE_CONNECTIONS', '{ 	\"amount\": 10000, 	\"ratio\": 0.8 } ', 'ZK 连接数', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_APPROXIMATE_DATA_SIZE', '{ 	\"amount\": 524288000, 	\"ratio\": 0.8 } ', 'ZK 数据大小(Byte)', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_SENT_RATE', '{ 	\"amount\": 500000, 	\"ratio\": 0.8 } ', 'ZK 发包数', 'admin');
 -- 初始化权限
 INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('1593', '多集群管理', '0', '0', '1', '多集群管理', '0', 'know-streaming');
 INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('1595', '系统管理', '0', '0', '1', '系统管理', '0', 'know-streaming');
@@ -734,6 +846,7 @@ INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `l
 
 
 -- 初始化用户
+-- INSERT INTO `logi_security_user` (`id`, `user_name`, `pw`, `real_name`, `is_delete`, `app_name`) VALUES ('1', 'admin', 'V1ZkU2RHRlhOSGxOUkVsNVdETjBRVlp0Y0V0T1IwWnlaVEZ6YWxGRVJrRkpNVEU1VTJwYVUySkhlRzlSU0RBOWUwQldha28wWVd0N1d5TkFNa0FqWFgxS05sSnNiR2hBZlE9PXtAVmpKNGFre1sjQDNAI119SjZSbGxoQH0=Mv{#cdRgJ45Lqx}3IubEW87!==', '系统管理员', '0', 'know-streaming');
 INSERT INTO `logi_security_user` (`id`, `user_name`, `pw`, `real_name`, `is_delete`, `app_name`) VALUES ('1', 'admin', 'V1ZkU2RHRlhOVGRSUmxweFUycFNhR0V6ZEdKSk1FRjRVVU5PWkdaVmJ6SlZiWGh6WVVWQ09YdEFWbXBLTkdGcmUxc2pRREpBSTExOVNqWlNiR3hvUUgwPXtAVmpKNGFre1sjQDNAI119SjZSbGxoQH0=Mv{#cdRgJ45Lqx}3IubEW87!==', '系统管理员', '0', 'know-streaming');
 
 -- 初始化角色
@@ -782,3 +895,4 @@ INSERT INTO `logi_security_config`
 (`value_group`,`value_name`,`value`,`edit`,`status`,`memo`,`is_delete`,`app_name`,`operator`)
 VALUES
 ('SECURITY.LOGIN','SECURITY.TRICK_USERS','[\n  \"admin\"\n]',1,1,'允许跳过登录的用户',0,'know-streaming','admin');
+

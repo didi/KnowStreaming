@@ -33,6 +33,8 @@ spec:
       - name: init-config
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         command: ['/bin/bash', '/conf/init_es_index.sh']
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
         volumeMounts:
           - name: configmap
             mountPath: /conf

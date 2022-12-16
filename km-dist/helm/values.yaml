@@ -3,7 +3,7 @@ replicaCount: 2
 image:
   repository: knowstreaming/knowstreaming-manager
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "0.7.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -73,7 +73,7 @@ knowstreaming-web:
     image:
       repository: knowstreaming/knowstreaming-ui
       pullPolicy: IfNotPresent
-      tag: "latest"
+      tag: "0.7.0"
 
     service:
       type: NodePort
@@ -93,6 +93,7 @@ elasticsearch:
 #------------------------------------------------------------------
     esClientAddress: 10.96.64.13
     esProt: 8061
+    userPass: "username:password"   #ES账号密码，如果有账号密码，按照username:password 的格式填写，没有则不需要填写
 #------------------------------------------------------------------
     replicas: 3
     minimumMasterNodes: 2
