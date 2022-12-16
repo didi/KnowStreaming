@@ -440,9 +440,9 @@ CREATE TABLE `ks_kc_worker` (
      `url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'URL信息',
      `leader_url` varchar(1024) NOT NULL DEFAULT '' COMMENT 'leaderURL信息',
      `leader` int(16) NOT NULL DEFAULT '0' COMMENT '状态: 1是leader，0不是leader',
+     `worker_id` varchar(128) NOT NULL COMMENT 'worker地址',
      `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
      `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-     `worker_id` varchar(128) NOT NULL COMMENT 'worker地址',
      PRIMARY KEY (`id`),
      UNIQUE KEY `uniq_cluster_id_member_id` (`connect_cluster_id`,`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='worker信息表';
