@@ -349,7 +349,7 @@ const LoadBalance: React.FC = (props: any) => {
         <LoadRebalanceCardBar trigger={trigger} genData={resetList} filterList={filterList} />
       </div>
       <div className="load-rebalance-container">
-        <div className="balance-main clustom-table-content">
+        <div className="balance-main custom-table-content">
           <div className={tableHeaderPrefix}>
             <div className={`${tableHeaderPrefix}-left`}>
               <div

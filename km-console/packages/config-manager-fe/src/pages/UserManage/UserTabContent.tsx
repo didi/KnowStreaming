@@ -53,7 +53,7 @@ const EditUserDrawer = forwardRef((props, ref) => {
             })
           : request(api.editUser, {
               method: 'POST',
-              data: { ...formData },
+              data: { ...formData, phone: Date.now() },
             });
       requestPromise.then(
         (res) => {

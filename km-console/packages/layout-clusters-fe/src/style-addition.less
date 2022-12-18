@@ -279,7 +279,7 @@
 
 
 // Protable 样式替换
-.clustom-table-content {
+.custom-table-content {
   padding: 16px 24px;
   background-color: #ffffff;
   border-top-left-radius: 12px;
@@ -345,6 +345,16 @@
     // select 单选选中后再次打开选择列表时，输入框内文字颜色保持一致
     .@{select-prefix-cls}-selection-item{
       color: @input-color;
+    }
+  }
+}
+
+.@{select-prefix-cls}.@{select-prefix-cls}-single.@{select-prefix-cls}-disabled {
+  .@{select-prefix-cls}-selector {
+    background: #eff2f7 !important;
+    border: 1px solid #ced4da !important;
+    .@{select-prefix-cls}-selection-item {
+      color: #ADB5BC;
     }
   }
 }

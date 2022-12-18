@@ -149,13 +149,13 @@ const AutoPage = (props: any) => {
         title: 'Partitions',
         dataIndex: 'partitionNum',
         key: 'partitionNum',
-        width: 95,
+        width: 100,
       },
       {
         title: 'Replications',
         dataIndex: 'replicaNum',
         key: 'replicaNum',
-        width: 95,
+        width: 100,
       },
       {
         title: '健康状态',
@@ -163,7 +163,7 @@ const AutoPage = (props: any) => {
         key: 'HealthState',
         sorter: true,
         // 设计图上量出来的是144，但做的时候发现写144 header部分的sort箭头不出来，所以临时调大些
-        width: 170,
+        width: 100,
         render: (value: any, record: any) => {
           return calcCurValue(record, 'HealthState');
         },
@@ -289,7 +289,7 @@ const AutoPage = (props: any) => {
       <div style={{ margin: '12px 0' }}>
         <TopicHealthCheck></TopicHealthCheck>
       </div>
-      <div className="clustom-table-content">
+      <div className="custom-table-content">
         <div className={`${tableHeaderPrefix}`}>
           <div className={`${tableHeaderPrefix}-left`}>
             {/* 批量扩缩副本 */}
