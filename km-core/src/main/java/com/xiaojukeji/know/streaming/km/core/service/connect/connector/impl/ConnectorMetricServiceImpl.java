@@ -312,8 +312,8 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
             return Result.buildFailure(NOT_EXIST);
         }
 
-        Float sum = ret.getData().stream().max((a, b) -> a.getMetric(metric).compareTo(b.getMetric(metric))).get().getMetric(metric);
-        ConnectorMetrics connectorMetrics = ConnectorMetrics.initWithMetric(connectClusterId, connectorName, metric, sum / ret.getData().size());
+        Float max = ret.getData().stream().max((a, b) -> a.getMetric(metric).compareTo(b.getMetric(metric))).get().getMetric(metric);
+        ConnectorMetrics connectorMetrics = ConnectorMetrics.initWithMetric(connectClusterId, connectorName, metric, max);
         return Result.buildSuc(connectorMetrics);
     }
 
