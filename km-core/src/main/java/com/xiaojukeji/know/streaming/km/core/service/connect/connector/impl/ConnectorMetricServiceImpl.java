@@ -55,7 +55,7 @@ import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultS
 public class ConnectorMetricServiceImpl extends BaseConnectorMetricService implements ConnectorMetricService {
     protected static final ILog LOGGER = LogFactory.getLog(ConnectorMetricServiceImpl.class);
 
-    public static final String CONNECTOR_METHOD_DO_NOTHING                               = "getConnectWorkerMetricSum";
+    public static final String CONNECTOR_METHOD_DO_NOTHING                               = "doNothing";
 
     public static final String CONNECTOR_METHOD_GET_CONNECT_WORKER_METRIC_SUM            = "getConnectWorkerMetricSum";
 
