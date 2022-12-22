@@ -82,6 +82,11 @@ public class ConnectConnectorMetricCollector extends AbstractConnectMetricCollec
 
         for (VersionControlItem v : items) {
             try {
+                //过滤已测得指标
+                if (metrics.getMetrics().get(v.getName()) != null) {
+                    continue;
+                }
+
                 Result<ConnectorMetrics> ret = connectorMetricService.collectConnectClusterMetricsFromKafka(connectClusterId, connectorName, v.getName(), connectorType);
                 if (null == ret || ret.failed() || null == ret.getData()) {
                     continue;
