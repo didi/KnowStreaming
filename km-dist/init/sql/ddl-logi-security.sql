@@ -135,7 +135,7 @@ CREATE TABLE `logi_security_user`
     pw          varchar(2048)                          not null comment '用户密码',
     salt        char(5)      default ''                not null comment '密码盐',
     real_name   varchar(128) default ''                not null comment '真实姓名',
-    phone       char(11)     default ''                not null comment 'mobile',
+    phone       char(20)     default ''                not null comment 'mobile',
     email       varchar(30)  default ''                not null comment 'email',
     dept_id     int                                    null comment '所属部门id',
     is_delete   tinyint(1)   default 0                 not null comment '逻辑删除',
