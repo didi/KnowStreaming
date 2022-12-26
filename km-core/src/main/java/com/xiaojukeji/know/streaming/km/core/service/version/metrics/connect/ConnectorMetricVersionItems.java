@@ -14,7 +14,6 @@ import static com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectorTyp
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.METRIC_CONNECT_CONNECTOR;
 import static com.xiaojukeji.know.streaming.km.common.jmx.JmxAttribute.*;
 import static com.xiaojukeji.know.streaming.km.common.jmx.JmxName.*;
-import static com.xiaojukeji.know.streaming.km.core.service.broker.impl.BrokerMetricServiceImpl.BROKER_METHOD_DO_NOTHING;
 import static com.xiaojukeji.know.streaming.km.core.service.connect.connector.impl.ConnectorMetricServiceImpl.*;
 
 
@@ -129,6 +128,13 @@ public class ConnectorMetricVersionItems extends BaseMetricVersionMetric {
         items.add(buildAllVersionsItem()
                 .name(CONNECTOR_METRIC_HEALTH_STATE).unit("0:好 1:中 2:差 3:宕机").desc("健康状态(0:好 1:中 2:差 3:宕机)").category(CATEGORY_HEALTH)
                 .extendMethod(CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE));
+        items.add(buildAllVersionsItem()
+                .name(CONNECTOR_METRIC_HEALTH_CHECK_PASSED).unit("个").desc("健康项检查通过数").category(CATEGORY_HEALTH)
+                .extendMethod(CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE));
+        items.add(buildAllVersionsItem()
+                .name(CONNECTOR_METRIC_HEALTH_CHECK_TOTAL).unit("个").desc("健康项检查总数").category(CATEGORY_HEALTH)
+                .extendMethod(CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE));
+
         items.add(buildAllVersionsItem()
                 .name(CONNECTOR_METRIC_CONNECTOR_TOTAL_TASK_COUNT).unit("个").desc("所有任务数量").category(CATEGORY_PERFORMANCE)
                 .extend(buildConnectJMXMethodExtend(CONNECTOR_METHOD_GET_CONNECT_WORKER_METRIC_SUM)
