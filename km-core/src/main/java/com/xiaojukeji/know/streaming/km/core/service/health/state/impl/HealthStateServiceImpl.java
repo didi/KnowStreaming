@@ -8,12 +8,14 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthScoreRes
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.*;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.connect.ConnectorMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
+import com.xiaojukeji.know.streaming.km.common.component.SpringTool;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthStateEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
+import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperService;
@@ -224,17 +226,20 @@ public class HealthStateServiceImpl implements HealthStateService {
     }
 
     @Override
-    public List<HealthScoreResult> getClusterHealthResult(Long clusterPhyId) {
-        List<HealthCheckResultPO> poList = healthCheckResultService.listCheckResult(clusterPhyId);
+    public List<HealthScoreResult> getAllDimensionHealthResult(Long clusterPhyId) {
+        List<Integer> supportedDimensionCodeList = new ArrayList<>();
 
-        return this.convert2HealthScoreResultList(clusterPhyId, poList, null);
-    }
+        // 获取支持的code
+        for (AbstractHealthCheckService service: SpringTool.getBeansOfType(AbstractHealthCheckService.class).values()) {
+            Integer dimensionCode = service.getDimensionCodeIfSupport(clusterPhyId);
+            if (dimensionCode == null) {
+                continue;
+            }
 
-    @Override
-    public List<HealthScoreResult> getDimensionHealthResult(Long clusterPhyId, HealthCheckDimensionEnum dimensionEnum) {
-        List<HealthCheckResultPO> poList = healthCheckResultService.listCheckResult(clusterPhyId, dimensionEnum.getDimension());
+            supportedDimensionCodeList.add(dimensionCode);
+        }
 
-        return this.convert2HealthScoreResultList(clusterPhyId, poList, dimensionEnum.getDimension());
+        return this.getDimensionHealthResult(clusterPhyId, supportedDimensionCodeList);
     }
 
     @Override
@@ -242,22 +247,14 @@ public class HealthStateServiceImpl implements HealthStateService {
         //查找健康巡查结果
         List<HealthCheckResultPO> poList = new ArrayList<>();
         for (Integer dimensionCode : dimensionCodeList) {
-            HealthCheckDimensionEnum dimensionEnum = HealthCheckDimensionEnum.getByCode(dimensionCode);
-
-            if (dimensionEnum.equals(HealthCheckDimensionEnum.UNKNOWN)) {
-                continue;
-            }
-
-            if (dimensionEnum.equals(HealthCheckDimensionEnum.CONNECTOR)) {
+            if (dimensionCode.equals(HealthCheckDimensionEnum.CONNECTOR.getDimension())) {
                 poList.addAll(healthCheckResultService.getConnectorHealthCheckResult(clusterPhyId));
             } else {
-                poList.addAll(healthCheckResultService.listCheckResult(clusterPhyId, dimensionEnum.getDimension()));
+                poList.addAll(healthCheckResultService.listCheckResult(clusterPhyId, dimensionCode));
             }
         }
 
-        List<HealthScoreResult> resultList = this.getResHealthResult(clusterPhyId, dimensionCodeList, poList);
-        return resultList;
-
+        return this.getResHealthResult(clusterPhyId, dimensionCodeList, poList);
     }
 
     @Override

@@ -19,6 +19,7 @@ import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.zookeeper.ZKRoleEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.zookeeper.ZookeeperUtils;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ZookeeperMetricVersionItems;
@@ -56,7 +57,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
     @Override
     public List<ClusterParam> getResList(Long clusterPhyId) {
         ClusterPhy clusterPhy = LoadedClusterPhyCache.getByPhyId(clusterPhyId);
-        if (clusterPhy == null) {
+        if (clusterPhy == null || ValidateUtils.isBlank(clusterPhy.getZookeeper())) {
             return new ArrayList<>();
         }
 
@@ -78,6 +79,15 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
     @Override
     public HealthCheckDimensionEnum getHealthCheckDimensionEnum() {
         return HealthCheckDimensionEnum.ZOOKEEPER;
+    }
+
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        if (ValidateUtils.isEmptyList(this.getResList(kafkaClusterPhyId))) {
+            return null;
+        }
+
+        return this.getHealthCheckDimensionEnum().getDimension();
     }
 
     private HealthCheckResult checkBrainSplit(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {

@@ -33,10 +33,6 @@ public class HealthScoreBaseResultVO extends BaseTimeVO {
     @ApiModelProperty(value="检查说明", example = "Group延迟")
     private String configDesc;
 
-    @Deprecated
-    @ApiModelProperty(value="得分", example = "100")
-    private Integer score = 100;
-
     @ApiModelProperty(value="结果", example = "true")
     private Boolean passed;
 
