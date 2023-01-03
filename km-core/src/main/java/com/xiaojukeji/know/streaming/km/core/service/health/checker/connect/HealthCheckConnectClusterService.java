@@ -14,7 +14,9 @@ import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterMetricService;
+import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
 import com.xiaojukeji.know.streaming.km.persistence.connect.cache.LoadedConnectClusterCache;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +34,10 @@ import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.conn
  */
 @Service
 public class HealthCheckConnectClusterService extends AbstractHealthCheckService {
-
     private static final ILog log = LogFactory.getLog(HealthCheckConnectClusterService.class);
+
+    @Autowired
+    private ConnectClusterService connectClusterService;
 
     @Autowired
     private ConnectClusterMetricService connectClusterMetricService;
@@ -55,6 +59,16 @@ public class HealthCheckConnectClusterService extends AbstractHealthCheckService
     @Override
     public HealthCheckDimensionEnum getHealthCheckDimensionEnum() {
         return HealthCheckDimensionEnum.CONNECT_CLUSTER;
+    }
+
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        List<ConnectCluster> clusterList = connectClusterService.listByKafkaCluster(kafkaClusterPhyId);
+        if (ValidateUtils.isEmptyList(clusterList)) {
+            return null;
+        }
+
+        return this.getHealthCheckDimensionEnum().getDimension();
     }
 
     private HealthCheckResult checkStartupFailurePercentage(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {

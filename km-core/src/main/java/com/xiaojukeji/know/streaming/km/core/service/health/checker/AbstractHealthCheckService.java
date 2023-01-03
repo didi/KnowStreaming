@@ -28,6 +28,8 @@ public abstract class AbstractHealthCheckService {
 
     public abstract HealthCheckDimensionEnum getHealthCheckDimensionEnum();
 
+    public abstract Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId);
+
     public HealthCheckResult checkAndGetResult(ClusterParam clusterParam, BaseClusterHealthConfig clusterHealthConfig) {
         if (ValidateUtils.anyNull(clusterParam, clusterHealthConfig)) {
             return null;
