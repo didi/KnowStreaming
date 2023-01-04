@@ -4,6 +4,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthCompareValueConfig;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectCluster;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.connect.ConnectorMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
@@ -13,6 +14,8 @@ import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
@@ -32,10 +35,13 @@ import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.conn
  */
 @Service
 public class HealthCheckConnectorService extends AbstractHealthCheckService {
-
     private static final ILog log = LogFactory.getLog(HealthCheckConnectorService.class);
+
     @Autowired
     private ConnectorService connectorService;
+
+    @Autowired
+    private ConnectClusterService connectClusterService;
 
     @Autowired
     private ConnectorMetricService connectorMetricService;
@@ -64,6 +70,16 @@ public class HealthCheckConnectorService extends AbstractHealthCheckService {
     @Override
     public HealthCheckDimensionEnum getHealthCheckDimensionEnum() {
         return HealthCheckDimensionEnum.CONNECTOR;
+    }
+
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        List<ConnectCluster> clusterList = connectClusterService.listByKafkaCluster(kafkaClusterPhyId);
+        if (ValidateUtils.isEmptyList(clusterList)) {
+            return null;
+        }
+
+        return this.getHealthCheckDimensionEnum().getDimension();
     }
 
     private HealthCheckResult checkFailedTaskCount(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {

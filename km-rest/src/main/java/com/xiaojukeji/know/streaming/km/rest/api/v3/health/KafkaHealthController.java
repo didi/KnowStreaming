@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,14 +31,6 @@ public class KafkaHealthController {
     @Autowired
     private HealthStateService healthStateService;
 
-    private List<Integer> allDimensionCodeList = new ArrayList<Integer>() {
-        {
-            for (HealthCheckDimensionEnum dimensionEnum : HealthCheckDimensionEnum.values()) {
-                add(dimensionEnum.getDimension());
-            }
-        }
-    };
-
     @Autowired
     private HealthCheckResultService healthCheckResultService;
 
@@ -49,12 +41,18 @@ public class KafkaHealthController {
                                                                                      @RequestParam(required = false) Integer dimensionCode) {
         HealthCheckDimensionEnum dimensionEnum = HealthCheckDimensionEnum.getByCode(dimensionCode);
         if (!dimensionEnum.equals(HealthCheckDimensionEnum.UNKNOWN)) {
-            return Result.buildSuc(HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(healthStateService.getDimensionHealthResult(clusterPhyId, Arrays.asList(dimensionCode))));
+            return Result.buildSuc(
+                    HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
+                            healthStateService.getDimensionHealthResult(clusterPhyId, Collections.singletonList(dimensionCode))
+                    )
+            );
         }
 
-        return Result.buildSuc(HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
-                healthStateService.getDimensionHealthResult(clusterPhyId, allDimensionCodeList)
-        ));
+        return Result.buildSuc(
+                HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
+                        healthStateService.getAllDimensionHealthResult(clusterPhyId)
+                )
+        );
     }
 
     @ApiOperation(value = "集群-健康检查详情")

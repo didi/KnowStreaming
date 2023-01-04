@@ -57,6 +57,11 @@ public class HealthCheckBrokerService extends AbstractHealthCheckService {
         return HealthCheckDimensionEnum.BROKER;
     }
 
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        return this.getHealthCheckDimensionEnum().getDimension();
+    }
+
     /**
      * Broker网络处理线程平均值过低
      */

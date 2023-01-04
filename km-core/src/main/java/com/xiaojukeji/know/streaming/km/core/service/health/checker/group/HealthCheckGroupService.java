@@ -51,6 +51,11 @@ public class HealthCheckGroupService extends AbstractHealthCheckService {
         return HealthCheckDimensionEnum.GROUP;
     }
 
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        return this.getHealthCheckDimensionEnum().getDimension();
+    }
+
     /**
      * 检查Group re-balance太频繁
      */

@@ -62,6 +62,11 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
         return HealthCheckDimensionEnum.TOPIC;
     }
 
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        return this.getHealthCheckDimensionEnum().getDimension();
+    }
+
     /**
      * 检查Topic长期未同步
      */
