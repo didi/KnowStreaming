@@ -13,9 +13,6 @@ import java.util.Properties;
  */
 @ApiModel(description = "ZK配置")
 public class ZKConfig implements Serializable {
-    @ApiModelProperty(value="ZK的jmx配置")
-    private JmxConfig jmxConfig;
-
     @ApiModelProperty(value="ZK是否开启secure", example = "false")
     private Boolean openSecure = false;
 
@@ -27,14 +24,6 @@ public class ZKConfig implements Serializable {
 
     @ApiModelProperty(value="ZK的Request超时时间")
     private Properties otherProps = new Properties();
-
-    public JmxConfig getJmxConfig() {
-        return jmxConfig == null? new JmxConfig(): jmxConfig;
-    }
-
-    public void setJmxConfig(JmxConfig jmxConfig) {
-        this.jmxConfig = jmxConfig;
-    }
 
     public Boolean getOpenSecure() {
         return openSecure != null && openSecure;
@@ -53,7 +42,7 @@ public class ZKConfig implements Serializable {
     }
 
     public Integer getRequestTimeoutUnitMs() {
-        return requestTimeoutUnitMs == null? Constant.DEFAULT_REQUEST_TIMEOUT_UNIT_MS: requestTimeoutUnitMs;
+        return requestTimeoutUnitMs == null? Constant.DEFAULT_SESSION_TIMEOUT_UNIT_MS: requestTimeoutUnitMs;
     }
 
     public void setRequestTimeoutUnitMs(Integer requestTimeoutUnitMs) {
