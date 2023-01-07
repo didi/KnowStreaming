@@ -167,8 +167,11 @@ export const ExpandedRow: any = ({ record, groupName }: any) => {
     )
       .then((data: any) => {
         if (!data) return;
-        setPagination((origin: any) => {
-          return { ...origin, current: data.pagination?.pageNo, pageSize: data.pagination?.pageSize };
+
+        setPagination({
+          current: data.pagination?.pageNo,
+          pageSize: data.pagination?.pageSize,
+          total: data.pagination?.total,
         });
         setConsumerList(data?.bizData || []);
       })
