@@ -90,7 +90,7 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
         );
 
         if (countResult.failed() || !countResult.hasData()) {
-            LOGGER.error("method=checkTopicUnderReplicatedPartition||param={}||config={}||result={}||errMsg=get metrics failed",
+            LOGGER.error("method=checkTopicUnderReplicatedPartition||param={}||config={}||result={}||errMsg=search metrics from es failed",
                     param, singleConfig, countResult);
             return null;
         }
