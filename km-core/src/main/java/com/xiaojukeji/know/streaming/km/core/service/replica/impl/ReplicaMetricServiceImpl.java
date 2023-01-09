@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.core.service.replica.impl;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ReplicationMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.metric.ReplicationMetricParam;
@@ -10,26 +9,21 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionJmxInfo;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ReplicationMetricPO;
-import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
-import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
-import com.xiaojukeji.know.streaming.km.persistence.es.dao.ReplicationMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.METRIC_REPLICATION;
@@ -53,9 +47,6 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
 
     @Autowired
     private PartitionService partitionService;
-
-    @Autowired
-    private ReplicationMetricESDAO replicationMetricESDAO;
 
     @Override
     protected List<String> listMetricPOFields(){
@@ -116,21 +107,6 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
         } catch (VCHandlerNotExistException e) {
             return Result.buildFailure(VC_HANDLE_NOT_EXIST);
         }
-    }
-
-    @Override
-    public Result<List<MetricPointVO>> getMetricPointsFromES(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, MetricDTO dto) {
-        Map<String/*metric*/, MetricPointVO> metricPointMap = replicationMetricESDAO.getReplicationMetricsPoint(clusterPhyId, topicName, brokerId, partitionId,
-                dto.getMetricsNames(), dto.getAggType(), dto.getStartTime(), dto.getEndTime());
-
-        List<MetricPointVO> metricPoints = new ArrayList<>(metricPointMap.values());
-        return Result.buildSuc(metricPoints);
-    }
-
-    @Override
-    public Result<ReplicationMetrics> getLatestMetricsFromES(Long clusterPhyId, Integer brokerId, String topicName, Integer partitionId, List<String> metricNames) {
-        ReplicationMetricPO metricPO = replicationMetricESDAO.getReplicationLatestMetrics(clusterPhyId, brokerId, topicName, partitionId, metricNames);
-        return Result.buildSuc(ConvertUtil.obj2Obj(metricPO, ReplicationMetrics.class));
     }
 
     /**************************************************** private method ****************************************************/
