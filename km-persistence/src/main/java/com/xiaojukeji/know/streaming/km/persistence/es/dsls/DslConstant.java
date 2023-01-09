@@ -62,11 +62,6 @@ public class DslConstant {
 
     public static final String LIST_PARTITION_LATEST_METRICS_BY_TOPIC   = "PartitionMetricESDAO/listPartitionLatestMetricsByTopic";
 
-    /**************************************************** REPLICATION ****************************************************/
-    public static final String GET_REPLICATION_AGG_SINGLE_METRICS       = "ReplicationMetricESDAO/getAggSingleReplicationMetrics";
-
-    public static final String GET_REPLICATION_LATEST_METRICS           = "ReplicationMetricESDAO/getReplicationLatestMetrics";
-
     /**************************************************** Group ****************************************************/
     public static final String GET_GROUP_TOPIC_PARTITION                = "GroupMetricESDAO/getTopicPartitionOfGroup";
 
