@@ -266,8 +266,13 @@ public class PartitionServiceImpl extends BaseKafkaVersionControlService impleme
 
         List<TopicPartition> tpList = this.listPartitionFromCacheFirst(clusterPhyId, topicName).stream()
                 .filter(item -> !item.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
+                .filter(partition -> partition.getPartitionId().equals(partitionId))
                 .map(elem -> new TopicPartition(topicName, elem.getPartitionId()))
                 .collect(Collectors.toList());
+
+        if (ValidateUtils.isEmptyList(tpList)) {
+            return Result.buildSuc(new HashMap<>(0));
+        }
 
         try {
             Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> listResult =
