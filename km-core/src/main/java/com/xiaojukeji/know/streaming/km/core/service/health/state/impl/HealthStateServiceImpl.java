@@ -1,10 +1,12 @@
 package com.xiaojukeji.know.streaming.km.core.service.health.state.impl;
 
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectCluster;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckAggResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthScoreResult;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.*;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.connect.ConnectorMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
@@ -18,7 +20,9 @@ import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClus
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
+import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperService;
+import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.connect.cache.LoadedConnectClusterCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.List;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum.*;
+import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthStateEnum.DEAD;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.ConnectorMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems.*;
@@ -49,6 +54,9 @@ public class HealthStateServiceImpl implements HealthStateService {
 
     @Autowired
     private ConnectClusterService connectClusterService;
+
+    @Autowired
+    private KafkaControllerService kafkaControllerService;
 
     @Override
     public ClusterMetrics calClusterHealthMetrics(Long clusterPhyId) {
@@ -99,6 +107,11 @@ public class HealthStateServiceImpl implements HealthStateService {
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_CLUSTER));
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_CONNECTOR));
 
+        //如果controller不存在，直接挂掉
+        if (isKafkaClusterDown(clusterPhyId)) {
+            state = Float.valueOf(DEAD.getDimension());
+        }
+
         metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED, passed);
         metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL, total);
         metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_STATE, state);
@@ -125,7 +138,7 @@ public class HealthStateServiceImpl implements HealthStateService {
                 // DB中不存在，则默认是存活的
                 metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)HealthStateEnum.GOOD.getDimension());
             } else if (!broker.alive()) {
-                metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)HealthStateEnum.DEAD.getDimension());
+                metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float) DEAD.getDimension());
             } else {
                 metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)this.calHealthState(aggResultList).getDimension());
             }
@@ -185,7 +198,7 @@ public class HealthStateServiceImpl implements HealthStateService {
 
         if (zookeeperService.allServerDown(clusterPhyId)) {
             // 所有服务挂掉
-            metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_STATE, (float)HealthStateEnum.DEAD.getDimension());
+            metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_STATE, (float) DEAD.getDimension());
             return metrics;
         }
 
@@ -207,7 +220,7 @@ public class HealthStateServiceImpl implements HealthStateService {
 
         // 找不到connect集群
         if (connectCluster == null) {
-            metrics.putMetric(CONNECTOR_METRIC_HEALTH_STATE, (float) HealthStateEnum.DEAD.getDimension());
+            metrics.putMetric(CONNECTOR_METRIC_HEALTH_STATE, (float) DEAD.getDimension());
             return metrics;
         }
 
@@ -321,7 +334,7 @@ public class HealthStateServiceImpl implements HealthStateService {
 
         if (brokerService.allServerDown(clusterPhyId)) {
             // 所有服务挂掉
-            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_STATE_BROKERS, (float)HealthStateEnum.DEAD.getDimension());
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_STATE_BROKERS, (float) DEAD.getDimension());
             return metrics;
         }
 
@@ -479,5 +492,17 @@ public class HealthStateServiceImpl implements HealthStateService {
         }
 
         return existNotPassed? HealthStateEnum.MEDIUM: HealthStateEnum.GOOD;
+    }
+
+    private boolean isKafkaClusterDown(Long clusterPhyId) {
+        ClusterPhy clusterPhy = LoadedClusterPhyCache.getByPhyId(clusterPhyId);
+        KafkaController kafkaController = kafkaControllerService.getKafkaControllerFromDB(clusterPhyId);
+        if (kafkaController != null && !kafkaController.alive()) {
+            return true;
+        } else if ((System.currentTimeMillis() - clusterPhy.getCreateTime().getTime() >= 5 * 60 * 1000) && kafkaController == null) {
+            // 集群接入时间是在近5分钟内，同时kafkaController信息不存在，则设置为down
+            return true;
+        }
+        return false;
     }
 }

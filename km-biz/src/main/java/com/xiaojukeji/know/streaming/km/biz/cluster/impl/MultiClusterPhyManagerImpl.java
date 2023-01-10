@@ -48,28 +48,19 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
     @Override
     public ClusterPhysState getClusterPhysState() {
         List<ClusterPhy> clusterPhyList = clusterPhyService.listAllClusters();
-
-        Map<Long, KafkaController> controllerMap = kafkaControllerService.getKafkaControllersFromDB(
-                clusterPhyList.stream().map(elem -> elem.getId()).collect(Collectors.toList()),
-                false
-        );
-
         ClusterPhysState physState = new ClusterPhysState(0, 0, clusterPhyList.size());
-        for (ClusterPhy clusterPhy: clusterPhyList) {
-            KafkaController kafkaController = controllerMap.get(clusterPhy.getId());
 
-            if (kafkaController != null && !kafkaController.alive()) {
-                // 存在明确的信息表示controller挂了
+        for (ClusterPhy clusterPhy : clusterPhyList) {
+            ClusterMetrics metrics = clusterMetricService.getLatestMetricsFromCache(clusterPhy.getId());
+            Float state = metrics.getMetric(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_STATE);
+            if (state == null) {
                 physState.setDownCount(physState.getDownCount() + 1);
-            } else if ((System.currentTimeMillis() - clusterPhy.getCreateTime().getTime() >= 5 * 60 * 1000) && kafkaController == null) {
-                // 集群接入时间是在近5分钟内，同时kafkaController信息不存在，则设置为down
+            } else if (state.intValue() == HealthStateEnum.DEAD.getDimension()) {
                 physState.setDownCount(physState.getDownCount() + 1);
             } else {
-                // 其他情况都设置为alive
                 physState.setLiveCount(physState.getLiveCount() + 1);
             }
         }
-
         return physState;
     }
 
