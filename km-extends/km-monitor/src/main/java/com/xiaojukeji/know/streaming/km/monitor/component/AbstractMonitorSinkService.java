@@ -56,9 +56,6 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
                 GroupMetricEvent groupMetricEvent = (GroupMetricEvent)event;
                 sinkMetrics(groupMetric2SinkPoint(groupMetricEvent.getGroupMetrics()));
 
-            } else if(event instanceof ReplicaMetricEvent) {
-                ReplicaMetricEvent       replicaMetricEvent = (ReplicaMetricEvent)event;
-                sinkMetrics(replicationMetric2SinkPoint(replicaMetricEvent.getReplicationMetrics()));
             } else if(event instanceof ZookeeperMetricEvent) {
                 ZookeeperMetricEvent     zookeeperMetricEvent = (ZookeeperMetricEvent)event;
                 sinkMetrics(zookeeperMetric2SinkPoint(zookeeperMetricEvent.getZookeeperMetrics()));

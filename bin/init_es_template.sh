@@ -13,7 +13,7 @@ curl -s --connect-timeout 10 -o /dev/null -X POST -H 'cache-control: no-cache' -
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "2"
       }
     },
     "mappings" : {
@@ -115,7 +115,7 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "2"
       }
     },
     "mappings" : {
@@ -302,7 +302,7 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "6"
       }
     },
     "mappings" : {
@@ -377,7 +377,7 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "6"
       }
     },
     "mappings" : {
@@ -436,72 +436,6 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     "aliases" : { }
   }' 
 
-curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esaddr}:${port}/_template/ks_kafka_replication_metric -d '{
-    "order" : 10,
-    "index_patterns" : [
-      "ks_kafka_replication_metric*"
-    ],
-    "settings" : {
-      "index" : {
-        "number_of_shards" : "10"
-      }
-    },
-    "mappings" : {
-      "properties" : {
-        "brokerId" : {
-          "type" : "long"
-        },
-        "partitionId" : {
-          "type" : "long"
-        },
-        "routingValue" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "ignore_above" : 256,
-              "type" : "keyword"
-            }
-          }
-        },
-        "clusterPhyId" : {
-          "type" : "long"
-        },
-        "topic" : {
-          "type" : "keyword"
-        },
-        "metrics" : {
-          "properties" : {
-            "LogStartOffset" : {
-              "type" : "float"
-            },
-            "Messages" : {
-              "type" : "float"
-            },
-            "LogEndOffset" : {
-              "type" : "float"
-            }
-          }
-        },
-        "key" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "ignore_above" : 256,
-              "type" : "keyword"
-            }
-          }
-        },
-        "timestamp" : {
-          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
-          "index" : true,
-          "type" : "date",
-          "doc_values" : true
-        }
-      }
-    },
-    "aliases" : { }
-  }'
-
 curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${esaddr}:${port}/_template/ks_kafka_topic_metric -d '{
     "order" : 10,
     "index_patterns" : [
@@ -509,7 +443,7 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "6"
       }
     },
     "mappings" : {
@@ -626,7 +560,7 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "2"
       }
     },
     "mappings" : {
@@ -704,6 +638,288 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     "aliases" : { }
   }'
 
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_connect_cluster_metric -d '{
+    "order" : 10,
+    "index_patterns" : [
+      "ks_kafka_connect_cluster_metric*"
+    ],
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "2"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "connectClusterId" : {
+          "type" : "long"
+        },
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "clusterPhyId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "ConnectorCount" : {
+              "type" : "float"
+            },
+            "TaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorStartupAttemptsTotal" : {
+              "type" : "float"
+            },
+            "ConnectorStartupFailurePercentage" : {
+              "type" : "float"
+            },
+            "ConnectorStartupFailureTotal" : {
+              "type" : "float"
+            },
+            "ConnectorStartupSuccessPercentage" : {
+              "type" : "float"
+            },
+            "ConnectorStartupSuccessTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupAttemptsTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupFailurePercentage" : {
+              "type" : "float"
+            },
+            "TaskStartupFailureTotal" : {
+              "type" : "float"
+            },
+            "TaskStartupSuccessPercentage" : {
+              "type" : "float"
+            },
+            "TaskStartupSuccessTotal" : {
+              "type" : "float"
+            }
+          }
+        },
+        "key" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "timestamp" : {
+          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+          "index" : true,
+          "type" : "date",
+          "doc_values" : true
+        }
+      }
+    },
+    "aliases" : { }
+  }'
+
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_connect_connector_metric -d '{
+    "order" : 10,
+    "index_patterns" : [
+      "ks_kafka_connect_connector_metric*"
+    ],
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "2"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "connectClusterId" : {
+          "type" : "long"
+        },
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "connectorName" : {
+          "type" : "keyword"
+        },
+        "connectorNameAndClusterId" : {
+          "type" : "keyword"
+        },
+        "clusterPhyId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "HealthState" : {
+              "type" : "float"
+            },
+            "ConnectorTotalTaskCount" : {
+              "type" : "float"
+            },
+            "HealthCheckPassed" : {
+              "type" : "float"
+            },
+            "HealthCheckTotal" : {
+              "type" : "float"
+            },
+            "ConnectorRunningTaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorPausedTaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorFailedTaskCount" : {
+              "type" : "float"
+            },
+            "ConnectorUnassignedTaskCount" : {
+              "type" : "float"
+            },
+            "BatchSizeAvg" : {
+              "type" : "float"
+            },
+            "BatchSizeMax" : {
+              "type" : "float"
+            },
+            "OffsetCommitAvgTimeMs" : {
+              "type" : "float"
+            },
+            "OffsetCommitMaxTimeMs" : {
+              "type" : "float"
+            },
+             "OffsetCommitFailurePercentage" : {
+               "type" : "float"
+             },
+             "OffsetCommitSuccessPercentage" : {
+               "type" : "float"
+             },
+             "PollBatchAvgTimeMs" : {
+               "type" : "float"
+             },
+             "PollBatchMaxTimeMs" : {
+               "type" : "float"
+             },
+             "SourceRecordActiveCount" : {
+               "type" : "float"
+             },
+             "SourceRecordActiveCountAvg" : {
+               "type" : "float"
+             },
+             "SourceRecordActiveCountMax" : {
+               "type" : "float"
+             },
+             "SourceRecordPollRate" : {
+               "type" : "float"
+             },
+             "SourceRecordPollTotal" : {
+               "type" : "float"
+             },
+             "SourceRecordWriteRate" : {
+               "type" : "float"
+             },
+             "SourceRecordWriteTotal" : {
+               "type" : "float"
+             },
+           "OffsetCommitCompletionRate" : {
+             "type" : "float"
+           },
+           "OffsetCommitCompletionTotal" : {
+             "type" : "float"
+           },
+           "OffsetCommitSkipRate" : {
+             "type" : "float"
+           },
+           "OffsetCommitSkipTotal" : {
+             "type" : "float"
+           },
+           "PartitionCount" : {
+             "type" : "float"
+           },
+           "PutBatchAvgTimeMs" : {
+             "type" : "float"
+           },
+           "PutBatchMaxTimeMs" : {
+             "type" : "float"
+           },
+           "SinkRecordActiveCount" : {
+             "type" : "float"
+           },
+           "SinkRecordActiveCountAvg" : {
+             "type" : "float"
+           },
+           "SinkRecordActiveCountMax" : {
+             "type" : "float"
+           },
+           "SinkRecordLagMax" : {
+             "type" : "float"
+           },
+           "SinkRecordReadRate" : {
+             "type" : "float"
+           },
+           "SinkRecordReadTotal" : {
+             "type" : "float"
+           },
+           "SinkRecordSendRate" : {
+             "type" : "float"
+           },
+           "SinkRecordSendTotal" : {
+             "type" : "float"
+           },
+           "DeadletterqueueProduceFailures" : {
+             "type" : "float"
+           },
+           "DeadletterqueueProduceRequests" : {
+             "type" : "float"
+           },
+           "LastErrorTimestamp" : {
+             "type" : "float"
+           },
+           "TotalErrorsLogged" : {
+             "type" : "float"
+           },
+           "TotalRecordErrors" : {
+             "type" : "float"
+           },
+           "TotalRecordFailures" : {
+             "type" : "float"
+           },
+           "TotalRecordsSkipped" : {
+             "type" : "float"
+           },
+           "TotalRetries" : {
+             "type" : "float"
+           }
+          }
+        },
+        "key" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "timestamp" : {
+          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+          "index" : true,
+          "type" : "date",
+          "doc_values" : true
+        }
+      }
+    },
+    "aliases" : { }
+  }'
+
 for i in {0..6};
 do
     logdate=_$(date -d "${i} day ago" +%Y-%m-%d)
@@ -711,8 +927,9 @@ do
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_cluster_metric${logdate} && \
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_group_metric${logdate} && \
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_partition_metric${logdate} && \
-    curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_replication_metric${logdate} && \
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_zookeeper_metric${logdate} && \
+    curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_connect_cluster_metric${logdate} && \
+    curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_connect_connector_metric${logdate} && \
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_topic_metric${logdate} || \
     exit 2
 done

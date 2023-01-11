@@ -35,7 +35,7 @@ public class ReplicaMetricsController {
                                                               @PathVariable String topicName,
                                                               @PathVariable Integer partitionId,
                                                               @RequestBody MetricDTO dto) {
-        return replicationMetricService.getMetricPointsFromES(clusterPhyId, brokerId, topicName, partitionId, dto);
+        return Result.buildSuc();
     }
 
     @ApiOperation(value = "Replica指标-单个Replica")

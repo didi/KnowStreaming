@@ -5,7 +5,7 @@
     ],
     "settings" : {
       "index" : {
-        "number_of_shards" : "10"
+        "number_of_shards" : "6"
       }
     },
     "mappings" : {
