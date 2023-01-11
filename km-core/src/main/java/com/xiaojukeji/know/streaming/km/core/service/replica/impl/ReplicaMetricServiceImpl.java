@@ -78,8 +78,8 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
                 Result<ReplicationMetrics> ret = this.collectReplicaMetricsFromKafka(
                         clusterId,
                         metrics.getTopic(),
-                        metrics.getBrokerId(),
                         metrics.getPartitionId(),
+                        metrics.getBrokerId(),
                         metricName
                 );
 
@@ -146,8 +146,8 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
         Integer     brokerId    = metricParam.getBrokerId();
         Integer     partitionId = metricParam.getPartitionId();
 
-        Result<ReplicationMetrics> endRet   = this.collectReplicaMetricsFromKafka(clusterId, topic, brokerId, partitionId, REPLICATION_METRIC_LOG_END_OFFSET);
-        Result<ReplicationMetrics> startRet = this.collectReplicaMetricsFromKafka(clusterId, topic, brokerId, partitionId, REPLICATION_METRIC_LOG_START_OFFSET);
+        Result<ReplicationMetrics> endRet   = this.collectReplicaMetricsFromKafka(clusterId, topic, partitionId, brokerId, REPLICATION_METRIC_LOG_END_OFFSET);
+        Result<ReplicationMetrics> startRet = this.collectReplicaMetricsFromKafka(clusterId, topic, partitionId, brokerId, REPLICATION_METRIC_LOG_START_OFFSET);
 
         ReplicationMetrics replicationMetrics = new ReplicationMetrics(clusterId, topic, brokerId, partitionId);
         if(null != endRet && endRet.successful() && null != startRet && startRet.successful()){
@@ -155,6 +155,8 @@ public class ReplicaMetricServiceImpl extends BaseMetricService implements Repli
             Float startOffset = startRet.getData().getMetrics().get(REPLICATION_METRIC_LOG_START_OFFSET);
 
             replicationMetrics.putMetric(metric, endOffset - startOffset);
+            replicationMetrics.putMetric(REPLICATION_METRIC_LOG_END_OFFSET, endOffset);
+            replicationMetrics.putMetric(REPLICATION_METRIC_LOG_START_OFFSET, startOffset);
         }
 
         return Result.buildSuc(replicationMetrics);
