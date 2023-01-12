@@ -373,8 +373,8 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
                 Result<ReplicationMetrics> metricsResult = replicaMetricService.collectReplicaMetricsFromKafka(
                         clusterId,
                         p.getTopicName(),
-                        brokerId,
                         p.getPartitionId(),
+                        brokerId,
                         ReplicaMetricVersionItems.REPLICATION_METRIC_LOG_SIZE
                 );
 
