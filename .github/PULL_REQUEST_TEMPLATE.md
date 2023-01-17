@@ -14,9 +14,10 @@ XXXX
 
 请遵循此清单，以帮助我们快速轻松地整合您的贡献：
 
-* [ ] 确保有针对更改提交的 Github issue（通常在您开始处理之前）。诸如拼写错误之类的琐碎更改不需要 Github issue。您的Pull Request应该只解决这个问题，而不需要进行其他更改——  一个 PR 解决一个问题。
-* [ ] 格式化 Pull Request 标题，如[ISSUE #123] support Confluent Schema Registry。 Pull Request 中的每个提交都应该有一个有意义的主题行和正文。
-* [ ] 编写足够详细的Pull Request描述，以了解Pull Request的作用、方式和原因。
-* [ ] 编写必要的单元测试来验证您的逻辑更正。如果提交了新功能或重大更改，请记住在test 模块中添加 integration-test
-* [ ] 确保编译通过，集成测试通过
+* [ ] 一个 PR（Pull Request的简写）只解决一个问题，禁止一个 PR 解决多个问题；
+* [ ] 确保 PR 有对应的 Issue（通常在您开始处理之前创建），除非是书写错误之类的琐碎更改不需要 Issue ；
+* [ ] 格式化 PR 及 Commit-Log 的标题及内容，例如 #861 。PS：Commit-Log 需要在 Git Commit 代码时进行填写，在 GitHub 上修改不了；
+* [ ] 编写足够详细的 PR 描述，以了解 PR 的作用、方式和原因；
+* [ ] 编写必要的单元测试来验证您的逻辑更正。如果提交了新功能或重大更改，请记住在 test 模块中添加 integration-test；
+* [ ] 确保编译通过，集成测试通过；
 
