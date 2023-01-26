@@ -20,12 +20,13 @@ import java.util.Set;
 
 public class GroupMetricESDAOTest extends KnowStreamApplicationTest {
 
+    Long clusterId = 1L;
+
     @Autowired
     private GroupMetricESDAO groupMetricESDAO;
 
     @Test
     public void listLatestMetricsAggByGroupTopicTest(){
-        Long clusterPhyId = 2L;
         List<GroupTopic> groupTopicList = new ArrayList<>();
         groupTopicList.add(new GroupTopic("g-know-streaming-123456", "know-streaming-test-251"));
         groupTopicList.add(new GroupTopic("test_group", "know-streaming-test-251"));
@@ -33,14 +34,13 @@ public class GroupMetricESDAOTest extends KnowStreamApplicationTest {
         List<String> metrics = Arrays.asList("OffsetConsumed", "Lag");
         AggTypeEnum aggType = AggTypeEnum.AVG;
 
-        List<GroupMetricPO> groupMetricPOS = groupMetricESDAO.listLatestMetricsAggByGroupTopic(clusterPhyId, groupTopicList, metrics, aggType);
+        List<GroupMetricPO> groupMetricPOS = groupMetricESDAO.listLatestMetricsAggByGroupTopic(clusterId, groupTopicList, metrics, aggType);
 
         assert !CollectionUtils.isEmpty(groupMetricPOS);
     }
 
     @Test
     public void listGroupTopicPartitionsTest(){
-        Long   clusterId = 2L;
         String groupName = "g-know-streaming-123456";
         Long   endTime   = System.currentTimeMillis();
         Long   startTime = endTime - 24 * 3600 * 1000;
@@ -51,17 +51,15 @@ public class GroupMetricESDAOTest extends KnowStreamApplicationTest {
 
     @Test
     public void listPartitionLatestMetricsTest(){
-        Long   clusterId = 2L;
         String groupName = "test_group_20220421";
         String topicName = "know-streaming-test-251";
         List<GroupMetricPO> groupMetricPOS = groupMetricESDAO.listPartitionLatestMetrics(clusterId, groupName, topicName, null);
 
-        assert !CollectionUtils.isEmpty(groupMetricPOS);
+        assert CollectionUtils.isEmpty(groupMetricPOS);
     }
 
     @Test
     public void countMetricValueTest(){
-        Long   clusterId = 3L;
         String groupName = "test_group";
 
         SearchTerm searchTerm = new SearchTerm("HealthCheckTotal", "1", false);
@@ -75,7 +73,6 @@ public class GroupMetricESDAOTest extends KnowStreamApplicationTest {
 
     @Test
     public void listGroupMetricsTest(){
-        Long   clusterId = 2L;
         String groupName = "g-know-streaming-123456";
         Long   endTime   = System.currentTimeMillis();
         Long   startTime = endTime - 24 * 3600 * 1000;

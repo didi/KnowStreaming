@@ -18,12 +18,13 @@ import java.util.List;
 
 public class TopicMetricServiceTest extends KnowStreamApplicationTest {
 
+    Long clusterId = 1L;
+
     @Autowired
     private TopicMetricService topicMetricService;
 
     @Test
     public void listTopicMetricsFromESTest(){
-        Long clusterId = 1l;
         Long endTime   = System.currentTimeMillis();
         Long startTime = endTime - 3600 * 1000;
 
@@ -47,7 +48,6 @@ public class TopicMetricServiceTest extends KnowStreamApplicationTest {
 
     @Test
     public void pagingTopicWithLatestMetricsFromESTest(){
-        Long clusterId = 2l;
         List<String> metricNameList = new ArrayList<>();
         SearchSort sort = new SearchSort();
         sort.setQueryName("LogSize");
