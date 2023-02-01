@@ -71,7 +71,11 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
         );
 
         Float activeController = clusterMetricsResult.getData().getMetric(ClusterMetricVersionItems.CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT);
-
+        if (activeController == null) {
+            log.error("method=checkClusterNoController||param={}||config={}||errMsg=get metrics failed, activeControllerCount is null",
+                    param, valueConfig);
+            return null;
+        }
 
         checkResult.setPassed(activeController.intValue() != valueConfig.getValue().intValue() ? 0: 1);
 
