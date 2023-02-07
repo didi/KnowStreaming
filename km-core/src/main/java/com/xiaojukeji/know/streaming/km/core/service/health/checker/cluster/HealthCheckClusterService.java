@@ -58,7 +58,7 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
 
         Result<ClusterMetrics> clusterMetricsResult = clusterMetricService.getLatestMetricsFromES(param.getClusterPhyId(), Arrays.asList(ClusterMetricVersionItems.CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT));
         if (clusterMetricsResult.failed() || !clusterMetricsResult.hasData()) {
-            log.error("method=checkClusterNoController||param={}||config={}||result={}||errMsg=get metrics failed",
+            log.error("method=checkClusterNoController||param={}||config={}||result={}||errMsg=get metrics from es failed",
                     param, valueConfig, clusterMetricsResult);
             return null;
         }
@@ -72,7 +72,7 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
 
         Float activeController = clusterMetricsResult.getData().getMetric(ClusterMetricVersionItems.CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT);
         if (activeController == null) {
-            log.error("method=checkClusterNoController||param={}||config={}||errMsg=get metrics failed, activeControllerCount is null",
+            log.error("method=checkClusterNoController||param={}||config={}||errMsg=get metrics from es failed, activeControllerCount is null",
                     param, valueConfig);
             return null;
         }
