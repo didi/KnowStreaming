@@ -1,7 +1,7 @@
 package com.xiaojukeji.know.streaming.km;
 
 import com.xiaojukeji.know.streaming.km.rest.KnowStreaming;
-import com.xiaojukeji.know.streaming.test.km.KMBase;
+import com.xiaojukeji.know.streaming.test.KMTestEnvService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -19,7 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = KnowStreaming.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class KnowStreamApplicationTest extends KMBase {
+public class KnowStreamApplicationTest extends KMTestEnvService {
     @LocalServerPort
     private Integer port;
 

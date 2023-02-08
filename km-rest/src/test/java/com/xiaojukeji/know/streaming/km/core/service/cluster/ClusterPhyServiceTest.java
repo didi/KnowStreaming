@@ -5,6 +5,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.ClusterPhyAddDTO
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig;
 import com.xiaojukeji.know.streaming.km.common.converter.ClusterConverter;
+import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.DuplicateException;
 import com.xiaojukeji.know.streaming.km.common.exception.ParamErrorException;
@@ -33,7 +34,7 @@ public class ClusterPhyServiceTest extends KnowStreamApplicationTest {
             ClusterPhyAddDTO dto = new ClusterPhyAddDTO();
             dto.setName("test");
             dto.setDescription("");
-            dto.setKafkaVersion(kafkaVersion());
+            dto.setKafkaVersion(VersionEnum.V_2_5_1.getVersion());
             dto.setJmxProperties(jmxConfig);
             dto.setClientProperties(properties);
             dto.setZookeeper(zookeeperUrl());
