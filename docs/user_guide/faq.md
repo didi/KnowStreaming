@@ -222,3 +222,7 @@ spring:
   logi-security:
     login-extend-bean-name: ksLdapLoginService # 表示使用ldap的service
 ```
+
+## 8.15、测试时使用Testcontainers的说明
+1. 需要docker运行环境 [Testcontainers运行环境说明](https://www.testcontainers.org/supported_docker_environment/)
+2. 如果本机没有docker，可以使用[远程访问docker](https://docs.docker.com/config/daemon/remote-access/) [Testcontainers配置说明](https://www.testcontainers.org/features/configuration/#customizing-docker-host-detection)  
