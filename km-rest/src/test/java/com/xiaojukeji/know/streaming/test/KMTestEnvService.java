@@ -27,7 +27,7 @@ public abstract class KMTestEnvService {
             mySQLTestContainer.init();
         }
 
-        if (useMysql) {
+        if (useES) {
             esTestContainer = new ESTestContainer();
             esTestContainer.init();
         }
