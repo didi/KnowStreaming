@@ -18,6 +18,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.config.PlatformClusterConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.connect.ConnectClusterDAO;
+import com.xiaojukeji.know.streaming.km.persistence.mysql.connect.ConnectorDAO;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.health.HealthCheckResultDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -38,6 +39,9 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
 
     @Autowired
     private ConnectClusterDAO connectClusterDAO;
+
+    @Autowired
+    private ConnectorDAO connectorDAO;
 
     @Autowired
     private PlatformClusterConfigService platformClusterConfigService;
