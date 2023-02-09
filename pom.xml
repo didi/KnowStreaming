@@ -60,6 +60,7 @@
         <module>km-collector</module>
         <module>km-rest</module>
         <module>km-dist</module>
+        <module>km-enterprise/km-ha</module>
     </modules>
 
     <dependencyManagement>

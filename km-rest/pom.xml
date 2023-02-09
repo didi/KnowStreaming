@@ -57,6 +57,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>km-ha</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
         </dependency>
