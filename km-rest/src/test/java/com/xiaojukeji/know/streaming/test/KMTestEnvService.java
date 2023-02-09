@@ -22,7 +22,7 @@ public abstract class KMTestEnvService {
 
     @BeforeAll
     static void init() {
-        if (useES) {
+        if (useMysql) {
             mySQLTestContainer = new MySQLTestContainer();
             mySQLTestContainer.init();
         }
