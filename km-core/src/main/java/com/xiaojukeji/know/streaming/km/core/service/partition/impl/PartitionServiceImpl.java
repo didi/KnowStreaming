@@ -22,7 +22,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.Triple;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionMap;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;

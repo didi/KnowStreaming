@@ -1,4 +1,4 @@
-package com.xiaojukeji.know.streaming.km.core.cache;
+package com.xiaojukeji.know.streaming.km.persistence.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -7,31 +7,58 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class DataBaseDataLocalCache {
-    private static final Cache<Long, Map<String, TopicMetrics>> topicLatestMetricsCache = Caffeine.newBuilder()
-            .expireAfterWrite(360, TimeUnit.SECONDS)
-            .maximumSize(500)
-            .build();
+    @Value(value = "${cache.metric.topic-size:2000}")
+    private Long topicLatestMetricsCacheSize;
 
-    private static final Cache<Long, ClusterMetrics> clusterLatestMetricsCache = Caffeine.newBuilder()
-            .expireAfterWrite(180, TimeUnit.SECONDS)
-            .maximumSize(500)
-            .build();
+    @Value(value = "${cache.metric.cluster-size:2000}")
+    private Long clusterLatestMetricsCacheSize;
 
-    private static final Cache<Long, Map<String, List<Partition>>> partitionsCache = Caffeine.newBuilder()
-            .expireAfterWrite(60, TimeUnit.SECONDS)
-            .maximumSize(500)
-            .build();
+    @Value(value = "${cache.metadata.partition-size:2000}")
+    private Long partitionsCacheSize;
 
-    private static final Cache<Long, Map<String, List<HealthCheckResultPO>>> healthCheckResultCache = Caffeine.newBuilder()
-            .expireAfterWrite(90, TimeUnit.SECONDS)
-            .maximumSize(1000)
-            .build();
+    @Value(value = "${cache.metadata.health-check-result-size:10000}")
+    private Long healthCheckResultCacheSize;
+
+    private static Cache<Long, Map<String, TopicMetrics>> topicLatestMetricsCache;
+
+    private static Cache<Long, ClusterMetrics> clusterLatestMetricsCache;
+
+    private static Cache<Long, Map<String, List<Partition>>> partitionsCache;
+
+    private static Cache<Long, Map<String, List<HealthCheckResultPO>>> healthCheckResultCache;
+
+    @PostConstruct
+    private void init() {
+        topicLatestMetricsCache = Caffeine.newBuilder()
+                .expireAfterWrite(360, TimeUnit.SECONDS)
+                .maximumSize(topicLatestMetricsCacheSize)
+                .build();
+
+        clusterLatestMetricsCache = Caffeine.newBuilder()
+                .expireAfterWrite(180, TimeUnit.SECONDS)
+                .maximumSize(clusterLatestMetricsCacheSize)
+                .build();
+
+        partitionsCache = Caffeine.newBuilder()
+                .expireAfterWrite(60, TimeUnit.SECONDS)
+                .maximumSize(partitionsCacheSize)
+                .build();
+
+        healthCheckResultCache = Caffeine.newBuilder()
+                .expireAfterWrite(90, TimeUnit.SECONDS)
+                .maximumSize(healthCheckResultCacheSize)
+                .build();
+    }
 
     public static Map<String, TopicMetrics> getTopicMetrics(Long clusterPhyId) {
         return topicLatestMetricsCache.getIfPresent(clusterPhyId);

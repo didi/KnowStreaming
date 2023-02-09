@@ -4,14 +4,19 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResp
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BaseMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchFuzzy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchShould;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchTerm;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchSort;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.TopicMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
+import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.PaginationMetricsUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -308,25 +313,32 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         return table;
     }
 
-    //public for test
-    public Map<String, List<String>> getTopNTopics(Long clusterPhyId, List<String> metrics,
-                                                   String aggType, int topN,
-                                                   Long startTime, Long endTime){
-        //1、获取需要查下的索引
-        String realIndex = realIndex(startTime, endTime);
+    public Map<String, List<String>> getTopNTopics(Long clusterPhyId,
+                                                   List<String> metricNameList,
+                                                   String aggType,
+                                                   int topN,
+                                                   Long startTime,
+                                                   Long endTime) {
+        Map<String, TopicMetrics> metricsMap = DataBaseDataLocalCache.getTopicMetrics(clusterPhyId);
+        if (metricsMap == null) {
+            return new HashMap<>();
+        }
 
-        //2、根据查询的时间区间大小来确定指标点的聚合区间大小
-        String interval = MetricsUtils.getInterval(endTime - startTime);
+        List<TopicMetrics> metricsList = new ArrayList<>(metricsMap.values());
 
-        //3、构造agg查询条件
-        String aggDsl   = buildAggsDSL(metrics, aggType);
+        Map<String, List<String>> resultMap = new HashMap<>();
+        for (String metricName: metricNameList) {
+            metricsList = PaginationMetricsUtil.sortMetrics(
+                    metricsList.stream().map(elem -> (BaseMetrics)elem).collect(Collectors.toList()),
+                    metricName,
+                    "topic",
+                    SortTypeEnum.DESC.getSortType()
+            ).stream().map(elem -> (TopicMetrics)elem).collect(Collectors.toList());
 
-        //4、查询es
-        String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslConstant.GET_TOPIC_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+            resultMap.put(metricName, metricsList.subList(0, Math.min(topN, metricsList.size())).stream().map(elem -> elem.getTopic()).collect(Collectors.toList()));
+        }
 
-        return esOpClient.performRequest(realIndex, dsl,
-                s -> handleTopTopicESQueryResponse(s, metrics, topN), 3);
+        return resultMap;
     }
 
     /**************************************************** private method ****************************************************/
