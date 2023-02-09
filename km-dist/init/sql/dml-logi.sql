@@ -97,3 +97,25 @@ INSERT INTO `logi_security_config`
 (`value_group`,`value_name`,`value`,`edit`,`status`,`memo`,`is_delete`,`app_name`,`operator`)
 VALUES
 ('SECURITY.LOGIN','SECURITY.TRICK_USERS','[\n  \"admin\"\n]',1,1,'允许跳过登录的用户',0,'know-streaming','admin');
+
+
+-- 多集群管理权限2023-01-05新增
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2012', 'Topic-新增Topic复制', '1593', '1', '2', 'Topic-新增Topic复制', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2014', 'Topic-详情-取消Topic复制', '1593', '1', '2', 'Topic-详情-取消Topic复制', '0', 'know-streaming');
+
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2012', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2014', '0', 'know-streaming');
+
+
+-- 多集群管理权限2023-01-18新增
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2016', 'MM2-新增', '1593', '1', '2', 'MM2-新增', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2018', 'MM2-编辑', '1593', '1', '2', 'MM2-编辑', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2020', 'MM2-删除', '1593', '1', '2', 'MM2-删除', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2022', 'MM2-重启', '1593', '1', '2', 'MM2-重启', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2024', 'MM2-暂停&恢复', '1593', '1', '2', 'MM2-暂停&恢复', '0', 'know-streaming');
+
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2016', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2018', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2020', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2022', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2024', '0', 'know-streaming');
