@@ -45,4 +45,14 @@ public class KSConnector implements Serializable {
      * 状态
      */
     private String state;
+
+    /**
+     *   心跳检测connector名称
+     */
+    private String heartbeatConnectorName;
+
+    /**
+     *   进度确认connector名称
+     */
+    private String checkpointConnectorName;
 }
