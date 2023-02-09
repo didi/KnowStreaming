@@ -34,6 +34,7 @@ import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafk
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.MirrorMakerMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ZookeeperMetricVersionItems.*;
 
 @Service
@@ -114,6 +115,14 @@ public class VersionControlManagerImpl implements VersionControlManager {
         defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_KAFKA_ZK_DISCONNECTS_PER_SEC, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_KAFKA_ZK_SYNC_CONNECTS_PER_SEC, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_KAFKA_ZK_REQUEST_LATENCY_99TH, true));
+
+        // mm2
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_BYTE_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_BYTE_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_AGE_MS_MAX, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_REPLICATION_LATENCY_MS_MAX, true));
     }
 
     @Autowired

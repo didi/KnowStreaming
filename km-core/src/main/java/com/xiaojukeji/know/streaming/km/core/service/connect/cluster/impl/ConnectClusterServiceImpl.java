@@ -69,8 +69,8 @@ public class ConnectClusterServiceImpl implements ConnectClusterService {
         if (ValidateUtils.isBlank(oldPO.getVersion())) {
             oldPO.setVersion(KafkaConstant.DEFAULT_CONNECT_VERSION);
         }
-        if (ValidateUtils.isBlank(oldPO.getClusterUrl())) {
-            oldPO.setClusterUrl(metadata.getMemberLeaderUrl());
+        if (!ValidateUtils.isBlank(clusterUrl)) {
+            oldPO.setClusterUrl(clusterUrl);
         }
         connectClusterDAO.updateById(oldPO);
 
