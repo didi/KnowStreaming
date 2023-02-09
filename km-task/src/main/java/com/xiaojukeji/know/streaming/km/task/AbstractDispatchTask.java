@@ -9,6 +9,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.EntityIdInterface;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminTaskCodeException;
+import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 
 import javax.annotation.PostConstruct;
@@ -82,7 +83,15 @@ public abstract class AbstractDispatchTask<E extends Comparable & EntityIdInterf
             }
 
             // 进行任务处理
-            return this.processTask(subTaskList, triggerTimeUnitMs);
+            TaskResult ret = this.processTask(subTaskList, triggerTimeUnitMs);
+
+            //组装信息
+            TaskResult taskResult = new TaskResult();
+            taskResult.setCode(ret.getCode());
+            taskResult.setMessage(ConvertUtil.list2String(subTaskList, ","));
+
+            return taskResult;
+
         } catch (Exception e) {
             LOGGER.error("process task failed, taskName:{}", taskName, e);
 
