@@ -24,6 +24,8 @@ public enum HealthCheckDimensionEnum {
 
     CONNECTOR(6, "Connector", "Connect"),
 
+    MIRROR_MAKER(7,"MirrorMaker","MirrorMaker"),
+
     MAX_VAL(100, "所有的dimension的值需要小于MAX_VAL", "Ignore")
 
     ;

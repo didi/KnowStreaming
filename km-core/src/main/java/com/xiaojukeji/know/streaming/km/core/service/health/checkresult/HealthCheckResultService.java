@@ -26,4 +26,6 @@ public interface HealthCheckResultService {
     void batchReplace(Long clusterPhyId, Integer dimension, List<HealthCheckResult> healthCheckResults);
 
     List<HealthCheckResultPO> getConnectorHealthCheckResult(Long clusterPhyId);
+
+    List<HealthCheckResultPO> getMirrorMakerHealthCheckResult(Long clusterPhyId);
 }
