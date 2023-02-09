@@ -422,6 +422,8 @@ CREATE TABLE `ks_kc_connector` (
      `state` varchar(45) NOT NULL DEFAULT '' COMMENT '状态',
      `topics` text COMMENT '访问过的Topics',
      `task_count` int(11) NOT NULL DEFAULT '0' COMMENT '任务数',
+     `heartbeat_connector_name` varchar(512) DEFAULT '' COMMENT '心跳检测connector名称',
+     `checkpoint_connector_name` varchar(512) DEFAULT '' COMMENT '进度确认connector名称',
      `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
      `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
      PRIMARY KEY (`id`),
@@ -463,3 +465,19 @@ CREATE TABLE `ks_kc_worker_connector` (
      PRIMARY KEY (`id`),
      UNIQUE KEY `uniq_relation` (`connect_cluster_id`,`connector_name`,`task_id`,`worker_member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Worker和Connector关系表';
+
+
+DROP TABLE IF EXISTS `ks_ha_active_standby_relation`;
+CREATE TABLE `ks_ha_active_standby_relation` (
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `active_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '主集群ID',
+    `standby_cluster_phy_id` bigint(20) NOT NULL DEFAULT '-1' COMMENT '备集群ID',
+    `res_name` varchar(192) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '' COMMENT '资源名称',
+    `res_type` int(11) NOT NULL DEFAULT '-1' COMMENT '资源类型，0：集群，1：镜像Topic，2：主备Topic',
+    `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `modify_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_cluster_res` (`res_type`,`active_cluster_phy_id`,`standby_cluster_phy_id`,`res_name`),
+    UNIQUE KEY `uniq_res_type_standby_cluster_res_name` (`res_type`,`standby_cluster_phy_id`,`res_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='HA主备关系表';

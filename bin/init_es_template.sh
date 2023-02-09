@@ -920,6 +920,106 @@ curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: appl
     "aliases" : { }
   }'
 
+curl -s -o /dev/null -X POST -H 'cache-control: no-cache' -H 'content-type: application/json' http://${SERVER_ES_ADDRESS}/_template/ks_kafka_connect_mirror_maker_metric -d '{
+    "order" : 10,
+    "index_patterns" : [
+      "ks_kafka_connect_mirror_maker_metric*"
+    ],
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "2"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "connectClusterId" : {
+          "type" : "long"
+        },
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "connectorName" : {
+          "type" : "keyword"
+        },
+        "connectorNameAndClusterId" : {
+          "type" : "keyword"
+        },
+        "clusterPhyId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "HealthState" : {
+              "type" : "float"
+            },
+            "HealthCheckTotal" : {
+              "type" : "float"
+            },
+            "ByteCount" : {
+              "type" : "float"
+            },
+            "ByteRate" : {
+              "type" : "float"
+            },
+            "RecordAgeMs" : {
+              "type" : "float"
+            },
+            "RecordAgeMsAvg" : {
+              "type" : "float"
+            },
+            "RecordAgeMsMax" : {
+              "type" : "float"
+            },
+            "RecordAgeMsMin" : {
+              "type" : "float"
+            },
+            "RecordCount" : {
+              "type" : "float"
+            },
+            "RecordRate" : {
+              "type" : "float"
+            },
+            "ReplicationLatencyMs" : {
+              "type" : "float"
+            },
+            "ReplicationLatencyMsAvg" : {
+              "type" : "float"
+            },
+            "ReplicationLatencyMsMax" : {
+               "type" : "float"
+            },
+            "ReplicationLatencyMsMin" : {
+               "type" : "float"
+            }
+          }
+        },
+        "key" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "timestamp" : {
+          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+          "index" : true,
+          "type" : "date",
+          "doc_values" : true
+        }
+      }
+    },
+    "aliases" : { }
+  }'
+
+
 for i in {0..6};
 do
     logdate=_$(date -d "${i} day ago" +%Y-%m-%d)
@@ -930,6 +1030,7 @@ do
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_zookeeper_metric${logdate} && \
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_connect_cluster_metric${logdate} && \
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_connect_connector_metric${logdate} && \
+    curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_connect_mirror_maker_metric${logdate} && \
     curl -s -o /dev/null -X PUT http://${esaddr}:${port}/ks_kafka_topic_metric${logdate} || \
     exit 2
 done
