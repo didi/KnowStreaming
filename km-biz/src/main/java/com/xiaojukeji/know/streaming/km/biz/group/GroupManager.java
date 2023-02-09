@@ -39,5 +39,5 @@ public interface GroupManager {
 
     Result<Void> resetGroupOffsets(GroupOffsetResetDTO dto, String operator) throws Exception;
 
-    List<GroupTopicOverviewVO> getGroupTopicOverviewVOList  (Long clusterPhyId, List<GroupMemberPO> groupMemberPOList);
+    List<GroupTopicOverviewVO> getGroupTopicOverviewVOList(Long clusterPhyId, List<GroupMemberPO> groupMemberPOList);
 }

@@ -58,6 +58,7 @@ public interface GroupService {
     /**
      * DB-GroupTopic相关接口
      */
+    List<GroupMemberPO> listGroupByCluster(Long clusterPhyId);
     List<GroupMemberPO> listGroupByTopic(Long clusterPhyId, String topicName);
 
     PaginationResult<GroupMemberPO> pagingGroupMembers(Long clusterPhyId,

@@ -225,6 +225,14 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
     }
 
     @Override
+    public List<GroupMemberPO> listGroupByCluster(Long clusterPhyId) {
+        LambdaQueryWrapper<GroupMemberPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
+
+        return groupMemberDAO.selectList(lambdaQueryWrapper);
+    }
+
+    @Override
     public List<GroupMemberPO> listGroupByTopic(Long clusterPhyId, String topicName) {
         LambdaQueryWrapper<GroupMemberPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
