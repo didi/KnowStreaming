@@ -110,4 +110,11 @@ public class MsgConstant {
     public static String getConnectorBizStr(Long clusterPhyId, String topicName) {
         return String.format("Connect集群ID:[%d] Connector名称:[%s]", clusterPhyId, topicName);
     }
+
+
+    /**************************************************** Connector ****************************************************/
+
+    public static String getConnectorNotExist(Long connectClusterId, String connectorName) {
+        return String.format("Connect集群ID:[%d] Connector名称:[%s] 不存在", connectClusterId, connectorName);
+    }
 }
