@@ -10,7 +10,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
-import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
