@@ -10,6 +10,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.connect.ConnectCl
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.connector.ClusterConnectorOverviewVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.connector.ConnectorBasicCombineExistVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.connector.ConnectorBasicVO;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.mm2.MirrorMakerBasicVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricLineVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant;
@@ -48,6 +49,25 @@ public class ConnectConverter {
         List<ConnectorBasicVO> voList = new ArrayList<>();
         poList.stream().filter(item -> clusterMap.containsKey(item.getConnectClusterId())).forEach(elem -> {
             ConnectorBasicVO vo = new ConnectorBasicVO();
+            vo.setConnectClusterId(elem.getConnectClusterId());
+            vo.setConnectClusterName(clusterMap.get(elem.getConnectClusterId()).getName());
+            vo.setConnectorName(elem.getConnectorName());
+
+            voList.add(vo);
+        });
+
+        return voList;
+    }
+
+    public static List<MirrorMakerBasicVO> convert2MirrorMakerBasicVOList(
+            List<ConnectCluster> clusterList,
+            List<ConnectorPO> poList) {
+        Map<Long, ConnectCluster> clusterMap = new HashMap<>();
+        clusterList.stream().forEach(elem -> clusterMap.put(elem.getId(), elem));
+
+        List<MirrorMakerBasicVO> voList = new ArrayList<>();
+        poList.stream().filter(item -> clusterMap.containsKey(item.getConnectClusterId())).forEach(elem -> {
+            MirrorMakerBasicVO vo = new MirrorMakerBasicVO();
             vo.setConnectClusterId(elem.getConnectClusterId());
             vo.setConnectClusterName(clusterMap.get(elem.getConnectClusterId()).getName());
             vo.setConnectorName(elem.getConnectorName());
