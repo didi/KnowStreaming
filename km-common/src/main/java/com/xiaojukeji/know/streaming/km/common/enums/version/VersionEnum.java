@@ -53,7 +53,11 @@ public enum VersionEnum {
     V_2_3_1("2.3.1", normailze("2.3.1")),
     V_2_4_0("2.4.0", normailze("2.4.0")),
     V_2_4_1("2.4.1", normailze("2.4.1")),
+
     V_2_5_0("2.5.0", normailze("2.5.0")),
+    V_2_5_0_D_300("2.5.0-d-300", normailze("2.5.0-d-300")),
+    V_2_5_0_D_MAX("2.5.0-d-999", normailze("2.5.0-d-999")),
+
     V_2_5_1("2.5.1", normailze("2.5.1")),
     V_2_6_0("2.6.0", normailze("2.6.0")),
     V_2_6_1("2.6.1", normailze("2.6.1")),
@@ -77,9 +81,9 @@ public enum VersionEnum {
 
     ;
 
-    private String version;
+    private final String version;
 
-    private Long   versionL;
+    private final Long   versionL;
 
     VersionEnum(String version, Long versionL) {
         this.version  = version;
