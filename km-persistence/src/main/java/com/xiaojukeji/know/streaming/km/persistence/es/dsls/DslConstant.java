@@ -89,6 +89,4 @@ public class DslConstant {
     public static final String GET_CONNECTOR_AGG_LIST_METRICS           = "ConnectorMetricESDAO/getConnectorAggListMetric";
 
     public static final String GET_CONNECTOR_AGG_TOP_METRICS            = "ConnectorMetricESDAO/getConnectorAggTopMetric";
-
-
 }

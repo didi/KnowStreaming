@@ -13,27 +13,16 @@ import com.xiaojukeji.know.streaming.km.common.utils.Triple;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.BaseMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.CONNECT_CONNECTOR_INDEX;
 
-@Component
-public class ConnectorMetricESDAO extends BaseMetricESDAO {
-
-    @PostConstruct
-    public void init() {
-        super.indexName     = CONNECT_CONNECTOR_INDEX;
-        checkCurrentDayIndexExist();
-        register( this);
-    }
+public class BaseConnectorMetricESDAO extends BaseMetricESDAO {
 
     /**
-     * 获取每个 metric 的 topN 个 connector 的指标，如果获取不到 topN 的 connectors, 则默认返回 defaultTopics 的指标
+     * 获取每个 metric 的 topN 个 connector 的指标，如果获取不到 topN 的 connectors, 则默认返回 defaultConnectorList 的指标
      */
     public Table<String/*metric*/, Tuple<Long, String>, List<MetricPointVO>> listMetricsByTopN(Long clusterPhyId,
                                                                                                List<Tuple<Long, String>> defaultConnectorList,
@@ -143,7 +132,7 @@ public class ConnectorMetricESDAO extends BaseMetricESDAO {
         for(Tuple<Long, String> connector : connectorList) {
             try {
                 esTPService.submitSearchTask(
-                        String.format("class=ConnectorMetricESDAO||method=listMetricsByConnectors||ClusterPhyId=%d||connectorName=%s", clusterPhyId, connector.getV2()),
+                        String.format("class=BaseConnectorMetricESDAO||method=listMetricsByConnectors||ClusterPhyId=%d||connectorName=%s", clusterPhyId, connector.getV2()),
                         3000,
                         () -> {
                             String dsl = dslLoaderUtil.getFormatDslByFileName(
@@ -318,7 +307,9 @@ public class ConnectorMetricESDAO extends BaseMetricESDAO {
 
     private Tuple<String, Long> splitConnectorNameAndClusterId(String connectorNameAndClusterId){
         String[] ss = connectorNameAndClusterId.split("#");
-        if(null == ss || ss.length != 2){return null;}
+        if(null == ss || ss.length != 2) {
+            return null;
+        }
 
         return new Tuple<>(ss[0], Long.valueOf(ss[1]));
     }
