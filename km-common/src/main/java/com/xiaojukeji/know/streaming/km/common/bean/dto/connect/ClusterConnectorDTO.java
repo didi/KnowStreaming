@@ -19,11 +19,11 @@ import javax.validation.constraints.NotNull;
 public class ClusterConnectorDTO extends BaseDTO {
     @NotNull(message = "connectClusterId不允许为空")
     @ApiModelProperty(value = "Connector集群ID", example = "1")
-    private Long connectClusterId;
+    protected Long connectClusterId;
 
     @NotBlank(message = "name不允许为空串")
     @ApiModelProperty(value = "Connector名称", example = "know-streaming-connector")
-    private String connectorName;
+    protected String connectorName;
 
     public ClusterConnectorDTO(Long connectClusterId, String connectorName) {
         this.connectClusterId = connectClusterId;

@@ -4,6 +4,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.dto.connect.ClusterConnector
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.util.Properties;
@@ -13,9 +14,15 @@ import java.util.Properties;
  * @date 2022-10-17
  */
 @Data
+@NoArgsConstructor
 @ApiModel(description = "创建Connector")
 public class ConnectorCreateDTO extends ClusterConnectorDTO {
     @NotNull(message = "configs不允许为空")
     @ApiModelProperty(value = "配置", example = "")
-    private Properties configs;
+    protected Properties configs;
+
+    public ConnectorCreateDTO(Long connectClusterId, String connectorName, Properties configs) {
+        super(connectClusterId, connectorName);
+        this.configs = configs;
+    }
 }

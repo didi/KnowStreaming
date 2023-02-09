@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.net.URI;
 
 @Data
 @NoArgsConstructor
