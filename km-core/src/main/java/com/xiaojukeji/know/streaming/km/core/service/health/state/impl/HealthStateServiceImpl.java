@@ -7,6 +7,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckAgg
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthScoreResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.*;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.connect.ConnectorMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.mm2.MirrorMakerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
 import com.xiaojukeji.know.streaming.km.common.component.SpringTool;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.ConnectorMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.MirrorMakerMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.*;
@@ -72,6 +74,7 @@ public class HealthStateServiceImpl implements HealthStateService {
         metrics.putMetric(this.calClusterGroupsHealthMetrics(clusterPhyId).getMetrics());
         metrics.putMetric(this.calZookeeperHealthMetrics(clusterPhyId).getMetrics());
         metrics.putMetric(this.calClusterConnectsHealthMetrics(clusterPhyId).getMetrics());
+        metrics.putMetric(this.calClusterMirrorMakersHealthMetrics(clusterPhyId).getMetrics());
 
         // 统计最终结果
         Float passed = 0.0f;
@@ -81,6 +84,7 @@ public class HealthStateServiceImpl implements HealthStateService {
         passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_GROUPS);
         passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CLUSTER);
         passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CONNECTOR);
+        passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_MIRROR_MAKER);
 
         Float total = 0.0f;
         total += metrics.getMetric(ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL);
@@ -89,6 +93,7 @@ public class HealthStateServiceImpl implements HealthStateService {
         total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_GROUPS);
         total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CLUSTER);
         total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CONNECTOR);
+        total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_MIRROR_MAKER);
 
         // 状态
         Float state = 0.0f;
@@ -98,6 +103,7 @@ public class HealthStateServiceImpl implements HealthStateService {
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_GROUPS));
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_CLUSTER));
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_CONNECTOR));
+        state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_MIRROR_MAKER));
 
         metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED, passed);
         metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL, total);
@@ -226,6 +232,31 @@ public class HealthStateServiceImpl implements HealthStateService {
     }
 
     @Override
+    public MirrorMakerMetrics calMirrorMakerHealthMetrics(Long connectClusterId, String mirrorMakerName) {
+        ConnectCluster connectCluster = LoadedConnectClusterCache.getByPhyId(connectClusterId);
+        MirrorMakerMetrics metrics = new MirrorMakerMetrics(connectClusterId, mirrorMakerName);
+
+        if (connectCluster == null) {
+            metrics.putMetric(MIRROR_MAKER_METRIC_HEALTH_STATE, (float) HealthStateEnum.DEAD.getDimension());
+            return metrics;
+        }
+
+        List<HealthCheckAggResult> resultList = healthCheckResultService.getHealthCheckAggResult(connectClusterId, HealthCheckDimensionEnum.MIRROR_MAKER, mirrorMakerName);
+
+        if (ValidateUtils.isEmptyList(resultList)) {
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_PASSED, 0.0f);
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_TOTAL, 0.0f);
+        } else {
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(resultList));
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_TOTAL, (float) resultList.size());
+        }
+
+        metrics.putMetric(MIRROR_MAKER_METRIC_HEALTH_STATE, (float) this.calHealthState(resultList).getDimension());
+        return metrics;
+    }
+
+
+    @Override
     public List<HealthScoreResult> getAllDimensionHealthResult(Long clusterPhyId) {
         List<Integer> supportedDimensionCodeList = new ArrayList<>();
 
@@ -249,6 +280,8 @@ public class HealthStateServiceImpl implements HealthStateService {
         for (Integer dimensionCode : dimensionCodeList) {
             if (dimensionCode.equals(HealthCheckDimensionEnum.CONNECTOR.getDimension())) {
                 poList.addAll(healthCheckResultService.getConnectorHealthCheckResult(clusterPhyId));
+            } else if (dimensionCode.equals(HealthCheckDimensionEnum.MIRROR_MAKER.getDimension())) {
+                poList.addAll(healthCheckResultService.getMirrorMakerHealthCheckResult(clusterPhyId));
             } else {
                 poList.addAll(healthCheckResultService.listCheckResult(clusterPhyId, dimensionCode));
             }
@@ -363,6 +396,24 @@ public class HealthStateServiceImpl implements HealthStateService {
         }
 
         metrics.putMetric(CLUSTER_METRIC_HEALTH_STATE_CONNECTOR, (float) this.calHealthState(resultList).getDimension());
+        return metrics;
+    }
+
+    private ClusterMetrics calClusterMirrorMakersHealthMetrics(Long clusterPhyId){
+        List<HealthCheckResultPO> mirrorMakerHealthCheckResult = healthCheckResultService.getMirrorMakerHealthCheckResult(clusterPhyId);
+        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(mirrorMakerHealthCheckResult, Arrays.asList(MIRROR_MAKER.getDimension()));
+
+        ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
+
+        if (ValidateUtils.isEmptyList(resultList)) {
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_MIRROR_MAKER, 0.0f);
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_MIRROR_MAKER, 0.0f);
+        } else {
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_MIRROR_MAKER, this.getHealthCheckPassed(resultList));
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_MIRROR_MAKER, (float) resultList.size());
+        }
+
+        metrics.putMetric(CLUSTER_METRIC_HEALTH_STATE_MIRROR_MAKER, (float) this.calHealthState(resultList).getDimension());
         return metrics;
     }
 

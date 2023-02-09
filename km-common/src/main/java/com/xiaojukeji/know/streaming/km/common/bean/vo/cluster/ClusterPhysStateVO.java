@@ -18,6 +18,9 @@ public class ClusterPhysStateVO {
     @ApiModelProperty(value = "挂掉集群数", example = "10")
     private Integer downCount;
 
+    @ApiModelProperty(value = "未知状态集群数", example = "10")
+    private Integer unknownCount;
+
     @ApiModelProperty(value = "集群总数", example = "40")
     private Integer total;
 }

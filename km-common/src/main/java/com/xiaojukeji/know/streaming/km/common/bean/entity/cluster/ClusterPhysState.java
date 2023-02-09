@@ -18,5 +18,7 @@ public class ClusterPhysState {
 
     private Integer downCount;
 
+    private Integer unknownCount;
+
     private Integer total;
 }

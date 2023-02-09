@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum.CONNECTOR;
+import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum.MIRROR_MAKER;
 
 @Service
 public class HealthCheckResultServiceImpl implements HealthCheckResultService {
@@ -146,7 +147,26 @@ public class HealthCheckResultServiceImpl implements HealthCheckResultService {
         LambdaQueryWrapper<HealthCheckResultPO> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(HealthCheckResultPO::getDimension, CONNECTOR.getDimension());
         wrapper.in(HealthCheckResultPO::getClusterPhyId, connectClusterIdList);
-        resultPOList.addAll(healthCheckResultDAO.selectList(wrapper));
+        resultPOList = healthCheckResultDAO.selectList(wrapper);
+        return resultPOList;
+    }
+
+    @Override
+    public List<HealthCheckResultPO> getMirrorMakerHealthCheckResult(Long clusterPhyId) {
+        List<HealthCheckResultPO> resultPOList = new ArrayList<>();
+
+        //查找connect集群
+        LambdaQueryWrapper<ConnectClusterPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ConnectClusterPO::getKafkaClusterPhyId, clusterPhyId);
+        List<Long> connectClusterIdList = connectClusterDAO.selectList(lambdaQueryWrapper).stream().map(elem -> elem.getId()).collect(Collectors.toList());
+        if (ValidateUtils.isEmptyList(connectClusterIdList)) {
+            return resultPOList;
+        }
+
+        LambdaQueryWrapper<HealthCheckResultPO> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(HealthCheckResultPO::getDimension, MIRROR_MAKER.getDimension());
+        wrapper.in(HealthCheckResultPO::getClusterPhyId, connectClusterIdList);
+        resultPOList = healthCheckResultDAO.selectList(wrapper);
         return resultPOList;
     }
 

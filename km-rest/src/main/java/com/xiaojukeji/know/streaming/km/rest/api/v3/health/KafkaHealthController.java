@@ -60,6 +60,14 @@ public class KafkaHealthController {
     @ResponseBody
     public Result<List<HealthScoreResultDetailVO>> getClusterHealthCheckResultDetail(@PathVariable Long clusterPhyId,
                                                                                      @RequestBody List<Integer> dimensionCodeList) {
+        if (dimensionCodeList.isEmpty()) {
+            return Result.buildSuc(
+                    HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
+                            healthStateService.getAllDimensionHealthResult(clusterPhyId)
+                    )
+            );
+        }
+
         return Result.buildSuc(HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
                 healthStateService.getDimensionHealthResult(clusterPhyId, dimensionCodeList)
         ));
