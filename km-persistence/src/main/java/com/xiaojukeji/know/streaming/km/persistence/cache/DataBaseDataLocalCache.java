@@ -39,6 +39,7 @@ public class DataBaseDataLocalCache {
     private static Cache<Long, Map<String, List<Partition>>> partitionsCache;
 
     private static Cache<Long, Map<String, List<HealthCheckResultPO>>> healthCheckResultCache;
+
     private static Cache<String, Boolean> haTopicCache;
 
     @PostConstruct
