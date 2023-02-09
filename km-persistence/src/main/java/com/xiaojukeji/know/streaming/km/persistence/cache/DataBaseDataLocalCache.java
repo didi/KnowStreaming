@@ -29,6 +29,9 @@ public class DataBaseDataLocalCache {
     @Value(value = "${cache.metadata.health-check-result-size:10000}")
     private Long healthCheckResultCacheSize;
 
+    @Value(value = "${cache.metadata.ha-topic-size:10000}")
+    private Long haTopicCacheSize;
+
     private static Cache<Long, Map<String, TopicMetrics>> topicLatestMetricsCache;
 
     private static Cache<Long, ClusterMetrics> clusterLatestMetricsCache;
@@ -36,6 +39,7 @@ public class DataBaseDataLocalCache {
     private static Cache<Long, Map<String, List<Partition>>> partitionsCache;
 
     private static Cache<Long, Map<String, List<HealthCheckResultPO>>> healthCheckResultCache;
+    private static Cache<String, Boolean> haTopicCache;
 
     @PostConstruct
     private void init() {
@@ -57,6 +61,11 @@ public class DataBaseDataLocalCache {
         healthCheckResultCache = Caffeine.newBuilder()
                 .expireAfterWrite(90, TimeUnit.SECONDS)
                 .maximumSize(healthCheckResultCacheSize)
+                .build();
+
+        haTopicCache = Caffeine.newBuilder()
+                .expireAfterWrite(90, TimeUnit.SECONDS)
+                .maximumSize(haTopicCacheSize)
                 .build();
     }
 
@@ -98,6 +107,16 @@ public class DataBaseDataLocalCache {
 
     public static Long getHealthCheckCacheKey(Long clusterId, Integer dimensionCode) {
         return clusterId * HealthCheckDimensionEnum.MAX_VAL.getDimension() + dimensionCode;
+    }
+
+    public static void putHaTopic(Long clusterPhyId, String topicName) {
+        String key = clusterPhyId + "@" + topicName;
+        haTopicCache.put(key, true);
+    }
+
+    public static boolean isHaTopic(Long clusterPhyId, String topicName) {
+        String key = clusterPhyId + "@" + topicName;
+        return haTopicCache.getIfPresent(key) != null;
     }
 
     /**************************************************** private method ****************************************************/

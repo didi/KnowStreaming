@@ -2,6 +2,7 @@ package com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka;
 
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMetricControlItem;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
+import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.BaseMetricVersionMetric;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,8 @@ public class TopicMetricVersionItems extends BaseMetricVersionMetric {
     public static final String TOPIC_METRIC_BYTES_OUT_MIN_15                        = "BytesOut_min_15";
     public static final String TOPIC_METRIC_LOG_SIZE                                = "LogSize";
     public static final String TOPIC_METRIC_UNDER_REPLICA_PARTITIONS                = "PartitionURP";
+
+    public static final String TOPIC_METRIC_MIRROR_FETCH_LAG                        = "MirrorFetchLag";
     public static final String TOPIC_METRIC_COLLECT_COST_TIME                       = Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME;
 
     @Override
@@ -147,6 +150,11 @@ public class TopicMetricVersionItems extends BaseMetricVersionMetric {
         itemList.add(buildAllVersionsItem()
                 .name(TOPIC_METRIC_COLLECT_COST_TIME).unit("秒").desc("采集Topic指标的耗时").category(CATEGORY_PERFORMANCE)
                 .extendMethod(TOPIC_METHOD_DO_NOTHING));
+
+        itemList.add(buildItem().minVersion(VersionEnum.V_2_5_0_D_300).maxVersion(VersionEnum.V_2_5_0_D_MAX)
+                .name(TOPIC_METRIC_MIRROR_FETCH_LAG).unit("条").desc("Topic复制延迟消息数").category(CATEGORY_FLOW)
+                .extend(buildJMXMethodExtend(TOPIC_METHOD_GET_TOPIC_MIRROR_FETCH_LAG)
+                        .jmxObjectName(JMX_SERVER_TOPIC_MIRROR).jmxAttribute(VALUE)));
 
         return itemList;
     }

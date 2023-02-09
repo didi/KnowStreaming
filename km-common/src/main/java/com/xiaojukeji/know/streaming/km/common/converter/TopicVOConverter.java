@@ -77,7 +77,7 @@ public class TopicVOConverter {
         return vo;
     }
 
-    public static List<ClusterPhyTopicsOverviewVO> convert2ClusterPhyTopicsOverviewVOList(List<Topic> topicList, Map<String, TopicMetrics> metricsMap) {
+    public static List<ClusterPhyTopicsOverviewVO> convert2ClusterPhyTopicsOverviewVOList(List<Topic> topicList, Map<String, TopicMetrics> metricsMap, Set<String> haTopicNameSet) {
         List<ClusterPhyTopicsOverviewVO> voList = new ArrayList<>();
         for (Topic topic: topicList) {
             ClusterPhyTopicsOverviewVO vo = new ClusterPhyTopicsOverviewVO();
@@ -92,6 +92,7 @@ public class TopicVOConverter {
 
             vo.setLatestMetrics(metricsMap.getOrDefault(topic.getTopicName(), new TopicMetrics(topic.getTopicName(), topic.getClusterPhyId())));
 
+            vo.setInMirror(haTopicNameSet.contains(topic.getTopicName()));
             voList.add(vo);
         }
 
