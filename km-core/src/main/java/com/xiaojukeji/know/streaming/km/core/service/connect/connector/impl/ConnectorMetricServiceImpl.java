@@ -34,7 +34,7 @@ import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerServic
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseConnectorMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.connect.ConnectJMXClient;
-import com.xiaojukeji.know.streaming.km.persistence.es.dao.connect.ConnectorMetricESDAO;
+import com.xiaojukeji.know.streaming.km.persistence.es.dao.connect.connector.ConnectorMetricESDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
