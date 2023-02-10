@@ -1,11 +1,20 @@
 package com.xiaojukeji.know.streaming.test.container.mysql;
 
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.delegate.DatabaseDelegate;
+import org.testcontainers.ext.ScriptUtils;
+import org.testcontainers.jdbc.JdbcDatabaseDelegate;
 import org.testcontainers.utility.DockerImageName;
 
+import javax.script.ScriptException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,6 +22,8 @@ import java.util.Set;
  * @see org.testcontainers.containers.MySQLContainer
  */
 public class KSMySQLContainer<SELF extends KSMySQLContainer<SELF>> extends JdbcDatabaseContainer<SELF> {
+    private static final ILog LOGGER = LogFactory.getLog(KSMySQLContainer.class);
+
     public static final String NAME = "mysql";
 
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("mysql");
@@ -38,6 +49,8 @@ public class KSMySQLContainer<SELF extends KSMySQLContainer<SELF>> extends JdbcD
     private String password = DEFAULT_PASSWORD;
 
     private static final String MYSQL_ROOT_USER = "root";
+
+    private List<Tuple<String, String>> initScriptPathAndContentList = new ArrayList<>();
 
     /**
      * @deprecated use {@link MySQLContainer(DockerImageName)} instead
@@ -168,5 +181,32 @@ public class KSMySQLContainer<SELF extends KSMySQLContainer<SELF>> extends JdbcD
     public SELF withPassword(final String password) {
         this.password = password;
         return self();
+    }
+
+    public SELF addInitScriptPathAndContent(String initScriptPath, String initScriptContent) {
+        initScriptPathAndContentList.add(new Tuple<>(initScriptPath, initScriptContent));
+        return self();
+    }
+
+    // KS改动的地方
+    @Override
+    public DatabaseDelegate getDatabaseDelegate() {
+        return new JdbcDatabaseDelegate(this, "");
+    }
+
+    @Override
+    protected void runInitScriptIfRequired() {
+        if (initScriptPathAndContentList.isEmpty()) {
+            return;
+        }
+
+        for (Tuple<String, String> elem: initScriptPathAndContentList) {
+            try {
+                ScriptUtils.executeDatabaseScript(this.getDatabaseDelegate(), elem.getV1(), elem.getV2());
+            } catch (ScriptException var5) {
+                LOGGER.error("Error while executing init script: {}", elem.getV1(), var5);
+                throw new ScriptUtils.UncategorizedScriptException("Error while executing init script: " + elem.getV2(), var5);
+            }
+        }
     }
 }
