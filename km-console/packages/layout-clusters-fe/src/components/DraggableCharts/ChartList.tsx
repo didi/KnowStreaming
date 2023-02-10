@@ -24,7 +24,6 @@ const ChartList = (props: ChartListProps) => {
   const { loading, gridNum, data, autoReload, busInstance, dragCallback, onExpand } = props;
   const [global] = AppContainer.useGlobalValue();
   const [chartData, setChartData] = useState(data);
-
   // 拖拽开始回调，触发图表的 onDrag 事件（ 设置为 true ），禁止同步展示图表的 tooltip
   const dragStart = () => {
     busInstance.emit('onDrag', true);
@@ -105,23 +104,33 @@ const ChartList = (props: ChartListProps) => {
                           </span>
                         </Tooltip>
                       </div>
-                      <div className="expand-icon-box" onClick={() => onExpand(metricName, metricType)}>
-                        <IconFont type="icon-chuangkoufangda" className="expand-icon" />
-                      </div>
-                      <SingleChart
-                        chartKey={metricName}
-                        chartTypeProp="line"
-                        showHeader={false}
-                        wrapStyle={{
-                          width: 'auto',
-                          height: 222,
-                        }}
-                        connectEventName={`${metricType}BoardDragChart`}
-                        eventBus={busInstance}
-                        propChartData={metricLines}
-                        optionMergeProps={{ replaceMerge: autoReload ? ['xAxis'] : ['series'] }}
-                        {...getChartConfig(`${metricName}{unit|（${metricUnit}）}`, metricLines.length, showLegend)}
-                      />
+                      {metricLines?.length > 0 && (
+                        <div className="expand-icon-box" onClick={() => onExpand(metricName, metricType)}>
+                          <IconFont type="icon-chuangkoufangda" className="expand-icon" />
+                        </div>
+                      )}
+                      {metricLines?.length > 0 ? (
+                        <SingleChart
+                          chartKey={metricName}
+                          chartTypeProp="line"
+                          showHeader={false}
+                          wrapStyle={{
+                            width: 'auto',
+                            height: 222,
+                          }}
+                          connectEventName={`${metricType}BoardDragChart`}
+                          eventBus={busInstance}
+                          propChartData={metricLines}
+                          optionMergeProps={{ replaceMerge: autoReload ? ['xAxis'] : ['series'] }}
+                          {...getChartConfig(`${metricName}{unit|（${metricUnit}）}`, metricLines.length, showLegend)}
+                        />
+                      ) : (
+                        <Empty
+                          description="指标采集失败，请刷新或联系管理员排查"
+                          image={Empty.PRESENTED_IMAGE_CUSTOM}
+                          style={{ padding: '40px 0' }}
+                        />
+                      )}
                     </div>
                   );
                 })}

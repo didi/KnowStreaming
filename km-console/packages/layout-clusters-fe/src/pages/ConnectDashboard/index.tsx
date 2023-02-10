@@ -103,17 +103,53 @@ const DraggableCharts = (): JSX.Element => {
             MetricType.Connect,
             curHeaderOptions.rangeTime
           ) as FormattedMetricData[];
+          // todo 将指标筛选选中但是没有返回的指标插入chartData中
+          const newConnectClusterData: any = [];
+          metricList[MetricType.Connect]?.forEach((item) => {
+            if (connectClusterData && connectClusterData.some((key) => item === key.metricName)) {
+              newConnectClusterData.push(null);
+            } else {
+              const chartData: any = {
+                metricName: item,
+                metricType: MetricType.Connect,
+                metricUnit: global.getMetricDefine(MetricType.Connect, item)?.unit || '',
+                metricLines: [],
+                showLegend: false,
+                targetUnit: undefined,
+              };
+              newConnectClusterData.push(chartData);
+            }
+          });
           const connectorData = formatChartData(
             res[1],
             global.getMetricDefine || {},
             MetricType.Connectors,
             curHeaderOptions.rangeTime
           ) as FormattedMetricData[];
+          // todo 将指标筛选选中但是没有返回的指标插入chartData中
+          const newConnectorData: any = [];
+
+          metricList[MetricType.Connectors]?.forEach((item) => {
+            if (connectorData && connectorData.some((key) => item === key.metricName)) {
+              newConnectorData.push(null);
+            } else {
+              const chartData: any = {
+                metricName: item,
+                metricType: MetricType.Connectors,
+                metricUnit: global.getMetricDefine(MetricType.Connectors, item)?.unit || '',
+                metricLines: [],
+                showLegend: false,
+                targetUnit: undefined,
+              };
+              newConnectorData.push(chartData);
+            }
+          });
           // 指标排序
           const formattedMetricData = [...connectClusterData, ...connectorData];
+          const nullDataMetricData = [...newConnectClusterData, ...newConnectorData].filter((item) => item !== null);
           formattedMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
-
-          setMetricChartData(formattedMetricData);
+          nullDataMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
+          setMetricChartData([...formattedMetricData, ...nullDataMetricData]);
         } else {
           setMetricChartData([]);
         }
@@ -186,6 +222,9 @@ const DraggableCharts = (): JSX.Element => {
     if (Object.values(metricList).some((list) => list.length) && curHeaderOptions) {
       setLoading(true);
       getMetricChartData();
+    } else {
+      setMetricChartData([]);
+      setLoading(false);
     }
   }, [metricList]);
 
