@@ -13,8 +13,8 @@ const carouselList = [
       <img className="carousel-eg-ctr-two-img img-one" src={egTwoContent} />
       <div className="carousel-eg-ctr-two-desc desc-one">
         <span>Github: </span>
-        <span>5.6K</span>
-        <span>+ Star的项目 Know Streaming</span>
+        <span>5.8K</span>
+        <span>+ Star的的实时流处理平台</span>
       </div>
       <div className="carousel-eg-ctr-two-desc desc-two">
         从开源至今社区内已经超过 2000+ 用户使用，从新创公司到巨头，尤其是得到各行业一线企业开发者的信赖。
