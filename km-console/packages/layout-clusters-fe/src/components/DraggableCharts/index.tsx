@@ -150,18 +150,35 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
 
   // 获取节点范围列表
   const getScopeList = async () => {
-    const res: any = await Utils.request(api.getDashboardMetadata(clusterId, dashboardType));
-    const list = res.map((item: any) => {
-      return dashboardType === MetricType.Broker
-        ? {
-            label: item.host,
-            value: item.brokerId,
-          }
-        : {
-            label: item.topicName,
-            value: item.topicName,
-          };
-    });
+    const res: any = await Utils.request(
+      dashboardType !== MetricType.MM2 ? api.getDashboardMetadata(clusterId, dashboardType) : api.getMirrorMakerMetadata(clusterId)
+    );
+    const mockRes = [{ connectClusterId: 1, connectClusterName: 'connectClusterName', connectorName: 'connectorName' }];
+    const list =
+      res.length > 0
+        ? res.map((item: any) => {
+            return dashboardType === MetricType.Broker
+              ? {
+                  label: item.host,
+                  value: item.brokerId,
+                }
+              : dashboardType === MetricType.MM2
+              ? {
+                  label: item.connectorName,
+                  value: JSON.stringify({ connectClusterId: item.connectClusterId, connectorName: item.connectorName }),
+                }
+              : {
+                  label: item.topicName,
+                  value: item.topicName,
+                };
+          })
+        : mockRes.map((item) => {
+            return {
+              label: item.connectorName,
+              value: JSON.stringify(item),
+            };
+          });
+
     setScopeList(list);
   };
 
@@ -172,19 +189,23 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
     const [startTime, endTime] = curHeaderOptions.rangeTime;
     const curTimestamp = Date.now();
     curFetchingTimestamp.current = curTimestamp;
-
     const reqBody = Object.assign(
       {
         startTime,
         endTime,
         metricsNames: metricList || [],
       },
-      dashboardType === MetricType.Broker || dashboardType === MetricType.Topic
+      dashboardType === MetricType.Broker || dashboardType === MetricType.Topic || dashboardType === MetricType.MM2
         ? {
             topNu: curHeaderOptions?.scopeData?.isTop ? curHeaderOptions.scopeData.data : null,
-            [dashboardType === MetricType.Broker ? 'brokerIds' : 'topics']: curHeaderOptions?.scopeData?.isTop
-              ? null
-              : curHeaderOptions.scopeData.data,
+            [dashboardType === MetricType.Broker ? 'brokerIds' : dashboardType === MetricType.MM2 ? 'connectorNameList' : 'topics']:
+              curHeaderOptions?.scopeData?.isTop
+                ? null
+                : dashboardType === MetricType.MM2
+                ? curHeaderOptions.scopeData.data?.map((item: any) => {
+                    return JSON.parse(item);
+                  })
+                : curHeaderOptions.scopeData.data,
           }
         : {}
     );
@@ -207,10 +228,31 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
             dashboardType,
             curHeaderOptions.rangeTime
           ) as FormattedMetricData[];
+          //  todo 将指标筛选选中但是没有返回的指标插入chartData中
+          const nullformattedMetricData: any = [];
+
+          metricList?.forEach((item) => {
+            if (formattedMetricData && formattedMetricData.some((key) => item === key.metricName)) {
+              nullformattedMetricData.push(null);
+            } else {
+              const chartData: any = {
+                metricName: item,
+                metricType: dashboardType,
+                metricUnit: global.getMetricDefine(dashboardType, item)?.unit || '',
+                metricLines: [],
+                showLegend: false,
+                targetUnit: undefined,
+              };
+              nullformattedMetricData.push(chartData);
+            }
+          });
           // 指标排序
           formattedMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
-
-          setMetricChartData(formattedMetricData);
+          const filterNullformattedMetricData = nullformattedMetricData.filter((item: any) => item !== null);
+          filterNullformattedMetricData.sort(
+            (a: any, b: any) => metricRankList.current.indexOf(a?.metricName) - metricRankList.current.indexOf(b?.metricName)
+          );
+          setMetricChartData([...formattedMetricData, ...filterNullformattedMetricData]);
         }
         setLoading(false);
       },
@@ -255,12 +297,15 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
   useEffect(() => {
     if (metricList?.length && curHeaderOptions) {
       getMetricChartData();
+    } else {
+      setMetricChartData([]);
+      setLoading(false);
     }
   }, [curHeaderOptions, metricList]);
 
   useEffect(() => {
     // 初始化页面，获取 scope 和 metric 信息
-    (dashboardType === MetricType.Broker || dashboardType === MetricType.Topic) && getScopeList();
+    (dashboardType === MetricType.Broker || dashboardType === MetricType.Topic || dashboardType === MetricType.MM2) && getScopeList();
   }, []);
 
   return (
@@ -270,11 +315,24 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
         hideNodeScope={dashboardType === MetricType.Zookeeper}
         openMetricFilter={() => metricFilterRef.current?.open()}
         nodeSelect={{
-          name: dashboardType === MetricType.Broker ? 'Broker' : dashboardType === MetricType.Topic ? 'Topic' : 'Zookeeper',
+          name:
+            dashboardType === MetricType.Broker
+              ? 'Broker'
+              : dashboardType === MetricType.Topic
+              ? 'Topic'
+              : dashboardType === MetricType.MM2
+              ? 'MM2'
+              : 'Zookeeper',
           customContent: (
             <SelectContent
               title={`自定义 ${
-                dashboardType === MetricType.Broker ? 'Broker' : dashboardType === MetricType.Topic ? 'Topic' : 'Zookeeper'
+                dashboardType === MetricType.Broker
+                  ? 'Broker'
+                  : dashboardType === MetricType.Topic
+                  ? 'Topic'
+                  : dashboardType === MetricType.MM2
+                  ? 'MM2'
+                  : 'Zookeeper'
               } 范围`}
               list={scopeList}
             />

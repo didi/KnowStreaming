@@ -18,6 +18,7 @@ export enum MetricType {
   Connect = 120,
   Connectors = 121,
   Controls = 901,
+  MM2 = 122,
 }
 
 const api = {
@@ -233,9 +234,9 @@ const api = {
   getConnectors: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/connectors-basic`),
   getConnectorMetrics: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/connectors-metrics`),
   getConnectorPlugins: (connectClusterId: number) => getApi(`/kafka-connect/clusters/${connectClusterId}/connector-plugins`),
-  getConnectorPluginConfig: (connectClusterId: number, pluginName: string) =>
+  getConnectorPluginConfig: (connectClusterId: number | string, pluginName: string) =>
     getApi(`/kafka-connect/clusters/${connectClusterId}/connector-plugins/${pluginName}/config`),
-  getCurPluginConfig: (connectClusterId: number, connectorName: string) =>
+  getCurPluginConfig: (connectClusterId: number | string, connectorName: string) =>
     getApi(`/kafka-connect/clusters/${connectClusterId}/connectors/${connectorName}/config`),
   isConnectorExist: (connectClusterId: number, connectorName: string) =>
     getApi(`/kafka-connect/clusters/${connectClusterId}/connectors/${connectorName}/basic-combine-exist`),
@@ -251,6 +252,39 @@ const api = {
 
   getConnectClusterBasicExit: (clusterPhyId: string, clusterPhyName: string) =>
     getApi(`/kafka-clusters/${clusterPhyId}/connect-clusters/${clusterPhyName}/basic-combine-exist`),
+
+  // MM2 列表
+  getMirrorMakerList: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/mirror-makers-overview`),
+  // MM2 状态卡片
+  getMirrorMakerState: (clusterPhyId: string) => getApi(`/kafka-clusters/${clusterPhyId}/mirror-makers-state`),
+  // MM2 指标卡片
+  getMirrorMakerMetrics: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/mirror-makers-metrics`),
+  // MM2 筛选
+  getMirrorMakerMetadata: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/mirror-makers-basic`),
+  // MM2 详情列表
+  getMM2DetailTasks: (connectorName: number | string, connectClusterId: number | string) =>
+    getApi(`/kafka-mm2/clusters/${connectClusterId}/connectors/${connectorName}/tasks`),
+  // MM2 详情状态卡片
+  getMM2DetailState: (connectorName: number | string, connectClusterId: number | string) =>
+    getApi(`/kafka-mm2/clusters/${connectClusterId}/connectors/${connectorName}/state`),
+  // MM2 操作接口 新增、暂停、重启、删除
+  mirrorMakerOperates: getApi('/kafka-mm2/mirror-makers'),
+  // MM2 操作接口 新增、编辑校验
+  validateMM2Config: getApi('/kafka-mm2/mirror-makers-config/validate'),
+  // 修改 Connector 配置
+  updateMM2Config: getApi('/kafka-mm2/mirror-makers-config'),
+  // MM2 详情
+  getMirrorMakerMetricPoints: (mirrorMakerName: number | string, connectClusterId: number | string) =>
+    getApi(`/kafka-mm2/clusters/${connectClusterId}/connectors/${mirrorMakerName}/latest-metrics`),
+  getSourceKafkaClusterBasic: getApi(`/physical-clusters/basic`),
+  getGroupBasic: (clusterPhyId: string) => getApi(`/clusters/${clusterPhyId}/groups-basic`),
+  // Topic复制
+  getMirrorClusterList: () => getApi(`/ha-mirror/physical-clusters/basic`),
+  handleTopicMirror: () => getApi(`/ha-mirror/topics`),
+  getTopicMirrorList: (clusterPhyId: number, topicName: string) =>
+    getApi(`/ha-mirror/clusters/${clusterPhyId}/topics/${topicName}/mirror-info`),
+  getMirrorMakerConfig: (connectClusterId: number | string, connectorName: string) =>
+    getApi(`/kafka-mm2/clusters/${connectClusterId}/connectors/${connectorName}/config`),
 };
 
 export default api;
