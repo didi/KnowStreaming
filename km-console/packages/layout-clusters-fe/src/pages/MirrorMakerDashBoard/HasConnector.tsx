@@ -23,7 +23,7 @@ const NoConnector = () => {
       }}
     >
       <img src={NodataImg} style={{ width: 100, height: 162 }} />
-      <span style={{ fontSize: 13, color: '#919AAC', paddingTop: 16 }}>暂无数据，请先接入 Connect 集群</span>
+      <span style={{ fontSize: 13, color: '#919AAC', paddingTop: 16 }}>暂无数据，请先创建 MM2 任务</span>
     </div>
   );
 };
@@ -36,7 +36,7 @@ export default (props: Props) => {
   const [disabled, setDisabled] = useState(true);
 
   useLayoutEffect(() => {
-    Utils.request(api.getConnectClusters(clusterId))
+    Utils.request(api.getMirrorMakerMetadata(clusterId))
       .then((res: any[]) => {
         res?.length && setDisabled(false);
       })

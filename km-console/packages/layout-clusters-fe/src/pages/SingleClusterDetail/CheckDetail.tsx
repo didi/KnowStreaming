@@ -19,6 +19,7 @@ const CheckDetail = forwardRef((props: any, ref): JSX.Element => {
   const getHealthDetail = () => {
     setLoading(true);
     return Utils.request(API.getResourceListHealthDetail(+clusterId)).then((res: any) => {
+      res.sort((a: any, b: any) => a.dimension - b.dimension);
       setData(res);
       setLoading(false);
     });
