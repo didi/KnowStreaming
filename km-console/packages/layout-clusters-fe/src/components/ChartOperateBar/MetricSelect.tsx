@@ -89,7 +89,15 @@ export const MetricSelect = forwardRef((metricSelect: MetricSelectProps, ref) =>
 
   const columns = [
     {
-      title: `${pathname.endsWith('/broker') ? 'Broker' : pathname.endsWith('/topic') ? 'Topic' : 'Cluster'} Metrics`,
+      title: `${
+        pathname.endsWith('/broker')
+          ? 'Broker'
+          : pathname.endsWith('/topic')
+          ? 'Topic'
+          : pathname.endsWith('/replication')
+          ? 'MM2'
+          : 'Cluster'
+      } Metrics`,
       dataIndex: 'category',
       key: 'category',
     },
@@ -112,7 +120,7 @@ export const MetricSelect = forwardRef((metricSelect: MetricSelectProps, ref) =>
         desc,
         unit: metricDefine?.unit,
       };
-      if (metricDefine.category) {
+      if (metricDefine?.category) {
         if (!categoryData[metricDefine.category]) {
           categoryData[metricDefine.category] = [returnData];
         } else {
@@ -129,11 +137,11 @@ export const MetricSelect = forwardRef((metricSelect: MetricSelectProps, ref) =>
   };
 
   const formateSelectedKeys = () => {
-    const newKeys = metricSelect.selectedRows;
+    const newKeys = metricSelect?.selectedRows;
     const result: SelectedMetrics = {};
     const selectedCategories: string[] = [];
 
-    newKeys.forEach((name: string) => {
+    newKeys?.forEach((name: string) => {
       const metricDefine = global.getMetricDefine(metricSelect?.metricType, name);
       if (metricDefine) {
         if (!result[metricDefine.category]) {

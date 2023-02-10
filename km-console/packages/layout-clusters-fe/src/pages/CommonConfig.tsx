@@ -26,11 +26,19 @@ export enum ClustersPermissionMap {
   TOPIC_ADD = 'Topic-新增Topic',
   TOPIC_MOVE_REPLICA = 'Topic-迁移副本',
   TOPIC_CHANGE_REPLICA = 'Topic-扩缩副本',
+  TOPIC_REPLICATOR = 'Topic-新增Topic复制',
+  TOPIC_CANCEL_REPLICATOR = 'Topic-详情-取消Topic复制',
   // Consumers
   CONSUMERS_RESET_OFFSET = 'Consumers-重置Offset',
   // Test
   TEST_CONSUMER = 'Test-Consumer',
   TEST_PRODUCER = 'Test-Producer',
+  // MM2
+  MM2_ADD = 'MM2-新增',
+  MM2_CHANGE_CONFIG = 'MM2-编辑',
+  MM2_DELETE = 'MM2-删除',
+  MM2_RESTART = 'MM2-重启',
+  MM2_STOP_RESUME = 'MM2-暂停&恢复',
 }
 
 export interface PermissionNode {

@@ -5,6 +5,7 @@ const METRIC_DASHBOARD_REQ_MAP = {
   [MetricType.Broker]: (clusterId: string) => api.getDashboardMetricChartData(clusterId, MetricType.Broker),
   [MetricType.Topic]: (clusterId: string) => api.getDashboardMetricChartData(clusterId, MetricType.Topic),
   [MetricType.Zookeeper]: (clusterId: string) => api.getZookeeperMetrics(clusterId),
+  [MetricType.MM2]: (clusterId: string) => api.getMirrorMakerMetrics(clusterId),
 };
 
 export const getMetricDashboardReq = (clusterId: string, type: MetricType.Broker | MetricType.Topic | MetricType.Zookeeper) =>
