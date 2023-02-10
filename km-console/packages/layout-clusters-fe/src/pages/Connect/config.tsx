@@ -95,27 +95,11 @@ const renderLine = (record: any, metricName: string) => {
 export const getConnectorsColumns = (arg?: any) => {
   const columns = [
     {
-      title: 'Connect集群',
-      dataIndex: 'connectClusterName',
-      key: 'connectClusterName',
-      width: 200,
-      fixed: 'left',
-      lineClampOne: true,
-      needTooltip: true,
-      // render: (t: string, r: any) => {
-      //   return (
-      //     <span>
-      //       {t}
-      //       {r?.status ? <Tag className="tag-success">Live</Tag> : <Tag className="tag-error">Down</Tag>}
-      //     </span>
-      //   );
-      // },
-    },
-    {
       title: 'Connector Name',
       dataIndex: 'connectorName',
       key: 'connectorName',
       width: 160,
+      fixed: 'left',
       lineClampOne: true,
       render: (t: string, r: any) => {
         return t ? (
@@ -135,6 +119,23 @@ export const getConnectorsColumns = (arg?: any) => {
         );
       },
     },
+    {
+      title: 'Connect集群',
+      dataIndex: 'connectClusterName',
+      key: 'connectClusterName',
+      width: 200,
+      lineClampOne: true,
+      needTooltip: true,
+      // render: (t: string, r: any) => {
+      //   return (
+      //     <span>
+      //       {t}
+      //       {r?.status ? <Tag className="tag-success">Live</Tag> : <Tag className="tag-error">Down</Tag>}
+      //     </span>
+      //   );
+      // },
+    },
+
     {
       title: 'State',
       dataIndex: 'state',

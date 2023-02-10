@@ -40,6 +40,10 @@ export const dimensionMap = {
     label: 'Connector',
     href: '/connect/connectors',
   },
+  7: {
+    label: 'MirrorMaker',
+    href: '/replication',
+  },
 } as any;
 
 const toLowerCase = (name = '') => {
@@ -94,6 +98,18 @@ const CONFIG_ITEM_DETAIL_DESC = {
   },
   ConnectorUnassignedTaskCount: (valueGroup: any) => {
     return `未被分配的任务数量 小于 ${valueGroup?.value}`;
+  },
+  MirrorMakerFailedTaskCount: (valueGroup: any) => {
+    return `失败状态的任务数量 小于 ${valueGroup?.value}`;
+  },
+  MirrorMakerUnassignedTaskCount: (valueGroup: any) => {
+    return `未被分配的任务数量 小于 ${valueGroup?.value}`;
+  },
+  ReplicationLatencyMsMax: (valueGroup: any) => {
+    return `消息复制最大延迟时间 小于 ${valueGroup?.value}`;
+  },
+  'TotalRecord-errors': (valueGroup: any) => {
+    return `消息处理错误的次数 增量小于 ${valueGroup?.value}`;
   },
 };
 
@@ -401,6 +417,42 @@ export const getHealthySettingColumn = (form: any, data: any, clusterId: string)
             );
           }
           case 'ConnectorUnassignedTaskCount': {
+            return (
+              <div className="table-form-item">
+                <span className="left-text">{'>'}</span>
+                {getFormItem({ configItem, attrs: { min: 0, max: 99998 } })}
+                <span className="right-text">则不通过</span>
+              </div>
+            );
+          }
+          case 'MirrorMakerFailedTaskCount': {
+            return (
+              <div className="table-form-item">
+                <span className="left-text">{'>'}</span>
+                {getFormItem({ configItem, attrs: { min: 0, max: 99998 } })}
+                <span className="right-text">则不通过</span>
+              </div>
+            );
+          }
+          case 'MirrorMakerUnassignedTaskCount': {
+            return (
+              <div className="table-form-item">
+                <span className="left-text">{'>'}</span>
+                {getFormItem({ configItem, attrs: { min: 0, max: 99998 } })}
+                <span className="right-text">则不通过</span>
+              </div>
+            );
+          }
+          case 'ReplicationLatencyMsMax': {
+            return (
+              <div className="table-form-item">
+                <span className="left-text">{'>'}</span>
+                {getFormItem({ configItem, attrs: { min: 0, max: 99998 } })}
+                <span className="right-text">则不通过</span>
+              </div>
+            );
+          }
+          case 'TotalRecord-errors': {
             return (
               <div className="table-form-item">
                 <span className="left-text">{'>'}</span>

@@ -6,6 +6,7 @@ import TourGuide, { MultiPageSteps } from '@src/components/TourGuide';
 import { healthSorceList, sliderValueMap, sortFieldList, sortTypes, statusFilters } from './config';
 import ClusterList from './List';
 import AccessClusters from './AccessCluster';
+import AccessCluster from './AccessClusterConfig';
 import CustomCheckGroup from './CustomCheckGroup';
 import { ClustersPermissionMap } from '../CommonConfig';
 import './index.less';
@@ -359,6 +360,7 @@ const MultiClusterPage = () => {
                     />
                   </div>
                 </div>
+                <AccessCluster />
               </div>
             </div>
             <div className="multi-cluster-page-dashboard">
