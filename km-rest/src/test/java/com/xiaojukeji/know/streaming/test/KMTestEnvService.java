@@ -42,8 +42,16 @@ public abstract class KMTestEnvService {
     @DynamicPropertySource
     static void setUp(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.know-streaming.jdbc-url", mySQLTestContainer.jdbcUrl());
+        registry.add("spring.datasource.know-streaming.username", mySQLTestContainer.jdbcUsername());
+        registry.add("spring.datasource.know-streaming.password", mySQLTestContainer.jdbcPassword());
+
         registry.add("spring.logi-job.jdbc-url", mySQLTestContainer.jdbcUrl());
+        registry.add("spring.logi-job.username", mySQLTestContainer.jdbcUsername());
+        registry.add("spring.logi-job.password", mySQLTestContainer.jdbcPassword());
+
         registry.add("spring.logi-security.jdbc-url", mySQLTestContainer.jdbcUrl());
+        registry.add("spring.logi-security.username", mySQLTestContainer.jdbcUsername());
+        registry.add("spring.logi-security.password", mySQLTestContainer.jdbcPassword());
 
         registry.add("es.client.address", esTestContainer.esUrl());
     }

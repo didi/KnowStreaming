@@ -26,6 +26,22 @@
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
+        <fileSet>
+            <directory>../km-persistence/src/main/resources</directory>
+            <outputDirectory>init</outputDirectory>
+            <includes>
+                <include>sql</include>
+                <include>sql/*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../km-persistence/src/main/resources/es</directory>
+            <outputDirectory>init</outputDirectory>
+            <includes>
+                <include>template</include>
+                <include>template/*</include>
+            </includes>
+        </fileSet>
 
         <fileSet>
             <includes>
@@ -34,8 +50,6 @@
 
                 <include>init/*</include>
                 <include>init/*/*</include>
-
-                <include>packages/*</include>
             </includes>
         </fileSet>
     </fileSets>
