@@ -10,6 +10,7 @@ import ConsumerGroups from './ConsumerGroups';
 import ACLs from './ACLs';
 import Configuration from './Configuration';
 import Consumers from './ConsumerGroups';
+import Replicator from './Replicator';
 // import Consumers from '@src/pages/Consumers';
 import './index.less';
 import TopicDetailHealthCheck from '@src/components/CardBar/TopicDetailHealthCheck';
@@ -205,6 +206,9 @@ const TopicDetail = (props: any) => {
           {positionType === 'Configuration' && (
             <Configuration searchKeywords={searchKeywords} positionType={positionType} hashData={hashData} />
           )}
+        </TabPane>
+        <TabPane tab="Replicator" key="Replicator">
+          {positionType === 'Replicator' && <Replicator searchKeywords={searchKeywords} positionType={positionType} hashData={hashData} />}
         </TabPane>
       </Tabs>
     </Drawer>
