@@ -140,7 +140,8 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
             clusterBrokersStateVO.setKafkaControllerAlive(true);
         }
 
-        clusterBrokersStateVO.setConfigSimilar(brokerConfigService.countBrokerConfigDiffsFromDB(clusterPhyId, Arrays.asList("broker.id", "listeners", "name", "value")) <= 0);
+        clusterBrokersStateVO.setConfigSimilar(brokerConfigService.countBrokerConfigDiffsFromDB(clusterPhyId, KafkaConstant.CONFIG_SIMILAR_IGNORED_CONFIG_KEY_LIST) <= 0
+        );
 
         return clusterBrokersStateVO;
     }
