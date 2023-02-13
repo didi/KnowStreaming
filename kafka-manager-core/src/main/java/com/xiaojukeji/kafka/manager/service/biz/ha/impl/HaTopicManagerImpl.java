@@ -7,6 +7,7 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.TopicOperationResult;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ha.HaSwitchTopic;
+import com.xiaojukeji.kafka.manager.common.entity.dto.ha.KafkaUserAndClientDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.HaTopicRelationDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
@@ -14,13 +15,14 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.JobLogDO;
 import com.xiaojukeji.kafka.manager.common.utils.BackoffUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ConvertUtil;
+import com.xiaojukeji.kafka.manager.common.utils.HAUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.service.biz.ha.HaTopicManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
+import com.xiaojukeji.kafka.manager.service.service.AdminService;
 import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.service.service.JobLogService;
 import com.xiaojukeji.kafka.manager.service.service.TopicManagerService;
-import com.xiaojukeji.kafka.manager.service.service.gateway.AuthorityService;
 import com.xiaojukeji.kafka.manager.service.service.ha.HaASRelationService;
 import com.xiaojukeji.kafka.manager.service.service.ha.HaKafkaUserService;
 import com.xiaojukeji.kafka.manager.service.service.ha.HaTopicService;
@@ -28,6 +30,7 @@ import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -39,9 +42,6 @@ public class HaTopicManagerImpl implements HaTopicManager {
 
     @Autowired
     private ClusterService clusterService;
-
-    @Autowired
-    private AuthorityService authorityService;
 
     @Autowired
     private HaTopicService haTopicService;
@@ -61,10 +61,14 @@ public class HaTopicManagerImpl implements HaTopicManager {
     @Autowired
     private JobLogService jobLogService;
 
+    @Autowired
+    private AdminService adminService;
+
     @Override
     public Result<HaSwitchTopic> switchHaWithCanRetry(Long newActiveClusterPhyId,
                                                       Long newStandbyClusterPhyId,
                                                       List<String> switchTopicNameList,
+                                                      List<KafkaUserAndClientDTO> kafkaUserAndClientIdList,
                                                       boolean focus,
                                                       boolean firstTriggerExecute,
                                                       JobLogDO switchLogTemplate,
@@ -106,7 +110,7 @@ public class HaTopicManagerImpl implements HaTopicManager {
         }
 
         // 4、进行切换预处理
-        HaSwitchTopic switchTopic = this.prepareSwitching(newStandbyClusterPhyDO, doList, focus, switchLogTemplate);
+        HaSwitchTopic switchTopic = this.prepareSwitching(newStandbyClusterPhyDO, doList, kafkaUserAndClientIdList, focus, switchLogTemplate);
 
         // 5、直接等待10秒，使得相关数据有机会同步完成
         BackoffUtils.backoff(10000);
@@ -125,7 +129,15 @@ public class HaTopicManagerImpl implements HaTopicManager {
         switchTopic.addHaSwitchTopic(this.newStandbyTopicAddFetchConfig(newActiveClusterPhyDO, newStandbyClusterPhyDO, doList, focus, switchLogTemplate, operator));
 
         // 9、进行切换收尾
-        switchTopic.addHaSwitchTopic(this.closeoutSwitching(newActiveClusterPhyDO, newStandbyClusterPhyDO, configUtils.getDKafkaGatewayZK(), doList, focus, switchLogTemplate));
+        switchTopic.addHaSwitchTopic(this.closeoutSwitching(
+                newActiveClusterPhyDO,
+                newStandbyClusterPhyDO,
+                configUtils.getDKafkaGatewayZK(),
+                doList,
+                kafkaUserAndClientIdList,
+                focus,
+                switchLogTemplate
+        ));
 
         // 10、状态结果汇总记录
         doList.forEach(elem -> switchTopic.addActiveTopicStatus(elem.getActiveResName(), elem.getStatus()));
@@ -135,6 +147,18 @@ public class HaTopicManagerImpl implements HaTopicManager {
                 "method=switchHaWithCanRetry||newActiveClusterPhyId={}||newStandbyClusterPhyId={}||switchTopicNameList={}||switchResult={}||operator={}",
                 newActiveClusterPhyId, newStandbyClusterPhyId, ConvertUtil.obj2Json(switchTopicNameList), switchTopic, operator
         );
+
+        if (switchTopic.isFinished()) {
+            // 全都切换完成，则更新HA信息
+            try {
+                updateHAClient(newActiveClusterPhyId, newStandbyClusterPhyId, kafkaUserAndClientIdList);
+            } catch (Exception e) {
+                LOGGER.error(
+                        "method=switchHaWithCanRetry||newActiveClusterPhyId={}||newStandbyClusterPhyId={}||kafkaUserAndClientIdList={}||operator={}||errMsg=exception",
+                        newActiveClusterPhyId, newStandbyClusterPhyId, ConvertUtil.obj2Json(kafkaUserAndClientIdList), operator, e
+                );
+            }
+        }
 
         return Result.buildSuc(switchTopic);
     }
@@ -188,6 +212,20 @@ public class HaTopicManagerImpl implements HaTopicManager {
             }
 
             Result<Void> rv = haTopicService.deleteHA(relationDO.getActiveClusterPhyId(), relationDO.getStandbyClusterPhyId(), topicName, operator);
+
+            //删除备topic资源
+            if (dto.getRetainStandbyResource() != null && !dto.getRetainStandbyResource()) {
+                ResultStatus statusEnum = adminService.deleteTopic(
+                        PhysicalClusterMetadataManager.getClusterFromCache(dto.getStandbyClusterId()),
+                        topicName,
+                        operator);
+                if (statusEnum.getCode() != ResultStatus.SUCCESS.getCode()){
+                    LOGGER.error(
+                            "method=batchRemoveHaTopic||activeClusterPhyId={}||standbyClusterPhyId={}||topicName={}||result={}||msg=delete standby topic failed.",
+                            dto.getActiveClusterId(), dto.getStandbyClusterId(), topicName, statusEnum
+                    );
+                }
+            }
             operationResultList.add(TopicOperationResult.buildFrom(dto.getActiveClusterId(), topicName, rv));
         }
 
@@ -200,57 +238,42 @@ public class HaTopicManagerImpl implements HaTopicManager {
         jobLogService.addLogAndIgnoreException(switchLogTemplate.setAndCopyNew(new Date(), content));
     }
 
-    /**
-     * 切换预处理
-     * 1、在主集群上，将Topic关联的KafkaUser的active集群设置为None
-     */
-    private HaSwitchTopic prepareSwitching(ClusterDO oldActiveClusterPhyDO, List<HaASRelationDO> doList, boolean focus, JobLogDO switchLogTemplate) {
-        // 暂停HA的KafkaUser
-        Set<String> stoppedHaKafkaUserSet = new HashSet<>();
-
+    private HaSwitchTopic prepareSwitching(ClusterDO oldActiveClusterPhyDO,
+                                           List<HaASRelationDO> doList,
+                                           List<KafkaUserAndClientDTO> clientDTOList,
+                                           boolean focus,
+                                           JobLogDO switchLogTemplate) {
         HaSwitchTopic haSwitchTopic = new HaSwitchTopic(true);
 
         boolean allSuccess = true; // 所有都成功
-        boolean needLog = false; // 需要记录日志
-        for (HaASRelationDO relationDO: doList) {
-            if (!relationDO.getStatus().equals(HaStatusEnum.SWITCHING_PREPARE_CODE)) {
-                // 当前不处于prepare状态
-                haSwitchTopic.setFinished(true);
-                continue;
-            }
-            needLog = true;
 
-            // 获取关联的KafkaUser
-            Set<String> relatedKafkaUserSet = authorityService.getAuthorityByTopic(relationDO.getActiveClusterPhyId(), relationDO.getActiveResName())
-                    .stream()
-                    .map(elem -> elem.getAppId())
-                    .filter(kafkaUser -> !stoppedHaKafkaUserSet.contains(kafkaUser))
-                    .collect(Collectors.toSet());
-
-            // 暂停kafkaUser HA
-            for (String kafkaUser: relatedKafkaUserSet) {
-                Result<Void> rv = haKafkaUserService.setNoneHAInKafka(oldActiveClusterPhyDO.getZookeeper(), kafkaUser);
-                if (rv.failed() && !focus) {
-                    haSwitchTopic.setFinished(false);
-
-                    this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_PREPARE.getMsg(oldActiveClusterPhyDO.getClusterName())));
-                    return haSwitchTopic;
-                } else if (rv.failed() && focus) {
-                    allSuccess = false;
-                }
-            }
-
-            // 记录操作过的user
-            stoppedHaKafkaUserSet.addAll(relatedKafkaUserSet);
-
-            // 修改Topic主备状态
-            relationDO.setStatus(HaStatusEnum.SWITCHING_WAITING_IN_SYNC_CODE);
-            haASRelationService.updateRelationStatus(relationDO.getId(), HaStatusEnum.SWITCHING_WAITING_IN_SYNC_CODE);
+        // 存在prepare状态的，则就需要进行预处理操作
+        boolean needDOIt = doList.stream().filter(elem -> elem.getStatus().equals(HaStatusEnum.SWITCHING_PREPARE_CODE)).count() > 0;
+        if (!needDOIt) {
+            // 不需要做
+            return haSwitchTopic;
         }
 
-        if (needLog) {
-            this.saveLogs(switchLogTemplate, String.format("%s:\t%s", HaStatusEnum.SWITCHING_PREPARE.getMsg(oldActiveClusterPhyDO.getClusterName()), allSuccess? "成功": "存在失败，但进行强制执行，跳过该操作"));
+        // 暂停kafkaUser HA
+        for (KafkaUserAndClientDTO dto: clientDTOList) {
+            Result<Void> rv = haKafkaUserService.setNoneHAInKafka(oldActiveClusterPhyDO.getZookeeper(), HAUtils.mergeKafkaUserAndClient(dto.getKafkaUser(), dto.getClientId()));
+            if (rv.failed() && !focus) {
+                haSwitchTopic.setFinished(false);
+
+                this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_PREPARE.getMsg(oldActiveClusterPhyDO.getClusterName())));
+                return haSwitchTopic;
+            } else if (rv.failed() && focus) {
+                allSuccess = false;
+            }
         }
+
+        // 修改Topic主备状态
+        doList.forEach(elem -> {
+            elem.setStatus(HaStatusEnum.SWITCHING_WAITING_IN_SYNC_CODE);
+            haASRelationService.updateRelationStatus(elem.getId(), HaStatusEnum.SWITCHING_WAITING_IN_SYNC_CODE);
+        });
+
+        this.saveLogs(switchLogTemplate, String.format("%s:\t%s", HaStatusEnum.SWITCHING_PREPARE.getMsg(oldActiveClusterPhyDO.getClusterName()), allSuccess? "成功": "存在失败，但进行强制执行，跳过该操作"));
 
         haSwitchTopic.setFinished(true);
         return haSwitchTopic;
@@ -412,87 +435,76 @@ public class HaTopicManagerImpl implements HaTopicManager {
      * 2、原先的备集群-修改user的active集群，指向新的主集群
      * 3、网关-修改user的active集群，指向新的主集群
      */
-    private HaSwitchTopic closeoutSwitching(ClusterDO newActiveClusterPhyDO, ClusterDO newStandbyClusterPhyDO, String gatewayZK, List<HaASRelationDO> doList, boolean focus, JobLogDO switchLogTemplate) {
-        // 暂停HA的KafkaUser
-        Set<String> activeHaKafkaUserSet = new HashSet<>();
+    private HaSwitchTopic closeoutSwitching(ClusterDO newActiveClusterPhyDO,
+                                            ClusterDO newStandbyClusterPhyDO,
+                                            String gatewayZK,
+                                            List<HaASRelationDO> doList,
+                                            List<KafkaUserAndClientDTO> kafkaUserAndClientDTOList,
+                                            boolean focus,
+                                            JobLogDO switchLogTemplate) {
+        HaSwitchTopic haSwitchTopic = new HaSwitchTopic(true);
+
+        boolean needDOIt = doList.stream().filter(elem -> elem.getStatus().equals(HaStatusEnum.SWITCHING_CLOSEOUT_CODE)).count() > 0;
+        if (!needDOIt) {
+            // 不需要做任何事情
+            return haSwitchTopic;
+        }
 
         boolean allSuccess = true;
-        boolean needLog = false;
         boolean forceAndNewStandbyFailed = false; // 强制切换，但是新的备依旧操作失败
 
-        HaSwitchTopic haSwitchTopic = new HaSwitchTopic(true);
-        for (HaASRelationDO relationDO: doList) {
-            if (!relationDO.getStatus().equals(HaStatusEnum.SWITCHING_CLOSEOUT_CODE)) {
-                // 当前不处于closeout状态
+        for (KafkaUserAndClientDTO dto: kafkaUserAndClientDTOList) {
+            String zkNodeName = HAUtils.mergeKafkaUserAndClient(dto.getKafkaUser(), dto.getClientId());
+
+            // 操作新的主集群
+            Result<Void> rv = haKafkaUserService.activeHAInKafka(newActiveClusterPhyDO.getZookeeper(), newActiveClusterPhyDO.getId(), zkNodeName);
+            if (rv.failed() && !focus) {
                 haSwitchTopic.setFinished(false);
-                continue;
+                this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_CLOSEOUT.getMsg(newActiveClusterPhyDO.getClusterName())));
+                return haSwitchTopic;
+            } else if (rv.failed() && focus) {
+                allSuccess = false;
             }
 
-            needLog = true;
-
-            // 获取关联的KafkaUser
-            Set<String> relatedKafkaUserSet = authorityService.getAuthorityByTopic(relationDO.getActiveClusterPhyId(), relationDO.getActiveResName())
-                    .stream()
-                    .map(elem -> elem.getAppId())
-                    .filter(kafkaUser -> !activeHaKafkaUserSet.contains(kafkaUser))
-                    .collect(Collectors.toSet());
-
-            for (String kafkaUser: relatedKafkaUserSet) {
-                // 操作新的主集群
-                Result<Void> rv = haKafkaUserService.activeHAInKafka(newActiveClusterPhyDO.getZookeeper(), newActiveClusterPhyDO.getId(), kafkaUser);
-                if (rv.failed() && !focus) {
-                    haSwitchTopic.setFinished(false);
-                    this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_CLOSEOUT.getMsg(newActiveClusterPhyDO.getClusterName())));
-                    return haSwitchTopic;
-                } else if (rv.failed() && focus) {
-                    allSuccess = false;
-                }
-
-                // 操作新的备集群，如果出现错误，则下次就不再进行操作ZK。新的备的Topic不是那么重要，因此这里允许出现跳过
-                rv = null;
-                if (!forceAndNewStandbyFailed) {
-                    // 如果对备集群的操作过程中，出现了失败，则直接跳过
-                    rv = haKafkaUserService.activeHAInKafka(newStandbyClusterPhyDO.getZookeeper(), newActiveClusterPhyDO.getId(), kafkaUser);
-                }
-
-                if (rv != null && rv.failed() && !focus) {
-                    haSwitchTopic.setFinished(false);
-                    this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_CLOSEOUT.getMsg(newActiveClusterPhyDO.getClusterName())));
-                    return haSwitchTopic;
-                } else if (rv != null && rv.failed() && focus) {
-                    allSuccess = false;
-                    forceAndNewStandbyFailed = true;
-                }
-
-                // 操作网关
-                rv = haKafkaUserService.activeHAInKafka(gatewayZK, newActiveClusterPhyDO.getId(), kafkaUser);
-                if (rv.failed() && !focus) {
-                    haSwitchTopic.setFinished(false);
-                    this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_CLOSEOUT.getMsg(newActiveClusterPhyDO.getClusterName())));
-                    return haSwitchTopic;
-                } else if (rv.failed() && focus) {
-                    allSuccess = false;
-                }
+            // 操作新的备集群，如果出现错误，则下次就不再进行操作ZK。新的备的Topic不是那么重要，因此这里允许出现跳过
+            rv = null;
+            if (!forceAndNewStandbyFailed) {
+                // 如果对备集群的操作过程中，出现了失败，则直接跳过
+                rv = haKafkaUserService.activeHAInKafka(newStandbyClusterPhyDO.getZookeeper(), newActiveClusterPhyDO.getId(), zkNodeName);
             }
 
-            // 记录已经激活的User
-            activeHaKafkaUserSet.addAll(relatedKafkaUserSet);
+            if (rv != null && rv.failed() && !focus) {
+                haSwitchTopic.setFinished(false);
+                this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_CLOSEOUT.getMsg(newActiveClusterPhyDO.getClusterName())));
+                return haSwitchTopic;
+            } else if (rv != null && rv.failed() && focus) {
+                allSuccess = false;
+                forceAndNewStandbyFailed = true;
+            }
 
-            // 修改Topic主备信息
+            // 操作网关
+            rv = haKafkaUserService.activeHAInKafka(gatewayZK, newActiveClusterPhyDO.getId(), zkNodeName);
+            if (rv.failed() && !focus) {
+                haSwitchTopic.setFinished(false);
+                this.saveLogs(switchLogTemplate, String.format("%s:\t失败，1分钟后再进行重试", HaStatusEnum.SWITCHING_CLOSEOUT.getMsg(newActiveClusterPhyDO.getClusterName())));
+                return haSwitchTopic;
+            } else if (rv.failed() && focus) {
+                allSuccess = false;
+            }
+        }
+
+        // 修改Topic主备信息
+        doList.forEach(elem -> {
             HaASRelationDO newHaASRelationDO = new HaASRelationDO(
-                    newActiveClusterPhyDO.getId(), relationDO.getActiveResName(),
-                    newStandbyClusterPhyDO.getId(), relationDO.getStandbyResName(),
+                    newActiveClusterPhyDO.getId(), elem.getActiveResName(),
+                    newStandbyClusterPhyDO.getId(), elem.getStandbyResName(),
                     HaResTypeEnum.TOPIC.getCode(),
                     HaStatusEnum.STABLE_CODE
             );
-            newHaASRelationDO.setId(relationDO.getId());
+            newHaASRelationDO.setId(elem.getId());
 
             haASRelationService.updateById(newHaASRelationDO);
-        }
-
-        if (!needLog) {
-            return haSwitchTopic;
-        }
+        });
 
         this.saveLogs(switchLogTemplate, String.format("%s:\t%s", HaStatusEnum.SWITCHING_CLOSEOUT.getMsg(newActiveClusterPhyDO.getClusterName()), allSuccess? "成功": "存在失败，但进行强制执行，跳过该操作"));
         return haSwitchTopic;
@@ -555,5 +567,46 @@ public class HaTopicManagerImpl implements HaTopicManager {
         }
 
         return Result.buildSuc(relationDO);
+    }
+
+    private void updateHAClient(Long newActiveClusterPhyId,
+                                Long newStandbyClusterPhyId,
+                                List<KafkaUserAndClientDTO> kafkaUserAndClientIdList) {
+        if (ValidateUtils.isEmptyList(kafkaUserAndClientIdList)) {
+            return;
+        }
+
+        List<HaASRelationDO> doList = haASRelationService.listAllHAFromDB(newActiveClusterPhyId, HaResTypeEnum.KAFKA_USER_AND_CLIENT);
+
+        Map<String, HaASRelationDO> resNameMap = new HashMap<>();
+        doList.forEach(elem -> resNameMap.put(elem.getActiveResName(), elem));
+
+        for (KafkaUserAndClientDTO dto: kafkaUserAndClientIdList) {
+            if (ValidateUtils.isBlank(dto.getClientId())) {
+                continue;
+            }
+            String resName = HAUtils.mergeKafkaUserAndClient(dto.getKafkaUser(), dto.getClientId());
+
+            HaASRelationDO newDO = new HaASRelationDO(
+                    newActiveClusterPhyId,
+                    resName,
+                    newStandbyClusterPhyId,
+                    resName,
+                    HaResTypeEnum.KAFKA_USER_AND_CLIENT.getCode(),
+                    HaStatusEnum.STABLE_CODE
+            );
+
+            HaASRelationDO oldDO = resNameMap.remove(resName);
+            if (oldDO != null) {
+                newDO.setId(oldDO.getId());
+                haASRelationService.updateById(newDO);
+            } else {
+                try {
+                    haASRelationService.addHAToDB(newDO);
+                } catch (DuplicateKeyException dke) {
+                    // ignore
+                }
+            }
+        }
     }
 }

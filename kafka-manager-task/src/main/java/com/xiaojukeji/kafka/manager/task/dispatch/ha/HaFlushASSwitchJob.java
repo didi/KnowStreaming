@@ -1,4 +1,4 @@
-package com.xiaojukeji.kafka.manager.task.dispatch.op;
+package com.xiaojukeji.kafka.manager.task.dispatch.ha;
 
 import com.xiaojukeji.kafka.manager.service.biz.job.HaASSwitchJobManager;
 import com.xiaojukeji.kafka.manager.service.service.ha.HaASSwitchJobService;

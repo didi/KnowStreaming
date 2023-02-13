@@ -32,6 +32,9 @@ public class HaTopicRelationDTO {
     @ApiModelProperty(value = "需要关联|解绑的topic名称列表")
     private List<String> topicNames;
 
+    @ApiModelProperty(value = "解绑是否保留备集群资源（topic,kafkaUser,group）")
+    private Boolean retainStandbyResource;
+
     @Override
     public String toString() {
         return "HaTopicRelationDTO{" +
@@ -39,6 +42,7 @@ public class HaTopicRelationDTO {
                 ", standbyClusterId=" + standbyClusterId +
                 ", all=" + all +
                 ", topicNames=" + topicNames +
+                ", retainStandbyResource=" + retainStandbyResource +
                 '}';
     }
 

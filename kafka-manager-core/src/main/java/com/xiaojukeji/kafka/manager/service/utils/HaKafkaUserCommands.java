@@ -6,10 +6,15 @@ import kafka.admin.AdminUtils;
 import kafka.admin.AdminUtils$;
 import kafka.server.ConfigType;
 import kafka.utils.ZkUtils;
+import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.security.JaasUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
@@ -40,7 +45,7 @@ public class HaKafkaUserCommands {
             props.putAll(modifiedProps);
 
             // 修改配置, 这里不使用changeUserOrUserClientIdConfig方法的原因是changeUserOrUserClientIdConfig这个方法会进行参数检查
-            AdminUtils$.MODULE$.kafka$admin$AdminUtils$$changeEntityConfig(zkUtils, ConfigType.User(), kafkaUser, props);
+            AdminUtils$.MODULE$.kafka$admin$AdminUtils$$changeEntityConfig(zkUtils, ConfigType.User(), sanitize(kafkaUser), props);
         } catch (Exception e) {
             LOGGER.error("method=changeHaUserConfig||zookeeper={}||kafkaUser={}||modifiedProps={}||errMsg=exception", zookeeper, kafkaUser, modifiedProps, e);
             return false;
@@ -73,7 +78,7 @@ public class HaKafkaUserCommands {
             }
 
             // 修改配置, 这里不使用changeUserOrUserClientIdConfig方法的原因是changeUserOrUserClientIdConfig这个方法会进行参数检查
-            AdminUtils$.MODULE$.kafka$admin$AdminUtils$$changeEntityConfig(zkUtils, ConfigType.User(), kafkaUser, presentProps);
+            AdminUtils$.MODULE$.kafka$admin$AdminUtils$$changeEntityConfig(zkUtils, ConfigType.User(), sanitize(kafkaUser), presentProps);
 
             return true;
         }catch (Exception e){
@@ -89,5 +94,38 @@ public class HaKafkaUserCommands {
     }
 
     private HaKafkaUserCommands() {
+    }
+
+    private static String sanitize(String name) {
+        String encoded = "";
+        try {
+            encoded = URLEncoder.encode(name, StandardCharsets.UTF_8.name());
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < encoded.length(); i++) {
+                char c = encoded.charAt(i);
+                if (c == '*') {         // Metric ObjectName treats * as pattern
+                    builder.append("%2A");
+                } else if (c == '+') {  // Space URL-encoded as +, replace with percent encoding
+                    builder.append("%20");
+                } else {
+                    builder.append(c);
+                }
+            }
+            return builder.toString();
+        } catch (UnsupportedEncodingException e) {
+            throw new KafkaException(e);
+        }
+    }
+
+    /**
+     * Desanitize name that was URL-encoded using {@link #sanitize(String)}. This
+     * is used to obtain the desanitized version of node names in ZooKeeper.
+     */
+    private static String desanitize(String name) {
+        try {
+            return URLDecoder.decode(name, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new KafkaException(e);
+        }
     }
 }

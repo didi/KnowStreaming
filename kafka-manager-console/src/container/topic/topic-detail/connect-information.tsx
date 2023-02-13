@@ -6,6 +6,8 @@ import { Table, Tooltip } from 'component/antd';
 import { SearchAndFilterContainer } from 'container/search-filter';
 import Url from 'lib/url-parser';
 import { pagination, cellStyle } from 'constants/table';
+import moment = require('moment');
+import { timeFormat } from 'constants/strategy';
 
 @observer
 export class ConnectInformation extends SearchAndFilterContainer {
@@ -27,44 +29,70 @@ export class ConnectInformation extends SearchAndFilterContainer {
       title: '客户端类型',
       dataIndex: 'clientType',
       key: 'clientType',
-      width: '20%',
+      width: 130,
       filters: [{ text: '消费', value: 'consumer' }, { text: '生产', value: 'produce' }],
       onFilter: (value: string, record: IConnectionInfo) => record.clientType.indexOf(value) === 0,
       render: (t: string) =>
         <span>{t === 'consumer' ? '消费' : '生产'}</span>,
     }, this.renderColumnsFilter('filterVisible'));
 
-    const columns = [{
-      title: 'AppID',
-      dataIndex: 'appId',
-      key: 'appId',
-      width: '20%',
-      sorter: (a: IConnectionInfo, b: IConnectionInfo) => a.appId.charCodeAt(0) - b.appId.charCodeAt(0),
-    },
-    {
-      title: '主机名',
-      dataIndex: 'hostname',
-      key: 'hostname',
-      width: '40%',
-      onCell: () => ({
-        style: {
-          maxWidth: 250,
-          ...cellStyle,
-        },
-      }),
-      render: (t: string) => {
-        return (
-          <Tooltip placement="bottomLeft" title={t} >{t}</Tooltip>
-        );
+    const columns = [
+      {
+        title: 'AppID',
+        dataIndex: 'appId',
+        key: 'appId',
+        width: '30%',
+        sorter: (a: IConnectionInfo, b: IConnectionInfo) => a.appId.charCodeAt(0) - b.appId.charCodeAt(0),
       },
-    },
-    {
-      title: '客户端版本',
-      dataIndex: 'clientVersion',
-      key: 'clientVersion',
-      width: '20%',
-    },
+      {
+        title: 'clientID',
+        dataIndex: 'clientId',
+        key: 'clientId',
+        width: '30%',
+        onCell: () => ({
+          style: {
+            maxWidth: 250,
+            ...cellStyle,
+          },
+        }),
+        render: (t: string) => {
+          return (
+            <Tooltip placement="bottomLeft" title={t} >{t}</Tooltip>
+          );
+        },
+      },
+      {
+        title: '主机名',
+        dataIndex: 'hostname',
+        key: 'hostname',
+        width: '30%',
+        onCell: () => ({
+          style: {
+            maxWidth: 250,
+            ...cellStyle,
+          },
+        }),
+        render: (t: string) => {
+          return (
+            <Tooltip placement="bottomLeft" title={t} >{t}</Tooltip>
+          );
+        },
+      },
+      {
+        title: '客户端版本',
+        dataIndex: 'clientVersion',
+        key: 'clientVersion',
+        width: 130,
+      },
       clientType,
+      {
+        title: '最后访问时间',
+        dataIndex: 'realConnectTime',
+        key: 'realConnectTime',
+        width: 170,
+        render: (t: number) => moment(t).format(timeFormat),
+        sorter: (a: IConnectionInfo, b: IConnectionInfo) => a.realConnectTime - b.realConnectTime,
+      },
     ];
     if (connectInfo) {
       return (

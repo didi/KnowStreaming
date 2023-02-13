@@ -75,6 +75,8 @@ export interface IConnectionInfo {
   hostname: string;
   ip: string;
   topicName: string;
+  clientId?: string;
+  realConnectTime?: number;
   key?: number;
 }
 

@@ -21,4 +21,11 @@ public class AppRelateTopicsDTO {
     @NotNull(message = "filterTopicNameList不允许为NULL")
     @ApiModelProperty(value="过滤的Topic列表")
     private List<String> filterTopicNameList;
+
+    @ApiModelProperty(value="使用KafkaUser+Client维度的数据，默认是kafkaUser维度")
+    private Boolean useKafkaUserAndClientId;
+
+    @NotNull(message = "ha不允许为NULL")
+    @ApiModelProperty(value="查询是否高可用topic")
+    private Boolean ha;
 }

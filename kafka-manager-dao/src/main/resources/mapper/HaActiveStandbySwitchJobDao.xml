@@ -10,6 +10,8 @@
         <result column="active_cluster_phy_id"      property="activeClusterPhyId" />
         <result column="standby_cluster_phy_id"     property="standbyClusterPhyId" />
         <result column="job_status"                 property="jobStatus" />
+        <result column="type"                       property="type" />
+        <result column="extend_data"                property="extendData" />
         <result column="operator"                   property="operator" />
     </resultMap>
 
@@ -18,9 +20,9 @@
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO ks_km_physical_cluster
-        (active_cluster_phy_id, standby_cluster_phy_id, job_status, operator)
+        (active_cluster_phy_id, standby_cluster_phy_id, job_status, `type`, extend_data, operator)
         VALUES
-        (#{activeClusterPhyId}, #{standbyClusterPhyId}, #{jobStatus}, #{operator})
+        (#{activeClusterPhyId}, #{standbyClusterPhyId}, #{jobStatus}, #{type}, #{extendData}, #{operator})
     </insert>
 
     <select id="listAllLatest" resultMap="HaASSwitchJobMap">

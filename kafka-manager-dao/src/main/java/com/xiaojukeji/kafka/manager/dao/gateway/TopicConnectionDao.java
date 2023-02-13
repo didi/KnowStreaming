@@ -16,4 +16,6 @@ public interface TopicConnectionDao {
     List<TopicConnectionDO> getByTopicName(Long clusterId, String topicName, Date startTime, Date endTime);
 
     List<TopicConnectionDO> getByAppId(String appId, Date startTime, Date endTime);
+
+    List<TopicConnectionDO> getByClusterAndAppId(Long clusterId, String appId, Date startTime, Date endTime);
 }

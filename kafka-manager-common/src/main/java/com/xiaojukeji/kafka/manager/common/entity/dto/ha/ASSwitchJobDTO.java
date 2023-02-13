@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -27,5 +28,13 @@ public class ASSwitchJobDTO {
     private Long standbyClusterPhyId;
 
     @NotNull(message = "topicNameList不允许为NULL")
+    @ApiModelProperty(value="切换的Topic名称列表")
     private List<String> topicNameList;
+
+    /**
+     * kafkaUser+Client列表
+     */
+    @Valid
+    @ApiModelProperty(value="切换的KafkaUser&ClientId列表，Client可以为空串")
+    private List<KafkaUserAndClientDTO> kafkaUserAndClientIdList;
 }

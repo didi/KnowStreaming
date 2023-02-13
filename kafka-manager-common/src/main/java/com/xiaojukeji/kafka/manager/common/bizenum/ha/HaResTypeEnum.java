@@ -9,8 +9,12 @@ import lombok.Getter;
 @Getter
 public enum HaResTypeEnum {
     CLUSTER(0, "Cluster"),
+
     TOPIC(1, "Topic"),
+
     KAFKA_USER(2, "KafkaUser"),
+
+    KAFKA_USER_AND_CLIENT(3, "KafkaUserAndClient"),
 
     ;
 

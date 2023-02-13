@@ -6,6 +6,7 @@ import com.xiaojukeji.kafka.manager.common.bizenum.ha.job.HaJobStatusEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ha.job.*;
+import com.xiaojukeji.kafka.manager.common.entity.dto.ha.KafkaUserAndClientDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchJobDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchSubJobDO;
 import com.xiaojukeji.kafka.manager.common.utils.ConvertUtil;
@@ -35,10 +36,22 @@ public class HaASSwitchJobServiceImpl implements HaASSwitchJobService {
 
     @Override
     @Transactional
-    public Result<Long> createJob(Long activeClusterPhyId, Long standbyClusterPhyId, List<String> topicNameList, String operator) {
+    public Result<Long> createJob(Long activeClusterPhyId,
+                                  Long standbyClusterPhyId,
+                                  List<String> topicNameList,
+                                  List<KafkaUserAndClientDTO> kafkaUserAndClientList,
+                                  String operator) {
         try {
             // 父任务
-            HaASSwitchJobDO jobDO = new HaASSwitchJobDO(activeClusterPhyId, standbyClusterPhyId, HaJobStatusEnum.RUNNING.getStatus(), operator);
+            HaASSwitchJobDO jobDO = new HaASSwitchJobDO(
+                    activeClusterPhyId,
+                    standbyClusterPhyId,
+                    ValidateUtils.isEmptyList(kafkaUserAndClientList)? 0: 1,
+                    kafkaUserAndClientList,
+                    HaJobStatusEnum.RUNNING.getStatus(),
+                    operator
+            );
+
             haASSwitchJobDao.insert(jobDO);
 
             // 子任务

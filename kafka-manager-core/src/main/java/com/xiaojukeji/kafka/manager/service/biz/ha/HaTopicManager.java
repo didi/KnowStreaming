@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.service.biz.ha;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.TopicOperationResult;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ha.HaSwitchTopic;
+import com.xiaojukeji.kafka.manager.common.entity.dto.ha.KafkaUserAndClientDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.HaTopicRelationDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.JobLogDO;
 
@@ -37,6 +38,7 @@ public interface HaTopicManager {
     Result<HaSwitchTopic> switchHaWithCanRetry(Long newActiveClusterPhyId,
                                                Long newStandbyClusterPhyId,
                                                List<String> switchTopicNameList,
+                                               List<KafkaUserAndClientDTO> kafkaUserAndClientIdList,
                                                boolean focus,
                                                boolean firstTriggerExecute,
                                                JobLogDO switchLogTemplate,

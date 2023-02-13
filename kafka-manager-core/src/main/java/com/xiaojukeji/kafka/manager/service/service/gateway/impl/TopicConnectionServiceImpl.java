@@ -1,6 +1,8 @@
 package com.xiaojukeji.kafka.manager.service.service.gateway.impl;
 
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
@@ -68,6 +70,71 @@ public class TopicConnectionServiceImpl implements TopicConnectionService {
     }
 
     @Override
+    public Result<Map<String, Set<String>>> getHaKafkaUserAndClientIdByTopicName(Long firstClusterId,
+                                                                                 Long secondClusterId,
+                                                                                 String topicName,
+                                                                                 Date startTime,
+                                                                                 Date endTime) {
+        List<TopicConnectionDO> doList = new ArrayList<>();
+        try {
+            if (firstClusterId != null) {
+                doList.addAll(topicConnectionDao.getByTopicName(firstClusterId, topicName, startTime, endTime));
+            }
+        } catch (Exception e) {
+            LOGGER.error("get topic connections failed, firstClusterId:{} topicName:{}.", firstClusterId, topicName, e);
+
+            return Result.buildFromRSAndMsg(ResultStatus.MYSQL_ERROR, e.getMessage());
+        }
+
+        try {
+            if (secondClusterId != null) {
+                doList.addAll(topicConnectionDao.getByTopicName(secondClusterId, topicName, startTime, endTime));
+            }
+        } catch (Exception e) {
+            LOGGER.error("get topic connections failed, secondClusterId:{} topicName:{}.", secondClusterId, topicName, e);
+
+            return Result.buildFromRSAndMsg(ResultStatus.MYSQL_ERROR, e.getMessage());
+        }
+
+        if (ValidateUtils.isEmptyList(doList)) {
+            return Result.buildSuc(new HashMap<>());
+        }
+
+        Map<String, Set<String>> userAndClientMap = new HashMap<>();
+        for (TopicConnectionDO po: doList) {
+            if (!po.getClientId().startsWith("P#") && !po.getClientId().startsWith("C#")) {
+                // 忽略非HA的clientId
+                continue;
+            }
+
+            userAndClientMap.putIfAbsent(po.getAppId(), new HashSet<>());
+            userAndClientMap.get(po.getAppId()).add(po.getClientId());
+        }
+
+        return Result.buildSuc(userAndClientMap);
+    }
+
+    @Override
+    public Set<String> getKafkaUserAndClientIdTopicNames(Set<Long> clusterIdSet, String kafkaUser, String clientId, Date startTime, Date endTime) {
+        List<TopicConnectionDO> doList = null;
+        try {
+            doList = topicConnectionDao.getByAppId(kafkaUser, startTime, endTime);
+        } catch (Exception e) {
+            LOGGER.error("get topic connections failed, kafkaUser:{}.", kafkaUser, e);
+        }
+
+        if (ValidateUtils.isEmptyList(doList)) {
+            return new HashSet<>();
+        }
+
+        return doList
+                .stream()
+                .filter(elem -> elem.getClientId().equals(clientId) && clusterIdSet.contains(elem.getClusterId()))
+                .map(item -> item.getTopicName())
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public List<TopicConnection> getByTopicName(Long clusterId,
                                                 String topicName,
                                                 String appId,
@@ -100,6 +167,36 @@ public class TopicConnectionServiceImpl implements TopicConnectionService {
             return new ArrayList<>();
         }
         return getByTopicName(null, doList);
+    }
+
+    @Override
+    public Result<List<TopicConnectionDO>> getByClusterAndAppId(Long firstClusterId, Long secondClusterId, String appId, Date startTime, Date endTime) {
+        List<TopicConnectionDO> doList = new ArrayList<>();
+        try {
+            if (firstClusterId != null) {
+                doList.addAll(topicConnectionDao.getByClusterAndAppId(firstClusterId, appId, startTime, endTime));
+            }
+        } catch (Exception e) {
+            LOGGER.error("get topic connections failed, firstClusterId:{} appId:{}.", firstClusterId, appId, e);
+
+            return Result.buildFromRSAndMsg(ResultStatus.MYSQL_ERROR, e.getMessage());
+        }
+
+        try {
+            if (secondClusterId != null) {
+                doList.addAll(topicConnectionDao.getByClusterAndAppId(secondClusterId, appId, startTime, endTime));
+            }
+        } catch (Exception e) {
+            LOGGER.error("get topic connections failed, secondClusterId:{} appId:{}.", secondClusterId, appId, e);
+
+            return Result.buildFromRSAndMsg(ResultStatus.MYSQL_ERROR, e.getMessage());
+        }
+
+        if (ValidateUtils.isEmptyList(doList)) {
+            return Result.buildSuc(new ArrayList<>());
+        }
+
+        return Result.buildSuc(doList);
     }
 
     @Override
@@ -210,6 +307,10 @@ public class TopicConnectionServiceImpl implements TopicConnectionService {
             LOGGER.error("get hostname failed. ip:{}.", connectionDO.getIp(), e);
         }
         dto.setHostname(hostName.replace(KafkaConstant.BROKER_HOST_NAME_SUFFIX, ""));
+
+        dto.setClientId(connectionDO.getClientId());
+        dto.setRealConnectTime(connectionDO.getRealConnectTime());
+        dto.setCreateTime(connectionDO.getCreateTime().getTime());
         return dto;
     }
 

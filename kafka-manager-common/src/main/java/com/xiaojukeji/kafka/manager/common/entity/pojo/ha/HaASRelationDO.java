@@ -1,6 +1,7 @@
 package com.xiaojukeji.kafka.manager.common.entity.pojo.ha;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.xiaojukeji.kafka.manager.common.bizenum.ha.HaResTypeEnum;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.BaseDO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,6 +38,7 @@ public class HaASRelationDO extends BaseDO {
 
     /**
      * 资源类型
+     * @see HaResTypeEnum
      */
     private Integer resType;
 

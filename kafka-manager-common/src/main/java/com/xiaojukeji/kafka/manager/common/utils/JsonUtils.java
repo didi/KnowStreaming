@@ -79,10 +79,27 @@ public class JsonUtils {
                     TopicConnectionDO connectionDO = new TopicConnectionDO();
 
                     String[] appIdDetailArray = appIdDetail.toString().split("#");
-                    if (appIdDetailArray.length >= 3) {
-                        connectionDO.setAppId(appIdDetailArray[0]);
-                        connectionDO.setIp(appIdDetailArray[1]);
-                        connectionDO.setClientVersion(appIdDetailArray[2]);
+                    if (appIdDetailArray == null) {
+                        appIdDetailArray = new String[0];
+                    }
+
+                    connectionDO.setAppId(parseTopicConnections(appIdDetailArray, 0));
+                    connectionDO.setIp(parseTopicConnections(appIdDetailArray, 1));
+                    connectionDO.setClientVersion(parseTopicConnections(appIdDetailArray, 2));
+
+                    // 解析clientId
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 3; i < appIdDetailArray.length - 1; ++i) {
+                        sb.append(parseTopicConnections(appIdDetailArray, i)).append("#");
+                    }
+                    connectionDO.setClientId(sb.substring(0, sb.length() - 1));
+
+                    // 解析时间
+                    Long receiveTime = ConvertUtil.string2Long(parseTopicConnections(appIdDetailArray, appIdDetailArray.length - 1));
+                    if (receiveTime == null) {
+                        connectionDO.setRealConnectTime(-1L);
+                    } else {
+                        connectionDO.setRealConnectTime(receiveTime);
                     }
 
                     connectionDO.setClusterId(clusterId);
@@ -94,5 +111,9 @@ public class JsonUtils {
             }
         }
         return connectionDOList;
+    }
+
+    private static String parseTopicConnections(String[] appIdDetailArray, int idx) {
+        return (appIdDetailArray != null && appIdDetailArray.length >= idx + 1)? appIdDetailArray[idx]: "";
     }
 }

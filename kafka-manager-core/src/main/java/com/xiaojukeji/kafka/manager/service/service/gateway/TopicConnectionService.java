@@ -1,10 +1,13 @@
 package com.xiaojukeji.kafka.manager.service.service.gateway;
 
+import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.TopicConnectionDO;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhongyuankai
@@ -21,6 +24,14 @@ public interface TopicConnectionService {
                                          Date startTime,
                                          Date endTime);
 
+    Result<Map<String/*KafkaUser*/, Set<String>/*ClientID*/>> getHaKafkaUserAndClientIdByTopicName(Long firstClusterId,
+                                                                                                 Long secondClusterId,
+                                                                                                 String topicName,
+                                                                                                 Date startTime,
+                                                                                                 Date endTime);
+
+    Set<String> getKafkaUserAndClientIdTopicNames(Set<Long> clusterIdSet, String kafkaUser, String clientId, Date startTime, Date endTime);
+
     /**
      * 查询连接信息
      */
@@ -36,6 +47,8 @@ public interface TopicConnectionService {
     List<TopicConnection> getByAppId(String appId,
                                      Date startTime,
                                      Date endTime);
+
+    Result<List<TopicConnectionDO>> getByClusterAndAppId(Long firstClusterId, Long secondClusterId, String appId, Date startTime, Date endTime);
 
     /**
      * 判断topic是否存在连接

@@ -592,3 +592,6 @@ CREATE TABLE `work_order` (
   `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='工单表';
+
+
+ALTER TABLE `topic_connections` ADD COLUMN `client_id` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '客户端ID' AFTER `client_version`;

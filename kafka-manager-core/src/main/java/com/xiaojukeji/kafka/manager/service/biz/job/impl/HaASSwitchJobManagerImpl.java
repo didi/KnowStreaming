@@ -22,10 +22,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchJobDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchSubJobDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.JobLogDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.ha.job.HaJobDetailVO;
-import com.xiaojukeji.kafka.manager.common.utils.BackoffUtils;
-import com.xiaojukeji.kafka.manager.common.utils.ConvertUtil;
-import com.xiaojukeji.kafka.manager.common.utils.FutureUtil;
-import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.common.utils.*;
 import com.xiaojukeji.kafka.manager.service.biz.ha.HaAppManager;
 import com.xiaojukeji.kafka.manager.service.biz.ha.HaTopicManager;
 import com.xiaojukeji.kafka.manager.service.biz.job.HaASSwitchJobManager;
@@ -95,19 +92,20 @@ public class HaASSwitchJobManagerImpl implements HaASSwitchJobManager {
 
         LOGGER.info("method=createJob||activeClusterPhyId={}||switchTopics={}||operator={}", dto.getActiveClusterPhyId(), ConvertUtil.obj2Json(haTopicSetResult.getData()), operator);
 
-        // 2、查看是否将KafkaUser关联的Topic都涵盖了
-        if (dto.getMustContainAllKafkaUserTopics() != null
-                && dto.getMustContainAllKafkaUserTopics()
-                && (dto.getAll() == null || !dto.getAll())
-                && !haAppManager.isContainAllRelateAppTopics(dto.getActiveClusterPhyId(), dto.getTopicNameList())) {
-            return Result.buildFromRSAndMsg(ResultStatus.OPERATION_FORBIDDEN, "存在KafkaUser关联的Topic未选中");
-        }
+//        // 2、查看是否将KafkaUser关联的Topic都涵盖了
+//        if (dto.getMustContainAllKafkaUserTopics() != null
+//                && dto.getMustContainAllKafkaUserTopics()
+//                && (dto.getAll() == null || !dto.getAll())
+//                && !haAppManager.isContainAllRelateAppTopics(dto.getActiveClusterPhyId(), dto.getTopicNameList())) {
+//            return Result.buildFromRSAndMsg(ResultStatus.OPERATION_FORBIDDEN, "存在KafkaUser关联的Topic未选中");
+//        }
 
         // 3、创建任务
         Result<Long> longResult = haASSwitchJobService.createJob(
                 dto.getActiveClusterPhyId(),
                 dto.getStandbyClusterPhyId(),
                 new ArrayList<>(haTopicSetResult.getData()),
+                dto.getKafkaUserAndClientIdList(),
                 operator
         );
         if (longResult.failed()) {
@@ -176,6 +174,7 @@ public class HaASSwitchJobManagerImpl implements HaASSwitchJobManager {
                 jobDO.getActiveClusterPhyId(),
                 jobDO.getStandbyClusterPhyId(),
                 subJobDOList.stream().map(elem -> elem.getActiveResName()).collect(Collectors.toList()),
+                jobDO.getExtendRawData(),
                 focus,
                 firstTriggerExecute,
                 new JobLogDO(JobLogBizTypEnum.HA_SWITCH_JOB_LOG.getCode(), String.valueOf(jobId)),

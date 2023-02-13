@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -52,6 +53,10 @@ public class RdAppController {
     @PostMapping(value = "apps/relate-topics")
     @ResponseBody
     public Result<List<AppRelateTopicsVO>> appRelateTopics(@Validated @RequestBody AppRelateTopicsDTO dto) {
-        return haAppManager.appRelateTopics(dto.getClusterPhyId(), dto.getFilterTopicNameList());
+        if (dto.getUseKafkaUserAndClientId() != null && dto.getUseKafkaUserAndClientId()) {
+            return haAppManager.appAndClientRelateTopics(dto.getClusterPhyId(), new HashSet<>(dto.getFilterTopicNameList()));
+        }
+
+        return haAppManager.appRelateTopics(dto.getHa(), dto.getClusterPhyId(), dto.getFilterTopicNameList());
     }
 }

@@ -58,4 +58,14 @@ public class TopicConnectionDaoImpl implements TopicConnectionDao {
         params.put("endTime", endTime);
         return sqlSession.selectList("TopicConnectionDao.getByAppId", params);
     }
+
+    @Override
+    public List<TopicConnectionDO> getByClusterAndAppId(Long clusterId, String appId, Date startTime, Date endTime) {
+        Map<String, Object> params = new HashMap<>(4);
+        params.put("appId", appId);
+        params.put("clusterId", clusterId);
+        params.put("startTime", startTime);
+        params.put("endTime", endTime);
+        return sqlSession.selectList("TopicConnectionDao.getByClusterAndAppId", params);
+    }
 }

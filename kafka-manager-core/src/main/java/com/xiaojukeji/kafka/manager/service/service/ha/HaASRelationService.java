@@ -5,6 +5,8 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface HaASRelationService {
     Result<Void> replaceTopicRelationsToDB(Long standbyClusterPhyId, List<HaASRelationDO> topicRelationDOList);
@@ -52,6 +54,8 @@ public interface HaASRelationService {
      * 获取主备关系
      */
     List<HaASRelationDO> listAllHAFromDB(Long firstClusterPhyId, HaResTypeEnum resTypeEnum);
+
+    Map<String, Set<String>> listAllHAClient(Long firstClusterPhyId, Set<String> kafkaUserSet);
 
     /**
      * 获取主备关系

@@ -15,12 +15,4 @@ public class ASSwitchJobActionDTO {
     @NotBlank(message = "action不允许为空")
     @ApiModelProperty(value = "动作, force")
     private String action;
-
-//    @NotNull(message = "all不允许为NULL")
-//    @ApiModelProperty(value = "所有的Topic")
-//    private Boolean allJumpWaitInSync;
-//
-//    @NotNull(message = "jumpWaitInSyncActiveTopicList不允许为NULL")
-//    @ApiModelProperty(value = "操作的Topic")
-//    private List<String> jumpWaitInSyncActiveTopicList;
 }

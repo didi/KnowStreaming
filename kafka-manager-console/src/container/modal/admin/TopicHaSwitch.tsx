@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { admin } from 'store/admin';
-import { Modal, Form, Radio, Tag, Popover, Button } from 'antd';
+import { Modal, Form, Radio, Tag, Popover, Button, Tooltip, Spin } from 'antd';
 import { IBrokersMetadata, IBrokersRegions, IMetaData } from 'types/base-type';
 import { Alert, Icon, message, Table, Transfer } from 'component/antd';
 import { getClusterHaTopics, getAppRelatedTopics, createSwitchTask } from 'lib/api';
 import { TooltipPlacement } from 'antd/es/tooltip';
 import * as XLSX from 'xlsx';
 import moment from 'moment';
+import { cloneDeep } from "lodash";
 import { timeMinute } from 'constants/strategy';
 
 const layout = {
@@ -35,13 +36,17 @@ interface IHaTopic {
   disabled?: boolean;
 }
 
-interface IKafkaUser {
+export interface IKafkaUser {
   clusterPhyId: number;
   kafkaUser: string;
   notHaTopicNameList: string[];
   notSelectTopicNameList: string[];
   selectedTopicNameList: string[];
   show: boolean;
+  manualSelectedTopics: string[];
+  autoSelectedTopics: string[];
+  clientId?: string;
+  haClientIdList?: string[]
 }
 
 const columns = [
@@ -71,17 +76,23 @@ const kafkaUserColumn = [
     ellipsis: true,
   },
   {
-    dataIndex: 'selectedTopicNameList',
+    dataIndex: 'clientId',
+    title: 'clientID',
+    width: 100,
+    ellipsis: true,
+  },
+  {
+    dataIndex: 'manualSelectedTopics',
     title: '已选中Topic',
-    width: 120,
+    // width: 120,
     render: (text: string[]) => {
       return text?.length ? renderAttributes({ data: text, limit: 3 }) : '-';
     },
   },
   {
-    dataIndex: 'notSelectTopicNameList',
+    dataIndex: 'autoSelectedTopics',
     title: '选中关联Topic',
-    width: 120,
+    // width: 120,
     render: (text: string[]) => {
       return text?.length ? renderAttributes({ data: text, limit: 3 }) : '-';
     },
@@ -89,7 +100,7 @@ const kafkaUserColumn = [
   {
     dataIndex: 'notHaTopicNameList',
     title: '未建立HA Topic',
-    width: 120,
+    // width: 120,
     render: (text: string[]) => {
       return text?.length ? renderAttributes({ data: text, limit: 3 }) : '-';
     },
@@ -135,31 +146,64 @@ export const renderAttributes = (params: {
 class TopicHaSwitch extends React.Component<IXFormProps> {
   public state = {
     radioCheck: 'spec',
+    switchMode: 'kafkaUser',
     targetKeys: [] as string[],
     selectedKeys: [] as string[],
     topics: [] as IHaTopic[],
     kafkaUsers: [] as IKafkaUser[],
+    primaryTopics: [] as string[],
     primaryActiveKeys: [] as string[],
     primaryStandbyKeys: [] as string[],
     firstMove: true,
+    manualSelectedKeys: [] as string[],
+    selectTableColumn: kafkaUserColumn.filter(item => item.title !== 'clientID') as [],
+    spinLoading: false,
   };
+
+  public selectSingle = null as boolean;
+  public manualSelectedNames = [] as string[];
+
+  public setSelectSingle = (val: boolean) => {
+    this.selectSingle = val;
+  }
+  public setManualSelectedNames = (keys: string[]) => {
+    // this.manualSelectedNames = this.getTopicsByKeys(keys);
+    this.manualSelectedNames = keys;
+  }
+
+  public filterManualSelectedKeys = (key: string, selected: boolean) => {
+    const newManualSelectedKeys = [...this.state.manualSelectedKeys];
+    const index = newManualSelectedKeys.findIndex(item => item === key);
+    if (selected) {
+      if (index === -1) newManualSelectedKeys.push(key);
+    } else {
+      if (index !== -1) newManualSelectedKeys.splice(index, 1);
+    }
+    this.setManualSelectedNames(newManualSelectedKeys);
+    this.setState({
+      manualSelectedKeys: newManualSelectedKeys,
+    });
+  }
+
+  public getManualSelected = (single: boolean, key?: any, selected?: boolean) => {
+    this.setSelectSingle(single);
+    if (single) {
+      this.filterManualSelectedKeys(key, selected);
+    } else {
+      this.setManualSelectedNames(key);
+      this.setState({
+        manualSelectedKeys: key,
+      });
+    }
+  }
 
   public isPrimaryStatus = (targetKeys: string[]) => {
     const { primaryStandbyKeys } = this.state;
     let isReset = false;
     // 判断当前移动是否还原为最初的状态
     if (primaryStandbyKeys.length === targetKeys.length) {
-      targetKeys.sort((a, b) => +a - (+b));
-      primaryStandbyKeys.sort((a, b) => +a - (+b));
-      let i = 0;
-      while (i < targetKeys.length) {
-        if (targetKeys[i] === primaryStandbyKeys[i]) {
-          i++;
-        } else {
-          break;
-        }
-      }
-      isReset = i === targetKeys.length;
+      const diff = targetKeys.find(item => primaryStandbyKeys.indexOf(item) < 0);
+      isReset = diff ? false : true;
     }
     return isReset;
   }
@@ -168,16 +212,17 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
     const targetTopics = [];
     for (const key of currentKeys) {
       if (!primaryKeys.includes(key)) {
-        const topic = this.state.topics.find(item => item.key === key)?.topicName;
-        targetTopics.push(topic);
+        // const topic = this.state.topics.find(item => item.key === key)?.topicName;
+        // targetTopics.push(topic);
+        targetTopics.push(key);
       }
     }
     return targetTopics;
   }
 
   public handleOk = () => {
-    const { primaryStandbyKeys, primaryActiveKeys, topics } = this.state;
-    const standbyClusterId = this.props.currentCluster.haClusterVO.clusterId;
+    const { primaryStandbyKeys, primaryActiveKeys, topics, kafkaUsers, switchMode } = this.state;
+    const standbyClusterId = this.props.currentCluster.haClusterVO?.clusterId;
     const activeClusterId = this.props.currentCluster.clusterId;
 
     this.props.form.validateFields((err: any, values: any) => {
@@ -188,6 +233,7 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
           all: true,
           mustContainAllKafkaUserTopics: true,
           standbyClusterPhyId: standbyClusterId,
+          kafkaUserAndClientIdList: [],
           topicNameList: [],
         }).then(res => {
           message.success('任务创建成功');
@@ -217,11 +263,28 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
       const activeClusterPhyId = currentStandbyKeys.length > primaryStandbyKeys.length ? standbyClusterId : activeClusterId;
       const standbyClusterPhyId = currentStandbyKeys.length > primaryStandbyKeys.length ? activeClusterId : standbyClusterId;
       const targetTopics = this.getTargetTopics(currentKeys, primaryKeys);
+      const clientIdParams = kafkaUsers.map(item => ({ clientId: item.clientId, kafkaUser: item.kafkaUser }));
+      const kafkaUserParams = [] as any;
+      kafkaUsers.forEach(item => {
+        kafkaUserParams.push({
+          clientId: null,
+          kafkaUser: item.kafkaUser,
+        });
+        if (item.haClientIdList?.length) {
+          item.haClientIdList.forEach(clientId => {
+            kafkaUserParams.push({
+              clientId,
+              kafkaUser: item.kafkaUser,
+            });
+          });
+        }
+      });
       createSwitchTask({
         activeClusterPhyId,
         all: false,
-        mustContainAllKafkaUserTopics: true,
+        mustContainAllKafkaUserTopics: switchMode === 'kafkaUser',
         standbyClusterPhyId,
+        kafkaUserAndClientIdList: switchMode === 'clientID' ? clientIdParams : kafkaUserParams,
         topicNameList: targetTopics,
       }).then(res => {
         message.success('任务创建成功');
@@ -252,8 +315,7 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
       const topicName = topics.find(row => row.key === key)?.topicName;
       for (const item of kafkaUsers) {
         if (item.selectedTopicNameList.includes(topicName)) {
-          relatedTopics = relatedTopics.concat(item.selectedTopicNameList);
-          relatedTopics = relatedTopics.concat(item.notSelectTopicNameList);
+          relatedTopics = relatedTopics.concat(item.selectedTopicNameList, item.notSelectTopicNameList);
         }
       }
       for (const item of relatedTopics) {
@@ -291,21 +353,20 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
     }));
   }
 
-  public getFilterTopics = (selectKeys: string[]) => {
+  public getTopicsByKeys = (keys: string[]) => {
     // 依据key值找topicName
-    const filterTopics: string[] = [];
-    const targetKeys = selectKeys;
-    for (const key of targetKeys) {
+    const topicNames: string[] = [];
+    for (const key of keys) {
       const topicName = this.state.topics.find(item => item.key === key)?.topicName;
       if (topicName) {
-        filterTopics.push(topicName);
+        topicNames.push(topicName);
       }
     }
-    return filterTopics;
+    return topicNames;
   }
 
   public getNewKafkaUser = (targetKeys: string[]) => {
-    const { primaryStandbyKeys, topics } = this.state;
+    const { primaryStandbyKeys, kafkaUsers, topics } = this.state;
     const removeKeys = [];
     const addKeys = [];
     for (const key of primaryStandbyKeys) {
@@ -321,9 +382,9 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
       }
     }
     const keepKeys = [...removeKeys, ...addKeys];
-    const newKafkaUsers = this.state.kafkaUsers;
+    const newKafkaUsers = kafkaUsers;
 
-    const moveTopics = this.getFilterTopics(keepKeys);
+    const moveTopics = this.getTopicsByKeys(keepKeys);
 
     for (const topic of moveTopics) {
       for (const item of newKafkaUsers) {
@@ -355,8 +416,8 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
   }
 
   public getAppRelatedTopicList = (selectedKeys: string[]) => {
-    const { topics, targetKeys, primaryStandbyKeys, kafkaUsers } = this.state;
-    const filterTopicNameList = this.getFilterTopics(selectedKeys);
+    const { topics, targetKeys, primaryStandbyKeys, kafkaUsers, switchMode } = this.state;
+    const filterTopicNameList = this.getTopicsByKeys(selectedKeys);
     const isReset = this.isPrimaryStatus(targetKeys);
 
     if (!filterTopicNameList.length && isReset) {
@@ -376,10 +437,14 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
     }
 
     // 单向选择，所以取当前值的aactiveClusterId
-    const clusterPhyId = topics.find(item => item.topicName === filterTopicNameList[0]).activeClusterId;
+    const clusterPhyId = topics.find(item => item.topicName === filterTopicNameList[0])?.activeClusterId;
+    if (!clusterPhyId) return;
+    this.setState({spinLoading: true});
     getAppRelatedTopics({
       clusterPhyId,
       filterTopicNameList,
+      ha: true,
+      useKafkaUserAndClientId: switchMode === 'clientID',
     }).then((res: IKafkaUser[]) => {
       let notSelectTopicNames: string[] = [];
       const notSelectTopicKeys: string[] = [];
@@ -390,7 +455,7 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
       for (const item of notSelectTopicNames) {
         const key = topics.find(row => row.topicName === item)?.key;
 
-        if (key) {
+        if (key && notSelectTopicKeys.indexOf(key) < 0) {
           notSelectTopicKeys.push(key);
         }
       }
@@ -399,11 +464,13 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
       const newKafkaUsers = (res || []).map(item => ({
         ...item,
         show: true,
+        manualSelectedTopics: item.selectedTopicNameList.filter(topic => this.manualSelectedNames.indexOf(topic) > -1),
+        autoSelectedTopics: [...item.selectedTopicNameList, ...item.notSelectTopicNameList].filter(topic => this.manualSelectedNames.indexOf(topic) === -1),
       }));
       const { kafkaUsers } = this.state;
 
       for (const item of kafkaUsers) {
-        const resItem = res.find(row => row.kafkaUser === item.kafkaUser);
+        const resItem = res.find(row => switchMode === 'clientID' ? row.kafkaUser === item.kafkaUser && row.clientId === item.clientId : row.kafkaUser === item.kafkaUser);
         if (!resItem) {
           newKafkaUsers.push(item);
         }
@@ -416,6 +483,8 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
       if (notSelectTopicKeys.length) {
         this.getAppRelatedTopicList(newSelectedKeys);
       }
+    }).finally(() => {
+      this.setState({spinLoading: false});
     });
   }
 
@@ -440,7 +509,7 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
 
     // 判断当前选中项属于哪一类
     if (keys.length) {
-      const activeClusterId = topics.find(item => item.key === keys[0]).activeClusterId;
+      const activeClusterId = topics.find(item => item.key === keys[0])?.activeClusterId;
       const needDisabledKeys = topics.filter(item => item.activeClusterId !== activeClusterId).map(row => row.key);
       this.setTopicsStatus(needDisabledKeys, true);
     }
@@ -457,11 +526,11 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
   }
 
   public onDirectChange = (targetKeys: string[], direction: string, moveKeys: string[]) => {
-    const { primaryStandbyKeys, firstMove, primaryActiveKeys, topics } = this.state;
+    const { primaryStandbyKeys, firstMove, primaryActiveKeys, kafkaUsers, topics } = this.state;
 
     const getKafkaUser = () => {
-      const newKafkaUsers = this.state.kafkaUsers;
-      const moveTopics = this.getFilterTopics(moveKeys);
+      const newKafkaUsers = kafkaUsers;
+      const moveTopics = this.getTopicsByKeys(moveKeys);
       for (const topic of moveTopics) {
         for (const item of newKafkaUsers) {
           if (item.selectedTopicNameList.includes(topic)) {
@@ -503,21 +572,27 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
   }
 
   public downloadData = () => {
-    const { kafkaUsers } = this.state;
+    const { kafkaUsers, switchMode } = this.state;
     const tableData = kafkaUsers.map(item => {
-      return {
+      const column = {
         // tslint:disable
         'kafkaUser': item.kafkaUser,
-        '已选中Topic': item.selectedTopicNameList?.join('、'),
-        '选中关联Topic': item.notSelectTopicNameList?.join('、'),
+        'clientID': item.clientId,
+        '已选中Topic': item.manualSelectedTopics?.join('、'),
+        '选中关联Topic': item.autoSelectedTopics?.join('、'),
         '未建立HA Topic': item.notHaTopicNameList?.join(`、`),
       };
+      if (switchMode === 'kafkaUser') {
+        delete column.clientID
+      }
+      return column;
     });
     const data = [].concat(tableData);
     const wb = XLSX.utils.book_new();
     // json转sheet
+    const header = ['kafkaUser', 'clientID', '已选中Topic', '选中关联Topic', '未建立HA Topic'];
     const ws = XLSX.utils.json_to_sheet(data, {
-      header: ['kafkaUser', '已选中Topic', '选中关联Topic', '未建立HA Topic'],
+      header: switchMode === 'kafkaUser' ? header.filter(item => item !== 'clientID') : header,
     });
     // XLSX.utils.
     XLSX.utils.book_append_sheet(wb, ws, 'kafkaUser');
@@ -537,18 +612,38 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
     return false;
   }
 
+  public onModeChange = (e: any) => {
+    const mode = e.target.value;
+    // 切换方式变更时，初始化数据
+    const { primaryTopics, primaryStandbyKeys } = this.state;
+    this.setState({
+      switchMode: mode,
+      topics: cloneDeep(primaryTopics),
+      targetKeys: primaryStandbyKeys,
+      selectedKeys: [],
+      kafkaUsers: [],
+      firstMove: true,
+      manualSelectedKeys: [],
+      selectTableColumn: mode === 'kafkaUser' ? kafkaUserColumn.filter(item => item.title !== 'clientID') : kafkaUserColumn,
+    });
+    this.props.form.setFieldsValue({targetKeys: primaryStandbyKeys});
+    this.setSelectSingle(null);
+    this.setManualSelectedNames([]);
+  }
+
   public componentDidMount() {
-    const standbyClusterId = this.props.currentCluster.haClusterVO.clusterId;
+    const standbyClusterId = this.props.currentCluster.haClusterVO?.clusterId;
     const activeClusterId = this.props.currentCluster.clusterId;
-    getClusterHaTopics(this.props.currentCluster.clusterId, standbyClusterId).then((res: IHaTopic[]) => {
-      res = res.map((item, index) => ({
-        key: index.toString(),
+    getClusterHaTopics(activeClusterId, standbyClusterId).then((res: IHaTopic[]) => {
+      res = res.map((item) => ({
+        key: item.topicName,
         ...item,
       }));
       const targetKeys = (res || []).filter((item) => item.activeClusterId === standbyClusterId).map(row => row.key);
       const primaryActiveKeys = (res || []).filter((item) => item.activeClusterId === activeClusterId).map(row => row.key);
       this.setState({
         topics: res || [],
+        primaryTopics: cloneDeep(res) || [],
         primaryStandbyKeys: targetKeys,
         primaryActiveKeys,
         targetKeys,
@@ -563,7 +658,15 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
     metadata = admin.brokersMetadata ? admin.brokersMetadata : metadata;
     let regions = [] as IBrokersRegions[];
     regions = admin.brokersRegions ? admin.brokersRegions : regions;
-    const tableData = this.state.kafkaUsers.filter(row => row.show);
+    const { switchMode, kafkaUsers, radioCheck, targetKeys, selectedKeys, topics, selectTableColumn, spinLoading } = this.state;
+    const tableData = kafkaUsers.filter(row => row.show);
+    const rulesNode = (
+      <div>
+        1、符合规范的ClientID格式为P#或C#前缀，分别代表生产者客户端和消费者客户端。
+        <br />
+        2、此处只展示符合规范的ClientID格式的高可用Topic。若未找到所需Topic，请检查ClientID的格式是否正确。
+      </div>
+    );
 
     return (
       <Modal
@@ -580,62 +683,83 @@ class TopicHaSwitch extends React.Component<IXFormProps> {
         }
       >
         <Alert
-          message={`注意：必须把同一个kafkauser关联的所有Topic都建立高可用关系，并且都选中，才能执行任务`}
+          message={`注意：必须把同一个${switchMode}关联的所有Topic都建立高可用关系，并且都选中，才能执行任务`}
           type="info"
           showIcon={true}
         />
-        <Form {...layout} name="basic" className="x-form">
-          {/* <Form.Item label="规则"  >
-            {getFieldDecorator('rule', {
-              initialValue: 'spec',
-              rules: [{
-                required: true,
-                message: '请选择规则',
-              }],
-            })(<Radio.Group onChange={this.handleRadioChange} >
-              <Radio value="all">应用于所有Topic</Radio>
-              <Radio value="spec">应用于特定Topic</Radio>
-            </Radio.Group>)}
-          </Form.Item> */}
-          {this.state.radioCheck === 'spec' ? <Form.Item className="no-label" label=""  >
-            {getFieldDecorator('targetKeys', {
-              initialValue: this.state.targetKeys,
-              rules: [{
-                required: false,
-                message: '请选择Topic',
-              }],
-            })(
-              <TransferTable
-                selectedKeys={this.state.selectedKeys}
-                topicChange={this.handleTopicChange}
-                onDirectChange={this.onDirectChange}
-                dataSource={this.state.topics}
-                currentCluster={currentCluster}
-              />,
-            )}
-          </Form.Item> : ''}
-        </Form>
-        {this.state.radioCheck === 'spec' ?
-          <>
-            <Table
-              className="modal-table-content"
-              columns={kafkaUserColumn}
-              dataSource={tableData}
-              size="small"
-              rowKey="kafkaUser"
-              pagination={false}
-              scroll={{ y: 300 }}
-            />
-            {this.state.kafkaUsers.length ? <div onClick={this.downloadData} className="modal-table-download"><a>下载表单内容</a></div> : null}
-          </>
-          : null}
+        <Spin spinning={spinLoading}>
+          <Form {...layout} name="basic" className="x-form">
+            <Form.Item label="切换维度">
+              {getFieldDecorator('switchMode', {
+                initialValue: 'kafkaUser',
+                rules: [{
+                  required: true,
+                  message: '请选择切换维度',
+                }],
+              })(<Radio.Group onChange={this.onModeChange}>
+                <Radio value="kafkaUser">kafkaUser</Radio>
+                <Radio value="clientID">kafkaUser + clientID</Radio>
+              </Radio.Group>)}
+            </Form.Item>
+            {/* <Form.Item label="规则"  >
+              {getFieldDecorator('rule', {
+                initialValue: 'spec',
+                rules: [{
+                  required: true,
+                  message: '请选择规则',
+                }],
+              })(<Radio.Group onChange={this.handleRadioChange} >
+                <Radio value="all">应用于所有Topic</Radio>
+                <Radio value="spec">应用于特定Topic</Radio>
+              </Radio.Group>)}
+            </Form.Item> */}
+            {switchMode === 'clientID' && <div style={{ margin: '-10px 0 10px 0' }} >
+              <Tooltip placement="bottomLeft" title={rulesNode}>
+                <a>规则说明</a>
+              </Tooltip>
+            </div>}
+            {radioCheck === 'spec' ? <Form.Item className="no-label" label=""  >
+              {getFieldDecorator('targetKeys', {
+                initialValue: targetKeys,
+                rules: [{
+                  required: false,
+                  message: '请选择Topic',
+                }],
+              })(
+                <TransferTable
+                  selectedKeys={selectedKeys}
+                  topicChange={this.handleTopicChange}
+                  onDirectChange={this.onDirectChange}
+                  columns={columns}
+                  dataSource={topics}
+                  currentCluster={currentCluster}
+                  getManualSelected={this.getManualSelected}
+                />,
+              )}
+            </Form.Item> : null}
+          </Form>
+          {radioCheck === 'spec' ?
+            <>
+              <Table
+                className="modal-table-content"
+                columns={selectTableColumn}
+                dataSource={tableData}
+                size="small"
+                rowKey="kafkaUser"
+                pagination={false}
+                scroll={{ y: 300 }}
+              />
+              {tableData.length ? <div onClick={this.downloadData} className="modal-table-download"><a>下载表单内容</a></div> : null}
+            </>
+            : null}
+        </Spin>
       </Modal>
     );
   }
 }
 export const TopicSwitchWrapper = Form.create<IXFormProps>()(TopicHaSwitch);
 
-const TableTransfer = ({ leftColumns, ...restProps }: any) => (
+export const TableTransfer = ({ leftColumns, getManualSelected, tableAttrs, ...restProps }: any) => (
   <Transfer {...restProps} showSelectAll={true}>
     {({
       filteredItems,
@@ -651,6 +775,7 @@ const TableTransfer = ({ leftColumns, ...restProps }: any) => (
           disabled: item.disabled,
         }),
         onSelect({ key }: any, selected: any) {
+          getManualSelected(true, key, selected);
           onItemSelect(key, selected);
         },
         selectedRowKeys: listSelectedKeys,
@@ -668,9 +793,11 @@ const TableTransfer = ({ leftColumns, ...restProps }: any) => (
           onRow={({ key, disabled }) => ({
             onClick: () => {
               if (disabled) return;
+              getManualSelected(true, key, listSelectedKeys.includes(key));
               onItemSelect(key, !listSelectedKeys.includes(key));
             },
           })}
+          {...tableAttrs}
         />
       );
     }}
@@ -683,8 +810,12 @@ interface IProps {
   onDirectChange?: any;
   currentCluster: any;
   topicChange: any;
+  columns: any[];
   dataSource: any[];
   selectedKeys: string[];
+  getManualSelected: any;
+  transferAttrs?: any;
+  tableAttrs?: any;
 }
 
 export class TransferTable extends React.Component<IProps> {
@@ -695,7 +826,7 @@ export class TransferTable extends React.Component<IProps> {
   }
 
   public render() {
-    const { currentCluster, dataSource, value, topicChange, selectedKeys } = this.props;
+    const { currentCluster, columns, dataSource, value, topicChange, selectedKeys, getManualSelected, transferAttrs, tableAttrs } = this.props;
     return (
       <div>
         <TableTransfer
@@ -705,12 +836,16 @@ export class TransferTable extends React.Component<IProps> {
           showSearch={true}
           onChange={this.onChange}
           onSelectChange={topicChange}
+          filterOption={(inputValue: string, item: any) => item.topicName?.indexOf(inputValue) > -1}
           leftColumns={columns}
-          titles={[`集群${currentCluster.clusterName}`, `集群${currentCluster.haClusterVO.clusterName}`]}
+          titles={[`集群${currentCluster.clusterName}`, `集群${currentCluster.haClusterVO?.clusterName}`]}
           locale={{
             itemUnit: '',
             itemsUnit: '',
           }}
+          getManualSelected={getManualSelected}
+          tableAttrs={tableAttrs}
+          {...transferAttrs}
         />
       </div>
     );

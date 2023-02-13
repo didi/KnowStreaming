@@ -6,6 +6,8 @@ import com.xiaojukeji.kafka.manager.common.bizenum.ha.HaStatusEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
+import com.xiaojukeji.kafka.manager.common.utils.HAUtils;
+import com.xiaojukeji.kafka.manager.common.utils.Tuple;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.dao.ha.HaASRelationDao;
 import com.xiaojukeji.kafka.manager.service.service.ha.HaASRelationService;
@@ -14,9 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -175,6 +175,34 @@ public class HaASRelationServiceImpl implements HaASRelationService {
         }
 
         return doList;
+    }
+
+    @Override
+    public  Map<String, Set<String>> listAllHAClient(Long firstClusterPhyId, Set<String> kafkaUserSet) {
+        LambdaQueryWrapper<HaASRelationDO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(HaASRelationDO::getResType, HaResTypeEnum.KAFKA_USER_AND_CLIENT.getCode());
+        lambdaQueryWrapper.and(lambda ->
+                lambda.eq(HaASRelationDO::getActiveClusterPhyId, firstClusterPhyId).or().eq(HaASRelationDO::getStandbyClusterPhyId, firstClusterPhyId)
+        );
+
+        // 查询HA列表
+        List<HaASRelationDO> doList = haASRelationDao.selectList(lambdaQueryWrapper);
+        if (ValidateUtils.isNull(doList)) {
+            return new HashMap<>();
+        }
+
+        Map<String, Set<String>> haClientMap = new HashMap<>();
+        doList.forEach(elem -> {
+            Tuple<String, String> data = HAUtils.splitKafkaUserAndClient(elem.getActiveResName());
+            if (data == null || !kafkaUserSet.contains(data.getV1())) {
+                return;
+            }
+
+            haClientMap.putIfAbsent(data.getV1(), new HashSet<>());
+            haClientMap.get(data.getV1()).add(data.getV2());
+        });
+
+        return haClientMap;
     }
 
     @Override

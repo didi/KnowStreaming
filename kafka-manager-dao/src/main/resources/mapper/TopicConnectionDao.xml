@@ -10,31 +10,27 @@
         <result property="appId"            column="app_id"/>
         <result property="ip"               column="ip"/>
         <result property="clientVersion"    column="client_version"/>
+        <result property="clientId"         column="client_id"/>
+        <result property="realConnectTime"  column="real_connect_time"/>
         <result property="createTime"       column="create_time"/>
     </resultMap>
 
     <insert id="batchReplace" parameterType="java.util.List">
-        REPLACE INTO topic_connections (
-            cluster_id,
-            topic_name,
-            `type`,
-            app_id,
-            ip,
-            client_version,
-            create_time
-        )
-        VALUES
-        <foreach collection="list" item="item" index="index" separator=",">
-            (
-            #{item.clusterId},
-            #{item.topicName},
-            #{item.type},
-            #{item.appId},
-            #{item.ip},
-            #{item.clientVersion},
-            #{item.createTime}
-            )
+        insert into topic_connections (cluster_id, topic_name, `type`, app_id, ip, client_version, client_id, real_connect_time, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.clusterId}, #{item.topicName}, #{item.type}, #{item.appId}, #{item.ip}, #{item.clientVersion}, #{item.clientId}, #{item.realConnectTime}, #{item.createTime})
         </foreach>
+        on duplicate key update
+            real_connect_time = IF(real_connect_time > VALUES(real_connect_time), real_connect_time, VALUES(real_connect_time)),
+            cluster_id = VALUES(cluster_id),
+            topic_name = VALUES(topic_name),
+            `type` = VALUES(`type`),
+            app_id = VALUES(app_id),
+            ip = VALUES(ip),
+            client_version = VALUES(client_version),
+            client_id = VALUES(client_id),
+            create_time = VALUES(create_time)
     </insert>
 
     <select id="getByTopicName" parameterType="java.util.Map" resultMap="TopicConnectionMap">
@@ -52,5 +48,15 @@
         WHERE app_id = #{appId}
           AND create_time >= #{startTime} AND #{endTime} >= create_time
     ]]>
+    </select>
+
+    <select id="getByClusterAndAppId" parameterType="java.util.Map" resultMap="TopicConnectionMap">
+        <![CDATA[
+        SELECT * FROM topic_connections
+        WHERE app_id = #{appId}
+          AND cluster_id = #{clusterId}
+          AND create_time >= #{startTime}
+          AND #{endTime} >= create_time
+        ]]>
     </select>
 </mapper>

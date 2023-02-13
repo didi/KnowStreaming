@@ -33,6 +33,8 @@ public class ConfigConstant {
 
     public static final String HA_SWITCH_JOB_TIMEOUT_UNIT_SEC_CONFIG_PREFIX = "HA_SWITCH_JOB_TIMEOUT_UNIT_SEC_CONFIG_CLUSTER";
 
+    public static final String HA_CONNECTION_ACTIVE_TIME_UNIT_MIN = "HA_CONNECTION_ACTIVE_TIME_UNIT_MIN";
+
     private ConfigConstant() {
     }
 }

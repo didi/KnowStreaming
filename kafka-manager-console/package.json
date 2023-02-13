@@ -4,10 +4,10 @@
   "description": "",
   "scripts": {
     "prestart": "npm install --save-dev webpack-dev-server",
-    "start": "webpack serve",
+    "start": "webpack-dev-server",
     "daily-build": "cross-env NODE_ENV=production webpack",
     "pre-build": "cross-env NODE_ENV=production webpack",
-    "prod-build": "cross-env NODE_ENV=production webpack",
+    "prod-build": "cross-env NODE_OPTIONS=--max-old-space-size=8000 NODE_ENV=production webpack",
     "fix-memory": "cross-env LIMIT=4096 increase-memory-limit"
   },
   "author": "",
@@ -52,7 +52,8 @@
     "typescript": "^3.3.3333",
     "url-loader": "^4.1.1",
     "webpack": "^4.29.6",
-    "webpack-cli": "^4.9.1",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.11.3",
     "xlsx": "^0.16.1"
   },
   "dependencies": {

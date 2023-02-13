@@ -4,6 +4,7 @@ package com.xiaojukeji.kafka.manager.service.service.ha;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ha.job.HaJobDetail;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ha.job.HaSubJobExtendData;
+import com.xiaojukeji.kafka.manager.common.entity.dto.ha.KafkaUserAndClientDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchJobDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchSubJobDO;
 
@@ -14,7 +15,11 @@ public interface HaASSwitchJobService {
     /**
      * 创建任务
      */
-    Result<Long> createJob(Long activeClusterPhyId, Long standbyClusterPhyId, List<String> topicNameList, String operator);
+    Result<Long> createJob(Long activeClusterPhyId,
+                           Long standbyClusterPhyId,
+                           List<String> topicNameList,
+                           List<KafkaUserAndClientDTO> kafkaUserAndClientList,
+                           String operator);
 
     /**
      * 更新任务状态
