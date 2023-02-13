@@ -2,6 +2,7 @@ package com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * @author zengqiao
  * @date 19/4/1
  */
+@Data
 @ApiModel(description = "Topic基本信息")
 public class TopicBasicVO {
     @ApiModelProperty(value = "集群id")
@@ -57,125 +59,8 @@ public class TopicBasicVO {
     @ApiModelProperty(value = "所属region")
     private List<String> regionNameList;
 
-    public Long getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(Long clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    public String getAppId() {
-        return appId;
-    }
-
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    public String getAppName() {
-        return appName;
-    }
-
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-
-    public Integer getPartitionNum() {
-        return partitionNum;
-    }
-
-    public void setPartitionNum(Integer partitionNum) {
-        this.partitionNum = partitionNum;
-    }
-
-    public Integer getReplicaNum() {
-        return replicaNum;
-    }
-
-    public void setReplicaNum(Integer replicaNum) {
-        this.replicaNum = replicaNum;
-    }
-
-    public String getPrincipals() {
-        return principals;
-    }
-
-    public void setPrincipals(String principals) {
-        this.principals = principals;
-    }
-
-    public Long getRetentionTime() {
-        return retentionTime;
-    }
-
-    public void setRetentionTime(Long retentionTime) {
-        this.retentionTime = retentionTime;
-    }
-
-    public Long getRetentionBytes() {
-        return retentionBytes;
-    }
-
-    public void setRetentionBytes(Long retentionBytes) {
-        this.retentionBytes = retentionBytes;
-    }
-
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    public Long getModifyTime() {
-        return modifyTime;
-    }
-
-    public void setModifyTime(Long modifyTime) {
-        this.modifyTime = modifyTime;
-    }
-
-    public Integer getScore() {
-        return score;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
-    }
-
-    public String getTopicCodeC() {
-        return topicCodeC;
-    }
-
-    public void setTopicCodeC(String topicCodeC) {
-        this.topicCodeC = topicCodeC;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getBootstrapServers() {
-        return bootstrapServers;
-    }
-
-    public void setBootstrapServers(String bootstrapServers) {
-        this.bootstrapServers = bootstrapServers;
-    }
-
-    public List<String> getRegionNameList() {
-        return regionNameList;
-    }
-
-    public void setRegionNameList(List<String> regionNameList) {
-        this.regionNameList = regionNameList;
-    }
+    @ApiModelProperty(value = "高可用关系：1:主topic, 0:备topic , 其他:非主备topic")
+    private Integer haRelation;
 
     @Override
     public String toString() {
@@ -195,6 +80,7 @@ public class TopicBasicVO {
                 ", description='" + description + '\'' +
                 ", bootstrapServers='" + bootstrapServers + '\'' +
                 ", regionNameList=" + regionNameList +
+                ", haRelation=" + haRelation +
                 '}';
     }
 }

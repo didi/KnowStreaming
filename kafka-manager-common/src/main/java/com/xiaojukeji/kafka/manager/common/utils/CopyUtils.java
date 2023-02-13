@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author huangyiminghappy@163.com
  * @date 2019/3/15
  */
+@Deprecated
 public class CopyUtils {
 
     @SuppressWarnings({"unchecked", "rawtypes"})

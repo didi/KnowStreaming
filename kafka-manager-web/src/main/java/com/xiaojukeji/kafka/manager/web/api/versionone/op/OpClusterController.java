@@ -1,13 +1,14 @@
 package com.xiaojukeji.kafka.manager.web.api.versionone.op;
 
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.ControllerPreferredCandidateDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.rd.ClusterDTO;
-import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
-import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
-import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaClusterManager;
+import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.web.converters.ClusterModelConverter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +27,9 @@ public class OpClusterController {
     @Autowired
     private ClusterService clusterService;
 
+    @Autowired
+    private HaClusterManager haClusterManager;
+
     @ApiOperation(value = "接入集群")
     @PostMapping(value = "clusters")
     @ResponseBody
@@ -33,16 +37,14 @@ public class OpClusterController {
         if (ValidateUtils.isNull(dto) || !dto.legal()) {
             return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
-        return Result.buildFrom(
-                clusterService.addNew(ClusterModelConverter.convert2ClusterDO(dto), SpringTool.getUserName())
-        );
+        return haClusterManager.addNew(ClusterModelConverter.convert2ClusterDO(dto), dto.getActiveClusterId(), SpringTool.getUserName());
     }
 
     @ApiOperation(value = "删除集群")
     @DeleteMapping(value = "clusters")
     @ResponseBody
     public Result delete(@RequestParam(value = "clusterId") Long clusterId) {
-        return Result.buildFrom(clusterService.deleteById(clusterId, SpringTool.getUserName()));
+        return haClusterManager.deleteById(clusterId, SpringTool.getUserName());
     }
 
     @ApiOperation(value = "修改集群信息")

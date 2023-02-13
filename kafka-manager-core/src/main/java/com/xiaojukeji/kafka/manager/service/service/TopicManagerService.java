@@ -2,11 +2,14 @@ package com.xiaojukeji.kafka.manager.service.service;
 
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.TopicOperationResult;
 import com.xiaojukeji.kafka.manager.common.entity.ao.RdTopicBasic;
+import com.xiaojukeji.kafka.manager.common.entity.ao.topic.MineTopicSummary;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicAppData;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicBusinessInfo;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicDTO;
-import com.xiaojukeji.kafka.manager.common.entity.ao.topic.MineTopicSummary;
+import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicExpansionDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicModificationDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicExpiredDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicStatisticsDO;
@@ -130,5 +133,15 @@ public interface TopicManagerService {
      * @return
      */
     ResultStatus addAuthority(AuthorityDO authorityDO);
+
+    /**
+     * 修改topic
+     */
+    Result modifyTopic(TopicModificationDTO dto);
+
+    /**
+     * topic扩分区
+     */
+    TopicOperationResult expandTopic(TopicExpansionDTO dto);
 }
 

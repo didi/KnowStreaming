@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * @author zengqiao
  * @date 20/4/23
  */
+@Data
 @ApiModel(description = "集群接入&修改")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterDTO {
@@ -33,60 +35,21 @@ public class ClusterDTO {
     @ApiModelProperty(value="Jmx配置")
     private String jmxProperties;
 
-    public Long getClusterId() {
-        return clusterId;
-    }
+    @ApiModelProperty(value="主集群Id")
+    private Long activeClusterId;
 
-    public void setClusterId(Long clusterId) {
-        this.clusterId = clusterId;
-    }
+    @ApiModelProperty(value="是否高可用")
+    private boolean isHa;
 
-    public String getClusterName() {
-        return clusterName;
-    }
-
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
-    }
-
-    public String getZookeeper() {
-        return zookeeper;
-    }
-
-    public void setZookeeper(String zookeeper) {
-        this.zookeeper = zookeeper;
-    }
-
-    public String getBootstrapServers() {
-        return bootstrapServers;
-    }
-
-    public void setBootstrapServers(String bootstrapServers) {
-        this.bootstrapServers = bootstrapServers;
-    }
-
-    public String getIdc() {
-        return idc;
-    }
-
-    public void setIdc(String idc) {
-        this.idc = idc;
-    }
-
-    public String getSecurityProperties() {
-        return securityProperties;
-    }
-
-    public void setSecurityProperties(String securityProperties) {
-        this.securityProperties = securityProperties;
-    }
-
-    public String getJmxProperties() {
-        return jmxProperties;
-    }
-
-    public void setJmxProperties(String jmxProperties) {
-        this.jmxProperties = jmxProperties;
+    public boolean legal() {
+        if (ValidateUtils.isNull(clusterName)
+                || ValidateUtils.isNull(zookeeper)
+                || ValidateUtils.isNull(idc)
+                || ValidateUtils.isNull(bootstrapServers)
+                || (isHa && ValidateUtils.isNull(activeClusterId))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -99,16 +62,8 @@ public class ClusterDTO {
                 ", idc='" + idc + '\'' +
                 ", securityProperties='" + securityProperties + '\'' +
                 ", jmxProperties='" + jmxProperties + '\'' +
+                ", activeClusterId=" + activeClusterId +
+                ", isHa=" + isHa +
                 '}';
-    }
-
-    public boolean legal() {
-        if (ValidateUtils.isNull(clusterName)
-                || ValidateUtils.isNull(zookeeper)
-                || ValidateUtils.isNull(idc)
-                || ValidateUtils.isNull(bootstrapServers)) {
-            return false;
-        }
-        return true;
     }
 }

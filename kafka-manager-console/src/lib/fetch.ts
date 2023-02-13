@@ -33,7 +33,6 @@ const checkStatus = (res: Response) => {
 };
 
 const filter = (init: IInit) => (res: IRes) => {
-  
   if (res.code !== 0 && res.code !== 200) {
     if (!init.errorNoTips) {
       notification.error({
@@ -117,7 +116,7 @@ export default function fetch(url: string, init?: IInit) {
 
 export function formFetch(url: string, init?: IInit) {
   url = url.indexOf('?') > 0 ?
-      `${url}&dataCenter=${region.currentRegion}` : `${url}?dataCenter=${region.currentRegion}`;
+    `${url}&dataCenter=${region.currentRegion}` : `${url}?dataCenter=${region.currentRegion}`;
   let realUrl = url;
 
   if (!/^http(s)?:\/\//.test(url)) {
@@ -127,8 +126,8 @@ export function formFetch(url: string, init?: IInit) {
   init = addCustomHeader(init);
 
   return window
-  .fetch(realUrl, init)
-  .then(res => checkStatus(res))
-  .then((res) => res.json())
-  .then(filter(init));
+    .fetch(realUrl, init)
+    .then(res => checkStatus(res))
+    .then((res) => res.json())
+    .then(filter(init));
 }

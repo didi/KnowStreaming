@@ -2,6 +2,8 @@ package com.xiaojukeji.kafka.manager.common.entity.pojo;
 
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicCreationDTO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -9,6 +11,8 @@ import java.util.Date;
  * @author zengqiao
  * @date 20/4/24
  */
+@Data
+@NoArgsConstructor
 public class TopicDO {
     private Long id;
 
@@ -26,68 +30,12 @@ public class TopicDO {
 
     private Long peakBytesIn;
 
-    public String getAppId() {
-        return appId;
-    }
-
-    public void setAppId(String appId) {
+    public TopicDO(String appId, Long clusterId, String topicName, String description, Long peakBytesIn) {
         this.appId = appId;
-    }
-
-    public Long getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(Long clusterId) {
         this.clusterId = clusterId;
-    }
-
-    public String getTopicName() {
-        return topicName;
-    }
-
-    public void setTopicName(String topicName) {
         this.topicName = topicName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Long getPeakBytesIn() {
-        return peakBytesIn;
-    }
-
-    public void setPeakBytesIn(Long peakBytesIn) {
         this.peakBytesIn = peakBytesIn;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Date getGmtCreate() {
-        return gmtCreate;
-    }
-
-    public void setGmtCreate(Date gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
-
-    public Date getGmtModify() {
-        return gmtModify;
-    }
-
-    public void setGmtModify(Date gmtModify) {
-        this.gmtModify = gmtModify;
     }
 
     public static TopicDO buildFrom(TopicCreationDTO dto) {

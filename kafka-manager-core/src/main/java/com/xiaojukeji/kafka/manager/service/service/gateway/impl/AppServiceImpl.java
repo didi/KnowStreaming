@@ -4,24 +4,27 @@ import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperationStatusEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.ha.HaResTypeEnum;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.AppTopicDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.AppDTO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.KafkaUserDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
 import com.xiaojukeji.kafka.manager.dao.gateway.AppDao;
 import com.xiaojukeji.kafka.manager.dao.gateway.KafkaUserDao;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.OperateRecordService;
+import com.xiaojukeji.kafka.manager.service.service.TopicManagerService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AuthorityService;
-import com.xiaojukeji.kafka.manager.service.service.TopicManagerService;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaASRelationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +62,9 @@ public class AppServiceImpl implements AppService {
 
     @Autowired
     private OperateRecordService operateRecordService;
+
+    @Autowired
+    private HaASRelationService haASRelationService;
 
     @Override
     public ResultStatus addApp(AppDO appDO, String operator) {
@@ -175,6 +181,52 @@ public class AppServiceImpl implements AppService {
                         .filter(appDO -> ListUtils.string2StrList(appDO.getPrincipals()).contains(principal))
                         .collect(Collectors.toList());
             }
+        } catch (Exception e) {
+            LOGGER.error("get app list failed, principals:{}.", principal);
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<AppDO> getByPrincipalAndClusterId(String principal, Long phyClusterId) {
+        try {
+            List<AppDO> appDOs = appDao.getByPrincipal(principal);
+            if (ValidateUtils.isEmptyList(appDOs)){
+                return new ArrayList<>();
+            }
+
+            List<HaASRelationDO> has = haASRelationService.listAllHAFromDB(phyClusterId, HaResTypeEnum.CLUSTER);
+            List<AuthorityDO> authorityDOS;
+            if (has.isEmpty()){
+                authorityDOS = authorityService.listAll().stream()
+                        .filter(authorityDO -> !authorityDO.getClusterId().equals(phyClusterId))
+                        .collect(Collectors.toList());
+            }else {
+                authorityDOS = authorityService.listAll().stream()
+                        .filter(authorityDO -> !(has.get(0).getActiveClusterPhyId().equals(authorityDO.getClusterId())
+                                || has.get(0).getStandbyClusterPhyId().equals(authorityDO.getClusterId())))
+                        .collect(Collectors.toList());
+            }
+
+            Map<String,List<AuthorityDO>> appClusterIdMap = authorityDOS
+                    .stream().filter(authorityDO -> !authorityDO.getClusterId().equals(phyClusterId))
+                    .collect(Collectors.groupingBy(AuthorityDO::getAppId));
+
+            //过滤已被其他集群topic使用的app
+            appDOs = appDOs.stream()
+                    .filter(appDO -> ListUtils.string2StrList(appDO.getPrincipals()).contains(principal))
+                    .filter(appDO -> appClusterIdMap.get(appDO.getAppId()) == null)
+                    .collect(Collectors.toList());
+
+            //过滤已被其他集群使用的app
+            List<String> clusterAppIds = logicClusterMetadataManager.getLogicalClusterList()
+                    .stream().filter(logicalClusterDO -> !logicalClusterDO.getClusterId().equals(phyClusterId) )
+                    .map(LogicalClusterDO::getAppId).collect(Collectors.toList());
+            appDOs = appDOs.stream()
+                    .filter(appDO -> !clusterAppIds.contains(appDO.getAppId()))
+                    .collect(Collectors.toList());
+
+            return appDOs;
         } catch (Exception e) {
             LOGGER.error("get app list failed, principals:{}.", principal);
         }

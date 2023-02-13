@@ -15,6 +15,14 @@
     <result column="jmx_properties"       property="jmxProperties" />
   </resultMap>
 
+  <insert id="insertWithId" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO">
+    INSERT INTO cluster (
+        id, cluster_name, zookeeper, bootstrap_servers, security_properties, jmx_properties
+    ) VALUES (
+        #{id}, #{clusterName}, #{zookeeper}, #{bootstrapServers}, #{securityProperties}, #{jmxProperties}
+    )
+  </insert>
+
   <insert id="insert"
           parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO"
           useGeneratedKeys="true"

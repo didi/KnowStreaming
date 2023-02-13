@@ -3,13 +3,16 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 import com.xiaojukeji.kafka.manager.common.bizenum.DBStatusEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.ha.HaRelationTypeEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.ha.HaResTypeEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.ClusterDetailDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.ControllerPreferredCandidate;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.ClusterNameDTO;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
 import com.xiaojukeji.kafka.manager.dao.ClusterDao;
@@ -18,15 +21,16 @@ import com.xiaojukeji.kafka.manager.dao.ControllerDao;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaASRelationService;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaClusterService;
 import com.xiaojukeji.kafka.manager.service.utils.ConfigUtils;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -41,6 +45,9 @@ public class ClusterServiceImpl implements ClusterService {
 
     @Autowired
     private ClusterDao clusterDao;
+
+    @Autowired
+    private HaClusterService haClusterService;
 
     @Autowired
     private ClusterMetricsDao clusterMetricsDao;
@@ -69,6 +76,9 @@ public class ClusterServiceImpl implements ClusterService {
     @Autowired
     private OperateRecordService operateRecordService;
 
+    @Autowired
+    private HaASRelationService haASRelationService;
+
     @Override
     public ResultStatus addNew(ClusterDO clusterDO, String operator) {
         if (ValidateUtils.isNull(clusterDO) || ValidateUtils.isNull(operator)) {
@@ -96,6 +106,7 @@ public class ClusterServiceImpl implements ClusterService {
             LOGGER.error("add new cluster failed, operate mysql failed, clusterDO:{}.", clusterDO, e);
             return ResultStatus.MYSQL_ERROR;
         }
+        physicalClusterMetadataManager.addNew(clusterDO);
         return ResultStatus.SUCCESS;
     }
 
@@ -253,9 +264,11 @@ public class ClusterServiceImpl implements ClusterService {
         Map<Long, Integer> consumerGroupNumMap =
                 needDetail? consumerService.getConsumerGroupNumMap(doList): new HashMap<>(0);
 
+        Map<Long, Integer> haRelationMap = haClusterService.getClusterHARelation();
         List<ClusterDetailDTO> dtoList = new ArrayList<>();
         for (ClusterDO clusterDO: doList) {
             ClusterDetailDTO dto = getClusterDetailDTO(clusterDO, needDetail);
+            dto.setHaRelation(haRelationMap.get(clusterDO.getId()));
             dto.setConsumerGroupNum(consumerGroupNumMap.get(clusterDO.getId()));
             dto.setRegionNum(regionNumMap.get(clusterDO.getId()));
             dtoList.add(dto);
@@ -281,10 +294,11 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     @Override
-    public ResultStatus deleteById(Long clusterId, String operator) {
+    @Transactional
+    public Result<Void> deleteById(Long clusterId, String operator) {
         List<RegionDO> regionDOList = regionService.getByClusterId(clusterId);
         if (!ValidateUtils.isEmptyList(regionDOList)) {
-            return ResultStatus.OPERATION_FORBIDDEN;
+            return Result.buildFrom(ResultStatus.OPERATION_FORBIDDEN);
         }
         try {
             Map<String, String> content = new HashMap<>();
@@ -292,13 +306,14 @@ public class ClusterServiceImpl implements ClusterService {
             operateRecordService.insert(operator, ModuleEnum.CLUSTER, String.valueOf(clusterId), OperateEnum.DELETE, content);
             if (clusterDao.deleteById(clusterId) <= 0) {
                 LOGGER.error("delete cluster failed, clusterId:{}.", clusterId);
-                return ResultStatus.MYSQL_ERROR;
+                return Result.buildFrom(ResultStatus.MYSQL_ERROR);
             }
         } catch (Exception e) {
             LOGGER.error("delete cluster failed, clusterId:{}.", clusterId, e);
-            return ResultStatus.MYSQL_ERROR;
+            return Result.buildFrom(ResultStatus.MYSQL_ERROR);
         }
-        return ResultStatus.SUCCESS;
+
+        return Result.buildSuc();
     }
 
     private ClusterDetailDTO getClusterDetailDTO(ClusterDO clusterDO, Boolean needDetail) {
@@ -318,6 +333,21 @@ public class ClusterServiceImpl implements ClusterService {
         dto.setStatus(clusterDO.getStatus());
         dto.setGmtCreate(clusterDO.getGmtCreate());
         dto.setGmtModify(clusterDO.getGmtModify());
+
+        List<HaASRelationDO> haASRelationDOS = haASRelationService
+                .listAllHAFromDB(clusterDO.getId(), HaResTypeEnum.CLUSTER);
+        if (!haASRelationDOS.isEmpty()){
+            ClusterDO mbCluster;
+            if (haASRelationDOS.get(0).getActiveClusterPhyId().equals(clusterDO.getId())){
+                dto.setHaRelation(HaRelationTypeEnum.ACTIVE.getCode());
+                mbCluster = PhysicalClusterMetadataManager.getClusterFromCache(haASRelationDOS.get(0).getStandbyClusterPhyId());
+            }else {
+                dto.setHaRelation(HaRelationTypeEnum.STANDBY.getCode());
+                mbCluster = PhysicalClusterMetadataManager.getClusterFromCache(haASRelationDOS.get(0).getActiveClusterPhyId());
+            }
+            dto.setMutualBackupClusterName(mbCluster != null ? mbCluster.getClusterName() : null);
+        }
+
         if (ValidateUtils.isNull(needDetail) || !needDetail) {
             return dto;
         }

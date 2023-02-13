@@ -42,4 +42,13 @@ public interface ZookeeperService {
      * @return
      */
     Result deleteControllerPreferredCandidate(Long clusterId, Integer brokerId);
+
+    /**
+     * 获取集群的brokerId
+     * @param zookeeper zookeeper
+     * @return 操作结果
+     */
+    Result<List<Integer>> getBrokerIds(String zookeeper);
+
+    Long getClusterIdAndNullIfFailed(String zookeeper);
 }

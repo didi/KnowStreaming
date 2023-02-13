@@ -20,4 +20,7 @@ public class ConfigUtils {
 
     @Value(value = "${spring.profiles.active:dev}")
     private String kafkaManagerEnv;
+
+    @Value(value = "${d-kafka.gateway-zk:}")
+    private String dKafkaGatewayZK;
 }

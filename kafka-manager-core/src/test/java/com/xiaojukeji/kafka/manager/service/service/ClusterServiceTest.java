@@ -22,12 +22,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.*;
 
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
@@ -327,8 +325,8 @@ public class ClusterServiceTest extends BaseTest {
     @Test(description = "测试删除集群时，该集群下还有region，禁止删除")
     public void deleteById2OperationForbiddenTest() {
         when(regionService.getByClusterId(Mockito.anyLong())).thenReturn(Arrays.asList(new RegionDO()));
-        ResultStatus resultStatus = clusterService.deleteById(1L, "admin");
-        Assert.assertEquals(resultStatus.getCode(), ResultStatus.OPERATION_FORBIDDEN.getCode());
+        Result result = clusterService.deleteById(1L, "admin");
+        Assert.assertEquals(result.successful(), ResultStatus.OPERATION_FORBIDDEN.getCode());
     }
 
     @Test(description = "测试删除集群成功")
@@ -337,18 +335,18 @@ public class ClusterServiceTest extends BaseTest {
         when(regionService.getByClusterId(Mockito.anyLong())).thenReturn(Collections.emptyList());
         Mockito.when(operateRecordService.insert(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
         Mockito.when(clusterDao.deleteById(Mockito.any())).thenReturn(1);
-        ResultStatus resultStatus = clusterService.deleteById(clusterDO.getId(), "admin");
-        Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
+        Result result  = clusterService.deleteById(clusterDO.getId(), "admin");
+        Assert.assertEquals(result.successful(), ResultStatus.SUCCESS.getCode());
 
     }
 
     @Test(description = "测试MYSQL_ERROR")
     public void deleteById2MysqlErrorTest() {
         when(regionService.getByClusterId(Mockito.anyLong())).thenReturn(Collections.emptyList());
-        ResultStatus resultStatus = clusterService.deleteById(100L, "admin");
+        Result result  = clusterService.deleteById(100L, "admin");
         Mockito.when(operateRecordService.insert(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(1);
         Mockito.when(clusterDao.deleteById(Mockito.any())).thenReturn(-1);
-        Assert.assertEquals(resultStatus.getCode(), ResultStatus.MYSQL_ERROR.getCode());
+        Assert.assertEquals(result.successful(), ResultStatus.MYSQL_ERROR.getCode());
     }
 
     @Test(description = "测试从zk中获取被选举的broker")

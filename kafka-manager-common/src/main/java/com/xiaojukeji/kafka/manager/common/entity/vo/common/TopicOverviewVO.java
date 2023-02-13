@@ -2,12 +2,14 @@ package com.xiaojukeji.kafka.manager.common.entity.vo.common;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * Topic信息
  * @author zengqiao
  * @date 19/4/1
  */
+@Data
 @ApiModel(description = "Topic信息概览")
 public class TopicOverviewVO {
     @ApiModelProperty(value = "集群ID")
@@ -49,109 +51,8 @@ public class TopicOverviewVO {
     @ApiModelProperty(value = "逻辑集群id")
     private Long logicalClusterId;
 
-    public Long getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(Long clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    public String getTopicName() {
-        return topicName;
-    }
-
-    public void setTopicName(String topicName) {
-        this.topicName = topicName;
-    }
-
-    public Integer getReplicaNum() {
-        return replicaNum;
-    }
-
-    public void setReplicaNum(Integer replicaNum) {
-        this.replicaNum = replicaNum;
-    }
-
-    public Integer getPartitionNum() {
-        return partitionNum;
-    }
-
-    public void setPartitionNum(Integer partitionNum) {
-        this.partitionNum = partitionNum;
-    }
-
-    public Long getRetentionTime() {
-        return retentionTime;
-    }
-
-    public void setRetentionTime(Long retentionTime) {
-        this.retentionTime = retentionTime;
-    }
-
-    public Object getByteIn() {
-        return byteIn;
-    }
-
-    public void setByteIn(Object byteIn) {
-        this.byteIn = byteIn;
-    }
-
-    public Object getByteOut() {
-        return byteOut;
-    }
-
-    public void setByteOut(Object byteOut) {
-        this.byteOut = byteOut;
-    }
-
-    public Object getProduceRequest() {
-        return produceRequest;
-    }
-
-    public void setProduceRequest(Object produceRequest) {
-        this.produceRequest = produceRequest;
-    }
-
-    public String getAppName() {
-        return appName;
-    }
-
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-
-    public String getAppId() {
-        return appId;
-    }
-
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Long getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Long updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public Long getLogicalClusterId() {
-        return logicalClusterId;
-    }
-
-    public void setLogicalClusterId(Long logicalClusterId) {
-        this.logicalClusterId = logicalClusterId;
-    }
+    @ApiModelProperty(value = "高可用关系：1:主topic, 0:备topic , 其他:非高可用topic")
+    private Integer haRelation;
 
     @Override
     public String toString() {
@@ -169,6 +70,7 @@ public class TopicOverviewVO {
                 ", description='" + description + '\'' +
                 ", updateTime=" + updateTime +
                 ", logicalClusterId=" + logicalClusterId +
+                ", haRelation=" + haRelation +
                 '}';
     }
 }

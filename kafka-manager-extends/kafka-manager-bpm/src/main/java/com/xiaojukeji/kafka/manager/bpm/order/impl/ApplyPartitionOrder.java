@@ -3,6 +3,7 @@ package com.xiaojukeji.kafka.manager.bpm.order.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderTypeEnum;
+import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.OrderExtensionQuotaDTO;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.PartitionOrderExtensionDTO;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.detail.AbstractOrderDetailData;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.detail.PartitionOrderDetailData;
@@ -12,16 +13,17 @@ import com.xiaojukeji.kafka.manager.bpm.order.AbstractOrder;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
-import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.OrderExtensionQuotaDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
@@ -60,6 +62,9 @@ public class ApplyPartitionOrder extends AbstractOrder {
 
     @Autowired
     private RegionService regionService;
+
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @Override
     public AbstractOrderDetailData getOrderExtensionDetailData(String extensions) {
@@ -169,28 +174,30 @@ public class ApplyPartitionOrder extends AbstractOrder {
         if (ValidateUtils.isNull(physicalClusterId)) {
             return ResultStatus.CLUSTER_NOT_EXIST;
         }
-        if (!PhysicalClusterMetadataManager.isTopicExistStrictly(physicalClusterId, extensionDTO.getTopicName())) {
-            return ResultStatus.TOPIC_NOT_EXIST;
-        }
         if (handleDTO.isExistNullParam()) {
             return ResultStatus.OPERATION_FAILED;
         }
-        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
-        return adminService.expandPartitions(
-                clusterDO,
-                extensionDTO.getTopicName(),
-                handleDTO.getPartitionNum(),
-                handleDTO.getRegionId(),
-                handleDTO.getBrokerIdList(),
-                userName
-        );
-    }
 
-    private OrderExtensionQuotaDTO supplyExtension(OrderExtensionQuotaDTO extensionDTO, OrderHandleQuotaDTO handleDTO){
-        extensionDTO.setPartitionNum(handleDTO.getPartitionNum());
-        extensionDTO.setRegionId(handleDTO.getRegionId());
-        extensionDTO.setBrokerIdList(handleDTO.getBrokerIdList());
-        return extensionDTO;
+        //备topic扩分区
+        HaASRelationDO relationDO = haASRelationManager.getASRelation(physicalClusterId, extensionDTO.getTopicName());
+        if (relationDO != null){
+            //用户侧不允许操作备topic
+            if (relationDO.getStandbyClusterPhyId().equals(extensionDTO.getClusterId())){
+                return ResultStatus.OPERATION_FORBIDDEN;
+            }
+            ResultStatus rv = apply(relationDO.getStandbyClusterPhyId(),
+                    relationDO.getStandbyResName(),
+                    userName,
+                    handleDTO.getPartitionNum(),
+                    null,
+                    PhysicalClusterMetadataManager.getBrokerIdList(relationDO.getStandbyClusterPhyId()));
+            if (ResultStatus.SUCCESS.getCode() != rv.getCode()){
+                return rv;
+            }
+        }
+
+        return apply(physicalClusterId, extensionDTO.getTopicName(), userName,
+                handleDTO.getPartitionNum(), handleDTO.getRegionId(), handleDTO.getBrokerIdList());
     }
 
     @Override
@@ -206,4 +213,29 @@ public class ApplyPartitionOrder extends AbstractOrder {
         return accountService.getAdminOrderHandlerFromCache();
     }
 
+    private ResultStatus apply(Long physicalClusterId, String topicName, String userName, int partitionNum, Long regionId, List<Integer> brokerIds){
+        ClusterDO clusterDO = clusterService.getById(physicalClusterId);
+        if (clusterDO == null){
+            return ResultStatus.CLUSTER_NOT_EXIST;
+        }
+
+        if (!PhysicalClusterMetadataManager.isTopicExistStrictly(physicalClusterId, topicName)) {
+            return ResultStatus.TOPIC_NOT_EXIST;
+        }
+        return adminService.expandPartitions(
+                clusterDO,
+                topicName,
+                partitionNum,
+                regionId,
+                brokerIds,
+                userName
+        );
+    }
+
+    private OrderExtensionQuotaDTO supplyExtension(OrderExtensionQuotaDTO extensionDTO, OrderHandleQuotaDTO handleDTO){
+        extensionDTO.setPartitionNum(handleDTO.getPartitionNum());
+        extensionDTO.setRegionId(handleDTO.getRegionId());
+        extensionDTO.setBrokerIdList(handleDTO.getBrokerIdList());
+        return extensionDTO;
+    }
 }

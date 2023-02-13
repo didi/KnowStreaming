@@ -39,6 +39,7 @@ public class TopicModelConverter {
         vo.setDescription(dto.getDescription());
         vo.setBootstrapServers("");
         vo.setRegionNameList(dto.getRegionNameList());
+        vo.setHaRelation(dto.getHaRelation());
         if (!ValidateUtils.isNull(clusterDO)) {
             vo.setBootstrapServers(clusterDO.getBootstrapServers());
         }

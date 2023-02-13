@@ -4,7 +4,7 @@ import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterTaskDO;
 import com.xiaojukeji.kafka.manager.dao.ClusterTaskDao;
-import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskActionEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TaskActionEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskStateEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskTypeEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskLog;
@@ -163,7 +163,7 @@ public class ClusterTaskServiceTest extends BaseTest {
     }
 
     private void executeTask2TaskNotExistTest() {
-        ResultStatus resultStatus = clusterTaskService.executeTask(INVALID_TASK_ID, ClusterTaskActionEnum.START.getAction(), ADMIN);
+        ResultStatus resultStatus = clusterTaskService.executeTask(INVALID_TASK_ID, TaskActionEnum.START.getAction(), ADMIN);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.RESOURCE_NOT_EXIST.getCode());
     }
 
@@ -172,7 +172,7 @@ public class ClusterTaskServiceTest extends BaseTest {
         ClusterTaskDO clusterTaskDO = getClusterTaskDO();
         Mockito.when(clusterTaskDao.getById(Mockito.anyLong())).thenReturn(clusterTaskDO);
 
-        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.START.getAction(), ADMIN);
+        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.START.getAction(), ADMIN);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.CALL_CLUSTER_TASK_AGENT_FAILED.getCode());
     }
 
@@ -183,12 +183,12 @@ public class ClusterTaskServiceTest extends BaseTest {
 
         // success
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(true);
-        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.START.getAction(), ADMIN);
+        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.START.getAction(), ADMIN);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
 
         // operation failed
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(false);
-        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.START.getAction(), ADMIN);
+        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.START.getAction(), ADMIN);
         Assert.assertEquals(resultStatus2.getCode(), ResultStatus.OPERATION_FAILED.getCode());
     }
 
@@ -199,12 +199,12 @@ public class ClusterTaskServiceTest extends BaseTest {
 
         // success
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(true);
-        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.PAUSE.getAction(), ADMIN);
+        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.PAUSE.getAction(), ADMIN);
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
 
         // operation failed
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(false);
-        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.PAUSE.getAction(), ADMIN);
+        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.PAUSE.getAction(), ADMIN);
         Assert.assertEquals(resultStatus2.getCode(), ResultStatus.OPERATION_FAILED.getCode());
     }
 
@@ -215,12 +215,12 @@ public class ClusterTaskServiceTest extends BaseTest {
 
         // success
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(true);
-        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.IGNORE.getAction(), "");
+        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.IGNORE.getAction(), "");
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
 
         // operation failed
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(false);
-        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.IGNORE.getAction(), "");
+        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.IGNORE.getAction(), "");
         Assert.assertEquals(resultStatus2.getCode(), ResultStatus.OPERATION_FAILED.getCode());
     }
 
@@ -231,12 +231,12 @@ public class ClusterTaskServiceTest extends BaseTest {
 
         // success
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(true);
-        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.CANCEL.getAction(), "");
+        ResultStatus resultStatus = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.CANCEL.getAction(), "");
         Assert.assertEquals(resultStatus.getCode(), ResultStatus.SUCCESS.getCode());
 
         // operation failed
         Mockito.when(abstractAgent.actionTask(Mockito.anyLong(), Mockito.any())).thenReturn(false);
-        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.CANCEL.getAction(), "");
+        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.CANCEL.getAction(), "");
         Assert.assertEquals(resultStatus2.getCode(), ResultStatus.OPERATION_FAILED.getCode());
     }
 
@@ -246,7 +246,7 @@ public class ClusterTaskServiceTest extends BaseTest {
         Mockito.when(clusterTaskDao.getById(Mockito.anyLong())).thenReturn(clusterTaskDO);
 
         // operation failed
-        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.START.getAction(), ADMIN);
+        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.START.getAction(), ADMIN);
         Assert.assertEquals(resultStatus2.getCode(), ResultStatus.OPERATION_FAILED.getCode());
     }
 
@@ -257,7 +257,7 @@ public class ClusterTaskServiceTest extends BaseTest {
         Mockito.when(clusterTaskDao.getById(Mockito.anyLong())).thenReturn(clusterTaskDO);
 
         // operation failed
-        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, ClusterTaskActionEnum.ROLLBACK.getAction(), ADMIN);
+        ResultStatus resultStatus2 = clusterTaskService.executeTask(REAL_TASK_ID_IN_MYSQL, TaskActionEnum.ROLLBACK.getAction(), ADMIN);
         Assert.assertEquals(resultStatus2.getCode(), ResultStatus.OPERATION_FORBIDDEN.getCode());
     }
 

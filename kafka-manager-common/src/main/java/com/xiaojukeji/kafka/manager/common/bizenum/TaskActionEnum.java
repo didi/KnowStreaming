@@ -1,11 +1,11 @@
-package com.xiaojukeji.kafka.manager.kcm.common.bizenum;
+package com.xiaojukeji.kafka.manager.common.bizenum;
 
 /**
  * 任务动作
  * @author zengqiao
  * @date 20/4/26
  */
-public enum ClusterTaskActionEnum {
+public enum TaskActionEnum {
     UNKNOWN("unknown"),
 
     START("start"),
@@ -17,13 +17,15 @@ public enum ClusterTaskActionEnum {
     REDO("redo"),
     KILL("kill"),
 
+    FORCE("force"),
+
     ROLLBACK("rollback"),
 
     ;
 
-    private String action;
+    private final String action;
 
-    ClusterTaskActionEnum(String action) {
+    TaskActionEnum(String action) {
         this.action = action;
     }
 

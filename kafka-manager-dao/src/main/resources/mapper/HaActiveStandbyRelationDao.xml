@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.kafka.manager.dao.ha.HaASRelationDao">
+    <resultMap  id="HaASRelationMap"                type="com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO">
+        <id     column="id"                         property="id" />
+        <result column="create_time"                property="createTime" />
+        <result column="modify_time"                property="modifyTime" />
+
+        <result column="active_cluster_phy_id"      property="activeClusterPhyId" />
+        <result column="active_res_name"            property="activeResName" />
+        <result column="standby_cluster_phy_id"     property="standbyClusterPhyId" />
+        <result column="standby_res_name"           property="standbyResName" />
+        <result column="res_type"                   property="resType" />
+        <result column="status"                     property="status" />
+        <result column="unique_field"               property="uniqueField" />
+    </resultMap>
+</mapper>

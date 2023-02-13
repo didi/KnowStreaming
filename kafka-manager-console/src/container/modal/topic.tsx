@@ -16,6 +16,17 @@ import { modal } from 'store/modal';
 import { TopicAppSelect } from '../topic/topic-app-select';
 import Url from 'lib/url-parser';
 import { expandRemarks, quotaRemarks } from 'constants/strategy';
+import { getAppListByClusterId } from 'lib/api';
+
+const updateApplyTopicFormModal = (clusterId: number) => {
+  const formMap = wrapper.xFormWrapper.formMap;
+  const formData = wrapper.xFormWrapper.formData;
+  getAppListByClusterId(clusterId).then(res => {
+    formMap[2].customFormItem = <AppSelect selectData={res} />;
+    // tslint:disable-next-line:no-unused-expression
+    wrapper.ref && wrapper.ref.updateFormMap$(formMap, formData);
+  });
+};
 
 export const applyTopic = () => {
   const xFormModal = {
@@ -28,6 +39,9 @@ export const applyTopic = () => {
         rules: [{ required: true, message: '请选择' }],
         attrs: {
           placeholder: '请选择',
+          onChange(value: number) {
+            updateApplyTopicFormModal(value);
+          },
         },
       }, {
         key: 'topicName',
@@ -49,7 +63,7 @@ export const applyTopic = () => {
         type: 'custom',
         defaultValue: '',
         rules: [{ required: true, message: '请选择' }],
-        customFormItem: <AppSelect selectData={app.data} />,
+        customFormItem: <AppSelect selectData={[]} />,
       }, {
         key: 'peakBytesIn',
         label: '峰值流量',
@@ -88,7 +102,7 @@ export const applyTopic = () => {
     ],
     formData: {},
     visible: true,
-    title: <div><span>申请Topic</span><a className='applicationDocument' href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/resource_apply.md" target='_blank'>资源申请文档</a></div>,
+    title: <div><span>申请Topic</span><a className="applicationDocument" href="https://github.com/didi/Logi-KafkaManager/blob/master/docs/user_guide/resource_apply.md" target="_blank">资源申请文档</a></div>,
     okText: '确认',
     // customRenderElement: <span className="tips">集群资源充足时，预计1分钟自动审批通过</span>,
     isWaitting: true,
@@ -106,7 +120,7 @@ export const applyTopic = () => {
       };
       return topic.applyTopic(quotaParams).then(data => {
         window.location.href = `${urlPrefix}/user/order-detail/?orderId=${data.id}&region=${region.currentRegion}`;
-      })
+      });
     },
     onSubmitFaild: (err: any, ref: any, formData: any, formMap: any) => {
       if (err.message === 'topic already existed') {
@@ -115,10 +129,10 @@ export const applyTopic = () => {
           topicName: {
             value: topic,
             errors: [new Error('该topic名称已存在')],
-          }
-        })
+          },
+        });
       }
-    }
+    },
   };
   wrapper.open(xFormModal);
 };
@@ -186,7 +200,7 @@ export const showApplyQuatoModal = (item: ITopic | IAppsIdInfo, record: IQuotaQu
       //   rules: [{ required: true, message: '' }],
       //   attrs: { disabled: true },
       //   invisible: !item.hasOwnProperty('clusterName'),
-      // }, 
+      // },
       {
         key: 'topicName',
         label: 'Topic名称',
@@ -300,7 +314,7 @@ export const showTopicApplyQuatoModal = (item: ITopic) => {
       //   attrs: { disabled: true },
       //   defaultValue: item.clusterName,
       //   // invisible: !item.hasOwnProperty('clusterName'),
-      // }, 
+      // },
       {
         key: 'topicName',
         label: 'Topic名称',
@@ -380,12 +394,19 @@ export const showTopicApplyQuatoModal = (item: ITopic) => {
         consumeQuota: transMBToB(value.consumeQuota),
         produceQuota: transMBToB(value.produceQuota),
       });
+
+      if (item.isPhysicalClusterId) {
+        Object.assign(quota, {
+          isPhysicalClusterId: true,
+        });
+      }
       const quotaParams = {
         type: 2,
         applicant: users.currentUser.username,
         description: value.description,
         extensions: JSON.stringify(quota),
       };
+
       topic.applyQuota(quotaParams).then((data) => {
         notification.success({ message: '申请配额成功' });
         window.location.href = `${urlPrefix}/user/order-detail/?orderId=${data.id}&region=${region.currentRegion}`;
@@ -454,23 +475,24 @@ const judgeAccessStatus = (access: number) => {
 
 export const showAllPermissionModal = (item: ITopic) => {
   let appId: string = null;
+  app.getAppListByClusterId(item.clusterId).then(res => {
+    if (!app.clusterAppData || !app.clusterAppData.length) {
+      return notification.info({
+        message: (
+          <>
+            <span>
+              您的账号暂无可用应用，请先
+              <a href={`${urlPrefix}/topic/app-list?application=1`}>申请应用</a>
+            </span>
+          </>),
+      });
+    }
+    const index = app.clusterAppData.findIndex(row => row.appId === item.appId);
 
-  if (!app.data || !app.data.length) {
-    return notification.info({
-      message: (
-        <>
-          <span>
-            您的账号暂无可用应用，请先
-            <a href={`${urlPrefix}/topic/app-list?application=1`}>申请应用</a>
-          </span>
-        </>),
+    appId = index > -1 ? item.appId : app.clusterAppData[0].appId;
+    topic.getAuthorities(appId, item.clusterId, item.topicName).then((data) => {
+      showAllPermission(appId, item, data.access);
     });
-  }
-  const index = app.data.findIndex(row => row.appId === item.appId);
-
-  appId = index > -1 ? item.appId : app.data[0].appId;
-  topic.getAuthorities(appId, item.clusterId, item.topicName).then((data) => {
-    showAllPermission(appId, item, data.access);
   });
 };
 
@@ -494,7 +516,7 @@ const showAllPermission = (appId: string, item: ITopic, access: number) => {
         defaultValue: appId,
         rules: [{ required: true, message: '请选择应用' }],
         type: 'custom',
-        customFormItem: <TopicAppSelect selectData={app.data} parameter={item} />,
+        customFormItem: <TopicAppSelect selectData={app.clusterAppData} parameter={item} />,
       },
       {
         key: 'access',

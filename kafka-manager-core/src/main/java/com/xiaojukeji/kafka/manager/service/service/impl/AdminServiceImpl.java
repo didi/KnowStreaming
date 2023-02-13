@@ -2,21 +2,27 @@ package com.xiaojukeji.kafka.manager.service.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.xiaojukeji.kafka.manager.common.bizenum.*;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
-import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
+import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TaskStatusEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.ZkConfigImpl;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AuthorityService;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaTopicService;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
 import com.xiaojukeji.kafka.manager.service.utils.TopicCommands;
 import kafka.admin.AdminOperationException;
@@ -54,6 +60,12 @@ public class AdminServiceImpl implements AdminService {
 
     @Autowired
     private AuthorityService authorityService;
+
+    @Autowired
+    private HaTopicService haTopicService;
+
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -123,15 +135,22 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResultStatus deleteTopic(ClusterDO clusterDO,
-                                    String topicName,
-                                    String operator) {
-        // 1. 集群中删除topic
+    public ResultStatus deleteTopic(ClusterDO clusterDO, String topicName, String operator) {
+        // 1. 若存在高可用topic，先解除高可用关系才能删除topic
+        HaASRelationDO haASRelationDO = haASRelationManager.getASRelation(clusterDO.getId(), topicName);
+        if (haASRelationDO != null){
+            //高可用topic不允许删除
+            if (haASRelationDO.getStandbyClusterPhyId().equals(clusterDO.getId())){
+                return ResultStatus.HA_TOPIC_DELETE_FORBIDDEN;
+            }
+        }
+
+        // 2. 集群中删除topic
         ResultStatus rs = TopicCommands.deleteTopic(clusterDO, topicName);
         if (!ResultStatus.SUCCESS.equals(rs)) {
             return rs;
         }
-        // 2. 记录操作
+        // 3. 记录操作
         Map<String, Object> content = new HashMap<>(2);
         content.put("clusterId", clusterDO.getId());
         content.put("topicName", topicName);
@@ -144,12 +163,13 @@ public class AdminServiceImpl implements AdminService {
         operateRecordDO.setOperator(operator);
         operateRecordService.insert(operateRecordDO);
 
-        // 3. 数据库中删除topic
+        // 4. 数据库中删除topic
         topicManagerService.deleteByTopicName(clusterDO.getId(), topicName);
         topicExpiredService.deleteByTopicName(clusterDO.getId(), topicName);
 
-        // 4. 数据库中删除authority
+        // 5. 数据库中删除authority
         authorityService.deleteAuthorityByTopic(clusterDO.getId(), topicName);
+
         return rs;
     }
 
@@ -346,7 +366,6 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public ResultStatus modifyTopicConfig(ClusterDO clusterDO, String topicName, Properties properties, String operator) {
-        ResultStatus rs = TopicCommands.modifyTopicConfig(clusterDO, topicName, properties);
-        return rs;
+        return TopicCommands.modifyTopicConfig(clusterDO, topicName, properties);
     }
 }

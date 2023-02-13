@@ -4,6 +4,7 @@ import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperationStatusEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
+import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OperateRecordDO;
@@ -75,8 +76,10 @@ public class AuthorityServiceImpl implements AuthorityService {
             return kafkaAclDao.insert(kafkaAclDO);
         } catch (Exception e) {
             LOGGER.error("add authority failed, authorityDO:{}.", authorityDO, e);
+
+            // 返回-1表示出错
+            return Constant.INVALID_CODE;
         }
-        return result;
     }
 
     @Override
@@ -124,7 +127,10 @@ public class AuthorityServiceImpl implements AuthorityService {
             operateRecordService.insert(operateRecordDO);
         } catch (Exception e) {
             LOGGER.error("delete authority failed, authorityDO:{}.", authorityDO, e);
+
+            return ResultStatus.MYSQL_ERROR;
         }
+
         return ResultStatus.SUCCESS;
     }
 
@@ -150,6 +156,11 @@ public class AuthorityServiceImpl implements AuthorityService {
             LOGGER.error("get authority failed, clusterId:{} topicName:{}.", clusterId, topicName, e);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<AuthorityDO> getAuthorityByTopicFromCache(Long clusterId, String topicName) {
+        return authorityDao.getAuthorityByTopicFromCache(clusterId, topicName);
     }
 
     @Override

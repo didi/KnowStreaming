@@ -1,10 +1,13 @@
 package com.xiaojukeji.kafka.manager.common.bizenum;
 
+import lombok.Getter;
+
 /**
  * 任务状态
  * @author zengqiao
  * @date 2017/6/29.
  */
+@Getter
 public enum TaskStatusEnum {
     UNKNOWN(    -1, "未知"),
 
@@ -15,6 +18,7 @@ public enum TaskStatusEnum {
 
         RUNNING(    30, "运行中"),
             KILLING(    31, "杀死中"),
+            RUNNING_IN_TIMEOUT(    32, "超时运行中"),
 
         BLOCKED(    40, "暂停"),
 
@@ -30,29 +34,13 @@ public enum TaskStatusEnum {
 
     ;
 
-    private Integer code;
+    private final Integer code;
 
-    private String message;
+    private final String message;
 
     TaskStatusEnum(Integer code, String message) {
         this.code = code;
         this.message = message;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    @Override
-    public String toString() {
-        return "TaskStatusEnum{" +
-                "code=" + code +
-                ", message='" + message + '\'' +
-                '}';
     }
 
     public static Boolean isFinished(Integer code) {

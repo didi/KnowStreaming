@@ -37,6 +37,7 @@ export interface ITopicBaseInfo {
   physicalClusterId: number;
   percentile: string;
   regionNameList: any;
+  haRelation: number;
 }
 
 export interface IRealTimeTraffic {

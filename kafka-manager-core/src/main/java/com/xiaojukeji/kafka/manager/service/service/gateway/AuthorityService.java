@@ -46,6 +46,8 @@ public interface AuthorityService {
      */
     List<AuthorityDO> getAuthorityByTopic(Long clusterId, String topicName);
 
+    List<AuthorityDO> getAuthorityByTopicFromCache(Long clusterId, String topicName);
+
     List<AuthorityDO> getAuthority(String appId);
 
     /**

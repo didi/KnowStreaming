@@ -1,30 +1,28 @@
 package com.xiaojukeji.kafka.manager.common.entity;
 
-import com.alibaba.fastjson.JSON;
-import com.xiaojukeji.kafka.manager.common.constant.Constant;
-
-import java.io.Serializable;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * @author huangyiminghappy@163.com
  * @date 2019-07-08
  */
-public class Result<T> implements Serializable {
-    private static final long serialVersionUID = -2772975319944108658L;
+@Data
+@ApiModel(description = "调用结果")
+public class Result<T> extends BaseResult {
+    @ApiModelProperty(value = "数据")
+    protected T data;
 
-    private T data;
-    private String message;
-    private String tips;
-    private int code;
+    public Result() {
+        this.code = ResultStatus.SUCCESS.getCode();
+        this.message = ResultStatus.SUCCESS.getMessage();
+    }
 
     public Result(T data) {
         this.data = data;
         this.code = ResultStatus.SUCCESS.getCode();
         this.message = ResultStatus.SUCCESS.getMessage();
-    }
-
-    public Result() {
-        this(null);
     }
 
     public Result(Integer code, String message) {
@@ -38,48 +36,31 @@ public class Result<T> implements Serializable {
         this.code = code;
     }
 
-    public T getData()
-    {
-        return (T)this.data;
+    public static <T> Result<T> build(boolean succ) {
+        if (succ) {
+            return buildSuc();
+        }
+        return buildFail();
     }
 
-    public void setData(T data)
-    {
-        this.data = data;
+    public static <T> Result<T> buildFail() {
+        Result<T> result = new Result<>();
+        result.setCode(ResultStatus.FAIL.getCode());
+        result.setMessage(ResultStatus.FAIL.getMessage());
+        return result;
     }
 
-    public String getMessage()
-    {
-        return this.message;
-    }
-
-    public void setMessage(String message)
-    {
-        this.message = message;
-    }
-
-    public String getTips() {
-        return tips;
-    }
-
-    public void setTips(String tips) {
-        this.tips = tips;
-    }
-
-    public int getCode()
-    {
-        return this.code;
-    }
-
-    public void setCode(int code)
-    {
-        this.code = code;
-    }
-
-    @Override
-    public String toString()
-    {
-        return JSON.toJSONString(this);
+    public static <T> Result<T> build(boolean succ, T data) {
+        Result<T> result = new Result<>();
+        if (succ) {
+            result.setCode(ResultStatus.SUCCESS.getCode());
+            result.setMessage(ResultStatus.SUCCESS.getMessage());
+            result.setData(data);
+        } else {
+            result.setCode(ResultStatus.FAIL.getCode());
+            result.setMessage(ResultStatus.FAIL.getMessage());
+        }
+        return result;
     }
 
     public static <T> Result<T> buildSuc() {
@@ -97,14 +78,6 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public static <T> Result<T> buildGatewayFailure(String message) {
-        Result<T> result = new Result<>();
-        result.setCode(ResultStatus.GATEWAY_INVALID_REQUEST.getCode());
-        result.setMessage(message);
-        result.setData(null);
-        return result;
-    }
-
     public static <T> Result<T> buildFailure(String message) {
         Result<T> result = new Result<>();
         result.setCode(ResultStatus.FAIL.getCode());
@@ -113,10 +86,34 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public static <T> Result<T> buildFrom(ResultStatus resultStatus) {
+    public static <T> Result<T> buildFailure(String message,  T data) {
         Result<T> result = new Result<>();
-        result.setCode(resultStatus.getCode());
-        result.setMessage(resultStatus.getMessage());
+        result.setCode(ResultStatus.FAIL.getCode());
+        result.setMessage(message);
+        result.setData(data);
+        return result;
+    }
+
+    public static <T> Result<T> buildFailure(ResultStatus rs) {
+        Result<T> result = new Result<>();
+        result.setCode(rs.getCode());
+        result.setMessage(rs.getMessage());
+        result.setData(null);
+        return result;
+    }
+
+    public static <T> Result<T> buildGatewayFailure(String message) {
+        Result<T> result = new Result<>();
+        result.setCode(ResultStatus.GATEWAY_INVALID_REQUEST.getCode());
+        result.setMessage(message);
+        result.setData(null);
+        return result;
+    }
+
+    public static <T> Result<T> buildFrom(ResultStatus rs) {
+        Result<T> result = new Result<>();
+        result.setCode(rs.getCode());
+        result.setMessage(rs.getMessage());
         return result;
     }
 
@@ -128,8 +125,46 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public boolean failed() {
-        return !Constant.SUCCESS.equals(code);
+    public static <T> Result<T> buildFromRSAndMsg(ResultStatus resultStatus, String message) {
+        Result<T> result = new Result<>();
+        result.setCode(resultStatus.getCode());
+        result.setMessage(message);
+        result.setData(null);
+        return result;
     }
 
+    public static <T> Result<T> buildFromRSAndData(ResultStatus rs, T data) {
+        Result<T> result = new Result<>();
+        result.setCode(rs.getCode());
+        result.setMessage(rs.getMessage());
+        result.setData(data);
+        return result;
+    }
+
+    public static <T, U> Result<T> buildFromIgnoreData(Result<U> anotherResult) {
+        Result<T> result = new Result<>();
+        result.setCode(anotherResult.getCode());
+        result.setMessage(anotherResult.getMessage());
+        return result;
+    }
+
+    public static <T> Result<T> buildParamIllegal(String msg) {
+        Result<T> result = new Result<>();
+        result.setCode(ResultStatus.PARAM_ILLEGAL.getCode());
+        result.setMessage(ResultStatus.PARAM_ILLEGAL.getMessage() + ":" + msg + "，请检查后再提交！");
+        return result;
+    }
+
+    public boolean hasData(){
+        return !failed() && this.data != null;
+    }
+
+    @Override
+    public String toString() {
+        return "Result{" +
+                "message='" + message + '\'' +
+                ", code=" + code +
+                ", data=" + data +
+                '}';
+    }
 }

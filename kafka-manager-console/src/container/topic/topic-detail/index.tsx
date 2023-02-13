@@ -331,11 +331,13 @@ export class TopicDetail extends React.Component<any> {
   public render() {
     const role = users.currentUser.role;
     const baseInfo = topic.baseInfo as ITopicBaseInfo;
-    const showEditBtn = (role == 1 || role == 2) || (topic.topicBusiness && topic.topicBusiness.principals.includes(users.currentUser.username));
+    const showEditBtn = (role == 1 || role == 2) ||
+      (topic.topicBusiness && topic.topicBusiness.principals.includes(users.currentUser.username));
     const topicRecord = {
       clusterId: this.clusterId,
       topicName: this.topicName,
-      clusterName: this.clusterName
+      clusterName: this.clusterName,
+      isPhysicalClusterId: !!this.isPhysicalTrue,
     } as ITopic;
 
     return (
@@ -349,9 +351,12 @@ export class TopicDetail extends React.Component<any> {
                 title={this.topicName || ''}
                 extra={
                   <>
-                    {this.needAuth == "true" && <Button key="0" type="primary" onClick={() => showAllPermissionModal(topicRecord)} >申请权限</Button>}
-                    <Button key="1" type="primary" onClick={() => applyTopicQuotaQuery(topicRecord)} >申请配额</Button>
-                    <Button key="2" type="primary" onClick={() => applyExpandModal(topicRecord)} >申请分区</Button>
+                    {this.needAuth == 'true' &&
+                      <Button key="0" type="primary" onClick={() => showAllPermissionModal(topicRecord)} >申请权限</Button>}
+                    {baseInfo.haRelation === 0 ? null :
+                      <Button key="1" type="primary" onClick={() => applyTopicQuotaQuery(topicRecord)} >申请配额</Button>}
+                    {baseInfo.haRelation === 0 ? null :
+                      <Button key="2" type="primary" onClick={() => applyExpandModal(topicRecord)} >申请分区</Button>}
                     <Button key="3" type="primary" onClick={() => this.props.history.push(`/alarm/add`)} >新建告警</Button>
                     <Button key="4" type="primary" onClick={this.showDrawer.bind(this)} >数据采样</Button>
                     {/* {showEditBtn && <Button key="5" onClick={() => this.compileDetails()} type="primary">编辑</Button>} */}

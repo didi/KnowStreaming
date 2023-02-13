@@ -3,7 +3,7 @@ package com.xiaojukeji.kafka.manager.kcm.component.agent.n9e;
 import com.xiaojukeji.kafka.manager.common.bizenum.KafkaFileEnum;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.kcm.common.Constant;
-import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskActionEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TaskActionEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskTypeEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskLog;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.CreationTaskData;
@@ -94,7 +94,7 @@ public class N9e extends AbstractAgent {
     }
 
     @Override
-    public boolean actionTask(Long taskId, ClusterTaskActionEnum actionEnum) {
+    public boolean actionTask(Long taskId, TaskActionEnum actionEnum) {
         Map<String, Object> param = new HashMap<>(1);
         param.put("action", actionEnum.getAction());
 
@@ -115,7 +115,7 @@ public class N9e extends AbstractAgent {
     }
 
     @Override
-    public boolean actionHostTask(Long taskId, ClusterTaskActionEnum actionEnum, String hostname) {
+    public boolean actionHostTask(Long taskId, TaskActionEnum actionEnum, String hostname) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("action", actionEnum.getAction());
         params.put("hostname", hostname);
@@ -234,7 +234,7 @@ public class N9e extends AbstractAgent {
         n9eCreationTask.setScript(this.script);
         n9eCreationTask.setArgs(sb.toString());
         n9eCreationTask.setAccount(this.account);
-        n9eCreationTask.setAction(ClusterTaskActionEnum.PAUSE.getAction());
+        n9eCreationTask.setAction(TaskActionEnum.PAUSE.getAction());
         n9eCreationTask.setHosts(creationTaskData.getHostList());
         return n9eCreationTask;
     }

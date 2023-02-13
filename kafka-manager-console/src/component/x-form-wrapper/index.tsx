@@ -8,7 +8,7 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
   public state = {
     confirmLoading: false,
     formMap: this.props.formMap || [] as any,
-    formData: this.props.formData || {}
+    formData: this.props.formData || {},
   };
 
   private $formRef: any;
@@ -121,7 +121,8 @@ export class XFormWrapper extends React.Component<IXFormWrapper> {
             this.closeModalWrapper();
           }).catch((err: any) => {
             const { formMap, formData } = wrapper.xFormWrapper;
-            onSubmitFaild(err, this.$formRef, formData, formMap);
+            // tslint:disable-next-line:no-unused-expression
+            onSubmitFaild && onSubmitFaild(err, this.$formRef, formData, formMap);
           }).finally(() => {
             this.setState({
               confirmLoading: false,

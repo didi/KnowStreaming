@@ -371,7 +371,7 @@ public class TopicServiceTest extends BaseTest {
     private void getPartitionOffset2EmptyTest() {
         ClusterDO clusterDO = getClusterDO();
         Map<TopicPartition, Long> partitionOffset = topicService.getPartitionOffset(
-                null, null, OffsetPosEnum.BEGINNING);
+                clusterDO, null, OffsetPosEnum.BEGINNING);
         Assert.assertTrue(partitionOffset.isEmpty());
 
         Map<TopicPartition, Long> partitionOffset2 = topicService.getPartitionOffset(

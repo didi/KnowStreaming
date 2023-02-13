@@ -8,6 +8,7 @@ import kafka.admin.AdminOperationException;
 import kafka.admin.AdminUtils;
 import kafka.admin.BrokerMetadata;
 import kafka.common.TopicAndPartition;
+import kafka.server.ConfigType;
 import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.apache.kafka.common.errors.*;
@@ -27,6 +28,8 @@ import java.util.*;
 public class TopicCommands {
     private static final Logger LOGGER = LoggerFactory.getLogger(TopicCommands.class);
 
+    private TopicCommands() {
+    }
 
     public static ResultStatus createTopic(ClusterDO clusterDO,
                                            String topicName,
@@ -51,7 +54,7 @@ public class TopicCommands {
                             replicaNum,
                             randomFixedStartIndex(),
                             -1
-            );
+                    );
 
             // 写ZK
             AdminUtils.createOrUpdateTopicPartitionAssignmentPathInZK(
@@ -129,6 +132,11 @@ public class TopicCommands {
                     Constant.DEFAULT_SESSION_TIMEOUT_UNIT_MS,
                     JaasUtils.isZkSecurityEnabled()
             );
+
+            if(!zkUtils.pathExists(zkUtils.getTopicPath(topicName))){
+                return ResultStatus.TOPIC_NOT_EXIST;
+            }
+
             AdminUtils.changeTopicConfig(zkUtils, topicName, config);
         } catch (AdminOperationException e) {
             LOGGER.error("class=TopicCommands||method=modifyTopicConfig||errMsg={}||clusterDO={}||topicName={}||config={}", e.getMessage(), clusterDO, topicName,config, e);
@@ -207,6 +215,31 @@ public class TopicCommands {
         }
 
         return ResultStatus.SUCCESS;
+    }
+
+    /**
+     * 获取Topic的动态配置
+     */
+    public static Properties fetchTopicConfig(ClusterDO clusterDO, String topicName){
+        ZkUtils zkUtils = null;
+        try {
+            zkUtils = ZkUtils.apply(
+                    clusterDO.getZookeeper(),
+                    Constant.DEFAULT_SESSION_TIMEOUT_UNIT_MS,
+                    Constant.DEFAULT_SESSION_TIMEOUT_UNIT_MS,
+                    JaasUtils.isZkSecurityEnabled()
+            );
+
+            return AdminUtils.fetchEntityConfig(zkUtils, ConfigType.Topic(), topicName);
+        } catch (Exception e){
+            LOGGER.error("get topic config failed, zk:{},topic:{} .err:{}", clusterDO.getZookeeper(), topicName, e);
+        } finally {
+            if (null != zkUtils) {
+                zkUtils.close();
+            }
+        }
+
+        return null;
     }
 
     private static Seq<BrokerMetadata> convert2BrokerMetadataSeq(List<Integer> brokerIdList) {

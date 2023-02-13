@@ -30,13 +30,13 @@ export class ClusterOverview extends React.Component<IOverview> {
     const content = this.props.basicInfo as IMetaData;
     const gmtCreate = moment(content.gmtCreate).format(timeFormat);
     const clusterContent = [{
-      value: content.clusterName,
+      value: `${content.clusterName}${content.haRelation === 0 ? '（备）' : content.haRelation === 1 ? '（主）' : content.haRelation === 2 ? '（主&备）' : ''}`,
       label: '集群名称',
-    }, 
+    },
     // {
     //   value: clusterTypeMap[content.mode],
     //   label: '集群类型',
-    // }, 
+    // },
     {
       value: gmtCreate,
       label: '接入时间',
@@ -50,6 +50,9 @@ export class ClusterOverview extends React.Component<IOverview> {
     }, {
       value: content.zookeeper,
       label: 'Zookeeper',
+    }, {
+      value: `${content.mutualBackupClusterName || '-'}${content.haRelation === 0 ? '（主）' : content.haRelation === 1 ? '（备）' : content.haRelation === 2 ? '（主&备）' : ''}`,
+      label: '互备集群',
     }];
     return (
       <>
@@ -64,18 +67,18 @@ export class ClusterOverview extends React.Component<IOverview> {
               </Descriptions.Item>
             ))}
             {clusterInfo.map((item: ILabelValue, index: number) => (
-                <Descriptions.Item key={index} label={item.label}>
-                  <Tooltip placement="bottomLeft" title={item.value}>
-                    <span className="overview-bootstrap">
-                      <Icon
-                        onClick={() => copyString(item.value)}
-                        type="copy"
-                        className="didi-theme overview-theme"
-                      />
-                      <i className="overview-boot">{item.value}</i>
-                    </span>
-                  </Tooltip>
-                </Descriptions.Item>
+              <Descriptions.Item key={index} label={item.label}>
+                <Tooltip placement="bottomLeft" title={item.value}>
+                  <span className="overview-bootstrap">
+                    <Icon
+                      onClick={() => copyString(item.value)}
+                      type="copy"
+                      className="didi-theme overview-theme"
+                    />
+                    <i className="overview-boot">{item.value}</i>
+                  </span>
+                </Tooltip>
+              </Descriptions.Item>
             ))}
           </Descriptions>
         </PageHeader>

@@ -25,6 +25,7 @@ public interface AuthorityDao {
     List<AuthorityDO> getAuthority(Long clusterId, String topicName, String appId);
 
     List<AuthorityDO> getAuthorityByTopic(Long clusterId, String topicName);
+    List<AuthorityDO> getAuthorityByTopicFromCache(Long clusterId, String topicName);
 
     List<AuthorityDO> getByAppId(String appId);
 

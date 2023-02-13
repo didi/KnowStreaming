@@ -5,19 +5,20 @@ import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.LogicalCluster;
 import com.xiaojukeji.kafka.manager.common.entity.ao.cluster.LogicalClusterMetrics;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.BrokerMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerMetricsDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.dao.LogicalClusterDao;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.BrokerMetricsDO;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
-import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.service.service.BrokerService;
 import com.xiaojukeji.kafka.manager.service.service.LogicalClusterService;
+import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaClusterService;
 import com.xiaojukeji.kafka.manager.service.utils.MetricsConvertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,9 @@ public class LogicalClusterServiceImpl implements LogicalClusterService {
 
     @Autowired
     private AppService appService;
+
+    @Autowired
+    private HaClusterService haClusterService;
 
     @Autowired
     private LogicalClusterMetadataManager logicClusterMetadataManager;

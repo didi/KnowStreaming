@@ -23,6 +23,8 @@ public enum ResultStatus {
     API_CALL_EXCEED_LIMIT(1403, "api call exceed limit"),
     USER_WITHOUT_AUTHORITY(1404, "user without authority"),
     CHANGE_ZOOKEEPER_FORBIDDEN(1405, "change zookeeper forbidden"),
+    HA_CLUSTER_DELETE_FORBIDDEN(1409, "先删除主topic，才能删除该集群"),
+    HA_TOPIC_DELETE_FORBIDDEN(1410, "先解除高可用关系，才能删除该topic"),
 
 
     APP_OFFLINE_FORBIDDEN(1406, "先下线topic，才能下线应用～"),
@@ -76,6 +78,8 @@ public enum ResultStatus {
     QUOTA_NOT_EXIST(7113, "quota not exist, please check clusterId, topicName and appId"),
     CONSUMER_GROUP_NOT_EXIST(7114, "consumerGroup not exist"),
     TOPIC_BIZ_DATA_NOT_EXIST(7115, "topic biz data not exist, please sync topic to db"),
+    SD_ZK_NOT_EXIST(7116, "SD_ZK未配置"),
+
 
     // 资源已存在
     RESOURCE_ALREADY_EXISTED(7200, "资源已经存在"),
@@ -88,6 +92,7 @@ public enum ResultStatus {
     RESOURCE_ALREADY_USED(7400, "资源早已被使用"),
 
 
+
     /**
      * 因为外部系统的问题, 操作时引起的错误, [8000, 9000)
      * ------------------------------------------------------------------------------------------
@@ -98,6 +103,7 @@ public enum ResultStatus {
     ZOOKEEPER_READ_FAILED(8021, "zookeeper read failed"),
     ZOOKEEPER_WRITE_FAILED(8022, "zookeeper write failed"),
     ZOOKEEPER_DELETE_FAILED(8023, "zookeeper delete failed"),
+    ZOOKEEPER_OPERATE_FAILED(8024, "zookeeper operate failed"),
 
     // 调用集群任务里面的agent失败
     CALL_CLUSTER_TASK_AGENT_FAILED(8030, " call cluster task agent failed"),

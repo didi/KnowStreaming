@@ -30,6 +30,7 @@ import com.xiaojukeji.kafka.manager.common.entity.pojo.ControllerDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.utils.MetricsConvertUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.util.*;
 
@@ -89,7 +90,7 @@ public class ClusterModelConverter {
             return null;
         }
         ClusterDetailVO vo = new ClusterDetailVO();
-        CopyUtils.copyProperties(vo, dto);
+        BeanUtils.copyProperties(dto, vo);
         if (ValidateUtils.isNull(vo.getRegionNum())) {
             vo.setRegionNum(0);
         }

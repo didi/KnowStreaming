@@ -2,11 +2,13 @@ package com.xiaojukeji.kafka.manager.common.entity.vo.rd.cluster;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * @author zengqiao
  * @date 20/4/23
  */
+@Data
 @ApiModel(description="集群信息")
 public class ClusterDetailVO extends ClusterBaseVO {
     @ApiModelProperty(value="Broker数")
@@ -24,45 +26,11 @@ public class ClusterDetailVO extends ClusterBaseVO {
     @ApiModelProperty(value="Region数")
     private Integer regionNum;
 
-    public Integer getBrokerNum() {
-        return brokerNum;
-    }
+    @ApiModelProperty(value = "高可用关系：1:主, 0:备 , 其他:非高可用")
+    private Integer haRelation;
 
-    public void setBrokerNum(Integer brokerNum) {
-        this.brokerNum = brokerNum;
-    }
-
-    public Integer getTopicNum() {
-        return topicNum;
-    }
-
-    public void setTopicNum(Integer topicNum) {
-        this.topicNum = topicNum;
-    }
-
-    public Integer getConsumerGroupNum() {
-        return consumerGroupNum;
-    }
-
-    public void setConsumerGroupNum(Integer consumerGroupNum) {
-        this.consumerGroupNum = consumerGroupNum;
-    }
-
-    public Integer getControllerId() {
-        return controllerId;
-    }
-
-    public void setControllerId(Integer controllerId) {
-        this.controllerId = controllerId;
-    }
-
-    public Integer getRegionNum() {
-        return regionNum;
-    }
-
-    public void setRegionNum(Integer regionNum) {
-        this.regionNum = regionNum;
-    }
+    @ApiModelProperty(value = "互备集群名称")
+    private String mutualBackupClusterName;
 
     @Override
     public String toString() {
@@ -72,6 +40,8 @@ public class ClusterDetailVO extends ClusterBaseVO {
                 ", consumerGroupNum=" + consumerGroupNum +
                 ", controllerId=" + controllerId +
                 ", regionNum=" + regionNum +
-                "} " + super.toString();
+                ", haRelation=" + haRelation +
+                ", mutualBackupClusterName='" + mutualBackupClusterName + '\'' +
+                '}';
     }
 }

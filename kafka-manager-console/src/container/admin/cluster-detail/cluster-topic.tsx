@@ -118,10 +118,10 @@ export class ClusterTopic extends SearchAndFilterContainer {
   public renderClusterTopicList() {
     const clusterColumns = [
       {
-        title: 'Topic名称',
+        title: `Topic名称`,
         dataIndex: 'topicName',
         key: 'topicName',
-        width: '120px',
+        width: '140px',
         sorter: (a: IClusterTopics, b: IClusterTopics) => a.topicName.charCodeAt(0) - b.topicName.charCodeAt(0),
         render: (text: string, record: IClusterTopics) => {
           return (
@@ -130,7 +130,7 @@ export class ClusterTopic extends SearchAndFilterContainer {
                 // tslint:disable-next-line:max-line-length
                 href={`${urlPrefix}/topic/topic-detail?clusterId=${record.clusterId || ''}&topic=${record.topicName || ''}&isPhysicalClusterId=true&region=${region.currentRegion}`}
               >
-                {text}
+                {text}{record.haRelation === 0 ? '（备）' : record.haRelation === 1 ? '（主）' : record.haRelation === 2 ? '（主&备）' : ''}
               </a>
             </Tooltip>);
         },
@@ -208,23 +208,27 @@ export class ClusterTopic extends SearchAndFilterContainer {
       {
         title: '操作',
         width: '120px',
-        render: (value: string, item: IClusterTopics) => (
-          <>
-            <a onClick={() => this.getBaseInfo(item)} className="action-button">编辑</a>
-            <a onClick={() => this.expandPartition(item)} className="action-button">扩分区</a>
-            {/* <a onClick={() => this.expandPartition(item)} className="action-button">删除</a> */}
-            <Popconfirm
-              title="确定删除？"
-              // 运维管控－集群列表－Topic列表修改删除业务逻辑
-              onConfirm={() => this.confirmDetailTopic(item)}
-              // onConfirm={() => this.deleteTopic(item)}
-              cancelText="取消"
-              okText="确认"
-            >
-              <a>删除</a>
-            </Popconfirm>
-          </>
-        ),
+        render: (value: string, item: IClusterTopics) => {
+          if (item.haRelation === 0) return '-';
+
+          return (
+            <>
+              <a onClick={() => this.getBaseInfo(item)} className="action-button">编辑</a>
+              <a onClick={() => this.expandPartition(item)} className="action-button">扩分区</a>
+              {/* <a onClick={() => this.expandPartition(item)} className="action-button">删除</a> */}
+              <Popconfirm
+                title="确定删除？"
+                // 运维管控－集群列表－Topic列表修改删除业务逻辑
+                onConfirm={() => this.confirmDetailTopic(item)}
+                // onConfirm={() => this.deleteTopic(item)}
+                cancelText="取消"
+                okText="确认"
+              >
+                <a>删除</a>
+              </Popconfirm>
+            </>
+          );
+        },
       },
     ];
     if (users.currentUser.role !== 2) {

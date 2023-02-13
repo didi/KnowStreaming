@@ -23,7 +23,11 @@ public class ClusterDaoImpl implements ClusterDao {
 
     @Override
     public int insert(ClusterDO clusterDO) {
-        return sqlSession.insert("ClusterDao.insert", clusterDO);
+        if (clusterDO.getId() != null) {
+            return sqlSession.insert("ClusterDao.insertWithId", clusterDO);
+        } else {
+            return sqlSession.insert("ClusterDao.insert", clusterDO);
+        }
     }
 
     @Override

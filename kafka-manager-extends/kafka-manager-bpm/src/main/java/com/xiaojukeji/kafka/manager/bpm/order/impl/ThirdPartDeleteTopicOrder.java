@@ -155,6 +155,7 @@ public class ThirdPartDeleteTopicOrder extends AbstractTopicOrder {
             return ResultStatus.USER_WITHOUT_AUTHORITY;
         }
 
+
         ResultStatus resultStatus = adminService.deleteTopic(clusterDO, extensionDTO.getTopicName(), userName);
         if (!ResultStatus.SUCCESS.equals(resultStatus)) {
             return resultStatus;

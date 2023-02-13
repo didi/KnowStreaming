@@ -248,6 +248,10 @@ export const getAppTopicList = (appId: string, mine: boolean) => {
   return fetch(`/normal/apps/${appId}/topics?mine=${mine}`);
 };
 
+export const getAppListByClusterId = (clusterId: number) => {
+  return fetch(`/normal/apps/${clusterId}`);
+};
+
 /**
  * 专家服务
  */
@@ -418,8 +422,69 @@ export const getMetaData = (needDetail: boolean = true) => {
   return fetch(`/rd/clusters/basic-info?need-detail=${needDetail}`);
 };
 
+export const getHaMetaData = () => {
+  return fetch(`/rd/clusters/ha/basic-info`);
+};
+
+export const getClusterHaTopics = (firstClusterId: number, secondClusterId?: number) => {
+  return fetch(`/rd/clusters/${firstClusterId}/ha-topics?secondClusterId=${secondClusterId || ''}`);
+};
+
+export const getClusterHaTopicsStatus = (firstClusterId: number, checkMetadata: boolean) => {
+  return fetch(`/rd/clusters/${firstClusterId}/ha-topics/status?checkMetadata=${checkMetadata}`);
+};
+
+export const setHaTopics = (params: any) => {
+  return fetch(`/op/ha-topics`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+
+export const getAppRelatedTopics = (params: any) => {
+  return fetch(`/rd/apps/relate-topics
+  `, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+// 取消Topic高可用
+export const unbindHaTopics = (params: any) => {
+  return fetch(`/op/ha-topics`, {
+    method: 'DELETE',
+    body: JSON.stringify(params),
+  });
+};
+
+// 创建Topic主备切换任务
+export const createSwitchTask = (params: any) => {
+  return fetch(`/op/as-switch-jobs`, {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+
+export const getJobDetail = (jobId: number) => {
+  return fetch(`/op/as-switch-jobs/${jobId}/job-detail`);
+};
+
+export const getJobLog = (jobId: number, startLogId?: number) => {
+  return fetch(`/op/as-switch-jobs/${jobId}/job-logs?startLogId=${startLogId || ''}`);
+};
+
+export const getJobState = (jobId: number) => {
+  return fetch(`/op/as-switch-jobs/${jobId}/job-state`);
+};
+
+export const switchAsJobs = (jobId: number, params: any) => {
+  return fetch(`/op/as-switch-jobs/${jobId}/action`, {
+    method: 'PUT',
+    body: JSON.stringify(params),
+  });
+};
+
 export const getOperationRecordData = (params: any) => {
-  return fetch(`/rd/operate-record`,{
+  return fetch(`/rd/operate-record`, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -569,15 +634,15 @@ export const getCandidateController = (clusterId: number) => {
   return fetch(`/rd/clusters/${clusterId}/controller-preferred-candidates`);
 };
 
-export const addCandidateController = (params:any) => {
-  return  fetch(`/op/cluster-controller/preferred-candidates`, {
+export const addCandidateController = (params: any) => {
+  return fetch(`/op/cluster-controller/preferred-candidates`, {
     method: 'POST',
     body: JSON.stringify(params),
   });
 };
 
-export const deleteCandidateCancel = (params:any)=>{
-  return  fetch(`/op/cluster-controller/preferred-candidates`, {
+export const deleteCandidateCancel = (params: any) => {
+  return fetch(`/op/cluster-controller/preferred-candidates`, {
     method: 'DELETE',
     body: JSON.stringify(params),
   });

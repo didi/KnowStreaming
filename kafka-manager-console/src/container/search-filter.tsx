@@ -18,7 +18,7 @@ interface IFilterParams {
 }
 
 interface ISearchAndFilterState {
-  [filter: string]: boolean | string | number | any[];
+  [filter: string]: boolean | string | number | any;
 }
 
 export class SearchAndFilterContainer extends React.Component<any, ISearchAndFilterState> {

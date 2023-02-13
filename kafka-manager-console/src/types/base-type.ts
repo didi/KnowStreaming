@@ -474,7 +474,14 @@ export interface IMetaData {
   status: number;
   topicNum: number;
   zookeeper: string;
+  haRelation?: number;
+  haASSwitchJobId?: number;
+  haStatus?: number;
+  haClusterVO?: IMetaData;
+  activeTopicCount?: number;
+  standbyTopicCount?: number;
   key?: number;
+  mutualBackupClusterName?: string;
 }
 
 export interface IConfigure {
@@ -641,6 +648,7 @@ export interface IClusterTopics {
   properties: any;
   clusterName: string;
   logicalClusterId: number;
+  haRelation?: number;
   key?: number;
 }
 

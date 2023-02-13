@@ -44,7 +44,7 @@ export class MyCluster extends SearchAndFilterContainer {
           label: '所属应用',
           rules: [{ required: true, message: '请选择所属应用' }],
           type: 'select',
-          options: app.data.map((item) => {
+          options: app.clusterAppData.map((item) => {
             return {
               label: item.name,
               value: item.appId,
@@ -135,8 +135,8 @@ export class MyCluster extends SearchAndFilterContainer {
     if (!cluster.clusterModes.length) {
       cluster.getClusterModes();
     }
-    if (!app.data.length) {
-      app.getAppList();
+    if (!app.clusterAppData.length) {
+      app.getAppListByClusterId(-1);
     }
   }
 

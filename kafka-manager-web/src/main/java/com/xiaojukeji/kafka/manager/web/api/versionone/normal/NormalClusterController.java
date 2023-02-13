@@ -24,6 +24,7 @@ import com.xiaojukeji.kafka.manager.service.service.ThrottleService;
 import com.xiaojukeji.kafka.manager.service.service.TopicService;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaTopicService;
 import com.xiaojukeji.kafka.manager.web.converters.ClusterModelConverter;
 import com.xiaojukeji.kafka.manager.web.converters.CommonModelConverter;
 import io.swagger.annotations.Api;
@@ -49,6 +50,9 @@ public class NormalClusterController {
 
     @Autowired
     private TopicService topicService;
+
+    @Autowired
+    private HaTopicService haTopicService;
 
     @Autowired
     private LogicalClusterService logicalClusterService;
@@ -142,6 +146,13 @@ public class NormalClusterController {
         LogicalClusterDO logicalClusterDO = logicalClusterMetadataManager.getLogicalCluster(logicalClusterId);
         if (ValidateUtils.isNull(logicalClusterDO)) {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+
+        //过滤备topic
+        Map<Long, List<String>> relationMap = haTopicService.getClusterStandbyTopicMap();
+        Set<String> topics = logicalClusterMetadataManager.getTopicNameSet(logicalClusterId);
+        if (relationMap !=null && relationMap.get(logicalClusterDO.getClusterId()) != null){
+            topics.removeAll(new HashSet<>(relationMap.get(logicalClusterDO.getClusterId())));
         }
 
         return new Result<>(CommonModelConverter.convert2TopicOverviewVOList(

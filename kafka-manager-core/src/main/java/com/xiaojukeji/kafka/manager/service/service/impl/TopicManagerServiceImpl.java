@@ -4,38 +4,41 @@ import com.xiaojukeji.kafka.manager.common.bizenum.KafkaClientEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.ModuleEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.OperateEnum;
 import com.xiaojukeji.kafka.manager.common.bizenum.TopicAuthorityEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.ha.HaRelationTypeEnum;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaConstant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.constant.TopicCreationConstant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.TopicOperationResult;
 import com.xiaojukeji.kafka.manager.common.entity.ao.RdTopicBasic;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.MineTopicSummary;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicAppData;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicBusinessInfo;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicExpansionDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicModificationDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicThrottledMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AuthorityDO;
-import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
-import com.xiaojukeji.kafka.manager.common.utils.JsonUtils;
-import com.xiaojukeji.kafka.manager.common.utils.NumberUtils;
-import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
-import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.common.utils.*;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.config.TopicQuotaData;
 import com.xiaojukeji.kafka.manager.dao.TopicDao;
 import com.xiaojukeji.kafka.manager.dao.TopicExpiredDao;
 import com.xiaojukeji.kafka.manager.dao.TopicStatisticsDao;
-import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicThrottledMetrics;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AuthorityService;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaTopicService;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
+import com.xiaojukeji.kafka.manager.service.utils.TopicCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +89,15 @@ public class TopicManagerServiceImpl implements TopicManagerService {
 
     @Autowired
     private OperateRecordService operateRecordService;
+
+    @Autowired
+    private HaTopicService haTopicService;
+
+    @Autowired
+    private AdminService adminService;
+
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @Override
     public List<TopicDO> listAll() {
@@ -188,12 +200,18 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         Map<String, Map<Long, Map<String, AuthorityDO>>> appMap = authorityService.getAllAuthority();
         // 增加权限信息和App信息
         List<MineTopicSummary> summaryList = new ArrayList<>();
+        Map<Long, List<String>> clusterStandbyTopicMap = haTopicService.getClusterStandbyTopicMap();
         for (AppDO appDO : appDOList) {
             // 查权限
             for (Map<String, AuthorityDO> subMap : appMap.getOrDefault(appDO.getAppId(), Collections.emptyMap()).values()) {
                 for (AuthorityDO authorityDO : subMap.values()) {
                     if (!PhysicalClusterMetadataManager.isTopicExist(authorityDO.getClusterId(), authorityDO.getTopicName())
                             || TopicAuthorityEnum.DENY.getCode().equals(authorityDO.getAccess())) {
+                        continue;
+                    }
+                    //过滤备topic
+                    List<String> standbyTopics = clusterStandbyTopicMap.get(authorityDO.getClusterId());
+                    if (standbyTopics != null && standbyTopics.contains(authorityDO.getTopicName())){
                         continue;
                     }
 
@@ -224,6 +242,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
             TopicDO topicDO = topicDao.getByTopicName(mineTopicSummary.getPhysicalClusterId(), mineTopicSummary.getTopicName());
             mineTopicSummary.setDescription(topicDO.getDescription());
         }
+
         return summaryList;
     }
 
@@ -302,8 +321,9 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         }
 
         List<TopicDTO> dtoList = new ArrayList<>();
+        Map<Long, List<String>> clusterStandbyTopicMap = haTopicService.getClusterStandbyTopicMap();
         for (ClusterDO clusterDO: clusterDOList) {
-            dtoList.addAll(getTopics(clusterDO, appMap, topicMap.getOrDefault(clusterDO.getId(), new HashMap<>())));
+            dtoList.addAll(getTopics(clusterDO, appMap, topicMap.getOrDefault(clusterDO.getId(), new HashMap<>()),clusterStandbyTopicMap.get(clusterDO.getId())));
         }
         return dtoList;
     }
@@ -311,13 +331,18 @@ public class TopicManagerServiceImpl implements TopicManagerService {
 
     private List<TopicDTO> getTopics(ClusterDO clusterDO,
                                      Map<String, AppDO> appMap,
-                                     Map<String, TopicDO> topicMap) {
+                                     Map<String, TopicDO> topicMap,
+                                     List<String> standbyTopicNames) {
         List<TopicDTO> dtoList = new ArrayList<>();
+
         for (String topicName: PhysicalClusterMetadataManager.getTopicNameList(clusterDO.getId())) {
             if (topicName.equals(KafkaConstant.COORDINATOR_TOPIC_NAME) || topicName.equals(KafkaConstant.TRANSACTION_TOPIC_NAME)) {
                 continue;
             }
-
+            //过滤备topic
+            if (standbyTopicNames != null && standbyTopicNames.contains(topicName)){
+                continue;
+            }
             LogicalClusterDO logicalClusterDO = logicalClusterMetadataManager.getTopicLogicalCluster(
                     clusterDO.getId(),
                     topicName
@@ -590,12 +615,12 @@ public class TopicManagerServiceImpl implements TopicManagerService {
 
         TopicDO topicDO = getByTopicName(physicalClusterId, topicName);
         if (ValidateUtils.isNull(topicDO)) {
-            return new Result<>(convert2RdTopicBasic(clusterDO, topicName, null, null, regionNameList, properties));
+            return new Result<>(convert2RdTopicBasic(clusterDO, topicName, null, null, regionNameList, properties, HaRelationTypeEnum.UNKNOWN.getCode()));
         }
         AppDO appDO = appService.getByAppId(topicDO.getAppId());
 
-
-        return new Result<>(convert2RdTopicBasic(clusterDO, topicName, topicDO, appDO, regionNameList, properties));
+        Integer haRelation = haASRelationManager.getRelation(physicalClusterId, topicName);
+        return new Result<>(convert2RdTopicBasic(clusterDO, topicName, topicDO, appDO, regionNameList, properties, haRelation));
     }
 
     @Override
@@ -656,12 +681,56 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         return ResultStatus.MYSQL_ERROR;
     }
 
+    @Override
+    public Result modifyTopic(TopicModificationDTO dto) {
+        ClusterDO clusterDO = clusterService.getById(dto.getClusterId());
+        if (ValidateUtils.isNull(clusterDO)) {
+            return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
+        }
+
+        // 获取属性
+        Properties properties = dto.getProperties();
+        if (ValidateUtils.isNull(properties)) {
+            properties = new Properties();
+        }
+        properties.put(KafkaConstant.RETENTION_MS_KEY, String.valueOf(dto.getRetentionTime()));
+
+        // 操作修改
+        String operator = SpringTool.getUserName();
+        ResultStatus rs = TopicCommands.modifyTopicConfig(clusterDO, dto.getTopicName(), properties);
+        if (!ResultStatus.SUCCESS.equals(rs)) {
+            return Result.buildFrom(rs);
+        }
+        modifyTopicByOp(dto.getClusterId(), dto.getTopicName(), dto.getAppId(), dto.getDescription(), operator);
+        return Result.buildSuc();
+    }
+
+    @Override
+    public TopicOperationResult expandTopic(TopicExpansionDTO dto) {
+        ClusterDO clusterDO = clusterService.getById(dto.getClusterId());
+        if (ValidateUtils.isNull(clusterDO)) {
+            return TopicOperationResult.buildFrom(dto.getClusterId(), dto.getTopicName(), ResultStatus.CLUSTER_NOT_EXIST);
+        }
+
+        // 参数检查合法, 开始对Topic进行扩分区
+        ResultStatus statusEnum = adminService.expandPartitions(
+                clusterDO,
+                dto.getTopicName(),
+                dto.getPartitionNum(),
+                dto.getRegionId(),
+                dto.getBrokerIdList(),
+                SpringTool.getUserName()
+        );
+        return TopicOperationResult.buildFrom(dto.getClusterId(), dto.getTopicName(), statusEnum);
+    }
+
     private RdTopicBasic convert2RdTopicBasic(ClusterDO clusterDO,
                                               String topicName,
                                               TopicDO topicDO,
                                               AppDO appDO,
                                               List<String> regionNameList,
-                                              Properties properties) {
+                                              Properties properties,
+                                              Integer haRelation) {
         RdTopicBasic rdTopicBasic = new RdTopicBasic();
         rdTopicBasic.setClusterId(clusterDO.getId());
         rdTopicBasic.setClusterName(clusterDO.getClusterName());
@@ -676,6 +745,7 @@ public class TopicManagerServiceImpl implements TopicManagerService {
         rdTopicBasic.setRegionNameList(regionNameList);
         rdTopicBasic.setProperties(properties);
         rdTopicBasic.setRetentionTime(KafkaZookeeperUtils.getTopicRetentionTime(properties));
+        rdTopicBasic.setHaRelation(haRelation);
         return rdTopicBasic;
     }
 }

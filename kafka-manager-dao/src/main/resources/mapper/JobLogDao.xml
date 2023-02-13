@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.kafka.manager.dao.ha.JobLogDao">
+    <resultMap  id="JobLogMap"                      type="com.xiaojukeji.kafka.manager.common.entity.pojo.ha.JobLogDO">
+        <id     column="id"                         property="id" />
+        <result column="create_time"                property="createTime" />
+        <result column="modify_time"                property="modifyTime" />
+
+        <result column="biz_type"                   property="bizType" />
+        <result column="biz_keyword"                property="bizKeyword" />
+        <result column="print_time"                 property="printTime" />
+        <result column="content"                    property="content" />
+    </resultMap>
+</mapper>

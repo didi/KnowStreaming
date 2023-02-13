@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author zengqiao
@@ -123,5 +124,44 @@ public class ZookeeperServiceImpl implements ZookeeperService {
             LOGGER.error("class=ZookeeperServiceImpl||method=deleteControllerPreferredCandidate||clusterId={}||brokerId={}||errMsg={}||", clusterId, brokerId, e.getMessage());
         }
         return Result.buildFrom(ResultStatus.ZOOKEEPER_DELETE_FAILED);
+    }
+
+    @Override
+    public Result<List<Integer>> getBrokerIds(String zookeeper) {
+        if (ValidateUtils.isNull(zookeeper)) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
+        }
+        ZkConfigImpl zkConfig = new ZkConfigImpl(zookeeper);
+        if (ValidateUtils.isNull(zkConfig)) {
+            return Result.buildFrom(ResultStatus.ZOOKEEPER_CONNECT_FAILED);
+        }
+
+        try {
+            if (!zkConfig.checkPathExists(ZkPathUtil.BROKER_IDS_ROOT)) {
+                return Result.buildSuc(new ArrayList<>());
+            }
+            List<String> brokerIdList = zkConfig.getChildren(ZkPathUtil.BROKER_IDS_ROOT);
+            if (ValidateUtils.isEmptyList(brokerIdList)) {
+                return Result.buildSuc(new ArrayList<>());
+            }
+            return Result.buildSuc(ListUtils.string2IntList(ListUtils.strList2String(brokerIdList)));
+        } catch (Exception e) {
+            LOGGER.error("class=ZookeeperServiceImpl||method=getBrokerIds||zookeeper={}||errMsg={}", zookeeper, e.getMessage());
+        }
+        return Result.buildFrom(ResultStatus.ZOOKEEPER_READ_FAILED);
+    }
+
+    @Override
+    public Long getClusterIdAndNullIfFailed(String zookeeper) {
+        try {
+            ZkConfigImpl zkConfig = new ZkConfigImpl(zookeeper);
+            Properties props = zkConfig.get(ZkPathUtil.CLUSTER_ID_NODE, Properties.class);
+
+            return Long.valueOf(props.getProperty("id"));
+        } catch (Exception e) {
+            LOGGER.error("class=ZookeeperServiceImpl||method=getClusterIdAndNullIfFailed||zookeeper={}||errMsg=exception", zookeeper, e);
+        }
+
+        return null;
     }
 }

@@ -1,11 +1,18 @@
 package com.xiaojukeji.kafka.manager.common.entity.pojo;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.util.Date;
 
 /**
  * @author zengqiao
  * @date 20/6/29
  */
+@Data
+@ToString
+@NoArgsConstructor
 public class LogicalClusterDO {
     private Long id;
 
@@ -27,99 +34,17 @@ public class LogicalClusterDO {
 
     private Date gmtModify;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public LogicalClusterDO(String name,
+                            String identification,
+                            Integer mode,
+                            String appId,
+                            Long clusterId,
+                            String regionList) {
         this.name = name;
-    }
-
-    public String getIdentification() {
-        return identification;
-    }
-
-    public void setIdentification(String identification) {
         this.identification = identification;
-    }
-
-    public Integer getMode() {
-        return mode;
-    }
-
-    public void setMode(Integer mode) {
         this.mode = mode;
-    }
-
-    public String getAppId() {
-        return appId;
-    }
-
-    public void setAppId(String appId) {
         this.appId = appId;
-    }
-
-    public Long getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(Long clusterId) {
         this.clusterId = clusterId;
-    }
-
-    public String getRegionList() {
-        return regionList;
-    }
-
-    public void setRegionList(String regionList) {
         this.regionList = regionList;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Date getGmtCreate() {
-        return gmtCreate;
-    }
-
-    public void setGmtCreate(Date gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
-
-    public Date getGmtModify() {
-        return gmtModify;
-    }
-
-    public void setGmtModify(Date gmtModify) {
-        this.gmtModify = gmtModify;
-    }
-
-    @Override
-    public String toString() {
-        return "LogicalClusterDO{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", identification='" + identification + '\'' +
-                ", mode=" + mode +
-                ", appId='" + appId + '\'' +
-                ", clusterId=" + clusterId +
-                ", regionList='" + regionList + '\'' +
-                ", description='" + description + '\'' +
-                ", gmtCreate=" + gmtCreate +
-                ", gmtModify=" + gmtModify +
-                '}';
     }
 }

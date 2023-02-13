@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx';
-import { getAppList, getAppDetail, getAppTopicList, applyOrder, modfiyApplication, modfiyAdminApp, getAdminAppList, getAppsConnections, getTopicAppQuota } from 'lib/api';
+import { getAppList, getAppDetail, getAppTopicList, applyOrder, modfiyApplication, modfiyAdminApp, getAdminAppList, getAppsConnections, getTopicAppQuota, getAppListByClusterId } from 'lib/api';
 import { IAppItem, IAppQuota, ITopic, IOrderParams, IConnectionInfo } from 'types/base-type';
 
 class App {
@@ -13,13 +13,16 @@ class App {
   public data: IAppItem[] = [];
 
   @observable
+  public clusterAppData: IAppItem[] = [];
+
+  @observable
   public adminAppData: IAppItem[] = [];
 
   @observable
   public selectData: IAppItem[] = [{
     appId: '-1',
     name: '所有关联应用',
-    } as IAppItem,
+  } as IAppItem,
   ];
 
   @observable
@@ -51,12 +54,12 @@ class App {
   @action.bound
   public setTopicAppQuota(data: IAppQuota[]) {
     return this.appQuota = data.map((item, index) => {
-       return {
-         ...item,
-         label: item.appName,
-         value: item.appId,
-         key: index,
-       };
+      return {
+        ...item,
+        label: item.appName,
+        value: item.appId,
+        key: index,
+      };
     });
   }
 
@@ -85,6 +88,16 @@ class App {
 
     this.selectData.push(...selectData);
     this.setLoading(false);
+  }
+
+  @action.bound
+  public setClusterAppData(data: IAppItem[] = []) {
+    this.clusterAppData = data.map((item, index) => ({
+      ...item,
+      key: index,
+      principalList: item.principals ? item.principals.split(',') : [],
+    }));
+    return this.clusterAppData;
   }
 
   @action.bound
@@ -131,6 +144,10 @@ class App {
   public getAppList() {
     this.setLoading(true);
     getAppList().then(this.setData);
+  }
+
+  public getAppListByClusterId(clusterId: number) {
+    return getAppListByClusterId(clusterId).then(this.setClusterAppData);
   }
 
   public getTopicAppQuota(clusterId: number, topicName: string) {

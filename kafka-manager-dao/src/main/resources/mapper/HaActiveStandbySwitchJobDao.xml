@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaojukeji.kafka.manager.dao.ha.HaASSwitchJobDao">
+    <resultMap  id="HaASSwitchJobMap"               type="com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchJobDO">
+        <id     column="id"                         property="id" />
+        <result column="create_time"                property="createTime" />
+        <result column="modify_time"                property="modifyTime" />
+
+        <result column="active_cluster_phy_id"      property="activeClusterPhyId" />
+        <result column="standby_cluster_phy_id"     property="standbyClusterPhyId" />
+        <result column="job_status"                 property="jobStatus" />
+        <result column="operator"                   property="operator" />
+    </resultMap>
+
+    <insert id="addAndSetId"
+            parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASSwitchJobDO"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO ks_km_physical_cluster
+        (active_cluster_phy_id, standby_cluster_phy_id, job_status, operator)
+        VALUES
+        (#{activeClusterPhyId}, #{standbyClusterPhyId}, #{jobStatus}, #{operator})
+    </insert>
+
+    <select id="listAllLatest" resultMap="HaASSwitchJobMap">
+        SELECT Table_B.* FROM
+            (SELECT max(`id`) as id FROM `ha_active_standby_switch_job` GROUP BY `active_cluster_phy_id`, `standby_cluster_phy_id`) AS Table_A
+                JOIN `ha_active_standby_switch_job` AS Table_B ON
+                Table_A.id=Table_B.id;
+    </select>
+</mapper>

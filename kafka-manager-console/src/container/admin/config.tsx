@@ -3,12 +3,13 @@ import { IUser, IUploadFile, IConfigure, IConfigGateway, IMetaData } from 'types
 import { users } from 'store/users';
 import { version } from 'store/version';
 import { showApplyModal, showApplyModalModifyPassword, showModifyModal, showConfigureModal, showConfigGatewayModal } from 'container/modal/admin';
-import { Popconfirm, Tooltip } from 'component/antd';
+import { Icon, Popconfirm, Tooltip } from 'component/antd';
 import { admin } from 'store/admin';
 import { cellStyle } from 'constants/table';
 import { timeFormat } from 'constants/strategy';
 import { urlPrefix } from 'constants/left-menu';
 import moment = require('moment');
+import { Tag } from 'antd';
 
 export const getUserColumns = () => {
   const columns = [
@@ -28,15 +29,15 @@ export const getUserColumns = () => {
           <span className="table-operation">
             <a onClick={() => showApplyModal(record)}>编辑</a>
             <a onClick={() => showApplyModalModifyPassword(record)}>修改密码</a>
-            {record.username == users.currentUser.username ? "" :
-                <Popconfirm
-                  title="确定删除？"
-                  onConfirm={() => users.deleteUser(record.username)}
-                  cancelText="取消"
-                  okText="确认"
-                >
-                  <a>删除</a>
-                </Popconfirm>
+            {record.username === users.currentUser.username ? '' :
+              <Popconfirm
+                title="确定删除？"
+                onConfirm={() => users.deleteUser(record.username)}
+                cancelText="取消"
+                okText="确认"
+              >
+                <a>删除</a>
+              </Popconfirm>
             }
           </span>);
       },
@@ -271,33 +272,82 @@ export const getConfigColumns = () => {
 const renderClusterHref = (value: number | string, item: IMetaData, key: number) => {
   return ( // 0 暂停监控--不可点击  1 监控中---可正常点击
     <>
-      {item.status === 1 ? <a href={`${urlPrefix}/admin/cluster-detail?clusterId=${item.clusterId}#${key}`}>{value}</a>
-        : <a style={{ cursor: 'not-allowed', color: '#999' }}>{value}</a>}
+      {item.status === 1 ? <a href={`${urlPrefix}/admin/cluster-detail?clusterId=${item.clusterId}#${key}`}>{value}</a> :
+        <a style={{ cursor: 'not-allowed', color: '#999' }}>{value}</a>}
     </>
   );
 };
 
-export const getAdminClusterColumns = () => {
+const renderTopicNum = (value: number | string, item: IMetaData, key: number, active?: boolean) => {
+  const show = item.haClusterVO || (!item.haClusterVO && !active);
+
+  if (!show) {
+    return ( // 0 暂停监控--不可点击  1 监控中---可正常点击
+      <>
+        {item.status === 1 ? <a href={`${urlPrefix}/admin/cluster-detail?clusterId=${item.clusterId}#${key}`}>
+          {value}
+        </a> :
+          <a style={{ cursor: 'not-allowed', color: '#999' }}>
+            {value}
+          </a>}
+      </>
+    );
+  }
+  return ( // 0 暂停监控--不可点击  1 监控中---可正常点击
+    <>
+      {item.status === 1 ? <a href={`${urlPrefix}/admin/cluster-detail?clusterId=${item.clusterId}#${key}`}>
+        {value}
+        <>（主{item.activeTopicCount ?? '-'}/备{item.standbyTopicCount ?? '-'}）</>
+      </a> :
+        <a style={{ cursor: 'not-allowed', color: '#999' }}>
+          {value}
+          <>（主{item.activeTopicCount ?? '-'}/备{item.standbyTopicCount ?? '-'}）</>
+        </a>}
+    </>
+  );
+};
+
+const renderClusterName = (value: number | string, item: IMetaData, key: number, active: boolean) => {
+  const show = item.haClusterVO || (!item.haClusterVO && !active);
+
+  return ( // 0 暂停监控--不可点击  1 监控中---可正常点击
+    <>
+      {item.status === 1 ?
+        <a href={`${urlPrefix}/admin/cluster-detail?clusterId=${item.clusterId}`}>{value}</a> :
+        <a style={{ cursor: 'not-allowed', color: '#999' }}>{value}</a>}
+      {active ? <>
+        {item.haClusterVO ? <Tooltip title="高可用集群"><Tag className="cluster-tag">HA</Tag></Tooltip> : null}
+        {item.haClusterVO && item.haStatus !== 0 ? <Tooltip title="Topic主备切换中"><Icon type="swap" style={{ color: '#27D687' }} /></Tooltip>
+          : null}
+      </> : null}
+    </>
+  );
+};
+export const getAdminClusterColumns = (active = true) => {
   return [
     {
       title: '物理集群ID',
       dataIndex: 'clusterId',
       key: 'clusterId',
-      sorter: (a: IMetaData, b: IMetaData) => b.clusterId - a.clusterId,
+      sorter: (a: IMetaData, b: IMetaData) => a.clusterId - b.clusterId,
+      width: active ? 115 : 111,
+      render: (text: number) => active ? text : `（${text ?? 0}）`,
     },
     {
       title: '物理集群名称',
       dataIndex: 'clusterName',
       key: 'clusterName',
       sorter: (a: IMetaData, b: IMetaData) => a.clusterName.charCodeAt(0) - b.clusterName.charCodeAt(0),
-      render: (text: string, item: IMetaData) => renderClusterHref(text, item, 1),
+      render: (text: string, item: IMetaData) => renderClusterName(text, item, 1, active),
+      width: 235,
     },
     {
       title: 'Topic数',
       dataIndex: 'topicNum',
       key: 'topicNum',
       sorter: (a: any, b: IMetaData) => b.topicNum - a.topicNum,
-      render: (text: number, item: IMetaData) => renderClusterHref(text, item, 2),
+      render: (text: number, item: IMetaData) => renderTopicNum(text, item, 2, active),
+      width: 140,
     },
     {
       title: 'Broker数',
@@ -305,6 +355,7 @@ export const getAdminClusterColumns = () => {
       key: 'brokerNum',
       sorter: (a: IMetaData, b: IMetaData) => b.brokerNum - a.brokerNum,
       render: (text: number, item: IMetaData) => renderClusterHref(text, item, 3),
+      width: 140,
     },
     {
       title: 'Consumer数',
@@ -312,6 +363,8 @@ export const getAdminClusterColumns = () => {
       key: 'consumerGroupNum',
       sorter: (a: IMetaData, b: IMetaData) => b.consumerGroupNum - a.consumerGroupNum,
       render: (text: number, item: IMetaData) => renderClusterHref(text, item, 4),
+      width: 150,
+
     },
     {
       title: 'Region数',
@@ -319,6 +372,8 @@ export const getAdminClusterColumns = () => {
       key: 'regionNum',
       sorter: (a: IMetaData, b: IMetaData) => b.regionNum - a.regionNum,
       render: (text: number, item: IMetaData) => renderClusterHref(text, item, 5),
+      width: 140,
+
     },
     {
       title: 'Controllerld',
@@ -326,12 +381,15 @@ export const getAdminClusterColumns = () => {
       key: 'controllerId',
       sorter: (a: IMetaData, b: IMetaData) => b.controllerId - a.controllerId,
       render: (text: number, item: IMetaData) => renderClusterHref(text, item, 7),
+      width: 150,
+
     },
     {
       title: '监控中',
       dataIndex: 'status',
       key: 'status',
       sorter: (a: IMetaData, b: IMetaData) => b.key - a.key,
+      width: 140,
       render: (value: number) => value === 1 ?
         <span className="success">是</span > : <span className="fail">否</span>,
     },

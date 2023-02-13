@@ -16,7 +16,10 @@
     <result column="description"    property="description" />
   </resultMap>
 
-  <insert id="insert" parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO">
+  <insert id="insert"
+          parameterType="com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO"
+          useGeneratedKeys="true"
+          keyProperty="id">
     INSERT INTO region
     (name, cluster_id, broker_list, status, description)
     VALUES

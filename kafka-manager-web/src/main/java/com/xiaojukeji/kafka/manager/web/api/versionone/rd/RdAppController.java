@@ -2,7 +2,10 @@ package com.xiaojukeji.kafka.manager.web.api.versionone.rd;
 
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.AppDTO;
+import com.xiaojukeji.kafka.manager.common.entity.dto.rd.AppRelateTopicsDTO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.app.AppVO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.rd.app.AppRelateTopicsVO;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaAppManager;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
@@ -10,6 +13,7 @@ import com.xiaojukeji.kafka.manager.web.converters.AppConverter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +29,9 @@ public class RdAppController {
     @Autowired
     private AppService appService;
 
+    @Autowired
+    private HaAppManager haAppManager;
+
     @ApiOperation(value = "App列表", notes = "")
     @RequestMapping(value = "apps", method = RequestMethod.GET)
     @ResponseBody
@@ -39,5 +46,12 @@ public class RdAppController {
         return Result.buildFrom(
                 appService.updateByAppId(dto, SpringTool.getUserName(), true)
         );
+    }
+
+    @ApiOperation(value = "App关联Topic信息查询", notes = "")
+    @PostMapping(value = "apps/relate-topics")
+    @ResponseBody
+    public Result<List<AppRelateTopicsVO>> appRelateTopics(@Validated @RequestBody AppRelateTopicsDTO dto) {
+        return haAppManager.appRelateTopics(dto.getClusterPhyId(), dto.getFilterTopicNameList());
     }
 }

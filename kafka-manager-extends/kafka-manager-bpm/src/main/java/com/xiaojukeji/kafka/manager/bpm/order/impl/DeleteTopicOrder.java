@@ -2,27 +2,29 @@ package com.xiaojukeji.kafka.manager.bpm.order.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderTypeEnum;
-import com.xiaojukeji.kafka.manager.common.entity.Result;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
-import com.xiaojukeji.kafka.manager.common.constant.Constant;
-import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
-import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.OrderExtensionDeleteTopicDTO;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.detail.AbstractOrderDetailData;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.detail.OrderDetailDeleteTopicDTO;
 import com.xiaojukeji.kafka.manager.bpm.common.handle.OrderHandleBaseDTO;
-import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.ClusterNameDTO;
-import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.bpm.order.AbstractTopicOrder;
+import com.xiaojukeji.kafka.manager.common.constant.Constant;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.ao.topic.TopicConnection;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
+import com.xiaojukeji.kafka.manager.common.entity.vo.normal.cluster.ClusterNameDTO;
+import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
-import com.xiaojukeji.kafka.manager.bpm.order.AbstractTopicOrder;
 import com.xiaojukeji.kafka.manager.service.service.AdminService;
-import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.service.service.TopicManagerService;
+import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.TopicConnectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,6 +55,9 @@ public class DeleteTopicOrder extends AbstractTopicOrder {
 
     @Autowired
     private TopicConnectionService connectionService;
+
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @Override
     public AbstractOrderDetailData getOrderExtensionDetailData(String extensions) {
@@ -128,26 +133,32 @@ public class DeleteTopicOrder extends AbstractTopicOrder {
         if (ValidateUtils.isNull(physicalClusterId)) {
             return ResultStatus.CLUSTER_NOT_EXIST;
         }
+
+        HaASRelationDO relationDO = haASRelationManager.getASRelation(physicalClusterId, extensionDTO.getTopicName());
+        if (relationDO != null) {
+            //高可用topic需要先解除高可用关系才能删除
+            return ResultStatus.HA_TOPIC_DELETE_FORBIDDEN;
+        }
+
+        return delTopic(physicalClusterId, extensionDTO.getTopicName(), userName);
+    }
+
+    private ResultStatus delTopic(Long physicalClusterId, String topicName, String userName){
         ClusterDO clusterDO = clusterService.getById(physicalClusterId);
-        if (!PhysicalClusterMetadataManager.isTopicExistStrictly(physicalClusterId, extensionDTO.getTopicName())) {
+        if (!PhysicalClusterMetadataManager.isTopicExistStrictly(physicalClusterId, topicName)) {
             return ResultStatus.TOPIC_NOT_EXIST;
         }
 
         // 最近topic是否还有生产或者消费操作
         if (connectionService.isExistConnection(
                 physicalClusterId,
-                extensionDTO.getTopicName(),
+                topicName,
                 new Date(System.currentTimeMillis() - Constant.TOPIC_CONNECTION_LATEST_TIME_MS),
                 new Date())
-                ) {
+        ) {
             return ResultStatus.OPERATION_FORBIDDEN;
         }
 
-        ResultStatus resultStatus = adminService.deleteTopic(clusterDO, extensionDTO.getTopicName(), userName);
-
-        if (!ResultStatus.SUCCESS.equals(resultStatus)) {
-            return resultStatus;
-        }
-        return resultStatus;
+        return adminService.deleteTopic(clusterDO, topicName, userName);
     }
 }

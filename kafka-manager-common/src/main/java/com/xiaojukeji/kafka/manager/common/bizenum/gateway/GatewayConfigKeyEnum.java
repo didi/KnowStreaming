@@ -10,12 +10,11 @@ public enum GatewayConfigKeyEnum {
     SD_APP_RATE("SD_APP_RATE", "SD_APP_RATE"),
     SD_IP_RATE("SD_IP_RATE", "SD_IP_RATE"),
     SD_SP_RATE("SD_SP_RATE", "SD_SP_RATE"),
-
     ;
 
-    private String configType;
+    private final String configType;
 
-    private String configName;
+    private final String configName;
 
     GatewayConfigKeyEnum(String configType, String configName) {
         this.configType = configType;

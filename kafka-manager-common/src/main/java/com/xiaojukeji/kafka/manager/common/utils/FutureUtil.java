@@ -40,6 +40,14 @@ public class FutureUtil<T> {
         return futureUtil;
     }
 
+    public Future<T> directSubmitTask(Callable<T> callable) {
+        return executor.submit(callable);
+    }
+
+    public Future<T> directSubmitTask(Runnable runnable) {
+        return (Future<T>) executor.submit(runnable);
+    }
+
     /**
      * 必须配合 waitExecute使用 否则容易会撑爆内存
      */

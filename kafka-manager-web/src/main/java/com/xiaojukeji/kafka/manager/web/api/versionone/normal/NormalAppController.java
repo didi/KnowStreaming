@@ -72,6 +72,19 @@ public class NormalAppController {
         );
     }
 
+    @ApiLevel(level = ApiLevelContent.LEVEL_NORMAL_3, rateLimit = 1)
+    @ApiOperation(value = "App列表", notes = "")
+    @RequestMapping(value = "apps/{clusterId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<List<AppVO>> getApps(@PathVariable Long clusterId,
+                                       @RequestParam(value = "isPhysicalClusterId", required = false, defaultValue = "false") Boolean isPhysicalClusterId) {
+
+        Long physicalClusterId = logicalClusterMetadataManager.getPhysicalClusterId(clusterId, isPhysicalClusterId);
+        return new Result<>(AppConverter.convert2AppVOList(
+                appService.getByPrincipalAndClusterId(SpringTool.getUserName(), physicalClusterId))
+        );
+    }
+
     @ApiOperation(value = "App基本信息", notes = "")
     @RequestMapping(value = "apps/{appId}/basic-info", method = RequestMethod.GET)
     @ResponseBody

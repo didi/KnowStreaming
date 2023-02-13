@@ -4,7 +4,7 @@ import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.kcm.ClusterTaskService;
 import com.xiaojukeji.kafka.manager.kcm.common.Converters;
-import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskActionEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TaskActionEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ClusterTaskConstant;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskLog;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskSubStatus;
@@ -93,38 +93,38 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
             return ResultStatus.CALL_CLUSTER_TASK_AGENT_FAILED;
         }
 
-        if (ClusterTaskActionEnum.START.getAction().equals(action) && ClusterTaskStateEnum.BLOCKED.equals(stateEnumResult.getData())) {
+        if (TaskActionEnum.START.getAction().equals(action) && ClusterTaskStateEnum.BLOCKED.equals(stateEnumResult.getData())) {
             // 暂停状态, 可以执行开始
-            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.START, "");
+            return actionTaskExceptRollbackAction(agentTaskId, TaskActionEnum.START, "");
         }
-        if (ClusterTaskActionEnum.PAUSE.getAction().equals(action) && ClusterTaskStateEnum.RUNNING.equals(stateEnumResult.getData())) {
+        if (TaskActionEnum.PAUSE.getAction().equals(action) && ClusterTaskStateEnum.RUNNING.equals(stateEnumResult.getData())) {
             // 运行状态, 可以执行暂停
-            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.PAUSE, "");
+            return actionTaskExceptRollbackAction(agentTaskId, TaskActionEnum.PAUSE, "");
         }
-        if (ClusterTaskActionEnum.IGNORE.getAction().equals(action)) {
+        if (TaskActionEnum.IGNORE.getAction().equals(action)) {
             // 忽略 & 取消随时都可以操作
-            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.IGNORE, hostname);
+            return actionTaskExceptRollbackAction(agentTaskId, TaskActionEnum.IGNORE, hostname);
         }
-        if (ClusterTaskActionEnum.CANCEL.getAction().equals(action)) {
+        if (TaskActionEnum.CANCEL.getAction().equals(action)) {
             // 忽略 & 取消随时都可以操作
-            return actionTaskExceptRollbackAction(agentTaskId, ClusterTaskActionEnum.CANCEL, hostname);
+            return actionTaskExceptRollbackAction(agentTaskId, TaskActionEnum.CANCEL, hostname);
         }
         if ((!ClusterTaskStateEnum.FINISHED.equals(stateEnumResult.getData()) || !rollback)
-                && ClusterTaskActionEnum.ROLLBACK.getAction().equals(action)) {
+                && TaskActionEnum.ROLLBACK.getAction().equals(action)) {
             // 暂未操作完时可以回滚, 回滚所有操作过的机器到上一个版本
             return actionTaskRollback(clusterTaskDO);
         }
         return ResultStatus.OPERATION_FAILED;
     }
 
-    private ResultStatus actionTaskExceptRollbackAction(Long agentId, ClusterTaskActionEnum actionEnum, String hostname) {
+    private ResultStatus actionTaskExceptRollbackAction(Long agentId, TaskActionEnum actionEnum, String hostname) {
         if (!ValidateUtils.isBlank(hostname)) {
             return actionHostTaskExceptRollbackAction(agentId, actionEnum, hostname);
         }
         return abstractAgent.actionTask(agentId, actionEnum)? ResultStatus.SUCCESS: ResultStatus.OPERATION_FAILED;
     }
 
-    private ResultStatus actionHostTaskExceptRollbackAction(Long agentId, ClusterTaskActionEnum actionEnum, String hostname) {
+    private ResultStatus actionHostTaskExceptRollbackAction(Long agentId, TaskActionEnum actionEnum, String hostname) {
         return abstractAgent.actionHostTask(agentId, actionEnum, hostname)? ResultStatus.SUCCESS: ResultStatus.OPERATION_FAILED;
     }
 
@@ -176,7 +176,7 @@ public class ClusterTaskServiceImpl implements ClusterTaskService {
             if (clusterTaskDao.updateRollback(clusterTaskDO) <= 0) {
                 return ResultStatus.MYSQL_ERROR;
             }
-            abstractAgent.actionTask(clusterTaskDO.getAgentTaskId(), ClusterTaskActionEnum.CANCEL);
+            abstractAgent.actionTask(clusterTaskDO.getAgentTaskId(), TaskActionEnum.CANCEL);
             return ResultStatus.SUCCESS;
         } catch (Exception e) {
             LOGGER.error("create cluster task failed, clusterTaskDO:{}.", clusterTaskDO, e);

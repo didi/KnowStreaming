@@ -1,18 +1,19 @@
 package com.xiaojukeji.kafka.manager.service.service.impl;
 
-import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
-import com.xiaojukeji.kafka.manager.common.entity.Result;
-import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.bizenum.OffsetPosEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TopicOffsetChangedEnum;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.constant.KafkaMetricsCollections;
 import com.xiaojukeji.kafka.manager.common.constant.TopicSampleConstant;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionAttributeDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.PartitionOffsetDTO;
 import com.xiaojukeji.kafka.manager.common.entity.ao.topic.*;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicDataSampleDTO;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.jmx.JmxConstant;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.BrokerMetadata;
@@ -22,13 +23,14 @@ import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata
 import com.xiaojukeji.kafka.manager.dao.TopicAppMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicMetricsDao;
 import com.xiaojukeji.kafka.manager.dao.TopicRequestMetricsDao;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.*;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaClientPool;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.*;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
+import com.xiaojukeji.kafka.manager.service.service.ha.HaTopicService;
 import com.xiaojukeji.kafka.manager.service.strategy.AbstractHealthScoreStrategy;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
 import com.xiaojukeji.kafka.manager.service.utils.MetricsConvertUtils;
@@ -89,6 +91,12 @@ public class TopicServiceImpl implements TopicService {
 
     @Autowired
     private KafkaClientPool kafkaClientPool;
+
+    @Autowired
+    private HaTopicService haTopicService;
+
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @Override
     public List<TopicMetricsDO> getTopicMetricsFromDB(Long clusterId, String topicName, Date startTime, Date endTime) {
@@ -244,6 +252,9 @@ public class TopicServiceImpl implements TopicService {
 
         basicDTO.setTopicCodeC(jmxService.getTopicCodeCValue(clusterId, topicName));
         basicDTO.setScore(healthScoreStrategy.calTopicHealthScore(clusterId, topicName));
+
+        basicDTO.setHaRelation(haASRelationManager.getRelation(clusterId, topicName));
+
         return basicDTO;
     }
 
@@ -326,6 +337,11 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
+    public Map<TopicPartition, Long> getPartitionOffset(Long clusterPhyId, String topicName, OffsetPosEnum offsetPosEnum) {
+        return this.getPartitionOffset(clusterService.getById(clusterPhyId), topicName, offsetPosEnum);
+    }
+
+    @Override
     public Map<TopicPartition, Long> getPartitionOffset(ClusterDO clusterDO,
                                                         String topicName,
                                                         OffsetPosEnum offsetPosEnum) {
@@ -403,6 +419,7 @@ public class TopicServiceImpl implements TopicService {
             appDOMap.put(appDO.getAppId(), appDO);
         }
 
+        Map<String, Integer> haRelationMap = haTopicService.getRelation(clusterId);
         List<TopicOverview> dtoList = new ArrayList<>();
         for (String topicName : topicNameList) {
             TopicMetadata topicMetadata = PhysicalClusterMetadataManager.getTopicMetadata(clusterId, topicName);
@@ -417,7 +434,8 @@ public class TopicServiceImpl implements TopicService {
                     logicalClusterMetadataManager.getTopicLogicalCluster(clusterId, topicName),
                     topicMetadata,
                     topicDO,
-                    appDO
+                    appDO,
+                    haRelationMap.get(topicName)
             );
             dtoList.add(overview);
         }
@@ -429,13 +447,15 @@ public class TopicServiceImpl implements TopicService {
                                            LogicalClusterDO logicalClusterDO,
                                            TopicMetadata topicMetadata,
                                            TopicDO topicDO,
-                                           AppDO appDO) {
+                                           AppDO appDO,
+                                           Integer haRelation) {
         TopicOverview overview = new TopicOverview();
         overview.setClusterId(physicalClusterId);
         overview.setTopicName(topicMetadata.getTopic());
         overview.setPartitionNum(topicMetadata.getPartitionNum());
         overview.setReplicaNum(topicMetadata.getReplicaNum());
         overview.setUpdateTime(topicMetadata.getModifyTime());
+        overview.setHaRelation(haRelation);
         overview.setRetentionTime(
                 PhysicalClusterMetadataManager.getTopicRetentionTime(physicalClusterId, topicMetadata.getTopic())
         );

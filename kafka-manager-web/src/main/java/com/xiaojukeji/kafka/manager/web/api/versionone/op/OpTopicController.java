@@ -13,14 +13,17 @@ import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicExpansionDTO
 import com.xiaojukeji.kafka.manager.common.entity.dto.op.topic.TopicModificationDTO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.TopicDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
+import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.AdminService;
 import com.xiaojukeji.kafka.manager.service.service.ClusterService;
 import com.xiaojukeji.kafka.manager.service.service.TopicManagerService;
-import com.xiaojukeji.kafka.manager.service.utils.TopicCommands;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +48,9 @@ public class OpTopicController {
 
     @Autowired
     private TopicManagerService topicManagerService;
+    
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @ApiOperation(value = "创建Topic")
     @RequestMapping(value = {"topics", "utils/topics"}, method = RequestMethod.POST)
@@ -109,28 +115,23 @@ public class OpTopicController {
     @RequestMapping(value = {"topics", "utils/topics"}, method = RequestMethod.PUT)
     @ResponseBody
     public Result modifyTopic(@RequestBody TopicModificationDTO dto) {
-        Result<ClusterDO> rc = checkParamAndGetClusterDO(dto);
-        if (rc.getCode() != ResultStatus.SUCCESS.getCode()) {
-            return rc;
+        if (!dto.paramLegal()) {
+            return Result.buildFrom(ResultStatus.PARAM_ILLEGAL);
         }
 
-        ClusterDO clusterDO = rc.getData();
-
-        // 获取属性
-        Properties properties = dto.getProperties();
-        if (ValidateUtils.isNull(properties)) {
-            properties = new Properties();
+        Result rs = topicManagerService.modifyTopic(dto);
+        if (rs.failed()){
+            return rs;
         }
-        properties.put(KafkaConstant.RETENTION_MS_KEY, String.valueOf(dto.getRetentionTime()));
 
-        // 操作修改
-        String operator = SpringTool.getUserName();
-        ResultStatus rs = TopicCommands.modifyTopicConfig(clusterDO, dto.getTopicName(), properties);
-        if (!ResultStatus.SUCCESS.equals(rs)) {
-            return Result.buildFrom(rs);
+        //修改备topic
+        HaASRelationDO relationDO = haASRelationManager.getASRelation(dto.getClusterId(), dto.getTopicName());
+        if (relationDO != null && relationDO.getActiveClusterPhyId().equals(dto.getClusterId())){
+            dto.setClusterId(relationDO.getStandbyClusterPhyId());
+            dto.setTopicName(relationDO.getStandbyResName());
+            rs = topicManagerService.modifyTopic(dto);
         }
-        topicManagerService.modifyTopicByOp(dto.getClusterId(), dto.getTopicName(), dto.getAppId(), dto.getDescription(), operator);
-        return new Result();
+        return rs;
     }
 
     @ApiOperation(value = "Topic扩分区", notes = "")
@@ -143,22 +144,31 @@ public class OpTopicController {
 
         List<TopicOperationResult> resultList = new ArrayList<>();
         for (TopicExpansionDTO dto: dtoList) {
-            Result<ClusterDO> rc = checkParamAndGetClusterDO(dto);
-            if (!Constant.SUCCESS.equals(rc.getCode())) {
-                resultList.add(TopicOperationResult.buildFrom(dto.getClusterId(), dto.getTopicName(), rc));
-                continue;
-            }
+            TopicOperationResult result;
 
-            // 参数检查合法, 开始对Topic进行扩分区
-            ResultStatus statusEnum = adminService.expandPartitions(
-                    rc.getData(),
-                    dto.getTopicName(),
-                    dto.getPartitionNum(),
-                    dto.getRegionId(),
-                    dto.getBrokerIdList(),
-                    SpringTool.getUserName()
-            );
-            resultList.add(TopicOperationResult.buildFrom(dto.getClusterId(), dto.getTopicName(), statusEnum));
+            HaASRelationDO relationDO = haASRelationManager.getASRelation(dto.getClusterId(), dto.getTopicName());
+            if (relationDO != null){
+                //用户侧不允许操作备topic
+                if (relationDO.getStandbyClusterPhyId().equals(dto.getClusterId())){
+                    resultList.add(TopicOperationResult.buildFrom(dto.getClusterId(),
+                            dto.getTopicName(),
+                            ResultStatus.OPERATION_FORBIDDEN));
+                    continue;
+                }
+                //备topic扩分区
+                TopicExpansionDTO standbyDto = new TopicExpansionDTO();
+                BeanUtils.copyProperties(dto, standbyDto);
+                standbyDto.setClusterId(relationDO.getStandbyClusterPhyId());
+                standbyDto.setTopicName(relationDO.getStandbyResName());
+                standbyDto.setBrokerIdList(PhysicalClusterMetadataManager.getBrokerIdList(relationDO.getStandbyClusterPhyId()));
+                standbyDto.setRegionId(null);
+                result = topicManagerService.expandTopic(standbyDto);
+                if (ResultStatus.SUCCESS.getCode() != result.getCode()){
+                    resultList.add(result);
+                    continue;
+                }
+            }
+            resultList.add(topicManagerService.expandTopic(dto));
         }
 
         for (TopicOperationResult operationResult: resultList) {
@@ -178,6 +188,12 @@ public class OpTopicController {
         if (ValidateUtils.isNull(clusterDO)) {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
         }
+
+        HaASRelationDO relationDO = haASRelationManager.getASRelation(dto.getClusterId(), dto.getTopicName());
+        if (relationDO != null) {
+            return Result.buildFrom(ResultStatus.HA_TOPIC_DELETE_FORBIDDEN);
+        }
+
         return new Result<>(clusterDO);
     }
 }

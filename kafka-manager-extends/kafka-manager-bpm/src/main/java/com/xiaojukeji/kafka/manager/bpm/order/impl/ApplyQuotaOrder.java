@@ -3,39 +3,46 @@ package com.xiaojukeji.kafka.manager.bpm.order.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.xiaojukeji.kafka.manager.account.AccountService;
 import com.xiaojukeji.kafka.manager.bpm.common.OrderTypeEnum;
-import com.xiaojukeji.kafka.manager.bpm.order.AbstractOrder;
-import com.xiaojukeji.kafka.manager.common.entity.Result;
-import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
-import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
-import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.apply.OrderExtensionQuotaDTO;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.detail.AbstractOrderDetailData;
 import com.xiaojukeji.kafka.manager.bpm.common.entry.detail.QuotaOrderDetailData;
 import com.xiaojukeji.kafka.manager.bpm.common.handle.OrderHandleBaseDTO;
 import com.xiaojukeji.kafka.manager.bpm.common.handle.OrderHandleQuotaDTO;
+import com.xiaojukeji.kafka.manager.bpm.order.AbstractOrder;
+import com.xiaojukeji.kafka.manager.common.entity.Result;
+import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
+import com.xiaojukeji.kafka.manager.common.entity.ao.account.Account;
+import com.xiaojukeji.kafka.manager.common.entity.ao.gateway.TopicQuota;
 import com.xiaojukeji.kafka.manager.common.entity.metrics.TopicMetrics;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.LogicalClusterDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.RegionDO;
 import com.xiaojukeji.kafka.manager.common.entity.pojo.gateway.AppDO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.utils.DateUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ListUtils;
 import com.xiaojukeji.kafka.manager.common.utils.NumberUtils;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.brokers.TopicMetadata;
 import com.xiaojukeji.kafka.manager.common.zookeeper.znode.config.TopicQuotaData;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.ClusterDO;
-import com.xiaojukeji.kafka.manager.common.entity.pojo.OrderDO;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
 import com.xiaojukeji.kafka.manager.service.cache.KafkaMetricsCache;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.cache.PhysicalClusterMetadataManager;
-import com.xiaojukeji.kafka.manager.service.service.*;
+import com.xiaojukeji.kafka.manager.service.service.AdminService;
+import com.xiaojukeji.kafka.manager.service.service.ClusterService;
+import com.xiaojukeji.kafka.manager.service.service.RegionService;
+import com.xiaojukeji.kafka.manager.service.service.TopicManagerService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.AppService;
 import com.xiaojukeji.kafka.manager.service.service.gateway.QuotaService;
 import com.xiaojukeji.kafka.manager.service.utils.KafkaZookeeperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +74,9 @@ public class ApplyQuotaOrder extends AbstractOrder {
 
     @Autowired
     private RegionService regionService;
+
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @Override
     public AbstractOrderDetailData getOrderExtensionDetailData(String extensions) {
@@ -198,40 +208,40 @@ public class ApplyQuotaOrder extends AbstractOrder {
         if (ValidateUtils.isNull(physicalClusterId)) {
             return ResultStatus.CLUSTER_NOT_EXIST;
         }
-        if (!PhysicalClusterMetadataManager.isTopicExistStrictly(physicalClusterId, extensionDTO.getTopicName())) {
-            return ResultStatus.TOPIC_NOT_EXIST;
-        }
-        if (!handleDTO.isExistNullParam()) {
-            ClusterDO clusterDO = clusterService.getById(physicalClusterId);
-            ResultStatus resultStatus = adminService.expandPartitions(
-                    clusterDO,
-                    extensionDTO.getTopicName(),
-                    handleDTO.getPartitionNum(),
-                    handleDTO.getRegionId(),
-                    handleDTO.getBrokerIdList(),
-                    userName);
-            if (!ResultStatus.SUCCESS.equals(resultStatus)) {
-                return resultStatus;
+
+        //备topic调整quota
+        HaASRelationDO relationDO = haASRelationManager.getASRelation(physicalClusterId, extensionDTO.getTopicName());
+        if (relationDO != null){
+            if (relationDO.getStandbyClusterPhyId().equals(physicalClusterId)){
+                return ResultStatus.OPERATION_FORBIDDEN;
+            }
+            List<Integer> standbyBrokerIds = PhysicalClusterMetadataManager.getBrokerIdList(relationDO.getStandbyClusterPhyId());
+            if(standbyBrokerIds == null || standbyBrokerIds.isEmpty()){
+                return ResultStatus.BROKER_NOT_EXIST;
+            }
+            OrderExtensionQuotaDTO standbyDto = new OrderExtensionQuotaDTO();
+            standbyDto.setClusterId(relationDO.getStandbyClusterPhyId());
+            standbyDto.setTopicName(relationDO.getStandbyResName());
+            standbyDto.setConsumeQuota(extensionDTO.getConsumeQuota());
+            standbyDto.setProduceQuota(extensionDTO.getProduceQuota());
+            standbyDto.setAppId(extensionDTO.getAppId());
+
+            ResultStatus rv = applyQuota(userName,
+                    new OrderHandleQuotaDTO(handleDTO.getPartitionNum(), null, standbyBrokerIds),
+                    standbyDto);
+            if (ResultStatus.SUCCESS.getCode() != rv.getCode()){
+                return rv;
             }
         }
-        TopicQuota topicQuotaDO = new TopicQuota();
-        topicQuotaDO.setAppId(extensionDTO.getAppId());
-        topicQuotaDO.setTopicName(extensionDTO.getTopicName());
-        topicQuotaDO.setConsumeQuota(extensionDTO.getConsumeQuota());
-        topicQuotaDO.setProduceQuota(extensionDTO.getProduceQuota());
-        topicQuotaDO.setClusterId(physicalClusterId);
-        if (quotaService.addTopicQuota(topicQuotaDO) > 0) {
-            orderDO.setExtensions(JSONObject.toJSONString(supplyExtension(extensionDTO, handleDTO)));
-            return ResultStatus.SUCCESS;
-        }
-        return ResultStatus.OPERATION_FAILED;
-    }
 
-    private OrderExtensionQuotaDTO supplyExtension(OrderExtensionQuotaDTO extensionDTO, OrderHandleQuotaDTO handleDTO){
-        extensionDTO.setPartitionNum(handleDTO.getPartitionNum());
-        extensionDTO.setRegionId(handleDTO.getRegionId());
-        extensionDTO.setBrokerIdList(handleDTO.getBrokerIdList());
-        return extensionDTO;
+        extensionDTO.setClusterId(physicalClusterId);
+        ResultStatus resultStatus = applyQuota(userName, handleDTO, extensionDTO);
+        if (ResultStatus.SUCCESS.getCode() != resultStatus.getCode()){
+            return resultStatus;
+        }
+        orderDO.setExtensions(JSONObject.toJSONString(supplyExtension(extensionDTO, handleDTO)));
+
+        return ResultStatus.SUCCESS;
     }
 
     @Override
@@ -245,5 +255,44 @@ public class ApplyQuotaOrder extends AbstractOrder {
     @Override
     public List<Account> getApproverList(String extensions) {
         return accountService.getAdminOrderHandlerFromCache();
+    }
+
+    private ResultStatus applyQuota(
+                                    String userName,
+                                    OrderHandleQuotaDTO handleDTO,
+                                    OrderExtensionQuotaDTO dto){
+        if (!PhysicalClusterMetadataManager.isTopicExistStrictly(dto.getClusterId(), dto.getTopicName())) {
+            return ResultStatus.TOPIC_NOT_EXIST;
+        }
+        if (!handleDTO.isExistNullParam()) {
+            ClusterDO clusterDO = clusterService.getById(dto.getClusterId());
+            ResultStatus resultStatus = adminService.expandPartitions(
+                    clusterDO,
+                    dto.getTopicName(),
+                    handleDTO.getPartitionNum(),
+                    handleDTO.getRegionId(),
+                    handleDTO.getBrokerIdList(),
+                    userName);
+            if (!ResultStatus.SUCCESS.equals(resultStatus)) {
+                return resultStatus;
+            }
+        }
+        TopicQuota topicQuotaDO = new TopicQuota();
+        topicQuotaDO.setAppId(dto.getAppId());
+        topicQuotaDO.setTopicName(dto.getTopicName());
+        topicQuotaDO.setConsumeQuota(dto.getConsumeQuota());
+        topicQuotaDO.setProduceQuota(dto.getProduceQuota());
+        topicQuotaDO.setClusterId(dto.getClusterId());
+        if (quotaService.addTopicQuota(topicQuotaDO) > 0) {
+            return ResultStatus.SUCCESS;
+        }
+        return ResultStatus.OPERATION_FAILED;
+    }
+
+    private OrderExtensionQuotaDTO supplyExtension(OrderExtensionQuotaDTO extensionDTO, OrderHandleQuotaDTO handleDTO){
+        extensionDTO.setPartitionNum(handleDTO.getPartitionNum());
+        extensionDTO.setRegionId(handleDTO.getRegionId());
+        extensionDTO.setBrokerIdList(handleDTO.getBrokerIdList());
+        return extensionDTO;
     }
 }

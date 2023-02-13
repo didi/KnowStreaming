@@ -85,6 +85,10 @@ class XForm extends React.Component<IXFormProps> {
       initialValue = false;
     }
 
+    if (formItem.type === FormItemType.select) {
+      initialValue = initialValue || undefined;
+    }
+
     // if (formItem.type === FormItemType.select && formItem.attrs
     //   && ['tags'].includes(formItem.attrs.mode)) {
     //   initialValue = formItem.defaultValue ? [formItem.defaultValue] : [];
@@ -105,7 +109,7 @@ class XForm extends React.Component<IXFormProps> {
     const { form, formData, formMap, formLayout, layout } = this.props;
     const { getFieldDecorator } = form;
     return (
-      <Form layout={layout || 'horizontal'} onSubmit={() => ({})}>
+      <Form className="x-form" layout={layout || 'horizontal'} onSubmit={() => ({})}>
         {formMap.map(formItem => {
           const { initialValue, valuePropName } = this.handleFormItem(formItem, formData);
           const getFieldValue = {
@@ -131,7 +135,13 @@ class XForm extends React.Component<IXFormProps> {
               )}
               {formItem.renderExtraElement ? formItem.renderExtraElement() : null}
               {/* 添加保存时间提示文案 */}
-              {formItem.attrs?.prompttype ? <span style={{ color: "#cccccc", fontSize: '12px', lineHeight: '20px', display: 'block' }}>{formItem.attrs.prompttype}</span> : null}
+              {formItem.attrs?.prompttype ?
+                <span className={`prompt-info ${formItem.attrs?.promptclass || ''}`}>
+                  {formItem.attrs?.prompticon ?
+                    <Icon type="info-circle" theme="twoTone" twoToneColor="#0A70F5" className={formItem.attrs?.prompticomclass} /> : null}
+                  {formItem.attrs.prompttype}
+                </span>
+                : null}
             </Form.Item>
           );
         })}

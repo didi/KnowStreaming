@@ -17,9 +17,9 @@ public enum TopicAuthorityEnum {
     OWNER(4, "可管理"),
     ;
 
-    private Integer code;
+    private final Integer code;
 
-    private String message;
+    private final String message;
 
     TopicAuthorityEnum(Integer code, String message) {
         this.code = code;
@@ -32,6 +32,16 @@ public enum TopicAuthorityEnum {
 
     public String getMessage() {
         return message;
+    }
+
+    public static String getMsgByCode(Integer code) {
+        for (TopicAuthorityEnum authorityEnum: TopicAuthorityEnum.values()) {
+            if (authorityEnum.getCode().equals(code)) {
+                return authorityEnum.message;
+            }
+        }
+
+        return DENY.message;
     }
 
     @Override

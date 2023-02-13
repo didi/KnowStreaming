@@ -1,0 +1,367 @@
+<mxfile host="65bd71144e">
+    <diagram id="bhaMuW99Q1BzDTtcfRXp" name="Page-1">
+        <mxGraphModel dx="1384" dy="785" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="81" value="1、主集群拒绝客户端的写入" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FFFFFF;strokeColor=#d79b00;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="630" y="70" width="490" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="79" value="主备高可用集群稳定时的状态" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FFFFFF;strokeColor=#d79b00;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="70" width="490" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="Kafka——主集群A" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="100" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="110" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="150" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="Kafka网关" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="220" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="230" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="Kafka-Gateways" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="270" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="63" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="39" target="27">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="440" y="380"/>
+                            <mxPoint x="440" y="140"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="64" value="备集群B 不断向 主集群A &lt;br&gt;发送Fetch请求，&lt;br&gt;从而同步主集群A的数据" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="63">
+                    <mxGeometry x="-0.05" y="-4" relative="1" as="geometry">
+                        <mxPoint x="6" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="39" value="Kafka——备集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="340" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="350" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="390" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="57" style="html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=default;startArrow=classic;startFill=1;" parent="1" source="42" target="27" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" value="对主集群进行读写" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="57" vertex="1" connectable="0">
+                    <mxGeometry x="-0.0724" y="1" relative="1" as="geometry">
+                        <mxPoint x="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="42" value="Kafka-Client" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="240" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" value="Kafka——主集群A" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="100" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="66" value="Zookeeper(修改ZK)" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FF3333;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="110" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="67" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="150" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="68" value="Kafka网关" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="220" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="69" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="230" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="70" value="Kafka-Gateways" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="270" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="71" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="73" target="65">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1040" y="380"/>
+                            <mxPoint x="1040" y="140"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="72" value="备集群B 不断向 主集群A&lt;br&gt;发送Fetch请求，&lt;br&gt;从而同步主集群A的数据" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="71">
+                    <mxGeometry x="-0.05" y="-4" relative="1" as="geometry">
+                        <mxPoint x="6" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="73" value="Kafka——备集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="340" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="74" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="350" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="75" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="390" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="76" style="html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FF3333;startArrow=none;startFill=0;strokeWidth=3;endArrow=none;endFill=0;dashed=1;" edge="1" parent="1" source="78" target="65">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="77" value="对主集群进行读写会出现失败" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF3333;fontSize=13;" vertex="1" connectable="0" parent="76">
+                    <mxGeometry x="-0.0724" y="1" relative="1" as="geometry">
+                        <mxPoint x="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="78" value="Kafka-Client" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="640" y="240" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="82" value="2、等待主备同步完成，避免丢数据" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FFFFFF;strokeColor=#d79b00;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="630" y="590" width="490" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="83" value="Kafka——主集群A" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="620" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="84" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="630" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="85" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="670" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="86" value="Kafka网关" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="740" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="87" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="750" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="88" value="Kafka-Gateways" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="790" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="89" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="91" target="83">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1040" y="900"/>
+                            <mxPoint x="1040" y="660"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="90" value="备集群B 不断向 主集群A&lt;br&gt;发送Fetch请求，&lt;br&gt;从而同步主集群A的&lt;br&gt;指定Topic的数据" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="89">
+                    <mxGeometry x="-0.05" y="-4" relative="1" as="geometry">
+                        <mxPoint x="6" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="91" value="Kafka——备集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="860" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="92" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="870" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="93" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="910" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="94" style="html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FF3333;startArrow=none;startFill=0;strokeWidth=3;endArrow=none;endFill=0;dashed=1;" edge="1" parent="1" source="96" target="83">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="95" value="对主集群进行读写会出现失败" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF3333;fontSize=13;" vertex="1" connectable="0" parent="94">
+                    <mxGeometry x="-0.0724" y="1" relative="1" as="geometry">
+                        <mxPoint x="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="96" value="Kafka-Client" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="640" y="760" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="97" value="3、Topic粒度数据同步方向调整，由主集群A向备集群B同步数据" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FFFFFF;strokeColor=#d79b00;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="590" width="490" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="98" value="Kafka——主集群A" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="620" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="99" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="630" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="100" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="670" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="101" value="Kafka网关" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="740" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="102" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="750" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="103" value="Kafka-Gateways" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="790" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="104" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=#FF3333;strokeWidth=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="106" target="98">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="440" y="900"/>
+                            <mxPoint x="440" y="660"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="105" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;主集群A 不断向 备集群B&lt;/span&gt;&lt;br style=&quot;font-size: 11px;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;发送Fetch请求，&lt;/span&gt;&lt;br style=&quot;font-size: 11px;&quot;&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;从而同步备集群B的&lt;br&gt;指定Topic的数据&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF3333;fontSize=13;" vertex="1" connectable="0" parent="104">
+                    <mxGeometry x="-0.05" y="-4" relative="1" as="geometry">
+                        <mxPoint x="-4" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="106" value="Kafka——备集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="860" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="107" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="870" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="108" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="910" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="109" style="html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FF3333;startArrow=none;startFill=0;strokeWidth=3;endArrow=none;endFill=0;dashed=1;" edge="1" parent="1" source="111" target="98">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="110" value="对主集群进行读写会出现失败" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF3333;fontSize=13;" vertex="1" connectable="0" parent="109">
+                    <mxGeometry x="-0.0724" y="1" relative="1" as="geometry">
+                        <mxPoint x="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="111" value="Kafka-Client" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="760" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="127" value="4、修改ZK，使得客户端使用的KafkaUser对应的集群为备集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FFFFFF;strokeColor=#d79b00;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="1110" width="490" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="128" value="Kafka——主集群A" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="1140" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="130" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="1190" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="131" value="Kafka网关" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="1260" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="132" value="Zookeeper(修改ZK)" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FF3333;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="1270" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="133" value="Kafka-Gateways" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="1310" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="134" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="136" target="128">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="440" y="1420"/>
+                            <mxPoint x="440" y="1180"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="135" value="&lt;span style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;主集群A 不断向 备集群B&lt;/span&gt;&lt;br style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;&lt;span style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;发送Fetch请求，&lt;/span&gt;&lt;br style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;&lt;span style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;从而同步备集群B的&lt;br&gt;指定Topic的数据&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF3333;fontSize=13;" vertex="1" connectable="0" parent="134">
+                    <mxGeometry x="-0.05" y="-4" relative="1" as="geometry">
+                        <mxPoint x="-4" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="136" value="Kafka——备集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="1380" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="138" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="1430" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="139" style="html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FF3333;startArrow=none;startFill=0;strokeWidth=3;endArrow=none;endFill=0;dashed=1;" edge="1" parent="1" source="141" target="128">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="140" value="对主集群进行读写会出现失败" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF3333;fontSize=13;" vertex="1" connectable="0" parent="139">
+                    <mxGeometry x="-0.0724" y="1" relative="1" as="geometry">
+                        <mxPoint x="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="141" value="Kafka-Client" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="1280" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="142" value="5、重启客户端，网关将请求转向集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FFFFFF;strokeColor=#d79b00;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="630" y="1110" width="490" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="143" value="Kafka——主集群A" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="1140" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="144" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="1150" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="145" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="1190" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="146" value="Kafka网关" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="1260" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="148" value="Kafka-Gateways" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="1310" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="149" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="151" target="143">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1040" y="1420"/>
+                            <mxPoint x="1040" y="1180"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="150" value="&lt;span style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;主集群A 不断向 备集群B&lt;/span&gt;&lt;br style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;&lt;span style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;发送Fetch请求，&lt;/span&gt;&lt;br style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;&lt;span style=&quot;color: rgb(0 , 0 , 0) ; font-size: 11px&quot;&gt;从而同步备集群B的&lt;br&gt;指定Topic的数据&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#FF3333;fontSize=13;" vertex="1" connectable="0" parent="149">
+                    <mxGeometry x="-0.05" y="-4" relative="1" as="geometry">
+                        <mxPoint x="-4" y="-10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="151" value="Kafka——备集群B" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#cdeb8b;strokeColor=#36393d;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" vertex="1" parent="1">
+                    <mxGeometry x="800" y="1380" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="152" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="1390" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="153" value="Kafka-Brokers" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="1430" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="156" value="Kafka-Client" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="640" y="1280" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="157" style="html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=default;startArrow=classic;startFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="156" target="151">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="529.9966666666667" y="1400" as="sourcePoint"/>
+                        <mxPoint x="613.3299999999999" y="1300" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="158" value="对B集群进行读写" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="157">
+                    <mxGeometry x="-0.0724" y="1" relative="1" as="geometry">
+                        <mxPoint x="-6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="159" value="Zookeeper(修改ZK)" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FF3333;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="1150" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="160" value="Zookeeper(修改ZK)" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#FF3333;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="210" y="1390" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="161" value="Zookeeper" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="810" y="1270" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="162" value="" style="shape=flexArrow;endArrow=classic;html=1;fontSize=13;fontColor=#FF3333;strokeColor=#000000;strokeWidth=1;fillColor=#9999FF;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="550" y="259.5" as="sourcePoint"/>
+                        <mxPoint x="600" y="259.5" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="163" value="" style="shape=flexArrow;endArrow=classic;html=1;fontSize=13;fontColor=#FF3333;strokeColor=#000000;strokeWidth=1;fillColor=#9999FF;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="879.5" y="490" as="sourcePoint"/>
+                        <mxPoint x="879.5" y="540" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="164" value="" style="shape=flexArrow;endArrow=classic;html=1;fontSize=13;fontColor=#FF3333;strokeColor=#000000;strokeWidth=1;fillColor=#9999FF;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="274.5" y="1010" as="sourcePoint"/>
+                        <mxPoint x="274.5" y="1060" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="165" value="" style="shape=flexArrow;endArrow=classic;html=1;fontSize=13;fontColor=#FF3333;strokeColor=#000000;strokeWidth=1;fillColor=#9999FF;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="550" y="1309" as="sourcePoint"/>
+                        <mxPoint x="600" y="1309" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="167" value="" style="shape=flexArrow;endArrow=classic;html=1;fontSize=13;fontColor=#FF3333;strokeColor=#000000;strokeWidth=1;fillColor=#9999FF;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="606" y="779.5" as="sourcePoint"/>
+                        <mxPoint x="550" y="779.5" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -73,6 +73,7 @@ export class LogicalCluster extends SearchAndFilterContainer {
         key: 'mode',
         render: (value: number) => {
           let val = '';
+          // tslint:disable-next-line:no-unused-expression
           cluster.clusterModes && cluster.clusterModes.forEach((ele: any) => {
             if (value === ele.code) {
               val = ele.message;
@@ -206,6 +207,7 @@ export class LogicalCluster extends SearchAndFilterContainer {
   }
 
   public render() {
+    const clusterModes = cluster.clusterModes;
     return (
       <div className="k-row">
         <ul className="k-tab">

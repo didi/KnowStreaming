@@ -1,21 +1,23 @@
 package com.xiaojukeji.kafka.manager.web.api.versionone.normal;
 
+import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
 import com.xiaojukeji.kafka.manager.common.constant.Constant;
 import com.xiaojukeji.kafka.manager.common.entity.Result;
 import com.xiaojukeji.kafka.manager.common.entity.ResultStatus;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicModifyDTO;
 import com.xiaojukeji.kafka.manager.common.entity.dto.normal.TopicRetainDTO;
+import com.xiaojukeji.kafka.manager.common.entity.pojo.ha.HaASRelationDO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicExpiredVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicMineVO;
 import com.xiaojukeji.kafka.manager.common.entity.vo.normal.topic.TopicVO;
+import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
+import com.xiaojukeji.kafka.manager.service.biz.ha.HaASRelationManager;
 import com.xiaojukeji.kafka.manager.service.cache.LogicalClusterMetadataManager;
 import com.xiaojukeji.kafka.manager.service.service.TopicExpiredService;
 import com.xiaojukeji.kafka.manager.service.service.TopicManagerService;
-import com.xiaojukeji.kafka.manager.common.utils.SpringTool;
-import com.xiaojukeji.kafka.manager.common.constant.ApiPrefix;
-import com.xiaojukeji.kafka.manager.web.utils.ResultCache;
 import com.xiaojukeji.kafka.manager.web.converters.TopicMineConverter;
+import com.xiaojukeji.kafka.manager.web.utils.ResultCache;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,9 @@ public class NormalTopicMineController {
 
     @Autowired
     private LogicalClusterMetadataManager logicalClusterMetadataManager;
+
+    @Autowired
+    private HaASRelationManager haASRelationManager;
 
     @ApiOperation(value = "我的Topic", notes = "")
     @RequestMapping(value = "topics/mine", method = RequestMethod.GET)
@@ -75,14 +80,31 @@ public class NormalTopicMineController {
         if (ValidateUtils.isNull(physicalClusterId)) {
             return Result.buildFrom(ResultStatus.CLUSTER_NOT_EXIST);
         }
-        return Result.buildFrom(
-                topicManagerService.modifyTopic(
-                        physicalClusterId,
-                        dto.getTopicName(),
-                        dto.getDescription(),
-                        SpringTool.getUserName()
-                )
+
+        //修改备topic
+        HaASRelationDO relationDO = haASRelationManager.getASRelation(dto.getClusterId(), dto.getTopicName());
+        if (relationDO != null){
+            if (relationDO.getStandbyClusterPhyId().equals(dto.getClusterId())){
+                return Result.buildFromRSAndMsg(ResultStatus.OPERATION_FORBIDDEN, "备topic不允许操作！");
+            }
+            ResultStatus rs = topicManagerService.modifyTopic(
+                    relationDO.getStandbyClusterPhyId(),
+                    relationDO.getStandbyResName(),
+                    dto.getDescription(),
+                    SpringTool.getUserName()
+            );
+            if (ResultStatus.SUCCESS.getCode() != rs.getCode()){
+                return Result.buildFrom(rs);
+            }
+        }
+
+        ResultStatus resultStatus = topicManagerService.modifyTopic(
+                physicalClusterId,
+                dto.getTopicName(),
+                dto.getDescription(),
+                SpringTool.getUserName()
         );
+        return Result.buildFrom(resultStatus);
     }
 
     @ApiOperation(value = "过期Topic信息", notes = "")

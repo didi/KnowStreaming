@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.xiaojukeji.kafka.manager.common.utils.ValidateUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -13,6 +15,8 @@ import java.util.List;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(description = "Quota工单审批参数")
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderHandleQuotaDTO {
     @ApiModelProperty(value = "分区数, 非必须")
     private Integer partitionNum;

@@ -57,8 +57,9 @@ import {
   getBillStaffDetail,
   getCandidateController,
   addCandidateController,
-  deleteCandidateCancel
-  } from 'lib/api';
+  deleteCandidateCancel,
+  getHaMetaData,
+} from 'lib/api';
 import { getControlMetricOption, getClusterMetricOption } from 'lib/line-charts-config';
 
 import { copyValueMap } from 'constants/status-map';
@@ -105,11 +106,14 @@ class Admin {
   public metaList: IMetaData[] = [];
 
   @observable
+  public haMetaList: IMetaData[] = [];
+
+  @observable
   public oRList: any[] = [];
 
   @observable
-  public oRparams:any={
-    moduleId:0
+  public oRparams: any = {
+    moduleId: 0
   };
 
   @observable
@@ -169,9 +173,9 @@ class Admin {
   @observable
   public controllerCandidate: IController[] = [];
 
-   @observable
+  @observable
   public filtercontrollerCandidate: string = '';
-  
+
   @observable
   public brokersPartitions: IBrokersPartitions[] = [];
 
@@ -329,9 +333,20 @@ class Admin {
   }
 
   @action.bound
-  public setOperationRecordList(data:any){
+  public setHaMetaList(data: IMetaData[]) {
     this.setLoading(false);
-    this.oRList = data ? data.map((item:any, index: any) => {
+    this.haMetaList = data ? data.map((item, index) => {
+      item.key = index;
+      return item;
+    }) : [];
+    this.haMetaList = this.haMetaList.sort((a, b) => a.clusterId - b.clusterId);
+    return this.haMetaList;
+  }
+
+  @action.bound
+  public setOperationRecordList(data: any) {
+    this.setLoading(false);
+    this.oRList = data ? data.map((item: any, index: any) => {
       item.key = index;
       return item;
     }) : [];
@@ -394,9 +409,9 @@ class Admin {
       item.key = index;
       return item;
     }) : [];
-    this.filtercontrollerCandidate = data?data.map((item,index)=>{
+    this.filtercontrollerCandidate = data ? data.map((item, index) => {
       return item.brokerId
-    }).join(','):''
+    }).join(',') : ''
   }
 
   @action.bound
@@ -479,8 +494,8 @@ class Admin {
   }
 
   @action.bound
-  public setBrokersMetadata(data: IBrokersMetadata[]|any) {
-    this.brokersMetadata = data ? data.map((item:any, index:any) => {
+  public setBrokersMetadata(data: IBrokersMetadata[] | any) {
+    this.brokersMetadata = data ? data.map((item: any, index: any) => {
       item.key = index;
       return {
         ...item,
@@ -675,6 +690,11 @@ class Admin {
     getMetaData(needDetail).then(this.setMetaList);
   }
 
+  public getHaMetaData() {
+    this.setLoading(true);
+    return getHaMetaData().then(this.setHaMetaList);
+  }
+
   public getOperationRecordData(params: any) {
     this.setLoading(true);
     this.oRparams = params
@@ -738,17 +758,17 @@ class Admin {
   }
 
   public getCandidateController(clusterId: number) {
-    return getCandidateController(clusterId).then(data=>{
+    return getCandidateController(clusterId).then(data => {
       return this.setCandidateController(data)
     });
   }
 
   public addCandidateController(clusterId: number, brokerIdList: any) {
-    return addCandidateController({clusterId, brokerIdList}).then(()=>this.getCandidateController(clusterId));
+    return addCandidateController({ clusterId, brokerIdList }).then(() => this.getCandidateController(clusterId));
   }
 
-  public deleteCandidateCancel(clusterId: number, brokerIdList: any){
-    return deleteCandidateCancel({clusterId, brokerIdList}).then(()=>this.getCandidateController(clusterId));
+  public deleteCandidateCancel(clusterId: number, brokerIdList: any) {
+    return deleteCandidateCancel({ clusterId, brokerIdList }).then(() => this.getCandidateController(clusterId));
   }
 
   public getBrokersBasicInfo(clusterId: number, brokerId: number) {

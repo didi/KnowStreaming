@@ -52,6 +52,13 @@ public interface AppService {
     List<AppDO> getByPrincipal(String principal);
 
     /**
+     * 通过负责人&集群id(排除已被其他集群绑定的app)来查找
+     * @param principal 负责人
+     * @return List<AppDO>
+     */
+    List<AppDO> getByPrincipalAndClusterId(String principal, Long phyClusterId);
+
+    /**
      * 通过appId来查,需要check当前登录人是否有权限.
      * @param appId appId
      * @return AppDO

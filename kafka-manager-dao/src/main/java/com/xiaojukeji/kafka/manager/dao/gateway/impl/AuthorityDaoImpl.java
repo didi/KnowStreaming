@@ -50,6 +50,28 @@ public class AuthorityDaoImpl implements AuthorityDao {
     }
 
     @Override
+    public List<AuthorityDO> getAuthorityByTopicFromCache(Long clusterId, String topicName) {
+        updateAuthorityCache();
+
+        List<AuthorityDO> doList = new ArrayList<>();
+        for (Map<Long, Map<String, AuthorityDO>> authMap: AUTHORITY_MAP.values()) {
+            Map<String, AuthorityDO> doMap = authMap.get(clusterId);
+            if (doMap == null) {
+                continue;
+            }
+
+            AuthorityDO authorityDO = doMap.get(topicName);
+            if (authorityDO == null) {
+                continue;
+            }
+
+            doList.add(authorityDO);
+        }
+
+        return doList;
+    }
+
+    @Override
     public List<AuthorityDO> getByAppId(String appId) {
         updateAuthorityCache();
         Map<Long, Map<String, AuthorityDO>> doMap = AUTHORITY_MAP.get(appId);

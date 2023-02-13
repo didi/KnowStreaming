@@ -31,6 +31,8 @@ public class ConfigConstant {
 
     public static final String KAFKA_CLUSTER_DO_CONFIG_KEY = "KAFKA_CLUSTER_DO_CONFIG";
 
+    public static final String HA_SWITCH_JOB_TIMEOUT_UNIT_SEC_CONFIG_PREFIX = "HA_SWITCH_JOB_TIMEOUT_UNIT_SEC_CONFIG_CLUSTER";
+
     private ConfigConstant() {
     }
 }

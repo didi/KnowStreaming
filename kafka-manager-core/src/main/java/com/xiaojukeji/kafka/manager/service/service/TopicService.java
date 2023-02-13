@@ -65,6 +65,7 @@ public interface TopicService {
      * 获取Topic的分区的offset
      */
     Map<TopicPartition, Long> getPartitionOffset(ClusterDO clusterDO, String topicName, OffsetPosEnum offsetPosEnum);
+    Map<TopicPartition, Long> getPartitionOffset(Long clusterPhyId, String topicName, OffsetPosEnum offsetPosEnum);
 
     /**
      * 获取Topic概览信息

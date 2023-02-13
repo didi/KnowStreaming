@@ -1,7 +1,7 @@
 package com.xiaojukeji.kafka.manager.kcm.component.agent;
 
 import com.xiaojukeji.kafka.manager.common.entity.Result;
-import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskActionEnum;
+import com.xiaojukeji.kafka.manager.common.bizenum.TaskActionEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskStateEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.bizenum.ClusterTaskSubStateEnum;
 import com.xiaojukeji.kafka.manager.kcm.common.entry.ao.ClusterTaskLog;
@@ -37,7 +37,7 @@ public abstract class AbstractAgent {
      * @param actionEnum 执行动作
      * @return true:触发成功, false:触发失败
      */
-    public abstract boolean actionTask(Long taskId, ClusterTaskActionEnum actionEnum);
+    public abstract boolean actionTask(Long taskId, TaskActionEnum actionEnum);
 
     /**
      * 执行任务
@@ -46,7 +46,7 @@ public abstract class AbstractAgent {
      * @param hostname 具体主机
      * @return true:触发成功, false:触发失败
      */
-    public abstract boolean actionHostTask(Long taskId, ClusterTaskActionEnum actionEnum, String hostname);
+    public abstract boolean actionHostTask(Long taskId, TaskActionEnum actionEnum, String hostname);
 
     /**
      * 获取任务运行的状态[阻塞, 执行中, 完成等]
