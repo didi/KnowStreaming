@@ -1,0 +1,2 @@
+enable=true
+unreplica.lag.min=10000
