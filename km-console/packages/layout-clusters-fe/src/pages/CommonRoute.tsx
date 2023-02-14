@@ -22,6 +22,8 @@ export enum ControlStatusMap {
   TESTING_PRODUCER_HEADER = 'FETestingProducerHeader',
   TESTING_PRODUCER_COMPRESSION_TYPE_ZSTD = 'FETestingProducerCompressionTypeZSTD',
   TESTING_CONSUMER_HEADER = 'FETestingConsumerHeader',
+  // Topic
+  CREATE_TOPIC_CLEANUP_POLICY = 'FECreateTopicCleanupPolicy',
 }
 
 const CommonRoute: React.FC = (props: any) => {
