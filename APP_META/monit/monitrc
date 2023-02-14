@@ -1,0 +1,13 @@
+set daemon  10              # check services at 10 seconds intervals
+set log syslog
+
+set httpd port 2812 and
+    use address localhost  # only accept connection from localhost
+    allow localhost        # allow localhost to connect to the server and
+    allow admin:monit      # require user 'admin' with password 'monit'
+    #with ssl {            # enable SSL/TLS and set path to server certificate
+    #    pemfile: /etc/ssl/certs/monit.pem
+    #}
+
+include /etc/monit.d/*
+

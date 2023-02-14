@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Version: sd-2.5.0-d-302
+

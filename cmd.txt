@@ -1,0 +1,52 @@
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+./bin/kafka-topics.sh --create --zookeeper 10.179.133.194:2181/yh --replication-factor 1 --partitions 1 --topic test
+bin/kafka-topics.sh --list --zookeeper 10.179.133.194:2181/yh 
+bin/kafka-console-consumer.sh --bootstrap-server 10.96.85.50:9092 --from-beginning --topic test --consumer.config config/consumer.properties
+bin/kafka-console-producer.sh --broker-list 10.96.85.50:9092 --topic test --producer.config config/producer.properties
+
+bin/kafka-acls.sh --authorizer-properties zookeeper.connect=10.179.133.194:2181/yh --add --allow-principal User:kafka --consumer --topic test  --group DemoConsumer
+bin/kafka-acls.sh --authorizer-properties zookeeper.connect=10.179.133.194:2181/yh --add --allow-principal User:kafka --producer --topic test 
+
+bin/kafka-acls.sh --authorizer-properties zookeeper.connect=10.179.133.194:2181/yh  --allow-principal User:ANONYMOUS  --consumer --topic=* --group=*  --add
+bin/kafka-acls.sh --authorizer-properties zookeeper.connect=10.179.133.194:2181/yh  --allow-principal User:ANONYMOUS  --producer --topic=* --add
+bin/kafka-acls.sh --authorizer-properties zookeeper.connect=10.179.133.194:2181/yh  --allow-principal User:ANONYMOUS --cluster  --operation ClusterAction --add
+
+bin/kafka-configs.sh --zookeeper 10.179.133.194:2181/yh --alter --add-config 'producer_byte_rate=10,consumer_byte_rate=1000' --entity-type users --entity-name kafka
+
+bin/kafka-configs.sh --zookeeper 10.179.162.171:2181/yh2  --alter --add-config 'producer_byte_rate=10,consumer_byte_rate=1000' --entity-type clients --entity-name kafka.test1
+
+kafka acls configration
+https://blog.csdn.net/ahzsg1314/article/details/54140909 
+
+
+./gradlew core:test -Dtest.single=ParitionControlTest 
+./gradlew --max-workers 1  core:test ZookeeperConsumerConnectorTest
+
+
+./gradlew assemble
+
+#./gradlew test --max-workers 1
+# ./gradlew unitTest --max-workers 1 --fail-fast
+
+./gradlew clean releaseTarGz
+
+#IDEA settings
+# main class: kafka.Kafka
+# vm options: -ea -Dkafka.logs.dir=logs -Dlog4j.configuration=file:config/log4j.properties -Djava.security.auth.login.config=config/kafka_server_jaas.conf
+# program arguments: config/server.properties
+
+

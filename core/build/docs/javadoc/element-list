@@ -1,0 +1,14 @@
+com.didichuxing.datachannel.kafka.cache
+com.didichuxing.datachannel.kafka.config
+com.didichuxing.datachannel.kafka.config.manager
+com.didichuxing.datachannel.kafka.jmx
+com.didichuxing.datachannel.kafka.metrics
+com.didichuxing.datachannel.kafka.partition
+com.didichuxing.datachannel.kafka.report
+com.didichuxing.datachannel.kafka.security.authorizer
+com.didichuxing.datachannel.kafka.security.login
+com.didichuxing.datachannel.kafka.security.sasl.didi
+com.didichuxing.datachannel.kafka.security.sasl.plain
+com.didichuxing.datachannel.kafka.server
+com.didichuxing.datachannel.kafka.util
+kafka.tools

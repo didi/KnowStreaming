@@ -1,0 +1,4 @@
+TopicRequestMetrics.*=false
+AppIdTopicMetrics.*=false
+ClientRequestMetrics.*=false
+DiskMetrics.*=false

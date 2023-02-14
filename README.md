@@ -1,63 +1,220 @@
+Apache Kafka
+=================
+See our [web site](https://kafka.apache.org) for details on the project.
 
----
+You need to have [Java](http://www.oracle.com/technetwork/java/javase/downloads/index.html) installed.
 
-![kafka-manager-logo](./docs/assets/images/common/logo_name.png)
+Java 8 should be used for building in order to support both Java 8 and Java 11 at runtime.
 
-**一站式`Apache Kafka`集群指标监控与运维管控平台**
+Scala 2.12 is used by default, see below for how to use a different Scala version or all of the supported Scala versions.
 
---- 
+### Build a jar and run it ###
+    ./gradlew jar
 
-## 主要功能特性
+Follow instructions in https://kafka.apache.org/documentation.html#quickstart
+
+### Build source jar ###
+    ./gradlew srcJar
+
+### Build aggregated javadoc ###
+    ./gradlew aggregatedJavadoc
+
+### Build javadoc and scaladoc ###
+    ./gradlew javadoc
+    ./gradlew javadocJar # builds a javadoc jar for each module
+    ./gradlew scaladoc
+    ./gradlew scaladocJar # builds a scaladoc jar for each module
+    ./gradlew docsJar # builds both (if applicable) javadoc and scaladoc jars for each module
+
+### Run unit/integration tests ###
+    ./gradlew test # runs both unit and integration tests
+    ./gradlew unitTest
+    ./gradlew integrationTest
+    
+### Force re-running tests without code change ###
+    ./gradlew cleanTest test
+    ./gradlew cleanTest unitTest
+    ./gradlew cleanTest integrationTest
+
+### Running a particular unit/integration test ###
+    ./gradlew clients:test --tests RequestResponseTest
+
+### Running a particular test method within a unit/integration test ###
+    ./gradlew core:test --tests kafka.api.ProducerFailureHandlingTest.testCannotSendToInternalTopic
+    ./gradlew clients:test --tests org.apache.kafka.clients.MetadataTest.testMetadataUpdateWaitTime
+
+### Running a particular unit/integration test with log4j output ###
+Change the log4j setting in either `clients/src/test/resources/log4j.properties` or `core/src/test/resources/log4j.properties`
+
+    ./gradlew clients:test --tests RequestResponseTest
+
+### Generating test coverage reports ###
+Generate coverage reports for the whole project:
+
+    ./gradlew reportCoverage
+
+Generate coverage for a single module, i.e.: 
+
+    ./gradlew clients:reportCoverage
+    
+### Building a binary release gzipped tar ball ###
+    ./gradlew clean releaseTarGz
+
+The above command will fail if you haven't set up the signing key. To bypass signing the artifact, you can run:
+
+    ./gradlew clean releaseTarGz -x signArchives
+
+The release file can be found inside `./core/build/distributions/`.
+
+### Cleaning the build ###
+    ./gradlew clean
+
+### Running a task with one of the Scala versions available (2.12.x or 2.13.x) ###
+*Note that if building the jars with a version other than 2.12.x, you need to set the `SCALA_VERSION` variable or change it in `bin/kafka-run-class.sh` to run the quick start.*
+
+You can pass either the major version (eg 2.12) or the full version (eg 2.12.7):
+
+    ./gradlew -PscalaVersion=2.12 jar
+    ./gradlew -PscalaVersion=2.12 test
+    ./gradlew -PscalaVersion=2.12 releaseTarGz
+
+### Running a task with all the scala versions enabled by default ###
+
+Append `All` to the task name:
+
+    ./gradlew testAll
+    ./gradlew jarAll
+    ./gradlew releaseTarGzAll
+
+### Running a task for a specific project ###
+This is for `core`, `examples` and `clients`
+
+    ./gradlew core:jar
+    ./gradlew core:test
+
+### Listing all gradle tasks ###
+    ./gradlew tasks
+
+### Building IDE project ####
+*Note that this is not strictly necessary (IntelliJ IDEA has good built-in support for Gradle projects, for example).*
+
+    ./gradlew eclipse
+    ./gradlew idea
+
+The `eclipse` task has been configured to use `${project_dir}/build_eclipse` as Eclipse's build directory. Eclipse's default
+build directory (`${project_dir}/bin`) clashes with Kafka's scripts directory and we don't use Gradle's build directory
+to avoid known issues with this configuration.
+
+### Publishing the jar for all version of Scala and for all projects to maven ###
+    ./gradlew uploadArchivesAll
+
+Please note for this to work you should create/update `${GRADLE_USER_HOME}/gradle.properties` (typically, `~/.gradle/gradle.properties`) and assign the following variables
+
+    mavenUrl=
+    mavenUsername=
+    mavenPassword=
+    signing.keyId=
+    signing.password=
+    signing.secretKeyRingFile=
+
+### Publishing the streams quickstart archetype artifact to maven ###
+For the Streams archetype project, one cannot use gradle to upload to maven; instead the `mvn deploy` command needs to be called at the quickstart folder:
+
+    cd streams/quickstart
+    mvn deploy
+
+Please note for this to work you should create/update user maven settings (typically, `${USER_HOME}/.m2/settings.xml`) to assign the following variables
+
+    <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                           https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    ...                           
+    <servers>
+       ...
+       <server>
+          <id>apache.snapshots.https</id>
+          <username>${maven_username}</username>
+          <password>${maven_password}</password>
+       </server>
+       <server>
+          <id>apache.releases.https</id>
+          <username>${maven_username}</username>
+          <password>${maven_password}</password>
+        </server>
+        ...
+     </servers>
+     ...
 
 
-### 集群监控维度
+### Installing the jars to the local Maven repository ###
+    ./gradlew installAll
 
-- 多版本集群管控，支持从`0.10.2`到`2.4`版本；
-- 集群Topic、Broker等多维度历史与实时关键指标查看；
+### Building the test jar ###
+    ./gradlew testJar
 
+### Determining how transitive dependencies are added ###
+    ./gradlew core:dependencies --configuration runtime
 
-### 集群管控维度
+### Determining if any dependencies could be updated ###
+    ./gradlew dependencyUpdates
 
-- 集群运维，包括逻辑Region方式管理集群
-- Broker运维，包括优先副本选举
-- Topic运维，包括创建、查询、扩容、修改属性、数据采样及迁移等；
-- 消费组运维，包括指定时间或指定偏移两种方式进行重置消费偏移
+### Running code quality checks ###
+There are two code quality analysis tools that we regularly run, spotbugs and checkstyle.
 
+#### Checkstyle ####
+Checkstyle enforces a consistent coding style in Kafka.
+You can run checkstyle using:
 
-### 用户使用维度
+    ./gradlew checkstyleMain checkstyleTest
 
-- 管理员用户与普通用户视角区分
-- 管理员用户与普通用户权限区分
+The checkstyle warnings will be found in `reports/checkstyle/reports/main.html` and `reports/checkstyle/reports/test.html` files in the
+subproject build directories. They are also printed to the console. The build will fail if Checkstyle fails.
 
+#### Spotbugs ####
+Spotbugs uses static analysis to look for bugs in the code.
+You can run spotbugs using:
 
-## kafka-manager架构图
+    ./gradlew spotbugsMain spotbugsTest -x test
 
-![kafka-manager-arch](./docs/assets/images/common/arch.png)
+The spotbugs warnings will be found in `reports/spotbugs/main.html` and `reports/spotbugs/test.html` files in the subproject build
+directories.  Use -PxmlSpotBugsReport=true to generate an XML report instead of an HTML one.
 
+### Common build options ###
 
-## 相关文档
+The following options should be set with a `-P` switch, for example `./gradlew -PmaxParallelForks=1 test`.
 
-- [kafka-manager安装手册](./docs/install_cn_guide.md)
-- [kafka-manager使用手册](./docs/user_cn_guide.md)
+* `commitId`: sets the build commit ID as .git/HEAD might not be correct if there are local commits added for build purposes.
+* `mavenUrl`: sets the URL of the maven deployment repository (`file://path/to/repo` can be used to point to a local repository).
+* `maxParallelForks`: limits the maximum number of processes for each task.
+* `showStandardStreams`: shows standard out and standard error of the test JVM(s) on the console.
+* `skipSigning`: skips signing of artifacts.
+* `testLoggingEvents`: unit test events to be logged, separated by comma. For example `./gradlew -PtestLoggingEvents=started,passed,skipped,failed test`.
+* `xmlSpotBugsReport`: enable XML reports for spotBugs. This also disables HTML reports as only one can be enabled at a time.
 
+### Dependency Analysis ###
 
-## 钉钉交流群
+The gradle [dependency debugging documentation](https://docs.gradle.org/current/userguide/viewing_debugging_dependencies.html) mentions using the `dependencies` or `dependencyInsight` tasks to debug dependencies for the root project or individual subprojects.
 
-![dingding_group](./docs/assets/images/common/dingding_group.jpg)
+Alternatively, use the `allDeps` or `allDepInsight` tasks for recursively iterating through all subprojects:
 
+    ./gradlew allDeps
 
-## 项目成员
+    ./gradlew allDepInsight --configuration runtime --dependency com.fasterxml.jackson.core:jackson-databind
 
-### 内部核心人员
+These take the same arguments as the builtin variants.
 
-`iceyuhui`、`liuyaguang`、`limengmonty`、`zhangliangmike`、`nullhuangyiming`、`zengqiao`、`eilenexuzhe`、`huangjiaweihjw`
+### Running system tests ###
 
+See [tests/README.md](tests/README.md).
 
-### 外部贡献者
+### Running in Vagrant ###
 
-`fangjunyu`、`zhoutaiyang`
+See [vagrant/README.md](vagrant/README.md).
 
+### Contribution ###
 
-## 协议
+Apache Kafka is interested in building the community; we would welcome any thoughts or [patches](https://issues.apache.org/jira/browse/KAFKA). You can reach us [on the Apache mailing lists](http://kafka.apache.org/contact.html).
 
-`kafka-manager`基于`Apache-2.0`协议进行分发和使用，更多信息参见[协议文件](./LICENSE)
+To contribute follow the instructions here:
+ * https://kafka.apache.org/contributing.html
