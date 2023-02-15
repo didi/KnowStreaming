@@ -196,11 +196,8 @@ CREATE TABLE `ks_km_kafka_change_record` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_field` (`unique_field`),
-  KEY `idx_cluster_phy_id` (`cluster_phy_id`)
+  KEY `idx_cluster_update_time` (`cluster_phy_id` ASC, `update_time` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Kafka变更记录表';
-ALTER TABLE `ks_km_kafka_change_record`
-DROP INDEX `idx_cluster_phy_id` ,
-ADD INDEX `idx_cluster_update_time` (`cluster_phy_id` ASC, `update_time` ASC);
 
 
 DROP TABLE IF EXISTS `ks_km_kafka_controller`;
