@@ -6,6 +6,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper.fourletterw
 import com.xiaojukeji.know.streaming.km.common.utils.zookeeper.FourLetterWordUtil;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +64,7 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                         monitorCmdData.setZkMaxLatency(Long.valueOf(elem.getValue()));
                         break;
                     case "zk_min_latency":
-                        monitorCmdData.setZkMinLatency(Long.valueOf(elem.getValue()));
+                        monitorCmdData.setZkMinLatency(new BigDecimal(elem.getValue()).longValue());
                         break;
                     case "zk_packets_received":
                         monitorCmdData.setZkPacketsReceived(Long.valueOf(elem.getValue()));
