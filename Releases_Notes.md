@@ -1,10 +1,6 @@
 
 ## v3.3.0
 
-**协议调整**
-- 项目由 AGPL-3.0 协议调整为 Apache-2.0 协议；
-
-
 **问题修复**
 - 修复 Connect 的 JMX-Port 配置未生效问题;
 - 修复 不存在 Connector 时，OverView 页面的数据一直处于加载中的问题;
@@ -18,7 +14,8 @@
 - 修复 connect 模块，max 纬度指标获取错误的问题；
 - 修复 Topic 指标大盘 TopN 指标显示信息错误的问题；
 - 修复 Broker Similar Config 显示错误的问题；
-
+- 修复解析 ZK 四字命令时，数据类型设置错误导致空指针的问题；
+- 修复新增 Topic 时，清理策略选项版本控制错误的问题；
 
 **产品优化**
 - ZK Overview 页面补充默认展示的指标；
@@ -31,6 +28,7 @@
 - Task 模块中的返回中，补充任务的分组信息；
 - FAQ 补充 Ldap 的配置说明；
 - FAQ 补充接入 Kerberos 认证的 Kafka 集群的配置说明；
+- ks_km_kafka_change_record 表增加时间纬度的索引，优化查询性能；
 
 
 **功能新增**
