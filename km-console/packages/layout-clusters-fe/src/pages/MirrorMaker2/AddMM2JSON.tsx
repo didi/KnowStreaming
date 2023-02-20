@@ -141,7 +141,7 @@ export default forwardRef((props: any, ref) => {
 
   return (
     <Drawer
-      title={`${type === 'create' ? '新建' : '编辑'} MM2`}
+      title={`${type === 'create' ? '新增' : '编辑'} MM2`}
       className="operate-connector-drawer-use-json"
       width={800}
       visible={visible}
