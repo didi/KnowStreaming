@@ -2,7 +2,7 @@ export const regNonnegativeInteger = /^\d+$/g; // 非负正整数
 
 export const regOddNumber = /^\d*[13579]$/; //奇数
 
-export const regClusterName = /^[\u4E00-\u9FA5A-Za-z0-9\_\-\!\"\#\$\%&'()\*\+,./\:\;\<=\>?\@\[\\\]^\`\{\|\}~]*$/im; // 大、小写字母、数字、-、_  new RegExp('\[a-z0-9_-]$', 'g')
+export const regClusterName = /^[\u4E00-\u9FA5A-Za-z0-9\_\-\!\#\$\%&'()\*\+,./\:\;\<=\>?\@\[\\\]^\`\{\|\}~]*$/im; // 大、小写字母、数字、-、_  new RegExp('\[a-z0-9_-]$', 'g')
 export const regUsername = /^[_a-zA-Z-]*$/; // 大、小写字母、数字、-、_  new RegExp('\[a-z0-9_-]$', 'g')
 
 export const regIpAddress = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;

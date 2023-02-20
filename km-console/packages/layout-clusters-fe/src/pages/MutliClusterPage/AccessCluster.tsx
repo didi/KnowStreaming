@@ -204,7 +204,7 @@ const ClusterTabContent = forwardRef((props: any, ref): JSX.Element => {
         return Promise.reject('集群名称长度限制在1～128字符');
       }
       if (!new RegExp(regClusterName).test(value)) {
-        return Promise.reject('集群名称支持中英文、数字、特殊字符 ! " # $ % & \' ( ) * + , - . / : ; < = > ? @ [  ] ^ _ ` { | } ~');
+        return Promise.reject("集群名称支持中英文、数字、特殊字符 ! # $ % & ' ( ) * + , - . / : ; < = > ? @ [  ] ^ _ ` { | } ~");
       }
       return Utils.request(api.getClusterBasicExit(value))
         .then((res: any) => {

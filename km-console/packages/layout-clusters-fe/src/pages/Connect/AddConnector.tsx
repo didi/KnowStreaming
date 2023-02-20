@@ -485,7 +485,7 @@ const StepFormSecond = (props: SubFormProps) => {
                 }
                 if (!new RegExp(regClusterName).test(value)) {
                   return Promise.reject(
-                    'Connector 名称支持中英文、数字、特殊字符 ! " # $ % & \' ( ) * + , - . / : ; < = > ? @ [  ] ^ _ ` { | } ~'
+                    "Connector 名称支持中英文、数字、特殊字符 ! # $ % & ' ( ) * + , - . / : ; < = > ? @ [  ] ^ _ ` { | } ~"
                   );
                 }
                 return Utils.request(api.isConnectorExist(prevForm.getFieldValue('connectClusterId'), value)).then(
