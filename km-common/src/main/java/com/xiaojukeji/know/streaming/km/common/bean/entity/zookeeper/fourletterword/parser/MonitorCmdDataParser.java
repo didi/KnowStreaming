@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper.fourletter
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper.fourletterword.MonitorCmdData;
+import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.zookeeper.FourLetterWordUtil;
 import lombok.Data;
 
@@ -57,13 +58,13 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                         monitorCmdData.setZkVersion(elem.getValue().split("-")[0]);
                         break;
                     case "zk_avg_latency":
-                        monitorCmdData.setZkAvgLatency(Float.valueOf(elem.getValue()));
+                        monitorCmdData.setZkAvgLatency(ConvertUtil.string2Float(elem.getValue()));
                         break;
                     case "zk_max_latency":
-                        monitorCmdData.setZkMaxLatency(Long.valueOf(elem.getValue()));
+                        monitorCmdData.setZkMaxLatency(ConvertUtil.string2Float(elem.getValue()));
                         break;
                     case "zk_min_latency":
-                        monitorCmdData.setZkMinLatency(Long.valueOf(elem.getValue()));
+                        monitorCmdData.setZkMinLatency(ConvertUtil.string2Float(elem.getValue()));
                         break;
                     case "zk_packets_received":
                         monitorCmdData.setZkPacketsReceived(Long.valueOf(elem.getValue()));

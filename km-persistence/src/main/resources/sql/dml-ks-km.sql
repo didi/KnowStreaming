@@ -1,0 +1,23 @@
+-- 检查检查配置
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_CLUSTER_NO_CONTROLLER','{ 	\"value\": 1, 	\"weight\": 30 } ','集群Controller数正常','know-streaming');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_BROKER_REQUEST_QUEUE_FULL','{ 	\"value\": 10, 	\"weight\": 20 } ','Broker-RequestQueueSize指标','know-streaming');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_BROKER_NETWORK_PROCESSOR_AVG_IDLE_TOO_LOW','{ 	\"value\": 0.8, 	\"weight\": 20 } ','Broker-NetworkProcessorAvgIdlePercent指标','know-streaming');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_GROUP_RE_BALANCE_TOO_FREQUENTLY','{\n	\"latestMinutes\": 10,\n	\"detectedTimes\": 8,\n	\"weight\": 10\n}\n','Group的re-balance频率','know-streaming');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_TOPIC_NO_LEADER','{ 	\"value\": 1, 	\"weight\": 10 } ','Topic 无Leader数','know-stream');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`,`value_group`,`value_name`,`value`,`description`,`operator`) VALUES (-1,'HEALTH','HC_TOPIC_UNDER_REPLICA_TOO_LONG','{ 	\"latestMinutes\": 10, 	\"detectedTimes\": 8, 	\"weight\": 10 } ','Topic 未同步持续时间','know-streaming');
+
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_BRAIN_SPLIT', '{ 	\"value\": 1} ', 'ZK 脑裂', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_OUTSTANDING_REQUESTS', '{ 	\"amount\": 100, \"ratio\":0.8} ', 'ZK Outstanding 请求堆积数', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_WATCH_COUNT', '{ 	\"amount\": 100000, 	\"ratio\": 0.8 } ', 'ZK WatchCount 数', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_ALIVE_CONNECTIONS', '{ 	\"amount\": 10000, 	\"ratio\": 0.8 } ', 'ZK 连接数', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_APPROXIMATE_DATA_SIZE', '{ 	\"amount\": 524288000, 	\"ratio\": 0.8 } ', 'ZK 数据大小(Byte)', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_ZK_SENT_RATE', '{ 	\"amount\": 500000, 	\"ratio\": 0.8 } ', 'ZK 发包数', 'admin');
+
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_CONNECTOR_FAILED_TASK_COUNT', '{\"value\" : 1}', 'Connector失败状态的任务数量', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_CONNECTOR_UNASSIGNED_TASK_COUNT', '{\"value\" : 1}', 'Connector未被分配的任务数量', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_CONNECT_CLUSTER_TASK_STARTUP_FAILURE_PERCENTAGE', '{\"value\" : 0.05}', 'Connect集群任务启动失败概率', 'admin');
+
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_MIRROR_MAKER_TOTAL_RECORD_ERRORS', '{\"value\" : 1}', 'MirrorMaker消息处理错误的次数', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_MIRROR_MAKER_REPLICATION_LATENCY_MS_MAX', '{\"value\" : 6000}', 'MirrorMaker消息复制最大延迟时间', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_MIRROR_MAKER_UNASSIGNED_TASK_COUNT', '{\"value\" : 20}', 'MirrorMaker未被分配的任务数量', 'admin');
+INSERT INTO `ks_km_platform_cluster_config` (`cluster_id`, `value_group`, `value_name`, `value`, `description`, `operator`) VALUES ('-1', 'HEALTH', 'HC_MIRROR_MAKER_FAILED_TASK_COUNT', '{\"value\" : 10}', 'MirrorMaker失败状态的任务数量', 'admin');

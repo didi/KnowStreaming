@@ -14,10 +14,12 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.res.ClusterPhyTop
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.TopicVOConverter;
+import com.xiaojukeji.know.streaming.km.common.enums.ha.HaResTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationMetricsUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.core.service.ha.HaActiveStandbyRelationService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,9 @@ public class ClusterTopicsManagerImpl implements ClusterTopicsManager {
     @Autowired
     private TopicMetricService topicMetricService;
 
+    @Autowired
+    private HaActiveStandbyRelationService haActiveStandbyRelationService;
+
     @Override
     public PaginationResult<ClusterPhyTopicsOverviewVO> getClusterPhyTopicsOverview(Long clusterPhyId, ClusterTopicsOverviewDTO dto) {
         // 获取集群所有的Topic信息
@@ -46,8 +51,11 @@ public class ClusterTopicsManagerImpl implements ClusterTopicsManager {
         // 获取集群所有Topic的指标
         Map<String, TopicMetrics> metricsMap = topicMetricService.getLatestMetricsFromCache(clusterPhyId);
 
+        // 获取HA信息
+        Set<String> haTopicNameSet = haActiveStandbyRelationService.listByClusterAndType(clusterPhyId, HaResTypeEnum.MIRROR_TOPIC).stream().map(elem -> elem.getResName()).collect(Collectors.toSet());
+
         // 转换成vo
-        List<ClusterPhyTopicsOverviewVO> voList = TopicVOConverter.convert2ClusterPhyTopicsOverviewVOList(topicList, metricsMap);
+        List<ClusterPhyTopicsOverviewVO> voList = TopicVOConverter.convert2ClusterPhyTopicsOverviewVOList(topicList, metricsMap, haTopicNameSet);
 
         // 请求分页信息
         PaginationResult<ClusterPhyTopicsOverviewVO> voPaginationResult = this.pagingTopicInLocal(voList, dto);

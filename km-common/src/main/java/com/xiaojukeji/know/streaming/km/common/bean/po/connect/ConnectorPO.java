@@ -47,4 +47,14 @@ public class ConnectorPO extends BasePO {
      * 状态
      */
     private String state;
+
+    /**
+     *   心跳检测connector
+     */
+    private String heartbeatConnectorName;
+
+    /**
+     *   进度确认connector
+     */
+    private String checkpointConnectorName;
 }

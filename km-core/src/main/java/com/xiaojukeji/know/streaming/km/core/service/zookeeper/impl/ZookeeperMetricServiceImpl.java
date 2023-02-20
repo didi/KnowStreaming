@@ -206,8 +206,8 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
 
             ZookeeperMetrics metrics = new ZookeeperMetrics(param.getClusterPhyId());
             metrics.putMetric(ZOOKEEPER_METRIC_AVG_REQUEST_LATENCY,         cmdData.getZkAvgLatency());
-            metrics.putMetric(ZOOKEEPER_METRIC_MIN_REQUEST_LATENCY,         cmdData.getZkMinLatency().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY,         cmdData.getZkMaxLatency().floatValue());
+            metrics.putMetric(ZOOKEEPER_METRIC_MIN_REQUEST_LATENCY,         cmdData.getZkMinLatency());
+            metrics.putMetric(ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY,         cmdData.getZkMaxLatency());
             metrics.putMetric(ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS,        cmdData.getZkOutstandingRequests().floatValue());
             metrics.putMetric(ZOOKEEPER_METRIC_NODE_COUNT,                  cmdData.getZkZnodeCount().floatValue());
             metrics.putMetric(ZOOKEEPER_METRIC_NUM_ALIVE_CONNECTIONS,       cmdData.getZkNumAliveConnections().floatValue());
@@ -255,8 +255,8 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
 
             ZookeeperMetrics metrics = new ZookeeperMetrics(param.getClusterPhyId());
             metrics.putMetric(ZOOKEEPER_METRIC_AVG_REQUEST_LATENCY,         cmdData.getZkAvgLatency());
-            metrics.putMetric(ZOOKEEPER_METRIC_MIN_REQUEST_LATENCY,         cmdData.getZkMinLatency().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY,         cmdData.getZkMaxLatency().floatValue());
+            metrics.putMetric(ZOOKEEPER_METRIC_MIN_REQUEST_LATENCY,         cmdData.getZkMinLatency());
+            metrics.putMetric(ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY,         cmdData.getZkMaxLatency());
             metrics.putMetric(ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS,        cmdData.getZkOutstandingRequests().floatValue());
             metrics.putMetric(ZOOKEEPER_METRIC_NODE_COUNT,                  cmdData.getZkZnodeCount().floatValue());
             metrics.putMetric(ZOOKEEPER_METRIC_WATCH_COUNT,                 cmdData.getZkWatchCount().floatValue());

@@ -1,0 +1,265 @@
+// mm2列表 图表
+.metric-data-wrap {
+  // display: flex;
+  // align-items: center;
+  width: 100%;
+  .cur-val {
+    display: block;
+    text-align: right;
+  }
+  .dcloud-spin-nested-loading {
+    flex: 1;
+  }
+}
+
+// 新增按钮
+.add-connect {
+  .dcloud-btn-primary:hover,
+  .dcloud-btn-primary:focus {
+    // 可以控制新增按钮的hover和focus的样式
+    // background: #556ee6;
+    // border-color: #556ee6;
+  }
+  &-btn {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: none;
+  }
+  &-dropdown-menu {
+    .dcloud-dropdown-menu {
+      border-radius: 8px;
+      &-item {
+        font-size: 13px;
+      }
+    }
+  }
+  &-json {
+    padding: 8px 12px !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-left: none;
+  }
+}
+
+// connect详情
+.mm2-detail-drawer {
+  .card-bar-container {
+    background: rgba(86, 110, 230, 0.04) !important;
+
+    .card-bar-colunms {
+      background-color: rgba(86, 110, 230, 0);
+    }
+  }
+  &-title {
+    margin: 20px 0 8px;
+    font-family: @font-family-bold;
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+// 删除
+.del-connect-modal {
+  .tip-info {
+    display: flex;
+    color: #592d00;
+    padding: 6px 14px;
+    font-size: 13px;
+    background: #fffae0;
+    border-radius: 4px;
+    .anticon {
+      color: #ffc300;
+      margin-right: 4px;
+      margin-top: 3px;
+    }
+    .test-right-away {
+      color: #556ee6;
+      cursor: pointer;
+    }
+    .dcloud-alert-content {
+      flex: none;
+    }
+  }
+}
+
+// 重启、继续/暂停 气泡卡片
+.connect-popconfirm {
+  .dcloud-popover-inner-content {
+    padding: 6px 16px;
+  }
+  .dcloud-popover-inner {
+    border-radius: 8px;
+  }
+  .dcloud-popover-message,
+  .dcloud-btn {
+    font-size: 12px !important;
+  }
+}
+
+.operate-connector-drawer {
+  .connector-plugin-desc {
+    font-size: 13px;
+    .connector-plugin-title {
+      font-family: @font-family-bold;
+    }
+  }
+  .dcloud-collapse.add-connector-collapse {
+    .add-connector-collapse-panel,
+    .add-connector-collapse-panel:last-child {
+      margin-bottom: 8px;
+      overflow: hidden;
+      background: #f8f9fa;
+      border: 0px;
+      border-radius: 8px;
+      .dcloud-collapse-header {
+        padding: 8px 12px;
+        font-size: 14px;
+        color: #495057;
+        .dcloud-collapse-arrow {
+          margin-right: 8px !important;
+          font-size: 10px;
+        }
+      }
+      &:hover .dcloud-collapse-extra {
+        opacity: 1;
+      }
+      &:not(.dcloud-collapse-item-active) {
+        .dcloud-collapse-header:hover {
+          background: #f1f3ff;
+        }
+      }
+      .dcloud-collapse-content-box {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        padding: 20px 14px 0 14px;
+        .dcloud-form-item {
+          flex: 1 0 50%;
+          .dcloud-input-number {
+            width: 100%;
+          }
+          &:nth-child(2n) {
+            padding-left: 6px;
+          }
+          &:nth-child(2n + 1) {
+            padding-right: 6px;
+          }
+          .dcloud-form-item-control-input {
+            height: 100%;
+          }
+        }
+      }
+    }
+  }
+
+  .add-container-plugin-select {
+    height: 27px;
+    margin: 4px 0;
+    position: relative;
+    .dcloud-form-item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      .dcloud-form-item-control-input {
+        min-height: 0;
+      }
+    }
+  }
+
+  .dcloud-alert {
+    margin: 16px 0 24px 0;
+    padding: 0 12px;
+    border: unset;
+    border-radius: 8px;
+    background: #fffae0;
+    .dcloud-alert-message {
+      font-size: 13px;
+      color: #592d00;
+      .dcloud-btn {
+        padding: 0 4px;
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+.operate-connector-drawer-use-json {
+  .CodeMirror.cm-s-default {
+    height: calc(100vh - 146px);
+  }
+  .dcloud-form-item {
+    margin-bottom: 0 !important;
+  }
+}
+
+.mirror-maker-steps {
+  width: 340px !important;
+  margin: 0 auto !important;
+}
+
+.add-mm2-config-title {
+  color: #556ee6;
+  margin-bottom: 24px;
+  display: inline-block;
+  cursor: pointer;
+  &-text {
+    margin-right: 7px;
+  }
+  &-icon {
+    transform: rotate(180deg);
+  }
+}
+
+.custom-form-item-27 {
+  padding: 0 16px;
+  .dcloud-form-item {
+    margin-bottom: 6px !important;
+  }
+  .dcloud-form-item-label > label {
+    height: 27px;
+  }
+  .group-offset-table {
+    margin-bottom: 40px;
+    margin-top: 12px;
+  }
+}
+
+.custom-form-item-36 {
+  .dcloud-form-item-control-input {
+    min-height: 36px;
+  }
+}
+
+.clear-topic-minHeight {
+  .dcloud-form-item-control-input {
+    min-height: 0;
+  }
+}
+
+.add-mm2-flex-layout {
+  &-item {
+    display: flex;
+    justify-content: space-between;
+  }
+  .senior-config-left {
+    width: 228px !important;
+    margin-right: 10px;
+    // .dcloud-form-item-label {
+    //   width: 190px !important;
+    //   text-align: right !important;
+    // }
+  }
+  .dcloud-form-item {
+    width: 345px;
+    flex-direction: row !important;
+    height: 27px;
+    margin-bottom: 2px !important;
+    &-label {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 !important;
+      margin-right: 10px;
+    }
+  }
+}

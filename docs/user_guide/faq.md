@@ -182,3 +182,47 @@ Node 版本: v12.22.12
 
 + 原因：由于数据库编码和我们提供的脚本不一致，数据库里的数据发生了乱码，因此出现权限识别失败问题。
 + 解决方案：清空数据库数据，将数据库字符集调整为utf8，最后重新执行[dml-logi.sql](https://github.com/didi/KnowStreaming/blob/master/km-dist/init/sql/dml-logi.sql)脚本导入数据即可。
+
+
+## 8.13、接入开启kerberos认证的kafka集群
+
+1. 部署KnowStreaming的机器上安装krb客户端；
+2. 替换/etc/krb5.conf配置文件；
+3. 把kafka对应的keytab复制到改机器目录下；
+4. 接入集群时认证配置，配置信息根据实际情况填写；
+```json
+{
+  "security.protocol": "SASL_PLAINTEXT",
+  "sasl.mechanism": "GSSAPI",
+  "sasl.jaas.config": "com.sun.security.auth.module.Krb5LoginModule required useKeyTab=true keyTab=\"/etc/keytab/kafka.keytab\" storeKey=true useTicketCache=false principal=\"kafka/kafka@TEST.COM\";",
+  "sasl.kerberos.service.name": "kafka"
+}
+```
+
+
+## 8.14、对接Ldap的配置
+
+```yaml
+# 需要在application.yml中增加如下配置。相关配置的信息，按实际情况进行调整
+account:
+  ldap:
+    url: ldap://127.0.0.1:8080/
+    basedn: DC=senz,DC=local
+    factory: com.sun.jndi.ldap.LdapCtxFactory
+    filter: sAMAccountName
+    security:
+      authentication: simple
+      principal: CN=search,DC=senz,DC=local
+      credentials: xxxxxxx
+    auth-user-registration: false # 是否注册到mysql，默认false
+    auth-user-registration-role: 1677 # 1677是超级管理员角色的id，如果赋予想默认赋予普通角色，可以到ks新建一个。
+
+# 需要在application.yml中修改如下配置
+spring:
+  logi-security:
+    login-extend-bean-name: ksLdapLoginService # 表示使用ldap的service
+```
+
+## 8.15、测试时使用Testcontainers的说明
+1. 需要docker运行环境 [Testcontainers运行环境说明](https://www.testcontainers.org/supported_docker_environment/)
+2. 如果本机没有docker，可以使用[远程访问docker](https://docs.docker.com/config/daemon/remote-access/) [Testcontainers配置说明](https://www.testcontainers.org/features/configuration/#customizing-docker-host-detection)  

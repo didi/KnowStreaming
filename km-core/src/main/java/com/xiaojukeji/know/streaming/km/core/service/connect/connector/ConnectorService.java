@@ -1,5 +1,6 @@
 package com.xiaojukeji.know.streaming.km.core.service.connect.connector;
 
+import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectCluster;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.connector.KSConnector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.connector.KSConnectorInfo;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.connector.KSConnectorStateInfo;
@@ -56,4 +57,6 @@ public interface ConnectorService {
     ConnectorPO getConnectorFromDB(Long connectClusterId, String connectorName);
 
     ConnectorTypeEnum getConnectorType(Long connectClusterId, String connectorName);
+
+    void completeMirrorMakerInfo(ConnectCluster connectCluster, List<KSConnector> connectorList);
 }

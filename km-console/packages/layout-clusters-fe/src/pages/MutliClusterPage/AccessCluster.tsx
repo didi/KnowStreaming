@@ -522,6 +522,7 @@ const ConnectorForm = (props: {
     const params = {
       ...values,
       id: initFieldsValue?.id,
+      jmxProperties: values.jmxProperties ? `{ "jmxProperties": "${values.jmxProperties}" }` : undefined,
     };
     Utils.put(api.batchConnectClusters, [params])
       .then((res) => {
@@ -542,7 +543,7 @@ const ConnectorForm = (props: {
     setSelectedTabKey(undefined);
     try {
       const jmxPortInfo = JSON.parse(initFieldsValue.jmxProperties) || {};
-      form.setFieldsValue({ ...initFieldsValue, jmxPort: jmxPortInfo.jmxPort });
+      form.setFieldsValue({ ...initFieldsValue, jmxProperties: jmxPortInfo.jmxProperties });
     } catch {
       form.setFieldsValue({ ...initFieldsValue });
     }
@@ -551,7 +552,7 @@ const ConnectorForm = (props: {
   useLayoutEffect(() => {
     try {
       const jmxPortInfo = JSON.parse(initFieldsValue.jmxProperties) || {};
-      form.setFieldsValue({ ...initFieldsValue, jmxPort: jmxPortInfo.jmxPort });
+      form.setFieldsValue({ ...initFieldsValue, jmxProperties: jmxPortInfo.jmxProperties });
     } catch {
       form.setFieldsValue({ ...initFieldsValue });
     }
@@ -626,7 +627,7 @@ const ConnectorForm = (props: {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="jmxPort" label="JMX Port" style={{ width: 202 }}>
+          <Form.Item name="jmxProperties" label="JMX Port" style={{ width: 202 }}>
             <InputNumber min={0} max={99999} style={{ width: 202 }} />
           </Form.Item>
         </div>

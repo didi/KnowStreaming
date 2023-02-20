@@ -12,7 +12,6 @@ import lombok.Data;
 @JsonIgnoreProperties(value = { "hibernateLazyInitializer", "handler" })
 @Data
 public class Tuple<T, V> {
-
     private T v1;
     private V v2;
 
@@ -57,5 +56,13 @@ public class Tuple<T, V> {
         int result = v1 != null ? v1.hashCode() : 0;
         result = 31 * result + (v2 != null ? v2.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Tuple{" +
+                "v1=" + v1 +
+                ", v2=" + v2 +
+                '}';
     }
 }

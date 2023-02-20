@@ -6,7 +6,6 @@ import com.xiaojukeji.know.streaming.km.biz.connect.connector.ConnectorManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.connect.connector.ConnectorActionDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.connect.connector.ConnectorCreateDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.connect.connector.ConnectorDeleteDTO;
-import com.xiaojukeji.know.streaming.km.common.bean.dto.connect.connector.ConnectorConfigModifyDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.config.ConnectConfigInfos;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
@@ -73,14 +72,14 @@ public class KafkaConnectorController {
     @ApiOperation(value = "修改Connector配置", notes = "")
     @PutMapping(value ="connectors-config")
     @ResponseBody
-    public Result<Void> modifyConnectors(@Validated @RequestBody ConnectorConfigModifyDTO dto) {
+    public Result<Void> modifyConnectors(@Validated @RequestBody ConnectorCreateDTO dto) {
         return connectorManager.updateConnectorConfig(dto.getConnectClusterId(), dto.getConnectorName(), dto.getConfigs(), HttpRequestUtil.getOperator());
     }
 
     @ApiOperation(value = "校验Connector配置", notes = "")
     @PutMapping(value ="connectors-config/validate")
     @ResponseBody
-    public Result<ConnectConfigInfosVO> validateConnectors(@Validated @RequestBody ConnectorConfigModifyDTO dto) {
+    public Result<ConnectConfigInfosVO> validateConnectors(@Validated @RequestBody ConnectorCreateDTO dto) {
         Result<ConnectConfigInfos> infoResult = pluginService.validateConfig(dto.getConnectClusterId(), dto.getConfigs());
         if (infoResult.failed()) {
             return Result.buildFromIgnoreData(infoResult);

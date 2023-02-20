@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.core.flusher;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.ha.HaActiveStandbyRelation;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
@@ -10,9 +11,10 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
-import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.service.ha.HaActiveStandbyRelationService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
@@ -50,6 +52,9 @@ public class DatabaseDataFlusher {
     @Autowired
     private PartitionService partitionService;
 
+    @Autowired
+    private HaActiveStandbyRelationService haActiveStandbyRelationService;
+
     @PostConstruct
     public void init() {
         this.flushPartitionsCache();
@@ -59,6 +64,8 @@ public class DatabaseDataFlusher {
         this.flushTopicLatestMetricsCache();
 
         this.flushHealthCheckResultCache();
+
+        this.flushHaTopicCache();
     }
 
     @Scheduled(cron="0 0/1 * * * ?")
@@ -157,6 +164,14 @@ public class DatabaseDataFlusher {
                     }
                 }
             });
+        }
+    }
+
+    @Scheduled(cron="0 0/1 * * * ?")
+    public void flushHaTopicCache() {
+        List<HaActiveStandbyRelation> haTopicList = haActiveStandbyRelationService.listAllTopicHa();
+        for (HaActiveStandbyRelation topic : haTopicList) {
+            DataBaseDataLocalCache.putHaTopic(topic.getStandbyClusterPhyId(), topic.getResName());
         }
     }
 }

@@ -18,7 +18,7 @@ export interface CardBarProps {
   cardColumns?: any[];
   healthData?: healthDataProps;
   showCardBg?: boolean;
-  scene: 'topics' | 'brokers' | 'topic' | 'broker' | 'group' | 'zookeeper' | 'connect' | 'connector';
+  scene: 'topics' | 'brokers' | 'topic' | 'broker' | 'group' | 'zookeeper' | 'connect' | 'connector' | 'mm2';
   record?: any;
   loading?: boolean;
   needProgress?: boolean;
@@ -67,6 +67,11 @@ const sceneCodeMap = {
     fieldName: 'connectorName',
     alias: 'Connector',
   },
+  mm2: {
+    code: 7,
+    fieldName: 'connectorName',
+    alias: 'MM2',
+  },
 };
 const CardColumnsItem: any = (cardItem: any) => {
   const { cardColumnsItemData, showCardBg } = cardItem;
@@ -108,7 +113,7 @@ const CardBar = (props: CardBarProps) => {
     const sceneObj = sceneCodeMap[scene];
     const path = record
       ? api.getResourceHealthDetail(
-          scene === 'connector' ? Number(record?.connectClusterId) : Number(routeParams.clusterId),
+          scene === 'connector' || scene === 'mm2' ? Number(record?.connectClusterId) : Number(routeParams.clusterId),
           sceneObj.code,
           record[sceneObj.fieldName]
         )

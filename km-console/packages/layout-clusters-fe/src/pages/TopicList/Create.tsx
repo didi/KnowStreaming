@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, Button, Checkbox, Divider, Drawer, Form, Input, InputNumber, Modal, Select, Utils } from 'knowdesign';
+import { Alert, Button, Checkbox, Divider, Drawer, Form, Input, InputNumber, Modal, Select, Utils, Radio, AppContainer } from 'knowdesign';
 import notification from '@src/components/Notification';
 import { PlusOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import Api from '@src/api/index';
+import { ControlStatusMap } from '../CommonRoute';
 
 const CheckboxGroup = Checkbox.Group;
+const RadioGroup = Radio.Group;
 
 interface DefaultConfig {
   name: string;
@@ -67,6 +69,8 @@ export default (props: any) => {
   const routeParams = useParams<{
     clusterId: string;
   }>();
+  const [global] = AppContainer.useGlobalValue();
+  const multiCleanupPolicy = global.isShowControl && global.isShowControl(ControlStatusMap.CREATE_TOPIC_CLEANUP_POLICY);
   const confirm = () => {
     form.validateFields().then((e) => {
       const formVal = JSON.parse(JSON.stringify(form.getFieldsValue()));
@@ -106,7 +110,7 @@ export default (props: any) => {
           let res: any;
           try {
             res =
-              item.name === 'cleanup.policy'
+              item.name === 'cleanup.policy' && multiCleanupPolicy
                 ? item.defaultValue
                     .replace(/\[|\]|\s+/g, '')
                     .split(',')
@@ -267,12 +271,21 @@ export default (props: any) => {
             </div>
           </Form.Item>
           <Form.Item name={['properties', 'cleanup.policy']} label="清理策略" rules={[{ required: true, message: '请输入清理策略' }]}>
-            <CheckboxGroup>
-              <Checkbox style={{ marginRight: '65px' }} value="delete">
-                delete
-              </Checkbox>
-              <Checkbox value="compact">compact</Checkbox>
-            </CheckboxGroup>
+            {multiCleanupPolicy ? (
+              <CheckboxGroup>
+                <Checkbox style={{ marginRight: '65px' }} value="delete">
+                  delete
+                </Checkbox>
+                <Checkbox value="compact">compact</Checkbox>
+              </CheckboxGroup>
+            ) : (
+              <RadioGroup>
+                <Radio style={{ marginRight: '65px' }} value="delete">
+                  delete
+                </Radio>
+                <Radio value="compact">compact</Radio>
+              </RadioGroup>
+            )}
           </Form.Item>
           <div className="more-config">
             <div className="txt">更多配置</div>

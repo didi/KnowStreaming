@@ -16,11 +16,11 @@ import java.util.Map;
 import static com.xiaojukeji.know.streaming.km.monitor.common.MonitorSinkTagEnum.*;
 
 public abstract class AbstractMonitorSinkService implements ApplicationListener<BaseMetricEvent> {
-    protected static final ILog LOGGER = LogFactory.getLog(AbstractMonitorSinkService.class);
+    protected static final ILog LOGGER              = LogFactory.getLog(AbstractMonitorSinkService.class);
 
-    private static final int    STEP       = 60;
+    private static final int    STEP                = 60;
 
-    private FutureUtil<Void> sinkTP = FutureUtil.init(
+    private static final FutureUtil<Void> sinkTP    = FutureUtil.init(
             "SinkMetricsTP",
             5,
             5,
@@ -151,21 +151,6 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
 
                 pointList.addAll(genSinkPoint("Group_Topic_Partition", g.getMetrics(), g.getTimestamp(), tagsMap));
             }
-        }
-
-        return pointList;
-    }
-
-    private List<MetricSinkPoint> replicationMetric2SinkPoint(List<ReplicationMetrics> replicationMetrics){
-        List<MetricSinkPoint> pointList = new ArrayList<>();
-
-        for(ReplicationMetrics r : replicationMetrics){
-            Map<String, Object> tagsMap = new HashMap<>();
-            tagsMap.put(CLUSTER_ID.getName(),     r.getClusterPhyId());
-            tagsMap.put(BROKER_ID.getName(),      r.getBrokerId());
-            tagsMap.put(PARTITION_ID.getName(),   r.getPartitionId());
-
-            pointList.addAll(genSinkPoint("Replication", r.getMetrics(), r.getTimestamp(), tagsMap));
         }
 
         return pointList;

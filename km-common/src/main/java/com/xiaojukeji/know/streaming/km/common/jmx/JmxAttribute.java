@@ -144,6 +144,32 @@ public class JmxAttribute {
 
     public static final String TOTAL_RETRIES                             = "total-retries";
 
+    /*********************************************************** mm2 ***********************************************************/
+
+    public static final String BYTE_COUNT                   = "byte-count";
+
+    public static final String BYTE_RATE                    = "byte-rate";
+
+    public static final String RECORD_AGE_MS                = "record-age-ms";
+
+    public static final String RECORD_AGE_MS_AVG            = "record-age-ms-avg";
+
+    public static final String RECORD_AGE_MS_MAX            = "record-age-ms-max";
+
+    public static final String RECORD_AGE_MS_MIN            = "record-age-ms-min";
+
+    public static final String RECORD_COUNT                 = "record-count";
+
+    public static final String RECORD_RATE                  = "record-rate";
+
+    public static final String REPLICATION_LATENCY_MS       = "replication-latency-ms";
+
+    public static final String REPLICATION_LATENCY_MS_AVG   = "replication-latency-ms-avg";
+
+    public static final String REPLICATION_LATENCY_MS_MAX   = "replication-latency-ms-max";
+
+    public static final String REPLICATION_LATENCY_MS_MIN   = "replication-latency-ms-min";
+
     private JmxAttribute() {
     }
 }

@@ -4,6 +4,7 @@ import com.xiaojukeji.know.streaming.km.biz.cluster.MultiClusterPhyManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.MultiClusterDashboardDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyBaseVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhysHealthStateVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhysStateVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyDashboardVO;
@@ -37,8 +38,15 @@ public class MultiClusterPhyController {
     @ApiOperation(value = "多物理集群-大盘", notes = "")
     @PostMapping(value = "physical-clusters/dashboard")
     @ResponseBody
-    public PaginationResult<ClusterPhyDashboardVO> getClusterPhyBasic(@RequestBody @Validated MultiClusterDashboardDTO dto) {
+    public PaginationResult<ClusterPhyDashboardVO> getClusterPhyDashboard(@RequestBody @Validated MultiClusterDashboardDTO dto) {
         return multiClusterPhyManager.getClusterPhysDashboard(dto);
+    }
+
+    @ApiOperation(value = "多物理集群-基本信息", notes = "")
+    @GetMapping(value = "physical-clusters/basic")
+    @ResponseBody
+    public Result<List<ClusterPhyBaseVO>> getClusterPhyBasic() {
+        return multiClusterPhyManager.getClusterPhysBasic();
     }
 
     @ApiOperation(value = "多物理集群-状态", notes = "")

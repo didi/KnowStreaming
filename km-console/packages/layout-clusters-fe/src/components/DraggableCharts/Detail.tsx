@@ -167,6 +167,9 @@ const ChartDetail = (props: ChartDetailProps) => {
   const getMetricChartData = ([startTime, endTime]: readonly [number, number]) => {
     const getQueryUrl = () => {
       switch (metricType) {
+        case MetricType.MM2: {
+          return api.getMirrorMakerMetrics(clusterId);
+        }
         case MetricType.Connect: {
           return api.getConnectClusterMetrics(clusterId);
         }
@@ -180,13 +183,16 @@ const ChartDetail = (props: ChartDetailProps) => {
       [MetricType.Topic]: 'topics',
       [MetricType.Connect]: 'connectClusterIdList',
       [MetricType.Connectors]: 'connectorNameList',
+      [MetricType.MM2]: 'connectorNameList',
     };
+
     return Utils.post(getQueryUrl(), {
       startTime,
       endTime,
       metricsNames: [metricName],
       topNu: null,
-      [queryMap[metricType as keyof typeof queryMap]]: queryLines,
+      [queryMap[metricType as keyof typeof queryMap]]:
+        metricType === MetricType.MM2 ? queryLines.map((item) => (typeof item === 'string' ? Utils.parseJSON(item) : item)) : queryLines,
     });
   };
 

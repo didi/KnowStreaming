@@ -1,7 +1,5 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.param.connect;
 
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ConnectClusterParam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,9 +16,12 @@ public class ConnectorParam extends ConnectClusterParam {
 
     private String connectorName;
 
-    public ConnectorParam(Long connectClusterId, String connectorName) {
+    private String connectorType;
+
+    public ConnectorParam(Long connectClusterId, String connectorName, String connectorType) {
         super(connectClusterId);
         this.connectorName = connectorName;
+        this.connectorType = connectorType;
     }
 
 }

@@ -13,6 +13,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.po.connect.ConnectorPO;
 import com.xiaojukeji.know.streaming.km.common.component.RestTool;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
+import com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.ConnectConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectorTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
@@ -33,7 +34,10 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant.MIRROR_MAKER_SOURCE_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME;
+import static com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant.MIRROR_MAKER_TARGET_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.SERVICE_OP_CONNECT_CONNECTOR;
 
 @Service
@@ -79,7 +83,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
 
             // 构造参数
             Properties props = new Properties();
-            props.put("name", connectorName);
+            props.put(KafkaConnectConstant.MIRROR_MAKER_NAME_FIELD_NAME, connectorName);
             props.put("config", configs);
 
             ConnectorInfo connectorInfo = restTool.postObjectWithJsonContent(
@@ -477,6 +481,45 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
         return connectorType;
     }
 
+    @Override
+    public void completeMirrorMakerInfo(ConnectCluster connectCluster, List<KSConnector> connectorList) {
+        List<KSConnector> sourceConnectorList = connectorList.stream().filter(elem -> elem.getConnectorClassName().equals(KafkaConnectConstant.MIRROR_MAKER_SOURCE_CONNECTOR_TYPE)).collect(Collectors.toList());
+        if (sourceConnectorList.isEmpty()) {
+            return;
+        }
+
+        List<KSConnector> heartBeatConnectorList = connectorList.stream().filter(elem -> elem.getConnectorClassName().equals(KafkaConnectConstant.MIRROR_MAKER_HEARTBEAT_CONNECTOR_TYPE)).collect(Collectors.toList());
+        List<KSConnector> checkpointConnectorList = connectorList.stream().filter(elem -> elem.getConnectorClassName().equals(KafkaConnectConstant.MIRROR_MAKER_CHECKPOINT_CONNECTOR_TYPE)).collect(Collectors.toList());
+
+        Map<String, String> heartbeatMap = this.buildMirrorMakerMap(connectCluster, heartBeatConnectorList);
+        Map<String, String> checkpointMap = this.buildMirrorMakerMap(connectCluster, checkpointConnectorList);
+
+        for (KSConnector sourceConnector : sourceConnectorList) {
+            Result<KSConnectorInfo> ret = this.getConnectorInfoFromCluster(connectCluster, sourceConnector.getConnectorName());
+
+            if (!ret.hasData()) {
+                LOGGER.error(
+                        "method=completeMirrorMakerInfo||connectClusterId={}||connectorName={}||get connectorInfo fail!",
+                        connectCluster.getId(), sourceConnector.getConnectorName()
+                );
+                continue;
+            }
+            KSConnectorInfo ksConnectorInfo = ret.getData();
+            String targetServers = ksConnectorInfo.getConfig().get(MIRROR_MAKER_TARGET_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME);
+            String sourceServers = ksConnectorInfo.getConfig().get(MIRROR_MAKER_SOURCE_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME);
+
+            if (ValidateUtils.anyBlank(targetServers, sourceServers)) {
+                continue;
+            }
+
+            String[] targetBrokerList = getBrokerList(targetServers);
+            String[] sourceBrokerList = getBrokerList(sourceServers);
+            sourceConnector.setHeartbeatConnectorName(this.findBindConnector(targetBrokerList, sourceBrokerList, heartbeatMap));
+            sourceConnector.setCheckpointConnectorName(this.findBindConnector(targetBrokerList, sourceBrokerList, checkpointMap));
+        }
+
+    }
+
     /**************************************************** private method ****************************************************/
     private int deleteConnectorInDB(Long connectClusterId, String connectorName) {
         LambdaQueryWrapper<ConnectorPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -577,5 +620,64 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
                     connectClusterId, connectorName, e
             );
         }
+    }
+
+    private Map<String, String> buildMirrorMakerMap(ConnectCluster connectCluster, List<KSConnector> ksConnectorList) {
+        Map<String, String> bindMap = new HashMap<>();
+
+        for (KSConnector ksConnector : ksConnectorList) {
+            Result<KSConnectorInfo> ret = this.getConnectorInfoFromCluster(connectCluster, ksConnector.getConnectorName());
+
+            if (!ret.hasData()) {
+                LOGGER.error(
+                        "method=buildMirrorMakerMap||connectClusterId={}||connectorName={}||get connectorInfo fail!",
+                        connectCluster.getId(), ksConnector.getConnectorName()
+                );
+                continue;
+            }
+
+            KSConnectorInfo ksConnectorInfo = ret.getData();
+            String targetServers = ksConnectorInfo.getConfig().get(MIRROR_MAKER_TARGET_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME);
+            String sourceServers = ksConnectorInfo.getConfig().get(MIRROR_MAKER_SOURCE_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME);
+
+            if (ValidateUtils.anyBlank(targetServers, sourceServers)) {
+                continue;
+            }
+
+            String[] targetBrokerList = getBrokerList(targetServers);
+            String[] sourceBrokerList = getBrokerList(sourceServers);
+            for (String targetBroker : targetBrokerList) {
+                for (String sourceBroker : sourceBrokerList) {
+                    bindMap.put(targetBroker + "@" + sourceBroker, ksConnector.getConnectorName());
+                }
+            }
+
+        }
+        return bindMap;
+    }
+
+    private String findBindConnector(String[] targetBrokerList, String[] sourceBrokerList, Map<String, String> connectorBindMap) {
+        for (String targetBroker : targetBrokerList) {
+            for (String sourceBroker : sourceBrokerList) {
+                String connectorName = connectorBindMap.get(targetBroker + "@" + sourceBroker);
+                if (connectorName != null) {
+                    return connectorName;
+                }
+            }
+        }
+        return "";
+    }
+
+    private String[] getBrokerList(String str) {
+        if (ValidateUtils.isBlank(str)) {
+            return new String[0];
+        }
+        if (str.contains(";")) {
+            return str.split(";");
+        }
+        if (str.contains(",")) {
+            return str.split(",");
+        }
+        return new String[]{str};
     }
 }

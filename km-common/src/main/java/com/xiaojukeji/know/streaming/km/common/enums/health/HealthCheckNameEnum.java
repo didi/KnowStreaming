@@ -136,7 +136,7 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.CONNECT_CLUSTER,
             "TaskStartupFailurePercentage",
             Constant.HC_CONFIG_NAME_PREFIX+"CONNECT_CLUSTER_TASK_STARTUP_FAILURE_PERCENTAGE",
-            "connect集群任务启动失败概率",
+            "Connect集群任务启动失败概率",
             HealthCompareValueConfig.class,
             false
     ),
@@ -145,7 +145,7 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.CONNECTOR,
             "ConnectorFailedTaskCount",
             Constant.HC_CONFIG_NAME_PREFIX+"CONNECTOR_FAILED_TASK_COUNT",
-            "connector失败状态的任务数量",
+            "Connector失败状态的任务数量",
             HealthCompareValueConfig.class,
             false
     ),
@@ -154,10 +154,47 @@ public enum HealthCheckNameEnum {
             HealthCheckDimensionEnum.CONNECTOR,
             "ConnectorUnassignedTaskCount",
             Constant.HC_CONFIG_NAME_PREFIX+"CONNECTOR_UNASSIGNED_TASK_COUNT",
-            "connector未被分配的任务数量",
+            "Connector未被分配的任务数量",
+            HealthCompareValueConfig.class,
+            false
+    ),
+
+    MIRROR_MAKER_FAILED_TASK_COUNT(
+            HealthCheckDimensionEnum.MIRROR_MAKER,
+            "MirrorMakerFailedTaskCount",
+            Constant.HC_CONFIG_NAME_PREFIX+"MIRROR_MAKER_FAILED_TASK_COUNT",
+            "MirrorMaker失败状态的任务数量",
+            HealthCompareValueConfig.class,
+            false
+    ),
+
+    MIRROR_MAKER_UNASSIGNED_TASK_COUNT(
+            HealthCheckDimensionEnum.MIRROR_MAKER,
+            "MirrorMakerUnassignedTaskCount",
+            Constant.HC_CONFIG_NAME_PREFIX+"MIRROR_MAKER_UNASSIGNED_TASK_COUNT",
+            "MirrorMaker未被分配的任务数量",
+            HealthCompareValueConfig.class,
+            false
+    ),
+
+    MIRROR_MAKER_TOTAL_RECORD_ERRORS(
+            HealthCheckDimensionEnum.MIRROR_MAKER,
+            "TotalRecord-errors",
+            Constant.HC_CONFIG_NAME_PREFIX + "MIRROR_MAKER_TOTAL_RECORD_ERRORS",
+            "MirrorMaker消息处理错误的次数",
+            HealthCompareValueConfig.class,
+            false
+    ),
+
+    MIRROR_MAKER_REPLICATION_LATENCY_MS_MAX(
+            HealthCheckDimensionEnum.MIRROR_MAKER,
+            "ReplicationLatencyMsMax",
+            Constant.HC_CONFIG_NAME_PREFIX + "MIRROR_MAKER_REPLICATION_LATENCY_MS_MAX",
+            "MirrorMaker消息复制最大延迟时间",
             HealthCompareValueConfig.class,
             false
     )
+
 
 
 

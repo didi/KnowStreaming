@@ -41,6 +41,8 @@ public class JmxName {
 
     public static final String JMX_SERVER_APP_INFO                      ="kafka.server:type=app-info";
 
+    public static final String JMX_SERVER_TOPIC_MIRROR                  ="kafka.server:type=FetcherLagMetrics,name=ConsumerLag,clientId=*,topic=%s,partition=*";
+
     /*********************************************************** controller ***********************************************************/
     public static final String JMX_CONTROLLER_ACTIVE_COUNT              = "kafka.controller:type=KafkaController,name=ActiveControllerCount";
 
@@ -81,6 +83,10 @@ public class JmxName {
     public static final String JMX_CONNECTOR_SINK_TASK_METRICS          = "kafka.connect:type=sink-task-metrics,connector=%s,task=%s";
 
     public static final String JMX_CONNECTOR_TASK_ERROR_METRICS         = "kafka.connect:type=task-error-metrics,connector=%s,task=%s";
+
+    /*********************************************************** mm2 ***********************************************************/
+
+    public static final String JMX_MIRROR_MAKER_SOURCE                  = "kafka.connect.mirror:type=MirrorSourceConnector,target=%s,topic=%s,partition=%s";
 
 
     private JmxName() {

@@ -15,6 +15,8 @@ import java.util.*;
 
 public class ClusterMetricESDAOTest extends KnowStreamApplicationTest {
 
+    Long clusterId = 1L;
+
     @Autowired
     private ClusterMetricESDAO clusterMetricESDAO;
 
@@ -34,7 +36,6 @@ public class ClusterMetricESDAOTest extends KnowStreamApplicationTest {
      */
     @Test
     public void getClusterMetricsPointTest(){
-        Long clusterId          = 1L;
         List<String> metrics    = Arrays.asList(
                 "Connections",                  "BytesIn_min_15",           "PartitionURP",
                 "HealthScore_Topics",           "EventQueueSize",           "ActiveControllerCount",
@@ -67,7 +68,6 @@ public class ClusterMetricESDAOTest extends KnowStreamApplicationTest {
      */
     @Test
     public void getClusterLatestMetricsTest(){
-        Long clusterId          = 1L;
         List<String> metrics    = Collections.emptyList();
 
         ClusterMetricPO clusterLatestMetrics = clusterMetricESDAO.getClusterLatestMetrics(clusterId, metrics);

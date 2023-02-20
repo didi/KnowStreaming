@@ -36,7 +36,7 @@ export default (props: Props) => {
   const [disabled, setDisabled] = useState(true);
 
   useLayoutEffect(() => {
-    Utils.request(api.getConnectors(clusterId))
+    Utils.request(api.getConnectClusters(clusterId))
       .then((res: any[]) => {
         res?.length && setDisabled(false);
       })

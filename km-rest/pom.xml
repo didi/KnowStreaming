@@ -19,6 +19,8 @@
 
         <springboot.version>2.3.7.RELEASE</springboot.version>
         <spring.version>5.3.19</spring.version>
+
+        <maven.test.skip>false</maven.test.skip>
     </properties>
 
     <dependencies>
@@ -51,6 +53,12 @@
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>km-collector</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>km-ha</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -102,10 +110,6 @@
         </dependency>
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
         </dependency>
@@ -133,6 +137,26 @@
             <artifactId>spring-boot-actuator-autoconfigure</artifactId>
             <version>${springboot.version}</version>
         </dependency>
+
+        <!--testcontainers-->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--testcontainers end-->
     </dependencies>
 
     <build>

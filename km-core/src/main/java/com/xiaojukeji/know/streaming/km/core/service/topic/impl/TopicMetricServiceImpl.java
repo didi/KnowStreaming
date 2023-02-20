@@ -28,7 +28,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
-import com.xiaojukeji.know.streaming.km.core.cache.DataBaseDataLocalCache;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
@@ -61,7 +61,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
     public static final String TOPIC_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_PARTITION_OF_BROKER_JMX  = "getMetricFromKafkaByTotalPartitionOfBrokerJmx";
     public static final String TOPIC_METHOD_GET_MESSAGES                                            = "getMessages";
     public static final String TOPIC_METHOD_GET_REPLICAS_COUNT                                      = "getReplicasCount";
-
+    public static final String TOPIC_METHOD_GET_TOPIC_MIRROR_FETCH_LAG                              = "getTopicMirrorFetchLag";
     @Autowired
     private HealthStateService healthStateService;
 
@@ -98,6 +98,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         registerVCHandler( TOPIC_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_PARTITION_OF_BROKER_JMX,     this::getMetricFromKafkaByTotalPartitionOfBrokerJmx );
         registerVCHandler( TOPIC_METHOD_GET_REPLICAS_COUNT,                                         this::getReplicasCount);
         registerVCHandler( TOPIC_METHOD_GET_MESSAGES,                                               this::getMessages);
+        registerVCHandler( TOPIC_METHOD_GET_TOPIC_MIRROR_FETCH_LAG,                                 this::getTopicMirrorFetchLag);
     }
 
     @Override
@@ -501,5 +502,42 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         }
 
         return aliveBrokerList.stream().filter(elem -> topic.getBrokerIdSet().contains(elem.getBrokerId())).collect(Collectors.toList());
+    }
+
+    private Result<List<TopicMetrics>> getTopicMirrorFetchLag(VersionItemParam param) {
+        TopicMetricParam topicMetricParam = (TopicMetricParam)param;
+
+        String      topic       = topicMetricParam.getTopic();
+        Long        clusterId   = topicMetricParam.getClusterId();
+        String      metric      = topicMetricParam.getMetric();
+
+        VersionJmxInfo jmxInfo = getJMXInfo(clusterId, metric);
+        if(null == jmxInfo){return Result.buildFailure(VC_ITEM_JMX_NOT_EXIST);}
+
+        if (!DataBaseDataLocalCache.isHaTopic(clusterId, topic)) {
+            return Result.buildFailure(NOT_EXIST);
+        }
+
+        List<Broker> brokers = this.listAliveBrokersByTopic(clusterId, topic);
+        if(CollectionUtils.isEmpty(brokers)){return Result.buildFailure(BROKER_NOT_EXIST);}
+
+        Float sumLag = 0f;
+        for (Broker broker : brokers) {
+            JmxConnectorWrap jmxConnectorWrap = kafkaJMXClient.getClientWithCheck(clusterId, broker.getBrokerId());
+            try {
+                String jmxObjectName = String.format(jmxInfo.getJmxObjectName(), topic);
+                Set<ObjectName> objectNameSet = jmxConnectorWrap.queryNames(new ObjectName(jmxObjectName), null);
+                for (ObjectName name : objectNameSet) {
+                    Object attribute = jmxConnectorWrap.getAttribute(name, jmxInfo.getJmxAttribute());
+                    sumLag += Float.valueOf(attribute.toString());
+                }
+            } catch (Exception e) {
+                LOGGER.error("method=getTopicMirrorFetchLag||cluster={}||brokerId={}||topic={}||metrics={}||jmx={}||msg={}",
+                        clusterId, broker.getBrokerId(), topic, metric, jmxInfo.getJmxObjectName(), e.getClass().getName());
+            }
+        }
+        TopicMetrics topicMetric = new TopicMetrics(topic, clusterId, true);
+        topicMetric.putMetric(metric, sumLag);
+        return Result.buildSuc(Arrays.asList(topicMetric));
     }
 }

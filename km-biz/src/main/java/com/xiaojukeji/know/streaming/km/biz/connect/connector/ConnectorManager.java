@@ -10,6 +10,7 @@ public interface ConnectorManager {
     Result<Void> updateConnectorConfig(Long connectClusterId, String connectorName, Properties configs, String operator);
 
     Result<Void> createConnector(ConnectorCreateDTO dto, String operator);
+    Result<Void> createConnector(ConnectorCreateDTO dto, String heartbeatName, String checkpointName, String operator);
 
     Result<ConnectorStateVO> getConnectorStateVO(Long connectClusterId, String connectorName);
 }
