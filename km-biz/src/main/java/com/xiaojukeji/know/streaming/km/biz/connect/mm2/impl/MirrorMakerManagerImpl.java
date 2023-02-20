@@ -561,13 +561,13 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
     }
 
     PaginationResult<ClusterMirrorMakerOverviewVO> pagingMirrorMakerInLocal(List<ClusterMirrorMakerOverviewVO> mirrorMakerOverviewVOList, ClusterMirrorMakersOverviewDTO dto) {
-        List<ClusterMirrorMakerOverviewVO> mirrorMakerVOList = PaginationUtil.pageByFuzzyFilter(mirrorMakerOverviewVOList, dto.getSearchKeywords(), Arrays.asList("connectClusterName"));
+        List<ClusterMirrorMakerOverviewVO> mirrorMakerVOList = PaginationUtil.pageByFuzzyFilter(mirrorMakerOverviewVOList, dto.getSearchKeywords(), Arrays.asList("connectorName"));
 
         //排序
         if (!dto.getLatestMetricNames().isEmpty()) {
-            PaginationMetricsUtil.sortMetrics(mirrorMakerVOList, "latestMetrics", dto.getSortMetricNameList(), "connectClusterName", dto.getSortType());
+            PaginationMetricsUtil.sortMetrics(mirrorMakerVOList, "latestMetrics", dto.getSortMetricNameList(), "connectorName", dto.getSortType());
         } else {
-            PaginationUtil.pageBySort(mirrorMakerVOList, dto.getSortField(), dto.getSortType(), "connectClusterName", dto.getSortType());
+            PaginationUtil.pageBySort(mirrorMakerVOList, dto.getSortField(), dto.getSortType(), "connectorName", dto.getSortType());
         }
 
         //分页
