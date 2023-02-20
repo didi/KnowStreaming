@@ -165,17 +165,21 @@ const CardBar = (props: CardBarProps) => {
       dataIndex: 'passed',
       width: '30%',
       render(value: boolean, record: any) {
-        const icon = value ? <IconFont type="icon-zhengchang"></IconFont> : <IconFont type="icon-yichang"></IconFont>;
-        const txt = value ? '已通过' : '未通过';
-        const notPassedResNameList = record.notPassedResNameList || [];
-        return (
-          <div style={{ display: 'flex', width: 240 }}>
-            <div style={{ marginRight: 6 }}>
-              {icon} {txt}
+        if (record?.updateTime) {
+          const icon = value ? <IconFont type="icon-zhengchang"></IconFont> : <IconFont type="icon-yichang"></IconFont>;
+          const txt = value ? '已通过' : '未通过';
+          const notPassedResNameList = record.notPassedResNameList || [];
+          return (
+            <div style={{ display: 'flex', width: 240 }}>
+              <div style={{ marginRight: 6 }}>
+                {icon} {txt}
+              </div>
+              {<TagsWithHide list={notPassedResNameList} expandTagContent="更多" />}
             </div>
-            {<TagsWithHide list={notPassedResNameList} expandTagContent="更多" />}
-          </div>
-        );
+          );
+        } else {
+          return '-';
+        }
       },
     },
   ];

@@ -215,7 +215,7 @@ export const getDetailColumn = (clusterId: number) => [
     width: 190,
     dataIndex: 'updateTime',
     render: (text: string) => {
-      return moment(text).format(timeFormat);
+      return text ? moment(text).format(timeFormat) : '-';
     },
   },
   {
@@ -224,21 +224,25 @@ export const getDetailColumn = (clusterId: number) => [
     width: 280,
     // eslint-disable-next-line react/display-name
     render: (passed: boolean, record: any) => {
-      if (passed) {
+      if (record?.updateTime) {
+        if (passed) {
+          return (
+            <>
+              <IconFont type="icon-zhengchang" />
+              <span style={{ marginLeft: 4 }}>通过</span>
+            </>
+          );
+        }
         return (
-          <>
-            <IconFont type="icon-zhengchang" />
-            <span style={{ marginLeft: 4 }}>通过</span>
-          </>
+          <div style={{ display: 'flex', alignItems: 'center', width: '240px' }}>
+            <IconFont type="icon-yichang" />
+            <div style={{ marginLeft: 4, marginRight: 6, flexShrink: 0 }}>未通过</div>
+            <TagsWithHide list={record.notPassedResNameList || []} expandTagContent="更多" />
+          </div>
         );
+      } else {
+        return '-';
       }
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', width: '240px' }}>
-          <IconFont type="icon-yichang" />
-          <div style={{ marginLeft: 4, marginRight: 6, flexShrink: 0 }}>未通过</div>
-          <TagsWithHide list={record.notPassedResNameList || []} expandTagContent="更多" />
-        </div>
-      );
     },
   },
 ];
