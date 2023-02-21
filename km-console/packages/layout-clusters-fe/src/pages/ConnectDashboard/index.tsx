@@ -250,7 +250,7 @@ const DraggableCharts = (): JSX.Element => {
           name: 'Connect',
           customContent: <SelectContent scopeList={scopeList} title="请选择 Connect 范围" />,
         }}
-        setScreenType={setScreenType}
+        // setScreenType={setScreenType} // 3.3.1小版本发布
       />
       <MetricsFilter
         ref={metricFilterRef}
