@@ -8,13 +8,6 @@
   "ident": "config",
   "homepage": "",
   "license": "ISC",
-  "publishConfig": {
-    "registry": "http://registry.npm.xiaojukeji.com/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@git.xiaojukeji.com:bigdata-cloud/d1.git"
-  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
