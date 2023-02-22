@@ -41,6 +41,7 @@ import com.xiaojukeji.know.streaming.km.core.service.connect.mm2.MirrorMakerMetr
 import com.xiaojukeji.know.streaming.km.core.service.connect.plugin.PluginService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerService;
+import com.xiaojukeji.know.streaming.km.core.utils.ApiCallThreadPoolService;
 import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -296,17 +297,15 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
         List<ClusterMirrorMakerOverviewVO> mirrorMakerOverviewVOList = this.convert2ClusterMirrorMakerOverviewVO(mirrorMakerList, connectClusterList, latestMetricsResult.getData());
 
-        PaginationResult<ClusterMirrorMakerOverviewVO> voPaginationResult = this.pagingMirrorMakerInLocal(mirrorMakerOverviewVOList, dto);
+        List<ClusterMirrorMakerOverviewVO> mirrorMakerVOList = this.completeClusterInfo(mirrorMakerOverviewVOList);
+
+        PaginationResult<ClusterMirrorMakerOverviewVO> voPaginationResult = this.pagingMirrorMakerInLocal(mirrorMakerVOList, dto);
 
         if (voPaginationResult.failed()) {
             LOGGER.error("method=ClusterMirrorMakerOverviewVO||clusterPhyId={}||result={}||errMsg=pagination in local failed", clusterPhyId, voPaginationResult);
 
             return PaginationResult.buildFailure(voPaginationResult, dto);
         }
-
-        //这里再补充源集群和目的集群信息，减少网络请求。
-        this.completeClusterInfo(voPaginationResult.getData().getBizData());
-
 
         // 查询历史指标
         Result<List<MetricMultiLinesVO>> lineMetricsResult = mirrorMakerMetricService.listMirrorMakerClusterMetricsFromES(
@@ -596,14 +595,31 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
         return voList;
     }
 
-    private void completeClusterInfo(List<ClusterMirrorMakerOverviewVO> mirrorMakerVOList) {
+    private List<ClusterMirrorMakerOverviewVO> completeClusterInfo(List<ClusterMirrorMakerOverviewVO> mirrorMakerVOList) {
+
+        Map<String, KSConnectorInfo> connectorInfoMap = new HashMap<>();
 
         for (ClusterMirrorMakerOverviewVO mirrorMakerVO : mirrorMakerVOList) {
-            Result<KSConnectorInfo> connectorInfoRet = connectorService.getConnectorInfoFromCluster(mirrorMakerVO.getConnectClusterId(), mirrorMakerVO.getConnectorName());
-            if (!connectorInfoRet.hasData()) {
+            ApiCallThreadPoolService.runnableTask(String.format("method=completeClusterInfo||connectClusterId=%d||connectorName=%s||getMirrorMakerInfo", mirrorMakerVO.getConnectClusterId(), mirrorMakerVO.getConnectorName()),
+                    3000
+                    , () -> {
+                        Result<KSConnectorInfo> connectorInfoRet = connectorService.getConnectorInfoFromCluster(mirrorMakerVO.getConnectClusterId(), mirrorMakerVO.getConnectorName());
+                        if (connectorInfoRet.hasData()) {
+                            connectorInfoMap.put(mirrorMakerVO.getConnectClusterId() + mirrorMakerVO.getConnectorName(), connectorInfoRet.getData());
+                        }
+
+                        return connectorInfoRet.getData();
+                    });
+        }
+
+        ApiCallThreadPoolService.waitResult(1000);
+
+        List<ClusterMirrorMakerOverviewVO> newMirrorMakerVOList = new ArrayList<>();
+        for (ClusterMirrorMakerOverviewVO mirrorMakerVO : mirrorMakerVOList) {
+            KSConnectorInfo connectorInfo = connectorInfoMap.get(mirrorMakerVO.getConnectClusterId() + mirrorMakerVO.getConnectorName());
+            if (connectorInfo == null) {
                 continue;
             }
-            KSConnectorInfo connectorInfo = connectorInfoRet.getData();
 
             String sourceClusterAlias = connectorInfo.getConfig().get(MIRROR_MAKER_SOURCE_CLUSTER_ALIAS_FIELD_NAME);
             String targetClusterAlias = connectorInfo.getConfig().get(MIRROR_MAKER_TARGET_CLUSTER_ALIAS_FIELD_NAME);
@@ -627,6 +643,10 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
                 }
             }
 
+            newMirrorMakerVOList.add(mirrorMakerVO);
+
         }
+
+        return newMirrorMakerVOList;
     }
 }
