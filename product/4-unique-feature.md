@@ -1,0 +1,50 @@
+---
+order: 4
+title: '4.特色能力'
+toc: menu
+---
+
+## 4.1、集群诊断(敬请期待)
+
+## 4.2、Kafka 多版本兼容方案
+
+&emsp;&emsp;当前 KnowStreaming 支持纳管多个版本的 kafka 集群，由于不同版本的 kafka 在指标采集、接口查询、行为操作上有些不一致，因此 KnowStreaming 需要一套机制来解决多 kafka 版本的纳管兼容性问题。
+
+### 4.2.1、整体思路
+
+&emsp;&emsp;由于需要纳管多个 kafka 版本，而且未来还可能会纳管非 kafka 官方的版本，kafka 的版本号会存在着多种情况，所以首先要明确一个核心思想：KnowStreaming 提供尽可能多的纳管能力，但是不提供无限的纳管能力，每一个版本的 KnowStreaming 只纳管其自身声明的 kafka 版本，后续随着 KnowStreaming 自身版本的迭代，会逐步支持更多 kafka 版本的纳管接入。
+
+### 4.2.2、构建版本兼容列表
+
+&emsp;&emsp;每一个版本的 KnowStreaming 都声明一个自身支持纳管的 kafka 版本列表，并且对 kafka 的版本号进行归一化处理，后续所有 KnowStreaming 对不同 kafka 集群的操作都和这个集群对应的版本号严格相关。
+
+&emsp;&emsp;KnowStreaming 对外提供自身所支持的 kafka 版本兼容列表，用以声明自身支持的版本范围。
+
+&emsp;&emsp;对于在集群接入过程中，如果希望接入当前 KnowStreaming 不支持的 kafka 版本的集群，KnowStreaming 建议在于的过程中选择相近的版本号接入。
+
+### 4.2.3、构建版本兼容性字典
+
+&emsp;&emsp;在构建了 KnowStreaming 支持的 kafka 版本列表的基础上，KnowStreaming 在实现过程中，还会声明自身支持的所有兼容性，构建兼容性字典。
+
+&emsp;&emsp;当前 KnowStreaming 支持的 kafka 版本兼容性字典包括三个维度：
+
+- 指标采集：同一个指标在不同 kafka 版本下可能获取的方式不一样，不同版本的 kafka 可能会有不同的指标，因此对于指标采集的处理需要构建兼容性字典。
+- kafka api：同一个 kafka 的操作处理的方式在不同 kafka 版本下可能存在不一致，如：topic 的创建，因此 KnowStreaming 针对不同 kafka-api 的处理需要构建兼容性字典。
+- 平台操作：KnowStreaming 在接入不同版本的 kafka 集群的时候，在平台页面上会根据不同的 kafka 版。
+
+兼容性字典的核心设计字段如下：
+
+| 兼容性维度 | 兼容项名称 | 最小 Kafka 版本号（归一化） | 最大 Kafka 版本号（归一化） | 处理器 |
+| ---------- | ---------- | --------------------------- | --------------------------- | ------ |
+
+KS-KM 根据其需要纳管的 kafka 版本，按照上述三个维度构建了完善了兼容性字典。
+
+### 4.2.4、兼容性问题
+
+&emsp;&emsp;KS-KM 的每个版本针对需要纳管的 kafka 版本列表，事先分析各个版本的差异性和产品需求，同时 KS-KM 构建了一套专门处理兼容性的服务，来进行兼容性的注册、字典构建、处理器分发等操作，其中版本兼容性处理器是来具体处理不同 kafka 版本差异性的地方。
+
+​ ![registerHandler](./assets/multi_version_compatible/registerHandler.png)
+
+&emsp;&emsp;如上图所示，KS-KM 的 topic 服务在面对不同 kafka 版本时，其 topic 的创建、删除、扩容由于 kafka 版本自身的差异，导致 KnowStreaming 的处理也不一样，所以需要根据不同的 kafka 版本来实现不同的兼容性处理器，同时向 KnowStreaming 的兼容服务进行兼容性的注册，构建兼容性字典，后续在 KnowStreaming 的运行过程中，针对不同的 kafka 版本即可分发到不同的处理器中执行。
+
+&emsp;&emsp;后续随着 KnowStreaming 产品的发展，如果有新的兼容性的地方需要增加，只需要实现新版本的处理器，增加注册项即可。
