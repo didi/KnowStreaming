@@ -122,7 +122,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         );
         if (metricsResult.failed() || !metricsResult.hasData()) {
             log.error(
-                    "method=checkOutstandingRequests||clusterPhyId={}||param={}||config={}||result={}||errMsg=get metrics failed",clusterPhyId ,param, valueConfig, metricsResult
+                    "method=checkOutstandingRequests||clusterPhyId={}||param={}||config={}||result={}||errMsg=get metrics failed, may be collect failed or zk srvr command not in whitelist.",clusterPhyId ,param, valueConfig, metricsResult
             );
             return null;
         }
@@ -136,7 +136,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
 
         Float value = metricsResult.getData().getMetric(ZookeeperMetricVersionItems.ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS);
         if(null == value){
-            log.error("method=checkOutstandingRequests||clusterPhyId={}|| errMsg=get OutstandingRequests metric failed, may be collect failed or zk mntr command not in whitelist.", clusterPhyId);
+            log.error("method=checkOutstandingRequests||clusterPhyId={}|| errMsg=get OutstandingRequests metric failed, may be collect failed or zk srvr command not in whitelist.", clusterPhyId);
             return null;
         }
         
@@ -169,7 +169,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
 
         if (metricsResult.failed() || !metricsResult.hasData()) {
             log.error(
-                    "method=checkWatchCount||param={}||config={}||result={}||errMsg=get metrics failed",
+                    "method=checkWatchCount||param={}||config={}||result={}||errMsg=get metrics failed, may be collect failed or zk mntr command not in whitelist.",
                     param, valueConfig, metricsResult
             );
             return null;
@@ -205,7 +205,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
 
         if (metricsResult.failed() || !metricsResult.hasData()) {
             log.error(
-                    "method=checkAliveConnections||param={}||config={}||result={}||errMsg=get metrics failed",
+                    "method=checkAliveConnections||param={}||config={}||result={}||errMsg=get metrics failed, may be collect failed or zk srvr command not in whitelist.",
                     param, valueConfig, metricsResult
             );
             return null;
@@ -241,7 +241,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
 
         if (metricsResult.failed() || !metricsResult.hasData()) {
             log.error(
-                    "method=checkApproximateDataSize||param={}||config={}||result={}||errMsg=get metrics failed",
+                    "method=checkApproximateDataSize||param={}||config={}||result={}||errMsg=get metrics failed, may be collect failed or zk srvr command not in whitelist.",
                     param, valueConfig, metricsResult
             );
             return null;
@@ -277,7 +277,7 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
 
         if (metricsResult.failed() || !metricsResult.hasData()) {
             log.error(
-                    "method=checkSentRate||param={}||config={}||result={}||errMsg=get metrics failed",
+                    "method=checkSentRate||param={}||config={}||result={}||errMsg=get metrics failed, may be collect failed or zk srvr command not in whitelist.",
                     param, valueConfig, metricsResult
             );
             return null;
