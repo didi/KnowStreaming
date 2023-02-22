@@ -592,3 +592,62 @@ CREATE TABLE `work_order` (
   `gmt_modify` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='工单表';
+
+create table ha_active_standby_relation
+(
+    id                     bigint unsigned auto_increment comment 'id'
+        primary key,
+    active_cluster_phy_id  bigint                        default -1                not null comment '主集群ID',
+    active_res_name        varchar(192) collate utf8_bin default ''                not null comment '主资源名称',
+    standby_cluster_phy_id bigint                        default -1                not null comment '备集群ID',
+    standby_res_name       varchar(192) collate utf8_bin default ''                not null comment '备资源名称',
+    res_type               int                           default -1                not null comment '资源类型',
+    status                 int                           default -1                not null comment '关系状态',
+    unique_field           varchar(1024)                 default ''                not null comment '唯一字段',
+    create_time            timestamp                     default CURRENT_TIMESTAMP not null comment '创建时间',
+    modify_time            timestamp                     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间',
+    kafka_status           int                           default 0                 null comment '高可用配置是否完全建立 1:Kafka上该主备关系正常，0:Kafka上该主备关系异常',
+    constraint uniq_unique_field
+        unique (unique_field)
+)
+    comment 'HA主备关系表' charset = utf8;
+
+create index idx_type_active
+    on ha_active_standby_relation (res_type, active_cluster_phy_id);
+
+create index idx_type_standby
+    on ha_active_standby_relation (res_type, standby_cluster_phy_id);
+
+create table ha_active_standby_switch_job
+(
+    id                     bigint unsigned auto_increment comment 'id'
+        primary key,
+    active_cluster_phy_id  bigint       default -1                not null comment '主集群ID',
+    standby_cluster_phy_id bigint       default -1                not null comment '备集群ID',
+    job_status             int          default -1                not null comment '任务状态',
+    operator               varchar(256) default ''                not null comment '操作人',
+    create_time            timestamp    default CURRENT_TIMESTAMP not null comment '创建时间',
+    modify_time            timestamp    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间',
+    type                   int          default 5                 not null comment '1:topic 2:实例 3：逻辑集群 4：物理集群',
+    active_business_id     varchar(100) default '-1'              not null comment '主业务id(topicName,实例id,逻辑集群id,物理集群id)',
+    standby_business_id    varchar(100) default '-1'              not null comment '备业务id(topicName,实例id,逻辑集群id,物理集群id)'
+)
+    comment 'HA主备关系切换-子任务表' charset = utf8;
+
+
+create table ha_active_standby_switch_sub_job
+(
+    id                     bigint unsigned auto_increment comment 'id'
+        primary key,
+    job_id                 bigint                        default -1                not null comment '任务ID',
+    active_cluster_phy_id  bigint                        default -1                not null comment '主集群ID',
+    active_res_name        varchar(192) collate utf8_bin default ''                not null comment '主资源名称',
+    standby_cluster_phy_id bigint                        default -1                not null comment '备集群ID',
+    standby_res_name       varchar(192) collate utf8_bin default ''                not null comment '备资源名称',
+    res_type               int                           default -1                not null comment '资源类型',
+    job_status             int                           default -1                not null comment '任务状态',
+    extend_data            text                                                    null comment '扩展数据',
+    create_time            timestamp                     default CURRENT_TIMESTAMP not null comment '创建时间',
+    modify_time            timestamp                     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间'
+)
+    comment 'HA主备关系-切换任务表' charset = utf8;
