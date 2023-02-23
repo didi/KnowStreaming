@@ -89,6 +89,9 @@ public class TopicStateManagerImpl implements TopicStateManager {
     @Autowired
     private GroupManager groupManager;
 
+    @Autowired
+    private ApiCallFutureWaitUtil apiCallFutureWaitUtil;
+
     @Override
     public TopicBrokerAllVO getTopicBrokerAll(Long clusterPhyId, String topicName, String searchBrokerHost) throws NotExistException {
         Topic topic = topicService.getTopic(clusterPhyId, topicName);
@@ -303,25 +306,38 @@ public class TopicStateManagerImpl implements TopicStateManager {
             return Result.buildSuc();
         }
 
-        Result<List<PartitionMetrics>> metricsResult = partitionMetricService.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, metricsNames);
-        if (metricsResult.failed()) {
-            // 仅打印错误日志，但是不直接返回错误
-            log.error(
-                    "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
-                    clusterPhyId, topicName, metricsResult
-            );
+        List<PartitionMetrics> partitionMetricsList = new ArrayList<>();
+        for (String metricName : metricsNames) {
+            apiCallFutureWaitUtil.runnableTask("task", 3000, () -> {
+                Result<List<PartitionMetrics>> metricsResult = partitionMetricService.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, Arrays.asList(metricName));
+                if (metricsResult.failed()) {
+                    // 仅打印错误日志，但是不直接返回错误
+                    log.error(
+                            "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
+                            clusterPhyId, topicName, metricsResult
+                    );
+                }
+                if (metricsResult.hasData()) {
+                    partitionMetricsList.addAll(metricsResult.getData());
+                }
+                return null;
+            });
         }
+
+        apiCallFutureWaitUtil.waitResult(300);
+
+        List<PartitionMetrics> metricsList = combinePartitionMetrics(partitionMetricsList);
 
         // 转map
         Map<Integer, PartitionMetrics> metricsMap = new HashMap<>();
-        if (metricsResult.hasData()) {
-            for (PartitionMetrics metrics: metricsResult.getData()) {
+        if (!metricsList.isEmpty()) {
+            for (PartitionMetrics metrics : metricsList) {
                 metricsMap.put(metrics.getPartitionId(), metrics);
             }
         }
 
         List<TopicPartitionVO> voList = new ArrayList<>();
-        for (Partition partition: partitionList) {
+        for (Partition partition : partitionList) {
             voList.add(TopicVOConverter.convert2TopicPartitionVO(partition, metricsMap.get(partition.getPartitionId())));
         }
         return Result.buildSuc(voList);
@@ -449,5 +465,18 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Math.max(2, Math.min(5, maxPollRecords)));
         return props;
+    }
+
+    private List<PartitionMetrics> combinePartitionMetrics(List<PartitionMetrics> partitionMetricsList) {
+        Map<String, PartitionMetrics> metricsMap = new HashMap<>();
+        for (PartitionMetrics partitionMetrics : partitionMetricsList) {
+            PartitionMetrics metrics = metricsMap.get(partitionMetrics.getClusterPhyId() + "@" + partitionMetrics.getPartitionId());
+            if (metrics == null) {
+                metricsMap.put(partitionMetrics.getClusterPhyId() + "@" + partitionMetrics.getPartitionId(), partitionMetrics);
+            } else {
+                metrics.putMetric(partitionMetrics.getMetrics());
+            }
+        }
+        return metricsMap.values().stream().collect(Collectors.toList());
     }
 }
