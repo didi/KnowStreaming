@@ -37,6 +37,7 @@ const DraggableCharts = (): JSX.Element => {
     connectClusters: [],
     connectors: [],
   });
+  const [screenType, setScreenType] = useState('all');
   const curFetchingTimestamp = useRef(0);
   const metricRankList = useRef<string[]>([]);
   const metricFilterRef = useRef(null);
@@ -149,7 +150,14 @@ const DraggableCharts = (): JSX.Element => {
           const nullDataMetricData = [...newConnectClusterData, ...newConnectorData].filter((item) => item !== null);
           formattedMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
           nullDataMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
-          setMetricChartData([...formattedMetricData, ...nullDataMetricData]);
+          const filterMetricData = [...formattedMetricData, ...nullDataMetricData];
+          setMetricChartData(
+            screenType === 'Connect'
+              ? filterMetricData.filter((item) => item.metricType === MetricType.Connect)
+              : screenType === 'Connector'
+              ? filterMetricData.filter((item) => item.metricType === MetricType.Connectors)
+              : filterMetricData
+          );
         } else {
           setMetricChartData([]);
         }
@@ -216,7 +224,7 @@ const DraggableCharts = (): JSX.Element => {
     if (Object.values(metricList).some((list) => list.length) && curHeaderOptions) {
       getMetricChartData();
     }
-  }, [curHeaderOptions]);
+  }, [curHeaderOptions, screenType]);
 
   useEffect(() => {
     if (Object.values(metricList).some((list) => list.length) && curHeaderOptions) {
@@ -242,6 +250,7 @@ const DraggableCharts = (): JSX.Element => {
           name: 'Connect',
           customContent: <SelectContent scopeList={scopeList} title="请选择 Connect 范围" />,
         }}
+        // setScreenType={setScreenType} // 3.3.1小版本发布
       />
       <MetricsFilter
         ref={metricFilterRef}

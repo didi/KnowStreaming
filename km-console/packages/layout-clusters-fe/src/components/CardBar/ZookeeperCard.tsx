@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CardBar, { healthDataProps } from './index';
-import { Utils } from 'knowdesign';
+import { Tooltip, Utils } from 'knowdesign';
 import api from '@src/api';
 import { HealthStateEnum } from '../HealthState';
 
@@ -81,7 +81,22 @@ const ZookeeperCard = () => {
         {
           title: 'Leader',
           value() {
-            return <span style={{ fontSize: 24 }}>{leaderNode || '-'}</span>;
+            return (
+              <Tooltip title={leaderNode}>
+                <span
+                  style={{
+                    fontSize: 24,
+                    overflow: 'hidden',
+                    display: 'block',
+                    width: '100%',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {leaderNode || '-'}
+                </span>
+              </Tooltip>
+            );
           },
         },
         {

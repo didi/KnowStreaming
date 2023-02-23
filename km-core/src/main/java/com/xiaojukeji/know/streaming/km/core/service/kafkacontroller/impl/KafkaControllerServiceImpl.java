@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -15,7 +14,6 @@ import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterRunStateEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.kafkacontroller.KafkaControllerDAO;
@@ -31,9 +29,6 @@ import java.util.*;
 @Service
 public class KafkaControllerServiceImpl implements KafkaControllerService {
     private static final ILog log = LogFactory.getLog(KafkaControllerServiceImpl.class);
-
-    @Autowired
-    private BrokerService brokerService;
 
     @Autowired
     private KafkaAdminClient kafkaAdminClient;
@@ -54,16 +49,14 @@ public class KafkaControllerServiceImpl implements KafkaControllerService {
     }
 
     @Override
-    public int insertAndIgnoreDuplicateException(KafkaController kafkaController) {
+    public int insertAndIgnoreDuplicateException(KafkaController kafkaController, String controllerHost, String controllerRack) {
         try {
-            Broker broker = brokerService.getBrokerFromCacheFirst(kafkaController.getClusterPhyId(), kafkaController.getBrokerId());
-
             KafkaControllerPO kafkaControllerPO = new KafkaControllerPO();
             kafkaControllerPO.setClusterPhyId(kafkaController.getClusterPhyId());
             kafkaControllerPO.setBrokerId(kafkaController.getBrokerId());
             kafkaControllerPO.setTimestamp(kafkaController.getTimestamp());
-            kafkaControllerPO.setBrokerHost(broker != null? broker.getHost(): "");
-            kafkaControllerPO.setBrokerRack(broker != null? broker.getRack(): "");
+            kafkaControllerPO.setBrokerHost(controllerHost != null? controllerHost: "");
+            kafkaControllerPO.setBrokerRack(controllerRack != null? controllerRack: "");
             kafkaControllerDAO.insert(kafkaControllerPO);
         } catch (DuplicateKeyException dke) {
             // ignore
@@ -92,7 +85,7 @@ public class KafkaControllerServiceImpl implements KafkaControllerService {
 
         // 归一化到秒, 并且将去1秒，避免gc导致时间不对
         noKafkaController.setTimestamp(triggerTime);
-        return this.insertAndIgnoreDuplicateException(noKafkaController);
+        return this.insertAndIgnoreDuplicateException(noKafkaController, "", "");
     }
 
     @Override

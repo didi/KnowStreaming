@@ -136,13 +136,13 @@ public class ClusterConnectorsManagerImpl implements ClusterConnectorsManager {
 
     private PaginationResult<ClusterConnectorOverviewVO> pagingConnectorInLocal(List<ClusterConnectorOverviewVO> connectorVOList, ClusterConnectorsOverviewDTO dto) {
         //模糊匹配
-        connectorVOList = PaginationUtil.pageByFuzzyFilter(connectorVOList, dto.getSearchKeywords(), Arrays.asList("connectClusterName"));
+        connectorVOList = PaginationUtil.pageByFuzzyFilter(connectorVOList, dto.getSearchKeywords(), Arrays.asList("connectorName"));
 
         //排序
         if (!dto.getLatestMetricNames().isEmpty()) {
-            PaginationMetricsUtil.sortMetrics(connectorVOList, "latestMetrics", dto.getSortMetricNameList(), "connectClusterName", dto.getSortType());
+            PaginationMetricsUtil.sortMetrics(connectorVOList, "latestMetrics", dto.getSortMetricNameList(), "connectorName", dto.getSortType());
         } else {
-            PaginationUtil.pageBySort(connectorVOList, dto.getSortField(), dto.getSortType(), "connectClusterName", dto.getSortType());
+            PaginationUtil.pageBySort(connectorVOList, dto.getSortField(), dto.getSortType(), "connectorName", dto.getSortType());
         }
 
         //分页

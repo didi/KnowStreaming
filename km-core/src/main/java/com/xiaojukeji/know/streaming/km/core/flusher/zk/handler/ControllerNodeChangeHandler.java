@@ -2,6 +2,7 @@ package com.xiaojukeji.know.streaming.km.core.flusher.zk.handler;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.po.changerecord.KafkaChangeRecordPO;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
@@ -100,7 +101,9 @@ public class ControllerNodeChangeHandler extends AbstractZKHandler implements ZN
             if (kafkaController == null) {
                 kafkaControllerService.setNoKafkaController(clusterPhyId, triggerTime);
             } else {
-                kafkaControllerService.insertAndIgnoreDuplicateException(kafkaController);
+                Broker broker = kafkaZKDAO.getBrokerMetadata(clusterPhyId, kafkaController.getBrokerId());
+
+                kafkaControllerService.insertAndIgnoreDuplicateException(kafkaController, broker != null? broker.getHost(): "", broker != null? broker.getRack(): "");
             }
         } catch (Exception e) {
             log.error("method=updateDBData||clusterPhyId={}||errMsg=exception", clusterPhyId, e);

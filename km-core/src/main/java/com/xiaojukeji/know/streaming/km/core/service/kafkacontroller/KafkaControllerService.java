@@ -12,7 +12,7 @@ import java.util.Map;
 public interface KafkaControllerService {
     Result<KafkaController> getControllerFromKafka(ClusterPhy clusterPhy);
 
-    int insertAndIgnoreDuplicateException(KafkaController kafkaController);
+    int insertAndIgnoreDuplicateException(KafkaController kafkaController, String controllerHost, String controllerRack);
 
     int setNoKafkaController(Long clusterPhyId, Long triggerTime);
 
