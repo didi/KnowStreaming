@@ -1,5 +1,6 @@
 package com.xiaojukeji.know.streaming.km.core.service.version.metrics;
 
+import com.xiaojukeji.know.streaming.km.common.annotations.enterprise.EnterpriseLoadReBalance;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMetricControlItem;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
@@ -18,6 +19,7 @@ import static com.xiaojukeji.know.streaming.km.core.service.cluster.impl.Cluster
  * @author didi
  */
 @Component
+@EnterpriseLoadReBalance(all = false)
 public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
     /**
      * 整体的健康指标
@@ -103,6 +105,13 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
     public static final String CLUSTER_METRIC_JOB_SUCCESS                           = "JobsSuccess";
     public static final String CLUSTER_METRIC_JOB_FAILED                            = "JobsFailed";
 
+    @EnterpriseLoadReBalance
+    public static final String CLUSTER_METRIC_LOAD_RE_BALANCE_ENABLE                = "LoadReBalanceEnable";
+    public static final String CLUSTER_METRIC_LOAD_RE_BALANCE_CPU                   = "LoadReBalanceCpu";
+    public static final String CLUSTER_METRIC_LOAD_RE_BALANCE_NW_IN                 = "LoadReBalanceNwIn";
+    public static final String CLUSTER_METRIC_LOAD_RE_BALANCE_NW_OUT                = "LoadReBalanceNwOut";
+    public static final String CLUSTER_METRIC_LOAD_RE_BALANCE_DISK                  = "LoadReBalanceDisk";
+
     public static final String CLUSTER_METRIC_COLLECT_COST_TIME                     = Constant.COLLECT_METRICS_COST_TIME_METRICS_NAME;
 
     public ClusterMetricVersionItems(){}
@@ -113,6 +122,7 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
     }
 
     @Override
+    @EnterpriseLoadReBalance(all = false)
     public List<VersionMetricControlItem> init(){
         List<VersionMetricControlItem> itemList = new ArrayList<>();
 
@@ -396,6 +406,27 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
         itemList.add( buildAllVersionsItem()
                 .name(CLUSTER_METRIC_JOB_FAILED).unit("个").desc("集群failed任务总数").category(CATEGORY_JOB)
                 .extend( buildMethodExtend( CLUSTER_METHOD_GET_JOBS_FAILED )));
+
+        // 集群维度-均衡相关
+        itemList.add( buildAllVersionsItem()
+                .name(CLUSTER_METRIC_LOAD_RE_BALANCE_ENABLE).unit("是/否").desc("是否开启均衡, 1：是；0：否").category(CATEGORY_CLUSTER)
+                .extend( buildMethodExtend( CLUSTER_METHOD_GET_CLUSTER_LOAD_RE_BALANCE_INFO )));
+
+        itemList.add( buildAllVersionsItem()
+                .name(CLUSTER_METRIC_LOAD_RE_BALANCE_CPU).unit("是/否").desc("CPU是否均衡, 1：是；0：否").category(CATEGORY_CLUSTER)
+                .extend( buildMethodExtend( CLUSTER_METHOD_GET_CLUSTER_LOAD_RE_BALANCE_INFO )));
+
+        itemList.add( buildAllVersionsItem()
+                .name(CLUSTER_METRIC_LOAD_RE_BALANCE_NW_IN).unit("是/否").desc("BytesIn是否均衡, 1：是；0：否").category(CATEGORY_CLUSTER)
+                .extend( buildMethodExtend( CLUSTER_METHOD_GET_CLUSTER_LOAD_RE_BALANCE_INFO )));
+
+        itemList.add( buildAllVersionsItem()
+                .name(CLUSTER_METRIC_LOAD_RE_BALANCE_NW_OUT).unit("是/否").desc("BytesOut是否均衡, 1：是；0：否").category(CATEGORY_CLUSTER)
+                .extend( buildMethodExtend( CLUSTER_METHOD_GET_CLUSTER_LOAD_RE_BALANCE_INFO )));
+
+        itemList.add( buildAllVersionsItem()
+                .name(CLUSTER_METRIC_LOAD_RE_BALANCE_DISK).unit("是/否").desc("Disk是否均衡, 1：是；0：否").category(CATEGORY_CLUSTER)
+                .extend( buildMethodExtend( CLUSTER_METHOD_GET_CLUSTER_LOAD_RE_BALANCE_INFO )));
 
         itemList.add(buildAllVersionsItem()
                 .name(CLUSTER_METRIC_COLLECT_COST_TIME).unit("秒").desc("采集Cluster指标的耗时").category(CATEGORY_PERFORMANCE)

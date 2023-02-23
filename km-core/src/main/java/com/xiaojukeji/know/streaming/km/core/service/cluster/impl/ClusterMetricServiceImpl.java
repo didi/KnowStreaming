@@ -5,10 +5,12 @@ import com.didiglobal.logi.log.LogFactory;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Table;
+import com.xiaojukeji.know.streaming.km.common.annotations.enterprise.EnterpriseLoadReBalance;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricsClusterPhyDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
+import com.xiaojukeji.know.streaming.km.common.enterprise.rebalance.bean.entity.ClusterBalanceItemState;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
@@ -38,6 +40,7 @@ import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.enterprise.rebalance.service.ClusterBalanceService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.job.JobService;
@@ -50,6 +53,7 @@ import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.ClusterMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
+import com.xiaojukeji.know.streaming.km.rebalance.model.Resource;
 import org.apache.kafka.common.resource.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -69,12 +73,14 @@ import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics.initWithMetrics;
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.ClusterMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems.*;
 
 /**
  * @author didi
  */
 @Service("clusterMetricService")
+@EnterpriseLoadReBalance(all = false)
 public class ClusterMetricServiceImpl extends BaseMetricService implements ClusterMetricService {
     private static final ILog LOGGER  = LogFactory.getLog(ClusterMetricServiceImpl.class);
 
@@ -112,6 +118,9 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     public static final String CLUSTER_METHOD_GET_JOBS_WAITING                               = "getJobsWaiting";
     public static final String CLUSTER_METHOD_GET_JOBS_SUCCESS                               = "getJobsSuccess";
     public static final String CLUSTER_METHOD_GET_JOBS_FAILED                                = "getJobsFailed";
+
+    @EnterpriseLoadReBalance(all = false)
+    public static final String CLUSTER_METHOD_GET_CLUSTER_LOAD_RE_BALANCE_INFO               = "getClusterLoadReBalanceInfo";
 
     @Autowired
     private HealthStateService healthStateService;
@@ -153,6 +162,9 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     private JobService jobService;
 
     @Autowired
+    private ClusterBalanceService clusterBalanceService;
+
+    @Autowired
     private ClusterPhyService clusterPhyService;
 
     private final Cache<Long, ClusterMetrics> clusterLatestMetricsCache = Caffeine.newBuilder()
@@ -179,6 +191,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     }
 
     @Override
+    @EnterpriseLoadReBalance(all = false)
     protected void initRegisterVCHandler(){
         registerVCHandler( CLUSTER_METHOD_DO_NOTHING,                                   this::doNothing);
         registerVCHandler( CLUSTER_METHOD_GET_TOPIC_SIZE,                               this::getTopicSize);
@@ -218,6 +231,8 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
         registerVCHandler( CLUSTER_METHOD_GET_JOBS_WAITING,                             this::getJobsWaiting);
         registerVCHandler( CLUSTER_METHOD_GET_JOBS_SUCCESS,                             this::getJobsSuccess);
         registerVCHandler( CLUSTER_METHOD_GET_JOBS_FAILED,                              this::getJobsFailed);
+
+        registerVCHandler( CLUSTER_METHOD_GET_CLUSTER_LOAD_RE_BALANCE_INFO,             this::getClusterLoadReBalanceInfo);
     }
 
     @Override
@@ -674,6 +689,26 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
         Integer     count        = jobService.countJobsByClusterAndJobStatus(clusterId, JobStatusEnum.FAILED.getStatus());
 
         return Result.buildSuc(initWithMetrics(clusterId, metric, count));
+    }
+
+    @EnterpriseLoadReBalance
+    private Result<ClusterMetrics> getClusterLoadReBalanceInfo(VersionItemParam metricParam) {
+        ClusterMetricParam param = (ClusterMetricParam)metricParam;
+
+        Result<ClusterBalanceItemState> stateResult = clusterBalanceService.getItemState(param.getClusterId());
+        if (stateResult.failed()) {
+            return Result.buildFromIgnoreData(stateResult);
+        }
+
+        ClusterBalanceItemState state = stateResult.getData();
+
+        ClusterMetrics metric = ClusterMetrics.initWithMetrics(param.getClusterId(), CLUSTER_METRIC_LOAD_RE_BALANCE_ENABLE, state.getEnable()? Constant.YES: Constant.NO);
+        metric.putMetric(CLUSTER_METRIC_LOAD_RE_BALANCE_CPU, state.getResItemState(Resource.CPU).floatValue());
+        metric.putMetric(CLUSTER_METRIC_LOAD_RE_BALANCE_NW_IN, state.getResItemState(Resource.NW_IN).floatValue());
+        metric.putMetric(CLUSTER_METRIC_LOAD_RE_BALANCE_NW_OUT, state.getResItemState(Resource.NW_OUT).floatValue());
+        metric.putMetric(CLUSTER_METRIC_LOAD_RE_BALANCE_DISK, state.getResItemState(Resource.DISK).floatValue());
+
+        return Result.buildSuc(metric);
     }
 
     /**

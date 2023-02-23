@@ -24,12 +24,22 @@
     <dependencies>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>km-testing</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>km-account</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>km-monitor</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>km-license</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

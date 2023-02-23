@@ -176,7 +176,10 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
         // 获取所有的metrics
         List<ClusterMetrics> metricsList = new ArrayList<>();
         for (ClusterPhyDashboardVO vo: voList) {
-            metricsList.add(clusterMetricService.getLatestMetricsFromCache(vo.getId()));
+            ClusterMetrics clusterMetrics = clusterMetricService.getLatestMetricsFromCache(vo.getId());
+            clusterMetrics.getMetrics().putIfAbsent(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_STATE, (float) HealthStateEnum.UNKNOWN.getDimension());
+
+            metricsList.add(clusterMetrics);
         }
 
         // 范围搜索

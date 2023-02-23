@@ -23,6 +23,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>km-rebalance</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>${spring.version}</version>

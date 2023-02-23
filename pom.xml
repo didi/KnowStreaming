@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <km.revision>3.1.0</km.revision>
+        <km.revision>enterprise-3.1.0</km.revision>
 
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -53,10 +53,13 @@
         <module>km-biz</module>
         <module>km-extends/km-account</module>
         <module>km-extends/km-monitor</module>
+        <module>km-extends/km-license</module>
+        <module>km-extends/km-rebalance</module>
         <module>km-task</module>
         <module>km-collector</module>
         <module>km-rest</module>
         <module>km-dist</module>
+        <module>km-enterprise/km-testing</module>
     </modules>
 
     <dependencyManagement>

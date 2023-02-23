@@ -89,6 +89,13 @@ es:
     io-thread-cnt: 2
     max-retry-cnt: 5
 
+
+# 集群自动均衡相关配置
+cluster-balance:
+  ignored-topics:
+    time-second: 300
+
+
 # 普罗米修斯指标导出相关配置
 management:
   endpoints:
@@ -106,3 +113,10 @@ management:
         enabled: true
     tags:
       application: know-streaming
+
+# license相关配置
+license:
+  app-name: know-streaming
+  server: http://127.0.0.1:8778
+  signature: 1234567890
+  token: license-builtin-token
