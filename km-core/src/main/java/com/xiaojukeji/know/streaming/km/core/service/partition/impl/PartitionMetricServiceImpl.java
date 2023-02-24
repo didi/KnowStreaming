@@ -15,6 +15,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistExcept
 import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
+import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
@@ -22,7 +23,6 @@ import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.PartitionMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
-import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.PartitionMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.PartitionMetricVersionItems.*;
 
 /**
  * @author didi
@@ -176,50 +176,45 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
 
         Map<Integer, PartitionMetrics> metricsMap = new HashMap<>();
 
-        // begin offset 指标
-        Result<Map<TopicPartition, Long>> beginOffsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, OffsetSpec.earliest(), null);
-        if (beginOffsetMapResult.hasData()) {
-            for (Map.Entry<TopicPartition, Long> entry: beginOffsetMapResult.getData().entrySet()) {
-                Partition partition = partitionMap.get(entry.getKey().partition());
-                PartitionMetrics metrics = metricsMap.getOrDefault(
-                        entry.getKey().partition(),
-                        new PartitionMetrics(clusterPhyId, topicName, partition != null? partition.getLeaderBrokerId(): KafkaConstant.NO_LEADER, entry.getKey().partition())
-                );
-
-                metrics.putMetric(PARTITION_METRIC_LOG_START_OFFSET, entry.getValue().floatValue());
-                metricsMap.put(entry.getKey().partition(), metrics);
-            }
-        } else {
+        // offset 指标
+        Result<Tuple<Map<TopicPartition, Long>, Map<TopicPartition, Long>>> offsetResult = partitionService.getPartitionBeginAndEndOffsetFromKafka(clusterPhyId, topicName);
+        if (offsetResult.failed()) {
             LOGGER.warn(
-                    "class=PartitionMetricServiceImpl||method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||resultMsg={}||msg=get begin offset failed",
-                    clusterPhyId, topicName, beginOffsetMapResult.getMessage()
+                    "method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||result={}||msg=get offset failed",
+                    clusterPhyId, topicName, offsetResult
             );
+
+            return Result.buildFromIgnoreData(offsetResult);
+        }
+
+        // begin offset 指标
+        for (Map.Entry<TopicPartition, Long> entry: offsetResult.getData().v1().entrySet()) {
+            Partition partition = partitionMap.get(entry.getKey().partition());
+            PartitionMetrics metrics = metricsMap.getOrDefault(
+                    entry.getKey().partition(),
+                    new PartitionMetrics(clusterPhyId, topicName, partition != null? partition.getLeaderBrokerId(): KafkaConstant.NO_LEADER, entry.getKey().partition())
+            );
+
+            metrics.putMetric(PARTITION_METRIC_LOG_START_OFFSET, entry.getValue().floatValue());
+            metricsMap.put(entry.getKey().partition(), metrics);
         }
 
         // end offset 指标
-        Result<Map<TopicPartition, Long>> endOffsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, OffsetSpec.latest(), null);
-        if (endOffsetMapResult.hasData()) {
-            for (Map.Entry<TopicPartition, Long> entry: endOffsetMapResult.getData().entrySet()) {
-                Partition partition = partitionMap.get(entry.getKey().partition());
-                PartitionMetrics metrics = metricsMap.getOrDefault(
-                        entry.getKey().partition(),
-                        new PartitionMetrics(clusterPhyId, topicName, partition != null? partition.getLeaderBrokerId(): KafkaConstant.NO_LEADER, entry.getKey().partition())
-                );
-
-                metrics.putMetric(PARTITION_METRIC_LOG_END_OFFSET, entry.getValue().floatValue());
-                metricsMap.put(entry.getKey().partition(), metrics);
-            }
-        } else {
-            LOGGER.warn(
-                    "class=PartitionMetricServiceImpl||method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||resultMsg={}||msg=get end offset failed",
-                    clusterPhyId, topicName, endOffsetMapResult.getMessage()
+        for (Map.Entry<TopicPartition, Long> entry: offsetResult.getData().v2().entrySet()) {
+            Partition partition = partitionMap.get(entry.getKey().partition());
+            PartitionMetrics metrics = metricsMap.getOrDefault(
+                    entry.getKey().partition(),
+                    new PartitionMetrics(clusterPhyId, topicName, partition != null? partition.getLeaderBrokerId(): KafkaConstant.NO_LEADER, entry.getKey().partition())
             );
+
+            metrics.putMetric(PARTITION_METRIC_LOG_END_OFFSET, entry.getValue().floatValue());
+            metricsMap.put(entry.getKey().partition(), metrics);
         }
 
         // messages 指标
-        if (endOffsetMapResult.hasData() && beginOffsetMapResult.hasData()) {
-            for (Map.Entry<TopicPartition, Long> entry: endOffsetMapResult.getData().entrySet()) {
-                Long beginOffset = beginOffsetMapResult.getData().get(entry.getKey());
+        if (!ValidateUtils.isEmptyMap(offsetResult.getData().v1()) && !ValidateUtils.isEmptyMap(offsetResult.getData().v2())) {
+            for (Map.Entry<TopicPartition, Long> entry: offsetResult.getData().v2().entrySet()) {
+                Long beginOffset = offsetResult.getData().v1().get(entry.getKey());
                 if (beginOffset == null) {
                     continue;
                 }
@@ -235,8 +230,8 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
             }
         } else {
             LOGGER.warn(
-                    "class=PartitionMetricServiceImpl||method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||endResultMsg={}||beginResultMsg={}||msg=get messages failed",
-                    clusterPhyId, topicName, endOffsetMapResult.getMessage(), beginOffsetMapResult.getMessage()
+                    "method=getOffsetRelevantMetrics||clusterPhyId={}||topicName={}||offsetData={}||msg=get messages failed",
+                    clusterPhyId, topicName, ConvertUtil.obj2Json(offsetResult.getData())
             );
         }
 
@@ -283,10 +278,9 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
 
             } catch (InstanceNotFoundException e) {
                 // ignore
-                continue;
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=PartitionMetricServiceImpl||method=getMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
+                        "method=getMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
                         clusterPhyId, topicName, partition.getPartitionId(), partition.getLeaderBrokerId(), metricName, e.getClass().getName()
                 );
             }
@@ -326,7 +320,7 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
                 // 4、获取jmx指标
                 String value = jmxConnectorWrap.getAttribute(new ObjectName(jmxInfo.getJmxObjectName() + ",topic=" + topicName), jmxInfo.getJmxAttribute()).toString();
 
-                Long leaderCount = partitionList.stream().filter(elem -> elem.getLeaderBrokerId().equals(partition.getLeaderBrokerId())).count();
+                long leaderCount = partitionList.stream().filter(elem -> elem.getLeaderBrokerId().equals(partition.getLeaderBrokerId())).count();
                 if (leaderCount <= 0) {
                     // leader已经切换走了
                     continue;
@@ -338,10 +332,9 @@ public class PartitionMetricServiceImpl extends BaseMetricService implements Par
 
             } catch (InstanceNotFoundException e) {
                 // ignore
-                continue;
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=PartitionMetricServiceImpl||method=getTopicAvgMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
+                        "method=getTopicAvgMetricFromJmx||clusterPhyId={}||topicName={}||partitionId={}||leaderBrokerId={}||metricName={}||msg={}",
                         clusterPhyId, topicName, partition.getPartitionId(), partition.getLeaderBrokerId(), metricName, e.getClass().getName()
                 );
             }

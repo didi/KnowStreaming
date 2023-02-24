@@ -4,7 +4,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
@@ -21,15 +21,17 @@ public abstract class AbstractHealthCheckService {
 
     protected static final Map<
             String,
-            Function<Tuple<ClusterPhyParam, BaseClusterHealthConfig>, HealthCheckResult>
+            Function<Tuple<ClusterParam, BaseClusterHealthConfig>, HealthCheckResult>
             > functionMap = new ConcurrentHashMap<>();
 
-    public abstract List<ClusterPhyParam> getResList(Long clusterPhyId);
+    public abstract List<ClusterParam> getResList(Long clusterId);
 
     public abstract HealthCheckDimensionEnum getHealthCheckDimensionEnum();
 
-    public HealthCheckResult checkAndGetResult(ClusterPhyParam clusterPhyParam, BaseClusterHealthConfig clusterHealthConfig) {
-        if (ValidateUtils.anyNull(clusterPhyParam.getClusterPhyId(), clusterPhyParam, clusterHealthConfig)) {
+    public abstract Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId);
+
+    public HealthCheckResult checkAndGetResult(ClusterParam clusterParam, BaseClusterHealthConfig clusterHealthConfig) {
+        if (ValidateUtils.anyNull(clusterParam, clusterHealthConfig)) {
             return null;
         }
 
@@ -39,16 +41,18 @@ public abstract class AbstractHealthCheckService {
             return null;
         }
 
-        Function<Tuple<ClusterPhyParam, BaseClusterHealthConfig>, HealthCheckResult> function = functionMap.get(clusterHealthConfig.getCheckNameEnum().getConfigName());
+        Function<Tuple<ClusterParam, BaseClusterHealthConfig>, HealthCheckResult> function = functionMap.get(clusterHealthConfig.getCheckNameEnum().getConfigName());
         if (function == null) {
             return null;
         }
 
         try {
-            return function.apply(new Tuple<>(clusterPhyParam, clusterHealthConfig));
+            return function.apply(new Tuple<>(clusterParam, clusterHealthConfig));
         } catch (Exception e) {
-            log.error("method=checkAndGetResult||clusterPhyParam={}||clusterHealthConfig={}||errMsg=exception!",
-                    clusterPhyParam, clusterHealthConfig, e);
+            log.error(
+                    "method=checkAndGetResult||clusterParam={}||clusterHealthConfig={}||errMsg=exception!",
+                    clusterParam, clusterHealthConfig, e
+            );
         }
 
         return null;

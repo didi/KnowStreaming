@@ -12,7 +12,8 @@
     display: flex;
     align-items: center;
     .card-bar-health {
-      width: 240px;
+      // width: 240px; // 去掉固定宽度自适应
+      margin-right: 10px;
       height: 70px;
       display: flex;
       align-items: center;
@@ -68,6 +69,15 @@
         letter-spacing: 0;
         text-align: justify;
         line-height: 20px;
+        .anticon-question-circle {
+          padding: 3px 3px 2px 3px;
+          margin-left: -3px;
+          font-size: 14px;
+          border-radius: 50%;
+          &:hover {
+            background: rgba(33, 37, 41, 0.04);
+          }
+        }
       }
       .card-bar-colunms-body {
         font-size: 40px;
@@ -79,6 +89,7 @@
         margin-top: 5px;
         .num {
           font-family: DIDIFD-Medium;
+          overflow: hidden;
         }
         .sub-title {
           font-family: @font-family;

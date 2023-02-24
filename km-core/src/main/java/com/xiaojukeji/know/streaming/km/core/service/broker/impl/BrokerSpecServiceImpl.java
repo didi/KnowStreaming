@@ -15,10 +15,8 @@ import java.util.Map;
 
 @Service
 public class BrokerSpecServiceImpl implements BrokerSpecService {
-
     @Autowired
     private PlatformClusterConfigService platformClusterConfigService;
-
 
     @Override
     public Map<Integer, BrokerSpec> getBrokerSpecMap(Long clusterPhyId) {
@@ -37,6 +35,4 @@ public class BrokerSpecServiceImpl implements BrokerSpecService {
         }
         return brokerSpecMap;
     }
-
-
 }

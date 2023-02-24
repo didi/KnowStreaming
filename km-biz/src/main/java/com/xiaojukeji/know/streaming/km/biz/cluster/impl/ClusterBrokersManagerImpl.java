@@ -6,6 +6,8 @@ import com.xiaojukeji.know.streaming.km.biz.cluster.ClusterBrokersManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.ClusterBrokersOverviewDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
@@ -16,6 +18,8 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.res.ClusterBroker
 import com.xiaojukeji.know.streaming.km.common.bean.vo.kafkacontroller.KafkaControllerVO;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterRunStateEnum;
+import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationMetricsUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
@@ -24,6 +28,7 @@ import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
+import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,9 +88,13 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
         Map<Integer, Boolean> jmxConnectedMap = new HashMap<>();
         brokerList.forEach(elem -> jmxConnectedMap.put(elem.getBrokerId(), kafkaJMXClient.getClientWithCheck(clusterPhyId, elem.getBrokerId()) != null));
 
+
+        ClusterPhy clusterPhy = LoadedClusterPhyCache.getByPhyId(clusterPhyId);
+
         // 格式转换
         return PaginationResult.buildSuc(
                 this.convert2ClusterBrokersOverviewVOList(
+                        clusterPhy,
                         paginationResult.getData().getBizData(),
                         brokerList,
                         metricsResult.getData(),
@@ -131,7 +140,8 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
             clusterBrokersStateVO.setKafkaControllerAlive(true);
         }
 
-        clusterBrokersStateVO.setConfigSimilar(brokerConfigService.countBrokerConfigDiffsFromDB(clusterPhyId, Arrays.asList("broker.id", "listeners", "name", "value")) <= 0);
+        clusterBrokersStateVO.setConfigSimilar(brokerConfigService.countBrokerConfigDiffsFromDB(clusterPhyId, KafkaConstant.CONFIG_SIMILAR_IGNORED_CONFIG_KEY_LIST) <= 0
+        );
 
         return clusterBrokersStateVO;
     }
@@ -169,7 +179,8 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
         );
     }
 
-    private List<ClusterBrokersOverviewVO> convert2ClusterBrokersOverviewVOList(List<Integer> pagedBrokerIdList,
+    private List<ClusterBrokersOverviewVO> convert2ClusterBrokersOverviewVOList(ClusterPhy clusterPhy,
+                                                                                List<Integer> pagedBrokerIdList,
                                                                                 List<Broker> brokerList,
                                                                                 List<BrokerMetrics> metricsList,
                                                                                 Topic groupTopic,
@@ -185,9 +196,15 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
             Broker broker = brokerMap.get(brokerId);
             BrokerMetrics brokerMetrics = metricsMap.get(brokerId);
             Boolean jmxConnected = jmxConnectedMap.get(brokerId);
-
             voList.add(this.convert2ClusterBrokersOverviewVO(brokerId, broker, brokerMetrics, groupTopic, transactionTopic, kafkaController, jmxConnected));
         }
+
+        //补充非zk模式的JMXPort信息
+        if (!clusterPhy.getRunState().equals(ClusterRunStateEnum.RUN_ZK.getRunState())) {
+            JmxConfig jmxConfig = ConvertUtil.str2ObjByJson(clusterPhy.getJmxProperties(), JmxConfig.class);
+            voList.forEach(elem -> elem.setJmxPort(jmxConfig.getJmxPort() == null ? -1 : jmxConfig.getJmxPort()));
+        }
+
         return voList;
     }
 

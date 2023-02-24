@@ -7,7 +7,6 @@ import { Tag, Tooltip, Utils } from 'knowdesign';
 import api from '@src/api';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { HealthStateEnum } from '../HealthState';
-
 export default () => {
   const routeParams = useParams<{
     clusterId: string;
@@ -112,5 +111,5 @@ export default () => {
     });
   }, [routeParams.clusterId]);
 
-  return <CardBar scene="broker" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
+  return <CardBar scene="brokers" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
 };

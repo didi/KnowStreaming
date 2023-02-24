@@ -31,6 +31,11 @@ public class FrontEndControlVersionItems extends BaseMetricVersionMetric {
     private static final String FE_SECURITY_ACL_CREATE_RESOURCE_TYPE_TRANSACTIONAL_ID   = "FESecurityAclCreateResourceTypeTransactionalId";
     private static final String FE_SECURITY_ACL_CREATE_RESOURCE_TYPE_DELEGATION_TOKEN   = "FESecurityAclCreateResourceTypeDelegationToken";
 
+    private static final String FE_CREATE_TOPIC_CLEANUP_POLICY                          = "FECreateTopicCleanupPolicy";
+
+    private static final String FE_HA_CREATE_MIRROR_TOPIC                               = "FEHaCreateMirrorTopic";
+    private static final String FE_HA_DELETE_MIRROR_TOPIC                               = "FEHaDeleteMirrorTopic";
+
     public FrontEndControlVersionItems(){}
 
     @Override
@@ -73,6 +78,16 @@ public class FrontEndControlVersionItems extends BaseMetricVersionMetric {
         // Security-创建ACL-ResourceType-DelegationToken
         itemList.add(buildItem().minVersion(VersionEnum.V_1_1_0).maxVersion(VersionEnum.V_MAX)
                 .name(FE_SECURITY_ACL_CREATE_RESOURCE_TYPE_DELEGATION_TOKEN).desc("Security-创建ACL-ResourceType-DelegationToken"));
+
+        // topic-创建-清理策略(delete和compact)V_0_10_1_0都可以选择
+        itemList.add(buildItem().minVersion(VersionEnum.V_0_10_1_0).maxVersion(VersionEnum.V_MAX)
+                .name(FE_CREATE_TOPIC_CLEANUP_POLICY).desc("Topic-创建Topic-Cleanup-Policy"));
+
+        // HA-Topic复制
+        itemList.add(buildItem().minVersion(VersionEnum.V_2_5_0_D_300).maxVersion(VersionEnum.V_2_5_0_D_MAX)
+                .name(FE_HA_CREATE_MIRROR_TOPIC).desc("HA-创建Topic复制"));
+        itemList.add(buildItem().minVersion(VersionEnum.V_2_5_0_D_300).maxVersion(VersionEnum.V_2_5_0_D_MAX)
+                .name(FE_HA_DELETE_MIRROR_TOPIC).desc("HA-取消Topic复制"));
 
         return itemList;
     }

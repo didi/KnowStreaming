@@ -37,6 +37,12 @@
         <dependency>
             <groupId>io.github.zqrferrari</groupId>
             <artifactId>logi-elasticsearch-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

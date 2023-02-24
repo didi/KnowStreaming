@@ -9,7 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.core.enterprise.rebalance.service.ClusterBalanceJobService;
 import com.xiaojukeji.know.streaming.km.core.enterprise.rebalance.service.ClusterBalanceReassignService;
 import com.xiaojukeji.know.streaming.km.core.enterprise.rebalance.service.ClusterBalanceService;
-import com.xiaojukeji.know.streaming.km.task.AbstractAsyncCommonDispatchTask;
+import com.xiaojukeji.know.streaming.km.task.kafka.AbstractAsyncCommonDispatchTask;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @EnterpriseLoadReBalance

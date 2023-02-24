@@ -45,6 +45,8 @@ public class Constant {
     public static final int INVALID_CODE = -1;
 
     public static final String MYSQL_TABLE_NAME_PREFIX = "ks_km_";
+    public static final String MYSQL_KC_TABLE_NAME_PREFIX = "ks_kc_";
+    public static final String MYSQL_HA_TABLE_NAME_PREFIX = "ks_ha_";
 
     public static final String SWAGGER_API_TAG_PREFIX = "KS-KM-";
 
@@ -59,9 +61,14 @@ public class Constant {
      * 采集指标的花费时间
      */
     public static final String COLLECT_METRICS_COST_TIME_METRICS_NAME = "CollectMetricsCostTimeUnitSec";
-    public static final Float COLLECT_METRICS_ERROR_COST_TIME = -1.0F;
+    public static final Float COLLECT_METRICS_ERROR_COST_TIME = 100.001F;
 
     public static final Integer DEFAULT_RETRY_TIME = 3;
 
     public static final Integer ZK_ALIVE_BUT_4_LETTER_FORBIDDEN         = 11;
+
+    public static final String CONNECTOR_CONFIG_ACTION_RELOAD_NAME      = "config.action.reload";
+
+    public static final String CONNECTOR_CONFIG_ERRORS_TOLERANCE_NAME   = "errors.tolerance";
+
 }

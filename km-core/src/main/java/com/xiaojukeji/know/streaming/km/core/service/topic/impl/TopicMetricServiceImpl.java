@@ -2,13 +2,10 @@ package com.xiaojukeji.know.streaming.km.core.service.topic.impl;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Table;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricsTopicDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.PartitionMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
@@ -21,6 +18,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionJmxInf
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.TopicMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
+import com.xiaojukeji.know.streaming.km.common.constant.ESConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.AggTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
@@ -30,36 +28,32 @@ import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
-import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.TopicMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.PartitionMetricVersionItems.PARTITION_METRIC_MESSAGES;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.PartitionMetricVersionItems.PARTITION_METRIC_MESSAGES;
 
 /**
  */
 @Service
 public class TopicMetricServiceImpl extends BaseMetricService implements TopicMetricService {
-
-    private static final ILog LOGGER = LogFactory.getLog( TopicMetricServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(TopicMetricServiceImpl.class);
 
     public static final String TOPIC_METHOD_DO_NOTHING                                              = "doNothing";
     public static final String TOPIC_METHOD_GET_HEALTH_SCORE                                        = "getMetricHealthScore";
@@ -67,7 +61,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
     public static final String TOPIC_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_PARTITION_OF_BROKER_JMX  = "getMetricFromKafkaByTotalPartitionOfBrokerJmx";
     public static final String TOPIC_METHOD_GET_MESSAGES                                            = "getMessages";
     public static final String TOPIC_METHOD_GET_REPLICAS_COUNT                                      = "getReplicasCount";
-
+    public static final String TOPIC_METHOD_GET_TOPIC_MIRROR_FETCH_LAG                              = "getTopicMirrorFetchLag";
     @Autowired
     private HealthStateService healthStateService;
 
@@ -85,18 +79,6 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
 
     @Autowired
     private TopicMetricESDAO topicMetricESDAO;
-
-    private final Cache<Long, Map<String, TopicMetrics>> topicLatestMetricsCache = Caffeine.newBuilder()
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .maximumSize(200)
-            .build();
-
-    @Scheduled(cron = "0 0/2 * * * ?")
-    private void flushClusterLatestMetricsCache() {
-        for (ClusterPhy clusterPhy: LoadedClusterPhyCache.listAll().values()) {
-            this.updateCacheAndGetMetrics(clusterPhy.getId());
-        }
-    }
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -116,6 +98,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         registerVCHandler( TOPIC_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_PARTITION_OF_BROKER_JMX,     this::getMetricFromKafkaByTotalPartitionOfBrokerJmx );
         registerVCHandler( TOPIC_METHOD_GET_REPLICAS_COUNT,                                         this::getReplicasCount);
         registerVCHandler( TOPIC_METHOD_GET_MESSAGES,                                               this::getMessages);
+        registerVCHandler( TOPIC_METHOD_GET_TOPIC_MIRROR_FETCH_LAG,                                 this::getTopicMirrorFetchLag);
     }
 
     @Override
@@ -152,13 +135,13 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
     }
 
     @Override
-    public Map<String, TopicMetrics> getLatestMetricsFromCacheFirst(Long clusterPhyId) {
-        Map<String, TopicMetrics> metricsMap = topicLatestMetricsCache.getIfPresent(clusterPhyId);
-        if (metricsMap != null) {
-            return metricsMap;
+    public Map<String, TopicMetrics> getLatestMetricsFromCache(Long clusterPhyId) {
+        Map<String, TopicMetrics> metricsMap = DataBaseDataLocalCache.getTopicMetrics(clusterPhyId);
+        if (metricsMap == null) {
+            return new HashMap<>();
         }
 
-        return this.updateCacheAndGetMetrics(clusterPhyId);
+        return metricsMap;
     }
 
     @Override
@@ -171,9 +154,17 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
 
     @Override
     public List<TopicMetrics> listTopicLatestMetricsFromES(Long clusterPhyId, List<String> topicNames, List<String> metricNames) {
-        List<TopicMetricPO> topicMetricPOs = topicMetricESDAO.listTopicLatestMetric(clusterPhyId, topicNames, metricNames);
+        List<TopicMetricPO> poList = new ArrayList<>();
 
-        return ConvertUtil.list2List(topicMetricPOs, TopicMetrics.class);
+        for (int i = 0; i < topicNames.size(); i += ESConstant.SEARCH_LATEST_TOPIC_METRIC_CNT_PER_REQUEST) {
+            poList.addAll(topicMetricESDAO.listTopicLatestMetric(
+                    clusterPhyId,
+                    topicNames.subList(i, Math.min(i + ESConstant.SEARCH_LATEST_TOPIC_METRIC_CNT_PER_REQUEST, topicNames.size())),
+                    Collections.emptyList())
+            );
+        }
+
+        return ConvertUtil.list2List(poList, TopicMetrics.class);
     }
 
     @Override
@@ -195,7 +186,7 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> retTable;
         if(CollectionUtils.isEmpty(topics)) {
             //如果 es 中获取不到topN的topic就使用从数据库中获取的topics
-            List<String> defaultTopics = listTopNTopics(clusterId, topN);
+            List<String> defaultTopics = this.listTopNTopics(clusterId, topN);
             retTable = topicMetricESDAO.listTopicMetricsByTopN(clusterId, defaultTopics, metrics, aggType, topN, startTime, endTime );
         }else {
             retTable = topicMetricESDAO.listTopicMetricsByTopics(clusterId, metrics, aggType, topics, startTime, endTime);
@@ -308,19 +299,8 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         return Result.buildSuc(count);
     }
 
+
     /**************************************************** private method ****************************************************/
-    private Map<String, TopicMetrics> updateCacheAndGetMetrics(Long clusterPhyId) {
-        List<String> topicNames = topicService.listTopicsFromDB(clusterPhyId)
-                .stream().map(Topic::getTopicName).collect(Collectors.toList());
-
-        List<TopicMetrics> metrics = listTopicLatestMetricsFromES(clusterPhyId, topicNames, Arrays.asList());
-
-        Map<String, TopicMetrics> metricsMap = metrics.stream()
-                .collect(Collectors.toMap(TopicMetrics::getTopic, Function.identity()));
-
-        topicLatestMetricsCache.put(clusterPhyId, metricsMap);
-        return metricsMap;
-    }
 
 
     private List<String> listTopNTopics(Long clusterId, int topN){
@@ -522,5 +502,42 @@ public class TopicMetricServiceImpl extends BaseMetricService implements TopicMe
         }
 
         return aliveBrokerList.stream().filter(elem -> topic.getBrokerIdSet().contains(elem.getBrokerId())).collect(Collectors.toList());
+    }
+
+    private Result<List<TopicMetrics>> getTopicMirrorFetchLag(VersionItemParam param) {
+        TopicMetricParam topicMetricParam = (TopicMetricParam)param;
+
+        String      topic       = topicMetricParam.getTopic();
+        Long        clusterId   = topicMetricParam.getClusterId();
+        String      metric      = topicMetricParam.getMetric();
+
+        VersionJmxInfo jmxInfo = getJMXInfo(clusterId, metric);
+        if(null == jmxInfo){return Result.buildFailure(VC_ITEM_JMX_NOT_EXIST);}
+
+        if (!DataBaseDataLocalCache.isHaTopic(clusterId, topic)) {
+            return Result.buildFailure(NOT_EXIST);
+        }
+
+        List<Broker> brokers = this.listAliveBrokersByTopic(clusterId, topic);
+        if(CollectionUtils.isEmpty(brokers)){return Result.buildFailure(BROKER_NOT_EXIST);}
+
+        Float sumLag = 0f;
+        for (Broker broker : brokers) {
+            JmxConnectorWrap jmxConnectorWrap = kafkaJMXClient.getClientWithCheck(clusterId, broker.getBrokerId());
+            try {
+                String jmxObjectName = String.format(jmxInfo.getJmxObjectName(), topic);
+                Set<ObjectName> objectNameSet = jmxConnectorWrap.queryNames(new ObjectName(jmxObjectName), null);
+                for (ObjectName name : objectNameSet) {
+                    Object attribute = jmxConnectorWrap.getAttribute(name, jmxInfo.getJmxAttribute());
+                    sumLag += Float.valueOf(attribute.toString());
+                }
+            } catch (Exception e) {
+                LOGGER.error("method=getTopicMirrorFetchLag||cluster={}||brokerId={}||topic={}||metrics={}||jmx={}||msg={}",
+                        clusterId, broker.getBrokerId(), topic, metric, jmxInfo.getJmxObjectName(), e.getClass().getName());
+            }
+        }
+        TopicMetrics topicMetric = new TopicMetrics(topic, clusterId, true);
+        topicMetric.putMetric(metric, sumLag);
+        return Result.buildSuc(Arrays.asList(topicMetric));
     }
 }

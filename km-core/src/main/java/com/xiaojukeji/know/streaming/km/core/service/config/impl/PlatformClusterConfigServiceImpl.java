@@ -12,6 +12,7 @@ import com.xiaojukeji.know.streaming.km.persistence.mysql.config.PlatformCluster
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -67,5 +68,21 @@ public class PlatformClusterConfigServiceImpl implements PlatformClusterConfigSe
         }
 
         return configPOMap;
+    }
+
+    @Override
+    public Map<Long, Map<String, PlatformClusterConfigPO>> listByGroup(String groupName) {
+        LambdaQueryWrapper<PlatformClusterConfigPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(PlatformClusterConfigPO::getValueGroup, groupName);
+
+        List<PlatformClusterConfigPO> poList = platformClusterConfigDAO.selectList(lambdaQueryWrapper);
+
+        Map<Long, Map<String, PlatformClusterConfigPO>> poMap = new HashMap<>();
+        poList.forEach(elem -> {
+            poMap.putIfAbsent(elem.getClusterId(), new HashMap<>());
+            poMap.get(elem.getClusterId()).put(elem.getValueName(), elem);
+        });
+
+        return poMap;
     }
 }

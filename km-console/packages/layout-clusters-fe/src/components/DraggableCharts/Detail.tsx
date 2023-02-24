@@ -165,12 +165,34 @@ const ChartDetail = (props: ChartDetailProps) => {
 
   // 请求图表数据
   const getMetricChartData = ([startTime, endTime]: readonly [number, number]) => {
-    return Utils.post(api.getDashboardMetricChartData(clusterId, metricType), {
+    const getQueryUrl = () => {
+      switch (metricType) {
+        case MetricType.MM2: {
+          return api.getMirrorMakerMetrics(clusterId);
+        }
+        case MetricType.Connect: {
+          return api.getConnectClusterMetrics(clusterId);
+        }
+        default: {
+          return api.getDashboardMetricChartData(clusterId, metricType);
+        }
+      }
+    };
+    const queryMap = {
+      [MetricType.Broker]: 'brokerIds',
+      [MetricType.Topic]: 'topics',
+      [MetricType.Connect]: 'connectClusterIdList',
+      [MetricType.Connectors]: 'connectorNameList',
+      [MetricType.MM2]: 'connectorNameList',
+    };
+
+    return Utils.post(getQueryUrl(), {
       startTime,
       endTime,
       metricsNames: [metricName],
       topNu: null,
-      [metricType === MetricType.Broker ? 'brokerIds' : 'topics']: queryLines,
+      [queryMap[metricType as keyof typeof queryMap]]:
+        metricType === MetricType.MM2 ? queryLines.map((item) => (typeof item === 'string' ? Utils.parseJSON(item) : item)) : queryLines,
     });
   };
 

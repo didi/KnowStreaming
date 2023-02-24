@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { arrayMoveImmutable } from 'array-move';
-import { Utils, Empty, Spin, AppContainer, SingleChart, Tooltip } from 'knowdesign';
-import { IconFont } from '@knowdesign/icons';
+import { Utils, AppContainer, Checkbox, Input, Row, Col, Button } from 'knowdesign';
 import { useParams } from 'react-router-dom';
 import api, { MetricType } from '@src/api';
-import { MetricInfo, OriginMetricData, FormattedMetricData, formatChartData, resolveMetricsRank } from '@src/constants/chartConfig';
+import { OriginMetricData, FormattedMetricData, formatChartData } from '@src/constants/chartConfig';
 import ChartOperateBar, { KsHeaderOptions } from '../ChartOperateBar';
-import DragGroup from '../DragGroup';
 import ChartDetail from './Detail';
-import { getChartConfig, getMetricDashboardReq } from './config';
+import { getMetricDashboardReq } from './config';
 import './index.less';
+import MetricsFilter from '../ChartOperateBar/MetricSelect';
+import ChartList from './ChartList';
+import { IconFont } from '@knowdesign/icons';
 
 interface IcustomScope {
   label: string;
@@ -25,7 +25,111 @@ type PropsType = {
 const { EventBus } = Utils;
 const busInstance = new EventBus();
 
-const DRAG_GROUP_GUTTER_NUM: [number, number] = [16, 16];
+interface SelectContentProps {
+  title: string;
+  list: {
+    label: string;
+    value: string | number;
+  }[];
+  isTop?: boolean;
+  visibleChange?: (v: boolean) => void;
+  onChange?: (list: any[], inputValue: string) => void;
+  searchPlaceholder?: string;
+}
+
+const SelectContent = (props: SelectContentProps) => {
+  const { searchPlaceholder = '输入内容进行搜索', list, isTop, visibleChange, onChange } = props;
+  const [scopeSearchValue, setScopeSearchValue] = useState('');
+  // 全选属性
+  const [indeterminate, setIndeterminate] = useState(false);
+  const [checkAll, setCheckAll] = useState(false);
+  const [checkedListTemp, setCheckedListTemp] = useState([]);
+  const [allCheckedList, setAllCheckedList] = useState([]);
+  const defaultChecked = useRef([]);
+
+  const customSure = () => {
+    defaultChecked.current = checkedListTemp;
+    onChange?.(checkedListTemp, `${checkedListTemp?.length}项`);
+  };
+
+  const customCancel = () => {
+    setCheckedListTemp(defaultChecked.current);
+    visibleChange(false);
+  };
+
+  const onCheckAllChange = (e: any) => {
+    setCheckedListTemp(e.target.checked ? allCheckedList : []);
+  };
+
+  const checkChange = (val: any) => {
+    setCheckedListTemp(val);
+  };
+
+  useEffect(() => {
+    setIndeterminate(!!checkedListTemp.length && checkedListTemp.length < allCheckedList.length);
+    setCheckAll(checkedListTemp?.length === allCheckedList.length);
+  }, [checkedListTemp]);
+
+  useEffect(() => {
+    const all = list?.map((item) => item.value) || [];
+    setAllCheckedList(all);
+  }, [list]);
+
+  useEffect(() => {
+    if (isTop) {
+      setCheckedListTemp([]);
+      defaultChecked.current = [];
+    }
+  }, [isTop]);
+
+  return (
+    <>
+      <h6 className="time_title">{props.title}</h6>
+      <div className="custom-scope">
+        <div className="check-row">
+          <Checkbox className="check-all" indeterminate={indeterminate} checked={checkAll} onChange={onCheckAllChange}>
+            全选
+          </Checkbox>
+          <Input
+            className="search-input"
+            suffix={<IconFont type="icon-fangdajing" style={{ fontSize: '16px' }} />}
+            size="small"
+            placeholder={searchPlaceholder}
+            onChange={(e) => setScopeSearchValue(e.target.value)}
+          />
+        </div>
+        <div className="fixed-height">
+          <Checkbox.Group style={{ width: '100%' }} onChange={checkChange} value={checkedListTemp}>
+            <Row gutter={[10, 12]}>
+              {list
+                .filter((item) => item.label.includes(scopeSearchValue))
+                .map((item) => (
+                  <Col span={12} key={item.value}>
+                    <Checkbox value={item.value}>{item.label}</Checkbox>
+                  </Col>
+                ))}
+            </Row>
+          </Checkbox.Group>
+        </div>
+
+        <div className="btn-con">
+          <Button
+            type="primary"
+            size="small"
+            className="btn-sure"
+            onClick={customSure}
+            disabled={checkedListTemp?.length > 0 ? false : true}
+          >
+            确定
+          </Button>
+          <Button size="small" onClick={customCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+};
 
 const DraggableCharts = (props: PropsType): JSX.Element => {
   const [global] = AppContainer.useGlobalValue();
@@ -35,64 +139,47 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
   }>();
   const [loading, setLoading] = useState<boolean>(true);
   const [scopeList, setScopeList] = useState<IcustomScope[]>([]); // 节点范围列表
-  const [metricsList, setMetricsList] = useState<MetricInfo[]>([]); // 指标列表
-  const [selectedMetricNames, setSelectedMetricNames] = useState<(string | number)[]>([]); // 默认选中的指标的列表
   const [curHeaderOptions, setCurHeaderOptions] = useState<ChartFilterOptions>();
+  const [metricList, setMetricList] = useState<(string | number)[]>([]);
   const [metricChartData, setMetricChartData] = useState<FormattedMetricData[]>([]); // 指标图表数据列表
   const [gridNum, setGridNum] = useState<number>(12); // 图表列布局
-  const metricRankList = useRef<string[]>([]);
-  const chartDetailRef = useRef(null);
   const curFetchingTimestamp = useRef(0);
+  const metricRankList = useRef<string[]>([]);
+  const metricFilterRef = useRef(null);
+  const chartDetailRef = useRef(null);
 
   // 获取节点范围列表
   const getScopeList = async () => {
-    const res: any = await Utils.request(api.getDashboardMetadata(clusterId, dashboardType));
-    const list = res.map((item: any) => {
-      return dashboardType === MetricType.Broker
-        ? {
-            label: item.host,
-            value: item.brokerId,
-          }
-        : {
-            label: item.topicName,
-            value: item.topicName,
-          };
-    });
+    const res: any = await Utils.request(
+      dashboardType !== MetricType.MM2 ? api.getDashboardMetadata(clusterId, dashboardType) : api.getMirrorMakerMetadata(clusterId)
+    );
+    const mockRes = [{ connectClusterId: 1, connectClusterName: 'connectClusterName', connectorName: 'connectorName' }];
+    const list =
+      res.length > 0
+        ? res.map((item: any) => {
+            return dashboardType === MetricType.Broker
+              ? {
+                  label: item.host,
+                  value: item.brokerId,
+                }
+              : dashboardType === MetricType.MM2
+              ? {
+                  label: item.connectorName,
+                  value: JSON.stringify({ connectClusterId: item.connectClusterId, connectorName: item.connectorName }),
+                }
+              : {
+                  label: item.topicName,
+                  value: item.topicName,
+                };
+          })
+        : mockRes.map((item) => {
+            return {
+              label: item.connectorName,
+              value: JSON.stringify(item),
+            };
+          });
+
     setScopeList(list);
-  };
-
-  // 更新 rank
-  const updateRank = (metricList: MetricInfo[]) => {
-    const { list, listInfo, shouldUpdate } = resolveMetricsRank(metricList);
-    metricRankList.current = list;
-    if (shouldUpdate) {
-      setMetricList(listInfo);
-    }
-  };
-
-  // 获取指标列表
-  const getMetricList = () => {
-    Utils.request(api.getDashboardMetricList(clusterId, dashboardType)).then((res: MetricInfo[] | null) => {
-      if (!res) return;
-      const supportMetrics = res.filter((metric) => metric.support);
-      const selectedMetrics = supportMetrics.filter((metric) => metric.set).map((metric) => metric.name);
-      updateRank([...supportMetrics]);
-      setMetricsList(supportMetrics);
-      setSelectedMetricNames(selectedMetrics);
-      if (!selectedMetrics.length) {
-        setLoading(false);
-      }
-    });
-  };
-
-  // 更新指标
-  const setMetricList = (metricDetailDTOList: { metric: string; rank: number; set: boolean }[]) => {
-    return Utils.request(api.getDashboardMetricList(clusterId, dashboardType), {
-      method: 'POST',
-      data: {
-        metricDetailDTOList,
-      },
-    });
   };
 
   // 根据筛选项获取图表信息
@@ -102,19 +189,23 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
     const [startTime, endTime] = curHeaderOptions.rangeTime;
     const curTimestamp = Date.now();
     curFetchingTimestamp.current = curTimestamp;
-
     const reqBody = Object.assign(
       {
         startTime,
         endTime,
-        metricsNames: selectedMetricNames,
+        metricsNames: metricList || [],
       },
-      dashboardType === MetricType.Broker || dashboardType === MetricType.Topic
+      dashboardType === MetricType.Broker || dashboardType === MetricType.Topic || dashboardType === MetricType.MM2
         ? {
             topNu: curHeaderOptions?.scopeData?.isTop ? curHeaderOptions.scopeData.data : null,
-            [dashboardType === MetricType.Broker ? 'brokerIds' : 'topics']: curHeaderOptions?.scopeData?.isTop
-              ? null
-              : curHeaderOptions.scopeData.data,
+            [dashboardType === MetricType.Broker ? 'brokerIds' : dashboardType === MetricType.MM2 ? 'connectorNameList' : 'topics']:
+              curHeaderOptions?.scopeData?.isTop
+                ? null
+                : dashboardType === MetricType.MM2
+                ? curHeaderOptions.scopeData.data?.map((item: any) => {
+                    return JSON.parse(item);
+                  })
+                : curHeaderOptions.scopeData.data,
           }
         : {}
     );
@@ -137,10 +228,31 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
             dashboardType,
             curHeaderOptions.rangeTime
           ) as FormattedMetricData[];
+          //  todo 将指标筛选选中但是没有返回的指标插入chartData中
+          const nullformattedMetricData: any = [];
+
+          metricList?.forEach((item) => {
+            if (formattedMetricData && formattedMetricData.some((key) => item === key.metricName)) {
+              nullformattedMetricData.push(null);
+            } else {
+              const chartData: any = {
+                metricName: item,
+                metricType: dashboardType,
+                metricUnit: global.getMetricDefine(dashboardType, item)?.unit || '',
+                metricLines: [],
+                showLegend: false,
+                targetUnit: undefined,
+              };
+              nullformattedMetricData.push(chartData);
+            }
+          });
           // 指标排序
           formattedMetricData.sort((a, b) => metricRankList.current.indexOf(a.metricName) - metricRankList.current.indexOf(b.metricName));
-
-          setMetricChartData(formattedMetricData);
+          const filterNullformattedMetricData = nullformattedMetricData.filter((item: any) => item !== null);
+          filterNullformattedMetricData.sort(
+            (a: any, b: any) => metricRankList.current.indexOf(a?.metricName) - metricRankList.current.indexOf(b?.metricName)
+          );
+          setMetricChartData([...formattedMetricData, ...filterNullformattedMetricData]);
         }
         setLoading(false);
       },
@@ -168,65 +280,32 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
     }
   };
 
-  // 指标选中项更新回调
-  const metricSelectCallback = (newMetricNames: (string | number)[]) => {
-    const updateMetrics: { metric: string; set: boolean; rank: number }[] = [];
-    // 需要选中的指标
-    newMetricNames.forEach(
-      (name) =>
-        !selectedMetricNames.includes(name) &&
-        updateMetrics.push({ metric: name as string, set: true, rank: metricsList.find(({ name: metric }) => metric === name)?.rank })
-    );
-    // 取消选中的指标
-    selectedMetricNames.forEach(
-      (name) =>
-        !newMetricNames.includes(name) &&
-        updateMetrics.push({ metric: name as string, set: false, rank: metricsList.find(({ name: metric }) => metric === name)?.rank })
-    );
-
-    const requestPromise = Object.keys(updateMetrics).length ? setMetricList(updateMetrics) : Promise.resolve();
-    requestPromise.then(
-      () => getMetricList(),
-      () => getMetricList()
-    );
-
-    return requestPromise;
-  };
-
-  // 拖拽开始回调，触发图表的 onDrag 事件（ 设置为 true ），禁止同步展示图表的 tooltip
-  const dragStart = () => {
-    busInstance.emit('onDrag', true);
-  };
-
-  // 拖拽结束回调，更新图表顺序，并触发图表的 onDrag 事件（ 设置为 false ），允许同步展示图表的 tooltip
-  const dragEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    busInstance.emit('onDrag', false);
+  // 图表拖拽
+  const dragCallback = (oldIndex: number, newIndex: number) => {
     const originFrom = metricRankList.current.indexOf(metricChartData[oldIndex].metricName);
     const originTarget = metricRankList.current.indexOf(metricChartData[newIndex].metricName);
-    const newList = arrayMoveImmutable(metricRankList.current, originFrom, originTarget);
-    metricRankList.current = newList;
-    setMetricList(newList.map((metric, rank) => ({ metric, rank, set: metricsList.find(({ name }) => metric === name)?.set || false })));
-    setMetricChartData(arrayMoveImmutable(metricChartData, oldIndex, newIndex));
+    metricFilterRef.current?.rankChange(originFrom, originTarget);
   };
 
-  // 监听盒子宽度变化，重置图表宽度
-  const observeDashboardWidthChange = () => {
-    const targetNode = document.getElementsByClassName('dcd-two-columns-layout-sider-footer')[0];
-    targetNode && targetNode.addEventListener('click', () => busInstance.emit('chartResize'));
+  // 展开图表详情
+  const onExpand = (metricName: string) => {
+    const linesName = scopeList.map((item) => item.value);
+    chartDetailRef.current.onOpen(dashboardType, metricName, linesName);
   };
 
+  // 获取图表指标
   useEffect(() => {
-    if (selectedMetricNames.length && curHeaderOptions) {
+    if (metricList?.length && curHeaderOptions) {
       getMetricChartData();
+    } else {
+      setMetricChartData([]);
+      setLoading(false);
     }
-  }, [curHeaderOptions, selectedMetricNames]);
+  }, [curHeaderOptions, metricList]);
 
   useEffect(() => {
     // 初始化页面，获取 scope 和 metric 信息
-    (dashboardType === MetricType.Broker || dashboardType === MetricType.Topic) && getScopeList();
-    getMetricList();
-
-    setTimeout(() => observeDashboardWidthChange());
+    (dashboardType === MetricType.Broker || dashboardType === MetricType.Topic || dashboardType === MetricType.MM2) && getScopeList();
   }, []);
 
   return (
@@ -234,95 +313,49 @@ const DraggableCharts = (props: PropsType): JSX.Element => {
       <ChartOperateBar
         onChange={ksHeaderChange}
         hideNodeScope={dashboardType === MetricType.Zookeeper}
-        nodeScopeModule={{
-          customScopeList: scopeList,
-          scopeName: dashboardType === MetricType.Broker ? 'Broker' : dashboardType === MetricType.Topic ? 'Topic' : 'Zookeeper',
-          scopeLabel: `自定义 ${
-            dashboardType === MetricType.Broker ? 'Broker' : dashboardType === MetricType.Topic ? 'Topic' : 'Zookeeper'
-          } 范围`,
-        }}
-        metricSelect={{
-          hide: false,
-          metricType: dashboardType,
-          tableData: metricsList,
-          selectedRows: selectedMetricNames,
-          submitCallback: metricSelectCallback,
+        openMetricFilter={() => metricFilterRef.current?.open()}
+        nodeSelect={{
+          name:
+            dashboardType === MetricType.Broker
+              ? 'Broker'
+              : dashboardType === MetricType.Topic
+              ? 'Topic'
+              : dashboardType === MetricType.MM2
+              ? 'MM2'
+              : 'Zookeeper',
+          customContent: (
+            <SelectContent
+              title={`自定义 ${
+                dashboardType === MetricType.Broker
+                  ? 'Broker'
+                  : dashboardType === MetricType.Topic
+                  ? 'Topic'
+                  : dashboardType === MetricType.MM2
+                  ? 'MM2'
+                  : 'Zookeeper'
+              } 范围`}
+              list={scopeList}
+            />
+          ),
         }}
       />
-      <div className="topic-dashboard-container">
-        <Spin spinning={loading} style={{ height: 400 }}>
-          {metricChartData && metricChartData.length ? (
-            <div className="no-group-con">
-              <DragGroup
-                sortableContainerProps={{
-                  onSortStart: dragStart,
-                  onSortEnd: dragEnd,
-                  axis: 'xy',
-                  useDragHandle: true,
-                }}
-                gridProps={{
-                  span: gridNum,
-                  gutter: DRAG_GROUP_GUTTER_NUM,
-                }}
-              >
-                {metricChartData.map((data) => {
-                  const { metricName, metricUnit, metricLines, showLegend } = data;
-
-                  return (
-                    <div key={metricName} className="dashboard-drag-item-box">
-                      <div className="dashboard-drag-item-box-title">
-                        <Tooltip
-                          placement="topLeft"
-                          title={() => {
-                            let content = '';
-                            const metricDefine = global.getMetricDefine(dashboardType, metricName);
-                            if (metricDefine) {
-                              content = metricDefine.desc;
-                            }
-                            return content;
-                          }}
-                        >
-                          <span>
-                            <span className="name">{metricName}</span>
-                            <span className="unit">（{metricUnit}）</span>
-                          </span>
-                        </Tooltip>
-                      </div>
-                      <div
-                        className="expand-icon-box"
-                        onClick={() => {
-                          const linesName = scopeList.map((item) => item.value);
-                          chartDetailRef.current.onOpen(dashboardType, metricName, linesName);
-                        }}
-                      >
-                        <IconFont type="icon-chuangkoufangda" className="expand-icon" />
-                      </div>
-                      <SingleChart
-                        chartKey={metricName}
-                        chartTypeProp="line"
-                        showHeader={false}
-                        wrapStyle={{
-                          width: 'auto',
-                          height: 222,
-                        }}
-                        connectEventName={`${dashboardType}BoardDragChart`}
-                        eventBus={busInstance}
-                        propChartData={metricLines}
-                        optionMergeProps={{ replaceMerge: curHeaderOptions.isAutoReload ? ['xAxis'] : ['series'] }}
-                        {...getChartConfig(`${metricName}{unit|（${metricUnit}）}`, metricLines.length, showLegend)}
-                      />
-                    </div>
-                  );
-                })}
-              </DragGroup>
-            </div>
-          ) : loading ? (
-            <></>
-          ) : (
-            <Empty description="数据为空，请选择指标或刷新" image={Empty.PRESENTED_IMAGE_CUSTOM} style={{ padding: '100px 0' }} />
-          )}
-        </Spin>
-      </div>
+      <MetricsFilter
+        ref={metricFilterRef}
+        metricType={dashboardType}
+        onSelectChange={(list, rankList) => {
+          metricRankList.current = rankList;
+          setMetricList(list);
+        }}
+      />
+      <ChartList
+        busInstance={busInstance}
+        loading={loading}
+        gridNum={gridNum}
+        data={metricChartData}
+        autoReload={curHeaderOptions?.isAutoReload}
+        dragCallback={dragCallback}
+        onExpand={onExpand}
+      />
       {/* 图表详情 */}
       <ChartDetail ref={chartDetailRef} />
     </div>

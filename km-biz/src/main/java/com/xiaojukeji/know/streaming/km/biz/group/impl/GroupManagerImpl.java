@@ -8,10 +8,15 @@ import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupOffsetResetDT
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.partition.PartitionOffsetDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.Group;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.GroupTopic;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.GroupTopicMember;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSGroupDescription;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSMemberConsumerAssignment;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSMemberDescription;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.GroupMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
@@ -34,15 +39,13 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationMetricsUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.GroupMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.GroupMetricESDAO;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
-import org.apache.kafka.clients.admin.MemberDescription;
-import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.common.ConsumerGroupState;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +53,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum.CONNECT_CLUSTER_PROTOCOL_TYPE;
 
 @Component
 public class GroupManagerImpl implements GroupManager {
@@ -69,6 +74,9 @@ public class GroupManagerImpl implements GroupManager {
 
     @Autowired
     private GroupMetricESDAO groupMetricESDAO;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Override
     public PaginationResult<GroupTopicOverviewVO> pagingGroupMembers(Long clusterPhyId,
@@ -140,6 +148,11 @@ public class GroupManagerImpl implements GroupManager {
                                                                                         String groupName,
                                                                                         List<String> latestMetricNames,
                                                                                         PaginationSortDTO dto) throws NotExistException, AdminOperateException {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(clusterPhyId);
+        if (clusterPhy == null) {
+            return PaginationResult.buildFailure(MsgConstant.getClusterPhyNotExist(clusterPhyId), dto);
+        }
+
         // 获取消费组消费的TopicPartition列表
         Map<TopicPartition, Long> consumedOffsetMap = groupService.getGroupOffsetFromKafka(clusterPhyId, groupName);
         List<Integer> partitionList = consumedOffsetMap.keySet()
@@ -150,13 +163,18 @@ public class GroupManagerImpl implements GroupManager {
         Collections.sort(partitionList);
 
         // 获取消费组当前运行信息
-        ConsumerGroupDescription groupDescription = groupService.getGroupDescriptionFromKafka(clusterPhyId, groupName);
+        KSGroupDescription groupDescription = groupService.getGroupDescriptionFromKafka(clusterPhy, groupName);
 
         // 转换存储格式
-        Map<TopicPartition, MemberDescription> tpMemberMap = new HashMap<>();
-        for (MemberDescription description: groupDescription.members()) {
-            for (TopicPartition tp: description.assignment().topicPartitions()) {
-                tpMemberMap.put(tp, description);
+        Map<TopicPartition, KSMemberDescription> tpMemberMap = new HashMap<>();
+
+        //如果不是connect集群
+        if (!groupDescription.protocolType().equals(CONNECT_CLUSTER_PROTOCOL_TYPE)) {
+            for (KSMemberDescription description : groupDescription.members()) {
+                KSMemberConsumerAssignment assignment = (KSMemberConsumerAssignment) description.assignment();
+                for (TopicPartition tp : assignment.topicPartitions()) {
+                    tpMemberMap.put(tp, description);
+                }
             }
         }
 
@@ -173,11 +191,11 @@ public class GroupManagerImpl implements GroupManager {
             vo.setTopicName(topicName);
             vo.setPartitionId(groupMetrics.getPartitionId());
 
-            MemberDescription memberDescription = tpMemberMap.get(new TopicPartition(topicName, groupMetrics.getPartitionId()));
-            if (memberDescription != null) {
-                vo.setMemberId(memberDescription.consumerId());
-                vo.setHost(memberDescription.host());
-                vo.setClientId(memberDescription.clientId());
+            KSMemberDescription ksMemberDescription = tpMemberMap.get(new TopicPartition(topicName, groupMetrics.getPartitionId()));
+            if (ksMemberDescription != null) {
+                vo.setMemberId(ksMemberDescription.consumerId());
+                vo.setHost(ksMemberDescription.host());
+                vo.setClientId(ksMemberDescription.clientId());
             }
 
             vo.setLatestMetrics(groupMetrics);
@@ -203,7 +221,12 @@ public class GroupManagerImpl implements GroupManager {
             return rv;
         }
 
-        ConsumerGroupDescription description = groupService.getGroupDescriptionFromKafka(dto.getClusterId(), dto.getGroupName());
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(dto.getClusterId());
+        if (clusterPhy == null) {
+            return Result.buildFromRSAndMsg(ResultStatus.CLUSTER_NOT_EXIST, MsgConstant.getClusterPhyNotExist(dto.getClusterId()));
+        }
+
+        KSGroupDescription description = groupService.getGroupDescriptionFromKafka(clusterPhy, dto.getGroupName());
         if (ConsumerGroupState.DEAD.equals(description.state()) && !dto.isCreateIfNotExist()) {
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, "group不存在, 重置失败");
         }
@@ -274,16 +297,16 @@ public class GroupManagerImpl implements GroupManager {
             )));
         }
 
-        OffsetSpec offsetSpec = null;
+        KSOffsetSpec offsetSpec = null;
         if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getResetType()) {
-            offsetSpec = OffsetSpec.forTimestamp(dto.getTimestamp());
+            offsetSpec = KSOffsetSpec.forTimestamp(dto.getTimestamp());
         } else if (OffsetTypeEnum.EARLIEST.getResetType() == dto.getResetType()) {
-            offsetSpec = OffsetSpec.earliest();
+            offsetSpec = KSOffsetSpec.earliest();
         } else {
-            offsetSpec = OffsetSpec.latest();
+            offsetSpec = KSOffsetSpec.latest();
         }
 
-        return partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), offsetSpec, dto.getTimestamp());
+        return partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), offsetSpec);
     }
 
     private List<GroupTopicOverviewVO> convert2GroupTopicOverviewVOList(List<GroupMemberPO> poList, List<GroupMetrics> metricsList) {
@@ -345,32 +368,4 @@ public class GroupManagerImpl implements GroupManager {
                 dto
         );
     }
-
-    private List<GroupTopicOverviewVO> convert2GroupTopicOverviewVOList(String groupName, String state, List<GroupTopicMember> groupTopicList, List<GroupMetrics> metricsList) {
-        if (metricsList == null) {
-            metricsList = new ArrayList<>();
-        }
-
-        // <TopicName, GroupMetrics>
-        Map<String, GroupMetrics> metricsMap = new HashMap<>();
-        for (GroupMetrics metrics : metricsList) {
-            if (!groupName.equals(metrics.getGroup())) continue;
-            metricsMap.put(metrics.getTopic(), metrics);
-        }
-
-        List<GroupTopicOverviewVO> voList = new ArrayList<>();
-        for (GroupTopicMember po : groupTopicList) {
-            GroupTopicOverviewVO vo = ConvertUtil.obj2Obj(po, GroupTopicOverviewVO.class);
-            vo.setGroupName(groupName);
-            vo.setState(state);
-            GroupMetrics metrics = metricsMap.get(po.getTopicName());
-            if (metrics != null) {
-                vo.setMaxLag(ConvertUtil.Float2Long(metrics.getMetrics().get(GroupMetricVersionItems.GROUP_METRIC_LAG)));
-            }
-
-            voList.add(vo);
-        }
-        return voList;
-    }
-
 }

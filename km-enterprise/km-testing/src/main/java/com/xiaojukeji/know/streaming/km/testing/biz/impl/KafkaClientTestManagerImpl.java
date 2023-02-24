@@ -6,6 +6,7 @@ import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.xiaojukeji.know.streaming.km.common.annotations.enterprise.EnterpriseTesting;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.partition.PartitionOffsetDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.record.RecordHeaderKS;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
@@ -35,7 +36,6 @@ import com.xiaojukeji.know.streaming.km.testing.common.bean.vo.TestProducerVO;
 import com.xiaojukeji.know.streaming.km.testing.common.enums.KafkaConsumerFilterEnum;
 import com.xiaojukeji.know.streaming.km.testing.common.enums.KafkaConsumerStartFromEnum;
 import org.apache.kafka.clients.CommonClientConfigs;
-import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -106,7 +106,7 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
             }
 
             //获取topic的BeginOffset
-            Result<Map<TopicPartition, Long>> partitionBeginOffsetMapResult = partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), OffsetSpec.earliest(), null);
+            Result<Map<TopicPartition, Long>> partitionBeginOffsetMapResult = partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), KSOffsetSpec.earliest());
             if (partitionBeginOffsetMapResult.failed()) {
                 return Result.buildFromIgnoreData(partitionBeginOffsetMapResult);
             }
@@ -118,7 +118,7 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
             });
 
             // 获取Topic的EndOffset
-            Result<Map<TopicPartition, Long>> partitionEndOffsetMapResult = partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), OffsetSpec.latest(), null);
+            Result<Map<TopicPartition, Long>> partitionEndOffsetMapResult = partitionService.getPartitionOffsetFromKafka(dto.getClusterId(), dto.getTopicName(), KSOffsetSpec.latest());
             if (partitionEndOffsetMapResult.failed()) {
                 return Result.buildFromIgnoreData(partitionEndOffsetMapResult);
             }
@@ -351,7 +351,7 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
     private Result<List<PartitionOffsetDTO>> getConsumeStartOffset(Long clusterPhyId, String topicName, KafkaConsumerStartFromDTO startFromDTO) throws NotExistException, AdminOperateException {
         // 最新位置开始消费
         if (KafkaConsumerStartFromEnum.LATEST.getCode().equals(startFromDTO.getStartFromType())) {
-            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, OffsetSpec.latest(), null);
+            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, KSOffsetSpec.latest());
             if (offsetMapResult.failed()) {
                 return Result.buildFromIgnoreData(offsetMapResult);
             }
@@ -365,7 +365,7 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
 
         // 最旧位置开始消费
         if (KafkaConsumerStartFromEnum.EARLIEST.getCode().equals(startFromDTO.getStartFromType())) {
-            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, OffsetSpec.earliest(), null);
+            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, KSOffsetSpec.earliest());
             if (offsetMapResult.failed()) {
                 return Result.buildFromIgnoreData(offsetMapResult);
             }
@@ -379,7 +379,7 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
 
         // 指定时间开始消费
         if (KafkaConsumerStartFromEnum.PRECISE_TIMESTAMP.getCode().equals(startFromDTO.getStartFromType())) {
-            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, OffsetSpec.forTimestamp(startFromDTO.getTimestampUnitMs()), startFromDTO.getTimestampUnitMs());
+            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, KSOffsetSpec.forTimestamp(startFromDTO.getTimestampUnitMs()));
             if (offsetMapResult.failed()) {
                 return Result.buildFromIgnoreData(offsetMapResult);
             }
@@ -409,7 +409,7 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
 
         // 近X条数据开始消费
         if (KafkaConsumerStartFromEnum.LATEST_MINUS_X_OFFSET.getCode().equals(startFromDTO.getStartFromType())) {
-            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, OffsetSpec.latest(), null);
+            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterPhyId, topicName, KSOffsetSpec.latest());
             if (offsetMapResult.failed()) {
                 return Result.buildFromIgnoreData(offsetMapResult);
             }

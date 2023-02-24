@@ -6,31 +6,26 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.BrokerMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
-import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.BROKER_INDEX;
 
 @Component
 public class BrokerMetricESDAO extends BaseMetricESDAO {
     @PostConstruct
     public void init() {
-        super.indexName     = BROKER_INDEX;
-        super.indexTemplate = BROKER_TEMPLATE;
+        super.indexName = BROKER_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register( this);
     }
-
-    protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("BrokerMetricESDAO", 4,8, 500);
 
     /**
      * 获取集群 clusterId 中 brokerId 最新的统计指标
@@ -40,7 +35,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         Long startTime = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_BROKER_LATEST_METRICS, clusterId, brokerId, startTime, endTime);
+                DslConstant.GET_BROKER_LATEST_METRICS, clusterId, brokerId, startTime, endTime);
 
         BrokerMetricPO brokerMetricPO = esOpClient.performRequestAndTakeFirst(
                 brokerId.toString(),
@@ -68,7 +63,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         String aggDsl   = buildAggsDSL(metrics, aggType);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_BROKER_AGG_SINGLE_METRICS, clusterPhyId, brokerId, startTime, endTime, aggDsl);
+                DslConstant.GET_BROKER_AGG_SINGLE_METRICS, clusterPhyId, brokerId, startTime, endTime, aggDsl);
 
         return esOpClient.performRequestWithRouting(
                 String.valueOf(brokerId),
@@ -132,7 +127,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         for(Long brokerId : brokerIds){
             try {
                 String dsl = dslLoaderUtil.getFormatDslByFileName(
-                        DslsConstant.GET_BROKER_AGG_LIST_METRICS,
+                        DslConstant.GET_BROKER_AGG_LIST_METRICS,
                         clusterPhyId,
                         brokerId,
                         startTime,
@@ -141,7 +136,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
                         aggDsl
                 );
 
-                queryFuture.runnableTask(
+                esTPService.submitSearchTask(
                         String.format("class=BrokerMetricESDAO||method=listBrokerMetricsByBrokerIds||ClusterPhyId=%d", clusterPhyId),
                         5000,
                         () -> {
@@ -154,8 +149,8 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
                             );
 
                             synchronized (table) {
-                                for(String metric : metricMap.keySet()){
-                                    table.put(metric, brokerId, metricMap.get(metric));
+                                for(Map.Entry<String, List<MetricPointVO>> entry: metricMap.entrySet()){
+                                    table.put(entry.getKey(), brokerId, entry.getValue());
                                 }
                             }
                         });
@@ -164,7 +159,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
             }
         }
 
-        queryFuture.waitExecute();
+        esTPService.waitExecute();
 
         return table;
     }
@@ -187,7 +182,7 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
 
         //4、查询es
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_BROKER_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+                DslConstant.GET_BROKER_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
 
         return esOpClient.performRequest(realIndex, dsl,
                 s -> handleTopBrokerESQueryResponse(s, metrics, topN), 3);
@@ -221,106 +216,86 @@ public class BrokerMetricESDAO extends BaseMetricESDAO {
         return metricMap;
     }
 
-    private Map<String, List<MetricPointVO>> handleListESQueryResponse(ESQueryResponse response, List<String> metrics, String aggType){
+    private Map<String, List<MetricPointVO>> handleListESQueryResponse(ESQueryResponse response, List<String> metricNameList, String aggType){
         Map<String, List<MetricPointVO>> metricMap = new HashMap<>();
 
-        if(null == response || null == response.getAggs()){
+        Map<String, ESAggr> esAggrMap = this.checkBucketsAndHitsOfResponseAggs(response);
+        if (esAggrMap == null) {
             return metricMap;
         }
 
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null == esAggrMap || null == esAggrMap.get(HIST)) {
-            return metricMap;
-        }
-
-        if(CollectionUtils.isEmpty(esAggrMap.get(HIST).getBucketList())){
-            return metricMap;
-        }
-
-        for(String metric : metrics){
+        for(String metricName : metricNameList){
             List<MetricPointVO> metricPoints = new ArrayList<>();
 
-            esAggrMap.get(HIST).getBucketList().forEach( esBucket -> {
+            esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
                 try {
-                    if (null != esBucket.getUnusedMap().get(KEY)) {
-                        Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        Object  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
-                        if(null           == value){return;}
-
-                        MetricPointVO metricPoint = new MetricPointVO();
-                        metricPoint.setAggType(aggType);
-                        metricPoint.setTimeStamp(timestamp);
-                        metricPoint.setValue(value.toString());
-                        metricPoint.setName(metric);
-
-                        metricPoints.add(metricPoint);
-                    }else {
-                        LOGGER.info("");
+                    if (null == esBucket.getUnusedMap().get(KEY)) {
+                        return;
                     }
-                }catch (Exception e){
-                    LOGGER.error("metric={}||errMsg=exception!", metric, e);
+
+                    Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
+                    Object  value     = esBucket.getAggrMap().get(metricName).getUnusedMap().get(VALUE);
+                    if(null == value) {
+                        return;
+                    }
+
+                    metricPoints.add(new MetricPointVO(metricName, timestamp, value.toString(), aggType));
+                } catch (Exception e){
+                    LOGGER.error("method=handleListESQueryResponse||metricName={}||errMsg=exception!", metricName, e);
                 }
             } );
 
-            metricMap.put(metric, optimizeMetricPoints(metricPoints));
+            metricMap.put(metricName, optimizeMetricPoints(metricPoints));
         }
 
         return metricMap;
     }
 
-    private Map<String, List<Long>> handleTopBrokerESQueryResponse(ESQueryResponse response, List<String> metrics, int topN){
+    private Map<String, List<Long>> handleTopBrokerESQueryResponse(ESQueryResponse response, List<String> metricNameList, int topN) {
         Map<String, List<Long>> ret = new HashMap<>();
 
-        if(null == response || null == response.getAggs()){
+        Map<String, ESAggr> esAggrMap = this.checkBucketsAndHitsOfResponseAggs(response);
+        if (esAggrMap == null) {
             return ret;
         }
 
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null == esAggrMap || null == esAggrMap.get(HIST)) {
-            return ret;
-        }
-
-        if(CollectionUtils.isEmpty(esAggrMap.get(HIST).getBucketList())){
-            return ret;
-        }
-
-        Map<String, List<Tuple<Long, Double>>> metricBrokerValueMap = new HashMap<>();
+        Map<String, List<Tuple<Long, Double>>> metricNameBrokerValueMap = new HashMap<>();
 
         //1、先获取每个指标对应的所有brokerIds以及指标的值
-        for(String metric : metrics) {
-            esAggrMap.get(HIST).getBucketList().forEach( esBucket -> {
+        for(String metricName : metricNameList) {
+            esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
                 try {
-                    if (null != esBucket.getUnusedMap().get(KEY)) {
-                        Long brokerId = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        Object value  = esBucket.getAggrMap().get(HIST).getBucketList().get(0).getAggrMap()
-                                .get(metric).getUnusedMap().get(VALUE);
-                        if(null       == value){return;}
-
-                        List<Tuple<Long, Double>> brokerValue = (null == metricBrokerValueMap.get(metric)) ?
-                                new ArrayList<>() : metricBrokerValueMap.get(metric);
-
-                        brokerValue.add(new Tuple<>(brokerId, Double.valueOf(value.toString())));
-                        metricBrokerValueMap.put(metric, brokerValue);
+                    if (null == esBucket.getUnusedMap().get(KEY)) {
+                        return;
                     }
-                }catch (Exception e){
-                    LOGGER.error("metrice={}||errMsg=exception!", metric, e);
+
+                    Long brokerId = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
+                    Object value  = esBucket.getAggrMap().get(HIST).getBucketList().get(0).getAggrMap().get(metricName).getUnusedMap().get(VALUE);
+                    if(null == value) {
+                        return;
+                    }
+
+                    metricNameBrokerValueMap.putIfAbsent(metricName, new ArrayList<>());
+                    metricNameBrokerValueMap.get(metricName).add(new Tuple<>(brokerId, Double.valueOf(value.toString())));
+                } catch (Exception e) {
+                    LOGGER.error("method=handleTopBrokerESQueryResponse||metric={}||errMsg=exception!", metricName, e);
                 }
-            } );
+            });
         }
 
         //2、对每个指标的broker按照指标值排序，并截取前topN个brokerIds
-        for(String metric : metricBrokerValueMap.keySet()){
-            List<Tuple<Long, Double>> brokerValue = metricBrokerValueMap.get(metric);
+        for(Map.Entry<String, List<Tuple<Long, Double>>> entry : metricNameBrokerValueMap.entrySet()){
+            entry.getValue().sort((o1, o2) -> {
+                if(null == o1 || null == o2){
+                    return 0;
+                }
 
-            brokerValue.sort((o1, o2) -> {
-                if(null == o1 || null == o2){return 0;}
                 return o2.getV2().compareTo(o1.getV2());
             } );
 
-            List<Tuple<Long, Double>> temp = (brokerValue.size() > topN) ? brokerValue.subList(0, topN) : brokerValue;
-            List<Long> brokerIds = temp.stream().map(t -> t.getV1()).collect( Collectors.toList());
-
-            ret.put(metric, brokerIds);
+            // 获取TopN的Broker
+            List<Long> brokerIdList = entry.getValue().subList(0, Math.min(topN, entry.getValue().size())).stream().map(elem -> elem.getV1()).collect(Collectors.toList());
+            ret.put(entry.getKey(), brokerIdList);
         }
 
         return ret;

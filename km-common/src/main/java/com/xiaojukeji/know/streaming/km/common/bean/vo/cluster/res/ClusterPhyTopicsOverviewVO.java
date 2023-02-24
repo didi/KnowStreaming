@@ -32,6 +32,9 @@ public class ClusterPhyTopicsOverviewVO extends BaseTimeVO {
     @ApiModelProperty(value = "副本数", example = "2")
     private Integer replicaNum;
 
+    @ApiModelProperty(value = "处于镜像复制中", example = "true")
+    private Boolean inMirror;
+
     @ApiModelProperty(value = "多个指标的当前值, 包括健康分/LogSize等")
     private BaseMetrics latestMetrics;
 

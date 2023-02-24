@@ -47,6 +47,15 @@ export default {
   [`menu.${systemKey}.operation.balance`]: 'Rebalance',
   [`menu.${systemKey}.operation.jobs`]: 'Job',
 
+  [`menu.${systemKey}.connect`]: 'Connect',
+  [`menu.${systemKey}.connect.dashboard`]: 'Overview',
+  [`menu.${systemKey}.connect.connectors`]: 'Connectors',
+  [`menu.${systemKey}.connect.workers`]: 'Workers',
+
+  [`menu.${systemKey}.replication`]: 'Replication',
+  [`menu.${systemKey}.replication.dashboard`]: 'Overview',
+  [`menu.${systemKey}.replication.mirror-maker`]: 'Mirror Makers',
+
   [`menu.${systemKey}.acls`]: 'ACLs',
 
   [`menu.${systemKey}.jobs`]: 'Job',

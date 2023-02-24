@@ -2,8 +2,6 @@ package com.xiaojukeji.know.streaming.km.core.service.cluster.impl;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Table;
 import com.xiaojukeji.know.streaming.km.common.annotations.enterprise.EnterpriseLoadReBalance;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
@@ -15,6 +13,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.Kafka
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.metric.ClusterMetricParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
@@ -26,6 +25,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.ClusterMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
+import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterAuthTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
@@ -35,6 +35,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.common.jmx.JmxConnectorWrap;
 import com.xiaojukeji.know.streaming.km.common.utils.*;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.acl.KafkaAclService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
@@ -54,27 +55,24 @@ import com.xiaojukeji.know.streaming.km.persistence.es.dao.ClusterMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
 import com.xiaojukeji.know.streaming.km.rebalance.model.Resource;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.resource.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics.initWithMetrics;
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.ClusterMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems.*;
 
 /**
  * @author didi
@@ -166,19 +164,6 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
 
     @Autowired
     private ClusterPhyService clusterPhyService;
-
-    private final Cache<Long, ClusterMetrics> clusterLatestMetricsCache = Caffeine.newBuilder()
-            .expireAfterWrite(180, TimeUnit.SECONDS)
-            .maximumSize(1000)
-            .build();
-
-    @PostConstruct
-    @Scheduled(cron = "0 0/1 * * * ?")
-    private void flushClusterLatestMetricsCache() {
-        for (ClusterPhy clusterPhy: clusterPhyService.listAllClusters()) {
-            FutureUtil.quickStartupFutureUtil.submitTask(() -> this.updateCacheAndGetMetrics(clusterPhy.getId()));
-        }
-    }
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -297,7 +282,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
 
     @Override
     public ClusterMetrics getLatestMetricsFromCache(Long clusterPhyId) {
-        ClusterMetrics metrics = clusterLatestMetricsCache.getIfPresent(clusterPhyId);
+        ClusterMetrics metrics = DataBaseDataLocalCache.getClusterLatestMetrics(clusterPhyId);
         if (metrics != null) {
             return metrics;
         }
@@ -349,24 +334,6 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
 
     /**************************************************** private method ****************************************************/
 
-    private ClusterMetrics updateCacheAndGetMetrics(Long clusterPhyId) {
-        try {
-            Result<ClusterMetrics> metricsResult = this.getLatestMetricsFromES(clusterPhyId, Arrays.asList());
-            if (metricsResult.hasData()) {
-                LOGGER.info("method=updateCacheAndGetMetrics||clusterPhyId={}||msg=success", clusterPhyId);
-                clusterLatestMetricsCache.put(clusterPhyId, metricsResult.getData());
-
-                return metricsResult.getData();
-            }
-        } catch (Exception e) {
-            LOGGER.error("method=updateCacheAndGetMetrics||clusterPhyId={}||errMsg=exception!",  clusterPhyId, e);
-        }
-
-        ClusterMetrics clusterMetrics = new ClusterMetrics(clusterPhyId);
-        clusterLatestMetricsCache.put(clusterPhyId, clusterMetrics);
-        return clusterMetrics;
-    }
-
     /**
      * doNothing
      */
@@ -396,9 +363,28 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     /**
      * 获取集群的 messageSize
      */
-    private Result<ClusterMetrics> getMessageSize(VersionItemParam metricParam){
+    private Result<ClusterMetrics> getMessageSize(VersionItemParam metricParam) {
         ClusterMetricParam param = (ClusterMetricParam)metricParam;
-        return getMetricFromKafkaByTotalTopics(param.getClusterId(), param.getMetric(), TOPIC_METRIC_MESSAGES);
+
+        Result<Map<TopicPartition, Long>> beginOffsetMapResult = partitionService.getAllPartitionOffsetFromKafka(param.getClusterId(), KSOffsetSpec.earliest());
+
+        Result<Map<TopicPartition, Long>> endOffsetMapResult = partitionService.getAllPartitionOffsetFromKafka(param.getClusterId(), KSOffsetSpec.latest());
+        if (endOffsetMapResult.failed() || beginOffsetMapResult.failed()) {
+            // 有一个失败，直接返回失败
+            return Result.buildFromIgnoreData(endOffsetMapResult);
+        }
+
+        long msgCount = 0;
+        for (Map.Entry<TopicPartition, Long> entry: endOffsetMapResult.getData().entrySet()) {
+            Long beginOffset = beginOffsetMapResult.getData().get(entry.getKey());
+            if (beginOffset == null) {
+                continue;
+            }
+
+            msgCount += Math.max(0, entry.getValue() - beginOffset);
+        }
+
+        return Result.buildSuc(initWithMetrics(param.getClusterId(), param.getMetric(), (float)msgCount));
     }
 
     /**
@@ -420,9 +406,9 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     private Result<ClusterMetrics> getPartitionSize(VersionItemParam metricParam){
         ClusterMetricParam param = (ClusterMetricParam)metricParam;
 
-        String metric       = param.getMetric();
-        Long   clusterId    = param.getClusterId();
-        Integer   partitionNu  = partitionService.getPartitionSizeByClusterId(clusterId);
+        String      metric       = param.getMetric();
+        Long        clusterId    = param.getClusterId();
+        Integer     partitionNu  = partitionService.listPartitionFromCacheFirst(clusterId).size();
 
         return Result.buildSuc(initWithMetrics(clusterId, metric, partitionNu.floatValue()));
     }
@@ -435,7 +421,10 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
 
         String metric       = param.getMetric();
         Long   clusterId    = param.getClusterId();
-        Integer noLeaders   = partitionService.getNoLeaderPartitionSizeByClusterId(clusterId);
+        Integer noLeaders   = (int) partitionService.listPartitionFromCacheFirst(clusterId)
+                .stream()
+                .filter(partition -> partition.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
+                .count();
         return Result.buildSuc(initWithMetrics(clusterId, metric, noLeaders.floatValue()));
     }
 
@@ -781,7 +770,7 @@ public class ClusterMetricServiceImpl extends BaseMetricService implements Clust
     /**
      * 从所有的 Topic 的指标中加总聚合得到集群的指标
      */
-    private Result<ClusterMetrics> getMetricFromKafkaByTotalTopics(Long clusterId, String metric, String topicMetric){
+    private Result<ClusterMetrics> getMetricFromKafkaByTotalTopics(Long clusterId, String metric, String topicMetric) {
         List<Topic> topics = topicService.listTopicsFromCacheFirst(clusterId);
 
         float sumMetricValue = 0f;

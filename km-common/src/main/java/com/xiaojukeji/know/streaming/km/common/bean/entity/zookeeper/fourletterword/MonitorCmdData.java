@@ -23,8 +23,8 @@ import lombok.Data;
 public class MonitorCmdData extends BaseFourLetterWordCmdData {
     private String zkVersion;
     private Float zkAvgLatency;
-    private Long zkMaxLatency;
-    private Long zkMinLatency;
+    private Float zkMaxLatency;
+    private Float zkMinLatency;
     private Long zkPacketsReceived;
     private Long zkPacketsSent;
     private Long zkNumAliveConnections;

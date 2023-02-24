@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper.fourletter
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.zookeeper.fourletterword.MonitorCmdData;
+import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.zookeeper.FourLetterWordUtil;
 import lombok.Data;
 
@@ -57,13 +58,13 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                         monitorCmdData.setZkVersion(elem.getValue().split("-")[0]);
                         break;
                     case "zk_avg_latency":
-                        monitorCmdData.setZkAvgLatency(Float.valueOf(elem.getValue()));
+                        monitorCmdData.setZkAvgLatency(ConvertUtil.string2Float(elem.getValue()));
                         break;
                     case "zk_max_latency":
-                        monitorCmdData.setZkMaxLatency(Long.valueOf(elem.getValue()));
+                        monitorCmdData.setZkMaxLatency(ConvertUtil.string2Float(elem.getValue()));
                         break;
                     case "zk_min_latency":
-                        monitorCmdData.setZkMinLatency(Long.valueOf(elem.getValue()));
+                        monitorCmdData.setZkMinLatency(ConvertUtil.string2Float(elem.getValue()));
                         break;
                     case "zk_packets_received":
                         monitorCmdData.setZkPacketsReceived(Long.valueOf(elem.getValue()));
@@ -98,15 +99,19 @@ public class MonitorCmdDataParser implements FourLetterWordDataParser<MonitorCmd
                     case "zk_max_file_descriptor_count":
                         monitorCmdData.setZkMaxFileDescriptorCount(Long.valueOf(elem.getValue()));
                         break;
+                    case "Proposal sizes last/min/max":
+                    case "zk_fsync_threshold_exceed_count":
+                        // 忽略该指标的解析
+                        break;
                     default:
                         LOGGER.warn(
-                                "class=MonitorCmdDataParser||method=parseAndInitData||name={}||value={}||msg=data not parsed!",
+                                "method=parseAndInitData||name={}||value={}||msg=data not parsed!",
                                 elem.getKey(), elem.getValue()
                         );
                 }
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=MonitorCmdDataParser||method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
+                        "method=parseAndInitData||clusterPhyId={}||host={}||port={}||name={}||value={}||errMsg=exception!",
                         clusterPhyId, host, port, elem.getKey(), elem.getValue(), e
                 );
             }

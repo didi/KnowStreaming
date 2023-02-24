@@ -30,5 +30,6 @@ module.exports = {
     'prettier/prettier': 2, // 这项配置 对于不符合prettier规范的写法，eslint会提示报错
     'no-console': 1,
     'react/display-name': 0,
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
 };

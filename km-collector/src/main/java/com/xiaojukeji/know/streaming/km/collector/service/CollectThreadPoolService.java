@@ -237,7 +237,7 @@ public class CollectThreadPoolService {
     private synchronized FutureWaitUtil<Void> closeOldAndCreateNew(Long shardId) {
         // 新的
         FutureWaitUtil<Void> newFutureUtil = FutureWaitUtil.init(
-                "CollectorMetricsFutureUtil-Shard-" + shardId,
+                "MetricCollect-Shard-" + shardId,
                 this.futureUtilThreadNum,
                 this.futureUtilThreadNum,
                 this.futureUtilQueueSize

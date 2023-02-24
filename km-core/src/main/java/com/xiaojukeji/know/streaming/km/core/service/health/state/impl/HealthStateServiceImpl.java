@@ -1,36 +1,46 @@
 package com.xiaojukeji.know.streaming.km.core.service.health.state.impl;
 
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectCluster;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckAggResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthScoreResult;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.*;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.connect.ConnectorMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.mm2.MirrorMakerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.po.health.HealthCheckResultPO;
+import com.xiaojukeji.know.streaming.km.common.component.SpringTool;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthStateEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
+import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
+import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checkresult.HealthCheckResultService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
+import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperService;
-import org.apache.commons.collections.CollectionUtils;
+import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
+import com.xiaojukeji.know.streaming.km.persistence.connect.cache.LoadedConnectClusterCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.List;
-import java.util.Map;
 
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.BrokerMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.BrokerMetricVersionItems.BROKER_METRIC_HEALTH_STATE;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.ClusterMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.GroupMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.GroupMetricVersionItems.GROUP_METRIC_HEALTH_CHECK_TOTAL;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems.TOPIC_METRIC_HEALTH_CHECK_TOTAL;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.ZookeeperMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum.*;
+import static com.xiaojukeji.know.streaming.km.common.enums.health.HealthStateEnum.DEAD;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.ConnectorMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.MirrorMakerMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ZookeeperMetricVersionItems.*;
 
 
 @Service
@@ -44,12 +54,18 @@ public class HealthStateServiceImpl implements HealthStateService {
     @Autowired
     private BrokerService brokerService;
 
+    @Autowired
+    private ConnectClusterService connectClusterService;
+
+    @Autowired
+    private KafkaControllerService kafkaControllerService;
+
     @Override
     public ClusterMetrics calClusterHealthMetrics(Long clusterPhyId) {
         ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
 
         // 集群维度指标
-        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.CLUSTER);
+        List<HealthCheckAggResult> resultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.CLUSTER);
         if (ValidateUtils.isEmptyList(resultList)) {
             metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CLUSTER, 0.0f);
             metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CLUSTER, 0.0f);
@@ -65,6 +81,8 @@ public class HealthStateServiceImpl implements HealthStateService {
         metrics.putMetric(this.calClusterTopicsHealthMetrics(clusterPhyId).getMetrics());
         metrics.putMetric(this.calClusterGroupsHealthMetrics(clusterPhyId).getMetrics());
         metrics.putMetric(this.calZookeeperHealthMetrics(clusterPhyId).getMetrics());
+        metrics.putMetric(this.calClusterConnectsHealthMetrics(clusterPhyId).getMetrics());
+        metrics.putMetric(this.calClusterMirrorMakersHealthMetrics(clusterPhyId).getMetrics());
 
         // 统计最终结果
         Float passed = 0.0f;
@@ -73,6 +91,8 @@ public class HealthStateServiceImpl implements HealthStateService {
         passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_BROKERS);
         passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_GROUPS);
         passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CLUSTER);
+        passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CONNECTOR);
+        passed += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_PASSED_MIRROR_MAKER);
 
         Float total = 0.0f;
         total += metrics.getMetric(ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL);
@@ -80,6 +100,8 @@ public class HealthStateServiceImpl implements HealthStateService {
         total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_BROKERS);
         total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_GROUPS);
         total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CLUSTER);
+        total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CONNECTOR);
+        total += metrics.getMetric(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_MIRROR_MAKER);
 
         // 状态
         Float state = 0.0f;
@@ -88,6 +110,12 @@ public class HealthStateServiceImpl implements HealthStateService {
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_BROKERS));
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_GROUPS));
         state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_CLUSTER));
+        state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_CONNECTOR));
+        state = Math.max(state, metrics.getMetric(CLUSTER_METRIC_HEALTH_STATE_MIRROR_MAKER));
+
+        if (isKafkaClusterDown(clusterPhyId)) {
+            state = Float.valueOf(HealthStateEnum.DEAD.getDimension());
+        }
 
         metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED, passed);
         metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL, total);
@@ -98,16 +126,16 @@ public class HealthStateServiceImpl implements HealthStateService {
 
     @Override
     public BrokerMetrics calBrokerHealthMetrics(Long clusterPhyId, Integer brokerId) {
-        List<HealthScoreResult> healthScoreResultList = this.getResHealthResult(clusterPhyId, HealthCheckDimensionEnum.BROKER.getDimension(), String.valueOf(brokerId));
+        List<HealthCheckAggResult> aggResultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.BROKER, String.valueOf(brokerId));
 
         BrokerMetrics metrics = new BrokerMetrics(clusterPhyId, brokerId);
-        if (ValidateUtils.isEmptyList(healthScoreResultList)) {
+        if (ValidateUtils.isEmptyList(aggResultList)) {
             metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)HealthStateEnum.GOOD.getDimension());
             metrics.getMetrics().put(BROKER_METRIC_HEALTH_CHECK_PASSED, 0.0f);
             metrics.getMetrics().put(BROKER_METRIC_HEALTH_CHECK_TOTAL, 0.0f);
         } else {
-            metrics.getMetrics().put(BROKER_METRIC_HEALTH_CHECK_PASSED, getHealthCheckResultPassed(healthScoreResultList));
-            metrics.getMetrics().put(BROKER_METRIC_HEALTH_CHECK_TOTAL, Float.valueOf(healthScoreResultList.size()));
+            metrics.getMetrics().put(BROKER_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(aggResultList));
+            metrics.getMetrics().put(BROKER_METRIC_HEALTH_CHECK_TOTAL, (float)aggResultList.size());
 
             // 计算健康状态
             Broker broker = brokerService.getBrokerFromCacheFirst(clusterPhyId, brokerId);
@@ -117,7 +145,7 @@ public class HealthStateServiceImpl implements HealthStateService {
             } else if (!broker.alive()) {
                 metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)HealthStateEnum.DEAD.getDimension());
             } else {
-                metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)this.calHealthScoreResultState(healthScoreResultList).getDimension());
+                metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)this.calHealthState(aggResultList).getDimension());
             }
         }
 
@@ -126,17 +154,17 @@ public class HealthStateServiceImpl implements HealthStateService {
 
     @Override
     public TopicMetrics calTopicHealthMetrics(Long clusterPhyId, String topicName) {
-        List<HealthScoreResult> healthScoreResultList = this.getResHealthResult(clusterPhyId, HealthCheckDimensionEnum.TOPIC.getDimension(), topicName);
+        List<HealthCheckAggResult> aggResultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.TOPIC, topicName);
 
         TopicMetrics metrics = new TopicMetrics(topicName, clusterPhyId,true);
-        if (ValidateUtils.isEmptyList(healthScoreResultList)) {
+        if (ValidateUtils.isEmptyList(aggResultList)) {
             metrics.getMetrics().put(TOPIC_METRIC_HEALTH_STATE, (float)HealthStateEnum.GOOD.getDimension());
             metrics.getMetrics().put(TOPIC_METRIC_HEALTH_CHECK_PASSED, 0.0f);
             metrics.getMetrics().put(TOPIC_METRIC_HEALTH_CHECK_TOTAL, 0.0f);
         } else {
-            metrics.getMetrics().put(TOPIC_METRIC_HEALTH_STATE, (float)this.calHealthScoreResultState(healthScoreResultList).getDimension());
-            metrics.getMetrics().put(TOPIC_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckResultPassed(healthScoreResultList));
-            metrics.getMetrics().put(TOPIC_METRIC_HEALTH_CHECK_TOTAL, Float.valueOf(healthScoreResultList.size()));
+            metrics.getMetrics().put(TOPIC_METRIC_HEALTH_STATE, (float)this.calHealthState(aggResultList).getDimension());
+            metrics.getMetrics().put(TOPIC_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(aggResultList));
+            metrics.getMetrics().put(TOPIC_METRIC_HEALTH_CHECK_TOTAL, (float)aggResultList.size());
         }
 
         return metrics;
@@ -144,17 +172,17 @@ public class HealthStateServiceImpl implements HealthStateService {
 
     @Override
     public GroupMetrics calGroupHealthMetrics(Long clusterPhyId, String groupName) {
-        List<HealthScoreResult> healthScoreResultList = this.getResHealthResult(clusterPhyId, HealthCheckDimensionEnum.GROUP.getDimension(), groupName);
+        List<HealthCheckAggResult> aggResultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.GROUP, groupName);
 
         GroupMetrics metrics = new GroupMetrics(clusterPhyId, groupName, true);
-        if (ValidateUtils.isEmptyList(healthScoreResultList)) {
+        if (ValidateUtils.isEmptyList(aggResultList)) {
             metrics.getMetrics().put(GROUP_METRIC_HEALTH_STATE, (float)HealthStateEnum.GOOD.getDimension());
             metrics.getMetrics().put(GROUP_METRIC_HEALTH_CHECK_PASSED, 0.0f);
             metrics.getMetrics().put(GROUP_METRIC_HEALTH_CHECK_TOTAL, 0.0f);
         } else {
-            metrics.getMetrics().put(GROUP_METRIC_HEALTH_STATE, (float)this.calHealthScoreResultState(healthScoreResultList).getDimension());
-            metrics.getMetrics().put(GROUP_METRIC_HEALTH_CHECK_PASSED, getHealthCheckResultPassed(healthScoreResultList));
-            metrics.getMetrics().put(GROUP_METRIC_HEALTH_CHECK_TOTAL, Float.valueOf(healthScoreResultList.size()));
+            metrics.getMetrics().put(GROUP_METRIC_HEALTH_STATE, (float)this.calHealthState(aggResultList).getDimension());
+            metrics.getMetrics().put(GROUP_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(aggResultList));
+            metrics.getMetrics().put(GROUP_METRIC_HEALTH_CHECK_TOTAL, (float)aggResultList.size());
         }
 
         return metrics;
@@ -162,15 +190,15 @@ public class HealthStateServiceImpl implements HealthStateService {
 
     @Override
     public ZookeeperMetrics calZookeeperHealthMetrics(Long clusterPhyId) {
-        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.ZOOKEEPER);
+        List<HealthCheckAggResult> aggResultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.ZOOKEEPER);
 
         ZookeeperMetrics metrics = new ZookeeperMetrics(clusterPhyId);
-        if (ValidateUtils.isEmptyList(resultList)) {
+        if (ValidateUtils.isEmptyList(aggResultList)) {
             metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED, 0.0f);
             metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL, 0.0f);
         } else {
-            metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(resultList));
-            metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL, (float)resultList.size());
+            metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(aggResultList));
+            metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL, (float)aggResultList.size());
         }
 
         if (zookeeperService.allServerDown(clusterPhyId)) {
@@ -186,88 +214,104 @@ public class HealthStateServiceImpl implements HealthStateService {
         }
 
         // 服务未挂时，依据检查结果计算状态
-        metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_STATE, (float)this.calHealthState(resultList).getDimension());
+        metrics.getMetrics().put(ZOOKEEPER_METRIC_HEALTH_STATE, (float)this.calHealthState(aggResultList).getDimension());
         return metrics;
     }
 
     @Override
-    public List<HealthScoreResult> getClusterHealthResult(Long clusterPhyId) {
-        List<HealthCheckResultPO> poList = healthCheckResultService.getClusterHealthCheckResult(clusterPhyId);
+    public ConnectorMetrics calConnectorHealthMetrics(Long connectClusterId, String connectorName) {
+        ConnectCluster connectCluster = LoadedConnectClusterCache.getByPhyId(connectClusterId);
+        ConnectorMetrics metrics = new ConnectorMetrics(connectClusterId, connectorName);
 
-        // <检查项，<检查结果>>
-        Map<String, List<HealthCheckResultPO>> checkResultMap = new HashMap<>();
-        for (HealthCheckResultPO po: poList) {
-            checkResultMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
-            checkResultMap.get(po.getConfigName()).add(po);
+        // 找不到connect集群
+        if (connectCluster == null) {
+            metrics.putMetric(CONNECTOR_METRIC_HEALTH_STATE, (float) HealthStateEnum.DEAD.getDimension());
+            return metrics;
         }
 
-        Map<String, BaseClusterHealthConfig> configMap = healthCheckResultService.getClusterHealthConfig(clusterPhyId);
+        List<HealthCheckAggResult> resultList = healthCheckResultService.getHealthCheckAggResult(connectClusterId, HealthCheckDimensionEnum.CONNECTOR, connectorName);
 
-        List<HealthScoreResult> healthScoreResultList = new ArrayList<>();
-        for (HealthCheckNameEnum nameEnum: HealthCheckNameEnum.values()) {
-            BaseClusterHealthConfig baseConfig = configMap.get(nameEnum.getConfigName());
-            if (baseConfig == null) {
-                continue;
-            }
-
-            healthScoreResultList.add(new HealthScoreResult(
-                    nameEnum,
-                    baseConfig,
-                    checkResultMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>()))
-            );
+        if (ValidateUtils.isEmptyList(resultList)) {
+            metrics.getMetrics().put(CONNECTOR_METRIC_HEALTH_CHECK_PASSED, 0.0f);
+            metrics.getMetrics().put(CONNECTOR_METRIC_HEALTH_CHECK_TOTAL, 0.0f);
+        } else {
+            metrics.getMetrics().put(CONNECTOR_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(resultList));
+            metrics.getMetrics().put(CONNECTOR_METRIC_HEALTH_CHECK_TOTAL, (float) resultList.size());
         }
 
-        return healthScoreResultList;
+        metrics.putMetric(CONNECTOR_METRIC_HEALTH_STATE, (float) this.calHealthState(resultList).getDimension());
+        return metrics;
     }
 
     @Override
-    public List<HealthScoreResult> getDimensionHealthResult(Long clusterPhyId, HealthCheckDimensionEnum dimensionEnum) {
-        List<HealthCheckResultPO> poList = healthCheckResultService.getClusterResourcesHealthCheckResult(clusterPhyId, dimensionEnum.getDimension());
+    public MirrorMakerMetrics calMirrorMakerHealthMetrics(Long connectClusterId, String mirrorMakerName) {
+        ConnectCluster connectCluster = LoadedConnectClusterCache.getByPhyId(connectClusterId);
+        MirrorMakerMetrics metrics = new MirrorMakerMetrics(connectClusterId, mirrorMakerName);
 
-        // <检查项，<通过的数量，不通过的数量>>
-        Map<String, List<HealthCheckResultPO>> checkResultMap = new HashMap<>();
-        for (HealthCheckResultPO po: poList) {
-            checkResultMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
-            checkResultMap.get(po.getConfigName()).add(po);
+        if (connectCluster == null) {
+            metrics.putMetric(MIRROR_MAKER_METRIC_HEALTH_STATE, (float) HealthStateEnum.DEAD.getDimension());
+            return metrics;
         }
 
-        Map<String, BaseClusterHealthConfig> configMap = healthCheckResultService.getClusterHealthConfig(clusterPhyId);
+        List<HealthCheckAggResult> resultList = healthCheckResultService.getHealthCheckAggResult(connectClusterId, HealthCheckDimensionEnum.MIRROR_MAKER, mirrorMakerName);
 
-        List<HealthScoreResult> healthScoreResultList = new ArrayList<>();
-        for (HealthCheckNameEnum nameEnum: HealthCheckNameEnum.getByDimension(dimensionEnum)) {
-            BaseClusterHealthConfig baseConfig = configMap.get(nameEnum.getConfigName());
-            if (baseConfig == null) {
+        if (ValidateUtils.isEmptyList(resultList)) {
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_PASSED, 0.0f);
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_TOTAL, 0.0f);
+        } else {
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_PASSED, this.getHealthCheckPassed(resultList));
+            metrics.getMetrics().put(MIRROR_MAKER_METRIC_HEALTH_CHECK_TOTAL, (float) resultList.size());
+        }
+
+        metrics.putMetric(MIRROR_MAKER_METRIC_HEALTH_STATE, (float) this.calHealthState(resultList).getDimension());
+        return metrics;
+    }
+
+
+    @Override
+    public List<HealthScoreResult> getAllDimensionHealthResult(Long clusterPhyId) {
+        List<Integer> supportedDimensionCodeList = new ArrayList<>();
+
+        // 获取支持的code
+        for (AbstractHealthCheckService service: SpringTool.getBeansOfType(AbstractHealthCheckService.class).values()) {
+            Integer dimensionCode = service.getDimensionCodeIfSupport(clusterPhyId);
+            if (dimensionCode == null) {
                 continue;
             }
 
-            healthScoreResultList.add(new HealthScoreResult(nameEnum, baseConfig, checkResultMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>())));
+            supportedDimensionCodeList.add(dimensionCode);
         }
 
-        return healthScoreResultList;
+        return this.getDimensionHealthResult(clusterPhyId, supportedDimensionCodeList);
     }
 
     @Override
-    public List<HealthScoreResult> getResHealthResult(Long clusterPhyId, Integer dimension, String resNme) {
-        List<HealthCheckResultPO> poList = healthCheckResultService.getResHealthCheckResult(clusterPhyId, dimension, resNme);
+    public List<HealthScoreResult> getDimensionHealthResult(Long clusterPhyId, List<Integer> dimensionCodeList) {
+        //查找健康巡查结果
+        List<HealthCheckResultPO> poList = new ArrayList<>();
+        for (Integer dimensionCode : dimensionCodeList) {
+            if (dimensionCode.equals(HealthCheckDimensionEnum.CONNECTOR.getDimension())) {
+                poList.addAll(healthCheckResultService.getConnectorHealthCheckResult(clusterPhyId));
+            } else if (dimensionCode.equals(HealthCheckDimensionEnum.MIRROR_MAKER.getDimension())) {
+                poList.addAll(healthCheckResultService.getMirrorMakerHealthCheckResult(clusterPhyId));
+            } else {
+                poList.addAll(healthCheckResultService.listCheckResult(clusterPhyId, dimensionCode));
+            }
+        }
+
+        return this.getResHealthResult(clusterPhyId, dimensionCodeList, poList);
+    }
+
+    @Override
+    public List<HealthScoreResult> getResHealthResult(Long clusterPhyId, Long clusterId, Integer dimension, String resNme) {
+        List<HealthCheckResultPO> poList = healthCheckResultService.listCheckResult(clusterId, dimension, resNme);
         Map<String, List<HealthCheckResultPO>> checkResultMap = new HashMap<>();
         for (HealthCheckResultPO po: poList) {
             checkResultMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
             checkResultMap.get(po.getConfigName()).add(po);
         }
 
-        Map<String, BaseClusterHealthConfig> configMap = healthCheckResultService.getClusterHealthConfig(clusterPhyId);
-
-        List<HealthScoreResult> healthScoreResultList = new ArrayList<>();
-        for (HealthCheckNameEnum nameEnum: HealthCheckNameEnum.getByDimensionCode(dimension)) {
-            BaseClusterHealthConfig baseConfig = configMap.get(nameEnum.getConfigName());
-            if (baseConfig == null) {
-                continue;
-            }
-
-            healthScoreResultList.add(new HealthScoreResult(nameEnum, baseConfig, checkResultMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>())));
-        }
-
-        return healthScoreResultList;
+        return this.convert2HealthScoreResultList(clusterPhyId, poList, dimension);
     }
 
 
@@ -275,7 +319,7 @@ public class HealthStateServiceImpl implements HealthStateService {
 
 
     private ClusterMetrics calClusterTopicsHealthMetrics(Long clusterPhyId) {
-        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.TOPIC);
+        List<HealthCheckAggResult> resultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.TOPIC);
 
         ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
         if (ValidateUtils.isEmptyList(resultList)) {
@@ -292,7 +336,7 @@ public class HealthStateServiceImpl implements HealthStateService {
     }
 
     private ClusterMetrics calClusterGroupsHealthMetrics(Long clusterPhyId) {
-        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.GROUP);
+        List<HealthCheckAggResult> resultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.GROUP);
 
         ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
         if (ValidateUtils.isEmptyList(resultList)) {
@@ -309,7 +353,7 @@ public class HealthStateServiceImpl implements HealthStateService {
     }
 
     private ClusterMetrics calClusterBrokersHealthMetrics(Long clusterPhyId) {
-        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.BROKER);
+        List<HealthCheckAggResult> resultList = healthCheckResultService.getHealthCheckAggResult(clusterPhyId, HealthCheckDimensionEnum.BROKER);
 
         ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
         if (ValidateUtils.isEmptyList(resultList)) {
@@ -337,29 +381,148 @@ public class HealthStateServiceImpl implements HealthStateService {
         return metrics;
     }
 
-    private List<HealthCheckAggResult> getDimensionHealthCheckAggResult(Long clusterPhyId, HealthCheckDimensionEnum dimensionEnum) {
-        List<HealthCheckResultPO> poList = healthCheckResultService.getClusterResourcesHealthCheckResult(clusterPhyId, dimensionEnum.getDimension());
+    private ClusterMetrics calClusterConnectsHealthMetrics(Long clusterPhyId) {
+        //获取健康巡检结果
+        List<HealthCheckResultPO> connectHealthCheckResult = healthCheckResultService.getConnectorHealthCheckResult(clusterPhyId);
 
-        Map<String /*检查名*/, List<HealthCheckResultPO> /*检查结果列表*/> groupByCheckNamePOMap = new HashMap<>();
+        connectHealthCheckResult.addAll(healthCheckResultService.listCheckResult(clusterPhyId, CONNECT_CLUSTER.getDimension()));
+
+        List<Integer> dimensionCodeList = Arrays.asList(CONNECTOR.getDimension(), CONNECT_CLUSTER.getDimension());
+
+        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(connectHealthCheckResult, dimensionCodeList);
+
+        ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
+
+        if (ValidateUtils.isEmptyList(resultList)) {
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CONNECTOR, 0.0f);
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CONNECTOR, 0.0f);
+        } else {
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_CONNECTOR, this.getHealthCheckPassed(resultList));
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_CONNECTOR, (float) resultList.size());
+        }
+
+        // 先根据connect集群状态判断
+        if (connectClusterService.existConnectClusterDown(clusterPhyId)) {
+            metrics.putMetric(CLUSTER_METRIC_HEALTH_STATE_CONNECTOR, (float) HealthStateEnum.POOR.getDimension());
+            return metrics;
+        }
+
+        metrics.putMetric(CLUSTER_METRIC_HEALTH_STATE_CONNECTOR, (float) this.calHealthState(resultList).getDimension());
+        return metrics;
+    }
+
+    private ClusterMetrics calClusterMirrorMakersHealthMetrics(Long clusterPhyId){
+        List<HealthCheckResultPO> mirrorMakerHealthCheckResult = healthCheckResultService.getMirrorMakerHealthCheckResult(clusterPhyId);
+        List<HealthCheckAggResult> resultList = this.getDimensionHealthCheckAggResult(mirrorMakerHealthCheckResult, Arrays.asList(MIRROR_MAKER.getDimension()));
+
+        ClusterMetrics metrics = new ClusterMetrics(clusterPhyId);
+
+        if (ValidateUtils.isEmptyList(resultList)) {
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_MIRROR_MAKER, 0.0f);
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_MIRROR_MAKER, 0.0f);
+        } else {
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_PASSED_MIRROR_MAKER, this.getHealthCheckPassed(resultList));
+            metrics.getMetrics().put(CLUSTER_METRIC_HEALTH_CHECK_TOTAL_MIRROR_MAKER, (float) resultList.size());
+        }
+
+        metrics.putMetric(CLUSTER_METRIC_HEALTH_STATE_MIRROR_MAKER, (float) this.calHealthState(resultList).getDimension());
+        return metrics;
+    }
+
+
+    /**************************************************** 聚合数据 ****************************************************/
+
+    public List<HealthScoreResult> convert2HealthScoreResultList(Long clusterPhyId, List<HealthCheckResultPO> poList, Integer dimensionCode) {
+        Map<String, List<HealthCheckResultPO>> checkResultMap = new HashMap<>();
         for (HealthCheckResultPO po: poList) {
-            groupByCheckNamePOMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
-            groupByCheckNamePOMap.get(po.getConfigName()).add(po);
+            checkResultMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
+            checkResultMap.get(po.getConfigName()).add(po);
+        }
+
+        Map<String, BaseClusterHealthConfig> configMap = healthCheckResultService.getClusterHealthConfig(clusterPhyId);
+
+        List<HealthCheckNameEnum> nameEnums =
+                dimensionCode == null?
+                Arrays.stream(HealthCheckNameEnum.values()).collect(Collectors.toList()): HealthCheckNameEnum.getByDimensionCode(dimensionCode);
+
+        List<HealthScoreResult> resultList = new ArrayList<>();
+        for (HealthCheckNameEnum nameEnum: nameEnums) {
+            BaseClusterHealthConfig baseConfig = configMap.get(nameEnum.getConfigName());
+            if (baseConfig == null) {
+                continue;
+            }
+
+            resultList.add(new HealthScoreResult(nameEnum, baseConfig, checkResultMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>())));
+        }
+
+        return resultList;
+    }
+
+
+    /**************************************************** 计算指标 ****************************************************/
+
+
+    private List<HealthCheckAggResult> getDimensionHealthCheckAggResult(List<HealthCheckResultPO> poList, List<Integer> dimensionCodeList) {
+        Map<String /*检查名*/, List<HealthCheckResultPO> /*检查结果列表*/> checkResultMap = new HashMap<>();
+
+        for (HealthCheckResultPO po : poList) {
+            checkResultMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
+            checkResultMap.get(po.getConfigName()).add(po);
         }
 
         List<HealthCheckAggResult> stateList = new ArrayList<>();
-        for (HealthCheckNameEnum nameEnum: HealthCheckNameEnum.getByDimension(dimensionEnum)) {
-            stateList.add(new HealthCheckAggResult(nameEnum, groupByCheckNamePOMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>())));
-        }
+        for (Integer dimensionCode : dimensionCodeList) {
+            HealthCheckDimensionEnum dimensionEnum = HealthCheckDimensionEnum.getByCode(dimensionCode);
 
+            if (dimensionEnum.equals(UNKNOWN)) {
+                continue;
+            }
+
+            for (HealthCheckNameEnum nameEnum : HealthCheckNameEnum.getByDimension(dimensionEnum)) {
+                stateList.add(new HealthCheckAggResult(nameEnum, checkResultMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>())));
+            }
+        }
         return stateList;
     }
 
-    private float getHealthCheckPassed(List<HealthCheckAggResult> resultList){
-        if(ValidateUtils.isEmptyList(resultList)) {
+    private List<HealthScoreResult> getResHealthResult(Long clusterPhyId, List<Integer> dimensionCodeList, List<HealthCheckResultPO> poList) {
+        Map<String /*检查名*/, List<HealthCheckResultPO> /*检查结果列表*/> checkResultMap = new HashMap<>();
+
+        for (HealthCheckResultPO po : poList) {
+            checkResultMap.putIfAbsent(po.getConfigName(), new ArrayList<>());
+            checkResultMap.get(po.getConfigName()).add(po);
+        }
+
+        Map<String, BaseClusterHealthConfig> configMap = healthCheckResultService.getClusterHealthConfig(clusterPhyId);
+
+        List<HealthScoreResult> healthScoreResultList = new ArrayList<>();
+        for (Integer dimensionCode : dimensionCodeList) {
+            HealthCheckDimensionEnum dimensionEnum = HealthCheckDimensionEnum.getByCode(dimensionCode);
+
+            //该维度不存在，则跳过
+            if (dimensionEnum.equals(HealthCheckDimensionEnum.UNKNOWN)){
+                continue;
+            }
+
+            for (HealthCheckNameEnum nameEnum : HealthCheckNameEnum.getByDimension(dimensionEnum)) {
+                BaseClusterHealthConfig baseConfig = configMap.get(nameEnum.getConfigName());
+                if (baseConfig == null) {
+                    continue;
+                }
+
+                healthScoreResultList.add(new HealthScoreResult(nameEnum, baseConfig, checkResultMap.getOrDefault(nameEnum.getConfigName(), new ArrayList<>())));
+
+            }
+        }
+        return healthScoreResultList;
+    }
+
+    private float getHealthCheckPassed(List<HealthCheckAggResult> aggResultList){
+        if(ValidateUtils.isEmptyList(aggResultList)) {
             return 0f;
         }
 
-        return Float.valueOf(resultList.stream().filter(elem -> elem.getPassed()).count());
+        return Float.valueOf(aggResultList.stream().filter(elem -> elem.getPassed()).count());
     }
 
     private HealthStateEnum calHealthState(List<HealthCheckAggResult> resultList) {
@@ -381,28 +544,15 @@ public class HealthStateServiceImpl implements HealthStateService {
         return existNotPassed? HealthStateEnum.MEDIUM: HealthStateEnum.GOOD;
     }
 
-    private float getHealthCheckResultPassed(List<HealthScoreResult> healthScoreResultList){
-        if(CollectionUtils.isEmpty(healthScoreResultList)){return 0f;}
-
-        return Float.valueOf(healthScoreResultList.stream().filter(elem -> elem.getPassed()).count());
-    }
-
-    private HealthStateEnum calHealthScoreResultState(List<HealthScoreResult> resultList) {
-        if(ValidateUtils.isEmptyList(resultList)) {
-            return HealthStateEnum.GOOD;
+    private boolean isKafkaClusterDown(Long clusterPhyId) {
+        ClusterPhy clusterPhy = LoadedClusterPhyCache.getByPhyId(clusterPhyId);
+        KafkaController kafkaController = kafkaControllerService.getKafkaControllerFromDB(clusterPhyId);
+        if (kafkaController != null && !kafkaController.alive()) {
+            return true;
+        } else if ((System.currentTimeMillis() - clusterPhy.getCreateTime().getTime() >= 5 * 60 * 1000) && kafkaController == null) {
+            // 集群接入时间是在近5分钟内，同时kafkaController信息不存在，则设置为down
+            return true;
         }
-
-        boolean existNotPassed = false;
-        for (HealthScoreResult aggResult: resultList) {
-            if (aggResult.getCheckNameEnum().isAvailableChecker() && !aggResult.getPassed()) {
-                return HealthStateEnum.POOR;
-            }
-
-            if (!aggResult.getPassed()) {
-                existNotPassed = true;
-            }
-        }
-
-        return existNotPassed? HealthStateEnum.MEDIUM: HealthStateEnum.GOOD;
+        return false;
     }
 }

@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.PARTITION_INDEX;
+import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
 
 @EnterpriseLoadReBalance
 public class ClusterBalanceConverter {

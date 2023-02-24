@@ -56,12 +56,7 @@ export const leftMenus = (clusterId?: string, clusterRunState?: number) => ({
     clusterRunState && clusterRunState !== ClusterRunState.Raft
       ? {
           name: (intl: any) => {
-            return (
-              <div className="menu-item-with-beta-tag">
-                <span>{intl.formatMessage({ id: 'menu.cluster.zookeeper' })}</span>
-                <div className="beta-tag"></div>
-              </div>
-            );
+            return <span>{intl.formatMessage({ id: 'menu.cluster.zookeeper' })}</span>;
           },
           path: 'zookeeper',
           icon: 'icon-Zookeeper',
@@ -79,6 +74,58 @@ export const leftMenus = (clusterId?: string, clusterRunState?: number) => ({
           ],
         }
       : undefined,
+    {
+      name: (intl: any) => {
+        return (
+          <div className="menu-item-with-beta-tag">
+            <span>{intl.formatMessage({ id: 'menu.cluster.connect' })}</span>
+          </div>
+        );
+      },
+      path: 'connect',
+      icon: 'icon-Operation',
+      children: [
+        {
+          name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.connect.dashboard' })}</span>,
+          path: '',
+          icon: 'icon-luoji',
+        },
+        {
+          name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.connect.connectors' })}</span>,
+          path: 'connectors',
+          icon: '#icon-luoji',
+        },
+        {
+          name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.connect.workers' })}</span>,
+          path: 'workers',
+          icon: 'icon-Jobs',
+        },
+      ].filter((m) => m),
+    },
+    {
+      name: (intl: any) => {
+        return (
+          <div className="menu-item-with-beta-tag">
+            <span>{intl.formatMessage({ id: 'menu.cluster.replication' })}</span>
+            <div className="beta-tag"></div>
+          </div>
+        );
+      },
+      path: 'replication',
+      icon: 'icon-Operation',
+      children: [
+        {
+          name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.replication.dashboard' })}</span>,
+          path: '',
+          icon: 'icon-luoji',
+        },
+        {
+          name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.replication.mirror-maker' })}</span>,
+          path: 'mirror-maker',
+          icon: '#icon-luoji',
+        },
+      ].filter((m) => m),
+    },
     {
       name: 'consumer-group',
       path: 'consumers',

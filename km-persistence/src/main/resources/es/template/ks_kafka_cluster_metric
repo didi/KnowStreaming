@@ -1,0 +1,186 @@
+{
+    "order" : 10,
+    "index_patterns" : [
+      "ks_kafka_cluster_metric*"
+    ],
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "2"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "clusterPhyId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "Connections" : {
+              "type" : "double"
+            },
+            "BytesIn_min_15" : {
+              "type" : "double"
+            },
+            "PartitionURP" : {
+              "type" : "double"
+            },
+            "HealthScore_Topics" : {
+              "type" : "double"
+            },
+            "EventQueueSize" : {
+              "type" : "double"
+            },
+            "ActiveControllerCount" : {
+              "type" : "double"
+            },
+            "GroupDeads" : {
+              "type" : "double"
+            },
+            "BytesIn_min_5" : {
+              "type" : "double"
+            },
+            "HealthCheckTotal_Topics" : {
+              "type" : "double"
+            },
+            "Partitions" : {
+              "type" : "double"
+            },
+            "BytesOut" : {
+              "type" : "double"
+            },
+            "Groups" : {
+              "type" : "double"
+            },
+            "BytesOut_min_15" : {
+              "type" : "double"
+            },
+            "TotalRequestQueueSize" : {
+              "type" : "double"
+            },
+            "HealthCheckPassed_Groups" : {
+              "type" : "double"
+            },
+            "TotalProduceRequests" : {
+              "type" : "double"
+            },
+            "HealthCheckPassed" : {
+              "type" : "double"
+            },
+            "TotalLogSize" : {
+              "type" : "double"
+            },
+            "GroupEmptys" : {
+              "type" : "double"
+            },
+            "PartitionNoLeader" : {
+              "type" : "double"
+            },
+            "HealthScore_Brokers" : {
+              "type" : "double"
+            },
+            "Messages" : {
+              "type" : "double"
+            },
+            "Topics" : {
+              "type" : "double"
+            },
+            "PartitionMinISR_E" : {
+              "type" : "double"
+            },
+            "HealthCheckTotal" : {
+              "type" : "double"
+            },
+            "Brokers" : {
+              "type" : "double"
+            },
+            "Replicas" : {
+              "type" : "double"
+            },
+            "HealthCheckTotal_Groups" : {
+              "type" : "double"
+            },
+            "GroupRebalances" : {
+              "type" : "double"
+            },
+            "MessageIn" : {
+              "type" : "double"
+            },
+            "HealthScore" : {
+              "type" : "double"
+            },
+            "HealthCheckPassed_Topics" : {
+              "type" : "double"
+            },
+            "HealthCheckTotal_Brokers" : {
+              "type" : "double"
+            },
+            "PartitionMinISR_S" : {
+              "type" : "double"
+            },
+            "BytesIn" : {
+              "type" : "double"
+            },
+            "BytesOut_min_5" : {
+              "type" : "double"
+            },
+            "GroupActives" : {
+              "type" : "double"
+            },
+            "MessagesIn" : {
+              "type" : "double"
+            },
+            "GroupReBalances" : {
+              "type" : "double"
+            },
+            "HealthCheckPassed_Brokers" : {
+              "type" : "double"
+            },
+            "HealthScore_Groups" : {
+              "type" : "double"
+            },
+            "TotalResponseQueueSize" : {
+              "type" : "double"
+            },
+            "Zookeepers" : {
+              "type" : "double"
+            },
+            "LeaderMessages" : {
+              "type" : "double"
+            },
+            "HealthScore_Cluster" : {
+              "type" : "double"
+            },
+            "HealthCheckPassed_Cluster" : {
+              "type" : "double"
+            },
+            "HealthCheckTotal_Cluster" : {
+              "type" : "double"
+            }
+          }
+        },
+        "key" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "timestamp" : {
+          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+          "type" : "date"
+        }
+      }
+    },
+    "aliases" : { }
+   }

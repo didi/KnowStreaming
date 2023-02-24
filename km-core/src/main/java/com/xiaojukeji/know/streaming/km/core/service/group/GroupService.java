@@ -1,14 +1,15 @@
 package com.xiaojukeji.know.streaming.km.core.service.group;
 
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.Group;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSGroupDescription;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupMemberPO;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.common.TopicPartition;
 
 import java.util.Date;
@@ -19,16 +20,16 @@ public interface GroupService {
     /**
      * 从Kafka中获取消费组名称列表
      */
-    List<String> listGroupsFromKafka(Long clusterPhyId) throws NotExistException, AdminOperateException;
+    List<String> listGroupsFromKafka(ClusterPhy clusterPhy) throws AdminOperateException;
 
     /**
      * 从Kafka中获取消费组详细信息
      */
-    Group getGroupFromKafka(Long clusterPhyId, String groupName) throws NotExistException, AdminOperateException;
+    Group getGroupFromKafka(ClusterPhy clusterPhy, String groupName) throws NotExistException, AdminOperateException;
 
     Map<TopicPartition, Long> getGroupOffsetFromKafka(Long clusterPhyId, String groupName) throws NotExistException, AdminOperateException;
 
-    ConsumerGroupDescription getGroupDescriptionFromKafka(Long clusterPhyId, String groupName) throws NotExistException, AdminOperateException;
+    KSGroupDescription getGroupDescriptionFromKafka(ClusterPhy clusterPhy, String groupName) throws AdminOperateException;
 
     Result<Void> resetGroupOffsets(Long clusterPhyId, String groupName, Map<TopicPartition, Long> offsetMap, String operator) throws NotExistException, AdminOperateException;
 
@@ -57,6 +58,7 @@ public interface GroupService {
     /**
      * DB-GroupTopic相关接口
      */
+    List<GroupMemberPO> listGroupByCluster(Long clusterPhyId);
     List<GroupMemberPO> listGroupByTopic(Long clusterPhyId, String topicName);
 
     PaginationResult<GroupMemberPO> pagingGroupMembers(Long clusterPhyId,

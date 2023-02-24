@@ -6,6 +6,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.Ba
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthCompareValueConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.ClusterMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
@@ -13,7 +14,7 @@ import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimension
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ClusterMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
+    public List<ClusterParam> getResList(Long clusterPhyId) {
         return Arrays.asList(new ClusterPhyParam(clusterPhyId));
     }
 
@@ -43,16 +44,21 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
         return HealthCheckDimensionEnum.CLUSTER;
     }
 
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        return this.getHealthCheckDimensionEnum().getDimension();
+    }
+
     /**
      * 检查NoController
      */
-    private HealthCheckResult checkClusterNoController(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
-        ClusterPhyParam param = singleConfigSimpleTuple.getV1();
+    private HealthCheckResult checkClusterNoController(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+        ClusterPhyParam param =(ClusterPhyParam) singleConfigSimpleTuple.getV1();
         HealthCompareValueConfig valueConfig = (HealthCompareValueConfig) singleConfigSimpleTuple.getV2();
 
         Result<ClusterMetrics> clusterMetricsResult = clusterMetricService.getLatestMetricsFromES(param.getClusterPhyId(), Arrays.asList(ClusterMetricVersionItems.CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT));
         if (clusterMetricsResult.failed() || !clusterMetricsResult.hasData()) {
-            log.error("method=checkClusterNoController||param={}||config={}||result={}||errMsg=get metrics failed",
+            log.error("method=checkClusterNoController||param={}||config={}||result={}||errMsg=get metrics from es failed",
                     param, valueConfig, clusterMetricsResult);
             return null;
         }
@@ -65,7 +71,11 @@ public class HealthCheckClusterService extends AbstractHealthCheckService {
         );
 
         Float activeController = clusterMetricsResult.getData().getMetric(ClusterMetricVersionItems.CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT);
-
+        if (activeController == null) {
+            log.error("method=checkClusterNoController||param={}||config={}||errMsg=get metrics from es failed, activeControllerCount is null",
+                    param, valueConfig);
+            return null;
+        }
 
         checkResult.setPassed(activeController.intValue() != valueConfig.getValue().intValue() ? 0: 1);
 

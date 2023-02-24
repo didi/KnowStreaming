@@ -1,6 +1,5 @@
 package com.xiaojukeji.know.streaming.km.core.service.version;
 
-import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
@@ -10,7 +9,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionMethod
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
-import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
+import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.util.CollectionUtils;
@@ -25,7 +24,7 @@ import java.util.function.Function;
  */
 @DependsOn("versionControlService")
 public abstract class BaseVersionControlService {
-    protected static final ILog LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    protected static final ILog LOGGER = LogFactory.getLog(BaseVersionControlService.class);
 
     @Autowired
     protected VersionControlService versionControlService;
@@ -57,19 +56,14 @@ public abstract class BaseVersionControlService {
     }
 
     @Nullable
-    protected Object doVCHandler(Long clusterPhyId, String action, VersionItemParam param) throws VCHandlerNotExistException {
-        String methodName = getMethodName(clusterPhyId, action);
-        Object ret = versionControlService.doHandler(getVersionItemType(), methodName, param);
+    protected Tuple<Object, String> doVCHandler(String version, String action, VersionItemParam param) throws VCHandlerNotExistException {
+        String methodName = getMethodName(version, action);
 
-        if(!EnvUtil.isOnline()){
-            LOGGER.info("method=doVCHandler||clusterId={}||action={}||methodName={}||type={}param={}||ret={}}!",
-                    clusterPhyId, action, methodName, getVersionItemType().getMessage(), JSON.toJSONString(param), JSON.toJSONString(ret));
-        }
-        return ret;
+        return new Tuple<>(versionControlService.doHandler(getVersionItemType(), methodName, param), methodName);
     }
 
-    protected String getMethodName(Long clusterId, String action) {
-        VersionControlItem item = versionControlService.getVersionControlItem(clusterId, getVersionItemType().getCode(), action);
+    protected String getMethodName(String version, String action) {
+        VersionControlItem item = versionControlService.getVersionControlItem(version, getVersionItemType().getCode(), action);
         if (null == item) {
             return "";
         }
@@ -81,8 +75,8 @@ public abstract class BaseVersionControlService {
         return "";
     }
 
-    protected VersionJmxInfo getJMXInfo(Long clusterId, String action){
-        VersionControlItem item = versionControlService.getVersionControlItem(clusterId, getVersionItemType().getCode(), action);
+    protected VersionJmxInfo getJMXInfo(String version, String action){
+        VersionControlItem item = versionControlService.getVersionControlItem(version, getVersionItemType().getCode(), action);
         if (null == item) {
             return null;
         }

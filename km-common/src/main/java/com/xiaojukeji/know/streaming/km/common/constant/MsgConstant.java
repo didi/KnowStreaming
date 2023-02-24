@@ -52,6 +52,10 @@ public class MsgConstant {
 
     /**************************************************** Partition ****************************************************/
 
+    public static String getPartitionNoLeader(Long clusterPhyId) {
+        return String.format("集群ID:[%d] 所有分区NoLeader", clusterPhyId);
+    }
+
     public static String getPartitionNoLeader(Long clusterPhyId, String topicName) {
         return String.format("集群ID:[%d] Topic名称:[%s] 所有分区NoLeader", clusterPhyId, topicName);
     }
@@ -90,5 +94,27 @@ public class MsgConstant {
 
     public static String getJobNotExist(Long jobId) {
         return String.format("jobId:[%d] 不存在", jobId);
+    }
+
+
+    /**************************************************** Connect-Cluster ****************************************************/
+
+    public static String getConnectClusterBizStr(Long clusterId, String clusterName){
+        return String.format("Connect集群ID:[%d] 集群名称:[%s]", clusterId, clusterName);
+    }
+
+    public static String getConnectClusterNotExist(Long clusterId) {
+        return String.format("Connect集群ID:[%d] 不存在或者未加载", clusterId);
+    }
+
+    public static String getConnectorBizStr(Long clusterPhyId, String topicName) {
+        return String.format("Connect集群ID:[%d] Connector名称:[%s]", clusterPhyId, topicName);
+    }
+
+
+    /**************************************************** Connector ****************************************************/
+
+    public static String getConnectorNotExist(Long connectClusterId, String connectorName) {
+        return String.format("Connect集群ID:[%d] Connector名称:[%s] 不存在", connectClusterId, connectorName);
     }
 }

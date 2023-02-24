@@ -40,7 +40,7 @@ import com.xiaojukeji.know.streaming.km.core.enterprise.rebalance.service.Cluste
 import com.xiaojukeji.know.streaming.km.core.service.config.ConfigUtils;
 import com.xiaojukeji.know.streaming.km.core.service.job.JobService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.BrokerMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.rebalance.executor.ExecutionRebalance;
 import com.xiaojukeji.know.streaming.km.rebalance.executor.common.BalanceParameter;
 import com.xiaojukeji.know.streaming.km.rebalance.executor.common.BrokerBalanceState;

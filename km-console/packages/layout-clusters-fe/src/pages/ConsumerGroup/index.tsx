@@ -79,7 +79,7 @@ const BrokerList: React.FC = (props: any) => {
       <div style={{ margin: '12px 0' }}>
         <ConsumerGroupHealthCheck />
       </div>
-      <div className="clustom-table-content">
+      <div className="custom-table-content">
         <div className={tableHeaderPrefix}>
           <div className={`${tableHeaderPrefix}-left`}>
             <div

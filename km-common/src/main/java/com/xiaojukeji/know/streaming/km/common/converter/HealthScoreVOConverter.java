@@ -21,18 +21,11 @@ public class HealthScoreVOConverter {
             HealthScoreResultDetailVO vo = new HealthScoreResultDetailVO();
             vo.setDimension(healthScoreResult.getCheckNameEnum().getDimensionEnum().getDimension());
             vo.setDimensionName(healthScoreResult.getCheckNameEnum().getDimensionEnum().getMessage());
+            vo.setDimensionDisplayName(healthScoreResult.getCheckNameEnum().getDimensionEnum().getDimensionDisplayName());
             vo.setConfigName(healthScoreResult.getCheckNameEnum().getConfigName());
             vo.setConfigItem(healthScoreResult.getCheckNameEnum().getConfigItem());
             vo.setConfigDesc(healthScoreResult.getCheckNameEnum().getConfigDesc());
-
-            vo.setScore(healthScoreResult.calRawHealthScore());
-            if (healthScoreResult.getTotalCount() <= 0) {
-                // 未知
-                vo.setPassed(null);
-            } else {
-                vo.setPassed(healthScoreResult.getPassedCount().equals(healthScoreResult.getTotalCount()));
-            }
-
+            vo.setPassed(healthScoreResult.getPassed());
             vo.setCheckConfig(convert2HealthCheckConfigVO(ConfigGroupEnum.HEALTH.name(), healthScoreResult.getBaseConfig()));
 
             vo.setNotPassedResNameList(healthScoreResult.getNotPassedResNameList());
@@ -51,8 +44,7 @@ public class HealthScoreVOConverter {
             vo.setDimensionName(healthScoreResult.getCheckNameEnum().getDimensionEnum().getMessage());
             vo.setConfigName(healthScoreResult.getCheckNameEnum().getConfigName());
             vo.setConfigDesc(healthScoreResult.getCheckNameEnum().getConfigDesc());
-            vo.setScore(healthScoreResult.calRawHealthScore());
-            vo.setPassed(healthScoreResult.getPassedCount().equals(healthScoreResult.getTotalCount()));
+            vo.setPassed(healthScoreResult.getPassed());
             vo.setCheckConfig(convert2HealthCheckConfigVO(ConfigGroupEnum.HEALTH.name(), healthScoreResult.getBaseConfig()));
             vo.setCreateTime(healthScoreResult.getCreateTime());
             vo.setUpdateTime(healthScoreResult.getUpdateTime());
@@ -72,6 +64,7 @@ public class HealthScoreVOConverter {
     public static HealthCheckConfigVO convert2HealthCheckConfigVO(String groupName, BaseClusterHealthConfig config) {
         HealthCheckConfigVO vo = new HealthCheckConfigVO();
         vo.setDimensionCode(config.getCheckNameEnum().getDimensionEnum().getDimension());
+        vo.setDimensionDisplayName(config.getCheckNameEnum().getDimensionEnum().getDimensionDisplayName());
         vo.setDimensionName(config.getCheckNameEnum().getDimensionEnum().name());
         vo.setConfigGroup(groupName);
         vo.setConfigName(config.getCheckNameEnum().getConfigName());

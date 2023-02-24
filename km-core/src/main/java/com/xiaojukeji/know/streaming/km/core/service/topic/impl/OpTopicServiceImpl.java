@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.core.service.topic.impl;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.ha.HaActiveStandbyRelation;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicCreateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
@@ -12,15 +13,17 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.TopicConverter;
+import com.xiaojukeji.know.streaming.km.common.enums.ha.HaResTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
+import com.xiaojukeji.know.streaming.km.core.service.ha.HaActiveStandbyRelationService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.OpTopicService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
@@ -48,7 +51,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Service
-public class OpTopicServiceImpl extends BaseVersionControlService implements OpTopicService {
+public class OpTopicServiceImpl extends BaseKafkaVersionControlService implements OpTopicService {
     private static final ILog log = LogFactory.getLog(TopicConfigServiceImpl.class);
 
     private static final String TOPIC_CREATE    = "createTopic";
@@ -69,6 +72,9 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
 
     @Autowired
     private KafkaZKDAO kafkaZKDAO;
+
+    @Autowired
+    private HaActiveStandbyRelationService haActiveStandbyRelationService;
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -137,6 +143,25 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
 
             // 删除DB中的Topic数据
             topicService.deleteTopicInDB(param.getClusterPhyId(), param.getTopicName());
+
+            //解除高可用Topic关联
+            List<HaActiveStandbyRelation> haActiveStandbyRelations = haActiveStandbyRelationService.listByClusterAndType(param.getClusterPhyId(), HaResTypeEnum.MIRROR_TOPIC);
+            for (HaActiveStandbyRelation activeStandbyRelation : haActiveStandbyRelations) {
+                if (activeStandbyRelation.getResName().equals(param.getTopicName())) {
+                    try {
+                        KafkaZkClient kafkaZkClient = kafkaAdminZKClient.getClient(activeStandbyRelation.getStandbyClusterPhyId());
+                        Properties haTopics = kafkaZkClient.getEntityConfigs("ha-topics", activeStandbyRelation.getResName());
+                        if (haTopics.size() != 0) {
+                            kafkaZkClient.setOrCreateEntityConfigs("ha-topics", activeStandbyRelation.getResName(), new Properties());
+                            kafkaZkClient.createConfigChangeNotification("ha-topics/" + activeStandbyRelation.getResName());
+                        }
+                        haActiveStandbyRelationService.batchDeleteTopicHA(activeStandbyRelation.getActiveClusterPhyId(), activeStandbyRelation.getStandbyClusterPhyId(), Collections.singletonList(activeStandbyRelation.getResName()));
+                    } catch (Exception e) {
+                        log.error("method=deleteTopic||topicName:{}||errMsg=exception", activeStandbyRelation.getResName(), e);
+                        return Result.buildFailure(e.getMessage());
+                    }
+                }
+            }
 
             // 记录操作
             OplogDTO oplogDTO = new OplogDTO(operator,

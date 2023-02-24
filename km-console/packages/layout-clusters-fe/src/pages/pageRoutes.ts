@@ -25,6 +25,13 @@ import LoadRebalance from './LoadRebalance';
 import Zookeeper from './Zookeeper';
 import ZookeeperDashboard from './ZookeeperDashboard';
 
+import ConnectDashboard from './ConnectDashboard';
+import Connectors from './Connect';
+import Workers from './Connect/Workers';
+
+import MirrorMaker2 from './MirrorMaker2';
+import MirrorMakerDashboard from './MirrorMakerDashBoard';
+
 const pageRoutes = [
   {
     path: '/',
@@ -128,6 +135,36 @@ const pageRoutes = [
         path: 'zookeeper/servers',
         exact: true,
         component: Zookeeper,
+        noSider: false,
+      },
+      {
+        path: 'connect',
+        exact: true,
+        component: ConnectDashboard,
+        noSider: false,
+      },
+      {
+        path: 'connect/connectors',
+        exact: true,
+        component: Connectors,
+        noSider: false,
+      },
+      {
+        path: 'connect/workers',
+        exact: true,
+        component: Workers,
+        noSider: false,
+      },
+      {
+        path: 'replication',
+        exact: true,
+        component: MirrorMakerDashboard,
+        noSider: false,
+      },
+      {
+        path: 'replication/mirror-maker',
+        exact: true,
+        component: MirrorMaker2,
         noSider: false,
       },
       {

@@ -1,14 +1,14 @@
 package com.xiaojukeji.know.streaming.km.persistence.es.dao;
 
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.PartitionMetricPO;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
 import java.util.List;
 
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.PARTITION_INDEX;
 
 /**
  * @author didi
@@ -18,10 +18,9 @@ public class PartitionMetricESDAO extends BaseMetricESDAO {
 
     @PostConstruct
     public void init() {
-        super.indexName     = PARTITION_INDEX;
-        super.indexTemplate = PARTITION_TEMPLATE;
+        super.indexName = PARTITION_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register(this);
     }
 
     public PartitionMetricPO getPartitionLatestMetrics(Long clusterPhyId, String topic,
@@ -31,7 +30,7 @@ public class PartitionMetricESDAO extends BaseMetricESDAO {
         Long startTime  = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_PARTITION_LATEST_METRICS, clusterPhyId, topic, brokerId, partitionId, startTime, endTime);
+                DslConstant.GET_PARTITION_LATEST_METRICS, clusterPhyId, topic, brokerId, partitionId, startTime, endTime);
 
         PartitionMetricPO partitionMetricPO = esOpClient.performRequestAndTakeFirst(
                 partitionId.toString(), realIndex(startTime, endTime), dsl, PartitionMetricPO.class);
@@ -45,7 +44,7 @@ public class PartitionMetricESDAO extends BaseMetricESDAO {
         Long startTime  = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.LIST_PARTITION_LATEST_METRICS_BY_TOPIC, clusterPhyId, topic, startTime, endTime);
+                DslConstant.LIST_PARTITION_LATEST_METRICS_BY_TOPIC, clusterPhyId, topic, startTime, endTime);
 
         List<PartitionMetricPO> partitionMetricPOS = esOpClient.performRequest(
                 realIndex(startTime, endTime), dsl, PartitionMetricPO.class);

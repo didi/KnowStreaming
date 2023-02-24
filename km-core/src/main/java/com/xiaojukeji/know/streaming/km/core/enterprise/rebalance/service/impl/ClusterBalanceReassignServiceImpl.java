@@ -31,7 +31,7 @@ import com.xiaojukeji.know.streaming.km.core.service.partition.OpPartitionServic
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ReplicaMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.enterprise.rebalance.ClusterBalanceJobDao;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.enterprise.rebalance.ClusterBalanceReassignDao;
 import org.apache.kafka.common.TopicPartition;

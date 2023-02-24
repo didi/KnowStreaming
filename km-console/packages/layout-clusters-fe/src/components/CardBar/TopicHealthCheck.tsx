@@ -66,5 +66,5 @@ export default () => {
       });
     });
   }, []);
-  return <CardBar scene="topic" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
+  return <CardBar scene="topics" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
 };

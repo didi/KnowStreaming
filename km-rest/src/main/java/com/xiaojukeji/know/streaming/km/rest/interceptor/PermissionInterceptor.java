@@ -63,7 +63,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
             classRequestMappingValue = getClassRequestMappingValue(handler);
         } catch (Exception e) {
             LOGGER.error(
-                "class=PermissionInterceptor||method=preHandle||uri={}||msg=parse class request-mapping failed",
+                "method=preHandle||uri={}||msg=parse class request-mapping failed",
                 request.getRequestURI(), e);
         }
 

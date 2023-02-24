@@ -28,6 +28,7 @@ import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.kafka.KafkaReassignUtil;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
@@ -38,7 +39,7 @@ import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ReplicaMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.reassign.ReassignJobDAO;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.reassign.ReassignSubJobDAO;
 import org.apache.kafka.common.TopicPartition;
@@ -385,11 +386,13 @@ public class ReassignJobServiceImpl implements ReassignJobService {
 
         // 更新任务状态
         rv = this.checkAndSetSuccessIfFinished(jobPO, rrr.getData());
-        if (rv.successful()){
+
+        //如果任务还未完成，先返回，不必考虑优先副本的重新选举。
+        if (!rv.successful()) {
             return Result.buildFromIgnoreData(rv);
         }
 
-        //已完成
+        //任务已完成，检查是否需要重新选举，并进行选举。
         rv = this.preferredReplicaElection(jobId);
 
 
@@ -500,16 +503,15 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         List<ReassignSubJobPO> subJobPOList = this.getSubJobsByJobId(jobId);
         List<TopicPartition> topicPartitions = new ArrayList<>();
         subJobPOList.stream().forEach(reassignPO -> {
-            Integer targetLeader = CommonUtils.string2IntList(reassignPO.getReassignBrokerIds()).get(0);
-            Integer originalLeader = CommonUtils.string2IntList(reassignPO.getOriginalBrokerIds()).get(0);
             //替换过leader的添加到优先副本选举任务列表
-            if (!originalLeader.equals(targetLeader)){
+            if (!CommonUtils.checkFirstElementIsEquals(reassignPO.getReassignBrokerIds(), reassignPO.getOriginalBrokerIds())) {
                 topicPartitions.add(new TopicPartition(reassignPO.getTopicName(), reassignPO.getPartitionId()));
             }
         });
 
-        if (!topicPartitions.isEmpty()){
-            return opPartitionService.preferredReplicaElection(jobPO.getClusterPhyId(), topicPartitions);
+        //无论优先副本选举是否成功，都返回成功，以保证job的数据更新
+        if (!topicPartitions.isEmpty()) {
+            opPartitionService.preferredReplicaElection(jobPO.getClusterPhyId(), topicPartitions);
         }
 
         return Result.buildSuc();
@@ -533,7 +535,11 @@ public class ReassignJobServiceImpl implements ReassignJobService {
             if (dbSubPO == null) {
                 // DB中不存在
                 reassignSubJobDAO.insert(elem);
+                return;
             }
+
+            //补全缺失信息
+            this.completeInfo(elem,dbSubPO);
 
             // 已存在则进行更新
             elem.setId(dbSubPO.getId());
@@ -564,13 +570,10 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         long now = System.currentTimeMillis();
 
         boolean existNotFinished = false;
-        boolean unNeedPreferredReplicaElection = true;
+        boolean jobSucceed = false;
         List<ReassignSubJobPO> subJobPOList = this.getSubJobsByJobId(jobPO.getId());
 
         for (ReassignSubJobPO subJobPO: subJobPOList) {
-            if (!reassignmentResult.checkPreferredReplicaElectionUnNeed(subJobPO.getReassignBrokerIds(),subJobPO.getOriginalBrokerIds())) {
-                unNeedPreferredReplicaElection = false;
-            }
 
             if (!reassignmentResult.checkPartitionFinished(subJobPO.getTopicName(), subJobPO.getPartitionId())) {
                 existNotFinished = true;
@@ -590,12 +593,13 @@ public class ReassignJobServiceImpl implements ReassignJobService {
             // 当前没有分区处于迁移中， 并且没有任务并不处于执行中
             ReassignJobPO newJobPO = new ReassignJobPO();
             newJobPO.setId(jobPO.getId());
+            jobSucceed = true;
             newJobPO.setStatus(JobStatusEnum.SUCCESS.getStatus());
             newJobPO.setFinishedTime(new Date(now));
             reassignJobDAO.updateById(newJobPO);
         }
 
-        return Result.build(unNeedPreferredReplicaElection);
+        return Result.build(jobSucceed);
     }
 
     private Result<List<ReassignSubJobPO>> setJobInRunning(ReassignJobPO jobPO) {
@@ -859,5 +863,26 @@ public class ReassignJobServiceImpl implements ReassignJobService {
         }
 
         return returnRV;
+    }
+
+    private void completeInfo(ReassignSubJobPO newPO, ReassignSubJobPO dbPO) {
+        if (newPO.getJobId() == null) {
+            newPO.setJobId(dbPO.getJobId());
+        }
+        if (newPO.getTopicName() == null) {
+            newPO.setTopicName(dbPO.getTopicName());
+        }
+        if (newPO.getClusterPhyId() == null) {
+            newPO.setClusterPhyId(dbPO.getClusterPhyId());
+        }
+        if (newPO.getPartitionId() == null) {
+            newPO.setPartitionId(dbPO.getPartitionId());
+        }
+        if (newPO.getOriginalBrokerIds() == null || newPO.getOriginalBrokerIds().isEmpty()) {
+            newPO.setOriginalBrokerIds(dbPO.getOriginalBrokerIds());
+        }
+        if (newPO.getReassignBrokerIds() == null || newPO.getReassignBrokerIds().isEmpty()) {
+            newPO.setReassignBrokerIds(dbPO.getReassignBrokerIds());
+        }
     }
 }

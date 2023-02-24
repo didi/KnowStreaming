@@ -34,6 +34,9 @@ public enum ModuleEnum {
 
     KAFKA_CONTROLLER(70, "KafkaController"),
 
+    KAFKA_CONNECT_CLUSTER(80, "KafkaConnectCluster"),
+    KAFKA_CONNECT_CONNECTOR(81, "KafkaConnectConnector"),
+
     PLATFORM_CONFIG(100, "平台配置"),
 
     JOB_KAFKA_REPLICA_REASSIGN(110, "Job-KafkaReplica迁移"),

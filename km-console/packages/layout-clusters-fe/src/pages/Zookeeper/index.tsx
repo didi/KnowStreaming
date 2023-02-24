@@ -78,7 +78,7 @@ const ZookeeperList: React.FC = () => {
       <div style={{ margin: '12px 0' }}>
         <ZookeeperCard />
       </div>
-      <div className="clustom-table-content">
+      <div className="custom-table-content">
         <div className={tableHeaderPrefix}>
           <div className={`${tableHeaderPrefix}-left`}>
             <div

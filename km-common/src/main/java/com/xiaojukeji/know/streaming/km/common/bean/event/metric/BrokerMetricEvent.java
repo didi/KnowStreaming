@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public class BrokerMetricEvent extends BaseMetricEvent{
 
-    private List<BrokerMetrics> brokerMetrics;
+    private final List<BrokerMetrics> brokerMetrics;
 
     public BrokerMetricEvent(Object source, List<BrokerMetrics> brokerMetrics) {
         super( source );

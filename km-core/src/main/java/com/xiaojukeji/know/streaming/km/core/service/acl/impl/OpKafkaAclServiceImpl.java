@@ -19,6 +19,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.core.service.acl.OpKafkaAclService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
@@ -47,7 +48,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 
 
 @Service
-public class OpKafkaAclServiceImpl extends BaseVersionControlService implements OpKafkaAclService {
+public class OpKafkaAclServiceImpl extends BaseKafkaVersionControlService implements OpKafkaAclService {
     private static final ILog log = LogFactory.getLog(OpKafkaAclServiceImpl.class);
 
     private static final String ACL_CREATE            = "createKafkaAcl";

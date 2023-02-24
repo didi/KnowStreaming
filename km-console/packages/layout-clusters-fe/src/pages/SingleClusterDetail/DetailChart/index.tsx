@@ -1,20 +1,13 @@
-import { Col, Row, SingleChart, Utils, Modal, Spin, Empty, AppContainer, Tooltip } from 'knowdesign';
-import { IconFont } from '@knowdesign/icons';
+import { SingleChart, Utils, Spin, AppContainer, Tooltip } from 'knowdesign';
 import React, { useEffect, useRef, useState } from 'react';
 import { arrayMoveImmutable } from 'array-move';
 import api from '@src/api';
 import { useParams } from 'react-router-dom';
-import {
-  OriginMetricData,
-  FormattedMetricData,
-  formatChartData,
-  supplementaryPoints,
-  resolveMetricsRank,
-  MetricInfo,
-} from '@src/constants/chartConfig';
+import { OriginMetricData, FormattedMetricData, formatChartData, supplementaryPoints } from '@src/constants/chartConfig';
 import { MetricType } from '@src/api';
 import { getDataUnit } from '@src/constants/chartConfig';
 import ChartOperateBar, { KsHeaderOptions } from '@src/components/ChartOperateBar';
+import MetricsFilter from '@src/components/ChartOperateBar/MetricSelect';
 import RenderEmpty from '@src/components/RenderEmpty';
 import DragGroup from '@src/components/DragGroup';
 import { getChartConfig } from './config';
@@ -56,7 +49,6 @@ const DEFUALT_METRIC_NEED_METRICS = [DEFAULT_METRIC, 'TotalLogSize', 'TotalProdu
 const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
   const [global] = AppContainer.useGlobalValue();
   const { clusterId } = useParams<{ clusterId: string }>();
-  const [metricList, setMetricList] = useState<MetricInfo[]>([]); // 指标列表
   const [selectedMetricNames, setSelectedMetricNames] = useState<(string | number)[]>([]); // 默认选中的指标的列表
   const [metricDataList, setMetricDataList] = useState<any>([]);
   const [messagesInMetricData, setMessagesInMetricData] = useState<MessagesInMetric>({
@@ -72,6 +64,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
     messagesIn: 0,
     other: 0,
   });
+  const metricFilterRef = useRef(null);
 
   // 筛选项变化或者点击刷新按钮
   const ksHeaderChange = (ksOptions: KsHeaderOptions) => {
@@ -86,65 +79,9 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
     });
   };
 
-  // 更新 rank
-  const updateRank = (metricList: MetricInfo[]) => {
-    const { list, listInfo, shouldUpdate } = resolveMetricsRank(metricList);
-    metricRankList.current = list;
-    if (shouldUpdate) {
-      updateMetricList(listInfo);
-    }
-  };
-
-  // 获取指标列表
-  const getMetricList = () => {
-    Utils.request(api.getDashboardMetricList(clusterId, MetricType.Cluster)).then((res: MetricInfo[] | null) => {
-      if (!res) return;
-      const supportMetrics = res.filter((metric) => metric.support);
-      const selectedMetrics = supportMetrics.filter((metric) => metric.set).map((metric) => metric.name);
-      !selectedMetrics.includes(DEFAULT_METRIC) && selectedMetrics.push(DEFAULT_METRIC);
-      updateRank([...supportMetrics]);
-      setMetricList(supportMetrics);
-      setSelectedMetricNames(selectedMetrics);
-    });
-  };
-
-  // 更新指标
-  const updateMetricList = (metricDetailDTOList: { metric: string; rank: number; set: boolean }[]) => {
-    return Utils.request(api.getDashboardMetricList(clusterId, MetricType.Cluster), {
-      method: 'POST',
-      data: {
-        metricDetailDTOList,
-      },
-    });
-  };
-
-  // 指标选中项更新回调
-  const indicatorChangeCallback = (newMetricNames: (string | number)[]) => {
-    const updateMetrics: { metric: string; set: boolean; rank: number }[] = [];
-    // 需要选中的指标
-    newMetricNames.forEach(
-      (name) =>
-        !selectedMetricNames.includes(name) &&
-        updateMetrics.push({ metric: name as string, set: true, rank: metricList.find(({ name: metric }) => metric === name)?.rank })
-    );
-    // 取消选中的指标
-    selectedMetricNames.forEach(
-      (name) =>
-        !newMetricNames.includes(name) &&
-        updateMetrics.push({ metric: name as string, set: false, rank: metricList.find(({ name: metric }) => metric === name)?.rank })
-    );
-    const requestPromise = Object.keys(updateMetrics).length ? updateMetricList(updateMetrics) : Promise.resolve();
-    requestPromise.then(
-      () => getMetricList(),
-      () => getMetricList()
-    );
-
-    return requestPromise;
-  };
-
   // 获取 metric 列表的图表数据
   const getMetricData = () => {
-    if (!selectedMetricNames.length) return;
+    if (!selectedMetricNames?.length) return;
     !curHeaderOptions.isAutoReload && setChartLoading(true);
     const [startTime, endTime] = curHeaderOptions.rangeTime;
 
@@ -286,7 +223,7 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
     const originTarget = metricRankList.current.indexOf(metricDataList[newIndex].metricName);
     const newList = arrayMoveImmutable(metricRankList.current, originFrom, originTarget);
     metricRankList.current = newList;
-    updateMetricList(newList.map((metric, rank) => ({ metric, rank, set: metricList.find(({ name }) => metric === name)?.set || false })));
+    metricFilterRef.current?.rankChange(originFrom, originTarget);
     setMetricDataList(arrayMoveImmutable(metricDataList, oldIndex, newIndex));
   };
 
@@ -302,29 +239,23 @@ const DetailChart = (props: { children: JSX.Element }): JSX.Element => {
   }, [curHeaderOptions]);
 
   useEffect(() => {
-    getMetricList();
     setTimeout(() => observeDashboardWidthChange());
   }, []);
 
   return (
     <div className="chart-panel cluster-detail-container">
       <ChartOperateBar
+        openMetricFilter={() => metricFilterRef.current?.open()}
         onChange={ksHeaderChange}
         hideNodeScope={true}
         hideGridSelect={true}
-        metricSelect={{
-          hide: false,
-          metricType: MetricType.Cluster,
-          tableData: metricList,
-          selectedRows: selectedMetricNames,
-          checkboxProps: (record: MetricInfo) => {
-            return record.name === DEFAULT_METRIC
-              ? {
-                  disabled: true,
-                }
-              : {};
-          },
-          submitCallback: indicatorChangeCallback,
+      />
+      <MetricsFilter
+        ref={metricFilterRef}
+        metricType={MetricType.Cluster}
+        onSelectChange={(list, rankList) => {
+          metricRankList.current = rankList;
+          setSelectedMetricNames(list);
         }}
       />
 

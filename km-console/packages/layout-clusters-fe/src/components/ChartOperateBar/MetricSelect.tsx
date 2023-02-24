@@ -1,18 +1,25 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { Drawer, Button, Space, Divider, AppContainer, ProTable, Utils } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
-import { MetricSelect } from './index';
+import { arrayMoveImmutable } from 'array-move';
 import './style/indicator-drawer.less';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import api, { MetricType } from '@src/api';
+import { MetricInfo, resolveMetricsRank } from '@src/constants/chartConfig';
 
-interface PropsType extends React.HTMLAttributes<HTMLDivElement> {
-  metricSelect: MetricSelect;
+export interface Inode {
+  name: string;
+  desc: string;
 }
 
-interface MetricInfo {
-  name: string;
-  unit: string;
-  desc: string;
+export interface MetricSelectProps extends React.HTMLAttributes<HTMLDivElement> {
+  metricType: MetricType;
+  hide?: boolean;
+  drawerTitle?: string;
+  selectedRows: (string | number)[];
+  checkboxProps?: (record: any) => { [props: string]: any };
+  tableData?: Inode[];
+  submitCallback?: (value: (string | number)[]) => Promise<any>;
 }
 
 interface SelectedMetrics {
@@ -21,10 +28,14 @@ interface SelectedMetrics {
 
 type CategoryData = {
   category: string;
-  metrics: MetricInfo[];
+  metrics: {
+    name: string;
+    unit: string;
+    desc: string;
+  }[];
 };
 
-const expandedRowColumns = [
+export const expandedRowColumns = [
   {
     title: '指标名称',
     dataIndex: 'name',
@@ -44,16 +55,7 @@ const expandedRowColumns = [
 
 const ExpandedRow = ({ metrics, category, selectedMetrics, selectedMetricChange }: any) => {
   return (
-    <div
-      style={{
-        position: 'relative',
-        padding: '12px 16px',
-        margin: '0 7px',
-        border: '1px solid #EFF2F7',
-        borderRadius: '8px',
-        backgroundColor: '#ffffff',
-      }}
-    >
+    <div>
       <ProTable
         tableProps={{
           showHeader: false,
@@ -76,7 +78,7 @@ const ExpandedRow = ({ metrics, category, selectedMetrics, selectedMetricChange 
   );
 };
 
-const MetricSelect = forwardRef(({ metricSelect }: PropsType, ref) => {
+export const MetricSelect = forwardRef((metricSelect: MetricSelectProps, ref) => {
   const [global] = AppContainer.useGlobalValue();
   const { pathname } = useLocation();
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
@@ -87,7 +89,15 @@ const MetricSelect = forwardRef(({ metricSelect }: PropsType, ref) => {
 
   const columns = [
     {
-      title: `${pathname.endsWith('/broker') ? 'Broker' : pathname.endsWith('/topic') ? 'Topic' : 'Cluster'} Metrics`,
+      title: `${
+        pathname.endsWith('/broker')
+          ? 'Broker'
+          : pathname.endsWith('/topic')
+          ? 'Topic'
+          : pathname.endsWith('/replication')
+          ? 'MM2'
+          : 'Cluster'
+      } Metrics`,
       dataIndex: 'category',
       key: 'category',
     },
@@ -96,7 +106,11 @@ const MetricSelect = forwardRef(({ metricSelect }: PropsType, ref) => {
   const formateTableData = () => {
     const tableData = metricSelect.tableData;
     const categoryData: {
-      [category: string]: MetricInfo[];
+      [category: string]: {
+        name: string;
+        unit: string;
+        desc: string;
+      }[];
     } = {};
 
     tableData.forEach(({ name, desc }) => {
@@ -106,7 +120,7 @@ const MetricSelect = forwardRef(({ metricSelect }: PropsType, ref) => {
         desc,
         unit: metricDefine?.unit,
       };
-      if (metricDefine.category) {
+      if (metricDefine?.category) {
         if (!categoryData[metricDefine.category]) {
           categoryData[metricDefine.category] = [returnData];
         } else {
@@ -123,11 +137,11 @@ const MetricSelect = forwardRef(({ metricSelect }: PropsType, ref) => {
   };
 
   const formateSelectedKeys = () => {
-    const newKeys = metricSelect.selectedRows;
+    const newKeys = metricSelect?.selectedRows;
     const result: SelectedMetrics = {};
     const selectedCategories: string[] = [];
 
-    newKeys.forEach((name: string) => {
+    newKeys?.forEach((name: string) => {
       const metricDefine = global.getMetricDefine(metricSelect?.metricType, name);
       if (metricDefine) {
         if (!result[metricDefine.category]) {
@@ -328,4 +342,106 @@ const MetricSelect = forwardRef(({ metricSelect }: PropsType, ref) => {
   );
 });
 
-export default MetricSelect;
+interface MetricsFilterProps {
+  metricType: MetricType;
+  onSelectChange: (list: (string | number)[], rankList: string[]) => void;
+}
+
+const MetricsFilter = forwardRef((props: MetricsFilterProps, ref) => {
+  const { metricType, onSelectChange } = props;
+  const { clusterId } = useParams<{
+    clusterId: string;
+  }>();
+  const [metricsList, setMetricsList] = useState<MetricInfo[]>([]); // 指标列表
+  const [metricRankList, setMetricRankList] = useState<string[]>([]);
+  const [selectedMetricNames, setSelectedMetricNames] = useState<(string | number)[]>(undefined); // 默认选中的指标的列表
+  const metricSelectRef = useRef(null);
+
+  // 更新指标
+  const setMetricList = (metricDetailDTOList: { metric: string; rank: number; set: boolean }[]) => {
+    return Utils.request(api.getDashboardMetricList(clusterId, metricType), {
+      method: 'POST',
+      data: {
+        metricDetailDTOList,
+      },
+    });
+  };
+
+  // 图表展示顺序变更
+  const rankChange = (oldIndex: number, newIndex: number) => {
+    const newList = arrayMoveImmutable(metricRankList, oldIndex, newIndex);
+    setMetricRankList(newList);
+    setMetricList(newList.map((metric, rank) => ({ metric, rank, set: metricsList.find(({ name }) => metric === name)?.set || false })));
+  };
+
+  // 更新 rank
+  const updateRank = (metricList: MetricInfo[]) => {
+    const { list, listInfo, shouldUpdate } = resolveMetricsRank(metricList);
+    setMetricRankList(list);
+    if (shouldUpdate) {
+      setMetricList(listInfo);
+    }
+  };
+
+  // 获取指标列表
+  const getMetricList = () => {
+    Utils.request(api.getDashboardMetricList(clusterId, metricType)).then((res: MetricInfo[] | null) => {
+      if (!res) return;
+      const supportMetrics = res.filter((metric) => metric.support);
+      const selectedMetrics = supportMetrics.filter((metric) => metric.set).map((metric) => metric.name);
+      updateRank([...supportMetrics]);
+      setMetricsList(supportMetrics);
+      setSelectedMetricNames(selectedMetrics);
+    });
+  };
+
+  // 指标选中项更新回调
+  const metricSelectCallback = (newMetricNames: (string | number)[]) => {
+    const updateMetrics: { metric: string; set: boolean; rank: number }[] = [];
+    // 需要选中的指标
+    newMetricNames.forEach(
+      (name) =>
+        !selectedMetricNames.includes(name) &&
+        updateMetrics.push({ metric: name as string, set: true, rank: metricsList.find(({ name: metric }) => metric === name)?.rank })
+    );
+    // 取消选中的指标
+    selectedMetricNames.forEach(
+      (name) =>
+        !newMetricNames.includes(name) &&
+        updateMetrics.push({ metric: name as string, set: false, rank: metricsList.find(({ name: metric }) => metric === name)?.rank })
+    );
+
+    const requestPromise = Object.keys(updateMetrics).length ? setMetricList(updateMetrics) : Promise.resolve();
+    requestPromise.then(
+      () => getMetricList(),
+      () => getMetricList()
+    );
+
+    return requestPromise;
+  };
+
+  useEffect(() => {
+    onSelectChange(selectedMetricNames, metricRankList);
+  }, [selectedMetricNames, metricRankList]);
+
+  useEffect(() => {
+    getMetricList();
+  }, []);
+
+  useImperativeHandle(ref, () => ({
+    rankChange,
+    open: () => metricSelectRef.current?.open(),
+  }));
+
+  return (
+    <MetricSelect
+      ref={metricSelectRef}
+      metricType={metricType}
+      tableData={metricsList}
+      selectedRows={selectedMetricNames}
+      submitCallback={metricSelectCallback}
+    />
+  );
+});
+
+export default MetricsFilter;

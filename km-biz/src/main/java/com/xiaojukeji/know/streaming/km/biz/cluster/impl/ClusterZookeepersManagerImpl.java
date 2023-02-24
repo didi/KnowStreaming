@@ -19,7 +19,7 @@ import com.xiaojukeji.know.streaming.km.common.enums.zookeeper.ZKRoleEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ZookeeperMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ZookeeperMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZnodeService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.zookeeper.ZookeeperService;
@@ -94,7 +94,7 @@ public class ClusterZookeepersManagerImpl implements ClusterZookeepersManager {
         );
         if (metricsResult.failed()) {
             LOGGER.error(
-                    "class=ClusterZookeepersManagerImpl||method=getClusterPhyZookeepersState||clusterPhyId={}||errMsg={}",
+                    "method=getClusterPhyZookeepersState||clusterPhyId={}||errMsg={}",
                     clusterPhyId, metricsResult.getMessage()
             );
             return Result.buildSuc(vo);

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,11 +41,35 @@ public class KafkaHealthController {
                                                                                      @RequestParam(required = false) Integer dimensionCode) {
         HealthCheckDimensionEnum dimensionEnum = HealthCheckDimensionEnum.getByCode(dimensionCode);
         if (!dimensionEnum.equals(HealthCheckDimensionEnum.UNKNOWN)) {
-            return Result.buildSuc(HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(healthStateService.getDimensionHealthResult(clusterPhyId, dimensionEnum)));
+            return Result.buildSuc(
+                    HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
+                            healthStateService.getDimensionHealthResult(clusterPhyId, Collections.singletonList(dimensionCode))
+                    )
+            );
+        }
+
+        return Result.buildSuc(
+                HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
+                        healthStateService.getAllDimensionHealthResult(clusterPhyId)
+                )
+        );
+    }
+
+    @ApiOperation(value = "集群-健康检查详情")
+    @PostMapping(value = "clusters/{clusterPhyId}/health-detail")
+    @ResponseBody
+    public Result<List<HealthScoreResultDetailVO>> getClusterHealthCheckResultDetail(@PathVariable Long clusterPhyId,
+                                                                                     @RequestBody List<Integer> dimensionCodeList) {
+        if (dimensionCodeList.isEmpty()) {
+            return Result.buildSuc(
+                    HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
+                            healthStateService.getAllDimensionHealthResult(clusterPhyId)
+                    )
+            );
         }
 
         return Result.buildSuc(HealthScoreVOConverter.convert2HealthScoreResultDetailVOList(
-                healthStateService.getClusterHealthResult(clusterPhyId)
+                healthStateService.getDimensionHealthResult(clusterPhyId, dimensionCodeList)
         ));
     }
 
@@ -55,7 +80,7 @@ public class KafkaHealthController {
                                                                                 @PathVariable Integer dimensionCode,
                                                                                 @PathVariable String resName) {
         return Result.buildSuc(HealthScoreVOConverter.convert2HealthScoreBaseResultVOList(
-                healthStateService.getResHealthResult(clusterPhyId, dimensionCode, resName)
+                healthStateService.getResHealthResult(clusterPhyId, clusterPhyId, dimensionCode, resName)
         ));
     }
 

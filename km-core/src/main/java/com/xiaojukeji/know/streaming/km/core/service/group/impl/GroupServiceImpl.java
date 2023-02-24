@@ -7,8 +7,10 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.Group;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.GroupTopicMember;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.*;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
@@ -17,6 +19,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupPO;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.GroupConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
@@ -24,9 +27,10 @@ import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.kafka.KSPartialKafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.group.GroupDAO;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.group.GroupMemberDAO;
@@ -36,6 +40,7 @@ import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,7 +48,7 @@ import java.util.stream.Collectors;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.SERVICE_SEARCH_GROUP;
 
 @Service
-public class GroupServiceImpl extends BaseVersionControlService implements GroupService {
+public class GroupServiceImpl extends BaseKafkaVersionControlService implements GroupService {
     private static final ILog log = LogFactory.getLog(GroupServiceImpl.class);
 
     @Autowired
@@ -64,11 +69,18 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
     }
 
     @Override
-    public List<String> listGroupsFromKafka(Long clusterPhyId) throws NotExistException, AdminOperateException {
-        AdminClient adminClient = kafkaAdminClient.getClient(clusterPhyId);
-
+    public List<String> listGroupsFromKafka(ClusterPhy clusterPhy) throws AdminOperateException {
+        KSPartialKafkaAdminClient adminClient = null;
         try {
-            ListConsumerGroupsResult listConsumerGroupsResult = adminClient.listConsumerGroups(
+            Properties props = ConvertUtil.str2ObjByJson(clusterPhy.getClientProperties(), Properties.class);
+            if (props == null) {
+                props = new Properties();
+            }
+
+            props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, clusterPhy.getBootstrapServers());
+
+            adminClient = KSPartialKafkaAdminClient.create(props);
+            KSListGroupsResult listConsumerGroupsResult = adminClient.listConsumerGroups(
                     new ListConsumerGroupsOptions()
                             .timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
             );
@@ -80,33 +92,46 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
 
             return groupNameList;
         } catch (Exception e) {
-            log.error("method=getGroupsFromKafka||clusterPhyId={}||errMsg=exception!", clusterPhyId, e);
+            log.error("method=listGroupsFromKafka||clusterPhyId={}||errMsg=exception!", clusterPhy.getId(), e);
 
             throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
+        } finally {
+            if (adminClient != null) {
+                try {
+                    adminClient.close(Duration.ofSeconds(10));
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
     }
 
     @Override
-    public Group getGroupFromKafka(Long clusterPhyId, String groupName) throws NotExistException, AdminOperateException {
+    public Group getGroupFromKafka(ClusterPhy clusterPhy, String groupName) throws NotExistException, AdminOperateException {
         // 获取消费组的详细信息
-        ConsumerGroupDescription groupDescription = this.getGroupDescriptionFromKafka(clusterPhyId, groupName);
+        KSGroupDescription groupDescription = this.getGroupDescriptionFromKafka(clusterPhy, groupName);
         if (groupDescription == null) {
             return null;
         }
 
-        Group group = new Group(clusterPhyId, groupName, groupDescription);
+        Group group = new Group(clusterPhy.getId(), groupName, groupDescription);
 
         // 获取消费组消费过哪些Topic
         Map<String, GroupTopicMember> memberMap = new HashMap<>();
-        for (TopicPartition tp : this.getGroupOffsetFromKafka(clusterPhyId, groupName).keySet()) {
+        for (TopicPartition tp : this.getGroupOffsetFromKafka(clusterPhy.getId(), groupName).keySet()) {
             memberMap.putIfAbsent(tp.topic(), new GroupTopicMember(tp.topic(), 0));
         }
 
         // 记录成员信息
-        for (MemberDescription memberDescription : groupDescription.members()) {
+        for (KSMemberDescription memberDescription : groupDescription.members()) {
+            if (group.getType() == GroupTypeEnum.CONNECT_CLUSTER) {
+                continue;
+            }
             Set<TopicPartition> partitionList = new HashSet<>();
-            if (!ValidateUtils.isNull(memberDescription.assignment().topicPartitions())) {
-                partitionList = memberDescription.assignment().topicPartitions();
+
+            KSMemberConsumerAssignment assignment = (KSMemberConsumerAssignment) memberDescription.assignment();
+            if (!ValidateUtils.isNull(assignment.topicPartitions())) {
+                partitionList = assignment.topicPartitions();
             }
 
             Set<String> topicNameSet = partitionList.stream().map(elem -> elem.topic()).collect(Collectors.toSet());
@@ -143,20 +168,36 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
     }
 
     @Override
-    public ConsumerGroupDescription getGroupDescriptionFromKafka(Long clusterPhyId, String groupName) throws NotExistException, AdminOperateException {
-        AdminClient adminClient = kafkaAdminClient.getClient(clusterPhyId);
-
+    public KSGroupDescription getGroupDescriptionFromKafka(ClusterPhy clusterPhy, String groupName) throws AdminOperateException {
+        KSPartialKafkaAdminClient adminClient = null;
         try {
-            DescribeConsumerGroupsResult describeConsumerGroupsResult = adminClient.describeConsumerGroups(
+            Properties props = ConvertUtil.str2ObjByJson(clusterPhy.getClientProperties(), Properties.class);
+            if (props == null) {
+                props = new Properties();
+            }
+
+            props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, clusterPhy.getBootstrapServers());
+
+            adminClient = KSPartialKafkaAdminClient.create(props);
+
+            KSDescribeGroupsResult describeGroupsResult = adminClient.describeConsumerGroups(
                     Arrays.asList(groupName),
                     new DescribeConsumerGroupsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).includeAuthorizedOperations(false)
             );
 
-            return describeConsumerGroupsResult.all().get().get(groupName);
+            return describeGroupsResult.all().get().get(groupName);
         } catch(Exception e){
-            log.error("method=getGroupDescription||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhyId, groupName, e);
+            log.error("method=getGroupDescription||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhy.getId(), groupName, e);
 
             throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
+        } finally {
+            if (adminClient != null) {
+                try {
+                    adminClient.close(Duration.ofSeconds(10));
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
     }
 
@@ -181,6 +222,14 @@ public class GroupServiceImpl extends BaseVersionControlService implements Group
         }
 
         return GroupStateEnum.getByState(poList.get(0).getState());
+    }
+
+    @Override
+    public List<GroupMemberPO> listGroupByCluster(Long clusterPhyId) {
+        LambdaQueryWrapper<GroupMemberPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
+
+        return groupMemberDAO.selectList(lambdaQueryWrapper);
     }
 
     @Override

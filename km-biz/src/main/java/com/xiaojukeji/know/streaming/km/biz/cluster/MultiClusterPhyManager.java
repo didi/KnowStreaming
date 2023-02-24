@@ -4,7 +4,11 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhysHe
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhysState;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.MultiClusterDashboardDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyBaseVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyDashboardVO;
+
+import java.util.List;
 
 /**
  * 多集群总体状态
@@ -24,4 +28,6 @@ public interface MultiClusterPhyManager {
      * @return
      */
     PaginationResult<ClusterPhyDashboardVO> getClusterPhysDashboard(MultiClusterDashboardDTO dto);
+
+    Result<List<ClusterPhyBaseVO>> getClusterPhysBasic();
 }

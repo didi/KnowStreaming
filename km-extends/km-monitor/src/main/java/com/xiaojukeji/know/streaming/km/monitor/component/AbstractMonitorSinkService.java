@@ -4,7 +4,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.*;
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.*;
-import com.xiaojukeji.know.streaming.km.common.utils.NamedThreadFactory;
+import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.monitor.common.MetricSinkPoint;
 import org.springframework.context.ApplicationListener;
 
@@ -12,21 +12,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static com.xiaojukeji.know.streaming.km.monitor.common.MonitorSinkTagEnum.*;
 
 public abstract class AbstractMonitorSinkService implements ApplicationListener<BaseMetricEvent> {
-    protected static final ILog LOGGER = LogFactory.getLog(AbstractMonitorSinkService.class);
+    protected static final ILog LOGGER              = LogFactory.getLog(AbstractMonitorSinkService.class);
 
-    private static final int    STEP       = 60;
+    private static final int    STEP                = 60;
 
-    private ThreadPoolExecutor executor = new ThreadPoolExecutor(5, 10, 6000, TimeUnit.MILLISECONDS,
-            new LinkedBlockingDeque<>(1000),
-            new NamedThreadFactory("KM-Monitor-Sink-" + monitorName()),
-            (r, e) -> LOGGER.warn("class=AbstractMonitorSinkService||msg=Deque is blocked, taskCount:{}" + e.getTaskCount()));
+    private static final FutureUtil<Void> sinkTP    = FutureUtil.init(
+            "SinkMetricsTP",
+            5,
+            5,
+            10000
+    );
 
     /**
      * monitor 服务的名称
@@ -36,7 +35,7 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
 
     @Override
     public void onApplicationEvent(BaseMetricEvent event) {
-        executor.execute( () -> {
+        sinkTP.submitTask(() -> {
             if (event instanceof BrokerMetricEvent) {
                 BrokerMetricEvent brokerMetricEvent = (BrokerMetricEvent)event;
                 sinkMetrics(brokerMetric2SinkPoint(brokerMetricEvent.getBrokerMetrics()));
@@ -57,9 +56,6 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
                 GroupMetricEvent groupMetricEvent = (GroupMetricEvent)event;
                 sinkMetrics(groupMetric2SinkPoint(groupMetricEvent.getGroupMetrics()));
 
-            } else if(event instanceof ReplicaMetricEvent) {
-                ReplicaMetricEvent       replicaMetricEvent = (ReplicaMetricEvent)event;
-                sinkMetrics(replicationMetric2SinkPoint(replicaMetricEvent.getReplicationMetrics()));
             } else if(event instanceof ZookeeperMetricEvent) {
                 ZookeeperMetricEvent     zookeeperMetricEvent = (ZookeeperMetricEvent)event;
                 sinkMetrics(zookeeperMetric2SinkPoint(zookeeperMetricEvent.getZookeeperMetrics()));
@@ -139,27 +135,22 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
 
         for(GroupMetrics g : groupMetrics){
             if(g.isBGroupMetric()){
+                // Group 指标
                 Map<String, Object> tagsMap = new HashMap<>();
                 tagsMap.put(CLUSTER_ID.getName(),     g.getClusterPhyId());
                 tagsMap.put(CONSUMER_GROUP.getName(), g.getGroup());
 
                 pointList.addAll(genSinkPoint("Group", g.getMetrics(), g.getTimestamp(), tagsMap));
+            } else {
+                // Group + Topic + Partition指标
+                Map<String, Object> tagsMap = new HashMap<>();
+                tagsMap.put(CLUSTER_ID.getName(),       g.getClusterPhyId());
+                tagsMap.put(CONSUMER_GROUP.getName(),   g.getGroup());
+                tagsMap.put(TOPIC.getName(),            g.getTopic());
+                tagsMap.put(PARTITION_ID.getName(),     g.getPartitionId());
+
+                pointList.addAll(genSinkPoint("Group_Topic_Partition", g.getMetrics(), g.getTimestamp(), tagsMap));
             }
-        }
-
-        return pointList;
-    }
-
-    private List<MetricSinkPoint> replicationMetric2SinkPoint(List<ReplicationMetrics> replicationMetrics){
-        List<MetricSinkPoint> pointList = new ArrayList<>();
-
-        for(ReplicationMetrics r : replicationMetrics){
-            Map<String, Object> tagsMap = new HashMap<>();
-            tagsMap.put(CLUSTER_ID.getName(),     r.getClusterPhyId());
-            tagsMap.put(BROKER_ID.getName(),      r.getBrokerId());
-            tagsMap.put(PARTITION_ID.getName(),   r.getPartitionId());
-
-            pointList.addAll(genSinkPoint("Replication", r.getMetrics(), r.getTimestamp(), tagsMap));
         }
 
         return pointList;
@@ -184,10 +175,10 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
                                                Map<String, Object> tagsMap) {
         List<MetricSinkPoint> pointList = new ArrayList<>();
 
-        for(String metricName : metrics.keySet()){
+        for(Map.Entry<String, Float> entry: metrics.entrySet()){
             MetricSinkPoint metricSinkPoint = new MetricSinkPoint();
-            metricSinkPoint.setName(metricPre + "_" + metricName);
-            metricSinkPoint.setValue(metrics.get(metricName));
+            metricSinkPoint.setName(metricPre + "_" + entry.getKey());
+            metricSinkPoint.setValue(entry.getValue());
             metricSinkPoint.setTimestamp(timeStamp);
             metricSinkPoint.setStep(STEP);
             metricSinkPoint.setTagsMap(tagsMap);
