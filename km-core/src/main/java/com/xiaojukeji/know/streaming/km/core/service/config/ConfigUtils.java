@@ -16,5 +16,5 @@ public class ConfigUtils {
     }
 
     @Value("${cluster-balance.ignored-topics.time-second:300}")
-    private Integer                         clusterBalanceIgnoredTopicsTimeSecond;
+    private Integer     clusterBalanceIgnoredTopicsTimeSecond;
 }

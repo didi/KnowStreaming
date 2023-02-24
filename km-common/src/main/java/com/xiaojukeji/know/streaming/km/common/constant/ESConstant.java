@@ -36,8 +36,6 @@ public class ESConstant {
 
     public static final Integer DEFAULT_RETRY_TIME = 3;
 
-    public static final String PARTITION_INDEX          = "ks_kafka_partition_metric";
-
     /**
      * 获取Topic-Latest指标时，单次允许的Topic数
      */

@@ -41,11 +41,6 @@
         </dependency>
         <dependency>
             <groupId>com.xiaojukeji.kafka</groupId>
-            <artifactId>km-license</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.xiaojukeji.kafka</groupId>
             <artifactId>km-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

@@ -61,7 +61,6 @@ const LayoutContainer = () => {
   // 路由前置守卫
   const routeBeforeEach = useCallback(
     (path: string, permissionNode: string | number) => {
-      getLicenseInfo((msg) => licenseEventBus.emit('licenseError', msg));
       // 判断进入页面的前置条件是否满足，如果不满足，则展示加载状态
       const isClusterNotExist = path.includes(':clusterId') && !global.clusterInfo;
       const isNotLoadedPermissions = typeof global.hasPermission !== 'function';

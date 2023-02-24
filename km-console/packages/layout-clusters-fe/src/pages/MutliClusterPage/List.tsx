@@ -252,6 +252,7 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
     const {
       Brokers: brokers,
       Zookeepers: zks,
+      // ConnectionsCount: connect,
       HealthCheckPassed: healthCheckPassed,
       HealthCheckTotal: healthCheckTotal,
       HealthState: healthState,
@@ -352,6 +353,18 @@ const ClusterList = (props: { searchParams: SearchParams; showAccessCluster: any
                     <div className="indicator-left-item-value">{zookeepersAvailable === -1 ? '-' : zks}</div>
                   </div>
                 )}
+                {/* <div className="indicator-left-item">
+                  <div className="indicator-left-item-title">
+                    <span
+                      className="indicator-left-item-title-dot"
+                      style={{
+                        background: itemData.latestMetrics?.metrics?.BrokersNotAlive ? '#FF7066' : '#34C38F',
+                      }}
+                    ></span>
+                    Connect
+                  </div>
+                  <div className="indicator-left-item-value">{connect}</div>
+                </div> */}
               </div>
               <div className="indicator-right">
                 {metricPoints.map((row, index) => {

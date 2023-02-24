@@ -119,10 +119,3 @@ management:
         enabled: true
     tags:
       application: know-streaming
-
-# license相关配置
-license:
-  app-name: know-streaming
-  server: http://127.0.0.1:8778
-  signature: 1234567890
-  token: license-builtin-token

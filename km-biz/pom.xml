@@ -29,6 +29,11 @@
             <artifactId>km-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.xiaojukeji.kafka</groupId>
+            <artifactId>km-rebalance</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <!-- spring -->
         <dependency>

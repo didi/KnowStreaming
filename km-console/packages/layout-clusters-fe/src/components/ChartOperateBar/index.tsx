@@ -33,6 +33,7 @@ interface PropsType {
   };
   onChange: (options: KsHeaderOptions) => void;
   openMetricFilter: () => void;
+  setScreenType?: any;
 }
 
 interface ScopeData {
@@ -56,12 +57,29 @@ const GRID_SIZE_OPTIONS = [
   },
 ];
 
+// connect 筛选逻辑补充
+const CONNECT_OPTIONS = [
+  {
+    label: '全部',
+    value: 'all',
+  },
+  {
+    label: 'Cluster',
+    value: 'Connect',
+  },
+  {
+    label: 'Connector',
+    value: 'Connector',
+  },
+];
+
 const MetricOperateBar = ({
   nodeSelect = {},
   hideNodeScope = false,
   hideGridSelect = false,
   onChange: onChangeCallback,
   openMetricFilter,
+  setScreenType,
 }: PropsType): JSX.Element => {
   const [gridNum, setGridNum] = useState<number>(GRID_SIZE_OPTIONS[1].value);
   const [rangeTime, setRangeTime] = useState<[number, number]>(() => {
@@ -139,6 +157,17 @@ const MetricOperateBar = ({
             <DRangeTime timeChange={timeChange} rangeTimeArr={rangeTime} />
           </div>
           <div className="header-right">
+            {/* connect 单独逻辑 */}
+            {setScreenType && (
+              <Select
+                style={{ width: 120, marginRight: 10 }}
+                defaultValue="all"
+                options={CONNECT_OPTIONS}
+                onChange={(e) => {
+                  setScreenType(e);
+                }}
+              />
+            )}
             {/* 节点范围 */}
             {!hideNodeScope && (
               <NodeSelect name={nodeSelect.name || ''} onChange={nodeScopeChange}>

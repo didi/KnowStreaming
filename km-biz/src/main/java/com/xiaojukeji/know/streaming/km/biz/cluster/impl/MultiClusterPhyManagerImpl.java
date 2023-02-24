@@ -15,6 +15,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyBaseVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.ClusterPhyDashboardVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.converter.ClusterVOConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthStateEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -24,6 +25,10 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.rebalance.algorithm.model.Resource;
+import com.xiaojukeji.know.streaming.km.rebalance.common.BalanceMetricConstant;
+import com.xiaojukeji.know.streaming.km.rebalance.common.bean.entity.ClusterBalanceItemState;
+import com.xiaojukeji.know.streaming.km.rebalance.core.service.ClusterBalanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +44,9 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
 
     @Autowired
     private ClusterMetricService clusterMetricService;
+
+    @Autowired
+    private ClusterBalanceService clusterBalanceService;
 
     @Override
     public ClusterPhysState getClusterPhysState() {
@@ -153,6 +161,11 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
             ClusterMetrics clusterMetrics = clusterMetricService.getLatestMetricsFromCache(vo.getId());
             clusterMetrics.getMetrics().putIfAbsent(ClusterMetricVersionItems.CLUSTER_METRIC_HEALTH_STATE, (float) HealthStateEnum.UNKNOWN.getDimension());
 
+            Result<ClusterMetrics> balanceMetricsResult = this.getClusterLoadReBalanceInfo(vo.getId());
+            if (balanceMetricsResult.hasData()) {
+                clusterMetrics.putMetric(balanceMetricsResult.getData().getMetrics());
+            }
+
             metricsList.add(clusterMetrics);
         }
 
@@ -173,5 +186,22 @@ public class MultiClusterPhyManagerImpl implements MultiClusterPhyManager {
         MetricsClusterPhyDTO dto = ConvertUtil.obj2Obj(metricDTO, MetricsClusterPhyDTO.class);
         dto.setClusterPhyIds(clusterIdList);
         return dto;
+    }
+
+    private Result<ClusterMetrics> getClusterLoadReBalanceInfo(Long clusterPhyId) {
+        Result<ClusterBalanceItemState> stateResult = clusterBalanceService.getItemStateFromCacheFirst(clusterPhyId);
+        if (stateResult.failed()) {
+            return Result.buildFromIgnoreData(stateResult);
+        }
+
+        ClusterBalanceItemState state = stateResult.getData();
+
+        ClusterMetrics metric = ClusterMetrics.initWithMetrics(clusterPhyId, BalanceMetricConstant.CLUSTER_METRIC_LOAD_RE_BALANCE_ENABLE, state.getEnable()? Constant.YES: Constant.NO);
+        metric.putMetric(BalanceMetricConstant.CLUSTER_METRIC_LOAD_RE_BALANCE_CPU, state.getResItemState(Resource.CPU).floatValue());
+        metric.putMetric(BalanceMetricConstant.CLUSTER_METRIC_LOAD_RE_BALANCE_NW_IN, state.getResItemState(Resource.NW_IN).floatValue());
+        metric.putMetric(BalanceMetricConstant.CLUSTER_METRIC_LOAD_RE_BALANCE_NW_OUT, state.getResItemState(Resource.NW_OUT).floatValue());
+        metric.putMetric(BalanceMetricConstant.CLUSTER_METRIC_LOAD_RE_BALANCE_DISK, state.getResItemState(Resource.DISK).floatValue());
+
+        return Result.buildSuc(metric);
     }
 }

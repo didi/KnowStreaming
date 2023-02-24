@@ -143,7 +143,7 @@ public class HealthStateServiceImpl implements HealthStateService {
                 // DB中不存在，则默认是存活的
                 metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)HealthStateEnum.GOOD.getDimension());
             } else if (!broker.alive()) {
-                metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)HealthStateEnum.DEAD.getDimension());
+                metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float) HealthStateEnum.DEAD.getDimension());
             } else {
                 metrics.getMetrics().put(BROKER_METRIC_HEALTH_STATE, (float)this.calHealthState(aggResultList).getDimension());
             }

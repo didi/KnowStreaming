@@ -72,7 +72,7 @@ const ChartList = (props: ChartListProps) => {
                   const { metricName, metricType, metricUnit, metricLines, showLegend } = data;
 
                   return (
-                    <div key={metricName} className="dashboard-drag-item-box">
+                    <div key={metricName + metricType} className="dashboard-drag-item-box">
                       <div className="dashboard-drag-item-box-title">
                         <Tooltip
                           placement="topLeft"
