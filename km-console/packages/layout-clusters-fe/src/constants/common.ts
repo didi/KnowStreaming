@@ -154,15 +154,15 @@ export const urlParser = () => {
 
 export const getLicenseInfo = (cbk: (msg: string) => void) => {
   if (process.env.BUSINESS_VERSION) {
-    const info = (window as any).code;
-    if (!info) {
-      setTimeout(() => getLicenseInfo(cbk), 1000);
-    } else {
-      const res = info() || {};
-      if (res.code !== 0) {
-        cbk(res.msg);
-      }
-    }
+    // const info = (window as any).code;
+    // if (!info) {
+    //   setTimeout(() => getLicenseInfo(cbk), 1000);
+    // } else {
+    //   const res = info() || {};
+    //   if (res.code !== 0) {
+    //     cbk(res.msg);
+    //   }
+    // }
   }
 };
 

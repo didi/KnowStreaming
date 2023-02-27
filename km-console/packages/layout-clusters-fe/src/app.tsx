@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-constant-condition */
 import '@babel/polyfill';
 import React, { useState, useEffect, useLayoutEffect } from 'react';
@@ -84,6 +85,17 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
     } else {
       setCurActiveAppName('cluster');
     }
+    // @ts-ignore
+    window._hmt = window._hmt || [];
+    // window._hmt.push([
+    //   '_setPageviewProperty',
+    //   {
+    //     page_name: 'test',
+    //     page_title: null, // 当属性值传入 null 时，其作用为删除此前设置的该 PV 属性
+    //   },
+    // ]);
+    // @ts-ignore
+    window._hmt.push(['_trackPageview', pathname]);
   }, [pathname]);
 
   // 获取版本信息

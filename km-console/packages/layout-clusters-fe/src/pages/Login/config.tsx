@@ -45,6 +45,7 @@ export const FormMap = [
       prefix: <></>,
       // prefix: <UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />,
     },
+    initialValue: 'admin',
   },
   {
     key: 'pw',
@@ -64,6 +65,7 @@ export const FormMap = [
       placeholder: '请输入密码',
       // prefix: <LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />,
     },
+    initialValue: 'admin2022_',
   },
 ];
 

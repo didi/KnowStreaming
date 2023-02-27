@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <km.revision>enterprise-3.3.0</km.revision>
+        <km.revision>demo-3.3.0</km.revision>
 
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>

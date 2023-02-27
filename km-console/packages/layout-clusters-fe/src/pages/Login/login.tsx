@@ -58,7 +58,14 @@ export const LoginForm: React.FC<any> = (props) => {
         {FormMap.map((formItem) => {
           return (
             <Row key={formItem.key}>
-              <Form.Item key={formItem.key} name={formItem.key} label={formItem.label} rules={formItem.rules} style={{ width: '100%' }}>
+              <Form.Item
+                key={formItem.key}
+                name={formItem.key}
+                label={formItem.label}
+                rules={formItem.rules}
+                initialValue={formItem.initialValue}
+                style={{ width: '100%' }}
+              >
                 {renderFormItem(formItem)}
               </Form.Item>
             </Row>

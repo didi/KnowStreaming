@@ -259,6 +259,19 @@ li {
   }
 }
 
+.menu-item-with-pro-tag {
+  display: flex;
+  .pro-tag {
+    width: 24px;
+    margin-left: 4px;
+    background: no-repeat center/24px 16px url('./assets/pro-tag.png');
+  }
+}
+
+.dcloud-menu-item-selected .menu-item-with-pro-tag .pro-tag {
+  width: 0;
+}
+
 .menu-item-with-beta-tag {
   display: flex;
   .beta-tag {

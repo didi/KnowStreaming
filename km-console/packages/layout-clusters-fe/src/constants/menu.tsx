@@ -150,7 +150,14 @@ export const leftMenus = (clusterId?: string, clusterRunState?: number) => ({
       children: [
         process.env.BUSINESS_VERSION
           ? {
-              name: 'balance',
+              name: (intl: any) => {
+                return (
+                  <div className="menu-item-with-pro-tag">
+                    <span>{intl.formatMessage({ id: 'menu.cluster.operation.balance' })}</span>
+                    <div className="pro-tag"></div>
+                  </div>
+                );
+              },
               path: 'balance',
               icon: '#icon-luoji',
             }
@@ -164,19 +171,26 @@ export const leftMenus = (clusterId?: string, clusterRunState?: number) => ({
     },
     process.env.BUSINESS_VERSION
       ? {
-          name: 'produce-consume',
+          name: (intl: any) => {
+            return (
+              <div className="menu-item-with-pro-tag">
+                <span>{intl.formatMessage({ id: 'menu.cluster.produce-consume' })}</span>
+                <div className="pro-tag"></div>
+              </div>
+            );
+          },
           path: 'testing',
           icon: 'icon-Message',
           permissionPoint: [ClustersPermissionMap.TEST_CONSUMER, ClustersPermissionMap.TEST_PRODUCER],
           children: [
             {
-              name: 'producer',
+              name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.produce-consume.producer' })}</span>,
               path: 'producer',
               icon: 'icon-luoji',
               permissionPoint: ClustersPermissionMap.TEST_PRODUCER,
             },
             {
-              name: 'consumer',
+              name: (intl: any) => <span>{intl.formatMessage({ id: 'menu.cluster.produce-consume.consumer' })}</span>,
               path: 'consumer',
               icon: 'icon-luoji',
               permissionPoints: ClustersPermissionMap.TEST_CONSUMER,
