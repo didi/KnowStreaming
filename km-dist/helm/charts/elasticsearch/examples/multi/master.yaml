@@ -1,6 +1,0 @@
----
-clusterName: "multi"
-nodeGroup: "master"
-
-roles:
-  - master
