@@ -16,6 +16,11 @@
 - 修复 Broker Similar Config 显示错误的问题；
 - 修复解析 ZK 四字命令时，数据类型设置错误导致空指针的问题；
 - 修复新增 Topic 时，清理策略选项版本控制错误的问题；
+- 修复新接入集群时 Controller-Host 信息不显示的问题；
+- 修复 Connector 和 MM2 列表搜索不生效的问题；
+- 修复 Zookeeper 页面，Leader 显示存在异常的问题；
+- 修复前端打包失败的问题；
+
 
 **产品优化**
 - ZK Overview 页面补充默认展示的指标；
@@ -29,7 +34,7 @@
 - FAQ 补充 Ldap 的配置说明；
 - FAQ 补充接入 Kerberos 认证的 Kafka 集群的配置说明；
 - ks_km_kafka_change_record 表增加时间纬度的索引，优化查询性能；
-
+- 优化 ZK 健康巡检的日志，便于问题的排查；
 
 **功能新增**
 - 新增基于滴滴 Kafka 的 Topic 复制功能（需使用滴滴 Kafka 才可具备该能力）；
