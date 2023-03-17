@@ -1338,6 +1338,8 @@ public class KSPartialKafkaAdminClient {
                         if (groupMember.memberAssignment().length > 0) {
                             final Assignment assignment = ConsumerProtocol.deserializeAssignment(ByteBuffer.wrap(groupMember.memberAssignment()));
                             memberBaseAssignment = new KSMemberConsumerAssignment(new HashSet<>(assignment.partitions()));
+                        } else {
+                            memberBaseAssignment = new KSMemberConsumerAssignment(new HashSet<>());
                         }
                     } else {
                         ConnectProtocol.Assignment assignment = null;
