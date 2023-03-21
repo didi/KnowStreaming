@@ -25,15 +25,15 @@ public class MonitorCmdData extends BaseFourLetterWordCmdData {
     private Float zkAvgLatency;
     private Float zkMaxLatency;
     private Float zkMinLatency;
-    private Long zkPacketsReceived;
-    private Long zkPacketsSent;
-    private Long zkNumAliveConnections;
-    private Long zkOutstandingRequests;
+    private Float zkPacketsReceived;
+    private Float zkPacketsSent;
+    private Float zkNumAliveConnections;
+    private Float zkOutstandingRequests;
     private String zkServerState;
-    private Long zkZnodeCount;
-    private Long zkWatchCount;
-    private Long zkEphemeralsCount;
-    private Long zkApproximateDataSize;
-    private Long zkOpenFileDescriptorCount;
-    private Long zkMaxFileDescriptorCount;
+    private Float zkZnodeCount;
+    private Float zkWatchCount;
+    private Float zkEphemeralsCount;
+    private Float zkApproximateDataSize;
+    private Float zkOpenFileDescriptorCount;
+    private Float zkMaxFileDescriptorCount;
 }

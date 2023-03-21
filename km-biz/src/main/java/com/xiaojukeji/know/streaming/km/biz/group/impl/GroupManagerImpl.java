@@ -168,9 +168,10 @@ public class GroupManagerImpl implements GroupManager {
         // 转换存储格式
         Map<TopicPartition, KSMemberDescription> tpMemberMap = new HashMap<>();
 
-        //如果不是connect集群
+        // 如果不是connect集群
         if (!groupDescription.protocolType().equals(CONNECT_CLUSTER_PROTOCOL_TYPE)) {
             for (KSMemberDescription description : groupDescription.members()) {
+                // 如果是 Consumer 的 Description ，则 Assignment 的类型为 KSMemberConsumerAssignment 的
                 KSMemberConsumerAssignment assignment = (KSMemberConsumerAssignment) description.assignment();
                 for (TopicPartition tp : assignment.topicPartitions()) {
                     tpMemberMap.put(tp, description);

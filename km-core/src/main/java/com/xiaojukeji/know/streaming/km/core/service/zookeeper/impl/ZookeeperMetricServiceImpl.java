@@ -161,7 +161,7 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
 
         // 格式转化
         List<MetricLineVO> voList = new ArrayList<>();
-        pointVOMap.entrySet().stream().forEach(entry ->
+        pointVOMap.entrySet().forEach(entry ->
             voList.add(new MetricLineVO(String.valueOf(clusterPhyId), entry.getKey(), entry.getValue()))
         );
         return Result.buildSuc(voList);
@@ -208,11 +208,11 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
             metrics.putMetric(ZOOKEEPER_METRIC_AVG_REQUEST_LATENCY,         cmdData.getZkAvgLatency());
             metrics.putMetric(ZOOKEEPER_METRIC_MIN_REQUEST_LATENCY,         cmdData.getZkMinLatency());
             metrics.putMetric(ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY,         cmdData.getZkMaxLatency());
-            metrics.putMetric(ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS,        cmdData.getZkOutstandingRequests().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_NODE_COUNT,                  cmdData.getZkZnodeCount().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_NUM_ALIVE_CONNECTIONS,       cmdData.getZkNumAliveConnections().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_RECEIVED,            cmdData.getZkPacketsReceived().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_SENT,                cmdData.getZkPacketsSent().floatValue());
+            metrics.putMetric(ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS,        cmdData.getZkOutstandingRequests());
+            metrics.putMetric(ZOOKEEPER_METRIC_NODE_COUNT,                  cmdData.getZkZnodeCount());
+            metrics.putMetric(ZOOKEEPER_METRIC_NUM_ALIVE_CONNECTIONS,       cmdData.getZkNumAliveConnections());
+            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_RECEIVED,            cmdData.getZkPacketsReceived());
+            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_SENT,                cmdData.getZkPacketsSent());
 
             return Result.buildSuc(metrics);
         }
@@ -257,16 +257,16 @@ public class ZookeeperMetricServiceImpl extends BaseMetricService implements Zoo
             metrics.putMetric(ZOOKEEPER_METRIC_AVG_REQUEST_LATENCY,         cmdData.getZkAvgLatency());
             metrics.putMetric(ZOOKEEPER_METRIC_MIN_REQUEST_LATENCY,         cmdData.getZkMinLatency());
             metrics.putMetric(ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY,         cmdData.getZkMaxLatency());
-            metrics.putMetric(ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS,        cmdData.getZkOutstandingRequests().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_NODE_COUNT,                  cmdData.getZkZnodeCount().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_WATCH_COUNT,                 cmdData.getZkWatchCount().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_NUM_ALIVE_CONNECTIONS,       cmdData.getZkNumAliveConnections().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_RECEIVED,            cmdData.getZkPacketsReceived().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_SENT,                cmdData.getZkPacketsSent().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_EPHEMERALS_COUNT,            cmdData.getZkEphemeralsCount().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_APPROXIMATE_DATA_SIZE,       cmdData.getZkApproximateDataSize().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_OPEN_FILE_DESCRIPTOR_COUNT,  cmdData.getZkOpenFileDescriptorCount().floatValue());
-            metrics.putMetric(ZOOKEEPER_METRIC_MAX_FILE_DESCRIPTOR_COUNT,   cmdData.getZkMaxFileDescriptorCount().floatValue());
+            metrics.putMetric(ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS,        cmdData.getZkOutstandingRequests());
+            metrics.putMetric(ZOOKEEPER_METRIC_NODE_COUNT,                  cmdData.getZkZnodeCount());
+            metrics.putMetric(ZOOKEEPER_METRIC_WATCH_COUNT,                 cmdData.getZkWatchCount());
+            metrics.putMetric(ZOOKEEPER_METRIC_NUM_ALIVE_CONNECTIONS,       cmdData.getZkNumAliveConnections());
+            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_RECEIVED,            cmdData.getZkPacketsReceived());
+            metrics.putMetric(ZOOKEEPER_METRIC_PACKETS_SENT,                cmdData.getZkPacketsSent());
+            metrics.putMetric(ZOOKEEPER_METRIC_EPHEMERALS_COUNT,            cmdData.getZkEphemeralsCount());
+            metrics.putMetric(ZOOKEEPER_METRIC_APPROXIMATE_DATA_SIZE,       cmdData.getZkApproximateDataSize());
+            metrics.putMetric(ZOOKEEPER_METRIC_OPEN_FILE_DESCRIPTOR_COUNT,  cmdData.getZkOpenFileDescriptorCount());
+            metrics.putMetric(ZOOKEEPER_METRIC_MAX_FILE_DESCRIPTOR_COUNT,   cmdData.getZkMaxFileDescriptorCount());
 
             return Result.buildSuc(metrics);
         }
