@@ -10,6 +10,10 @@ public class BalanceParameter {
     private Properties kafkaConfig;
     //ES访问地址
     private String esRestURL;
+
+    //ES访问密码
+    private String esPassword;
+
     //ES存储索引前缀
     private String esIndexPrefix;
     //均衡目标
@@ -51,8 +55,14 @@ public class BalanceParameter {
         return esRestURL;
     }
 
-    public void setEsRestURL(String esRestURL) {
+    public void setEsInfo(String esRestURL, String esPassword, String esIndexPrefix) {
         this.esRestURL = esRestURL;
+        this.esPassword = esPassword;
+        this.esIndexPrefix = esIndexPrefix;
+    }
+
+    public String getEsPassword() {
+        return esPassword;
     }
 
     public List<String> getGoals() {
@@ -147,10 +157,6 @@ public class BalanceParameter {
         return esIndexPrefix;
     }
 
-    public void setEsIndexPrefix(String esIndexPrefix) {
-        this.esIndexPrefix = esIndexPrefix;
-    }
-
     public String getOfflineBrokers() {
         return offlineBrokers;
     }
@@ -181,9 +187,11 @@ public class BalanceParameter {
                 "cluster='" + cluster + '\'' +
                 ", kafkaConfig=" + kafkaConfig +
                 ", esRestURL='" + esRestURL + '\'' +
+                ", esPassword='" + esPassword + '\'' +
                 ", esIndexPrefix='" + esIndexPrefix + '\'' +
                 ", goals=" + goals +
                 ", excludedTopics='" + excludedTopics + '\'' +
+                ", ignoredTopics='" + ignoredTopics + '\'' +
                 ", offlineBrokers='" + offlineBrokers + '\'' +
                 ", balanceBrokers='" + balanceBrokers + '\'' +
                 ", topicReplicaThreshold=" + topicReplicaThreshold +

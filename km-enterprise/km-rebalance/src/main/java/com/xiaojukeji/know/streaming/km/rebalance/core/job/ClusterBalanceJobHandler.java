@@ -63,6 +63,9 @@ public class ClusterBalanceJobHandler implements JobHandler {
     @Value("${es.client.address:}")
     private String                          esAddress;
 
+    @Value("${es.client.pass:}")
+    private String                          esPassword;
+
     @Autowired
     private ClusterBalanceJobService clusterBalanceJobService;
 
@@ -116,7 +119,7 @@ public class ClusterBalanceJobHandler implements JobHandler {
 
         //获取任务计划
         List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(dto.getClusterId(), configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
-        BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(dto, brokers, brokerSpecMap, clusterPhy, esAddress, topicNames);
+        BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(dto, brokers, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames);
         try {
             ExecutionRebalance executionRebalance = new ExecutionRebalance();
             OptimizerResult optimizerResult = executionRebalance.optimizations(balanceParameter);
@@ -202,7 +205,7 @@ public class ClusterBalanceJobHandler implements JobHandler {
 
         List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(job.getClusterId(), configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
         JobClusterBalanceContent dto = ConvertUtil.str2ObjByJson(job.getJobData(), JobClusterBalanceContent.class);
-        BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(dto, brokers, brokerSpecMap, clusterPhy, esAddress, topicNames);
+        BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(dto, brokers, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames);
         ExecutionRebalance executionRebalance = new ExecutionRebalance();
         try {
             OptimizerResult optimizerResult = executionRebalance.optimizations(balanceParameter);

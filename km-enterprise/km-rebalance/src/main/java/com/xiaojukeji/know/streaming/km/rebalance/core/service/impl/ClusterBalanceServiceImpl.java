@@ -68,6 +68,9 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
     @Value("${es.client.address}")
     private String                          esAddress;
 
+    @Value("${es.client.pass:}")
+    private String                          esPassword;
+
     @Autowired
     private JobService jobService;
 
@@ -137,9 +140,9 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
         Map<Resource, Double> resourceDoubleMap;
         Map<Integer, BrokerBalanceState> brokerBalanceStateMap;
         try {
-            resourceDoubleMap = ExecutionRebalance.getClusterAvgResourcesState(ClusterBalanceConverter.convert2BalanceParameter(configPOResult.getData(), brokerMap, brokerSpecMap, clusterPhy, esAddress, topicNames));
+            resourceDoubleMap = ExecutionRebalance.getClusterAvgResourcesState(ClusterBalanceConverter.convert2BalanceParameter(configPOResult.getData(), brokerMap, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames));
             brokerBalanceStateMap = ExecutionRebalance
-                    .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(configPOResult.getData(), brokerMap, brokerSpecMap, clusterPhy, esAddress, topicNames));
+                    .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(configPOResult.getData(), brokerMap, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames));
         }catch (Exception e){
             logger.error("method=state||clusterPhyId={}||errMsg=exception", clusterPhyId, e);
             return Result.buildFailure(e.getMessage());
@@ -189,7 +192,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
             try {
                 List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
                 brokerBalanceStateMap = ExecutionRebalance
-                        .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(configPOResult.getData(), brokerMap, brokerSpecMap, clusterPhy, esAddress, topicNames));
+                        .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(configPOResult.getData(), brokerMap, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames));
             } catch (Exception e) {
                 logger.error("method=overview||clusterBalanceOverviewDTO={}||errMsg=exception", dto, e);
                 return PaginationResult.buildFailure(e.getMessage(), dto);
@@ -280,6 +283,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
                             brokerSpecMap,
                             clusterPhy,
                             esAddress,
+                            esPassword,
                             recentTopicNameList
                     )
             );
@@ -379,7 +383,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
         //获取任务计划
         Map<Integer, Broker> brokerMap = allBrokers.stream().collect(Collectors.toMap(Broker::getBrokerId, Function.identity()));
         List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
-        BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(clusterBalancePreviewDTO, brokerMap, brokerSpecMap, clusterPhy, esAddress, topicNames);
+        BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(clusterBalancePreviewDTO, brokerMap, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames);
         ExecutionRebalance executionRebalance = new ExecutionRebalance();
         try {
             OptimizerResult optimizerResult = executionRebalance.optimizations(balanceParameter);

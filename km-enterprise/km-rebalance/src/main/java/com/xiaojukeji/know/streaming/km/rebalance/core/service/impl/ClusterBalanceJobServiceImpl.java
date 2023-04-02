@@ -68,6 +68,9 @@ public class ClusterBalanceJobServiceImpl implements ClusterBalanceJobService {
     @Value("${es.client.address}")
     private String                          esAddress;
 
+    @Value("${es.client.pass:}")
+    private String                          esPassword;
+
     @Autowired
     private ClusterBalanceJobDao clusterBalanceJobDao;
 
@@ -303,7 +306,7 @@ public class ClusterBalanceJobServiceImpl implements ClusterBalanceJobService {
         //更新平衡任务状态信息
         List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhy.getId(), configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
         Map<Integer, BrokerBalanceState> brokerBalanceStateMap = ExecutionRebalance
-                .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(clusterBalanceJobPO, brokerMap, brokerSpecMap, clusterPhy, esAddress, topicNames));
+                .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(clusterBalanceJobPO, brokerMap, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames));
         List<ClusterBalancePlanDetail> oldDetails = ConvertUtil.str2ObjArrayByJson(clusterBalanceJobPO.getBrokerBalanceDetail(), ClusterBalancePlanDetail.class);
         List<ClusterBalancePlanDetail> newDetails = ClusterBalanceConverter.convert2ClusterBalancePlanDetail(oldDetails, brokerBalanceStateMap);
         clusterBalanceJobPO.setBrokerBalanceDetail(ConvertUtil.obj2Json(newDetails));
