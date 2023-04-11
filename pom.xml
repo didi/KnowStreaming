@@ -38,6 +38,7 @@
         <springboot.version>2.3.7.RELEASE</springboot.version>
         <spring.version>5.3.19</spring.version>
         <tomcat.version>9.0.41</tomcat.version>
+        <jackson-bom.version>2.13.5</jackson-bom.version>
 
         <fastjson.version>1.2.83</fastjson.version>
 
