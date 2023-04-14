@@ -6,7 +6,7 @@
     <groupId>com.xiaojukeji.kafka</groupId>
     <artifactId>km</artifactId>
     <packaging>pom</packaging>
-    <version>${km.revision}</version>
+    <version>${revision}</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <km.revision>3.3.0</km.revision>
+        <revision>3.3.0</revision>
 
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -38,6 +38,7 @@
         <springboot.version>2.3.7.RELEASE</springboot.version>
         <spring.version>5.3.19</spring.version>
         <tomcat.version>9.0.41</tomcat.version>
+        <jackson-bom.version>2.13.5</jackson-bom.version>
 
         <fastjson.version>1.2.83</fastjson.version>
 
