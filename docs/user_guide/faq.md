@@ -226,3 +226,24 @@ spring:
 ## 8.15、测试时使用Testcontainers的说明
 1. 需要docker运行环境 [Testcontainers运行环境说明](https://www.testcontainers.org/supported_docker_environment/)
 2. 如果本机没有docker，可以使用[远程访问docker](https://docs.docker.com/config/daemon/remote-access/) [Testcontainers配置说明](https://www.testcontainers.org/features/configuration/#customizing-docker-host-detection)  
+
+
+## 8.16、zk监控无数据问题
+**现象：** 
+zookeeper集群正常，但Ks上zk页面所有监控指标无数据，`KnowStreaming` log_error.log日志提示
+```vim
+[MetricCollect-Shard-0-8-thread-1] ERROR class=c.x.k.s.k.c.s.h.c.z.HealthCheckZookeeperService||method=checkWatchCount||param=ZookeeperParam(zkAddressList=[Tuple{v1=192.168.xxx.xx, v2=2181}, Tuple{v1=192.168.xxx.xx, v2=2181}, Tuple{v1=192.168.xxx.xx, v2=2181}], zkConfig=null)||config=HealthAmountRatioConfig(amount=100000, ratio=0.8)||result=Result{message='mntr is not executed because it is not in the whitelist.
+', code=8031, data=null}||errMsg=get metrics failed, may be collect failed or zk mntr command not in whitelist.
+2023-04-23 14:39:07.234 [MetricCollect-Shard-0-8-thread-1] ERROR class=c.x.k.s.k.c.s.h.checker.AbstractHeal
+```
+原因就很明确了。需要开放zk的四字命令，在`zoo.cfg`配置文件中添加
+```
+4lw.commands.whitelist=mntr,stat,ruok,envi,srvr,envi,cons,conf,wchs,wchp
+```
+建议至少开放上述几个四字命令，当然，您也可以全部开放
+```
+4lw.commands.whitelist=*
+```
+
+
+
