@@ -49,7 +49,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
 
 @Service
 public class GroupServiceImpl extends BaseKafkaVersionControlService implements GroupService {
-    private static final ILog log = LogFactory.getLog(GroupServiceImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(GroupServiceImpl.class);
 
     @Autowired
     private GroupDAO groupDAO;
@@ -92,7 +92,7 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
 
             return groupNameList;
         } catch (Exception e) {
-            log.error("method=listGroupsFromKafka||clusterPhyId={}||errMsg=exception!", clusterPhy.getId(), e);
+            LOGGER.error("method=listGroupsFromKafka||clusterPhyId={}||errMsg=exception!", clusterPhy.getId(), e);
 
             throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
         } finally {
@@ -142,7 +142,8 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
                 member.setMemberCount(member.getMemberCount() + 1);
             }
         }
-        group.setTopicMembers(memberMap.values().stream().collect(Collectors.toList()));
+
+        group.setTopicMembers(new ArrayList<>(memberMap.values()));
 
         return group;
     }
@@ -161,7 +162,7 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
 
             return offsetMap;
         } catch (Exception e) {
-            log.error("method=getGroupOffset||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhyId, groupName, e);
+            LOGGER.error("method=getGroupOffset||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhyId, groupName, e);
 
             throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
         }
@@ -187,7 +188,7 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
 
             return describeGroupsResult.all().get().get(groupName);
         } catch(Exception e){
-            log.error("method=getGroupDescription||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhy.getId(), groupName, e);
+            LOGGER.error("method=getGroupDescription||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhy.getId(), groupName, e);
 
             throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
         } finally {
@@ -202,12 +203,12 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
     }
 
     @Override
-    public void batchReplaceGroupsAndMembers(Long clusterPhyId, List<Group> newGroupList, long updateTime) {
+    public void batchReplaceGroupsAndMembers(Long clusterPhyId, List<Group> newGroupList, Set<String> getFailedGroupSet) {
         // 更新Group信息
-        this.batchReplaceGroups(clusterPhyId, newGroupList, updateTime);
+        this.batchReplaceGroups(clusterPhyId, newGroupList, getFailedGroupSet);
 
         // 更新Group-Topic信息
-        this.batchReplaceGroupMembers(clusterPhyId, newGroupList, updateTime);
+        this.batchReplaceGroupMembers(clusterPhyId, newGroupList, getFailedGroupSet);
     }
 
     @Override
@@ -284,21 +285,6 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
     }
 
     @Override
-    public int deleteByUpdateTimeBeforeInDB(Long clusterPhyId, Date beforeTime) {
-        // 删除过期Group信息
-        LambdaQueryWrapper<GroupPO> groupPOLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        groupPOLambdaQueryWrapper.eq(GroupPO::getClusterPhyId, clusterPhyId);
-        groupPOLambdaQueryWrapper.le(GroupPO::getUpdateTime, beforeTime);
-        groupDAO.delete(groupPOLambdaQueryWrapper);
-
-        // 删除过期GroupMember信息
-        LambdaQueryWrapper<GroupMemberPO> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(GroupMemberPO::getClusterPhyId, clusterPhyId);
-        queryWrapper.le(GroupMemberPO::getUpdateTime, beforeTime);
-        return groupMemberDAO.delete(queryWrapper);
-    }
-
-    @Override
     public List<String> getGroupsFromDB(Long clusterPhyId) {
         LambdaQueryWrapper<GroupPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(GroupPO::getClusterPhyId, clusterPhyId);
@@ -368,7 +354,7 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
 
             return Result.buildSuc();
         } catch(Exception e){
-            log.error("method=resetGroupOffsets||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhyId, groupName, e);
+            LOGGER.error("method=resetGroupOffsets||clusterPhyId={}|groupName={}||errMsg=exception!", clusterPhyId, groupName, e);
 
             throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
         }
@@ -378,62 +364,96 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
     /**************************************************** private method ****************************************************/
 
 
-    private void batchReplaceGroupMembers(Long clusterPhyId, List<Group> newGroupList, long updateTime) {
-        if (ValidateUtils.isEmptyList(newGroupList)) {
-            return;
-        }
+    private void batchReplaceGroupMembers(Long clusterPhyId, List<Group> newGroupList, Set<String> getFailedGroupSet) {
+        // DB 中的数据
+        Map<String, GroupMemberPO> dbPOMap = this.listClusterGroupsMemberPO(clusterPhyId)
+                .stream()
+                .collect(Collectors.toMap(elem -> elem.getGroupName() + elem.getTopicName(), Function.identity()));
 
-        List<GroupMemberPO> dbPOList = this.listClusterGroupsMemberPO(clusterPhyId);
-        Map<String, GroupMemberPO> dbPOMap = dbPOList.stream().collect(Collectors.toMap(elem -> elem.getGroupName() + elem.getTopicName(), Function.identity()));
-
+        // 进行数据的更新
         for (Group group: newGroupList) {
             for (GroupTopicMember member : group.getTopicMembers()) {
                 try {
-                    GroupMemberPO newPO = new GroupMemberPO(clusterPhyId, member.getTopicName(), group.getName(), group.getState().getState(), member.getMemberCount(), new Date(updateTime));
+                    GroupMemberPO newPO = new GroupMemberPO(clusterPhyId, member.getTopicName(), group.getName(), group.getState().getState(), member.getMemberCount(), new Date());
 
                     GroupMemberPO dbPO = dbPOMap.remove(newPO.getGroupName() + newPO.getTopicName());
-                    if (dbPO != null) {
+                    if (dbPO == null) {
+                        // 数据不存在则直接写入
+                        groupMemberDAO.insert(newPO);
+                    } else if (!dbPO.equal2GroupMemberPO(newPO)) {
+                        // 数据发生了变化则进行更新
                         newPO.setId(dbPO.getId());
                         groupMemberDAO.updateById(newPO);
-                        continue;
                     }
-
-                    groupMemberDAO.insert(newPO);
                 } catch (Exception e) {
-                    log.error(
+                    LOGGER.error(
                             "method=batchReplaceGroupMembers||clusterPhyId={}||groupName={}||topicName={}||errMsg=exception",
                             clusterPhyId, group.getName(), member.getTopicName(), e
                     );
                 }
             }
         }
+
+        // 删除剩余不存在的
+        dbPOMap.values().forEach(elem -> {
+            try {
+                if (getFailedGroupSet.contains(elem.getGroupName())) {
+                    // 该group信息获取失败，所以忽略对该数据的删除
+                    return;
+                }
+
+                groupDAO.deleteById(elem.getId());
+            } catch (Exception e) {
+                LOGGER.error(
+                        "method=batchReplaceGroupMembers||clusterPhyId={}||groupName={}||topicName={}||msg=delete expired group data in db failed||errMsg=exception",
+                        clusterPhyId, elem.getGroupName(), elem.getTopicName(), e
+                );
+            }
+        });
     }
 
-    private void batchReplaceGroups(Long clusterPhyId, List<Group> newGroupList, long updateTime) {
-        if (ValidateUtils.isEmptyList(newGroupList)) {
-            return;
-        }
+    private void batchReplaceGroups(Long clusterPhyId, List<Group> newGroupList, Set<String> getFailedGroupSet) {
+        // 获取 DB 中的数据
+        Map<String, GroupPO> dbGroupMap = this.listClusterGroupsPO(clusterPhyId)
+                .stream()
+                .collect(Collectors.toMap(elem -> elem.getName(), Function.identity()));
 
-        List<GroupPO> dbGroupList = this.listClusterGroupsPO(clusterPhyId);
-        Map<String, GroupPO> dbGroupMap = dbGroupList.stream().collect(Collectors.toMap(elem -> elem.getName(), Function.identity()));
-
+        // 进行数据的更新
         for (Group newGroup: newGroupList) {
             try {
-                GroupPO newPO = GroupConverter.convert2GroupPO(newGroup);
-                newPO.setUpdateTime(new Date(updateTime));
-
                 GroupPO dbPO = dbGroupMap.remove(newGroup.getName());
-                if (dbPO != null) {
-                    newPO.setId(dbPO.getId());
-                    groupDAO.updateById(newPO);
+                if (dbPO == null) {
+                    // 一条新的数据，则直接insert
+                    groupDAO.insert(GroupConverter.convert2GroupPO(newGroup));
                     continue;
                 }
 
-                groupDAO.insert(newPO);
+                GroupPO newPO = GroupConverter.convert2GroupPO(newGroup);
+                if (!newPO.equal2GroupPO(dbPO)) {
+                    // 如果不相等，则直接更新
+                    newPO.setId(dbPO.getId());
+                    groupDAO.updateById(newPO);
+                }
+
+                // 其他情况，则不需要进行任何操作
             } catch (Exception e) {
-                log.error("method=batchGroupReplace||clusterPhyId={}||groupName={}||errMsg=exception", clusterPhyId, newGroup.getName(), e);
+                LOGGER.error("method=batchReplaceGroups||clusterPhyId={}||groupName={}||errMsg=exception", clusterPhyId, newGroup.getName(), e);
             }
         }
+
+        // 删除剩余不存在的
+        dbGroupMap.values().forEach(elem -> {
+            try {
+                if (getFailedGroupSet.contains(elem.getName())) {
+                    // 该group信息获取失败，所以忽略对该数据的删除
+                    return;
+                }
+
+                groupDAO.deleteById(elem.getId());
+            } catch (Exception e) {
+                LOGGER.error("method=batchReplaceGroups||clusterPhyId={}||groupName={}||msg=delete expired group data in db failed||errMsg=exception", clusterPhyId, elem.getName(), e);
+            }
+        });
     }
 
     private List<GroupPO> listClusterGroupsPO(Long clusterPhyId) {

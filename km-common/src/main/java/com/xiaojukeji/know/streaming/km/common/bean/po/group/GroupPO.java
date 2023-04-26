@@ -9,6 +9,8 @@ import com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 
 @Data
 @NoArgsConstructor
@@ -58,4 +60,18 @@ public class GroupPO extends BasePO {
      */
     private int coordinatorId;
 
+    public boolean equal2GroupPO(GroupPO groupPO) {
+        if (groupPO == null) {
+            return false;
+        }
+
+        return coordinatorId == groupPO.coordinatorId
+                && Objects.equals(clusterPhyId, groupPO.clusterPhyId)
+                && Objects.equals(type, groupPO.type)
+                && Objects.equals(name, groupPO.name)
+                && Objects.equals(state, groupPO.state)
+                && Objects.equals(memberCount, groupPO.memberCount)
+                && Objects.equals(topicMembers, groupPO.topicMembers)
+                && Objects.equals(partitionAssignor, groupPO.partitionAssignor);
+    }
 }
