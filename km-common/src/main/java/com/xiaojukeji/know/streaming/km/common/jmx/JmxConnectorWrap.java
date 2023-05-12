@@ -64,12 +64,16 @@ public class JmxConnectorWrap {
         this.atomicInteger = new AtomicInteger(this.jmxConfig.getMaxConn());
     }
 
-    public boolean checkJmxConnectionAndInitIfNeed() {
+    public boolean checkJmxConnectionNeed() {
+        return this.port != null && this.port > 0;
+    }
+
+    public boolean initJmxConnection() {
+        if (!this.checkJmxConnectionNeed()) {
+            return false;
+        }
         if (jmxConnector != null) {
             return true;
-        }
-        if (port == null || port == -1) {
-            return false;
         }
         return createJmxConnector();
     }
@@ -221,6 +225,6 @@ public class JmxConnectorWrap {
         this.close();
 
         // 重新创建
-        this.checkJmxConnectionAndInitIfNeed();
+        this.initJmxConnection();
     }
 }

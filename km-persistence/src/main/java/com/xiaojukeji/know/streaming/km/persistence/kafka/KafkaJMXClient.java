@@ -35,7 +35,14 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
     public JmxConnectorWrap getClientWithCheck(Long clusterPhyId, Integer brokerId){
         JmxConnectorWrap jmxConnectorWrap = this.getClient(clusterPhyId, brokerId);
 
-        if (ValidateUtils.isNull(jmxConnectorWrap) || !jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
+        if (ValidateUtils.isNull(jmxConnectorWrap)) {
+            log.error("method=getClientWithCheck||clusterPhyId={}||brokerId={}||msg=get jmx connectorWrap failed!", clusterPhyId, brokerId);
+            return null;
+        }
+        if (!jmxConnectorWrap.checkJmxConnectionNeed()) {
+            return null;
+        }
+        if (!jmxConnectorWrap.initJmxConnection()) {
             log.error("method=getClientWithCheck||clusterPhyId={}||brokerId={}||msg=get jmx connector failed!", clusterPhyId, brokerId);
             return null;
         }

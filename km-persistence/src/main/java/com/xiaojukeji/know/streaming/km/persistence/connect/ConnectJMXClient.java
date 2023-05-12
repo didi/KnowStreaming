@@ -35,7 +35,14 @@ public class ConnectJMXClient extends AbstractConnectClusterChangeHandler {
     public JmxConnectorWrap getClientWithCheck(Long connectClusterId, String workerId) {
         JmxConnectorWrap jmxConnectorWrap = this.getClient(connectClusterId, workerId);
 
-        if (ValidateUtils.isNull(jmxConnectorWrap) || !jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
+        if (ValidateUtils.isNull(jmxConnectorWrap)) {
+            log.error("method=getClientWithCheck||connectClusterId={}||workerId={}||msg=get jmx connectorWrap failed!", connectClusterId, workerId);
+            return null;
+        }
+        if (!jmxConnectorWrap.checkJmxConnectionNeed()) {
+            return null;
+        }
+        if (!jmxConnectorWrap.initJmxConnection()) {
             log.error("method=getClientWithCheck||connectClusterId={}||workerId={}||msg=get jmx connector failed!", connectClusterId, workerId);
             return null;
         }
