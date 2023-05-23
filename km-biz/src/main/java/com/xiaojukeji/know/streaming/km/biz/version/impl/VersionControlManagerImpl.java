@@ -35,6 +35,8 @@ import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafk
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.MirrorMakerMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.ConnectClusterMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.ConnectorMetricVersionItems.*;
 import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ZookeeperMetricVersionItems.*;
 
 @Service
@@ -123,6 +125,42 @@ public class VersionControlManagerImpl implements VersionControlManager {
         defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_COUNT, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_RATE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_REPLICATION_LATENCY_MS_MAX, true));
+
+        // Connect Cluster
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_STARTUP_ATTEMPTS_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_STARTUP_FAILURE_PERCENTAGE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_STARTUP_FAILURE_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_STARTUP_ATTEMPTS_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_STARTUP_FAILURE_PERCENTAGE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_STARTUP_FAILURE_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_COLLECT_COST_TIME, true));
+
+
+        // Connect Connector
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_HEALTH_STATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_HEALTH_CHECK_PASSED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_HEALTH_CHECK_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_COLLECT_COST_TIME, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_CONNECTOR_TOTAL_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_CONNECTOR_RUNNING_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_CONNECTOR_FAILED_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_ACTIVE_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_POLL_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_WRITE_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_ACTIVE_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_READ_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_SEND_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_DEADLETTERQUEUE_PRODUCE_FAILURES, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_DEADLETTERQUEUE_PRODUCE_REQUESTS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_TOTAL_ERRORS_LOGGED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_POLL_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_WRITE_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_READ_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_SEND_RATE, true));
+
+
     }
 
     @Autowired
