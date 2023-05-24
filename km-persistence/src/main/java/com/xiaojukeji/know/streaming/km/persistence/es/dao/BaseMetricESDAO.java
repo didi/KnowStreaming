@@ -24,6 +24,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
 
@@ -68,13 +69,11 @@ public class BaseMetricESDAO extends BaseESDAO {
             String indexTemplate = templateLoaderUtil.getContextByFileName(indexName);
             esOpClient.createIndexTemplateIfNotExist(indexName, indexTemplate);
 
-            //检查最近7天索引存在不存
-            for(int i = 0; i < INDEX_DAYS; i++){
-                String realIndex = IndexNameUtils.genDailyIndexName(indexName, i);
-                if(esOpClient.indexExist(realIndex)){continue;}
-
-                esOpClient.createIndex(realIndex);
-            }
+            int retainDays = indexExpireDays > INDEX_DAYS ? INDEX_DAYS : indexExpireDays;
+            // 检查最近【retainDays】天索引存在不存
+            IntStream.range(0, retainDays).mapToObj(i -> IndexNameUtils.genDailyIndexName(indexName, i))
+                    .filter(realIndex -> !esOpClient.indexExist(realIndex))
+                    .forEach(realIndex -> esOpClient.createIndex(realIndex));
         } catch (Exception e) {
             LOGGER.error("method=checkCurrentDayIndexExist||errMsg=exception!", e);
         }
@@ -94,8 +93,7 @@ public class BaseMetricESDAO extends BaseESDAO {
                         indexExpireDays, indexList.subList(indexExpireDays, size));
             }
 
-            indexList.subList(indexExpireDays, size).stream().forEach(
-                    s -> esOpClient.delIndexByName(s));
+            indexList.subList(indexExpireDays, size).forEach(s -> esOpClient.delIndexByName(s));
         }
     }
 
