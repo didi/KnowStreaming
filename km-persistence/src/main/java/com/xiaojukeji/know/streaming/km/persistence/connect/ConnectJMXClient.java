@@ -90,7 +90,7 @@ public class ConnectJMXClient extends AbstractConnectClusterChangeHandler {
                     "connectClusterId: " + connectCluster.getId() + " workerId: " + workerId,
                     null,
                     connectWorker.getHost(),
-                    connectWorker.getJmxPort() != null ? connectWorker.getJmxPort() : jmxConfig.getJmxPort(),
+                    jmxConfig.getFinallyJmxPort(workerId, connectWorker.getJmxPort()),
                     jmxConfig
             );
 
