@@ -329,6 +329,14 @@
                 <scope>import</scope>
             </dependency>
             <!--testcontainers end-->
+
+            <!-- MDC -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>7.1.1</version>
+            </dependency>
+            <!-- MDC end -->
         </dependencies>
     </dependencyManagement>
 </project>
