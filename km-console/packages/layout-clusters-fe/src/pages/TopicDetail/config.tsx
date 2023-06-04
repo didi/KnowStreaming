@@ -81,7 +81,7 @@ export const getTopicMessagesColmns = () => {
       title: 'Offset',
       dataIndex: 'offset',
       key: 'offset',
-      render: (t: number) => (t ? t.toLocaleString() : '-'),
+      // render: (t: number) => (t ? t.toLocaleString() : '-'),
     },
     {
       title: 'Timestamp',
