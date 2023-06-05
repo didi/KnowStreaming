@@ -4,6 +4,7 @@ import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.xiaojukeji.know.streaming.km.biz.group.GroupManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupOffsetResetDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupTopicConsumedDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.group.Group;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupMemberPO;
@@ -11,6 +12,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicConsumedD
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metadata.GroupMetadataCombineExistVO;
 import com.xiaojukeji.know.streaming.km.common.constant.ApiPrefix;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
+import com.xiaojukeji.know.streaming.km.common.converter.GroupConverter;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,4 +64,15 @@ public class GroupController {
 
         return Result.buildSuc(new GroupMetadataCombineExistVO(clusterPhyId, groupName, topicName, true));
     }
+
+    @ApiOperation(value = "Group元信息", notes = "主要判断是否存在信息")
+    @GetMapping(value = "clusters/{clusterPhyId}/groups/{groupName}/metadata-combine-exist")
+    @ResponseBody
+    public Result<GroupMetadataCombineExistVO> getGroupMetadataCombineExist(@PathVariable Long clusterPhyId,
+                                                                            @PathVariable String groupName) {
+        Group group = groupService.getGroupFromDB(clusterPhyId, groupName);
+        return Result.buildSuc(GroupConverter.convert2GroupMetadataCombineExistVO(groupName, group));
+    }
+
+
 }

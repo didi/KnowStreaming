@@ -4,6 +4,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.group.Group;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.GroupTopicMember;
 import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupOverviewVO;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.metadata.GroupMetadataCombineExistVO;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -61,4 +62,17 @@ public class GroupConverter {
         po.setUpdateTime(new Date());
         return po;
     }
+
+    public static GroupMetadataCombineExistVO convert2GroupMetadataCombineExistVO(String groupName, Group group) {
+        GroupMetadataCombineExistVO vo = new GroupMetadataCombineExistVO();
+        vo.setGroupName(groupName);
+        if (group == null) {
+            vo.setExist(false);
+            return vo;
+        }
+        vo.setExist(true);
+        vo.setClusterPhyId(group.getClusterPhyId());
+        return vo;
+    }
+
 }

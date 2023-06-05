@@ -85,6 +85,7 @@ const AddDrawer = forwardRef((_, ref) => {
     return;
   });
   const [topicMetaData, setTopicMetaData] = React.useState([]);
+  const [groupMetaData, setGroupMetaData] = React.useState([]);
 
   // 获取 Topic 元信息
   const getTopicMetaData = (newValue: any) => {
@@ -99,6 +100,21 @@ const AddDrawer = forwardRef((_, ref) => {
         };
       });
       setTopicMetaData(topics);
+    });
+  };
+
+  // 获取 Group 元信息
+  const getGroupMetaData = () => {
+    Utils.request(api.getGroupOverview(+clusterId), {
+      method: 'GET',
+    }).then((res: UsersProps[]) => {
+      const groups = (res || []).map((item: any) => {
+        return {
+          label: item.groupName,
+          value: item.groupName,
+        };
+      });
+      setGroupMetaData(groups);
     });
   };
 
@@ -209,6 +225,7 @@ const AddDrawer = forwardRef((_, ref) => {
   useEffect(() => {
     getKafkaUserList();
     getTopicMetaData('');
+    getGroupMetaData();
   }, []);
 
   return (
@@ -308,6 +325,10 @@ const AddDrawer = forwardRef((_, ref) => {
                                   return Utils.request(api.getTopicMetadata(clusterId as any, value)).then((res: any) => {
                                     return res?.exist ? Promise.resolve() : Promise.reject('该 Topic 不存在');
                                   });
+                                }else if (type === 'group' && getFieldValue(`${type}PatternType`) === ACL_PATTERN_TYPE['Literal']){
+                                  return Utils.request(api.getGroupMetadata(clusterId as any, value)).then((res: any) => {
+                                    return res?.exist ? Promise.resolve() : Promise.reject('该 Group 不存在');
+                                  });
                                 }
                                 return Promise.resolve();
                               },
@@ -321,7 +342,7 @@ const AddDrawer = forwardRef((_, ref) => {
                               }
                               return false;
                             }}
-                            options={topicMetaData}
+                            options={type === 'topic' ? topicMetaData : type === 'group' ? groupMetaData : []}
                             placeholder={`请输入 ${type}Name`}
                           />
                         </Form.Item>

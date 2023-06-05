@@ -94,6 +94,9 @@ const api = {
   getTopicGroupPartitionsHistory: (clusterPhyId: number, groupName: string) =>
     getApi(`/clusters/${clusterPhyId}/groups/${groupName}/partitions`),
   resetGroupOffset: () => getApi('/group-offsets'),
+  getGroupMetadata: (clusterPhyId: number, groupName: string) =>
+    getApi(`/clusters/${clusterPhyId}/groups/${groupName}/metadata-combine-exist`),
+  getGroupOverview: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/groups-basic`),
 
   // topics列表
   getTopicsList: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/topics-overview`),
