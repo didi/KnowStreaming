@@ -107,11 +107,11 @@ const AddDrawer = forwardRef((_, ref) => {
   const getGroupMetaData = () => {
     Utils.request(api.getGroupOverview(+clusterId), {
       method: 'GET',
-    }).then((res: UsersProps[]) => {
-      const groups = (res || []).map((item: any) => {
+    }).then((res: any) => {
+      const groups = res?.bizData.map((item: any) => {
         return {
-          label: item.groupName,
-          value: item.groupName,
+          label: item.name,
+          value: item.name,
         };
       });
       setGroupMetaData(groups);
