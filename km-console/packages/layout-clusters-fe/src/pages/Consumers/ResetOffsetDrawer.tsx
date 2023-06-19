@@ -22,18 +22,19 @@ const CustomSelectResetTime = (props: { value?: string; onChange?: (val: number 
         }}
         onChange={(e) => {
           setTimeSetMode(e.target.value);
-          if (e.target.value === 'newest') {
-            onChange('newest');
+          if (e.target.value === 'newest' || e.target.value === 'oldest') {
+            onChange(e.target.value);
           }
         }}
         value={timeSetMode}
       >
         <Radio value={'newest'}>最新Offset</Radio>
+        <Radio value={'oldest'}>最旧Offset</Radio>
         <Radio value={'custom'}>自定义</Radio>
       </Radio.Group>
       {timeSetMode === 'custom' && (
         <DatePicker
-          value={moment(value === 'newest' ? Date.now() : value)}
+          value={moment(value === 'newest' || value === 'oldest' ? Date.now() : value)}
           style={{ width: '100%' }}
           showTime={true}
           onChange={(v) => {
@@ -91,7 +92,7 @@ export default (props: any) => {
       topicName: record.topicName,
     };
     if (formData.resetType === 'assignedTime') {
-      resetParams.resetType = formData.timestamp === 'newest' ? 0 : 2;
+      resetParams.resetType = formData.timestamp === 'newest' ? 0 : formData.timestamp === 'oldest' ? 1 : 2;
       if (resetParams.resetType === 2) {
         resetParams.timestamp = formData.timestamp;
       }
