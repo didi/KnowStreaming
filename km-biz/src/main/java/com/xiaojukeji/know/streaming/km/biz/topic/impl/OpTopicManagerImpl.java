@@ -156,6 +156,16 @@ public class OpTopicManagerImpl implements OpTopicManager {
         return rv;
     }
 
+    @Override
+    public Result<Void> truncateTopic(Long clusterPhyId, String topicName, String operator) {
+        // 清空Topic
+        Result<Void> rv = opTopicService.truncateTopic(new TopicParam(clusterPhyId, topicName), operator);
+        if (rv.failed()) {
+            return rv;
+        }
+
+        return Result.buildSuc();
+    }
 
     /**************************************************** private method ****************************************************/
 

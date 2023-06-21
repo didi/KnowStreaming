@@ -21,4 +21,9 @@ public interface OpTopicService {
      * 扩分区
      */
     Result<Void> expandTopic(TopicPartitionExpandParam expandParam, String operator);
+
+    /**
+     * 清空topic消息
+     */
+    Result<Void> truncateTopic(TopicParam param, String operator);
 }
