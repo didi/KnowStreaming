@@ -8,6 +8,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemPara
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicCreateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicPartitionExpandParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicTruncateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
@@ -208,7 +209,7 @@ public class OpTopicServiceImpl extends BaseKafkaVersionControlService implement
     }
 
     @Override
-    public Result<Void> truncateTopic(TopicParam param, String operator) {
+    public Result<Void> truncateTopic(TopicTruncateParam param, String operator) {
         try {
             // 清空topic数据
             Result<Void> rv = (Result<Void>) doVCHandler(param.getClusterPhyId(), TOPIC_TRUNCATE, param);
@@ -233,15 +234,15 @@ public class OpTopicServiceImpl extends BaseKafkaVersionControlService implement
     /**************************************************** private method ****************************************************/
 
     private Result<Void> truncateTopicByKafkaClient(VersionItemParam itemParam) {
-        TopicParam param = (TopicParam) itemParam;
+        TopicTruncateParam param = (TopicTruncateParam) itemParam;
         try {
             AdminClient adminClient = kafkaAdminClient.getClient(param.getClusterPhyId());
             //获取topic的分区信息
-            DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(Arrays.asList(param.getTopicName()));
+            DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(Arrays.asList(param.getTopicName()), new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
             Map<String, TopicDescription> descriptionMap = describeTopicsResult.all().get();
 
             Map<TopicPartition, RecordsToDelete> recordsToDelete = new HashMap<>();
-            RecordsToDelete recordsToDeleteOffset = RecordsToDelete.beforeOffset(-1);
+            RecordsToDelete recordsToDeleteOffset = RecordsToDelete.beforeOffset(param.getOffset());
 
             descriptionMap.forEach((topicName, topicDescription) -> {
                 for (TopicPartitionInfo topicPartition : topicDescription.partitions()) {
@@ -249,10 +250,10 @@ public class OpTopicServiceImpl extends BaseKafkaVersionControlService implement
                 }
             });
 
-            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(recordsToDelete);
+            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(recordsToDelete, new DeleteRecordsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
             deleteRecordsResult.all().get();
         } catch (Exception e) {
-            log.error("truncate topic by kafka-client failed，clusterPhyId:{} topicName:{}", param.getClusterPhyId(), param.getTopicName(), e);
+            log.error("truncate topic by kafka-client failed，clusterPhyId:{} topicName:{} offset:{}", param.getClusterPhyId(), param.getTopicName(), param.getOffset(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }

@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.core.service.topic;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicCreateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicPartitionExpandParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicTruncateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 
@@ -25,5 +26,5 @@ public interface OpTopicService {
     /**
      * 清空topic消息
      */
-    Result<Void> truncateTopic(TopicParam param, String operator);
+    Result<Void> truncateTopic(TopicTruncateParam param, String operator);
 }
