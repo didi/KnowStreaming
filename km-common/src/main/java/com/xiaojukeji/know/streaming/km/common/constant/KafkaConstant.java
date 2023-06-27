@@ -49,6 +49,8 @@ public class KafkaConstant {
 
     public static final Map<String, ConfigDef.ConfigKey> KAFKA_ALL_CONFIG_DEF_MAP = new ConcurrentHashMap<>();
 
+    public static final Integer TOPICK_TRUNCATE_DEFAULT_OFFSET = -1;
+
     static {
         try {
             KAFKA_ALL_CONFIG_DEF_MAP.putAll(CollectionConverters.asJava(LogConfig$.MODULE$.configKeys()));
