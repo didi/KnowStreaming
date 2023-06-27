@@ -38,6 +38,8 @@ public class FrontEndControlVersionItems extends BaseMetricVersionMetric {
 
     private static final String FE_TRUNCATE_TOPIC                                       = "FETruncateTopic";
 
+    private static final String FE_DELETE_GROUP_OFFSET                                  = "FEDeleteGroupOffset";
+
     public FrontEndControlVersionItems(){}
 
     @Override
@@ -91,10 +93,13 @@ public class FrontEndControlVersionItems extends BaseMetricVersionMetric {
         itemList.add(buildItem().minVersion(VersionEnum.V_2_5_0_D_300).maxVersion(VersionEnum.V_2_5_0_D_MAX)
                 .name(FE_HA_DELETE_MIRROR_TOPIC).desc("HA-取消Topic复制"));
 
-        //truncate topic
+        // truncate topic
         itemList.add(buildItem().minVersion(VersionEnum.V_0_11_0_0).maxVersion(VersionEnum.V_MAX)
-                .name(FE_TRUNCATE_TOPIC).desc("清空topic"));
+                .name(FE_TRUNCATE_TOPIC).desc("清空Topic"));
 
+        // truncate topic
+        itemList.add(buildItem().minVersion(VersionEnum.V_1_1_0).maxVersion(VersionEnum.V_MAX)
+                .name(FE_DELETE_GROUP_OFFSET).desc("删除GroupOffset"));
         return itemList;
     }
 }

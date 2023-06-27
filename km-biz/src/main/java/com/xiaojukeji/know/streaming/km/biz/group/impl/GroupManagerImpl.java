@@ -4,6 +4,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.biz.group.GroupManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.ClusterGroupSummaryDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupOffsetDeleteDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupOffsetResetDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
@@ -17,6 +18,9 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSMemberConsume
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSMemberDescription;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.GroupMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.group.DeleteGroupParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.group.DeleteGroupTopicParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.group.DeleteGroupTopicPartitionParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
@@ -32,6 +36,7 @@ import com.xiaojukeji.know.streaming.km.common.converter.GroupConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.AggTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.OffsetTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.group.DeleteGroupTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
@@ -42,6 +47,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
+import com.xiaojukeji.know.streaming.km.core.service.group.OpGroupService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems;
@@ -58,13 +64,16 @@ import static com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum.
 
 @Component
 public class GroupManagerImpl implements GroupManager {
-    private static final ILog log = LogFactory.getLog(GroupManagerImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(GroupManagerImpl.class);
 
     @Autowired
     private TopicService topicService;
 
     @Autowired
     private GroupService groupService;
+
+    @Autowired
+    private OpGroupService opGroupService;
 
     @Autowired
     private PartitionService partitionService;
@@ -247,6 +256,52 @@ public class GroupManagerImpl implements GroupManager {
     }
 
     @Override
+    public Result<Void> deleteGroupOffsets(GroupOffsetDeleteDTO dto, String operator) throws Exception {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(dto.getClusterPhyId());
+        if (clusterPhy == null) {
+            return Result.buildFromRSAndMsg(ResultStatus.CLUSTER_NOT_EXIST, MsgConstant.getClusterPhyNotExist(dto.getClusterPhyId()));
+        }
+
+
+        // 按照group纬度进行删除
+        if (ValidateUtils.isBlank(dto.getGroupName())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "groupName不允许为空");
+        }
+        if (DeleteGroupTypeEnum.GROUP.getCode().equals(dto.getDeleteType())) {
+            return opGroupService.deleteGroupOffset(
+                    new DeleteGroupParam(dto.getClusterPhyId(), dto.getGroupName(), DeleteGroupTypeEnum.GROUP),
+                    operator
+            );
+        }
+
+
+        // 按照topic纬度进行删除
+        if (ValidateUtils.isBlank(dto.getTopicName())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "topicName不允许为空");
+        }
+        if (DeleteGroupTypeEnum.GROUP_TOPIC.getCode().equals(dto.getDeleteType())) {
+            return opGroupService.deleteGroupOffset(
+                    new DeleteGroupTopicParam(dto.getClusterPhyId(), dto.getGroupName(), DeleteGroupTypeEnum.GROUP, dto.getTopicName()),
+                    operator
+            );
+        }
+
+
+        // 按照partition纬度进行删除
+        if (ValidateUtils.isNullOrLessThanZero(dto.getPartitionId())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "partitionId不允许为空或小于0");
+        }
+        if (DeleteGroupTypeEnum.GROUP_TOPIC_PARTITION.getCode().equals(dto.getDeleteType())) {
+            return opGroupService.deleteGroupOffset(
+                    new DeleteGroupTopicPartitionParam(dto.getClusterPhyId(), dto.getGroupName(), DeleteGroupTypeEnum.GROUP, dto.getTopicName(), dto.getPartitionId()),
+                    operator
+            );
+        }
+
+        return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "deleteType类型错误");
+    }
+
+    @Override
     public List<GroupTopicOverviewVO> getGroupTopicOverviewVOList(Long clusterPhyId, List<GroupMemberPO> groupMemberPOList) {
         // 获取指标
         Result<List<GroupMetrics>> metricsListResult = groupMetricService.listLatestMetricsAggByGroupTopicFromES(
@@ -257,7 +312,7 @@ public class GroupManagerImpl implements GroupManager {
         );
         if (metricsListResult.failed()) {
             // 如果查询失败，则输出错误信息，但是依旧进行已有数据的返回
-            log.error("method=completeMetricData||clusterPhyId={}||result={}||errMsg=search es failed", clusterPhyId, metricsListResult);
+            LOGGER.error("method=completeMetricData||clusterPhyId={}||result={}||errMsg=search es failed", clusterPhyId, metricsListResult);
         }
         return this.convert2GroupTopicOverviewVOList(groupMemberPOList, metricsListResult.getData());
     }
