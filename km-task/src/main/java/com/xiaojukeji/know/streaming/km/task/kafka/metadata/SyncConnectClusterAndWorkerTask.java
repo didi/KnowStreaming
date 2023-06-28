@@ -18,6 +18,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum;
+import com.xiaojukeji.know.streaming.km.common.enums.jmx.JmxEnum;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerService;
@@ -104,7 +105,7 @@ public class SyncConnectClusterAndWorkerTask extends AbstractAsyncMetadataDispat
                             connectClusterId,
                             memberDescription.consumerId(),
                             memberDescription.host().substring(1),
-                            Constant.INVALID_CODE,
+                            JmxEnum.UNKNOWN.getPort(),
                             assignment.getWorkerState().url(),
                             assignment.getAssignment().leaderUrl(),
                             memberDescription.consumerId().equals(assignment.getAssignment().leader()) ? Constant.YES : Constant.NO
@@ -115,7 +116,7 @@ public class SyncConnectClusterAndWorkerTask extends AbstractAsyncMetadataDispat
                             connectClusterId,
                             memberDescription.consumerId(),
                             memberDescription.host().substring(1),
-                            Constant.INVALID_CODE,
+                            JmxEnum.UNKNOWN.getPort(),
                             "",
                             "",
                             Constant.NO
