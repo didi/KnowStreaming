@@ -85,6 +85,7 @@ const AddDrawer = forwardRef((_, ref) => {
     return;
   });
   const [topicMetaData, setTopicMetaData] = React.useState([]);
+  const [groupMetaData, setGroupMetaData] = React.useState([]);
 
   // 获取 Topic 元信息
   const getTopicMetaData = (newValue: any) => {
@@ -99,6 +100,21 @@ const AddDrawer = forwardRef((_, ref) => {
         };
       });
       setTopicMetaData(topics);
+    });
+  };
+
+  // 获取 Group 元信息
+  const getGroupMetaData = () => {
+    Utils.request(api.getGroupOverview(+clusterId), {
+      method: 'GET',
+    }).then((res: any) => {
+      const groups = res?.bizData.map((item: any) => {
+        return {
+          label: item.name,
+          value: item.name,
+        };
+      });
+      setGroupMetaData(groups);
     });
   };
 
@@ -209,6 +225,7 @@ const AddDrawer = forwardRef((_, ref) => {
   useEffect(() => {
     getKafkaUserList();
     getTopicMetaData('');
+    getGroupMetaData();
   }, []);
 
   return (
@@ -321,7 +338,7 @@ const AddDrawer = forwardRef((_, ref) => {
                               }
                               return false;
                             }}
-                            options={topicMetaData}
+                            options={type === 'topic' ? topicMetaData : groupMetaData}
                             placeholder={`请输入 ${type}Name`}
                           />
                         </Form.Item>

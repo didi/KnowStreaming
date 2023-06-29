@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -36,5 +37,17 @@ public class GroupMemberPO extends BasePO {
         this.state = state;
         this.memberCount = memberCount;
         this.updateTime = updateTime;
+    }
+
+    public boolean equal2GroupMemberPO(GroupMemberPO that) {
+        if (that == null) {
+            return false;
+        }
+
+        return Objects.equals(clusterPhyId, that.clusterPhyId)
+                && Objects.equals(topicName, that.topicName)
+                && Objects.equals(groupName, that.groupName)
+                && Objects.equals(state, that.state)
+                && Objects.equals(memberCount, that.memberCount);
     }
 }

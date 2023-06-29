@@ -119,3 +119,31 @@ INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_del
 INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2020', '0', 'know-streaming');
 INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2022', '0', 'know-streaming');
 INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2024', '0', 'know-streaming');
+
+
+-- 多集群管理权限2023-06-27新增
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2026', 'Connector-新增', '1593', '1', '2', 'Connector-新增', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2028', 'Connector-编辑', '1593', '1', '2', 'Connector-编辑', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2030', 'Connector-删除', '1593', '1', '2', 'Connector-删除', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2032', 'Connector-重启', '1593', '1', '2', 'Connector-重启', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2034', 'Connector-暂停&恢复', '1593', '1', '2', 'Connector-暂停&恢复', '0', 'know-streaming');
+
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2026', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2028', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2030', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2032', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2034', '0', 'know-streaming');
+
+
+-- 多集群管理权限2023-06-29新增
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2036', 'Security-ACL新增', '1593', '1', '2', 'Security-ACL新增', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2038', 'Security-ACL删除', '1593', '1', '2', 'Security-ACL删除', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2040', 'Security-User新增', '1593', '1', '2', 'Security-User新增', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2042', 'Security-User删除', '1593', '1', '2', 'Security-User删除', '0', 'know-streaming');
+INSERT INTO `logi_security_permission` (`id`, `permission_name`, `parent_id`, `leaf`, `level`, `description`, `is_delete`, `app_name`) VALUES ('2044', 'Security-User修改密码', '1593', '1', '2', 'Security-User修改密码', '0', 'know-streaming');
+
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2036', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2038', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2040', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2042', '0', 'know-streaming');
+INSERT INTO `logi_security_role_permission` (`role_id`, `permission_id`, `is_delete`, `app_name`) VALUES ('1677', '2044', '0', 'know-streaming');

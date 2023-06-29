@@ -36,7 +36,7 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
         // 获取集群的Group列表
         List<String> groupNameList = groupService.listGroupsFromKafka(clusterPhy);
 
-        TaskResult allSuccess = TaskResult.SUCCESS;
+        Set<String> getFailedGroupSet = new HashSet<>();
 
         // 获取Group详细信息
         List<Group> groupList = new ArrayList<>();
@@ -44,13 +44,16 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
             try {
                 Group group = groupService.getGroupFromKafka(clusterPhy, groupName);
                 if (group == null) {
+                    // 获取到为空的 group 信息，直接忽略不要
                     continue;
                 }
 
                 groupList.add(group);
             } catch (Exception e) {
                 log.error("method=processClusterTask||clusterPhyId={}||groupName={}||errMsg=exception", clusterPhy.getId(), groupName, e);
-                allSuccess = TaskResult.FAIL;
+
+                // 记录获取失败的 group 信息
+                getFailedGroupSet.add(groupName);
             }
         }
 
@@ -58,17 +61,9 @@ public class SyncKafkaGroupTask extends AbstractAsyncMetadataDispatchTask {
         this.filterTopicIfTopicNotExist(clusterPhy.getId(), groupList);
 
         // 更新DB中的Group信息
-        groupService.batchReplaceGroupsAndMembers(clusterPhy.getId(), groupList, triggerTimeUnitMs);
+        groupService.batchReplaceGroupsAndMembers(clusterPhy.getId(), groupList, getFailedGroupSet);
 
-        // 如果存在错误，则直接返回
-        if (!TaskResult.SUCCESS.equals(allSuccess)) {
-            return allSuccess;
-        }
-
-        // 删除历史的Group
-        groupService.deleteByUpdateTimeBeforeInDB(clusterPhy.getId(), new Date(triggerTimeUnitMs - 5 * 60 * 1000));
-
-        return allSuccess;
+        return getFailedGroupSet.isEmpty()? TaskResult.SUCCESS: TaskResult.FAIL;
     }
 
     private void filterTopicIfTopicNotExist(Long clusterPhyId, List<Group> groupList) {

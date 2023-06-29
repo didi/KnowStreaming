@@ -4,6 +4,8 @@ package com.xiaojukeji.know.streaming.km.common.bean.entity.broker;
 import com.alibaba.fastjson.TypeReference;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.common.IpPortData;
 import com.xiaojukeji.know.streaming.km.common.bean.po.broker.BrokerPO;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
+import com.xiaojukeji.know.streaming.km.common.enums.jmx.JmxEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -71,10 +73,10 @@ public class Broker implements Serializable {
         metadata.setBrokerId(node.id());
         metadata.setHost(node.host());
         metadata.setPort(node.port());
-        metadata.setJmxPort(-1);
+        metadata.setJmxPort(JmxEnum.UNKNOWN.getPort());
         metadata.setStartTimestamp(startTimestamp);
         metadata.setRack(node.rack());
-        metadata.setStatus(1);
+        metadata.setStatus(Constant.ALIVE);
         return metadata;
     }
 
