@@ -20,7 +20,7 @@
   - [14、对接Ldap的配置](#14对接ldap的配置)
   - [15、测试时使用Testcontainers的说明](#15测试时使用testcontainers的说明)
   - [16、JMX连接失败怎么办](#16jmx连接失败怎么办)
-
+  - [17、zk监控无数据问题](#17zk监控无数据问题)
 
 ## 1、支持哪些 Kafka 版本？
 
@@ -254,3 +254,27 @@ spring:
 ## 16、JMX连接失败怎么办
 
 详细见：[解决连接JMX失败](../dev_guide/%E8%A7%A3%E5%86%B3%E8%BF%9E%E6%8E%A5JMX%E5%A4%B1%E8%B4%A5.md)
+
+
+## 17、zk监控无数据问题
+
+**现象：** 
+zookeeper集群正常，但Ks上zk页面所有监控指标无数据，`KnowStreaming` log_error.log日志提示
+
+```vim
+[MetricCollect-Shard-0-8-thread-1] ERROR class=c.x.k.s.k.c.s.h.c.z.HealthCheckZookeeperService||method=checkWatchCount||param=ZookeeperParam(zkAddressList=[Tuple{v1=192.168.xxx.xx, v2=2181}, Tuple{v1=192.168.xxx.xx, v2=2181}, Tuple{v1=192.168.xxx.xx, v2=2181}], zkConfig=null)||config=HealthAmountRatioConfig(amount=100000, ratio=0.8)||result=Result{message='mntr is not executed because it is not in the whitelist.
+', code=8031, data=null}||errMsg=get metrics failed, may be collect failed or zk mntr command not in whitelist.
+2023-04-23 14:39:07.234 [MetricCollect-Shard-0-8-thread-1] ERROR class=c.x.k.s.k.c.s.h.checker.AbstractHeal
+```
+
+
+原因就很明确了。需要开放zk的四字命令，在`zoo.cfg`配置文件中添加
+```
+4lw.commands.whitelist=mntr,stat,ruok,envi,srvr,envi,cons,conf,wchs,wchp
+```
+
+
+建议至少开放上述几个四字命令，当然，您也可以全部开放
+```
+4lw.commands.whitelist=*
+```
