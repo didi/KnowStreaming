@@ -321,11 +321,11 @@ const AddDrawer = forwardRef((_, ref) => {
                                 if (!value) {
                                   return Promise.reject(`${UpperCaseType}Name 不能为空`);
                                 }
-                                if (type === 'topic' && getFieldValue(`${type}PatternType`) === ACL_PATTERN_TYPE['Literal']) {
-                                  return Utils.request(api.getTopicMetadata(clusterId as any, value)).then((res: any) => {
-                                    return res?.exist ? Promise.resolve() : Promise.reject('该 Topic 不存在');
-                                  });
-                                }
+                                // if (type === 'topic' && getFieldValue(`${type}PatternType`) === ACL_PATTERN_TYPE['Literal']) {
+                                //   return Utils.request(api.getTopicMetadata(clusterId as any, value)).then((res: any) => {
+                                //     return res?.exist ? Promise.resolve() : Promise.reject('该 Topic 不存在');
+                                //   });
+                                // }
                                 return Promise.resolve();
                               },
                             }),
