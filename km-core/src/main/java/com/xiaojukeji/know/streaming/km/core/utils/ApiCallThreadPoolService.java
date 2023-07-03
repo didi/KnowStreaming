@@ -37,7 +37,16 @@ public class ApiCallThreadPoolService {
         apiFutureUtil.runnableTask(taskName, timeoutUnisMs, callable);
     }
 
+    public static void runnableTask(String taskName, Integer timeoutUnisMs, Runnable runnable) {
+        apiFutureUtil.runnableTask(taskName, timeoutUnisMs, runnable);
+    }
+
+    @Deprecated
     public static void waitResult(Integer stepWaitTimeUnitMs) {
         apiFutureUtil.waitResult(stepWaitTimeUnitMs);
+    }
+
+    public static void waitResult() {
+        apiFutureUtil.waitResult(0);
     }
 }

@@ -38,6 +38,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.service.config.KSConfigUtils;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
@@ -88,6 +89,9 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
     @Autowired
     private GroupManager groupManager;
+
+    @Autowired
+    private KSConfigUtils ksConfigUtils;
 
     @Override
     public TopicBrokerAllVO getTopicBrokerAll(Long clusterPhyId, String topicName, String searchBrokerHost) throws NotExistException {
@@ -178,9 +182,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
             // 获取指定时间每个分区的offset（按指定开始时间查询消息时）
             if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
                 Map<TopicPartition, Long> timestampsToSearch = new HashMap<>();
-                partitionList.forEach(topicPartition -> {
-                    timestampsToSearch.put(topicPartition, dto.getStartTimestampUnitMs());
-                });
+                partitionList.forEach(topicPartition -> timestampsToSearch.put(topicPartition, dto.getStartTimestampUnitMs()));
                 partitionOffsetAndTimestampMap = kafkaConsumer.offsetsForTimes(timestampsToSearch);
             }
 
@@ -360,13 +362,19 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
     @Override
     public PaginationResult<GroupTopicOverviewVO> pagingTopicGroupsOverview(Long clusterPhyId, String topicName, String searchGroupName, PaginationBaseDTO dto) {
+        long startTimeUnitMs = System.currentTimeMillis();
+
         PaginationResult<GroupMemberPO> paginationResult = groupService.pagingGroupMembers(clusterPhyId, topicName, "", "", searchGroupName, dto);
 
         if (!paginationResult.hasData()) {
             return PaginationResult.buildSuc(new ArrayList<>(), paginationResult);
         }
 
-        List<GroupTopicOverviewVO> groupTopicVOList = groupManager.getGroupTopicOverviewVOList(clusterPhyId, paginationResult.getData().getBizData());
+        List<GroupTopicOverviewVO> groupTopicVOList = groupManager.getGroupTopicOverviewVOList(
+                clusterPhyId,
+                paginationResult.getData().getBizData(),
+                ksConfigUtils.getApiCallLeftTimeUnitMs(System.currentTimeMillis() - startTimeUnitMs)    // 超时时间
+        );
 
         return PaginationResult.buildSuc(groupTopicVOList, paginationResult);
     }
