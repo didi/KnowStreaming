@@ -42,5 +42,7 @@ public interface GroupManager {
 
     Result<Void> deleteGroupOffsets(GroupOffsetDeleteDTO dto, String operator) throws Exception;
 
+    @Deprecated
     List<GroupTopicOverviewVO> getGroupTopicOverviewVOList(Long clusterPhyId, List<GroupMemberPO> groupMemberPOList);
+    List<GroupTopicOverviewVO> getGroupTopicOverviewVOList(Long clusterPhyId, List<GroupMemberPO> groupMemberPOList, Integer timeoutUnitMs);
 }
