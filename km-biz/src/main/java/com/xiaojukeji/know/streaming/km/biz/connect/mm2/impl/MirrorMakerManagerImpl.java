@@ -48,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -597,7 +598,7 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
     private List<ClusterMirrorMakerOverviewVO> completeClusterInfo(List<ClusterMirrorMakerOverviewVO> mirrorMakerVOList) {
 
-        Map<String, KSConnectorInfo> connectorInfoMap = new HashMap<>();
+        Map<String, KSConnectorInfo> connectorInfoMap = new ConcurrentHashMap<>();
 
         for (ClusterMirrorMakerOverviewVO mirrorMakerVO : mirrorMakerVOList) {
             ApiCallThreadPoolService.runnableTask(String.format("method=completeClusterInfo||connectClusterId=%d||connectorName=%s||getMirrorMakerInfo", mirrorMakerVO.getConnectClusterId(), mirrorMakerVO.getConnectorName()),
@@ -607,12 +608,10 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
                         if (connectorInfoRet.hasData()) {
                             connectorInfoMap.put(mirrorMakerVO.getConnectClusterId() + mirrorMakerVO.getConnectorName(), connectorInfoRet.getData());
                         }
-
-                        return connectorInfoRet.getData();
                     });
         }
 
-        ApiCallThreadPoolService.waitResult(1000);
+        ApiCallThreadPoolService.waitResult();
 
         List<ClusterMirrorMakerOverviewVO> newMirrorMakerVOList = new ArrayList<>();
         for (ClusterMirrorMakerOverviewVO mirrorMakerVO : mirrorMakerVOList) {

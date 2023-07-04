@@ -47,6 +47,7 @@ import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.utils.ApiCallThreadPoolService;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.TopicConfig;
@@ -60,7 +61,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class TopicStateManagerImpl implements TopicStateManager {
-    private static final ILog log = LogFactory.getLog(TopicStateManagerImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(TopicStateManagerImpl.class);
 
     @Autowired
     private TopicService topicService;
@@ -232,26 +233,37 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
     @Override
     public Result<List<TopicPartitionVO>> getTopicPartitions(Long clusterPhyId, String topicName, List<String> metricsNames) {
+        long startTime = System.currentTimeMillis();
+
         List<Partition> partitionList = partitionService.listPartitionByTopic(clusterPhyId, topicName);
         if (ValidateUtils.isEmptyList(partitionList)) {
             return Result.buildSuc();
         }
 
-        Result<List<PartitionMetrics>> metricsResult = partitionMetricService.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, metricsNames);
-        if (metricsResult.failed()) {
-            // 仅打印错误日志，但是不直接返回错误
-            log.error(
-                    "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
-                    clusterPhyId, topicName, metricsResult
-            );
-        }
-
-        // 转map
         Map<Integer, PartitionMetrics> metricsMap = new HashMap<>();
-        if (metricsResult.hasData()) {
-            for (PartitionMetrics metrics: metricsResult.getData()) {
-                metricsMap.put(metrics.getPartitionId(), metrics);
-            }
+        ApiCallThreadPoolService.runnableTask(
+                String.format("clusterPhyId=%d||topicName=%s||method=getTopicPartitions", clusterPhyId, topicName),
+                ksConfigUtils.getApiCallLeftTimeUnitMs(System.currentTimeMillis() - startTime),
+                () -> {
+                    Result<List<PartitionMetrics>> metricsResult = partitionMetricService.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, metricsNames);
+                    if (metricsResult.failed()) {
+                        // 仅打印错误日志，但是不直接返回错误
+                        LOGGER.error(
+                                "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from kafka failed",
+                                clusterPhyId, topicName, metricsResult
+                        );
+                    }
+
+                    for (PartitionMetrics metrics: metricsResult.getData()) {
+                        metricsMap.put(metrics.getPartitionId(), metrics);
+                    }
+                }
+        );
+        boolean finished = ApiCallThreadPoolService.waitResultAndReturnFinished(1);
+
+        if (!finished && metricsMap.isEmpty()) {
+            // 未完成 -> 打印日志
+            LOGGER.error("method=getTopicPartitions||clusterPhyId={}||topicName={}||msg=get metrics from kafka failed", clusterPhyId, topicName);
         }
 
         List<TopicPartitionVO> voList = new ArrayList<>();
@@ -423,7 +435,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
             return voList;
         } catch (Exception e) {
-            log.error("method=getTopicMessages||clusterPhyId={}||topicName={}||param={}||errMsg=exception", clusterPhy.getId(), topicName, dto, e);
+            LOGGER.error("method=getTopicMessages||clusterPhyId={}||topicName={}||param={}||errMsg=exception", clusterPhy.getId(), topicName, dto, e);
 
             throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
         }
