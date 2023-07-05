@@ -27,6 +27,10 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.20.0'
     - name: Build with Maven
       run: mvn -U clean package -Dmaven.test.skip=true
 
