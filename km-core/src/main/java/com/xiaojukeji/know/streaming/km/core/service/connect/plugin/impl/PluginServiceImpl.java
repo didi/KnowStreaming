@@ -66,7 +66,7 @@ public class PluginServiceImpl extends BaseVersionControlService implements Plug
 
             // 通过参数检查接口，获取插件配置
             ConfigInfos configInfos = restTool.putJsonForObject(
-                    connectCluster.getClusterUrl() + String.format(GET_PLUGIN_CONFIG_DESC_URI, props.getProperty(KafkaConnectConstant.CONNECTOR_CLASS_FILED_NAME)),
+                    connectCluster.getSuitableRequestUrl() + String.format(GET_PLUGIN_CONFIG_DESC_URI, props.getProperty(KafkaConnectConstant.CONNECTOR_CLASS_FILED_NAME)),
                     props,
                     ConfigInfos.class
             );
@@ -94,7 +94,7 @@ public class PluginServiceImpl extends BaseVersionControlService implements Plug
 
             // 通过参数检查接口，获取插件配置
             List<ConnectPluginBasic> pluginList = restTool.getArrayObjectWithJsonContent(
-                    connectCluster.getClusterUrl() + GET_ALL_PLUGINS_URI,
+                    connectCluster.getSuitableRequestUrl() + GET_ALL_PLUGINS_URI,
                     new HashMap<>(),
                     ConnectPluginBasic.class
             );
