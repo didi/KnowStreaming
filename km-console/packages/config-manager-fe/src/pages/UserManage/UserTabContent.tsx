@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Form, ProTable, Select, Button, Input, Modal, message, Drawer, Space, Divider, AppContainer, Utils } from 'knowdesign';
+import { Form, ProTable, Select, Button, Input, Modal, Drawer, Space, Divider, AppContainer, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -52,7 +53,7 @@ const EditUserDrawer = forwardRef((props, ref) => {
             })
           : request(api.editUser, {
               method: 'POST',
-              data: { ...formData },
+              data: { ...formData, phone: Date.now() },
             });
       requestPromise.then(
         (res) => {

@@ -22,7 +22,7 @@ import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistExcept
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerConfigDAO;
@@ -42,7 +42,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 
 
 @Service
-public class BrokerConfigServiceImpl extends BaseVersionControlService implements BrokerConfigService {
+public class BrokerConfigServiceImpl extends BaseKafkaVersionControlService implements BrokerConfigService {
     private static final ILog log = LogFactory.getLog(BrokerConfigServiceImpl.class);
 
     private static final String GET_BROKER_CONFIG      = "getBrokerConfig";
@@ -70,8 +70,8 @@ public class BrokerConfigServiceImpl extends BaseVersionControlService implement
         registerVCHandler(GET_BROKER_CONFIG,     V_0_10_1_0, V_0_11_0_0, "getBrokerConfigByZKClient",       this::getBrokerConfigByZKClient);
         registerVCHandler(GET_BROKER_CONFIG,     V_0_11_0_0, V_MAX,      "getBrokerConfigByKafkaClient",    this::getBrokerConfigByKafkaClient);
 
-        registerVCHandler(MODIFY_BROKER_CONFIG,     V_0_10_1_0, V_0_11_0_0, "modifyBrokerConfigByZKClient",       this::modifyBrokerConfigByZKClient);
-        registerVCHandler(MODIFY_BROKER_CONFIG,     V_0_11_0_0, V_MAX,      "modifyBrokerConfigByKafkaClient",    this::modifyBrokerConfigByKafkaClient);
+        registerVCHandler(MODIFY_BROKER_CONFIG,     V_0_10_1_0, V_2_3_0, "modifyBrokerConfigByZKClient",       this::modifyBrokerConfigByZKClient);
+        registerVCHandler(MODIFY_BROKER_CONFIG,     V_2_3_0, V_MAX,      "modifyBrokerConfigByKafkaClient",    this::modifyBrokerConfigByKafkaClient);
     }
 
     @Override

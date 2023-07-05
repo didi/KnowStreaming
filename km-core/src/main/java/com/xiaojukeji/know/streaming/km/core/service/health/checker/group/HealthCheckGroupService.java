@@ -5,10 +5,11 @@ import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.BaseClusterHealthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthDetectedInLatestMinutesConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.group.GroupParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchTerm;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckNameEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.health.HealthCheckDimensionEnum;
@@ -16,7 +17,6 @@ import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.health.checker.AbstractHealthCheckService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +24,8 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.GroupMetricVersionItems.GROUP_METRIC_STATE;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.GROUP_METRIC_STATE;
 
-@Data
 @Service
 public class HealthCheckGroupService extends AbstractHealthCheckService {
     private static final ILog log = LogFactory.getLog(HealthCheckGroupService.class);
@@ -43,7 +42,7 @@ public class HealthCheckGroupService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
+    public List<ClusterParam> getResList(Long clusterPhyId) {
         return groupService.getGroupsFromDB(clusterPhyId).stream().map(elem -> new GroupParam(clusterPhyId, elem)).collect(Collectors.toList());
     }
 
@@ -52,10 +51,15 @@ public class HealthCheckGroupService extends AbstractHealthCheckService {
         return HealthCheckDimensionEnum.GROUP;
     }
 
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        return this.getHealthCheckDimensionEnum().getDimension();
+    }
+
     /**
      * 检查Group re-balance太频繁
      */
-    private HealthCheckResult checkReBalanceTooFrequently(Tuple<ClusterPhyParam, BaseClusterHealthConfig> paramTuple) {
+    private HealthCheckResult checkReBalanceTooFrequently(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {
         GroupParam param = (GroupParam) paramTuple.getV1();
         HealthDetectedInLatestMinutesConfig singleConfig = (HealthDetectedInLatestMinutesConfig) paramTuple.getV2();
 
@@ -80,7 +84,7 @@ public class HealthCheckGroupService extends AbstractHealthCheckService {
             return null;
         }
 
-        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes()? 0: 1);
+        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes() ? Constant.NO : Constant.YES);
 
         return checkResult;
     }

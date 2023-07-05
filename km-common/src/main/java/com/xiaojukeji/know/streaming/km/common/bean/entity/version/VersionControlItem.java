@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.common.bean.entity.version;
 
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

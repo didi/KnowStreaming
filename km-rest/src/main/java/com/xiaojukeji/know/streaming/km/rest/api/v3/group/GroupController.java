@@ -2,6 +2,7 @@ package com.xiaojukeji.know.streaming.km.rest.api.v3.group;
 
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.xiaojukeji.know.streaming.km.biz.group.GroupManager;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupOffsetDeleteDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupOffsetResetDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.group.GroupTopicConsumedDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
@@ -32,11 +33,18 @@ public class GroupController {
     @Autowired
     private GroupService groupService;
 
-    @ApiOperation(value = "重置组消费偏移", notes = "")
+    @ApiOperation(value = "重置消费偏移", notes = "")
     @PutMapping(value = "group-offsets")
     @ResponseBody
     public Result<Void> resetGroupOffsets(@Validated @RequestBody GroupOffsetResetDTO dto) throws Exception {
         return groupManager.resetGroupOffsets(dto, HttpRequestUtil.getOperator());
+    }
+
+    @ApiOperation(value = "删除消费偏移", notes = "")
+    @DeleteMapping(value = "group-offsets")
+    @ResponseBody
+    public Result<Void> deleteGroupOffsets(@Validated @RequestBody GroupOffsetDeleteDTO dto) throws Exception {
+        return groupManager.deleteGroupOffsets(dto, HttpRequestUtil.getOperator());
     }
 
     @ApiOperation(value = "Group-Topic指标信息", notes = "")
@@ -55,7 +63,7 @@ public class GroupController {
     public Result<GroupMetadataCombineExistVO> getGroupMetadataCombineExist(@PathVariable Long clusterPhyId,
                                                                             @PathVariable String groupName,
                                                                             @PathVariable String topicName) {
-        GroupMemberPO po = groupService.getGroupFromDB(clusterPhyId, groupName, topicName);
+        GroupMemberPO po = groupService.getGroupTopicFromDB(clusterPhyId, groupName, topicName);
         if (po == null) {
             return Result.buildSuc(new GroupMetadataCombineExistVO(clusterPhyId, groupName, topicName, false));
         }

@@ -54,8 +54,11 @@ public enum ResultStatus {
      * 调用错误, [8000, 9000)
      */
     KAFKA_OPERATE_FAILED(8010, "Kafka操作失败"),
+    KAFKA_CONNECTOR_OPERATE_FAILED(8011, "KafkaConnect操作失败"),
+    KAFKA_CONNECTOR_READ_FAILED(8012, "KafkaConnect读失败"),
     MYSQL_OPERATE_FAILED(8020, "MySQL操作失败"),
     ZK_OPERATE_FAILED(8030, "ZK操作失败"),
+    ZK_FOUR_LETTER_CMD_FORBIDDEN(8031, "ZK四字命令被禁止"),
     ES_OPERATE_ERROR(8040, "ES操作失败"),
     HTTP_REQ_ERROR(8050, "第三方http请求异常"),
 

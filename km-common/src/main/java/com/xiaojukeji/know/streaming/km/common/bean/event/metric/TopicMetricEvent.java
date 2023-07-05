@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public class TopicMetricEvent extends BaseMetricEvent{
 
-    private List<TopicMetrics> topicMetrics;
+    private final List<TopicMetrics> topicMetrics;
 
     public TopicMetricEvent(Object source, List<TopicMetrics> topicMetrics) {
         super( source );

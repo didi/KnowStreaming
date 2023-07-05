@@ -1,0 +1,125 @@
+.topic-dashboard {
+  height: calc(100% - 162px);
+  padding-bottom: 10px;
+  .ks-chart-container-header {
+    margin-top: 12px;
+  }
+  &-container {
+    height: calc(100% - 40px);
+    overflow: auto;
+    .no-group-con {
+      overflow: hidden;
+    }
+    .drag-sort-item:last-child {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.dashboard-drag-item-box {
+  position: relative;
+  width: auto;
+  height: 262px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.01), 0 3px 6px 3px rgba(0, 0, 0, 0.01), 0 2px 6px 0 rgba(0, 0, 0, 0.03);
+  &-title {
+    padding: 18px 0 0 20px;
+    font-family: @font-family-bold;
+    line-height: 16px;
+    .name {
+      font-size: 14px;
+      color: #212529;
+    }
+    .unit {
+      font-size: 12px;
+      color: #495057;
+    }
+    > span {
+      cursor: pointer;
+    }
+  }
+  .expand-icon-box {
+    position: absolute;
+    z-index: 1000;
+    top: 14px;
+    right: 44px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    .expand-icon {
+      color: #adb5bc;
+      line-height: 24px;
+    }
+    &:hover {
+      background: rgba(33, 37, 41, 0.06);
+      .expand-icon {
+        color: #74788d;
+      }
+    }
+  }
+}
+.overview-chart-detail-drawer {
+  .dcloud-spin-nested-loading > div > .dcloud-spin.dcloud-spin-spinning {
+    height: 300px;
+  }
+  &.dcloud-drawer .dcloud-drawer-body {
+    padding: 0 20px;
+  }
+  .detail-header {
+    display: flex;
+    align-items: flex-end;
+    font-weight: normal;
+    .title {
+      font-family: @font-family-bold;
+      font-size: 18px;
+      color: #495057;
+      letter-spacing: 0;
+      .unit {
+        font-family: @font-family-bold;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+      }
+    }
+    .slider-info {
+      margin-left: 10px;
+      font-size: 12px;
+      font-family: @font-family;
+      color: #303a51;
+    }
+  }
+  .chart-detail-modal-container {
+    position: relative;
+    overflow: hidden;
+    .expand-icon-box {
+      position: absolute;
+      z-index: 1000;
+      top: 14px;
+      right: 44px;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 16px;
+      text-align: center;
+      border-radius: 50%;
+      transition: background-color 0.3s ease;
+      .expand-icon {
+        color: #adb5bc;
+        line-height: 24px;
+      }
+      &:hover {
+        background: rgba(33, 37, 41, 0.04);
+        .expand-icon {
+          color: #74788d;
+        }
+      }
+    }
+    .detail-table {
+      margin-top: 16px;
+    }
+  }
+}

@@ -1,20 +1,32 @@
 /* eslint-disable react/display-name */
-import { Button, Divider, Drawer, Form, message, ProTable, Table, Utils } from 'knowdesign';
+import { Button, Divider, Drawer, Form, ProTable, Table, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { getHealthySettingColumn } from './config';
 import API from '../../api';
 import { useParams } from 'react-router-dom';
+import notification from '@src/components/Notification';
+
+interface HealthConfig {
+  dimensionCode: number;
+  dimensionName: string;
+  configGroup: string;
+  configItem: string;
+  configName: string;
+  configDesc: string;
+  value: string;
+}
 
 const HealthySetting = React.forwardRef((props: any, ref): JSX.Element => {
   const intl = useIntl();
   const [form] = Form.useForm();
+  const { clusterId } = useParams<{ clusterId: string }>();
 
   const [visible, setVisible] = useState(false);
   const [initialValues, setInitialValues] = useState({} as any);
 
-  const [data, setData] = React.useState([]);
-  const { clusterId } = useParams<{ clusterId: string }>();
+  const [data, setData] = React.useState<HealthConfig[]>([]);
 
   React.useImperativeHandle(ref, () => ({
     setVisible,
@@ -22,29 +34,25 @@ const HealthySetting = React.forwardRef((props: any, ref): JSX.Element => {
   }));
 
   const getHealthconfig = () => {
-    return Utils.request(API.getClusterHealthyConfigs(+clusterId)).then((res: any) => {
+    return Utils.request(API.getClusterHealthyConfigs(+clusterId)).then((res: HealthConfig[]) => {
       const values = {} as any;
+      res.sort((a, b) => a.dimensionCode - b.dimensionCode);
 
       try {
-        res = res.map((item: any) => {
+        res.forEach((item) => {
           const itemValue = JSON.parse(item.value);
-          item.weight = itemValue?.weight;
+          const { value, latestMinutes, detectedTimes, amount, ratio } = itemValue;
 
-          item.configItemName =
-            item.configItem.indexOf('Group Re-Balance') > -1
-              ? 'ReBalance'
-              : item.configItem.includes('副本未同步')
-                ? 'UNDER_REPLICA'
-                : item.configItem;
-
-          values[`weight_${item.configItemName}`] = itemValue?.weight;
-          values[`value_${item.configItemName}`] = itemValue?.value;
-          values[`latestMinutes_${item.configItemName}`] = itemValue?.latestMinutes;
-          values[`detectedTimes_${item.configItemName}`] = itemValue?.detectedTimes;
-          return item;
+          value && (values[`value_${item.configItem}`] = value);
+          latestMinutes && (values[`latestMinutes_${item.configItem}`] = latestMinutes);
+          detectedTimes && (values[`detectedTimes_${item.configItem}`] = detectedTimes);
+          amount && (values[`amount_${item.configItem}`] = amount);
+          ratio && (values[`ratio_${item.configItem}`] = ratio);
         });
       } catch (err) {
-        //
+        notification.error({
+          message: '健康项检查规则解析失败',
+        });
       }
       const formItemsValue = {
         ...initialValues,
@@ -69,10 +77,11 @@ const HealthySetting = React.forwardRef((props: any, ref): JSX.Element => {
           clusterId: +clusterId,
           value: JSON.stringify({
             clusterPhyId: +clusterId,
-            detectedTimes: res[`detectedTimes_${item.configItemName}`],
-            latestMinutes: res[`latestMinutes_${item.configItemName}`],
-            weight: res[`weight_${item.configItemName}`],
-            value: item.configItemName === 'Controller' ? 1 : res[`value_${item.configItemName}`],
+            detectedTimes: res[`detectedTimes_${item.configItem}`],
+            latestMinutes: res[`latestMinutes_${item.configItem}`],
+            amount: res[`amount_${item.configItem}`],
+            ratio: res[`ratio_${item.configItem}`],
+            value: item.configItem === 'Controller' ? 1 : res[`value_${item.configItem}`],
           }),
           valueGroup: item.configGroup,
           valueName: item.configName,
@@ -119,7 +128,7 @@ const HealthySetting = React.forwardRef((props: any, ref): JSX.Element => {
         <Form form={form} layout="vertical" onValuesChange={onHandleValuesChange}>
           <ProTable
             tableProps={{
-              rowKey: 'dimensionCode',
+              rowKey: 'configItem',
               showHeader: false,
               dataSource: data,
               columns: getHealthySettingColumn(form, data, clusterId),

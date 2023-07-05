@@ -3,6 +3,7 @@ import React from 'react';
 import { timeFormat, getSizeAndUnit } from '../../constants/common';
 import moment from 'moment';
 import { Tag, Tooltip } from 'knowdesign';
+import { IconFont } from '@knowdesign/icons';
 
 export const getBrokerListColumns = (arg?: any) => {
   const columns = [
@@ -82,6 +83,14 @@ export const getBrokerListColumns = (arg?: any) => {
       dataIndex: 'jmxPort',
       key: 'jmxPort',
       width: 100,
+      render: (t: string, r: any) => {
+        return (
+          <span>
+            <IconFont type={r?.jmxConnected ? 'icon-zhengchang' : 'icon-yichang'} />
+            <span style={{ marginLeft: 4 }}>{t}</span>
+          </span>
+        );
+      },
     },
     {
       title: 'Partitions',

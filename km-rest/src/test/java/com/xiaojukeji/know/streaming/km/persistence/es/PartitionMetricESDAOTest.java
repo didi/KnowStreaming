@@ -11,16 +11,17 @@ import java.util.List;
 
 public class PartitionMetricESDAOTest extends KnowStreamApplicationTest {
 
+    Long clusterId = 1L;
+
     @Autowired
     private PartitionMetricESDAO partitionMetricESDAO;
 
     @Test
     public void listPartitionLatestMetricsByTopicTest(){
-        Long clusterPhyId = 2L;
         String topic = "__consumer_offsets";
 
         List<PartitionMetricPO> partitionMetricPOS = partitionMetricESDAO.listPartitionLatestMetricsByTopic(
-                clusterPhyId, topic, new ArrayList<>());
+                clusterId, topic, new ArrayList<>());
 
         assert null != partitionMetricPOS;
     }

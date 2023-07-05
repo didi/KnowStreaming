@@ -1,0 +1,86 @@
+@root-entry-name: 'default';
+@import '~knowdesign/es/basic/style/themes/index';
+@import '~knowdesign/es/basic/style/mixins/index';
+@collapse-prefix-cls: ~'@{ant-prefix}-collapse';
+
+.clearfix() {
+  &::before {
+    display: table;
+    content: '';
+  }
+
+  &::after {
+    display: table;
+    clear: both;
+    content: '';
+  }
+}
+.ks-chart-container {
+  .query-module-container {
+    padding: 20px 24px;
+    background: #fff;
+    border-bottom: 1px solid #f6f6f6;
+  }
+  .d1-row {
+    width: auto;
+  }
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    .header-left,
+    .header-right {
+      display: flex;
+      align-items: center;
+      .icon-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 3px;
+        border-radius: 50%;
+        cursor: pointer;
+        .icon {
+          font-size: 20px;
+          color: #74788d;
+        }
+        &:hover {
+          background: rgba(33, 37, 41, 0.04);
+          .refresh-icon {
+            color: #495057;
+          }
+        }
+      }
+    }
+    .header-right {
+      .grid-select {
+        margin-left: 12px;
+        .dcloud-select-selector {
+          border-radius: 8px;
+        }
+      }
+    }
+  }
+  .no-group-con {
+    padding: 0 24px;
+  }
+  .drag-sort-item {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background: #fff;
+  }
+  .@{ant-prefix}-collapse {
+    &-ghost {
+      > .@{collapse-prefix-cls}-item {
+        > .@{collapse-prefix-cls}-header {
+          padding: 10px 24px;
+        }
+        > .@{collapse-prefix-cls}-content {
+          > .@{collapse-prefix-cls}-content-box {
+            padding: 20px 24px;
+          }
+        }
+      }
+    }
+  }
+}

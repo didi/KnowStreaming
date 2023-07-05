@@ -1,31 +1,39 @@
 package com.xiaojukeji.know.streaming.km.persistence.kafka;
 
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.persistence.AbstractClusterLoadedChangedHandler;
 import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Slf4j
 @Component
 public class KafkaAdminClient extends AbstractClusterLoadedChangedHandler {
-    private static final Map<Long, AdminClient> KAFKA_ADMIN_CLIENT_MAP = new ConcurrentHashMap<>();
+    private static final ILog LOGGER = LogFactory.getLog(KafkaAdminClient.class);
+
+    @Value("${client-pool.kafka-admin.client-cnt:1}")
+    private Integer clientCnt;
+
+    private static final Map<Long, List<AdminClient>> KAFKA_ADMIN_CLIENT_MAP = new ConcurrentHashMap<>();
 
     public AdminClient getClient(Long clusterPhyId) throws NotExistException {
-        AdminClient adminClient = KAFKA_ADMIN_CLIENT_MAP.get(clusterPhyId);
-        if (adminClient != null) {
-            return adminClient;
+        List<AdminClient> adminClientList = KAFKA_ADMIN_CLIENT_MAP.get(clusterPhyId);
+        if (adminClientList != null) {
+            return adminClientList.get((int)(System.currentTimeMillis() % clientCnt));
         }
 
-        adminClient = this.createKafkaAdminClient(clusterPhyId);
+        AdminClient adminClient = this.createKafkaAdminClient(clusterPhyId);
         if (adminClient == null) {
             throw new NotExistException("kafka admin-client not exist due to create failed");
         }
@@ -61,18 +69,20 @@ public class KafkaAdminClient extends AbstractClusterLoadedChangedHandler {
         try {
             modifyClientMapLock.lock();
 
-            AdminClient adminClient = KAFKA_ADMIN_CLIENT_MAP.remove(clusterPhyId);
-            if (adminClient == null) {
+            List<AdminClient> adminClientList = KAFKA_ADMIN_CLIENT_MAP.remove(clusterPhyId);
+            if (adminClientList == null) {
                 return;
             }
 
-            log.info("close kafka AdminClient starting, clusterPhyId:{}", clusterPhyId);
+            LOGGER.info("close kafka AdminClient starting, clusterPhyId:{}", clusterPhyId);
 
-            adminClient.close();
+            boolean allSuccess = this.closeAdminClientList(adminClientList);
 
-            log.info("close kafka AdminClient success, clusterPhyId:{}", clusterPhyId);
+            if (allSuccess) {
+                LOGGER.info("close kafka AdminClient success, clusterPhyId:{}", clusterPhyId);
+            }
         } catch (Exception e) {
-            log.error("close kafka AdminClient failed, clusterPhyId:{}", clusterPhyId, e);
+            LOGGER.error("close kafka AdminClient failed, clusterPhyId:{}", clusterPhyId, e);
         } finally {
             modifyClientMapLock.unlock();
         }
@@ -88,29 +98,56 @@ public class KafkaAdminClient extends AbstractClusterLoadedChangedHandler {
     }
 
     private AdminClient createKafkaAdminClient(Long clusterPhyId, String bootstrapServers, Properties props) {
+        List<AdminClient> adminClientList = null;
         try {
             modifyClientMapLock.lock();
 
-            AdminClient adminClient = KAFKA_ADMIN_CLIENT_MAP.get(clusterPhyId);
-            if (adminClient != null) {
-                return adminClient;
+            adminClientList = KAFKA_ADMIN_CLIENT_MAP.get(clusterPhyId);
+            if (adminClientList != null) {
+                return adminClientList.get((int)(System.currentTimeMillis() % clientCnt));
             }
 
-            log.debug("create kafka AdminClient starting, clusterPhyId:{} props:{}", clusterPhyId, props);
+            LOGGER.debug("create kafka AdminClient starting, clusterPhyId:{} props:{}", clusterPhyId, props);
 
             if (props == null) {
                 props = new Properties();
             }
             props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-            KAFKA_ADMIN_CLIENT_MAP.put(clusterPhyId, AdminClient.create(props));
 
-            log.info("create kafka AdminClient success, clusterPhyId:{}", clusterPhyId);
+            adminClientList = new ArrayList<>();
+            for (int i = 0; i < clientCnt; ++i) {
+                adminClientList.add(AdminClient.create(props));
+            }
+
+            KAFKA_ADMIN_CLIENT_MAP.put(clusterPhyId, adminClientList);
+
+            LOGGER.info("create kafka AdminClient success, clusterPhyId:{}", clusterPhyId);
         } catch (Exception e) {
-            log.error("create kafka AdminClient failed, clusterPhyId:{} props:{}", clusterPhyId, props, e);
+            LOGGER.error("create kafka AdminClient failed, clusterPhyId:{} props:{}", clusterPhyId, props, e);
+
+            this.closeAdminClientList(adminClientList);
         } finally {
             modifyClientMapLock.unlock();
         }
 
-        return KAFKA_ADMIN_CLIENT_MAP.get(clusterPhyId);
+        return KAFKA_ADMIN_CLIENT_MAP.get(clusterPhyId).get((int)(System.currentTimeMillis() % clientCnt));
+    }
+
+    private boolean closeAdminClientList(List<AdminClient> adminClientList) {
+        if (adminClientList == null) {
+            return true;
+        }
+
+        boolean allSuccess = true;
+        for (AdminClient adminClient: adminClientList) {
+            try {
+                adminClient.close();
+            } catch (Exception e) {
+                // ignore
+                allSuccess = false;
+            }
+        }
+
+        return allSuccess;
     }
 }

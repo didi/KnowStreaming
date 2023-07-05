@@ -3,24 +3,28 @@ package com.xiaojukeji.know.streaming.km.core.service.topic.impl;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.dto.oplog.OplogDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.ha.HaActiveStandbyRelation;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicCreateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicPartitionExpandParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicTruncateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.TopicConverter;
+import com.xiaojukeji.know.streaming.km.common.enums.ha.HaResTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
+import com.xiaojukeji.know.streaming.km.core.service.ha.HaActiveStandbyRelationService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.OpTopicService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
@@ -30,6 +34,7 @@ import kafka.zk.AdminZkClient;
 import kafka.zk.KafkaZkClient;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.TopicPartitionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import scala.Option;
@@ -48,12 +53,13 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @author didi
  */
 @Service
-public class OpTopicServiceImpl extends BaseVersionControlService implements OpTopicService {
+public class OpTopicServiceImpl extends BaseKafkaVersionControlService implements OpTopicService {
     private static final ILog log = LogFactory.getLog(TopicConfigServiceImpl.class);
 
     private static final String TOPIC_CREATE    = "createTopic";
     private static final String TOPIC_DELETE    = "deleteTopic";
     private static final String TOPIC_EXPAND    = "expandTopic";
+    private static final String TOPIC_TRUNCATE  = "truncateTopic";
 
     @Autowired
     private TopicService topicService;
@@ -69,6 +75,9 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
 
     @Autowired
     private KafkaZKDAO kafkaZKDAO;
+
+    @Autowired
+    private HaActiveStandbyRelationService haActiveStandbyRelationService;
 
     @Override
     protected VersionItemTypeEnum getVersionItemType() {
@@ -86,6 +95,8 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
 
         registerVCHandler(TOPIC_EXPAND,     V_0_10_0_0, V_0_11_0_3, "expandTopicByZKClient",        this::expandTopicByZKClient);
         registerVCHandler(TOPIC_EXPAND,     V_0_11_0_3, V_MAX,      "expandTopicByKafkaClient",     this::expandTopicByKafkaClient);
+
+        registerVCHandler(TOPIC_TRUNCATE,   V_0_11_0_0, V_MAX,      "truncateTopicByKafkaClient",   this::truncateTopicByKafkaClient);
     }
 
     @Override
@@ -138,6 +149,25 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
             // 删除DB中的Topic数据
             topicService.deleteTopicInDB(param.getClusterPhyId(), param.getTopicName());
 
+            //解除高可用Topic关联
+            List<HaActiveStandbyRelation> haActiveStandbyRelations = haActiveStandbyRelationService.listByClusterAndType(param.getClusterPhyId(), HaResTypeEnum.MIRROR_TOPIC);
+            for (HaActiveStandbyRelation activeStandbyRelation : haActiveStandbyRelations) {
+                if (activeStandbyRelation.getResName().equals(param.getTopicName())) {
+                    try {
+                        KafkaZkClient kafkaZkClient = kafkaAdminZKClient.getClient(activeStandbyRelation.getStandbyClusterPhyId());
+                        Properties haTopics = kafkaZkClient.getEntityConfigs("ha-topics", activeStandbyRelation.getResName());
+                        if (haTopics.size() != 0) {
+                            kafkaZkClient.setOrCreateEntityConfigs("ha-topics", activeStandbyRelation.getResName(), new Properties());
+                            kafkaZkClient.createConfigChangeNotification("ha-topics/" + activeStandbyRelation.getResName());
+                        }
+                        haActiveStandbyRelationService.batchDeleteTopicHA(activeStandbyRelation.getActiveClusterPhyId(), activeStandbyRelation.getStandbyClusterPhyId(), Collections.singletonList(activeStandbyRelation.getResName()));
+                    } catch (Exception e) {
+                        log.error("method=deleteTopic||topicName:{}||errMsg=exception", activeStandbyRelation.getResName(), e);
+                        return Result.buildFailure(e.getMessage());
+                    }
+                }
+            }
+
             // 记录操作
             OplogDTO oplogDTO = new OplogDTO(operator,
                     OperationEnum.DELETE.getDesc(),
@@ -178,9 +208,58 @@ public class OpTopicServiceImpl extends BaseVersionControlService implements OpT
         return rv;
     }
 
+    @Override
+    public Result<Void> truncateTopic(TopicTruncateParam param, String operator) {
+        try {
+            // 清空topic数据
+            Result<Void> rv = (Result<Void>) doVCHandler(param.getClusterPhyId(), TOPIC_TRUNCATE, param);
+
+            if (rv == null || rv.failed()) {
+                return rv;
+            }
+
+            // 记录操作
+            OplogDTO oplogDTO = new OplogDTO(operator,
+                    OperationEnum.TRUNCATE.getDesc(),
+                    ModuleEnum.KAFKA_TOPIC.getDesc(),
+                    MsgConstant.getTopicBizStr(param.getClusterPhyId(), param.getTopicName()),
+                    String.format("清空Topic:[%s]", param.toString()));
+            opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
+            return rv;
+        } catch (VCHandlerNotExistException e) {
+            return Result.buildFailure(VC_HANDLE_NOT_EXIST);
+        }
+    }
 
     /**************************************************** private method ****************************************************/
 
+    private Result<Void> truncateTopicByKafkaClient(VersionItemParam itemParam) {
+        TopicTruncateParam param = (TopicTruncateParam) itemParam;
+        try {
+            AdminClient adminClient = kafkaAdminClient.getClient(param.getClusterPhyId());
+            //获取topic的分区信息
+            DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(Arrays.asList(param.getTopicName()), new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
+            Map<String, TopicDescription> descriptionMap = describeTopicsResult.all().get();
+
+            Map<TopicPartition, RecordsToDelete> recordsToDelete = new HashMap<>();
+            RecordsToDelete recordsToDeleteOffset = RecordsToDelete.beforeOffset(param.getOffset());
+
+            descriptionMap.forEach((topicName, topicDescription) -> {
+                for (TopicPartitionInfo topicPartition : topicDescription.partitions()) {
+                    recordsToDelete.put(new TopicPartition(topicName, topicPartition.partition()), recordsToDeleteOffset);
+                }
+            });
+
+            DeleteRecordsResult deleteRecordsResult = adminClient.deleteRecords(recordsToDelete, new DeleteRecordsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
+            deleteRecordsResult.all().get();
+        } catch (Exception e) {
+            log.error("truncate topic by kafka-client failed，clusterPhyId:{} topicName:{} offset:{}", param.getClusterPhyId(), param.getTopicName(), param.getOffset(), e);
+
+            return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
+        }
+
+        return Result.buildSuc();
+    }
 
     private Result<Void> deleteByKafkaClient(VersionItemParam itemParam) {
         TopicParam param = (TopicParam) itemParam;

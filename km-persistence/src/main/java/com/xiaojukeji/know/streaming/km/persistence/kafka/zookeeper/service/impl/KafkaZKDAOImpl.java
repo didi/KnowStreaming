@@ -7,6 +7,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.KafkaController;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.topic.TopicTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
@@ -78,7 +79,7 @@ public class KafkaZKDAOImpl implements KafkaZKDAO {
 
         try {
             BrokerMetadata metadata = this.getData(kafkaZkClient.currentZooKeeper(), BrokerIdZNode.path(brokerId), false, BrokerMetadata.class);
-            BrokerMetadata.parseAndUpdateBrokerMetadata(metadata);
+
             return this.convert2Broker(clusterPhyId, brokerId, metadata);
         } catch (KeeperException ke) {
             logger.error("method=getBrokerMetadata||clusterPhyId={}||brokerId={}||errMsg=exception", clusterPhyId, brokerId, ke);
@@ -279,7 +280,7 @@ public class KafkaZKDAOImpl implements KafkaZKDAO {
         metadata.setJmxPort(brokerMetadata.getJmxPort());
         metadata.setStartTimestamp(brokerMetadata.getTimestamp());
         metadata.setRack(brokerMetadata.getRack());
-        metadata.setStatus(1);
+        metadata.setStatus(Constant.ALIVE);
         metadata.setEndpointMap(brokerMetadata.getEndpointMap());
         return metadata;
     }

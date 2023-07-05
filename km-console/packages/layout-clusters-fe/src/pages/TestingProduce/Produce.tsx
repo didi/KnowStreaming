@@ -1,4 +1,5 @@
-import { AppContainer, Form, message, Tabs, Utils } from 'knowdesign';
+import { AppContainer, Form, Tabs, Utils } from 'knowdesign';
+import message from '@src/components/Message';
 import * as React from 'react';
 import ConfigForm from './component/ConfigFrom';
 import TestResult from '../TestingConsumer/component/Result';

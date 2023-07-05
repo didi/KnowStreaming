@@ -3,7 +3,6 @@ package com.xiaojukeji.know.streaming.km.rest.api.v3.topic;
 import com.xiaojukeji.know.streaming.km.biz.topic.TopicStateManager;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
-import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationSortDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.topic.TopicRecordDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BaseMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
@@ -11,6 +10,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.po.KafkaAclPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.acl.AclBindingVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicBasicVO;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicOverviewVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.TopicBrokersPartitionsSummaryVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.TopicStateVO;
@@ -74,7 +74,7 @@ public class TopicStateController {
     @GetMapping(value = "clusters/{clusterPhyId}/topics/{topicName}/brokers-partitions-summary")
     @ResponseBody
     public Result<TopicBrokersPartitionsSummaryVO> getTopicBrokersPartitionsSummary(@PathVariable Long clusterPhyId,
-                                                                                    @PathVariable String topicName) throws Exception {
+                                                                                    @PathVariable String topicName) {
         return topicStateManager.getTopicBrokersPartitionsSummary(clusterPhyId, topicName);
     }
 
@@ -83,7 +83,7 @@ public class TopicStateController {
     @ResponseBody
     public Result<List<TopicPartitionVO>> getTopicPartitions(@PathVariable Long clusterPhyId,
                                                              @PathVariable String topicName,
-                                                             @RequestBody List<String> metricsNames) throws Exception {
+                                                             @RequestBody List<String> metricsNames) {
         return topicStateManager.getTopicPartitions(clusterPhyId, topicName, metricsNames);
     }
 
@@ -136,8 +136,17 @@ public class TopicStateController {
     @ApiOperation(value = "TopicGroups基本信息列表")
     @GetMapping(value = "clusters/{clusterPhyId}/topics/{topicName}/groups-basic")
     @ResponseBody
-    public Result<List<GroupTopicBasicVO>> getTopicGroupsBasic(@PathVariable Long clusterPhyId,
-                                                               @PathVariable String topicName) {
+    public Result<List<GroupTopicBasicVO>> getTopicGroupsBasic(@PathVariable Long clusterPhyId, @PathVariable String topicName) {
         return Result.buildSuc(ConvertUtil.list2List(groupService.listGroupByTopic(clusterPhyId, topicName), GroupTopicBasicVO.class));
     }
+
+    @ApiOperation("Topic的Group列表")
+    @GetMapping(value = "clusters/{clusterPhyId}/topics/{topicName}/groups-overview")
+    public PaginationResult<GroupTopicOverviewVO> getTopicGroupsOverview(@PathVariable Long clusterPhyId,
+                                                                         @PathVariable String topicName,
+                                                                         @RequestParam(required = false) String searchGroupName,
+                                                                         PaginationBaseDTO dto) {
+        return topicStateManager.pagingTopicGroupsOverview(clusterPhyId, topicName, searchGroupName, dto);
+    }
+
 }

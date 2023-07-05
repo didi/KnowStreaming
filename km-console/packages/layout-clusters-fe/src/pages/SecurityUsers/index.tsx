@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   Modal,
-  message,
   ProTable,
   Drawer,
   Space,
@@ -16,6 +15,7 @@ import {
   Tooltip,
   Alert,
 } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import { CloseOutlined, EyeInvisibleOutlined, EyeOutlined, LoadingOutlined } from '@ant-design/icons';
 import './index.less';

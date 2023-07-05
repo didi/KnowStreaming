@@ -6,6 +6,7 @@ import com.google.common.collect.Table;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricGroupPartitionDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.group.GroupTopic;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.GroupMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.metric.GroupMetricParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -20,28 +21,25 @@ import com.xiaojukeji.know.streaming.km.common.utils.BeanUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
-import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
+import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.GroupMetricESDAO;
-import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
-import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.GroupMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.*;
 
 /**
  * @author didi
  */
 @Service("groupMetricService")
 public class GroupMetricServiceImpl extends BaseMetricService implements GroupMetricService {
-    private static final ILog LOGGER       = LogFactory.getLog( GroupMetricServiceImpl.class);
+    private static final ILog LOGGER       = LogFactory.getLog(GroupMetricServiceImpl.class);
 
     public static final String GROUP_METHOD_GET_JUST_FRO_TEST                       = "getMetricJustForTest";
     public static final String GROUP_METHOD_GET_HEALTH_SCORE                        = "getMetricHealthScore";
@@ -56,7 +54,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     @Override
     protected void initRegisterVCHandler(){
         registerVCHandler( GROUP_METHOD_GET_JUST_FRO_TEST,                              this::getMetricJustForTest);
-        registerVCHandler( GROUP_METHOD_GET_LAG_RELEVANT_FROM_ADMIN_CLIENT,             this::getLagRelevantFromAdminClient );
+        registerVCHandler( GROUP_METHOD_GET_LAG_RELEVANT_FROM_ADMIN_CLIENT,             this::getLagRelevantFromAdminClient);
         registerVCHandler( GROUP_METHOD_GET_HEALTH_SCORE,                               this::getMetricHealthScore);
         registerVCHandler( GROUP_METHOD_GET_STATE,                                      this::getGroupState);
     }
@@ -65,7 +63,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     private GroupService groupService;
 
     @Autowired
-    private HealthScoreService healthScoreService;
+    private HealthStateService healthStateService;
 
     @Autowired
     private PartitionService partitionService;
@@ -131,8 +129,14 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     @Override
     public Result<List<MetricMultiLinesVO>> listGroupMetricsFromES(Long clusterId, MetricGroupPartitionDTO dto) {
         Table<String/*metric*/, String/*topic&partition*/, List<MetricPointVO>> retTable = groupMetricESDAO.listGroupMetrics(
-                clusterId, dto.getGroup(), dto.getGroupTopics(), dto.getMetricsNames(),
-                dto.getAggType(), dto.getStartTime(), dto.getEndTime());
+                clusterId,
+                dto.getGroup(),
+                dto.getGroupTopics(),
+                dto.getMetricsNames(),
+                dto.getAggType(),
+                dto.getStartTime(),
+                dto.getEndTime()
+        );
 
         List<MetricMultiLinesVO> multiLinesVOS = metricMap2VO(clusterId, retTable.rowMap());
         return Result.buildSuc(multiLinesVOS);
@@ -142,7 +146,11 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     public Result<List<GroupMetrics>> listLatestMetricsAggByGroupTopicFromES(Long clusterPhyId, List<GroupTopic> groupTopicList,
                                                                              List<String> metricNames, AggTypeEnum aggType) {
         List<GroupMetricPO> groupMetricPOS = groupMetricESDAO.listLatestMetricsAggByGroupTopic(
-                clusterPhyId, groupTopicList, metricNames, aggType);
+                clusterPhyId,
+                groupTopicList,
+                metricNames,
+                aggType
+        );
 
         return Result.buildSuc( ConvertUtil.list2List(groupMetricPOS, GroupMetrics.class));
     }
@@ -151,7 +159,11 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     public Result<List<GroupMetrics>> listPartitionLatestMetricsFromES(Long clusterPhyId, String groupName, String topicName,
                                                                        List<String> metricNames) {
         List<GroupMetricPO> groupMetricPOS = groupMetricESDAO.listPartitionLatestMetrics(
-                clusterPhyId, groupName, topicName, metricNames);
+                clusterPhyId,
+                groupName,
+                topicName,
+                metricNames
+        );
 
         return Result.buildSuc( ConvertUtil.list2List(groupMetricPOS, GroupMetrics.class));
     }
@@ -160,9 +172,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     public Result<Integer> countMetricValueOccurrencesFromES(Long clusterPhyId, String groupName,
                                                              SearchTerm term, Long startTime, Long endTime) {
         setQueryMetricFlag(term);
-        int count = groupMetricESDAO.countMetricValue(clusterPhyId, groupName,
-                term, startTime, endTime);
-
+        int count = groupMetricESDAO.countMetricValue(clusterPhyId, groupName, term, startTime, endTime);
         if(count < 0){
             return Result.buildFail();
         }
@@ -183,7 +193,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
 
         List<GroupMetrics> metricsList = new ArrayList<>();
         try {
-            Map<TopicPartition, Long> groupOffsetMap = groupService.getGroupOffset(clusterId, groupName);
+            Map<TopicPartition, Long> groupOffsetMap = groupService.getGroupOffsetFromKafka(clusterId, groupName);
 
             // 组织 GROUP_METRIC_OFFSET_CONSUMED 指标
             for (Map.Entry<TopicPartition, Long> entry: groupOffsetMap.entrySet()) {
@@ -193,36 +203,34 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
                 metricsList.add(metrics);
             }
 
-            for (String topicName: groupOffsetMap.keySet().stream().map(elem -> elem.topic()).collect(Collectors.toSet())) {
-                Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterId, topicName, OffsetSpec.latest(), null);
-                if (!offsetMapResult.hasData()) {
-                    // 这个分区获取失败
+            Result<Map<TopicPartition, Long>> offsetMapResult = partitionService.getPartitionOffsetFromKafka(clusterId, new ArrayList<>(groupOffsetMap.keySet()), KSOffsetSpec.latest());
+            if (!offsetMapResult.hasData()) {
+                // 获取失败
+                return Result.buildSuc(metricsList);
+            }
+
+            for (Map.Entry<TopicPartition, Long> entry: offsetMapResult.getData().entrySet()) {
+                // 组织 GROUP_METRIC_LOG_END_OFFSET 指标
+                GroupMetrics metrics = new GroupMetrics(clusterId, entry.getKey().partition(), entry.getKey().topic(), groupName, false);
+                metrics.putMetric(GROUP_METRIC_LOG_END_OFFSET, entry.getValue().floatValue());
+                metricsList.add(metrics);
+
+                Long groupOffset = groupOffsetMap.get(entry.getKey());
+                if (groupOffset == null) {
+                    // 不存在，则直接跳过
                     continue;
                 }
 
-                for (Map.Entry<TopicPartition, Long> entry: offsetMapResult.getData().entrySet()) {
-                    // 组织 GROUP_METRIC_LOG_END_OFFSET 指标
-                    GroupMetrics metrics = new GroupMetrics(clusterId, entry.getKey().partition(), entry.getKey().topic(), groupName, false);
-                    metrics.putMetric(GROUP_METRIC_LOG_END_OFFSET, entry.getValue().floatValue());
-                    metricsList.add(metrics);
+                // 组织 GROUP_METRIC_LAG 指标
+                GroupMetrics groupMetrics = new GroupMetrics(clusterId, entry.getKey().partition(), entry.getKey().topic(), groupName, false);
+                groupMetrics.putMetric(GROUP_METRIC_LAG, Math.max(0L, entry.getValue() - groupOffset) * 1.0f);
 
-                    Long groupOffset = groupOffsetMap.get(entry.getKey());
-                    if (groupOffset == null) {
-                        // 不存在，则直接跳过
-                        continue;
-                    }
-
-                    // 组织 GROUP_METRIC_LAG 指标
-                    GroupMetrics groupMetrics = new GroupMetrics(clusterId, entry.getKey().partition(), entry.getKey().topic(), groupName, false);
-                    groupMetrics.putMetric(GROUP_METRIC_LAG, Math.max(0L, entry.getValue() - groupOffset) * 1.0f);
-
-                    metricsList.add(groupMetrics);
-                }
+                metricsList.add(groupMetrics);
             }
 
             return Result.buildSuc(metricsList);
         } catch (Exception e) {
-            LOGGER.error("class=GroupMetricServiceImpl||method=getLagFromAdminClient||clusterPhyId={}||groupName={}||metrics={}||msg=exception", clusterId, groupName, metric, e);
+            LOGGER.error("method=getLagFromAdminClient||clusterPhyId={}||groupName={}||metrics={}||msg=exception", clusterId, groupName, metric, e);
             return Result.buildFailure(VC_KAFKA_CLIENT_ERROR);
         }
     }
@@ -266,8 +274,8 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     private Result<List<GroupMetrics>> getMetricHealthScore(VersionItemParam param) {
         GroupMetricParam groupMetricParam = (GroupMetricParam)param;
 
-        return Result.buildSuc(Arrays.asList(healthScoreService.calGroupHealthScore(
-                groupMetricParam.getClusterPhyId(), groupMetricParam.getGroupName()))
+        return Result.buildSuc(Arrays.asList(
+                healthStateService.calGroupHealthMetrics(groupMetricParam.getClusterPhyId(), groupMetricParam.getGroupName()))
         );
     }
 }

@@ -12,30 +12,39 @@ export interface MetricInfo {
 }
 
 // 接口返回图表原始数据类型
-export interface MetricDefaultChartDataType {
+export interface OriginMetricData {
   metricName: string;
-  metricLines: {
+  metricLines?: {
     name: string;
     createTime: number;
     updateTime: number;
     metricPoints: {
       aggType: string;
       timeStamp: number;
-      value: number;
+      value: string;
       createTime: number;
       updateTime: number;
     }[];
   }[];
+  metricPoints?: {
+    aggType: string;
+    name: string;
+    timeStamp: number;
+    value: string;
+  }[];
 }
 
 // 格式化后图表数据类型
-export interface MetricChartDataType {
+export interface FormattedMetricData {
   metricName: string;
   metricUnit: string;
+  metricType: MetricType;
   metricLines: {
     name: string;
     data: (string | number)[][];
   }[];
+  showLegend: boolean;
+  targetUnit: [string, number] | undefined;
 }
 
 // 图表颜色库
@@ -55,22 +64,38 @@ export const CHART_COLOR_LIST = [
   '#C9E795',
 ];
 
-// 图表存储单位换算
-export const UNIT_MAP = {
+// 图表存储单位
+export const MEMORY_MAP = {
   TB: Math.pow(1024, 4),
   GB: Math.pow(1024, 3),
   MB: Math.pow(1024, 2),
   KB: 1024,
 };
-export const getUnit = (value: number) => Object.entries(UNIT_MAP).find(([, size]) => value / size >= 1) || ['Byte', 1];
-
-// 图表数字单位换算
-export const DATA_NUMBER_MAP = {
+// 图表时间单位
+export const TIME_MAP = {
+  h: 1000 * 60 * 60,
+  min: 1000 * 60,
+  s: 1000,
+};
+// 图表数字单位
+export const NUM_MAP = {
   十亿: Math.pow(1000, 3),
   百万: Math.pow(1000, 2),
   千: 1000,
 };
-export const getDataNumberUnit = (value: number) => Object.entries(DATA_NUMBER_MAP).find(([, size]) => value / size >= 1) || ['', 1];
+const calculateUnit = (map: { [unit: string]: number }, targetValue: number) => {
+  return Object.entries(map).find(([, size]) => targetValue / size >= 1);
+};
+const getMemoryUnit = (value: number) => calculateUnit(MEMORY_MAP, value) || ['Byte', 1];
+const getTimeUnit = (value: number) => calculateUnit(TIME_MAP, value) || ['ms', 1];
+const getNumUnit = (value: number) => calculateUnit(NUM_MAP, value) || ['', 1];
+
+export const getDataUnit = {
+  Memory: getMemoryUnit,
+  Time: getTimeUnit,
+  Num: getNumUnit,
+};
+export type DataUnitType = keyof typeof getDataUnit;
 
 // 图表补点间隔计算
 export const SUPPLEMENTARY_INTERVAL_MAP = {
@@ -112,9 +137,9 @@ export const resolveMetricsRank = (metricList: MetricInfo[]) => {
   };
 };
 
-// 补点
+// 图表补点
 export const supplementaryPoints = (
-  lines: MetricChartDataType['metricLines'],
+  lines: FormattedMetricData['metricLines'],
   timeRange: readonly [number, number],
   extraCallback?: (point: [number, 0]) => any[]
 ): void => {
@@ -165,19 +190,39 @@ export const supplementaryPoints = (
 // 格式化图表数据
 export const formatChartData = (
   // 图表源数据
-  metricData: MetricDefaultChartDataType[],
+  metricsData: OriginMetricData[],
   // 获取指标单位
   getMetricDefine: (type: MetricType, metric: string) => MetricsDefine[keyof MetricsDefine],
   // 指标类型
   metricType: MetricType,
   // 图表时间范围，用于补点
   timeRange: readonly [number, number],
-  transformUnit: [string, number] = undefined
-): MetricChartDataType[] => {
-  return metricData.map(({ metricName, metricLines }) => {
+  targetUnit: [string, number] = undefined
+): FormattedMetricData[] => {
+  return metricsData.map((originData) => {
+    const { metricName } = originData;
     const curMetricInfo = (getMetricDefine && getMetricDefine(metricType, metricName)) || null;
-    const isByteUnit = curMetricInfo?.unit?.toLowerCase().includes('byte');
+    let showLegend = true;
+    let metricLines = [];
     let maxValue = -1;
+    let unitType: DataUnitType;
+
+    if (originData?.metricLines && originData?.metricLines !== null) {
+      metricLines = originData.metricLines;
+    } else {
+      showLegend = false;
+      metricLines = [
+        {
+          name: metricName,
+          metricPoints: originData.metricPoints,
+        },
+      ];
+    }
+
+    {
+      const originUnit = curMetricInfo?.unit?.toLowerCase();
+      unitType = originUnit.includes('byte') ? 'Memory' : originUnit.includes('ms') ? 'Time' : 'Num';
+    }
 
     const PointsMapMethod = ({ timeStamp, value }: { timeStamp: number; value: string | number }) => {
       let parsedValue: string | number = Number(value);
@@ -194,8 +239,9 @@ export const formatChartData = (
     };
 
     // 初始化返回结构
-    const chartData = {
+    const chartData: FormattedMetricData = {
       metricName,
+      metricType,
       metricUnit: curMetricInfo?.unit || '',
       metricLines: metricLines
         .sort((a, b) => Number(a.name < b.name) - 0.5)
@@ -203,17 +249,21 @@ export const formatChartData = (
           name,
           data: metricPoints.map(PointsMapMethod),
         })),
+      showLegend,
+      targetUnit: undefined,
     };
     // 按时间先后进行对图表点排序
     chartData.metricLines.forEach(({ data }) => data.sort((a, b) => (a[0] as number) - (b[0] as number)));
 
     // 图表值单位转换
     if (maxValue > 0) {
-      const [unitName, unitSize]: [string, number] = transformUnit || isByteUnit ? getUnit(maxValue) : getDataNumberUnit(maxValue);
-      chartData.metricUnit = isByteUnit
-        ? chartData.metricUnit.toLowerCase().replace('byte', unitName)
-        : `${unitName}${chartData.metricUnit}`;
-      chartData.metricLines.forEach(({ data }) => data.forEach((point: any) => (point[1] /= unitSize)));
+      const [unitName, unitSize]: [string, number] = targetUnit || getDataUnit[unitType](maxValue);
+      chartData.targetUnit = [unitName, unitSize];
+      chartData.metricUnit =
+        unitType !== 'Num'
+          ? chartData.metricUnit.toLowerCase().replace(unitType === 'Memory' ? 'byte' : 'ms', unitName)
+          : `${unitName}${chartData.metricUnit}`;
+      chartData.metricLines.forEach(({ data }) => data.forEach((point: any) => parseFloat((point[1] /= unitSize).toFixed(3))));
     }
 
     // 补点
@@ -231,7 +281,7 @@ const tooltipFormatter = (date: any, arr: any, tooltip: any) => {
           <div style="display:flex;align-items:center;">
             <div style="margin-right:4px;width:8px;height:2px;background-color:${item.color};"></div>
             <div style="flex:1;display:flex;justify-content:space-between;align-items:center;overflow: hidden;">
-              <span style="font-size:12px;color:#74788D;pointer-events:auto;margin-left:2px;line-height: 18px;font-family: HelveticaNeue;overflow: hidden; text-overflow: ellipsis; white-space: no-wrap;">
+              <span style="font-size:12px;color:#74788D;pointer-events:auto;margin-left:2px;line-height: 18px;font-family: HelveticaNeue;overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 ${item.seriesName}
               </span>
               <span style="font-size:12px;color:#212529;line-height:18px;font-family:HelveticaNeue-Medium; padding-left: 6px;">
@@ -324,6 +374,7 @@ export const getBasicChartConfig = (props: any = {}) => {
       tooltip: false,
       ...legend,
     },
+    color: CHART_COLOR_LIST,
     // 横坐标配置
     xAxis: {
       type: 'category',

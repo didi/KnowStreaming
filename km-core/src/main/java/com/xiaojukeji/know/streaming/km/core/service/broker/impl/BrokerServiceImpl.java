@@ -8,8 +8,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.broker.BrokerParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.broker.BrokerParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
@@ -26,12 +26,12 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.jmx.JmxDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
-import com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
+import com.xiaojukeji.know.streaming.km.persistence.mysql.broker.BrokerDAO;
 import kafka.zk.BrokerIdsZNode;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.Node;
@@ -54,7 +54,7 @@ import static com.xiaojukeji.know.streaming.km.common.jmx.JmxAttribute.VERSION;
 import static com.xiaojukeji.know.streaming.km.common.jmx.JmxName.JMX_SERVER_APP_INFO;
 
 @Service
-public class BrokerServiceImpl extends BaseVersionControlService implements BrokerService {
+public class BrokerServiceImpl extends BaseKafkaVersionControlService implements BrokerService {
     private static final ILog log = LogFactory.getLog(BrokerServiceImpl.class);
 
     private static final String BROKER_LOG_DIR = "getLogDir";
@@ -134,7 +134,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
             newBrokerPO.setId(inDBBrokerPO.getId());
             newBrokerPO.setStatus(Constant.ALIVE);
             newBrokerPO.setCreateTime(inDBBrokerPO.getCreateTime());
-            newBrokerPO.setUpdateTime(inDBBrokerPO.getUpdateTime());
+            newBrokerPO.setUpdateTime(new Date());
             if (newBrokerPO.getStartTimestamp() == null) {
                 // 如果当前broker获取不到启动时间
                 // 如果DB中的broker状态为down，则使用当前时间，否则使用db中已有broker的时间
@@ -168,7 +168,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
             allBrokerList = this.listAllBrokersAndUpdateCache(clusterPhyId);
         }
 
-        return allBrokerList.stream().filter( elem -> elem.alive()).collect(Collectors.toList());
+        return allBrokerList.stream().filter(elem -> elem.alive()).collect(Collectors.toList());
     }
 
     @Override
@@ -234,11 +234,10 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
     @Override
     public String getBrokerVersionFromKafka(Long clusterId, Integer brokerId) {
-        JmxConnectorWrap jmxConnectorWrap = kafkaJMXClient.getClient(clusterId, brokerId);
-        if (ValidateUtils.isNull(jmxConnectorWrap) || !jmxConnectorWrap.checkJmxConnectionAndInitIfNeed()) {
+        JmxConnectorWrap jmxConnectorWrap = kafkaJMXClient.getClientWithCheck(clusterId, brokerId);
+        if (jmxConnectorWrap == null) {
             return "";
         }
-
         try {
             return (String) jmxConnectorWrap.getAttribute(new ObjectName(JMX_SERVER_APP_INFO + ",id=" + brokerId), VERSION);
         } catch (Exception e) {
@@ -262,12 +261,30 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
         return version;
     }
 
-
-
     @Override
     public Integer countAllBrokers() {
         LambdaQueryWrapper<BrokerPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         return brokerDAO.selectCount(lambdaQueryWrapper);
+    }
+
+    @Override
+    public boolean allServerDown(Long clusterPhyId) {
+        List<BrokerPO> poList = this.getAllBrokerPOsFromDB(clusterPhyId);
+        if (ValidateUtils.isEmptyList(poList)) {
+            return false;
+        }
+
+        return poList.stream().filter(elem -> elem.getStatus().equals(Constant.DOWN)).count() == poList.size();
+    }
+
+    @Override
+    public boolean existServerDown(Long clusterPhyId) {
+        List<BrokerPO> poList = this.getAllBrokerPOsFromDB(clusterPhyId);
+        if (ValidateUtils.isEmptyList(poList)) {
+            return false;
+        }
+
+        return poList.stream().filter(elem -> elem.getStatus().equals(Constant.DOWN)).count() > 0;
     }
 
     /**************************************************** private method ****************************************************/
@@ -313,7 +330,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
             return Result.buildSuc(brokerList);
         } catch (Exception e) {
-            log.error("class=BrokerServiceImpl||method=getBrokersFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getBrokersFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.ZK_OPERATE_FAILED, e.getMessage());
         }
@@ -335,7 +352,7 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
             return Result.buildSuc(newBrokerList);
         } catch (Exception e) {
-            log.error("class=BrokerServiceImpl||method=getBrokersFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getBrokersFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
@@ -343,19 +360,11 @@ public class BrokerServiceImpl extends BaseVersionControlService implements Brok
 
     private Broker getStartTimeAndBuildBroker(Long clusterPhyId, Node newNode, JmxConfig jmxConfig) {
         try {
-            Object object = jmxDAO.getJmxValue(
-                    clusterPhyId,
-                    newNode.id(),
-                    newNode.host(),
-                    null,
-                    jmxConfig,
-                    new ObjectName("java.lang:type=Runtime"),
-                    "StartTime"
-            );
+            Long startTime = jmxDAO.getServerStartTime(clusterPhyId, newNode.host(), jmxConfig.getFinallyJmxPort(String.valueOf(newNode.id())), jmxConfig);
 
-            return Broker.buildFrom(clusterPhyId, newNode, object != null? (Long) object: null);
+            return Broker.buildFrom(clusterPhyId, newNode, startTime);
         } catch (Exception e) {
-            log.error("class=BrokerServiceImpl||method=getStartTimeAndBuildBroker||clusterPhyId={}||brokerNode={}||jmxConfig={}||errMsg=exception!", clusterPhyId, newNode, jmxConfig, e);
+            log.error("method=getStartTimeAndBuildBroker||clusterPhyId={}||brokerNode={}||jmxConfig={}||errMsg=exception!", clusterPhyId, newNode, jmxConfig, e);
         }
 
         return Broker.buildFrom(clusterPhyId, newNode, null);

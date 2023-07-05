@@ -10,14 +10,21 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.BaseESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.BaseMetricESPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.EnvUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.IndexNameUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.persistence.es.BaseESDAO;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.ESTPService;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
+import com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateLoaderUtil;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
 
@@ -27,8 +34,7 @@ public class BaseMetricESDAO extends BaseESDAO {
     /**
      * 操作的索引名称
      */
-    protected String            indexName;
-    protected String            indexTemplate;
+    protected String                indexName;
 
     protected static final Long     ONE_MIN =  60 * 1000L;
     protected static final Long     FIVE_MIN = 5  * ONE_MIN;
@@ -40,8 +46,19 @@ public class BaseMetricESDAO extends BaseESDAO {
     /**
      * 不同维度 kafka 监控数据
      */
-    private static Map<String, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps
-            .newConcurrentMap();
+    private static Map<String, BaseMetricESDAO> ariusStatsEsDaoMap    = Maps.newConcurrentMap();
+
+    @Autowired
+    private TemplateLoaderUtil templateLoaderUtil;
+
+    @Autowired
+    protected ESTPService esTPService;
+
+    /**
+     * es 地址
+     */
+    @Value("${es.index.expire:60}")
+    private int indexExpireDays;
 
     /**
      * 检查 es 索引是否存在，不存在则创建索引
@@ -49,17 +66,34 @@ public class BaseMetricESDAO extends BaseESDAO {
     @Scheduled(cron = "0 3/5 * * * ?")
     public void checkCurrentDayIndexExist(){
         try {
+            String indexTemplate = templateLoaderUtil.getContextByFileName(indexName);
             esOpClient.createIndexTemplateIfNotExist(indexName, indexTemplate);
 
-            //检查最近7天索引存在不存
-            for(int i = 0; i < INDEX_DAYS; i++){
-                String realIndex = IndexNameUtils.genDailyIndexName(indexName, i);
-                if(esOpClient.indexExist(realIndex)){continue;}
-
-                esOpClient.createIndex(realIndex);
-            }
-        }catch (Exception e){
+            int retainDays = indexExpireDays > INDEX_DAYS ? INDEX_DAYS : indexExpireDays;
+            // 检查最近【retainDays】天索引存在不存
+            IntStream.range(0, retainDays).mapToObj(i -> IndexNameUtils.genDailyIndexName(indexName, i))
+                    .filter(realIndex -> !esOpClient.indexExist(realIndex))
+                    .forEach(realIndex -> esOpClient.createIndex(realIndex));
+        } catch (Exception e) {
             LOGGER.error("method=checkCurrentDayIndexExist||errMsg=exception!", e);
+        }
+    }
+
+    @Scheduled(cron = "0 30/45 * * * ?")
+    public void delExpireIndex(){
+        List<String> indexList = esOpClient.listIndexByName(indexName);
+        if(CollectionUtils.isEmpty(indexList)){return;}
+
+        indexList.sort((o1, o2) -> -o1.compareTo(o2));
+
+        int size = indexList.size();
+        if(size > indexExpireDays){
+            if(!EnvUtil.isOnline()){
+                LOGGER.info("method=delExpireIndex||indexExpireDays={}||delIndex={}",
+                        indexExpireDays, indexList.subList(indexExpireDays, size));
+            }
+
+            indexList.subList(indexExpireDays, size).forEach(s -> esOpClient.delIndexByName(s));
         }
     }
 
@@ -75,6 +109,15 @@ public class BaseMetricESDAO extends BaseESDAO {
      */
     public static void register(String statsType, BaseMetricESDAO baseAriusStatsEsDao) {
         ariusStatsEsDaoMap.put(statsType, baseAriusStatsEsDao);
+    }
+
+    /**
+     * 注册不同维度数据对应操作的es类
+     *
+     * @param baseAriusStatsEsDao
+     */
+    public void register(BaseMetricESDAO baseAriusStatsEsDao) {
+        BaseMetricESDAO.register(indexName, baseAriusStatsEsDao);
     }
 
     /**
@@ -324,21 +367,16 @@ public class BaseMetricESDAO extends BaseESDAO {
         sb.append(str, 1, str.length() - 1);
     }
 
-    protected Map<String, ESAggr> checkBucketsAndHitsOfResponseAggs(ESQueryResponse response){
-        if(null == response || null == response.getAggs()){
+    protected Map<String, ESAggr> checkBucketsAndHitsOfResponseAggs(ESQueryResponse response) {
+        if(null == response
+                || null == response.getAggs()
+                || null == response.getAggs().getEsAggrMap()
+                || null == response.getAggs().getEsAggrMap().get(HIST)
+                || ValidateUtils.isEmptyList(response.getAggs().getEsAggrMap().get(HIST).getBucketList())) {
             return null;
         }
 
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null == esAggrMap || null == esAggrMap.get(HIST)) {
-            return null;
-        }
-
-        if(CollectionUtils.isEmpty(esAggrMap.get(HIST).getBucketList())){
-            return null;
-        }
-
-        return esAggrMap;
+        return response.getAggs().getEsAggrMap();
     }
 
     protected int handleESQueryResponseCount(ESQueryResponse response){
@@ -390,7 +428,7 @@ public class BaseMetricESDAO extends BaseESDAO {
         Long endTime    = System.currentTimeMillis();
         Long startTime  = endTime - 12 * ONE_HOUR;
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_LATEST_METRIC_TIME, startTime, endTime, appendQueryDsl);
+        String dsl = dslLoaderUtil.getFormatDslByFileName( DslConstant.GET_LATEST_METRIC_TIME, startTime, endTime, appendQueryDsl);
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         return esOpClient.performRequest(

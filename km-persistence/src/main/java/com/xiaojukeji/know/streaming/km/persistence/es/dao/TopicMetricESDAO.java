@@ -4,16 +4,20 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResp
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BaseMetrics;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.TopicMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchFuzzy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchShould;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchTerm;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.search.SearchSort;
 import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.TopicMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
-import com.xiaojukeji.know.streaming.km.common.utils.FutureWaitUtil;
+import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.MetricsUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.PaginationMetricsUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
-import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslsConstant;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
+import com.xiaojukeji.know.streaming.km.persistence.es.dsls.DslConstant;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -22,20 +26,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.constant.ESConstant.*;
-import static com.xiaojukeji.know.streaming.km.common.constant.ESIndexConstant.*;
+import static com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant.TOPIC_INDEX;
 
 @Component
 public class TopicMetricESDAO extends BaseMetricESDAO {
-
     @PostConstruct
     public void init() {
-        super.indexName     = TOPIC_INDEX;
-        super.indexTemplate = TOPIC_TEMPLATE;
+        super.indexName = TOPIC_INDEX;
         checkCurrentDayIndexExist();
-        BaseMetricESDAO.register(indexName, this);
+        register(this);
     }
-
-    protected FutureWaitUtil<Void> queryFuture = FutureWaitUtil.init("TopicMetricESDAO", 4,8, 500);
 
     public List<TopicMetricPO> listTopicMaxMinMetrics(Long clusterPhyId, List<String> topics, String metric, boolean max, Long startTime, Long endTime){
         //1、获取需要查下的索引
@@ -47,7 +47,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
             String sortDsl   = buildSortDsl(sort, SearchSort.DEFAULT);
 
             String dsl   = dslLoaderUtil.getFormatDslByFileName(
-                    DslsConstant.GET_TOPIC_MAX_OR_MIN_SINGLE_METRIC, clusterPhyId, startTime, endTime, topic, sortDsl);
+                    DslConstant.GET_TOPIC_MAX_OR_MIN_SINGLE_METRIC, clusterPhyId, startTime, endTime, topic, sortDsl);
             TopicMetricPO topicMetricPO = esOpClient.performRequestAndTakeFirst(topic, realIndex, dsl, TopicMetricPO.class);
             ret.add(topicMetricPO);
         }
@@ -74,7 +74,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_AGG_SINGLE_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString(), aggDsl);
+                DslConstant.GET_TOPIC_AGG_SINGLE_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString(), aggDsl);
 
         return esOpClient.performRequest(realIndex, dsl,
                 s -> handleSingleESQueryResponse(s, metrics, aggType), 3);
@@ -112,7 +112,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         String realIndex = realIndex(startTime, latestMetricTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.LIST_TOPIC_WITH_LATEST_METRICS, clusterId, latestMetricTime, appendQueryDsl.toString(), sortDsl);
+                DslConstant.LIST_TOPIC_WITH_LATEST_METRICS, clusterId, latestMetricTime, appendQueryDsl.toString(), sortDsl);
 
         return esOpClient.performRequest(realIndex, dsl, TopicMetricPO.class);
     }
@@ -126,11 +126,16 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         String termDsl   = buildTermsDsl(Arrays.asList(term));
 
         String dsl = term.isEqual()
-                ? dslLoaderUtil.getFormatDslByFileName(DslsConstant.COUNT_TOPIC_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl)
-                : dslLoaderUtil.getFormatDslByFileName(DslsConstant.COUNT_TOPIC_NOT_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl);
+                ? dslLoaderUtil.getFormatDslByFileName( DslConstant.COUNT_TOPIC_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl)
+                : dslLoaderUtil.getFormatDslByFileName( DslConstant.COUNT_TOPIC_NOT_METRIC_VALUE, clusterPhyId, topic, startTime, endTime, termDsl);
 
-        return esOpClient.performRequestWithRouting(topic, realIndex, dsl,
-                s -> handleESQueryResponseCount(s), 3);
+        return esOpClient.performRequestWithRouting(
+                topic,
+                realIndex,
+                dsl,
+                s -> handleESQueryResponseCount(s),
+                DEFAULT_RETRY_TIME
+        );
     }
 
     /**
@@ -141,7 +146,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         Long startTime  = endTime - FIVE_MIN;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_BROKER_LATEST_METRICS, clusterPhyId, topic, brokerId, startTime, endTime);
+                DslConstant.GET_TOPIC_BROKER_LATEST_METRICS, clusterPhyId, topic, brokerId, startTime, endTime);
 
         TopicMetricPO topicMetricPO = esOpClient.performRequestAndTakeFirst(topic, realIndex(startTime, endTime), dsl, TopicMetricPO.class);
 
@@ -165,7 +170,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
+                DslConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
 
         //topicMetricPOS 已经按照 timeStamp 倒序排好序了
         List<TopicMetricPO> topicMetricPOS = esOpClient.performRequest(realIndex(startTime, endTime), dsl, TopicMetricPO.class);
@@ -197,7 +202,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         }
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
+                DslConstant.GET_TOPIC_LATEST_METRICS, clusterPhyId, startTime, endTime, appendQueryDsl.toString());
 
         TopicMetricPO topicMetricPO = esOpClient.performRequestAndTakeFirst(topic, realIndex(startTime, endTime), dsl, TopicMetricPO.class);
 
@@ -207,28 +212,55 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
     /**
      * 获取每个 metric 的 topN 个 topic 的指标，如果获取不到 topN 的topics, 则默认返回 defaultTopics 的指标
      */
-    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopN(Long clusterPhyId, List<String> defaultTopics,
-                                                                                                 List<String> metrics, String aggType, int topN,
-                                                                                                 Long startTime, Long endTime){
+    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopN(Long clusterPhyId,
+                                                                                                 List<String> defaultTopicNameList,
+                                                                                                 List<String> metricNameList,
+                                                                                                 String aggType,
+                                                                                                 int topN,
+                                                                                                 Long startTime,
+                                                                                                 Long endTime){
         //1、获取topN要查询的topic，每一个指标的topN的topic可能不一样
-        Map<String, List<String>> metricTopics = getTopNTopics(clusterPhyId, metrics, aggType, topN, startTime, endTime);
+        Map<String, List<String>> metricTopicsMap = this.getTopNTopics(clusterPhyId, metricNameList, aggType, topN, startTime, endTime);
 
-        Table<String, String, List<MetricPointVO>> table = HashBasedTable.create();
+        //2、获取topics列表
+        Set<String> topicNameSet = new HashSet<>(defaultTopicNameList);
+        metricTopicsMap.values().forEach(elem -> topicNameSet.addAll(elem));
 
-        for(String metric : metrics){
-            table.putAll(listTopicMetricsByTopics(clusterPhyId, Arrays.asList(metric),
-                    aggType, metricTopics.getOrDefault(metric, defaultTopics), startTime, endTime));
+        //3、批量获取信息
+        Table<String, String, List<MetricPointVO>> allMetricsTable = this.listTopicMetricsByTopics(
+                clusterPhyId,
+                metricNameList,
+                aggType,
+                new ArrayList<>(topicNameSet),
+                startTime,
+                endTime
+        );
+
+        //4、获取Top-Metric
+        Table<String, String, List<MetricPointVO>> metricsTable = HashBasedTable.create();
+        for(String metricName: metricNameList) {
+            for (String topicName: metricTopicsMap.getOrDefault(metricName, defaultTopicNameList)) {
+                List<MetricPointVO> voList = allMetricsTable.get(metricName, topicName);
+                if (voList == null) {
+                    continue;
+                }
+
+                metricsTable.put(metricName, topicName, voList);
+            }
         }
 
-        return table;
+        return metricsTable;
     }
 
     /**
      * 获取每个 metric 指定个 topic 的指标
      */
-    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopics(Long clusterPhyId, List<String> metrics,
-                                                                                                      String aggType, List<String> topics,
-                                                                                                      Long startTime, Long endTime){
+    public Table<String/*metric*/, String/*topics*/, List<MetricPointVO>> listTopicMetricsByTopics(Long clusterPhyId,
+                                                                                                   List<String> metricNameList,
+                                                                                                   String aggType,
+                                                                                                   List<String> topicNameList,
+                                                                                                   Long startTime,
+                                                                                                   Long endTime){
         //1、获取需要查下的索引
         String realIndex = realIndex(startTime, endTime);
 
@@ -236,60 +268,77 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
         //3、构造agg查询条件
-        String aggDsl   = buildAggsDSL(metrics, aggType);
+        String aggDsl   = buildAggsDSL(metricNameList, aggType);
 
         final Table<String, String, List<MetricPointVO>> table = HashBasedTable.create();
 
         //4、构造dsl查询条件
-        for(String topic : topics){
+        for(String topicName : topicNameList){
             try {
-                queryFuture.runnableTask(
-                        String.format("class=TopicMetricESDAO||method=listTopicMetricsByTopics||ClusterPhyId=%d||topicName=%s",
-                                clusterPhyId, topic),
+                esTPService.submitSearchTask(
+                        String.format("class=TopicMetricESDAO||method=listTopicMetricsByTopics||ClusterPhyId=%d||topicName=%s", clusterPhyId, topicName),
                         3000,
                         () -> {
                             String dsl = dslLoaderUtil.getFormatDslByFileName(
-                                    DslsConstant.GET_TOPIC_AGG_LIST_METRICS, clusterPhyId, topic, startTime, endTime, interval, aggDsl);
+                                    DslConstant.GET_TOPIC_AGG_LIST_METRICS,
+                                    clusterPhyId,
+                                    topicName,
+                                    startTime,
+                                    endTime,
+                                    interval,
+                                    aggDsl
+                            );
 
-                            Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequestWithRouting(topic, realIndex, dsl,
-                                    s -> handleListESQueryResponse(s, metrics, aggType), 3);
+                            Map<String/*metric*/, List<MetricPointVO>> metricMap = esOpClient.performRequestWithRouting(
+                                    topicName,
+                                    realIndex,
+                                    dsl,
+                                    s -> handleListESQueryResponse(s, metricNameList, aggType),
+                                    DEFAULT_RETRY_TIME
+                            );
 
                             synchronized (table){
-                                for(String metric : metricMap.keySet()){
-                                    table.put(metric, topic, metricMap.get(metric));
+                                for(Map.Entry<String/*metric*/, List<MetricPointVO>> entry: metricMap.entrySet()){
+                                    table.put(entry.getKey(), topicName, entry.getValue());
                                 }
                             }
                         });
             }catch (Exception e){
-                LOGGER.error("method=listBrokerMetricsByBrokerIds||clusterPhyId={}||brokerId{}||errMsg=exception!",
-                        clusterPhyId, topic, e);
+                LOGGER.error("method=listTopicMetricsByTopics||clusterPhyId={}||topicName={}||errMsg=exception!", clusterPhyId, topicName, e);
             }
         }
 
-        queryFuture.waitExecute();
+        esTPService.waitExecute();
 
         return table;
     }
 
-    //public for test
-    public Map<String, List<String>> getTopNTopics(Long clusterPhyId, List<String> metrics,
-                                                   String aggType, int topN,
-                                                   Long startTime, Long endTime){
-        //1、获取需要查下的索引
-        String realIndex = realIndex(startTime, endTime);
+    public Map<String, List<String>> getTopNTopics(Long clusterPhyId,
+                                                   List<String> metricNameList,
+                                                   String aggType,
+                                                   int topN,
+                                                   Long startTime,
+                                                   Long endTime) {
+        Map<String, TopicMetrics> metricsMap = DataBaseDataLocalCache.getTopicMetrics(clusterPhyId);
+        if (metricsMap == null) {
+            return new HashMap<>();
+        }
 
-        //2、根据查询的时间区间大小来确定指标点的聚合区间大小
-        String interval = MetricsUtils.getInterval(endTime - startTime);
+        List<TopicMetrics> metricsList = new ArrayList<>(metricsMap.values());
 
-        //3、构造agg查询条件
-        String aggDsl   = buildAggsDSL(metrics, aggType);
+        Map<String, List<String>> resultMap = new HashMap<>();
+        for (String metricName: metricNameList) {
+            metricsList = PaginationMetricsUtil.sortMetrics(
+                    metricsList.stream().map(elem -> (BaseMetrics)elem).collect(Collectors.toList()),
+                    metricName,
+                    "topic",
+                    SortTypeEnum.DESC.getSortType()
+            ).stream().map(elem -> (TopicMetrics)elem).collect(Collectors.toList());
 
-        //4、查询es
-        String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_TOPIC_AGG_TOP_METRICS, clusterPhyId, startTime, endTime, interval, aggDsl);
+            resultMap.put(metricName, metricsList.subList(0, Math.min(topN, metricsList.size())).stream().map(elem -> elem.getTopic()).collect(Collectors.toList()));
+        }
 
-        return esOpClient.performRequest(realIndex, dsl,
-                s -> handleTopTopicESQueryResponse(s, metrics, topN), 3);
+        return resultMap;
     }
 
     /**************************************************** private method ****************************************************/
@@ -327,7 +376,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
     private Map<String, List<MetricPointVO>> handleListESQueryResponse(ESQueryResponse response, List<String> metrics, String aggType){
         Map<String, List<MetricPointVO>> metricMap = new HashMap<>();
 
-        Map<String, ESAggr> esAggrMap = checkBucketsAndHitsOfResponseAggs(response);
+        Map<String, ESAggr> esAggrMap = this.checkBucketsAndHitsOfResponseAggs(response);
         if(null == esAggrMap){return metricMap;}
 
         for(String metric : metrics){
@@ -337,17 +386,10 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
                 try {
                     if (null != esBucket.getUnusedMap().get(KEY)) {
                         Long    timestamp = Long.valueOf(esBucket.getUnusedMap().get(KEY).toString());
-                        String  value     = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE).toString();
+                        Object  value  = esBucket.getAggrMap().get(metric).getUnusedMap().get(VALUE);
+                        if(value       == null){return;}
 
-                        MetricPointVO metricPoint = new MetricPointVO();
-                        metricPoint.setAggType(aggType);
-                        metricPoint.setTimeStamp(timestamp);
-                        metricPoint.setValue(value);
-                        metricPoint.setName(metric);
-
-                        metricPoints.add(metricPoint);
-                    }else {
-                        LOGGER.info("");
+                        metricPoints.add(new MetricPointVO(metric, timestamp, value.toString(), aggType));
                     }
                 }catch (Exception e){
                     LOGGER.error("method=handleListESQueryResponse||metric={}||errMsg=exception!", metric, e);
@@ -360,7 +402,7 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         return metricMap;
     }
 
-    private Map<String, List<String>> handleTopTopicESQueryResponse(ESQueryResponse response, List<String> metrics, int topN){
+    private Map<String, List<String>> handleTopTopicESQueryResponse(ESQueryResponse response, List<String> metricNameList, int topN){
         Map<String, List<String>> ret = new HashMap<>();
 
         Map<String, ESAggr> esAggrMap = checkBucketsAndHitsOfResponseAggs(response);
@@ -369,57 +411,37 @@ public class TopicMetricESDAO extends BaseMetricESDAO {
         Map<String, List<Tuple<String, Double>>> metricsTopicValueMap = new HashMap<>();
 
         //1、先获取每个指标对应的所有 topic 以及指标的值
-        for(String metric : metrics) {
+        for(String metricName: metricNameList) {
             esAggrMap.get(HIST).getBucketList().forEach( esBucket -> {
                 try {
                     if (null != esBucket.getUnusedMap().get(KEY)) {
                         String topic = esBucket.getUnusedMap().get(KEY).toString();
-                        Double value = Double.valueOf(esBucket.getAggrMap().get(HIST).getBucketList().get(0).getAggrMap()
-                                .get(metric).getUnusedMap().get(VALUE).toString());
+                        Double value = Double.valueOf(
+                                esBucket.getAggrMap().get(HIST).getBucketList().get(0).getAggrMap().get(metricName).getUnusedMap().get(VALUE).toString()
+                        );
 
-                        List<Tuple<String, Double>> brokerValue = (null == metricsTopicValueMap.get(metric)) ?
-                                new ArrayList<>() : metricsTopicValueMap.get(metric);
-
-                        brokerValue.add(new Tuple<>(topic, value));
-                        metricsTopicValueMap.put(metric, brokerValue);
+                        metricsTopicValueMap.putIfAbsent(metricName, new ArrayList<>());
+                        metricsTopicValueMap.get(metricName).add(new Tuple<>(topic, value));
                     }
                 }catch (Exception e){
-                    LOGGER.error("method=handleTopBrokerESQueryResponse||metric={}||errMsg=exception!", metric, e);
+                    LOGGER.error("method=handleTopTopicESQueryResponse||metricName={}||errMsg=exception!", metricName, e);
                 }
             } );
         }
 
         //2、对每个指标的broker按照指标值排序，并截取前topN个brokerIds
-        for(String metric : metricsTopicValueMap.keySet()){
-            List<Tuple<String, Double>> brokerValue = metricsTopicValueMap.get(metric);
+        for(Map.Entry<String, List<Tuple<String, Double>>> entry: metricsTopicValueMap.entrySet()){
+            entry.getValue().sort((o1, o2) -> {
+                if(null == o1 || null == o2) {
+                    return 0;
+                }
 
-            brokerValue.sort((o1, o2) -> {
-                if(null == o1 || null == o2){return 0;}
                 return o2.getV2().compareTo(o1.getV2());
             } );
 
-            List<Tuple<String, Double>> temp = (brokerValue.size() > topN) ? brokerValue.subList(0, topN) : brokerValue;
-            List<String> topics = temp.stream().map(t -> t.getV1()).collect(Collectors.toList());
+            List<String> topicNameList = entry.getValue().subList(0, Math.min(entry.getValue().size(), topN)).stream().map(t -> t.getV1()).collect(Collectors.toList());
 
-            ret.put(metric, topics);
-        }
-
-        return ret;
-    }
-
-    private Map<String/*metric*/, Map<String/*topic*/, List<MetricPointVO>>> topicMetricMap2MetricTopicMap(
-            Map<String/*topic*/, Map<String/*metric*/, List<MetricPointVO>>> topicMetricMap){
-        Map<String/*metric*/, Map<String/*topic*/, List<MetricPointVO>>> ret = new HashMap<>();
-
-        for(String topic : topicMetricMap.keySet()){
-            Map<String/*metric*/, List<MetricPointVO>> metricMap = topicMetricMap.get(topic);
-
-            for(String metric : metricMap.keySet()){
-                Map<String/*topic*/, List<MetricPointVO>> brokerMap = (null == ret.get(metric)) ? new HashMap<>() : ret.get(metric);
-
-                brokerMap.put(topic, metricMap.get(metric));
-                ret.put(metric, brokerMap);
-            }
+            ret.put(entry.getKey(), topicNameList);
         }
 
         return ret;

@@ -23,3 +23,11 @@ export const getChartConfig = (title: string) => {
     },
   };
 };
+
+export const HealthStateMap: any = {
+  '-1': 'Unknown',
+  0: '好',
+  1: '中',
+  2: '差',
+  3: 'Down',
+};

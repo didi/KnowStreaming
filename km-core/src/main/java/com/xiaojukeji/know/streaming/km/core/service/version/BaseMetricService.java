@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * @author didi
  */
-public abstract class BaseMetricService extends BaseVersionControlService {
+public abstract class BaseMetricService extends BaseKafkaVersionControlService {
     private static final ILog LOGGER  = LogFactory.getLog(BaseMetricService.class);
 
     private List<String> metricNames  = new ArrayList<>();
@@ -38,40 +38,41 @@ public abstract class BaseMetricService extends BaseVersionControlService {
 
     protected abstract void initRegisterVCHandler();
 
-    protected <T> List<MetricMultiLinesVO> metricMap2VO(Long clusterId,
-                                                        Map<String/*metric*/, Map<T, List<MetricPointVO>>> map){
-        List<MetricMultiLinesVO> multiLinesVOS = new ArrayList<>();
-        if (map == null || map.isEmpty()) {
+    protected <T> List<MetricMultiLinesVO> metricMap2VO(Long clusterId, Map<String/*metric*/, Map<T, List<MetricPointVO>>> metricsMap ){
+        List<MetricMultiLinesVO> lineVOList = new ArrayList<>();
+        if (metricsMap == null || metricsMap.isEmpty()) {
             // 如果为空，则直接返回
-            return multiLinesVOS;
+            return lineVOList;
         }
 
-        for(String metric : map.keySet()){
+        for(Map.Entry<String/*metric*/, Map<T, List<MetricPointVO>>> entry : metricsMap.entrySet()){
             try {
                 MetricMultiLinesVO multiLinesVO = new MetricMultiLinesVO();
-                multiLinesVO.setMetricName(metric);
+                multiLinesVO.setMetricName(entry.getKey());
 
-                List<MetricLineVO> metricLines = new ArrayList<>();
-
-                Map<T, List<MetricPointVO>> metricPointMap = map.get(metric);
-                if(null == metricPointMap || metricPointMap.isEmpty()){continue;}
-                for(Map.Entry<T, List<MetricPointVO>> entry : metricPointMap.entrySet()){
-                    MetricLineVO metricLineVO = new MetricLineVO();
-                    metricLineVO.setName(entry.getKey().toString());
-                    metricLineVO.setMetricName(metric);
-                    metricLineVO.setMetricPoints(entry.getValue());
-
-                    metricLines.add(metricLineVO);
+                if(null == entry.getValue() || entry.getValue().isEmpty()){
+                    continue;
                 }
 
+                List<MetricLineVO> metricLines = new ArrayList<>();
+                entry.getValue().entrySet().forEach(resNameAndMetricsEntry -> {
+                    MetricLineVO metricLineVO = new MetricLineVO();
+                    metricLineVO.setName(resNameAndMetricsEntry.getKey().toString());
+                    metricLineVO.setMetricName(entry.getKey());
+                    metricLineVO.setMetricPoints(resNameAndMetricsEntry.getValue());
+
+                    metricLines.add(metricLineVO);
+                });
+
                 multiLinesVO.setMetricLines(metricLines);
-                multiLinesVOS.add(multiLinesVO);
-            }catch (Exception e){
-                LOGGER.error("method=metricMap2VO||cluster={}||msg=exception!", clusterId, e);
+
+                lineVOList.add(multiLinesVO);
+            } catch (Exception e){
+                LOGGER.error("method=metricMap2VO||clusterId={}||msg=exception!", clusterId, e);
             }
         }
 
-        return multiLinesVOS;
+        return lineVOList;
     }
 
     /**

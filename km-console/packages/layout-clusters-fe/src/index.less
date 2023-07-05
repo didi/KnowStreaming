@@ -259,6 +259,21 @@ li {
   }
 }
 
+.menu-item-with-beta-tag {
+  display: flex;
+  .beta-tag {
+    width: 26px;
+    margin-left: 4px;
+    background: no-repeat center/26px 15px url('./assets/beta-tag.png');
+  }
+}
+
+.dcloud-menu-item-selected .menu-item-with-beta-tag .beta-tag {
+  width: 0;
+}
+
+
+
 .empty-panel {
   display: flex;
   flex-direction: column;
@@ -293,11 +308,18 @@ li {
     align-items: center;
   }
   &-left  {
-    &-refresh{
-      font-size: 20px;
-      color: #74788d;
-      cursor: pointer;
-    }
+    &-refresh {
+        font-size: 20px;
+        color: #74788d;
+        cursor: pointer;
+        &-icon {
+          border-radius: 50%;
+          padding: 3px;
+        }
+        &-icon:hover {
+          background: rgba(33, 37, 41, 0.04);
+        }
+      }
   }
   
   &-right{

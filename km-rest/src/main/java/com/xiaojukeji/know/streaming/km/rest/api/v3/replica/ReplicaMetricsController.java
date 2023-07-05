@@ -26,6 +26,7 @@ public class ReplicaMetricsController {
     @Autowired
     private ReplicaMetricService replicationMetricService;
 
+    @Deprecated
     @ApiOperation(value = "Replica指标-单个Replica")
     @PostMapping(value = "clusters/{clusterPhyId}/brokers/{brokerId}/topics/{topicName}/partitions/{partitionId}/metric-points")
     @ResponseBody
@@ -34,7 +35,7 @@ public class ReplicaMetricsController {
                                                               @PathVariable String topicName,
                                                               @PathVariable Integer partitionId,
                                                               @RequestBody MetricDTO dto) {
-        return replicationMetricService.getMetricPointsFromES(clusterPhyId, brokerId, topicName, partitionId, dto);
+        return Result.buildSuc();
     }
 
     @ApiOperation(value = "Replica指标-单个Replica")
@@ -45,7 +46,7 @@ public class ReplicaMetricsController {
                                                       @PathVariable String topicName,
                                                       @PathVariable Integer partitionId,
                                                       @RequestBody List<String> metricsNames) {
-        Result<ReplicationMetrics> metricsResult = replicationMetricService.getLatestMetricsFromES(clusterPhyId, brokerId, topicName, partitionId, metricsNames);
+        Result<ReplicationMetrics> metricsResult = replicationMetricService.collectReplicaMetricsFromKafka(clusterPhyId, topicName, partitionId, brokerId, metricsNames);
         if (metricsResult.failed()) {
             return Result.buildFromIgnoreData(metricsResult);
         }

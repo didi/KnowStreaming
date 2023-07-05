@@ -35,14 +35,19 @@
         }
         .edit-icon-box {
           position: relative;
-          width: 20px;
+          width: 24px;
           cursor: pointer;
           .edit-icon {
-            position: absolute;
-            bottom: 2px;
-            margin-left: 4px;
-            font-size: 16px;
-            color: #74788d;
+              position: absolute;
+              bottom: -2px;
+              padding: 3px;
+              margin-left: 4px;
+              font-size: 16px;
+              color: #74788d;
+              border-radius: 50%;
+            &:hover {
+              background: rgba(33, 37, 41, 0.04);
+            }
           }
         }
       }
@@ -195,20 +200,26 @@
       }
 
       .healthy-state {
-        margin-left: 14px;
-        margin-top: 8px;
+        margin-left: 10px;
 
         &-status {
           font-size: 13px;
           color: #495057;
           letter-spacing: 0;
           line-height: 20px;
-          margin-bottom: 13px;
+          margin-bottom: 10px;
 
           .icon {
             margin-left: 4px;
             font-size: 14px;
             cursor: pointer;
+              .anticon {
+                padding: 3px;
+                border-radius: 50%;
+                &:hover {
+                  background: rgba(33, 37, 41, 0.04);
+                }
+              }
           }
         }
 
@@ -225,7 +236,7 @@
       }
 
       .dcloud-divider-horizontal {
-        margin: 16px 4px;
+        margin: 0 16px 14px 0;
         padding: 0px 20px;
       }
     }

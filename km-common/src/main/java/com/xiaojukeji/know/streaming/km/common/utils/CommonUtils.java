@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class CommonUtils {
             //转换为16进制
             return new BigInteger(1, digest).toString(16);
         } catch (Exception e) {
-            LOGGER.error("class=CommonUtils||method=getMD5||msg=获取文件的md5失败:{}", e.getMessage());
+            LOGGER.error("method=getMD5||msg=获取文件的md5失败:{}", e.getMessage());
         }
         return null;
     }
@@ -250,5 +251,30 @@ public class CommonUtils {
         }
 
         return true;
+    }
+
+    public static String getWorkerId(String url){
+        try {
+            URI uri = new URI(url);
+            return uri.getHost() + ":" + uri.getPort();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+    /**
+     * 校验两个list的第一个元素是否相等,以","分隔元素。
+     * @param str1
+     * @param str2
+     * @return
+     */
+    public static boolean checkFirstElementIsEquals(String str1, String str2) {
+        if (ValidateUtils.anyBlank(str1, str2)) {
+            return false;
+        }
+        Integer targetLeader = CommonUtils.string2IntList(str1).get(0);
+        Integer originalLeader = CommonUtils.string2IntList(str2).get(0);
+        return originalLeader.equals(targetLeader);
     }
 }

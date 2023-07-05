@@ -15,6 +15,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class TopicConfig implements Serializable {
     /**
+     * 表主键ID
+     */
+    private Long id;
+
+    /**
      * 物理集群ID
      */
     private Long clusterPhyId;

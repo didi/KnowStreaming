@@ -8,8 +8,8 @@ import com.xiaojukeji.know.streaming.km.common.component.SpringTool;
 import com.xiaojukeji.know.streaming.km.common.utils.BackoffUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
-import com.xiaojukeji.know.streaming.km.task.metadata.AbstractAsyncMetadataDispatchTask;
-import com.xiaojukeji.know.streaming.km.task.metrics.AbstractAsyncMetricsDispatchTask;
+import com.xiaojukeji.know.streaming.km.task.kafka.metadata.AbstractAsyncMetadataDispatchTask;
+import com.xiaojukeji.know.streaming.km.task.kafka.metrics.AbstractAsyncMetricsDispatchTask;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class TaskClusterAddedListener implements ApplicationListener<ClusterPhyA
 
     @Override
     public void onApplicationEvent(ClusterPhyAddedEvent event) {
-        LOGGER.info("class=TaskClusterAddedListener||method=onApplicationEvent||clusterPhyId={}||msg=listened new cluster", event.getClusterPhyId());
+        LOGGER.info("method=onApplicationEvent||clusterPhyId={}||msg=listened new cluster", event.getClusterPhyId());
         Long now = System.currentTimeMillis();
 
         // 交由KS自定义的线程池，异步执行任务

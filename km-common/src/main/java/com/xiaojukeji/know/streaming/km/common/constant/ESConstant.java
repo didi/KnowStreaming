@@ -34,6 +34,13 @@ public class ESConstant {
 
     public static final String TOTAL            = "total";
 
+    public static final Integer DEFAULT_RETRY_TIME = 3;
+
+    /**
+     * 获取Topic-Latest指标时，单次允许的Topic数
+     */
+    public static final int SEARCH_LATEST_TOPIC_METRIC_CNT_PER_REQUEST = 500;
+
     private ESConstant() {
     }
 }

@@ -1,6 +1,8 @@
 package com.xiaojukeji.know.streaming.km.common.jmx;
 
+import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxAuthConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.JmxConfig;
+import com.xiaojukeji.know.streaming.km.common.enums.jmx.JmxEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.BackoffUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import org.slf4j.Logger;
@@ -28,33 +30,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JmxConnectorWrap {
     private static final Logger LOGGER = LoggerFactory.getLogger(JmxConnectorWrap.class);
 
-    private final Long physicalClusterId;
-
-    private final Integer brokerId;
+    //jmx打印日志时的附带信息
+    private final String clientLogIdent;
 
     private final Long brokerStartupTime;
 
-    private final String host;
+    private final String jmxHost;
 
-    private final Integer port;
+    private final Integer jmxPort;
 
     private JMXConnector jmxConnector;
 
     private final AtomicInteger atomicInteger;
 
-    private JmxConfig jmxConfig;
+    private JmxAuthConfig jmxConfig;
 
-    public JmxConnectorWrap(Long physicalClusterId, Integer brokerId, Long brokerStartupTime, String host, Integer port, JmxConfig jmxConfig) {
-        this.physicalClusterId = physicalClusterId;
-        this.brokerId = brokerId;
+    public JmxConnectorWrap(String clientLogIdent, Long brokerStartupTime, String jmxHost, Integer jmxPort, JmxAuthConfig jmxConfig) {
+        this.clientLogIdent=clientLogIdent;
         this.brokerStartupTime = brokerStartupTime;
-        this.host = host;
-
-        if (port == null || port == -1 && jmxConfig.getJmxPort() != null) {
-            this.port = jmxConfig.getJmxPort();
-        } else {
-            this.port = port;
-        }
+        this.jmxHost = jmxHost;
+        this.jmxPort = (jmxPort == null? JmxEnum.UNKNOWN.getPort() : jmxPort);
 
         this.jmxConfig = jmxConfig;
         if (ValidateUtils.isNull(this.jmxConfig)) {
@@ -63,6 +58,7 @@ public class JmxConnectorWrap {
         if (ValidateUtils.isNullOrLessThanZero(this.jmxConfig.getMaxConn())) {
             this.jmxConfig.setMaxConn(1000);
         }
+
         this.atomicInteger = new AtomicInteger(this.jmxConfig.getMaxConn());
     }
 
@@ -70,7 +66,7 @@ public class JmxConnectorWrap {
         if (jmxConnector != null) {
             return true;
         }
-        if (port == null || port == -1) {
+        if (jmxPort == null || jmxPort == -1) {
             return false;
         }
         return createJmxConnector();
@@ -93,7 +89,10 @@ public class JmxConnectorWrap {
 
             jmxConnector = null;
         } catch (IOException e) {
-            LOGGER.warn("close JmxConnector exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
+            LOGGER.error(
+                    "method=close||clientLogIdent={}||jmxHost={}||jmxPort={}||msg=close jmx JmxConnector exception.",
+                    clientLogIdent, jmxHost, jmxPort, e
+            );
         }
     }
 
@@ -161,7 +160,7 @@ public class JmxConnectorWrap {
         if (jmxConnector != null) {
             return true;
         }
-        String jmxUrl = String.format("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", host, port);
+        String jmxUrl = String.format("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", jmxHost, jmxPort);
         try {
             Map<String, Object> environment = new HashMap<String, Object>();
             if (!ValidateUtils.isBlank(this.jmxConfig.getUsername()) && !ValidateUtils.isBlank(this.jmxConfig.getToken())) {
@@ -176,12 +175,21 @@ public class JmxConnectorWrap {
             }
 
             jmxConnector = JMXConnectorFactory.connect(new JMXServiceURL(jmxUrl), environment);
-            LOGGER.info("JMX connect success, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port);
+            LOGGER.info(
+                    "method=createJmxConnector||clientLogIdent={}||jmxHost={}||jmxPort={}||msg=jmx connect success.",
+                    clientLogIdent, jmxHost, jmxPort
+            );
             return true;
         } catch (MalformedURLException e) {
-            LOGGER.error("JMX url exception, physicalClusterId:{} brokerId:{} host:{} port:{} jmxUrl:{}", physicalClusterId, brokerId, host, port, jmxUrl, e);
+            LOGGER.error(
+                    "method=createJmxConnector||clientLogIdent={}||jmxHost={}||jmxPort={}||jmxUrl={}||msg=jmx url exception.",
+                    clientLogIdent, jmxHost, jmxPort, jmxUrl, e
+            );
         } catch (Exception e) {
-            LOGGER.error("JMX connect exception, physicalClusterId:{} brokerId:{} host:{} port:{}.", physicalClusterId, brokerId, host, port, e);
+            LOGGER.error(
+                    "method=createJmxConnector||clientLogIdent={}||jmxHost={}||jmxPort={}||msg=jmx connect exception.",
+                    clientLogIdent, jmxHost, jmxPort, e
+            );
         }
         return false;
     }

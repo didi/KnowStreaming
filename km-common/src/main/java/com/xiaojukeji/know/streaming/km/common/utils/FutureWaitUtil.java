@@ -23,7 +23,7 @@ public class FutureWaitUtil<T> {
     private FutureWaitUtil() {
     }
 
-    public static <T> FutureWaitUtil<T> init(String name, int corePoolSize, int maxPoolSize, int queueSize) {
+    public static <T> FutureWaitUtil<T> init(String threadPoolName, int corePoolSize, int maxPoolSize, int queueSize) {
         FutureWaitUtil<T> futureUtil = new FutureWaitUtil<>();
 
         futureUtil.executor = new ThreadPoolExecutor(
@@ -32,7 +32,7 @@ public class FutureWaitUtil<T> {
                 300,
                 TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(queueSize),
-                new NamedThreadFactory("FutureWaitUtil-" + name),
+                new NamedThreadFactory(threadPoolName),
                 new ThreadPoolExecutor.DiscardOldestPolicy() //对拒绝任务不抛弃，而是抛弃队列里面等待最久的一个线程，然后把拒绝任务加到队列。
         );
         futureUtil.executor.allowCoreThreadTimeOut(true);
@@ -123,11 +123,11 @@ public class FutureWaitUtil<T> {
                 }
 
                 // 达到超时时间，但是任务未完成，则打印日志并强制取消
-                LOGGER.error("class=FutureUtil||method=waitExecute||taskName={}||msg=cancel task", queueData.getTaskName());
+                LOGGER.error("method=waitExecute||taskName={}||msg=cancel task", queueData.getTaskName());
 
                 queueData.getFutureTask().cancel(true);
             } catch (Exception e) {
-                LOGGER.error("class=FutureUtil||method=waitExecute||msg=exception", e);
+                LOGGER.error("method=waitExecute||msg=exception", e);
             }
         }
 
@@ -155,7 +155,7 @@ public class FutureWaitUtil<T> {
             return queueData.getFutureTask().get(stepWaitTimeUnitMs, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             // 达到超时时间，但是任务未完成，则打印日志并强制取消
-            LOGGER.error("class=FutureUtil||method=stepWaitResult||taskName={}||errMsg=exception", queueData.getTaskName(), e);
+            LOGGER.error("method=stepWaitResult||taskName={}||errMsg=exception", queueData.getTaskName(), e);
         }
 
         return null;

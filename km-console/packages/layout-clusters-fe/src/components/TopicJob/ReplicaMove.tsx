@@ -14,12 +14,12 @@ import {
   Table,
   Utils,
   AppContainer,
-  message,
   Space,
   Divider,
   Transfer,
   Tooltip,
 } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import './index.less';
 import Api, { MetricType } from '@src/api/index';

@@ -3,9 +3,8 @@ package com.xiaojukeji.know.streaming.km.core.service.partition.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.offset.KSOffsetSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.VersionItemParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.partition.PartitionOffsetParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
@@ -20,11 +19,14 @@ import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.Triple;
+import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.persistence.cache.DataBaseDataLocalCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionMap;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.znode.brokers.PartitionState;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaConsumerClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.partition.PartitionDAO;
@@ -44,7 +46,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,8 +56,8 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
 /**
  * @author didi
  */
-@Service("partitionService")
-public class PartitionServiceImpl extends BaseVersionControlService implements PartitionService {
+@Service
+public class PartitionServiceImpl extends BaseKafkaVersionControlService implements PartitionService {
     private static final ILog log = LogFactory.getLog(PartitionServiceImpl.class);
 
     private static final String PARTITION_OFFSET_GET    = "getPartitionOffset";
@@ -78,15 +79,10 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
         return SERVICE_OP_PARTITION;
     }
 
-    private final Cache<String, List<Partition>> partitionsCache = Caffeine.newBuilder()
-            .expireAfterWrite(90, TimeUnit.SECONDS)
-            .maximumSize(1000)
-            .build();
-
     @PostConstruct
     private void init() {
-        registerVCHandler(PARTITION_OFFSET_GET,     V_0_10_0_0, V_0_11_0_0,  "getPartitionOffsetFromKafkaConsumerClient",       this::getPartitionOffsetFromKafkaConsumerClient);
-        registerVCHandler(PARTITION_OFFSET_GET,     V_0_11_0_0, V_MAX,       "getPartitionOffsetFromKafkaAdminClient",          this::getPartitionOffsetFromKafkaAdminClient);
+        registerVCHandler(PARTITION_OFFSET_GET,     V_0_10_0_0, V_0_11_0_0,  "batchGetPartitionOffsetFromKafkaConsumerClient",  this::batchGetPartitionOffsetFromKafkaConsumerClient);
+        registerVCHandler(PARTITION_OFFSET_GET,     V_0_11_0_0, V_MAX,       "batchGetPartitionOffsetFromKafkaAdminClient",     this::batchGetPartitionOffsetFromKafkaAdminClient);
     }
 
     @Override
@@ -96,6 +92,15 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
         }
 
         return this.getPartitionsFromAdminClient(clusterPhy);
+    }
+
+    @Override
+    public Result<List<Partition>> listPartitionsFromKafka(ClusterPhy clusterPhy, String topicName) {
+        if (clusterPhy.getRunState().equals(ClusterRunStateEnum.RUN_ZK.getRunState())) {
+            return this.getPartitionsFromZKClientByClusterTopicName(clusterPhy,topicName);
+        }
+        return this.getPartitionsFromAdminClientByClusterTopicName(clusterPhy,topicName);
+
     }
 
     @Override
@@ -124,17 +129,32 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
     }
 
     @Override
-    public List<Partition> listPartitionFromCacheFirst(Long clusterPhyId, String topicName) {
-        String clusterPhyIdAndTopicKey = MsgConstant.getClusterTopicKey(clusterPhyId, topicName);
-        List<Partition> partitionList = partitionsCache.getIfPresent(clusterPhyIdAndTopicKey);
+    public List<Partition> listPartitionFromCacheFirst(Long clusterPhyId) {
+        Map<String, List<Partition>> partitionMap = DataBaseDataLocalCache.getPartitions(clusterPhyId);
 
-        if (!ValidateUtils.isNull(partitionList)) {
-            return partitionList;
+        if (partitionMap != null) {
+            return partitionMap.values().stream().collect(ArrayList::new, ArrayList::addAll, ArrayList::addAll);
         }
 
-        partitionList = this.listPartitionByTopic(clusterPhyId, topicName);
-        partitionsCache.put(clusterPhyIdAndTopicKey, partitionList);
-        return partitionList;
+        return this.listPartitionByCluster(clusterPhyId);
+    }
+
+    @Override
+    public List<Partition> listPartitionFromCacheFirst(Long clusterPhyId, Integer brokerId) {
+        List<Partition> partitionList = this.listPartitionFromCacheFirst(clusterPhyId);
+
+        return partitionList.stream().filter(elem -> elem.getAssignReplicaList().contains(brokerId)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Partition> listPartitionFromCacheFirst(Long clusterPhyId, String topicName) {
+        Map<String, List<Partition>> partitionMap = DataBaseDataLocalCache.getPartitions(clusterPhyId);
+
+        if (partitionMap != null) {
+            return partitionMap.getOrDefault(topicName, new ArrayList<>());
+        }
+
+        return this.listPartitionByTopic(clusterPhyId, topicName);
     }
 
     @Override
@@ -154,16 +174,6 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
     }
 
     @Override
-    public List<Partition> listPartitionByBroker(Long clusterPhyId, Integer brokerId) {
-        LambdaQueryWrapper<PartitionPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(PartitionPO::getClusterPhyId, clusterPhyId);
-
-        List<Partition> partitionList = this.convert2PartitionList(partitionDAO.selectList(lambdaQueryWrapper));
-
-        return partitionList.stream().filter(elem -> elem.getAssignReplicaList().contains(brokerId)).collect(Collectors.toList());
-    }
-
-    @Override
     public Partition getPartitionByTopicAndPartitionId(Long clusterPhyId, String topicName, Integer partitionId) {
         LambdaQueryWrapper<PartitionPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(PartitionPO::getClusterPhyId, clusterPhyId);
@@ -174,71 +184,127 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
     }
 
     @Override
-    public Integer getPartitionSizeByClusterId(Long clusterPhyId) {
-        LambdaQueryWrapper<PartitionPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(PartitionPO::getClusterPhyId, clusterPhyId);
-
-        return partitionDAO.selectCount(lambdaQueryWrapper);
-    }
-
-    @Override
-    public Integer getLeaderPartitionSizeByClusterId(Long clusterPhyId) {
-        LambdaQueryWrapper<PartitionPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(PartitionPO::getClusterPhyId, clusterPhyId);
-        lambdaQueryWrapper.ne(PartitionPO::getLeaderBrokerId, -1);
-
-        return partitionDAO.selectCount(lambdaQueryWrapper);
-    }
-
-    @Override
-    public Integer getNoLeaderPartitionSizeByClusterId(Long clusterPhyId) {
-        LambdaQueryWrapper<PartitionPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(PartitionPO::getClusterPhyId, clusterPhyId);
-        lambdaQueryWrapper.eq(PartitionPO::getLeaderBrokerId, -1);
-
-        return partitionDAO.selectCount(lambdaQueryWrapper);
-    }
-
-    @Override
-    public Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafka(Long clusterPhyId, String topicName, OffsetSpec offsetSpec, Long timestamp) {
-        Map<TopicPartition, OffsetSpec> topicPartitionOffsets = new HashMap<>();
-
-        List<Partition> partitionList = this.listPartitionByTopic(clusterPhyId, topicName);
-        if (partitionList == null || partitionList.isEmpty()) {
-            // Topic不存在
-            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getTopicNotExist(clusterPhyId, topicName));
-        }
-
-        partitionList.stream()
+    public Result<Map<TopicPartition, Long>> getAllPartitionOffsetFromKafka(Long clusterPhyId, KSOffsetSpec offsetSpec) {
+        List<TopicPartition> tpList = this.listPartitionFromCacheFirst(clusterPhyId).stream()
                 .filter(item -> !item.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
-                .forEach(elem -> topicPartitionOffsets.put(new TopicPartition(topicName, elem.getPartitionId()), offsetSpec));
-
-        if (topicPartitionOffsets.isEmpty()) {
-            // 所有分区no-leader
-            return Result.buildFromRSAndMsg(ResultStatus.OPERATION_FAILED, MsgConstant.getPartitionNoLeader(clusterPhyId, topicName));
-        }
+                .map(elem -> new TopicPartition(elem.getTopicName(), elem.getPartitionId()))
+                .collect(Collectors.toList());
 
         try {
-            return (Result<Map<TopicPartition, Long>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, topicPartitionOffsets, timestamp));
+            Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> listResult =
+                    (Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, offsetSpec, tpList));
+
+            return this.convert2OffsetMapResult(listResult);
         } catch (VCHandlerNotExistException e) {
             return Result.buildFailure(VC_HANDLE_NOT_EXIST);
         }
     }
 
     @Override
-    public Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafka(Long clusterPhyId, String topicName, Integer partitionId, OffsetSpec offsetSpec, Long timestamp) {
-        if (partitionId == null) {
-            return this.getPartitionOffsetFromKafka(clusterPhyId, topicName, offsetSpec, timestamp);
+    public Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafka(Long clusterPhyId, String topicName, KSOffsetSpec offsetSpec) {
+        List<TopicPartition> tpList = this.listPartitionFromCacheFirst(clusterPhyId, topicName).stream()
+                .filter(item -> !item.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
+                .map(elem -> new TopicPartition(topicName, elem.getPartitionId()))
+                .collect(Collectors.toList());
+
+        if (tpList.isEmpty()) {
+            // 所有分区no-leader
+            return Result.buildFromRSAndMsg(ResultStatus.OPERATION_FAILED, MsgConstant.getPartitionNoLeader(clusterPhyId, topicName));
         }
 
-        Map<TopicPartition, OffsetSpec> topicPartitionOffsets = new HashMap<>();
-        this.listPartitionByTopic(clusterPhyId, topicName)
-                .stream()
-                .filter(elem -> elem.getPartitionId().equals(partitionId))
-                .forEach(elem -> topicPartitionOffsets.put(new TopicPartition(topicName, elem.getPartitionId()), offsetSpec));
+        try {
+            Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> listResult =
+                    (Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, offsetSpec, tpList));
+
+            return this.convert2OffsetMapResult(listResult);
+        } catch (VCHandlerNotExistException e) {
+            return Result.buildFailure(VC_HANDLE_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public Result<Tuple<Map<TopicPartition, Long>, Map<TopicPartition, Long>>> getPartitionBeginAndEndOffsetFromKafka(Long clusterPhyId, String topicName) {
+        List<TopicPartition> tpList = this.listPartitionFromCacheFirst(clusterPhyId, topicName).stream()
+                .filter(item -> !item.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
+                .map(elem -> new TopicPartition(topicName, elem.getPartitionId()))
+                .collect(Collectors.toList());
+
+        if (tpList.isEmpty()) {
+            // 所有分区no-leader
+            return Result.buildFromRSAndMsg(ResultStatus.OPERATION_FAILED, MsgConstant.getPartitionNoLeader(clusterPhyId, topicName));
+        }
 
         try {
-            return (Result<Map<TopicPartition, Long>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, topicPartitionOffsets, timestamp));
+            Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> listResult =
+                    (Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, Arrays.asList(KSOffsetSpec.earliest(), KSOffsetSpec.latest()), tpList));
+            if (listResult.failed()) {
+                return Result.buildFromIgnoreData(listResult);
+            } else if (ValidateUtils.isEmptyList(listResult.getData())) {
+                return Result.buildSuc(new Tuple<Map<TopicPartition, Long>, Map<TopicPartition, Long>>(new HashMap<>(0), new HashMap<>(0)));
+            }
+
+            Tuple<Map<TopicPartition, Long>, Map<TopicPartition, Long>> tuple = new Tuple<>(new HashMap<>(0), new HashMap<>(0));
+            listResult.getData().forEach(elem -> {
+                if (elem.getV1() instanceof KSOffsetSpec.KSEarliestSpec) {
+                    tuple.setV1(elem.v2());
+                } else if (elem.v1() instanceof KSOffsetSpec.KSLatestSpec) {
+                    tuple.setV2(elem.v2());
+                }
+            });
+
+            return Result.buildSuc(tuple);
+        } catch (VCHandlerNotExistException e) {
+            return Result.buildFailure(VC_HANDLE_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafka(Long clusterPhyId, String topicName, Integer partitionId, KSOffsetSpec offsetSpec) {
+        if (partitionId == null) {
+            return this.getPartitionOffsetFromKafka(clusterPhyId, topicName, offsetSpec);
+        }
+
+        List<TopicPartition> tpList = this.listPartitionFromCacheFirst(clusterPhyId, topicName).stream()
+                .filter(item -> !item.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
+                .filter(partition -> partition.getPartitionId().equals(partitionId))
+                .map(elem -> new TopicPartition(topicName, elem.getPartitionId()))
+                .collect(Collectors.toList());
+
+        if (ValidateUtils.isEmptyList(tpList)) {
+            return Result.buildSuc(new HashMap<>(0));
+        }
+
+        try {
+            Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> listResult =
+                    (Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>>) doVCHandler(clusterPhyId, PARTITION_OFFSET_GET, new PartitionOffsetParam(clusterPhyId, topicName, offsetSpec, tpList));
+
+            return this.convert2OffsetMapResult(listResult);
+        } catch (VCHandlerNotExistException e) {
+            return Result.buildFailure(VC_HANDLE_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafka(Long clusterPhyId, List<TopicPartition> tpList, KSOffsetSpec offsetSpec) {
+        // 集群具有leader的分区列表
+        Set<TopicPartition> existLeaderTPSet = this.listPartitionFromCacheFirst(clusterPhyId).stream()
+                .filter(item -> !item.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER))
+                .map(elem -> new TopicPartition(elem.getTopicName(), elem.getPartitionId()))
+                .collect(Collectors.toSet());
+
+        List<TopicPartition> existLeaderTPList = tpList.stream().filter(elem -> existLeaderTPSet.contains(elem)).collect(Collectors.toList());
+        if (existLeaderTPList.isEmpty()) {
+            return Result.buildSuc(new HashMap<>(0));
+        }
+
+        try {
+            Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> listResult = (Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>>) doVCHandler(
+                    clusterPhyId,
+                    PARTITION_OFFSET_GET,
+                    new PartitionOffsetParam(clusterPhyId, offsetSpec, existLeaderTPList)
+            );
+
+            return this.convert2OffsetMapResult(listResult);
         } catch (VCHandlerNotExistException e) {
             return Result.buildFailure(VC_HANDLE_NOT_EXIST);
         }
@@ -258,6 +324,10 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
             }
 
             PartitionPO presentPartitionPO = this.convert2PartitionPO(partition);
+            if (presentPartitionPO.equals(dbPartitionPO)) {
+                // 数据一样，不进行DB操作
+                continue;
+            }
             presentPartitionPO.setId(dbPartitionPO.getId());
             partitionDAO.updateById(presentPartitionPO);
         }
@@ -297,64 +367,137 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
 
     /**************************************************** private method ****************************************************/
 
-
-    private Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafkaAdminClient(VersionItemParam itemParam) {
+    private Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> batchGetPartitionOffsetFromKafkaAdminClient(VersionItemParam itemParam) {
         PartitionOffsetParam offsetParam = (PartitionOffsetParam) itemParam;
+        if (offsetParam.getOffsetSpecList().isEmpty()) {
+            return Result.buildSuc(Collections.emptyList());
+        }
+
+        List<Triple<String, KSOffsetSpec, ListOffsetsResult>> resultList = new ArrayList<>();
+        for (Triple<String, KSOffsetSpec, List<TopicPartition>> elem: offsetParam.getOffsetSpecList()) {
+            Result<ListOffsetsResult> offsetsResult = this.getPartitionOffsetFromKafkaAdminClient(
+                    offsetParam.getClusterPhyId(),
+                    elem.v1(),
+                    elem.v2(),
+                    elem.v3()
+            );
+
+            if (offsetsResult.failed() && offsetParam.getOffsetSpecList().size() == 1) {
+                return Result.buildFromIgnoreData(offsetsResult);
+            }
+
+            if (offsetsResult.hasData()) {
+                resultList.add(new Triple<>(elem.v1(), elem.v2(), offsetsResult.getData()));
+            }
+        }
+
+        List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>> offsetMapList = new ArrayList<>();
+        for (Triple<String, KSOffsetSpec, ListOffsetsResult> triple: resultList) {
+            try {
+                Map<TopicPartition, Long> offsetMap = new HashMap<>();
+                triple.v3().all().get().entrySet().stream().forEach(elem -> offsetMap.put(elem.getKey(), elem.getValue().offset()));
+
+                offsetMapList.add(new Tuple<>(triple.v2(), offsetMap));
+            } catch (Exception e) {
+                log.error(
+                        "method=batchGetPartitionOffsetFromKafkaAdminClient||clusterPhyId={}||topicName={}||offsetSpec={}||errMsg=exception!",
+                        offsetParam.getClusterPhyId(), triple.v1(), triple.v2(), e
+                );
+            }
+        }
+
+        return Result.buildSuc(offsetMapList);
+    }
+
+    private Result<ListOffsetsResult> getPartitionOffsetFromKafkaAdminClient(Long clusterPhyId, String topicName, KSOffsetSpec offsetSpec, List<TopicPartition> tpList) {
         try {
-            AdminClient adminClient = kafkaAdminClient.getClient(offsetParam.getClusterPhyId());
+            AdminClient adminClient = kafkaAdminClient.getClient(clusterPhyId);
 
-            ListOffsetsResult listOffsetsResult = adminClient.listOffsets(offsetParam.getTopicPartitionOffsets(), new ListOffsetsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
+            Map<TopicPartition, OffsetSpec> kafkaOffsetSpecMap = new HashMap<>(tpList.size());
+            tpList.forEach(elem -> {
+                if (offsetSpec instanceof KSOffsetSpec.KSEarliestSpec) {
+                    kafkaOffsetSpecMap.put(elem, OffsetSpec.earliest());
+                } else if (offsetSpec instanceof KSOffsetSpec.KSLatestSpec) {
+                    kafkaOffsetSpecMap.put(elem, OffsetSpec.latest());
+                } else if (offsetSpec instanceof KSOffsetSpec.KSTimestampSpec) {
+                    kafkaOffsetSpecMap.put(elem, OffsetSpec.forTimestamp(((KSOffsetSpec.KSTimestampSpec) offsetSpec).timestamp()));
+                }
+            });
 
-            Map<TopicPartition, Long> offsetMap = new HashMap<>();
-            listOffsetsResult.all().get().entrySet().stream().forEach(elem -> offsetMap.put(elem.getKey(), elem.getValue().offset()));
+            ListOffsetsResult listOffsetsResult = adminClient.listOffsets(kafkaOffsetSpecMap, new ListOffsetsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS));
 
-            return Result.buildSuc(offsetMap);
+            return Result.buildSuc(listOffsetsResult);
         } catch (NotExistException nee) {
-            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(offsetParam.getClusterPhyId()));
+            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(clusterPhyId));
         } catch (Exception e) {
             log.error(
-                    "class=PartitionServiceImpl||method=getPartitionOffsetFromKafkaAdminClient||clusterPhyId={}||topicName={}||errMsg=exception!",
-                    offsetParam.getClusterPhyId(), offsetParam.getTopicName(), e
+                    "method=getPartitionOffsetFromKafkaAdminClient||clusterPhyId={}||topicName={}||errMsg=exception!",
+                    clusterPhyId, topicName, e
             );
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
     }
 
-    private Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafkaConsumerClient(VersionItemParam itemParam) {
+    private Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> batchGetPartitionOffsetFromKafkaConsumerClient(VersionItemParam itemParam) {
+        PartitionOffsetParam offsetParam = (PartitionOffsetParam) itemParam;
+        if (offsetParam.getOffsetSpecList().isEmpty()) {
+            return Result.buildSuc(Collections.emptyList());
+        }
+
+        List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>> offsetMapList = new ArrayList<>();
+        for (Triple<String, KSOffsetSpec, List<TopicPartition>> triple: offsetParam.getOffsetSpecList()) {
+            Result<Map<TopicPartition, Long>> subOffsetMapResult = this.getPartitionOffsetFromKafkaConsumerClient(
+                    offsetParam.getClusterPhyId(),
+                    triple.v1(),
+                    triple.v2(),
+                    triple.v3()
+            );
+
+            if (subOffsetMapResult.failed() && offsetParam.getOffsetSpecList().size() == 1) {
+                return Result.buildFromIgnoreData(subOffsetMapResult);
+            }
+
+            if (subOffsetMapResult.hasData()) {
+                offsetMapList.add(new Tuple<>(triple.v2(), subOffsetMapResult.getData()));
+            }
+        }
+
+        return Result.buildSuc(offsetMapList);
+    }
+
+    private Result<Map<TopicPartition, Long>> getPartitionOffsetFromKafkaConsumerClient(Long clusterPhyId, String topicName, KSOffsetSpec offsetSpec, List<TopicPartition> tpList) {
         KafkaConsumer<String, String> kafkaConsumer = null;
 
-        PartitionOffsetParam offsetParam = (PartitionOffsetParam) itemParam;
         try {
-            if (ValidateUtils.isEmptyMap(offsetParam.getTopicPartitionOffsets())) {
+            if (ValidateUtils.isEmptyList(tpList)) {
                 return Result.buildSuc(new HashMap<>());
             }
 
-            kafkaConsumer = kafkaConsumerClient.getClient(offsetParam.getClusterPhyId());
+            kafkaConsumer = kafkaConsumerClient.getClient(clusterPhyId);
 
-            OffsetSpec offsetSpec = new ArrayList<>(offsetParam.getTopicPartitionOffsets().values()).get(0);
-            if (offsetSpec instanceof OffsetSpec.LatestSpec) {
+            if (offsetSpec instanceof KSOffsetSpec.KSLatestSpec) {
                 return Result.buildSuc(
                         kafkaConsumer.endOffsets(
-                                offsetParam.getTopicPartitionOffsets().keySet(),
+                                tpList,
                                 Duration.ofMillis(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
                         )
                 );
             }
 
-            if (offsetSpec instanceof OffsetSpec.EarliestSpec) {
+            if (offsetSpec instanceof KSOffsetSpec.KSEarliestSpec) {
                 return Result.buildSuc(
                         kafkaConsumer.beginningOffsets(
-                                offsetParam.getTopicPartitionOffsets().keySet(),
+                                tpList,
                                 Duration.ofMillis(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
                         )
                 );
             }
 
-            if (offsetSpec instanceof OffsetSpec.TimestampSpec) {
+            if (offsetSpec instanceof KSOffsetSpec.KSTimestampSpec) {
                 // 按照时间进行查找
                 Map<TopicPartition, Long> timestampMap = new HashMap<>();
-                offsetParam.getTopicPartitionOffsets().entrySet().stream().forEach(elem -> timestampMap.put(elem.getKey(), offsetParam.getTimestamp()));
+                tpList.forEach(elem -> timestampMap.put(elem, ((KSOffsetSpec.KSTimestampSpec) offsetSpec).timestamp()));
 
                 Map<TopicPartition, OffsetAndTimestamp> offsetMetadataMap = kafkaConsumer.offsetsForTimes(
                         timestampMap,
@@ -368,17 +511,17 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
 
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "OffsetSpec type illegal");
         } catch (NotExistException nee) {
-            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(offsetParam.getClusterPhyId()));
+            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(clusterPhyId));
         } catch (Exception e) {
             log.error(
-                    "class=PartitionServiceImpl||method=getPartitionOffsetFromKafkaConsumerClient||clusterPhyId={}||topicName={}||errMsg=exception!",
-                    offsetParam.getClusterPhyId(), offsetParam.getTopicName(), e
+                    "method=getPartitionOffsetFromKafkaConsumerClient||clusterPhyId={}||topicName={}||errMsg=exception!",
+                    clusterPhyId, topicName, e
             );
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         } finally {
             if (kafkaConsumer != null) {
-                kafkaConsumerClient.returnClient(offsetParam.getClusterPhyId(), kafkaConsumer);
+                kafkaConsumerClient.returnClient(clusterPhyId, kafkaConsumer);
             }
         }
     }
@@ -392,19 +535,17 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
             // 获取Topic列表
             ListTopicsResult listTopicsResult = adminClient.listTopics(new ListTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS).listInternal(true));
             for (String topicName: listTopicsResult.names().get()) {
-                DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(
-                        Arrays.asList(topicName),
-                        new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
-                );
-
-                TopicDescription description = describeTopicsResult.all().get().get(topicName);
-
-                partitionMap.put(topicName, PartitionConverter.convert2PartitionList(clusterPhy.getId(), description));
+                Result<List<Partition>> partitionListRes = this.getPartitionsFromAdminClientByClusterTopicName(clusterPhy, topicName);
+                if (partitionListRes.successful()){
+                    partitionMap.put(topicName, partitionListRes.getData());
+                }else {
+                    return Result.buildFromIgnoreData(partitionListRes);
+                }
             }
 
             return Result.buildSuc(partitionMap);
         } catch (Exception e) {
-            log.error("class=PartitionServiceImpl||method=getPartitionsFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
+            log.error("method=getPartitionsFromAdminClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
@@ -416,13 +557,42 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
         try {
             List<String> topicNameList = kafkaZKDAO.getChildren(clusterPhy.getId(), TopicsZNode.path(), false);
             for (String topicName: topicNameList) {
-                PartitionMap zkPartitionMap = kafkaZKDAO.getData(clusterPhy.getId(), TopicZNode.path(topicName), PartitionMap.class);
+                Result<List<Partition>> partitionListRes = this.getPartitionsFromZKClientByClusterTopicName(clusterPhy, topicName);
+                if (partitionListRes.successful()){
+                    partitionMap.put(topicName, partitionListRes.getData());
+                }
+            }
+            return Result.buildSuc(partitionMap);
+        } catch (Exception e) {
+            log.error("method=getPartitionsFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
 
+            return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
+        }
+    }
+
+    private Result<List<Partition>> getPartitionsFromAdminClientByClusterTopicName(ClusterPhy clusterPhy, String topicName) {
+
+        try {
+            AdminClient adminClient = kafkaAdminClient.getClient(clusterPhy.getId());
+            DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(
+                    Arrays.asList(topicName),
+                    new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
+            );
+            TopicDescription description = describeTopicsResult.all().get().get(topicName);
+            return Result.buildSuc(PartitionConverter.convert2PartitionList(clusterPhy.getId(), description));
+        }catch (Exception e) {
+            log.error("method=getPartitionsFromAdminClientByClusterTopicName||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(),topicName, e);
+            return Result.buildFailure(ResultStatus.KAFKA_OPERATE_FAILED);
+        }
+    }
+
+    private Result<List<Partition>> getPartitionsFromZKClientByClusterTopicName(ClusterPhy clusterPhy, String topicName) {
+        try {
+                PartitionMap zkPartitionMap = kafkaZKDAO.getData(clusterPhy.getId(), TopicZNode.path(topicName), PartitionMap.class);
                 List<Partition> partitionList = new ArrayList<>();
                 List<String> partitionIdList = kafkaZKDAO.getChildren(clusterPhy.getId(), TopicPartitionsZNode.path(topicName), false);
                 for (String partitionId: partitionIdList) {
                     PartitionState partitionState = kafkaZKDAO.getData(clusterPhy.getId(), TopicPartitionStateZNode.path(new TopicPartition(topicName, Integer.valueOf(partitionId))), PartitionState.class);
-
                     Partition partition = new Partition();
                     partition.setClusterPhyId(clusterPhy.getId());
                     partition.setTopicName(topicName);
@@ -430,17 +600,11 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
                     partition.setLeaderBrokerId(partitionState.getLeader());
                     partition.setInSyncReplicaList(partitionState.getIsr());
                     partition.setAssignReplicaList(zkPartitionMap.getPartitionAssignReplicas(Integer.valueOf(partitionId)));
-
                     partitionList.add(partition);
                 }
-
-                partitionMap.put(topicName, partitionList);
-            }
-
-            return Result.buildSuc(partitionMap);
+            return Result.buildSuc(partitionList);
         } catch (Exception e) {
-            log.error("class=PartitionServiceImpl||method=getPartitionsFromZKClient||clusterPhyId={}||errMsg=exception", clusterPhy.getId(), e);
-
+            log.error("method=getPartitionsFromZKClientByClusterTopicName||clusterPhyId={}||topicName={}||errMsg=exception", clusterPhy.getId(),topicName, e);
             return Result.buildFromRSAndMsg(ResultStatus.KAFKA_OPERATE_FAILED, e.getMessage());
         }
     }
@@ -452,21 +616,24 @@ public class PartitionServiceImpl extends BaseVersionControlService implements P
 
         List<Partition> partitionList = new ArrayList<>();
         for (PartitionPO po: poList) {
-            if(null != po){partitionList.add(convert2Partition(po));}
+            if(null != po) {
+                partitionList.add(this.convert2Partition(po));
+            }
         }
         return partitionList;
     }
 
-    private List<PartitionPO> convert2PartitionPOList(List<Partition> partitionList) {
-        if (partitionList == null) {
-            return new ArrayList<>();
+    private Result<Map<TopicPartition, Long>> convert2OffsetMapResult(Result<List<Tuple<KSOffsetSpec, Map<TopicPartition, Long>>>> listResult) {
+        if (listResult.failed()) {
+            return Result.buildFromIgnoreData(listResult);
+        } else if (ValidateUtils.isEmptyList(listResult.getData())) {
+            return Result.buildSuc(new HashMap<>(0));
         }
 
-        List<PartitionPO> poList = new ArrayList<>();
-        for (Partition partition: partitionList) {
-            poList.add(this.convert2PartitionPO(partition));
-        }
-        return poList;
+        Map<TopicPartition, Long> offsetMap = new HashMap<>();
+        listResult.getData().forEach(elem -> offsetMap.putAll(elem.v2()));
+
+        return Result.buildSuc(offsetMap);
     }
 
     private PartitionPO convert2PartitionPO(Partition partition) {

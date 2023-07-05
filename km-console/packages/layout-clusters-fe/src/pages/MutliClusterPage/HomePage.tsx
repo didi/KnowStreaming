@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Slider, Input, Select, Checkbox, Button, Utils, Spin, AppContainer } from 'knowdesign';
+import { Slider, Input, Select, Checkbox, Button, Utils, Spin, AppContainer, Tooltip } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import API from '@src/api';
 import TourGuide, { MultiPageSteps } from '@src/components/TourGuide';
-import './index.less';
-import { healthSorceList, sortFieldList, sortTypes, statusFilters } from './config';
+import { healthSorceList, sliderValueMap, sortFieldList, sortTypes, statusFilters } from './config';
 import ClusterList from './List';
 import AccessClusters from './AccessCluster';
+import AccessCluster from './AccessClusterConfig';
 import CustomCheckGroup from './CustomCheckGroup';
 import { ClustersPermissionMap } from '../CommonConfig';
+import './index.less';
 
 const CheckboxGroup = Checkbox.Group;
 const { Option } = Select;
@@ -19,8 +20,17 @@ interface ClustersState {
   total: number;
 }
 
+interface ClustersHealthState {
+  deadCount: number;
+  goodCount: number;
+  mediumCount: number;
+  poorCount: number;
+  total: number;
+  unknownCount: number;
+}
+
 export interface SearchParams {
-  healthScoreRange?: [number, number];
+  healthState?: number[];
   checkedKafkaVersions?: string[];
   sortInfo?: {
     sortField: string;
@@ -74,16 +84,24 @@ const MultiClusterPage = () => {
     liveCount: 0,
     total: 0,
   });
+  const [clustersHealthState, setClustersHealthState] = React.useState<ClustersHealthState>();
+  const [sliderInfo, setSliderInfo] = React.useState<{
+    value: [number, number];
+    desc: string;
+  }>({
+    value: [0, 5],
+    desc: '',
+  });
   // TODO: 首次进入因 searchParams 状态变化导致获取两次列表数据的问题
   const [searchParams, setSearchParams] = React.useState<SearchParams>({
     keywords: '',
     checkedKafkaVersions: [],
-    healthScoreRange: [0, 100],
     sortInfo: {
-      sortField: 'HealthScore',
+      sortField: 'HealthState',
       sortType: 'asc',
     },
     clusterStatus: [0, 1],
+    healthState: [-1, 0, 1, 2, 3],
     // 是否拉取当前所有数据
     isReloadAll: false,
   });
@@ -91,10 +109,28 @@ const MultiClusterPage = () => {
   const searchKeyword = useRef('');
   const isReload = useRef(false);
 
+  const getPhyClusterHealthState = () => {
+    Utils.request(API.phyClusterHealthState).then((res: ClustersHealthState) => {
+      setClustersHealthState(res || undefined);
+
+      const result: string[] = [];
+      for (let i = 0; i < sliderInfo.value[1] - sliderInfo.value[0]; i++) {
+        const val = sliderValueMap[(sliderInfo.value[1] - i) as keyof typeof sliderValueMap];
+        result.push(`${val.name}: ${res?.[val.key as keyof ClustersHealthState]}`);
+      }
+
+      setSliderInfo((cur) => ({
+        ...cur,
+        desc: result.reverse().join(', '),
+      }));
+    });
+  };
+
   // 获取集群状态
   const getPhyClusterState = () => {
+    getPhyClusterHealthState();
     Utils.request(API.phyClusterState)
-      .then((res: any) => {
+      .then((res: ClustersState) => {
         setStateInfo(res);
       })
       .finally(() => {
@@ -111,13 +147,14 @@ const MultiClusterPage = () => {
 
   const updateSearchParams = (params: SearchParams) => {
     setSearchParams((curParams) => ({ ...curParams, isReloadAll: false, ...params }));
+    getPhyClusterHealthState();
   };
 
   const searchParamsChangeFunc = {
     // 健康分改变
-    onSilderChange: (value: [number, number]) =>
+    onSilderChange: (value: number[]) =>
       updateSearchParams({
-        healthScoreRange: value,
+        healthState: value,
       }),
     // 排序信息改变
     onSortInfoChange: (type: string, value: string) =>
@@ -251,16 +288,41 @@ const MultiClusterPage = () => {
                         </div>
                       </div>
                       <div className="header-filter-bottom-item header-filter-bottom-item-slider">
-                        <h3 className="header-filter-bottom-item-title title-right">健康分</h3>
-                        <div className="header-filter-bottom-item-content">
-                          <Slider
-                            range
-                            step={20}
-                            defaultValue={[0, 100]}
-                            marks={healthSorceList}
-                            onAfterChange={searchParamsChangeFunc.onSilderChange}
-                          />
-                        </div>
+                        <h3 className="header-filter-bottom-item-title title-right">健康状态</h3>
+                        <Tooltip title={sliderInfo.desc} overlayClassName="cluster-health-state-tooltip">
+                          <div className="header-filter-bottom-item-content" id="clusters-slider">
+                            <Slider
+                              dots
+                              range={{ draggableTrack: true }}
+                              step={1}
+                              max={5}
+                              marks={healthSorceList}
+                              value={sliderInfo.value}
+                              tooltipVisible={false}
+                              onChange={(value: [number, number]) => {
+                                if (value[0] !== value[1]) {
+                                  const result = [];
+                                  for (let i = 0; i < value[1] - value[0]; i++) {
+                                    const val = sliderValueMap[(value[1] - i) as keyof typeof sliderValueMap];
+                                    result.push(`${val.name}: ${clustersHealthState?.[val.key as keyof ClustersHealthState]}`);
+                                  }
+                                  setSliderInfo({
+                                    value,
+                                    desc: result.reverse().join(', '),
+                                  });
+                                }
+                              }}
+                              onAfterChange={(value: [number, number]) => {
+                                const result = [];
+                                for (let i = 0; i < value[1] - value[0]; i++) {
+                                  const val = sliderValueMap[(value[1] - i) as keyof typeof sliderValueMap];
+                                  result.push(val.code);
+                                }
+                                searchParamsChangeFunc.onSilderChange(result);
+                              }}
+                            />
+                          </div>
+                        </Tooltip>
                       </div>
                     </div>
                   </div>
@@ -269,7 +331,7 @@ const MultiClusterPage = () => {
                   <div className="multi-cluster-filter-select">
                     <Select
                       onChange={(value) => searchParamsChangeFunc.onSortInfoChange('sortField', value)}
-                      defaultValue="HealthScore"
+                      defaultValue="HealthState"
                       style={{ width: 170, marginRight: 12 }}
                     >
                       {sortFieldList.map((item) => (
@@ -298,6 +360,7 @@ const MultiClusterPage = () => {
                     />
                   </div>
                 </div>
+                <AccessCluster />
               </div>
             </div>
             <div className="multi-cluster-page-dashboard">

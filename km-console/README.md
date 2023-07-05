@@ -24,7 +24,7 @@ npm install -g lerna
 npm run i
 ```
 
-我们默认保留了 `package-lock.json` 文件，以防止可能的依赖包自动升级导致的问题。依赖默认会通过 taobao 镜像 `https://registry.npmmirror.com/` 服务下载。
+我们默认保留了 `package-lock.json` 文件，以防止可能的依赖包自动升级导致的问题。依赖默认会通过 taobao 镜像 `https://registry.npmmirror.com/` 服务下载（如需修改下载源，请见当前目录下 package.json 文件）。
 
 ## 三、启动项目（可选，打包构建请直接看步骤三）
 

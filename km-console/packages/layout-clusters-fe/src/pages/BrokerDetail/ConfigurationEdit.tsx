@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Drawer, Form, Input, Space, Button, Checkbox, Utils, Row, Col, Divider, message } from 'knowdesign';
+import { Drawer, Form, Input, Space, Button, Checkbox, Utils, Row, Col, Divider } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import { useParams } from 'react-router-dom';
 import Api from '@src/api';

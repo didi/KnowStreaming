@@ -8,20 +8,13 @@
   "ident": "config",
   "homepage": "",
   "license": "ISC",
-  "publishConfig": {
-    "registry": "http://registry.npm.xiaojukeji.com/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@git.xiaojukeji.com:bigdata-cloud/d1.git"
-  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "start": "cross-env NODE_ENV=development webpack-dev-server",
     "build": "cross-env NODE_ENV=production webpack --max_old_space_size=8000"
   },
   "dependencies": {
-    "@knowdesign/icons": "^1.0.0",
+    "@knowdesign/icons": "^1.0.2",
     "babel-preset-react-app": "^10.0.0",
     "classnames": "^2.2.6",
     "dotenv": "^16.0.1",
@@ -95,7 +88,7 @@
     "react-router-dom": "5.2.1",
     "stats-webpack-plugin": "^0.7.0",
     "ts-loader": "^8.0.11",
-    "typescript": "^3.5.3",
+    "typescript": "4.6.4",
     "webpack": "^4.40.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^3.2.3",

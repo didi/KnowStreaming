@@ -31,6 +31,9 @@ public class ClusterBrokersOverviewVO extends BrokerMetadataVO {
     @ApiModelProperty(value = "jmx端口")
     private Integer jmxPort;
 
+    @ApiModelProperty(value = "jmx连接状态 true:连接成功 false:连接失败")
+    private Boolean jmxConnected;
+
     @ApiModelProperty(value = "是否存活 true：存活 false：不存活")
     private Boolean alive;
 }

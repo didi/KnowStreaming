@@ -4,6 +4,7 @@ import CardBar from '@src/components/CardBar';
 import { healthDataProps } from '.';
 import { Utils } from 'knowdesign';
 import api from '@src/api';
+import { HealthStateEnum } from '../HealthState';
 
 export default () => {
   const routeParams = useParams<{
@@ -12,14 +13,12 @@ export default () => {
   const [loading, setLoading] = useState(false);
   const [cardData, setCardData] = useState([]);
   const [healthData, setHealthData] = useState<healthDataProps>({
-    score: 0,
+    state: HealthStateEnum.UNKNOWN,
     passed: 0,
     total: 0,
-    alive: 0,
   });
-  const [healthDetail, setHealthDetail] = useState([]);
   const cardItems = ['Topics', 'Partitions', 'PartitionNoLeader', 'PartitionMinISR_S', 'PartitionMinISR_E', 'PartitionURP'];
-  const healthItems = ['HealthScore_Topics', 'HealthCheckPassed_Topics', 'HealthCheckTotal_Topics', 'Alive'];
+  const healthItems = ['HealthCheckPassed_Topics', 'HealthCheckTotal_Topics', 'HealthState'];
   useEffect(() => {
     setLoading(true);
     Utils.post(api.getMetricPointsLatest(Number(routeParams.clusterId)), cardItems.concat(healthItems)).then((data: any) => {
@@ -42,12 +41,6 @@ export default () => {
         PartitionURP: 'URP',
         PartitionNoLeader: 'No Leader',
       };
-      // setCardData(data
-      //   .filter(item => cardItems.indexOf(item.name) >= 0)
-      //   .map(item => {
-      //     return { title: metricElmMap[item.name] || item.name, value: item.value }
-      //   })
-      // )
       setCardData(
         cardItems.map((item) => {
           let title = item;
@@ -66,13 +59,12 @@ export default () => {
           return { title, value: data.metrics[item] };
         })
       );
-      const healthResData: any = {};
-      healthResData.score = data.metrics['HealthScore_Topics'] || 0;
-      healthResData.passed = data.metrics['HealthCheckPassed_Topics'] || 0;
-      healthResData.total = data.metrics['HealthCheckTotal_Topics'] || 0;
-      healthResData.alive = data.metrics['Alive'] || 0;
-      setHealthData(healthResData);
+      setHealthData({
+        state: data.metrics['HealthState'],
+        passed: data.metrics['HealthCheckPassed_Topics'] || 0,
+        total: data.metrics['HealthCheckTotal_Topics'] || 0,
+      });
     });
   }, []);
-  return <CardBar scene="topic" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
+  return <CardBar scene="topics" healthData={healthData} cardColumns={cardData} loading={loading}></CardBar>;
 };

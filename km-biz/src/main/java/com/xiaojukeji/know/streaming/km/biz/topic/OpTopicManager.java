@@ -19,4 +19,9 @@ public interface OpTopicManager {
      * 扩分区
      */
     Result<Void> expandTopic(TopicExpansionDTO dto, String operator);
+
+    /**
+     * 清空Topic
+     */
+    Result<Void> truncateTopic(Long clusterPhyId, String topicName, String operator);
 }

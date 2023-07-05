@@ -1,19 +1,21 @@
 package com.xiaojukeji.know.streaming.km.rest.api.v3.cluster;
 
 import com.xiaojukeji.know.streaming.km.biz.group.GroupManager;
-import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.ClusterGroupsOverviewDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.ClusterGroupSummaryDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.metrices.MetricGroupPartitionDTO;
-import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.field.PaginationFuzzySearchFieldDTO;
+import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBaseDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.TopicPartitionKS;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupOverviewVO;
+import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicBasicVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.group.GroupTopicOverviewVO;
 import com.xiaojukeji.know.streaming.km.common.constant.ApiPrefix;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
-import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
-import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
+import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupMetricService;
+import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,22 +37,23 @@ public class ClusterGroupsController {
     private GroupManager groupManager;
 
     @Autowired
+    private GroupService groupService;
+
+    @Autowired
     private GroupMetricService groupMetricService;
 
     @ApiOperation(value = "集群Groups信息列表")
-    @PostMapping(value = "clusters/{clusterPhyId}/groups-overview")
+    @GetMapping(value = "clusters/{clusterPhyId}/groups-basic")
     @ResponseBody
-    public PaginationResult<GroupTopicOverviewVO> getClusterPhyGroupsOverview(@PathVariable Long clusterPhyId,
-                                                                              @RequestBody ClusterGroupsOverviewDTO dto) {
-        Tuple<String, String> searchKeyTuple = this.getSearchKeyWords(dto);
-        return groupManager.pagingGroupMembers(
-                clusterPhyId,
-                dto.getTopicName(),
-                dto.getGroupName(),
-                searchKeyTuple.getV1(),
-                searchKeyTuple.getV2(),
-                dto
-        );
+    public Result<List<GroupTopicBasicVO>> getGroupsBasic(@PathVariable Long clusterPhyId) {
+        return Result.buildSuc(ConvertUtil.list2List(groupService.listGroupByCluster(clusterPhyId), GroupTopicBasicVO.class));
+    }
+
+    @ApiOperation(value = "集群Groups信息列表")
+    @GetMapping(value = "clusters/{clusterPhyId}/groups-overview")
+    @ResponseBody
+    public PaginationResult<GroupOverviewVO> getGroupsOverview(@PathVariable Long clusterPhyId, ClusterGroupSummaryDTO dto) {
+        return groupManager.pagingClusterGroupsOverview(clusterPhyId, dto);
     }
 
     @ApiOperation(value = "集群Groups指标信息")
@@ -70,24 +73,13 @@ public class ClusterGroupsController {
         return groupManager.listClusterPhyGroupPartitions(clusterPhyId, groupName, startTime, endTime);
     }
 
-    /**************************************************** private method ****************************************************/
-
-    private Tuple<String, String> getSearchKeyWords(ClusterGroupsOverviewDTO dto) {
-        if (ValidateUtils.isEmptyList(dto.getFuzzySearchDTOList())) {
-            return new Tuple<>("", "");
-        }
-
-        String searchTopicName = "";
-        String searchGroupName = "";
-        for (PaginationFuzzySearchFieldDTO searchFieldDTO: dto.getFuzzySearchDTOList()) {
-            if (searchFieldDTO.getFieldName().equals("topicName")) {
-                searchTopicName = searchFieldDTO.getFieldValue();
-            }
-            if (searchFieldDTO.getFieldName().equals("groupName")) {
-                searchGroupName = searchFieldDTO.getFieldValue();
-            }
-        }
-
-        return new Tuple<>(searchTopicName, searchGroupName);
+    @ApiOperation(value = "Group的Topic列表")
+    @GetMapping(value = "clusters/{clusterPhyId}/groups/{groupName}/topics-overview")
+    public PaginationResult<GroupTopicOverviewVO> getGroupTopicsOverview(@PathVariable Long clusterPhyId,
+                                                                         @PathVariable String groupName,
+                                                                         PaginationBaseDTO dto) {
+        return groupManager.pagingGroupTopicMembers(clusterPhyId, groupName, dto);
     }
+
+    /**************************************************** private method ****************************************************/
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
-import { ProTable, Drawer, Utils, AppContainer, Form, Select, Input, Button, message, Modal, Divider } from 'knowdesign';
+import { ProTable, Drawer, Utils, AppContainer, Form, Select, Input, Button, Modal, Divider } from 'knowdesign';
+import message from '@src/components/Message';
 import { IconFont } from '@knowdesign/icons';
 import API from '../../api';
 import { getJobsListColumns, defaultPagination, runningStatus, jobType } from './config';
@@ -172,7 +173,7 @@ const JobsList: React.FC = (props: any) => {
         <JobsCheck />
       </div>
       {/* <Form form={form} layout="inline" onFinish={onFinish}> */}
-      <div className="clustom-table-content">
+      <div className="custom-table-content jobs-self">
         <div className={tableHeaderPrefix}>
           <div className={`${tableHeaderPrefix}-left`}>
             <div

@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import CardBar from '@src/components/CardBar';
-import { healthDataProps } from '.';
-import { Tag, Utils } from 'knowdesign';
+import { Utils } from 'knowdesign';
 import Api from '@src/api';
 
 export default () => {
@@ -12,14 +11,7 @@ export default () => {
   }>();
   const [loading, setLoading] = useState(false);
   const [cardData, setCardData] = useState([]);
-  const [healthData, setHealthData] = useState<healthDataProps>({
-    score: 0,
-    passed: 0,
-    total: 0,
-    alive: 0,
-  });
-  const cardItems = ['Partitions', 'PartitionsSkew', 'Leaders', 'LeadersSkew', 'LogSize'];
-  const healthItems = ['HealthScore_Brokers', 'HealthCheckPassed_Brokers', 'HealthCheckTotal_Brokers', 'alive'];
+
   const getCordRightMap = (data: any) => {
     const cordRightMap = [
       {
@@ -49,6 +41,7 @@ export default () => {
     ];
     return cordRightMap;
   };
+
   useEffect(() => {
     setLoading(true);
     // 获取状态

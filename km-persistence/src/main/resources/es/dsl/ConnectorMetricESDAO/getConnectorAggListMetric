@@ -1,0 +1,51 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "clusterPhyId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "connectClusterId": {
+              "value": %d
+            }
+          }
+        },
+        {
+          "term": {
+            "connectorName": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+      "hist": {
+        "date_histogram": {
+          "field": "timestamp",
+          "fixed_interval": "%s",
+          "time_zone": "Asia/Shanghai",
+          "min_doc_count": 0
+        },
+        "aggs": {
+           %s
+        }
+      }
+    }
+}

@@ -15,10 +15,10 @@ import {
   Tag,
   Utils,
   AppContainer,
-  message,
   Divider,
   Space,
 } from 'knowdesign';
+import message from '@src/components/Message';
 import './index.less';
 import Api, { MetricType } from '@src/api/index';
 import moment from 'moment';

@@ -14,10 +14,10 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.version.VersionControlItem;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.config.metric.UserMetricConfigVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.version.VersionItemVO;
-import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.VersionUtil;
+import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.version.VersionControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,10 +30,14 @@ import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.V_MAX;
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.BrokerMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.ClusterMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.GroupMetricVersionItems.*;
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ClusterMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.GroupMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.MirrorMakerMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.ConnectClusterMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.connect.ConnectorMetricVersionItems.*;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ZookeeperMetricVersionItems.*;
 
 @Service
 public class VersionControlManagerImpl implements VersionControlManager {
@@ -48,7 +52,8 @@ public class VersionControlManagerImpl implements VersionControlManager {
 
     @PostConstruct
     public void init(){
-        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_HEALTH_SCORE, true));
+        // topic
+        defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_HEALTH_STATE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_FAILED_FETCH_REQ, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_FAILED_PRODUCE_REQ, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_UNDER_REPLICA_PARTITIONS, true));
@@ -58,7 +63,8 @@ public class VersionControlManagerImpl implements VersionControlManager {
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_BYTES_REJECTED, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_TOPIC.getCode(), TOPIC_METRIC_MESSAGE_IN, true));
 
-        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_HEALTH_SCORE, true));
+        // cluster
+        defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_HEALTH_STATE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_ACTIVE_CONTROLLER_COUNT, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_BYTES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_BYTES_OUT, true));
@@ -73,12 +79,14 @@ public class VersionControlManagerImpl implements VersionControlManager {
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_GROUP_REBALANCES, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_CLUSTER.getCode(), CLUSTER_METRIC_JOB_RUNNING, true));
 
+        // group
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_OFFSET_CONSUMED, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_LAG, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_STATE, true));
-        defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_HEALTH_SCORE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_GROUP.getCode(), GROUP_METRIC_HEALTH_STATE, true));
 
-        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_HEALTH_SCORE, true));
+        // broker
+        defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_HEALTH_STATE, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_CONNECTION_COUNT, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_MESSAGE_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_NETWORK_RPO_AVG_IDLE, true));
@@ -91,7 +99,72 @@ public class VersionControlManagerImpl implements VersionControlManager {
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_PARTITIONS_SKEW, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_IN, true));
         defaultMetrics.add(new UserMetricConfig(METRIC_BROKER.getCode(), BROKER_METRIC_BYTES_OUT, true));
+
+        // zookeeper
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_HEALTH_STATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_HEALTH_CHECK_PASSED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_HEALTH_CHECK_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_MAX_REQUEST_LATENCY, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_OUTSTANDING_REQUESTS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_NODE_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_WATCH_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_NUM_ALIVE_CONNECTIONS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_PACKETS_RECEIVED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_PACKETS_SENT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_EPHEMERALS_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_APPROXIMATE_DATA_SIZE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_OPEN_FILE_DESCRIPTOR_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_KAFKA_ZK_DISCONNECTS_PER_SEC, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_KAFKA_ZK_SYNC_CONNECTS_PER_SEC, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_ZOOKEEPER.getCode(), ZOOKEEPER_METRIC_KAFKA_ZK_REQUEST_LATENCY_99TH, true));
+
+        // mm2
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_BYTE_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_BYTE_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_AGE_MS_MAX, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_RECORD_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_MIRROR_MAKER.getCode(), MIRROR_MAKER_METRIC_REPLICATION_LATENCY_MS_MAX, true));
+
+        // Connect Cluster
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_STARTUP_ATTEMPTS_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_STARTUP_FAILURE_PERCENTAGE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_CONNECTOR_STARTUP_FAILURE_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_STARTUP_ATTEMPTS_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_STARTUP_FAILURE_PERCENTAGE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_TASK_STARTUP_FAILURE_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CLUSTER.getCode(), CONNECT_CLUSTER_METRIC_COLLECT_COST_TIME, true));
+
+
+        // Connect Connector
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_HEALTH_STATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_HEALTH_CHECK_PASSED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_HEALTH_CHECK_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_COLLECT_COST_TIME, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_CONNECTOR_TOTAL_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_CONNECTOR_RUNNING_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_CONNECTOR_FAILED_TASK_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_ACTIVE_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_POLL_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_WRITE_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_ACTIVE_COUNT, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_READ_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_SEND_TOTAL, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_DEADLETTERQUEUE_PRODUCE_FAILURES, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_DEADLETTERQUEUE_PRODUCE_REQUESTS, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_TOTAL_ERRORS_LOGGED, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_POLL_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SOURCE_RECORD_WRITE_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_READ_RATE, true));
+        defaultMetrics.add(new UserMetricConfig(METRIC_CONNECT_CONNECTOR.getCode(), CONNECTOR_METRIC_SINK_RECORD_SEND_RATE, true));
+
+
     }
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Autowired
     private VersionControlService versionControlService;
@@ -108,27 +181,40 @@ public class VersionControlManagerImpl implements VersionControlManager {
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_BROKER.getCode()), VersionItemVO.class));
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_PARTITION.getCode()), VersionItemVO.class));
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_REPLICATION.getCode()), VersionItemVO.class));
+
+        allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_ZOOKEEPER.getCode()), VersionItemVO.class));
+
+        allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_CONNECT_CLUSTER.getCode()), VersionItemVO.class));
+        allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_CONNECT_CONNECTOR.getCode()), VersionItemVO.class));
+        allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(METRIC_CONNECT_MIRROR_MAKER.getCode()), VersionItemVO.class));
+
         allVersionItemVO.addAll(ConvertUtil.list2List(versionControlService.listVersionControlItem(WEB_OP.getCode()), VersionItemVO.class));
 
         Map<String, VersionItemVO> map = allVersionItemVO.stream().collect(
-                Collectors.toMap(u -> u.getType() + "@" + u.getName(), Function.identity() ));
+                Collectors.toMap(
+                        u -> u.getType() + "@" + u.getName(),
+                        Function.identity(),
+                        (v1, v2) -> v1)
+        );
 
         return Result.buildSuc(map);
     }
 
     @Override
-    public Result<Map<String, Long>> listAllVersions() {
+    public Result<Map<String, Long>> listAllKafkaVersions() {
         return Result.buildSuc(VersionEnum.allVersionsWithOutMax());
     }
 
     @Override
-    public Result<List<VersionItemVO>> listClusterVersionControlItem(Long clusterId, Integer type) {
+    public Result<List<VersionItemVO>> listKafkaClusterVersionControlItem(Long clusterId, Integer type) {
         List<VersionControlItem> allItem   = versionControlService.listVersionControlItem(type);
         List<VersionItemVO> versionItemVOS = new ArrayList<>();
 
+        String versionStr  = clusterPhyService.getVersionFromCacheFirst(clusterId);
+
         for (VersionControlItem item : allItem){
             VersionItemVO itemVO = ConvertUtil.obj2Obj(item, VersionItemVO.class);
-            boolean      support = versionControlService.isClusterSupport(clusterId, item);
+            boolean      support = versionControlService.isClusterSupport(versionStr, item);
 
             itemVO.setSupport(support);
             itemVO.setDesc(itemSupportDesc(item, support));
@@ -141,7 +227,7 @@ public class VersionControlManagerImpl implements VersionControlManager {
 
     @Override
     public Result<List<UserMetricConfigVO>> listUserMetricItem(Long clusterId, Integer type, String operator) {
-        Result<List<VersionItemVO>> ret = listClusterVersionControlItem(clusterId, type);
+        Result<List<VersionItemVO>> ret = listKafkaClusterVersionControlItem(clusterId, type);
         if(null == ret || ret.failed()){
             return Result.buildFail();
         }

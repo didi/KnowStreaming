@@ -10,7 +10,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.param.config.KafkaTop
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.kafka.*;
@@ -27,7 +26,7 @@ import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.zookeeper.service.KafkaZKDAO;
@@ -47,7 +46,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.
 
 
 @Service
-public class TopicConfigServiceImpl extends BaseVersionControlService implements TopicConfigService {
+public class TopicConfigServiceImpl extends BaseKafkaVersionControlService implements TopicConfigService {
     private static final ILog log = LogFactory.getLog(TopicConfigServiceImpl.class);
 
     private static final String GET_TOPIC_CONFIG                    = "getTopicConfig";
@@ -98,9 +97,9 @@ public class TopicConfigServiceImpl extends BaseVersionControlService implements
         registerVCHandler(GET_TOPIC_CONFIG,     V_0_10_0_0, V_0_11_0_0, "getTopicConfigByZKClient",            this::getTopicConfigByZKClient);
         registerVCHandler(GET_TOPIC_CONFIG,     V_0_11_0_0, V_MAX,      "getTopicConfigByKafkaClient",         this::getTopicConfigByKafkaClient);
 
-        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_0_0, V_0_10_2_0, "modifyTopicConfigByZKClientAndNodeVersionV1",       this::modifyTopicConfigByZKClientAndNodeVersionV1);
-        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_2_0, V_0_11_0_3, "modifyTopicConfigByZKClientAndNodeVersionV2",       this::modifyTopicConfigByZKClientAndNodeVersionV2);
-        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_11_0_3, V_MAX,      "modifyTopicConfigByKafkaClient",                    this::modifyTopicConfigByKafkaClient);
+        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_0_0, V_0_10_2_0,  "modifyTopicConfigByZKClientAndNodeVersionV1",       this::modifyTopicConfigByZKClientAndNodeVersionV1);
+        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_0_10_2_0, V_2_3_0,     "modifyTopicConfigByZKClientAndNodeVersionV2",       this::modifyTopicConfigByZKClientAndNodeVersionV2);
+        registerVCHandler(MODIFY_TOPIC_CONFIG,     V_2_3_0, V_MAX,          "modifyTopicConfigByKafkaClient",                    this::modifyTopicConfigByKafkaClient);
     }
 
     @Override
@@ -185,11 +184,9 @@ public class TopicConfigServiceImpl extends BaseVersionControlService implements
 
     private Result<Properties> getTopicConfigByZKClient(Long clusterPhyId, String topicName) {
         try {
-            Topic topic = topicService.getTopic(clusterPhyId, topicName);
-
             KafkaZkClient kafkaZkClient = kafkaAdminZKClient.getClient(clusterPhyId);
 
-            Properties properties = kafkaZkClient.getEntityConfigs("topics", topic.getTopicName());
+            Properties properties = kafkaZkClient.getEntityConfigs("topics", topicName);
             for (Object key: properties.keySet()) {
                 properties.getProperty((String) key);
             }
@@ -209,12 +206,10 @@ public class TopicConfigServiceImpl extends BaseVersionControlService implements
         try {
             AdminClient adminClient = kafkaAdminClient.getClient(param.getClusterPhyId());
 
-            Topic metadata = topicService.getTopic(param.getClusterPhyId(), param.getTopicName());
-
-            ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, metadata.getTopicName());
+            ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, param.getTopicName());
             DescribeConfigsResult describeConfigsResult = adminClient.describeConfigs(
-                    Arrays.asList(configResource),
-                    buildDescribeConfigsOptions()
+                    Collections.singletonList(configResource),
+                    buildDescribeConfigsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
             );
 
             Map<ConfigResource, Config> configMap = describeConfigsResult.all().get();

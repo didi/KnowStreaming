@@ -24,10 +24,16 @@ public class CollectedMetricsLocalCache {
             .maximumSize(10000)
             .build();
 
-    private static final Cache<String, Float> replicaMetricsValueCache = Caffeine.newBuilder()
+    private static final Cache<String, Float> connectClusterMetricsCache = Caffeine.newBuilder()
             .expireAfterWrite(90, TimeUnit.SECONDS)
-            .maximumSize(20000)
+            .maximumSize(10000)
             .build();
+
+    private static final Cache<String, Float> connectorMetricsCache = Caffeine.newBuilder()
+            .expireAfterWrite(90, TimeUnit.SECONDS)
+            .maximumSize(10000)
+            .build();
+
 
     public static Float getBrokerMetrics(String brokerMetricKey) {
         return brokerMetricsCache.getIfPresent(brokerMetricKey);
@@ -64,15 +70,26 @@ public class CollectedMetricsLocalCache {
         partitionMetricsCache.put(partitionMetricsKey, metricsList);
     }
 
-    public static Float getReplicaMetrics(String replicaMetricsKey) {
-        return replicaMetricsValueCache.getIfPresent(replicaMetricsKey);
-    }
-
-    public static void putReplicaMetrics(String replicaMetricsKey, Float value) {
+    public static void putConnectClusterMetrics(String connectClusterMetricKey, Float value) {
         if (value == null) {
             return;
         }
-        replicaMetricsValueCache.put(replicaMetricsKey, value);
+        connectClusterMetricsCache.put(connectClusterMetricKey, value);
+    }
+
+    public static Float getConnectClusterMetrics(String connectClusterMetricKey) {
+        return connectClusterMetricsCache.getIfPresent(connectClusterMetricKey);
+    }
+
+    public static void putConnectorMetrics(String connectClusterMetricKey, Float value) {
+        if (value == null) {
+            return;
+        }
+        connectorMetricsCache.put(connectClusterMetricKey, value);
+    }
+
+    public static Float getConnectorMetrics(String connectClusterMetricKey) {
+        return connectorMetricsCache.getIfPresent(connectClusterMetricKey);
     }
 
     public static String genBrokerMetricKey(Long clusterPhyId, Integer brokerId, String metricName) {
@@ -87,6 +104,16 @@ public class CollectedMetricsLocalCache {
         return clusterPhyId + "@" + brokerId + "@" + topicName + "@" + partitionId + "@" + metricName;
     }
 
+    public static String genConnectClusterMetricCacheKey(Long connectClusterId, String metricName) {
+        return connectClusterId + "@" + metricName;
+    }
+
+    public static String genConnectorMetricCacheKey(Long connectClusterId, String connectorName, String metricName) {
+        return connectClusterId + "@" + connectorName + '@' + metricName;
+    }
+
     /**************************************************** private method ****************************************************/
 
+    private CollectedMetricsLocalCache() {
+    }
 }

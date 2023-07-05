@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Button, Form, Input, Select, message, Drawer, Space, Divider, Utils, Radio, AutoComplete, Alert } from 'knowdesign';
+import { Button, Form, Input, Select, Drawer, Space, Divider, Utils, Radio, AutoComplete, Alert } from 'knowdesign';
+import message from '@src/components/Message';
 import api from '@src/api';
 import { useParams } from 'react-router-dom';
 import { UsersProps } from '../SecurityUsers';
@@ -84,6 +85,7 @@ const AddDrawer = forwardRef((_, ref) => {
     return;
   });
   const [topicMetaData, setTopicMetaData] = React.useState([]);
+  const [groupMetaData, setGroupMetaData] = React.useState([]);
 
   // 获取 Topic 元信息
   const getTopicMetaData = (newValue: any) => {
@@ -98,6 +100,21 @@ const AddDrawer = forwardRef((_, ref) => {
         };
       });
       setTopicMetaData(topics);
+    });
+  };
+
+  // 获取 Group 元信息
+  const getGroupMetaData = () => {
+    Utils.request(api.getGroupOverview(+clusterId), {
+      method: 'GET',
+    }).then((res: any) => {
+      const groups = res?.bizData.map((item: any) => {
+        return {
+          label: item.name,
+          value: item.name,
+        };
+      });
+      setGroupMetaData(groups);
     });
   };
 
@@ -208,6 +225,7 @@ const AddDrawer = forwardRef((_, ref) => {
   useEffect(() => {
     getKafkaUserList();
     getTopicMetaData('');
+    getGroupMetaData();
   }, []);
 
   return (
@@ -320,7 +338,7 @@ const AddDrawer = forwardRef((_, ref) => {
                               }
                               return false;
                             }}
-                            options={topicMetaData}
+                            options={type === 'topic' ? topicMetaData : groupMetaData}
                             placeholder={`请输入 ${type}Name`}
                           />
                         </Form.Item>

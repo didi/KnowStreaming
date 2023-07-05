@@ -1,7 +1,7 @@
 import React from 'react';
 import { MetricType } from '@src/api';
 import TopicHealthCheck from '@src/components/CardBar/TopicHealthCheck';
-import DashboardDragChart from '@src/components/DashboardDragChart';
+import DraggableCharts from '@src/components/DraggableCharts';
 import { AppContainer } from 'knowdesign';
 import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 
@@ -19,7 +19,7 @@ const TopicDashboard = () => {
         />
       </div>
       <TopicHealthCheck />
-      <DashboardDragChart type={MetricType.Topic} />
+      <DraggableCharts type={MetricType.Topic} />
     </>
   );
 };

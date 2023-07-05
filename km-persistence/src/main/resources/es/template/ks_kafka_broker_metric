@@ -1,0 +1,101 @@
+{
+    "order" : 10,
+    "index_patterns" : [
+      "ks_kafka_broker_metric*"
+    ],
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "2"
+      }
+    },
+    "mappings" : {
+      "properties" : {
+        "brokerId" : {
+          "type" : "long"
+        },
+        "routingValue" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "clusterPhyId" : {
+          "type" : "long"
+        },
+        "metrics" : {
+          "properties" : {
+            "NetworkProcessorAvgIdle" : {
+              "type" : "float"
+            },
+            "UnderReplicatedPartitions" : {
+              "type" : "float"
+            },
+            "BytesIn_min_15" : {
+              "type" : "float"
+            },
+            "HealthCheckTotal" : {
+              "type" : "float"
+            },
+            "RequestHandlerAvgIdle" : {
+              "type" : "float"
+            },
+            "connectionsCount" : {
+              "type" : "float"
+            },
+            "BytesIn_min_5" : {
+              "type" : "float"
+            },
+            "HealthScore" : {
+              "type" : "float"
+            },
+            "BytesOut" : {
+              "type" : "float"
+            },
+            "BytesOut_min_15" : {
+              "type" : "float"
+            },
+            "BytesIn" : {
+              "type" : "float"
+            },
+            "BytesOut_min_5" : {
+              "type" : "float"
+            },
+            "TotalRequestQueueSize" : {
+              "type" : "float"
+            },
+            "MessagesIn" : {
+              "type" : "float"
+            },
+            "TotalProduceRequests" : {
+              "type" : "float"
+            },
+            "HealthCheckPassed" : {
+              "type" : "float"
+            },
+            "TotalResponseQueueSize" : {
+              "type" : "float"
+            }
+          }
+        },
+        "key" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "ignore_above" : 256,
+              "type" : "keyword"
+            }
+          }
+        },
+        "timestamp" : {
+          "format" : "yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||epoch_millis",
+          "index" : true,
+          "type" : "date",
+          "doc_values" : true
+        }
+      }
+    },
+    "aliases" : { }
+  }

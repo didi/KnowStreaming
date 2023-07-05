@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { AppContainer, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button, Divider } from 'knowdesign';
+import { AppContainer, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button, Divider, Tag } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import Create from './Create';
 import './index.less';
@@ -15,9 +15,12 @@ import DBreadcrumb from 'knowdesign/es/extend/d-breadcrumb';
 import ReplicaChange from '@src/components/TopicJob/ReplicaChange';
 import SmallChart from '@src/components/SmallChart';
 import ReplicaMove from '@src/components/TopicJob/ReplicaMove';
+import TopicMirror from '@src/components/TopicJob/TopicMirror';
 import { formatAssignSize } from '../Jobs/config';
 import { DownOutlined } from '@ant-design/icons';
 import { tableHeaderPrefix } from '@src/constants/common';
+import { HealthStateMap } from './config';
+import { ControlStatusMap } from '../CommonRoute';
 
 const { Option } = Select;
 
@@ -38,6 +41,7 @@ const AutoPage = (props: any) => {
   const [type, setType] = useState<string>('');
   const [changeVisible, setChangeVisible] = useState(false);
   const [moveVisible, setMoveVisible] = useState(false);
+  const [mirrorVisible, setMirrorVisible] = useState(false);
   const [selectValue, setSelectValue] = useState('批量操作');
 
   const [sortObj, setSortObj] = useState<{
@@ -90,8 +94,8 @@ const AutoPage = (props: any) => {
     // return item?.value || '';
     const orgVal = record?.latestMetrics?.metrics?.[metricName];
     if (orgVal !== undefined) {
-      if (metricName === 'HealthScore') {
-        return Math.round(orgVal).toLocaleString();
+      if (metricName === 'HealthState') {
+        return HealthStateMap[orgVal] || '-';
       } else if (metricName === 'LogSize') {
         return Number(Utils.formatAssignSize(orgVal, 'MB')).toLocaleString();
       } else {
@@ -130,17 +134,34 @@ const AutoPage = (props: any) => {
         className: 'clean-padding-left',
         lineClampOne: true,
         // eslint-disable-next-line react/display-name
-        render: (t: string, r: any) => {
+        render: (t: string, record: any) => {
           return (
-            <Tooltip title={t}>
-              <a
-                onClick={() => {
-                  window.location.hash = `topicName=${t}`;
-                }}
-              >
-                {t}
-              </a>
-            </Tooltip>
+            <>
+              <Tooltip title={t}>
+                <a
+                  onClick={() => {
+                    window.location.hash = `topicName=${t}`;
+                  }}
+                >
+                  {t}
+                </a>
+              </Tooltip>
+              {record.inMirror && (
+                <div>
+                  <Tag
+                    style={{
+                      color: '#5664FF',
+                      padding: '2px 5px',
+                      background: '#eff1fd',
+                      marginLeft: '-4px',
+                      transform: 'scale(0.83,0.83)',
+                    }}
+                  >
+                    复制中...
+                  </Tag>
+                </div>
+              )}
+            </>
           );
         },
       },
@@ -148,22 +169,24 @@ const AutoPage = (props: any) => {
         title: 'Partitions',
         dataIndex: 'partitionNum',
         key: 'partitionNum',
-        width: 95,
+        width: 100,
       },
       {
         title: 'Replications',
         dataIndex: 'replicaNum',
         key: 'replicaNum',
-        width: 95,
+        width: 100,
       },
       {
-        title: '健康分',
-        dataIndex: 'HealthScore',
-        key: 'HealthScore',
+        title: '健康状态',
+        dataIndex: 'HealthState',
+        key: 'HealthState',
         sorter: true,
         // 设计图上量出来的是144，但做的时候发现写144 header部分的sort箭头不出来，所以临时调大些
-        width: 170,
-        render: (value: any, record: any) => renderLine(record, 'HealthScore'),
+        width: 100,
+        render: (value: any, record: any) => {
+          return calcCurValue(record, 'HealthState');
+        },
       },
       // {
       //   title: '创建时间',
@@ -253,6 +276,7 @@ const AutoPage = (props: any) => {
   const onclose = () => {
     setChangeVisible(false);
     setMoveVisible(false);
+    setMirrorVisible(false);
     setSelectValue('批量操作');
   };
 
@@ -266,6 +290,11 @@ const AutoPage = (props: any) => {
       {global.hasPermission(ClustersPermissionMap.TOPIC_MOVE_REPLICA) && (
         <Menu.Item>
           <a onClick={() => setMoveVisible(true)}>迁移副本</a>
+        </Menu.Item>
+      )}
+      {global.hasPermission(ClustersPermissionMap.TOPIC_REPLICATOR) && (
+        <Menu.Item>
+          <a onClick={() => setMirrorVisible(true)}>Topic复制</a>
         </Menu.Item>
       )}
     </Menu>
@@ -286,13 +315,15 @@ const AutoPage = (props: any) => {
       <div style={{ margin: '12px 0' }}>
         <TopicHealthCheck></TopicHealthCheck>
       </div>
-      <div className="clustom-table-content">
+      <div className="custom-table-content">
         <div className={`${tableHeaderPrefix}`}>
           <div className={`${tableHeaderPrefix}-left`}>
             {/* 批量扩缩副本 */}
             <ReplicaChange drawerVisible={changeVisible} jobId={''} topics={selectedRowKeys} onClose={onclose}></ReplicaChange>
             {/* 批量迁移 */}
             <ReplicaMove drawerVisible={moveVisible} jobId={''} topics={selectedRowKeys} onClose={onclose}></ReplicaMove>
+            {/* Topic复制 */}
+            <TopicMirror drawerVisible={mirrorVisible} genData={getTopicsList} onClose={onclose}></TopicMirror>
 
             <div className={`${tableHeaderPrefix}-left-refresh`} onClick={() => getTopicsList()}>
               <IconFont className={`${tableHeaderPrefix}-left-refresh-icon`} type="icon-shuaxin1" />
@@ -331,7 +362,8 @@ const AutoPage = (props: any) => {
               }}
             />
             {(global.hasPermission(ClustersPermissionMap.TOPIC_CHANGE_REPLICA) ||
-              global.hasPermission(ClustersPermissionMap.TOPIC_MOVE_REPLICA)) && (
+              global.hasPermission(ClustersPermissionMap.TOPIC_MOVE_REPLICA) ||
+              global.hasPermission(ClustersPermissionMap.TOPIC_REPLICATOR)) && (
               <Dropdown overlay={menu} trigger={['click']}>
                 <Button className="batch-btn" icon={<DownOutlined />} type="primary" ghost>
                   批量变更

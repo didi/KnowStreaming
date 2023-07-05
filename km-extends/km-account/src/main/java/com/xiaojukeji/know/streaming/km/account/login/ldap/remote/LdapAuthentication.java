@@ -5,6 +5,7 @@ import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.xiaojukeji.know.streaming.km.account.KmAccountConfig;
 import com.xiaojukeji.know.streaming.km.account.common.ldap.LdapPrincipal;
 import com.xiaojukeji.know.streaming.km.account.common.ldap.exception.LdapException;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
@@ -71,7 +74,7 @@ public class LdapAuthentication {
         env.put(Context.SECURITY_PRINCIPAL, kmAccountConfig.getSecurityPrincipal());
         env.put(Context.SECURITY_CREDENTIALS, kmAccountConfig.getSecurityCredentials());
         try {
-           return new InitialLdapContext(env, null);
+            return new InitialLdapContext(env, null);
         } catch (Exception e) {
             LOGGER.error("method=getLdapContext||errMsg=exception", e);
 
@@ -101,18 +104,21 @@ public class LdapAuthentication {
 
             // maybe more than one element
             while (en.hasMoreElements()) {
-                Object obj = en.nextElement();
-                if (obj instanceof SearchResult) {
-                    SearchResult si = (SearchResult) obj;
-
+                SearchResult obj = en.nextElement();
+                if (!ValidateUtils.isNull(obj)) {
                     // 携带LDAP更多元信息以填充用户元信息
                     LdapPrincipal ldapPrincipal = new LdapPrincipal();
-                    ldapPrincipal.setUserDN(si.getName() + "," + kmAccountConfig.getLdapBaseDN());
-                    ldapPrincipal.setSAMAccountName(this.keyValueSplit(si.getAttributes().get("samaccountname").toString()));
-                    ldapPrincipal.setDepartment(this.keyValueSplit(si.getAttributes().get("department").toString()));
-                    ldapPrincipal.setCompany(this.keyValueSplit(si.getAttributes().get("company").toString()));
-                    ldapPrincipal.setDisplayName(this.keyValueSplit(si.getAttributes().get("displayname").toString()));
-                    ldapPrincipal.setMail(this.keyValueSplit(si.getAttributes().get("mail").toString()));
+                    ldapPrincipal.setUserDN(obj.getName() + "," + kmAccountConfig.getLdapBaseDN());
+
+                    Attributes attributes = obj.getAttributes();
+                    //校验成功后 在获取值
+                    if (!ValidateUtils.isNull(attributes)) {
+                        ldapPrincipal.setSAMAccountName(getStringValueFromAttributes(attributes, "samaccountname"));
+                        ldapPrincipal.setDepartment(getStringValueFromAttributes(attributes, "department"));
+                        ldapPrincipal.setCompany(getStringValueFromAttributes(attributes, "company"));
+                        ldapPrincipal.setDisplayName(getStringValueFromAttributes(attributes, "displayname"));
+                        ldapPrincipal.setMail(getStringValueFromAttributes(attributes, "mail"));
+                    }
                     return ldapPrincipal;
                 }
             }
@@ -126,6 +132,29 @@ public class LdapAuthentication {
         }
     }
 
+    private String getStringValueFromAttributes(Attributes attributes, String attrId) {
+        //增加 多重校验
+        int two = 2;
+        Attribute attribute = attributes.get(attrId);
+        if (ValidateUtils.isNull(attribute)) {
+            return "";
+        }
+
+        String str = attribute.toString();
+        if (ValidateUtils.isBlank(str)) {
+            return "";
+        }
+        //分割字符串
+        String[] split = str.split(":\\s+");
+        if (ValidateUtils.isNotEmpty(split)) {
+            if (split.length >= two) {
+                return split[1];
+            }
+        }
+
+        return "";
+    }
+
     private void closeLdapContext(LdapContext ctx) {
         if (ctx == null) {
             return;
@@ -136,9 +165,5 @@ public class LdapAuthentication {
         } catch (Exception e) {
             LOGGER.error("method=closeLdapContext||errMsg=exception", e);
         }
-    }
-
-    public String keyValueSplit(String keyValue){
-        return keyValue.split(":\\s+")[1];
     }
 }

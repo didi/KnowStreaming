@@ -18,6 +18,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.BrokerMetricPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
+import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
@@ -28,15 +29,17 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
-import com.xiaojukeji.know.streaming.km.core.service.health.score.HealthScoreService;
+import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.replica.ReplicaMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseMetricService;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.BrokerMetricVersionItems;
-import com.xiaojukeji.know.streaming.km.core.service.version.metrics.ReplicaMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems;
+import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.ReplicaMetricVersionItems;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.BrokerMetricESDAO;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaJMXClient;
+import org.apache.kafka.clients.admin.LogDirDescription;
+import org.apache.kafka.clients.admin.ReplicaInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -55,7 +58,7 @@ import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultS
  */
 @Service
 public class BrokerMetricServiceImpl extends BaseMetricService implements BrokerMetricService {
-    protected static final ILog  LOGGER = LogFactory.getLog("METRIC_LOGGER");
+    protected static final ILog  LOGGER = LogFactory.getLog(BrokerMetricServiceImpl.class);
 
     public static final String BROKER_METHOD_DO_NOTHING                             = "doNothing";
     public static final String BROKER_METHOD_GET_METRIC_FROM_KAFKA_BY_JMX           = "getMetricFromKafkaByJMX";
@@ -63,7 +66,8 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     public static final String BROKER_METHOD_GET_HEALTH_SCORE                       = "getMetricHealthScore";
     public static final String BROKER_METHOD_GET_PARTITIONS_SKEW                    = "getPartitionsSkew";
     public static final String BROKER_METHOD_GET_LEADERS_SKEW                       = "getLeadersSkew";
-    public static final String BROKER_METHOD_GET_LOG_SIZE                           = "getLogSize";
+    public static final String BROKER_METHOD_GET_LOG_SIZE_FROM_CLIENT               = "getLogSizeFromClient";
+    public static final String BROKER_METHOD_GET_LOG_SIZE_FROM_JMX                  = "getLogSizeFromJmx";
     public static final String BROKER_METHOD_IS_BROKER_ALIVE                        = "isBrokerAlive";
 
     @Autowired
@@ -79,7 +83,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
     private ReplicaMetricService replicaMetricService;
 
     @Autowired
-    private HealthScoreService healthScoreService;
+    private HealthStateService healthStateService;
 
     @Autowired
     private KafkaJMXClient kafkaJMXClient;
@@ -105,7 +109,10 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
         registerVCHandler( BROKER_METHOD_GET_HEALTH_SCORE,                        this::getMetricHealthScore);
         registerVCHandler( BROKER_METHOD_GET_PARTITIONS_SKEW,                     this::getPartitionsSkew);
         registerVCHandler( BROKER_METHOD_GET_LEADERS_SKEW,                        this::getLeadersSkew);
-        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE,                            this::getLogSize);
+
+        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE_FROM_JMX,                   this::getLogSizeFromJmx);
+        registerVCHandler( BROKER_METHOD_GET_LOG_SIZE_FROM_CLIENT,                this::getLogSizeFromClient);
+
         registerVCHandler( BROKER_METHOD_IS_BROKER_ALIVE,                         this::isBrokerAlive);
     }
 
@@ -311,7 +318,7 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
         Long        clusterId   = param.getClusterId();
         Integer     brokerId    = param.getBrokerId();
 
-        BrokerMetrics brokerMetrics = healthScoreService.calBrokerHealthScore(clusterId, brokerId);
+        BrokerMetrics brokerMetrics = healthStateService.calBrokerHealthMetrics(clusterId, brokerId);
         return Result.buildSuc(brokerMetrics);
     }
 
@@ -351,28 +358,26 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
         );
     }
 
-    private Result<BrokerMetrics> getLogSize(VersionItemParam metricParam) {
+    private Result<BrokerMetrics> getLogSizeFromJmx(VersionItemParam metricParam) {
         BrokerMetricParam param = (BrokerMetricParam)metricParam;
 
         String      metric      = param.getMetric();
         Long        clusterId   = param.getClusterId();
         Integer     brokerId    = param.getBrokerId();
 
-        List<Partition> partitions = partitionService.listPartitionByBroker(clusterId, brokerId);
-
-        JmxConnectorWrap jmxConnectorWrap = kafkaJMXClient.getClientWithCheck(clusterId, brokerId);
-        if (ValidateUtils.isNull(jmxConnectorWrap)){return Result.buildFailure(VC_JMX_INIT_ERROR);}
+        List<Partition> partitions = partitionService.listPartitionFromCacheFirst(clusterId, brokerId);
 
         Float logSizeSum = 0f;
         for(Partition p : partitions) {
             try {
-                Result<ReplicationMetrics> metricsResult = replicaMetricService.collectReplicaMetricsFromKafkaWithCache(
+                Result<ReplicationMetrics> metricsResult = replicaMetricService.collectReplicaMetricsFromKafka(
                         clusterId,
                         p.getTopicName(),
-                        brokerId,
                         p.getPartitionId(),
+                        brokerId,
                         ReplicaMetricVersionItems.REPLICATION_METRIC_LOG_SIZE
                 );
+
                 if(null == metricsResult || metricsResult.failed() || null == metricsResult.getData()) {
                     continue;
                 }
@@ -382,9 +387,31 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
                 logSizeSum += (replicaLogSize == null? 0.0f: replicaLogSize);
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=BrokerMetricServiceImpl||method=getLogSize||clusterPhyId={}||brokerId={}||topicName={}||partitionId={}||metricName={}||errMsg=exception",
+                        "method=getLogSize||clusterPhyId={}||brokerId={}||topicName={}||partitionId={}||metricName={}||errMsg=exception",
                         clusterId, brokerId, p.getTopicName(), p.getPartitionId(), metric, e.getClass().getName()
                 );
+            }
+        }
+
+        return Result.buildSuc(BrokerMetrics.initWithMetric(clusterId, brokerId, metric, logSizeSum));
+    }
+
+    private Result<BrokerMetrics> getLogSizeFromClient(VersionItemParam metricParam) {
+        BrokerMetricParam param = (BrokerMetricParam)metricParam;
+
+        String      metric      = param.getMetric();
+        Long        clusterId   = param.getClusterId();
+        Integer     brokerId    = param.getBrokerId();
+
+        Result<Map<String, LogDirDescription>> descriptionMapResult = brokerService.getBrokerLogDirDescFromKafka(clusterId, brokerId);
+        if(null == descriptionMapResult || descriptionMapResult.failed() || null == descriptionMapResult.getData()) {
+            return Result.buildFromIgnoreData(descriptionMapResult);
+        }
+
+        Float logSizeSum = 0f;
+        for (LogDirDescription logDirDescription: descriptionMapResult.getData().values()) {
+            for (ReplicaInfo replicaInfo: logDirDescription.replicaInfos().values()) {
+                logSizeSum += replicaInfo.size();
             }
         }
 
@@ -405,7 +432,9 @@ public class BrokerMetricServiceImpl extends BaseMetricService implements Broker
 
         Float brokerLeaderCount = metricsResult.getData().getMetric( BrokerMetricVersionItems.BROKER_METRIC_LEADERS);
 
-        Integer globalLeaderCount = partitionService.getLeaderPartitionSizeByClusterId(clusterId);
+        Integer globalLeaderCount = (int) partitionService.listPartitionFromCacheFirst(clusterId)
+                .stream()
+                .filter(partition -> !partition.getLeaderBrokerId().equals(KafkaConstant.NO_LEADER)).count();
 
         Integer globalBrokerCount = brokerService.listAllBrokersFromDB(clusterId).size();
         if (globalLeaderCount <= 0 || globalBrokerCount <= 0) {

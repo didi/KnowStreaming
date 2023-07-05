@@ -6,7 +6,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.Ba
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthCompareValueConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.healthcheck.HealthDetectedInLatestMinutesConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.health.HealthCheckResult;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterPhyParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.cluster.ClusterParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
@@ -27,11 +27,11 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.TopicMetricVersionItems.TOPIC_METRIC_UNDER_REPLICA_PARTITIONS;
+import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems.TOPIC_METRIC_UNDER_REPLICA_PARTITIONS;
 
 @Service
 public class HealthCheckTopicService extends AbstractHealthCheckService {
-    private static final ILog log = LogFactory.getLog(HealthCheckTopicService.class);
+    private static final ILog LOGGER = LogFactory.getLog(HealthCheckTopicService.class);
 
     @Autowired
     private TopicService topicService;
@@ -49,9 +49,9 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
     }
 
     @Override
-    public List<ClusterPhyParam> getResList(Long clusterPhyId) {
-        List<ClusterPhyParam> paramList = new ArrayList<>();
-        for (Topic topic: topicService.listTopicsFromDB(clusterPhyId)) {
+    public List<ClusterParam> getResList(Long clusterPhyId) {
+        List<ClusterParam> paramList = new ArrayList<>();
+        for (Topic topic: topicService.listTopicsFromCacheFirst(clusterPhyId)) {
             paramList.add(new TopicParam(clusterPhyId, topic.getTopicName()));
         }
         return paramList;
@@ -62,10 +62,15 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
         return HealthCheckDimensionEnum.TOPIC;
     }
 
+    @Override
+    public Integer getDimensionCodeIfSupport(Long kafkaClusterPhyId) {
+        return this.getHealthCheckDimensionEnum().getDimension();
+    }
+
     /**
      * 检查Topic长期未同步
      */
-    private HealthCheckResult checkTopicUnderReplicatedPartition(Tuple<ClusterPhyParam, BaseClusterHealthConfig> paramTuple) {
+    private HealthCheckResult checkTopicUnderReplicatedPartition(Tuple<ClusterParam, BaseClusterHealthConfig> paramTuple) {
         TopicParam param = (TopicParam) paramTuple.getV1();
         HealthDetectedInLatestMinutesConfig singleConfig = (HealthDetectedInLatestMinutesConfig) paramTuple.getV2();
 
@@ -85,19 +90,19 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
         );
 
         if (countResult.failed() || !countResult.hasData()) {
-            log.error("method=checkTopicUnderReplicatedPartition||param={}||config={}||result={}||errMsg=get metrics failed",
+            LOGGER.error("method=checkTopicUnderReplicatedPartition||param={}||config={}||result={}||errMsg=search metrics from es failed",
                     param, singleConfig, countResult);
             return null;
         }
 
-        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes()? 0: 1);
+        checkResult.setPassed(countResult.getData() >= singleConfig.getDetectedTimes()? Constant.NO: Constant.YES);
         return checkResult;
     }
 
     /**
      * 检查NoLeader
      */
-    private HealthCheckResult checkTopicNoLeader(Tuple<ClusterPhyParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
+    private HealthCheckResult checkTopicNoLeader(Tuple<ClusterParam, BaseClusterHealthConfig> singleConfigSimpleTuple) {
         TopicParam param = (TopicParam) singleConfigSimpleTuple.getV1();
         List<Partition> partitionList = partitionService.listPartitionFromCacheFirst(param.getClusterPhyId(), param.getTopicName());
 
@@ -109,7 +114,7 @@ public class HealthCheckTopicService extends AbstractHealthCheckService {
                 param.getTopicName()
         );
 
-        checkResult.setPassed(partitionList.stream().filter(elem -> elem.getLeaderBrokerId().equals(Constant.INVALID_CODE)).count() >= valueConfig.getValue()? 0: 1);
+        checkResult.setPassed(partitionList.stream().filter(elem -> elem.getLeaderBrokerId().equals(Constant.INVALID_CODE)).count() >= valueConfig.getValue() ? Constant.NO : Constant.YES);
 
         return checkResult;
     }

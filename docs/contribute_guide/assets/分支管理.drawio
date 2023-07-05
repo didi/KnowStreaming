@@ -1,0 +1,111 @@
+<mxfile host="65bd71144e">
+    <diagram id="vxzhwhZdNVAY19FZ4dgb" name="Page-1">
+        <mxGraphModel dx="1194" dy="733" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="4" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=none;strokeWidth=2;strokeColor=#6666FF;" edge="1" parent="1" source="16">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="540" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;strokeColor=#33FF33;strokeWidth=2;" edge="1" parent="1" source="2">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="360" y="240" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="5" style="edgeStyle=none;html=1;startArrow=none;strokeColor=#33FF33;strokeWidth=2;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="400" as="targetPoint"/>
+                        <mxPoint x="360" y="360" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3" value="C3" style="verticalLabelPosition=middle;verticalAlign=middle;html=1;shape=mxgraph.flowchart.on-page_reference;labelPosition=center;align=center;strokeColor=#FF8000;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="280" width="40" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;strokeColor=#FF8000;strokeWidth=2;" edge="1" parent="1" source="8" target="3">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="fix_928" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;" vertex="1" parent="1">
+                    <mxGeometry x="320" y="40" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="github_master" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="40" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=classic;startArrow=none;endFill=1;strokeWidth=2;strokeColor=#6666FF;" edge="1" parent="1" source="11" target="2">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="640" as="targetPoint"/>
+                        <mxPoint x="200" y="80" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2" value="C2" style="verticalLabelPosition=middle;verticalAlign=middle;html=1;shape=mxgraph.flowchart.on-page_reference;labelPosition=center;align=center;strokeColor=#6666FF;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="200" width="40" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=classic;endFill=1;strokeWidth=2;strokeColor=#6666FF;" edge="1" parent="1" source="9" target="11">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="200" as="targetPoint"/>
+                        <mxPoint x="200" y="80" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="11" value="C1" style="verticalLabelPosition=middle;verticalAlign=middle;html=1;shape=mxgraph.flowchart.on-page_reference;labelPosition=center;align=center;strokeColor=#6666FF;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="120" width="40" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;endArrow=none;endFill=0;strokeColor=#FF8000;strokeWidth=2;" edge="1" parent="1" source="3">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="360" y="360" as="targetPoint"/>
+                        <mxPoint x="360" y="400" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="17" value="" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=none;endArrow=none;strokeWidth=2;strokeColor=#6666FF;" edge="1" parent="1" source="2" target="16">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="640" as="targetPoint"/>
+                        <mxPoint x="200" y="240" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="16" value="C4" style="verticalLabelPosition=middle;verticalAlign=middle;html=1;shape=mxgraph.flowchart.on-page_reference;labelPosition=center;align=center;strokeColor=#6666FF;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="440" width="40" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="Tag-v3.2.0" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="120" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="Tag-v3.2.1" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="440" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="切换到主分支：git checkout github_master" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="90" width="240" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" style="edgeStyle=none;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;entryX=0.855;entryY=0.145;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;dashPattern=8 8;fontSize=18;endArrow=none;endFill=0;" edge="1" parent="1" source="28" target="2">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="主分支拉最新代码：git pull" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="120" width="160" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;dashed=1;dashPattern=8 8;fontSize=18;endArrow=none;endFill=0;" edge="1" parent="1" source="29">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="270" y="225" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="29" value="基于主分支拉新分支：git checkout -b fix_928" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="210" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" style="edgeStyle=none;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;dashPattern=8 8;fontSize=18;endArrow=none;endFill=0;" edge="1" parent="1" source="30" target="3">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="提交代码：git commit -m &quot;[Optimize]优化xxx问题(#928)&quot;" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="270" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="提交到自己远端仓库：git push --set-upstream origin fix_928" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="300" width="334" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;dashed=1;dashPattern=8 8;fontSize=18;endArrow=none;endFill=0;" edge="1" parent="1" source="32">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="280" y="380" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="32" value="GitHub页面发起Pull Request请求，管理员合入主仓库" style="rounded=0;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=0;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="360" width="300" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
