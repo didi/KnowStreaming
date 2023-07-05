@@ -14,6 +14,7 @@ import com.xiaojukeji.know.streaming.km.common.constant.ApiPrefix;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectActionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.plugin.PluginService;
 import io.swagger.annotations.Api;
@@ -44,6 +45,10 @@ public class KafkaConnectorController {
     @PostMapping(value = "connectors")
     @ResponseBody
     public Result<Void> createConnector(@Validated @RequestBody ConnectorCreateDTO dto) {
+        if (ValidateUtils.isNull(dto.getSuitableConfig())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "config字段不能为空");
+        }
+
         return connectorManager.createConnector(dto, HttpRequestUtil.getOperator());
     }
 
@@ -73,14 +78,27 @@ public class KafkaConnectorController {
     @PutMapping(value ="connectors-config")
     @ResponseBody
     public Result<Void> modifyConnectors(@Validated @RequestBody ConnectorCreateDTO dto) {
-        return connectorManager.updateConnectorConfig(dto.getConnectClusterId(), dto.getConnectorName(), dto.getConfigs(), HttpRequestUtil.getOperator());
+        if (ValidateUtils.isNull(dto.getSuitableConfig())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "config字段不能为空");
+        }
+
+        return connectorManager.updateConnectorConfig(
+                dto.getConnectClusterId(),
+                dto.getConnectorName(),
+                dto.getSuitableConfig(),
+                HttpRequestUtil.getOperator()
+        );
     }
 
     @ApiOperation(value = "校验Connector配置", notes = "")
     @PutMapping(value ="connectors-config/validate")
     @ResponseBody
     public Result<ConnectConfigInfosVO> validateConnectors(@Validated @RequestBody ConnectorCreateDTO dto) {
-        Result<ConnectConfigInfos> infoResult = pluginService.validateConfig(dto.getConnectClusterId(), dto.getConfigs());
+        if (ValidateUtils.isNull(dto.getSuitableConfig())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "config字段不能为空");
+        }
+
+        Result<ConnectConfigInfos> infoResult = pluginService.validateConfig(dto.getConnectClusterId(), dto.getSuitableConfig());
         if (infoResult.failed()) {
             return Result.buildFromIgnoreData(infoResult);
         }
