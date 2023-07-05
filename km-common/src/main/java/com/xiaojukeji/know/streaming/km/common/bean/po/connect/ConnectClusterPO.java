@@ -29,7 +29,7 @@ public class ConnectClusterPO extends BasePO {
     private Integer state;
 
     /**
-     * 集群地址
+     * 用户填写的集群地址
      */
     private String clusterUrl;
 

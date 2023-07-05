@@ -20,7 +20,6 @@ import com.xiaojukeji.know.streaming.km.common.enums.group.GroupStateEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.group.GroupTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.jmx.JmxEnum;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
-import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerService;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.persistence.connect.cache.LoadedConnectClusterCache;
@@ -48,9 +47,6 @@ public class SyncConnectClusterAndWorkerTask extends AbstractAsyncMetadataDispat
     private WorkerService workerService;
 
     @Autowired
-    private WorkerConnectorService workerConnectorService;
-
-    @Autowired
     private ConnectClusterService connectClusterService;
 
     @Override
@@ -60,7 +56,6 @@ public class SyncConnectClusterAndWorkerTask extends AbstractAsyncMetadataDispat
         //获取connect集群
         List<Group> groupList = groupService.listClusterGroups(clusterPhy.getId()).stream().filter(elem->elem.getType()==GroupTypeEnum.CONNECT_CLUSTER).collect(Collectors.toList());
         for (Group group: groupList) {
-
             try {
                 KSGroupDescription ksGroupDescription = groupService.getGroupDescriptionFromKafka(clusterPhy, group.getName());
                 if (!ksGroupDescription.protocolType().equals(CONNECT_CLUSTER_PROTOCOL_TYPE)) {
