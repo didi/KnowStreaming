@@ -151,7 +151,7 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
                 return jmxMap;
             }
 
-            log.debug("method=createJmxConnectorWrap||clusterPhyId={}||brokerId={}||msg=create JmxConnectorWrap starting", clusterPhy.getId(), brokerId);
+            log.info("method=createJmxConnectorWrap||clusterPhyId={}||brokerId={}||msg=create JmxConnectorWrap starting", clusterPhy.getId(), brokerId);
 
             JmxConfig jmxConfig = ConvertUtil.str2ObjByJson(clusterPhy.getJmxProperties(), JmxConfig.class);
             if (jmxConfig == null) {
@@ -159,7 +159,7 @@ public class KafkaJMXClient extends AbstractClusterLoadedChangedHandler {
             }
 
             JmxConnectorWrap jmxConnectorWrap = new JmxConnectorWrap(
-                    "clusterPhyId: " + clusterPhy.getId() + " brokerId: " + brokerId,
+                    String.format("clusterPhyId=%s,brokerId=%d", clusterPhy.getId(), brokerId),
                     broker.getStartTimestamp(),
                     broker.getJmxHost(jmxConfig.getUseWhichEndpoint()),
                     jmxConfig.getFinallyJmxPort(String.valueOf(brokerId), broker.getJmxPort()),

@@ -46,7 +46,12 @@ public class JmxConnectorWrap {
     private JmxAuthConfig jmxConfig;
 
     public JmxConnectorWrap(String clientLogIdent, Long brokerStartupTime, String jmxHost, Integer jmxPort, JmxAuthConfig jmxConfig) {
-        this.clientLogIdent=clientLogIdent;
+        LOGGER.info(
+                "method=JmxConnectorWrap||clientLogIdent={}||brokerStartupTime={}||jmxHost={}||jmxPort={}||jmxConfig={}||msg=start construct JmxWrap.",
+                clientLogIdent, brokerStartupTime, jmxHost, jmxPort, jmxConfig
+        );
+
+        this.clientLogIdent = clientLogIdent;
         this.brokerStartupTime = brokerStartupTime;
         this.jmxHost = jmxHost;
         this.jmxPort = (jmxPort == null? JmxEnum.UNKNOWN.getPort() : jmxPort);
@@ -160,6 +165,11 @@ public class JmxConnectorWrap {
         if (jmxConnector != null) {
             return true;
         }
+        LOGGER.info(
+                "method=createJmxConnector||clientLogIdent={}||brokerStartupTime={}||jmxHost={}||jmxPort={}||jmxConfig={}||msg=start create jmx connector.",
+                clientLogIdent, brokerStartupTime, jmxHost, jmxPort, jmxConfig
+        );
+
         String jmxUrl = String.format("service:jmx:rmi:///jndi/rmi://%s:%d/jmxrmi", jmxHost, jmxPort);
         try {
             Map<String, Object> environment = new HashMap<String, Object>();
