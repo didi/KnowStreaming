@@ -13,7 +13,6 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupMemberPO;
 import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupPO;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
-import com.xiaojukeji.know.streaming.km.common.enums.group.DeleteGroupTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.ModuleEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.operaterecord.OperationEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
@@ -46,6 +45,8 @@ public class OpGroupServiceImpl extends BaseKafkaVersionControlService implement
     private static final ILog LOGGER = LogFactory.getLog(OpGroupServiceImpl.class);
 
     private static final String DELETE_GROUP_OFFSET                     = "deleteGroupOffset";
+    private static final String DELETE_GROUP_TOPIC_OFFSET               = "deleteGroupTopicOffset";
+    private static final String DELETE_GROUP_TP_OFFSET                  = "deleteGroupTopicPartitionOffset";
 
     @Autowired
     private GroupDAO groupDAO;
@@ -66,7 +67,9 @@ public class OpGroupServiceImpl extends BaseKafkaVersionControlService implement
 
     @PostConstruct
     private void init() {
-        registerVCHandler(DELETE_GROUP_OFFSET,  V_1_1_0, V_MAX,  "deleteGroupOffset",    this::deleteGroupOffsetByClient);
+        registerVCHandler(DELETE_GROUP_OFFSET,          V_2_0_0, V_MAX, "deleteGroupOffsetByClient",                this::deleteGroupOffsetByClient);
+        registerVCHandler(DELETE_GROUP_TOPIC_OFFSET,    V_2_4_0, V_MAX, "deleteGroupTopicOffsetByClient",           this::deleteGroupTopicOffsetByClient);
+        registerVCHandler(DELETE_GROUP_TP_OFFSET,       V_2_4_0, V_MAX, "deleteGroupTopicPartitionOffsetByClient",  this::deleteGroupTopicPartitionOffsetByClient);
     }
 
     @Override
@@ -80,46 +83,74 @@ public class OpGroupServiceImpl extends BaseKafkaVersionControlService implement
                 return rv;
             }
 
-            // 清理数据库中的数据
-            if (DeleteGroupTypeEnum.GROUP.equals(param.getDeleteGroupTypeEnum())) {
-                // 记录操作
-                OplogDTO oplogDTO = new OplogDTO(operator,
-                        OperationEnum.DELETE.getDesc(),
-                        ModuleEnum.KAFKA_GROUP.getDesc(),
-                        String.format("集群ID:[%d] Group名称:[%s]", param.getClusterPhyId(), param.getGroupName()),
-                        String.format("删除Offset:[%s]", ConvertUtil.obj2Json(param))
-                );
-                opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
+            // 记录操作
+            OplogDTO oplogDTO = new OplogDTO(operator,
+                    OperationEnum.DELETE.getDesc(),
+                    ModuleEnum.KAFKA_GROUP.getDesc(),
+                    String.format("集群ID:[%d] Group名称:[%s]", param.getClusterPhyId(), param.getGroupName()),
+                    String.format("删除Offset:[%s]", ConvertUtil.obj2Json(param))
+            );
+            opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
 
-                // 清理Group数据
-                this.deleteGroupInDB(param.getClusterPhyId(), param.getGroupName());
-                this.deleteGroupMemberInDB(param.getClusterPhyId(), param.getGroupName());
-            } else if (DeleteGroupTypeEnum.GROUP_TOPIC.equals(param.getDeleteGroupTypeEnum())) {
-                // 记录操作
-                DeleteGroupTopicParam topicParam = (DeleteGroupTopicParam) param;
-                OplogDTO oplogDTO = new OplogDTO(operator,
-                        OperationEnum.DELETE.getDesc(),
-                        ModuleEnum.KAFKA_GROUP.getDesc(),
-                        String.format("集群ID:[%d] Group名称:[%s] Topic名称:[%s]", param.getClusterPhyId(), param.getGroupName(), topicParam.getTopicName()),
-                        String.format("删除Offset:[%s]", ConvertUtil.obj2Json(topicParam))
-                );
-                opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
+            // 清理Group数据
+            this.deleteGroupInDB(param.getClusterPhyId(), param.getGroupName());
+            this.deleteGroupMemberInDB(param.getClusterPhyId(), param.getGroupName());
 
-                // 清理group + topic 数据
-                this.deleteGroupMemberInDB(topicParam.getClusterPhyId(), topicParam.getGroupName(), topicParam.getTopicName());
-            } else if (DeleteGroupTypeEnum.GROUP_TOPIC_PARTITION.equals(param.getDeleteGroupTypeEnum())) {
-                // 记录操作
-                DeleteGroupTopicPartitionParam partitionParam = (DeleteGroupTopicPartitionParam) param;
-                OplogDTO oplogDTO = new OplogDTO(operator,
-                        OperationEnum.DELETE.getDesc(),
-                        ModuleEnum.KAFKA_GROUP.getDesc(),
-                        String.format("集群ID:[%d] Group名称:[%s] Topic名称:[%s] PartitionID:[%d]", param.getClusterPhyId(), param.getGroupName(), partitionParam.getTopicName(), partitionParam.getPartitionId()),
-                        String.format("删除Offset:[%s]", ConvertUtil.obj2Json(partitionParam))
-                );
-                opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
+            return rv;
+        } catch (VCHandlerNotExistException e) {
+            return Result.buildFailure(VC_HANDLE_NOT_EXIST);
+        }
+    }
 
-                // 不需要进行清理
+    @Override
+    public Result<Void> deleteGroupTopicOffset(DeleteGroupTopicParam param, String operator) {
+        // 日志记录
+        LOGGER.info("method=deleteGroupTopicOffset||param={}||operator={}||msg=delete group topic offset", ConvertUtil.obj2Json(param), operator);
+
+        try {
+            Result<Void> rv = (Result<Void>) doVCHandler(param.getClusterPhyId(), DELETE_GROUP_TOPIC_OFFSET, param);
+            if (rv == null || rv.failed()) {
+                return rv;
             }
+
+            // 清理数据库中的数据
+            // 记录操作
+            OplogDTO oplogDTO = new OplogDTO(operator,
+                    OperationEnum.DELETE.getDesc(),
+                    ModuleEnum.KAFKA_GROUP.getDesc(),
+                    String.format("集群ID:[%d] Group名称:[%s] Topic名称:[%s]", param.getClusterPhyId(), param.getGroupName(), param.getTopicName()),
+                    String.format("删除Offset:[%s]", ConvertUtil.obj2Json(param))
+            );
+            opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
+
+            // 清理group + topic 数据
+            this.deleteGroupMemberInDB(param.getClusterPhyId(), param.getGroupName(), param.getTopicName());
+
+            return rv;
+        } catch (VCHandlerNotExistException e) {
+            return Result.buildFailure(VC_HANDLE_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public Result<Void> deleteGroupTopicPartitionOffset(DeleteGroupTopicPartitionParam param, String operator) {
+        // 日志记录
+        LOGGER.info("method=deleteGroupTopicPartitionOffset||param={}||operator={}||msg=delete group topic partition offset", ConvertUtil.obj2Json(param), operator);
+
+        try {
+            Result<Void> rv = (Result<Void>) doVCHandler(param.getClusterPhyId(), DELETE_GROUP_TP_OFFSET, param);
+            if (rv == null || rv.failed()) {
+                return rv;
+            }
+
+            // 记录操作
+            OplogDTO oplogDTO = new OplogDTO(operator,
+                    OperationEnum.DELETE.getDesc(),
+                    ModuleEnum.KAFKA_GROUP.getDesc(),
+                    String.format("集群ID:[%d] Group名称:[%s] Topic名称:[%s] PartitionID:[%d]", param.getClusterPhyId(), param.getGroupName(), param.getTopicName(), param.getPartitionId()),
+                    String.format("删除Offset:[%s]", ConvertUtil.obj2Json(param))
+            );
+            opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
 
             return rv;
         } catch (VCHandlerNotExistException e) {
@@ -130,20 +161,6 @@ public class OpGroupServiceImpl extends BaseKafkaVersionControlService implement
     /**************************************************** private method ****************************************************/
 
     private Result<Void> deleteGroupOffsetByClient(VersionItemParam itemParam) {
-        DeleteGroupParam deleteGroupParam = (DeleteGroupParam) itemParam;
-
-        if (DeleteGroupTypeEnum.GROUP.equals(deleteGroupParam.getDeleteGroupTypeEnum())) {
-            return this.deleteGroupByClient(itemParam);
-        } else if (DeleteGroupTypeEnum.GROUP_TOPIC.equals(deleteGroupParam.getDeleteGroupTypeEnum())) {
-            return this.deleteGroupTopicOffsetByClient(itemParam);
-        } else if (DeleteGroupTypeEnum.GROUP_TOPIC_PARTITION.equals(deleteGroupParam.getDeleteGroupTypeEnum())) {
-            return this.deleteGroupTopicPartitionOffsetByClient(itemParam);
-        }
-
-        return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "删除Offset时，删除的类型参数非法");
-    }
-
-    private Result<Void> deleteGroupByClient(VersionItemParam itemParam) {
         DeleteGroupParam param = (DeleteGroupParam) itemParam;
         try {
             AdminClient adminClient = kafkaAdminClient.getClient(param.getClusterPhyId());
@@ -156,7 +173,7 @@ public class OpGroupServiceImpl extends BaseKafkaVersionControlService implement
             deleteConsumerGroupsResult.all().get();
         } catch (Exception e) {
             LOGGER.error(
-                    "method=deleteGroupByClient||clusterPhyId={}||groupName={}||errMsg=delete group failed||msg=exception!",
+                    "method=deleteGroupOffsetByClient||clusterPhyId={}||groupName={}||errMsg=delete group failed||msg=exception!",
                     param.getClusterPhyId(), param.getGroupName(), e
             );
 
@@ -172,7 +189,7 @@ public class OpGroupServiceImpl extends BaseKafkaVersionControlService implement
             AdminClient adminClient = kafkaAdminClient.getClient(param.getClusterPhyId());
 
             DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(Collections.singletonList(
-                    param.getTopicName()),
+                            param.getTopicName()),
                     new DescribeTopicsOptions().timeoutMs(KafkaConstant.ADMIN_CLIENT_REQUEST_TIME_OUT_UNIT_MS)
             );
 
