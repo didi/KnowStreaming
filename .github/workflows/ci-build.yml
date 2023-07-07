@@ -27,7 +27,7 @@ jobs:
         node-version: '12.22.12'
 
     - name: Build With Maven
-      run: mvn -U clean package -Dmaven.test.skip=true
+      run: mvn -Prelease-package -Dmaven.test.skip=true clean install -U
 
     - name: Get KnowStreaming Version
       if: ${{ success() }}
@@ -40,6 +40,6 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: KnowStreaming-${{ env.VERSION }}.tar.gz
-        path: ./km-dist/target/KnowStreaming-${{ env.VERSION }}.tar.gz
+        path: km-dist/target/KnowStreaming-${{ env.VERSION }}.tar.gz
         
         
