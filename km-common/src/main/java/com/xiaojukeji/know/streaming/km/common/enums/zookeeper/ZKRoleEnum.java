@@ -10,6 +10,8 @@ public enum ZKRoleEnum {
 
     OBSERVER("observer"),
 
+    STANDALONE("standalone"),
+
     UNKNOWN("unknown"),
 
     ;

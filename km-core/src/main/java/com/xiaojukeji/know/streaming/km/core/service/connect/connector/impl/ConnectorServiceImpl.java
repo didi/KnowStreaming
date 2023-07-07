@@ -87,7 +87,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
             props.put("config", configs);
 
             ConnectorInfo connectorInfo = restTool.postObjectWithJsonContent(
-                    connectCluster.getClusterUrl() + CREATE_CONNECTOR_URI,
+                    connectCluster.getSuitableRequestUrl() + CREATE_CONNECTOR_URI,
                     props,
                     ConnectorInfo.class
             );
@@ -127,7 +127,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
             }
 
             List<String> nameList = restTool.getArrayObjectWithJsonContent(
-                    connectCluster.getClusterUrl() + LIST_CONNECTORS_URI,
+                    connectCluster.getSuitableRequestUrl() + LIST_CONNECTORS_URI,
                     new HashMap<>(),
                     String.class
             );
@@ -224,7 +224,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
             }
 
             restTool.putJsonForObject(
-                    connectCluster.getClusterUrl() + String.format(RESUME_CONNECTOR_URI, connectorName),
+                    connectCluster.getSuitableRequestUrl() + String.format(RESUME_CONNECTOR_URI, connectorName),
                     new HashMap<>(),
                     String.class
             );
@@ -259,7 +259,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
             }
 
             restTool.postObjectWithJsonContent(
-                    connectCluster.getClusterUrl() + String.format(RESTART_CONNECTOR_URI, connectorName),
+                    connectCluster.getSuitableRequestUrl() + String.format(RESTART_CONNECTOR_URI, connectorName),
                     new HashMap<>(),
                     String.class
             );
@@ -294,7 +294,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
             }
 
             restTool.putJsonForObject(
-                    connectCluster.getClusterUrl() + String.format(PAUSE_CONNECTOR_URI, connectorName),
+                    connectCluster.getSuitableRequestUrl() + String.format(PAUSE_CONNECTOR_URI, connectorName),
                     new HashMap<>(),
                     String.class
             );
@@ -329,7 +329,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
             }
 
             restTool.deleteWithParamsAndHeader(
-                    connectCluster.getClusterUrl() + String.format(DELETE_CONNECTOR_URI, connectorName),
+                    connectCluster.getSuitableRequestUrl() + String.format(DELETE_CONNECTOR_URI, connectorName),
                     new HashMap<>(),
                     new HashMap<>(),
                     String.class
@@ -365,7 +365,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
             }
 
             ConnectorInfo connectorInfo = restTool.putJsonForObject(
-                    connectCluster.getClusterUrl() + String.format(UPDATE_CONNECTOR_CONFIG_URI, connectorName),
+                    connectCluster.getSuitableRequestUrl() + String.format(UPDATE_CONNECTOR_CONFIG_URI, connectorName),
                     configs,
                     org.apache.kafka.connect.runtime.rest.entities.ConnectorInfo.class
             );
@@ -532,7 +532,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
     private Result<KSConnectorInfo> getConnectorInfoFromCluster(ConnectCluster connectCluster, String connectorName) {
         try {
             ConnectorInfo connectorInfo = restTool.getForObject(
-                    connectCluster.getClusterUrl() + GET_CONNECTOR_INFO_PREFIX_URI + "/" + connectorName,
+                    connectCluster.getSuitableRequestUrl() + GET_CONNECTOR_INFO_PREFIX_URI + "/" + connectorName,
                     new HashMap<>(),
                     ConnectorInfo.class
             );
@@ -558,7 +558,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
     private Result<List<String>> getConnectorTopicsFromCluster(ConnectCluster connectCluster, String connectorName) {
         try {
             Properties properties = restTool.getForObject(
-                    connectCluster.getClusterUrl() + String.format(GET_CONNECTOR_TOPICS_URI, connectorName),
+                    connectCluster.getSuitableRequestUrl() + String.format(GET_CONNECTOR_TOPICS_URI, connectorName),
                     new HashMap<>(),
                     Properties.class
             );
@@ -578,7 +578,7 @@ public class ConnectorServiceImpl extends BaseVersionControlService implements C
     private Result<KSConnectorStateInfo> getConnectorStateInfoFromCluster(ConnectCluster connectCluster, String connectorName) {
         try {
             KSConnectorStateInfo connectorStateInfo = restTool.getForObject(
-                    connectCluster.getClusterUrl() + String.format(GET_CONNECTOR_STATUS_URI, connectorName),
+                    connectCluster.getSuitableRequestUrl() + String.format(GET_CONNECTOR_STATUS_URI, connectorName),
                     new HashMap<>(),
                     KSConnectorStateInfo.class
             );

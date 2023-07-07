@@ -12,9 +12,9 @@ import com.xiaojukeji.know.streaming.km.common.exception.AdminOperateException;
 import com.xiaojukeji.know.streaming.km.common.exception.NotExistException;
 import org.apache.kafka.common.TopicPartition;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface GroupService {
     /**
@@ -35,10 +35,11 @@ public interface GroupService {
 
     /**
      * 批量更新DB
+     * @param clusterPhyId 集群ID
+     * @param newGroupList 新的group列表
+     * @param getFailedGroupSet 元信息获取失败的group列表
      */
-    void batchReplaceGroupsAndMembers(Long clusterPhyId, List<Group> newGroupList, long updateTime);
-
-    int deleteByUpdateTimeBeforeInDB(Long clusterPhyId, Date beforeTime);
+    void batchReplaceGroupsAndMembers(Long clusterPhyId, List<Group> newGroupList, Set<String> getFailedGroupSet);
 
     /**
      * DB-Group相关接口

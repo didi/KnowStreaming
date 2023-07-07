@@ -22,6 +22,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
+import com.xiaojukeji.know.streaming.km.core.service.config.KSConfigUtils;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.entity.ClusterBalanceInterval;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.entity.job.detail.ClusterBalancePlanDetail;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.po.ClusterBalanceJobConfigPO;
@@ -37,8 +38,6 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerSpecService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
-import com.xiaojukeji.know.streaming.km.core.service.config.ConfigUtils;
-import com.xiaojukeji.know.streaming.km.core.service.partition.OpPartitionService;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignService;
 import com.xiaojukeji.know.streaming.km.core.service.reassign.ReassignStrategyService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
@@ -93,16 +92,13 @@ public class ClusterBalanceJobServiceImpl implements ClusterBalanceJobService {
     private TopicService topicService;
 
     @Autowired
-    private ConfigUtils configUtils;
+    private KSConfigUtils ksConfigUtils;
 
     @Autowired
     private ReassignService reassignService;
 
     @Autowired
     private ReassignStrategyService reassignStrategyService;
-
-    @Autowired
-    private OpPartitionService opPartitionService;
 
     @Override
     public Result<Void> deleteByJobId(Long jobId, String operator) {
@@ -301,7 +297,7 @@ public class ClusterBalanceJobServiceImpl implements ClusterBalanceJobService {
         Map<Integer, Broker> brokerMap = brokerService.listAllBrokersFromDB(clusterBalanceJobPO.getClusterId()).stream().collect(Collectors.toMap(Broker::getBrokerId, Function.identity()));
 
         //更新平衡任务状态信息
-        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhy.getId(), configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
+        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhy.getId(), ksConfigUtils.getClusterBalanceIgnoredTopicsTimeSecond());
         Map<Integer, BrokerBalanceState> brokerBalanceStateMap = ExecutionRebalance
                 .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(clusterBalanceJobPO, brokerMap, brokerSpecMap, clusterPhy, esAddress, topicNames));
         List<ClusterBalancePlanDetail> oldDetails = ConvertUtil.str2ObjArrayByJson(clusterBalanceJobPO.getBrokerBalanceDetail(), ClusterBalancePlanDetail.class);

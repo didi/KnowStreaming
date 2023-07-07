@@ -1,13 +1,35 @@
+
+![Logo](https://user-images.githubusercontent.com/71620349/185368586-aed82d30-1534-453d-86ff-ecfa9d0f35bd.png)
+
 # FAQ
 
-## 8.1、支持哪些 Kafka 版本？
+- [FAQ](#faq)
+  - [1、支持哪些 Kafka 版本？](#1支持哪些-kafka-版本)
+  - [1、2.x 版本和 3.0 版本有什么差异？](#12x-版本和-30-版本有什么差异)
+  - [3、页面流量信息等无数据？](#3页面流量信息等无数据)
+  - [8.4、`Jmx`连接失败如何解决？](#84jmx连接失败如何解决)
+  - [5、有没有 API 文档？](#5有没有-api-文档)
+  - [6、删除 Topic 成功后，为何过段时间又出现了？](#6删除-topic-成功后为何过段时间又出现了)
+  - [7、如何在不登录的情况下，调用接口？](#7如何在不登录的情况下调用接口)
+  - [8、Specified key was too long; max key length is 767 bytes](#8specified-key-was-too-long-max-key-length-is-767-bytes)
+  - [9、出现 ESIndexNotFoundEXception 报错](#9出现-esindexnotfoundexception-报错)
+  - [10、km-console 打包构建失败](#10km-console-打包构建失败)
+  - [11、在 `km-console` 目录下执行 `npm run start` 时看不到应用构建和热加载过程？如何启动单个应用？](#11在-km-console-目录下执行-npm-run-start-时看不到应用构建和热加载过程如何启动单个应用)
+  - [12、权限识别失败问题](#12权限识别失败问题)
+  - [13、接入开启kerberos认证的kafka集群](#13接入开启kerberos认证的kafka集群)
+  - [14、对接Ldap的配置](#14对接ldap的配置)
+  - [15、测试时使用Testcontainers的说明](#15测试时使用testcontainers的说明)
+  - [16、JMX连接失败怎么办](#16jmx连接失败怎么办)
+  - [17、zk监控无数据问题](#17zk监控无数据问题)
+
+## 1、支持哪些 Kafka 版本？
 
 - 支持 0.10+ 的 Kafka 版本；
 - 支持 ZK 及 Raft 运行模式的 Kafka 版本；
 
 &nbsp;
 
-## 8.1、2.x 版本和 3.0 版本有什么差异？
+## 1、2.x 版本和 3.0 版本有什么差异？
 
 **全新设计理念**
 
@@ -23,7 +45,7 @@
 
 &nbsp;
 
-## 8.3、页面流量信息等无数据？
+## 3、页面流量信息等无数据？
 
 - 1、`Broker JMX`未正确开启
 
@@ -41,7 +63,7 @@
 
 &nbsp;
 
-## 8.5、有没有 API 文档？
+## 5、有没有 API 文档？
 
 `KnowStreaming` 采用 Swagger 进行 API 说明，在启动 KnowStreaming 服务之后，就可以从下面地址看到。
 
@@ -49,7 +71,7 @@ Swagger-API 地址： [http://IP:PORT/swagger-ui.html#/](http://IP:PORT/swagger-
 
 &nbsp;
 
-## 8.6、删除 Topic 成功后，为何过段时间又出现了？
+## 6、删除 Topic 成功后，为何过段时间又出现了？
 
 **原因说明：**
 
@@ -74,7 +96,7 @@ for (int i= 0; i < 100000; ++i) {
 
 &nbsp;
 
-## 8.7、如何在不登录的情况下，调用接口？
+## 7、如何在不登录的情况下，调用接口？
 
 步骤一：接口调用时，在 header 中，增加如下信息：
 
@@ -109,7 +131,7 @@ SECURITY.TRICK_USERS
 
 但是还有一点需要注意，绕过的用户仅能调用他有权限的接口，比如一个普通用户，那么他就只能调用普通的接口，不能去调用运维人员的接口。
 
-## 8.8、Specified key was too long; max key length is 767 bytes
+## 8、Specified key was too long; max key length is 767 bytes
 
 **原因：** 不同版本的 InoDB 引擎，参数‘innodb_large_prefix’默认值不同，即在 5.6 默认值为 OFF，5.7 默认值为 ON。
 
@@ -121,13 +143,13 @@ SECURITY.TRICK_USERS
 - 将字符集改为 latin1（一个字符=一个字节）。
 - 开启‘innodb_large_prefix’，修改默认行格式‘innodb_file_format’为 Barracuda，并设置 row_format=dynamic。
 
-## 8.9、出现 ESIndexNotFoundEXception 报错
+## 9、出现 ESIndexNotFoundEXception 报错
 
 **原因 ：**没有创建 ES 索引模版
 
 **解决方案：**执行 init_es_template.sh 脚本，创建 ES 索引模版即可。
 
-## 8.10、km-console 打包构建失败
+## 10、km-console 打包构建失败
 
 首先，**请确保您正在使用最新版本**，版本列表见 [Tags](https://github.com/didi/KnowStreaming/tags)。如果不是最新版本，请升级后再尝试有无问题。
 
@@ -161,14 +183,14 @@ Node 版本: v12.22.12
 错误截图:
 ```
 
-## 8.11、在 `km-console` 目录下执行 `npm run start` 时看不到应用构建和热加载过程？如何启动单个应用？
+## 11、在 `km-console` 目录下执行 `npm run start` 时看不到应用构建和热加载过程？如何启动单个应用？
 
 需要到具体的应用中执行 `npm run start`，例如 `cd packages/layout-clusters-fe` 后，执行 `npm run start`。
 
 应用启动后需要到基座应用中查看（需要启动基座应用，即 layout-clusters-fe）。
 
 
-## 8.12、权限识别失败问题
+## 12、权限识别失败问题
 1、使用admin账号登陆KnowStreaming时，点击系统管理-用户管理-角色管理-新增角色，查看页面是否正常。
 
 <img src="http://img-ys011.didistatic.com/static/dc2img/do1_gwGfjN9N92UxzHU8dfzr" width = "400" >
@@ -184,7 +206,7 @@ Node 版本: v12.22.12
 + 解决方案：清空数据库数据，将数据库字符集调整为utf8，最后重新执行[dml-logi.sql](https://github.com/didi/KnowStreaming/blob/master/km-dist/init/sql/dml-logi.sql)脚本导入数据即可。
 
 
-## 8.13、接入开启kerberos认证的kafka集群
+## 13、接入开启kerberos认证的kafka集群
 
 1. 部署KnowStreaming的机器上安装krb客户端；
 2. 替换/etc/krb5.conf配置文件；
@@ -200,7 +222,7 @@ Node 版本: v12.22.12
 ```
 
 
-## 8.14、对接Ldap的配置
+## 14、对接Ldap的配置
 
 ```yaml
 # 需要在application.yml中增加如下配置。相关配置的信息，按实际情况进行调整
@@ -223,6 +245,36 @@ spring:
     login-extend-bean-name: ksLdapLoginService # 表示使用ldap的service
 ```
 
-## 8.15、测试时使用Testcontainers的说明
+## 15、测试时使用Testcontainers的说明
+
 1. 需要docker运行环境 [Testcontainers运行环境说明](https://www.testcontainers.org/supported_docker_environment/)
 2. 如果本机没有docker，可以使用[远程访问docker](https://docs.docker.com/config/daemon/remote-access/) [Testcontainers配置说明](https://www.testcontainers.org/features/configuration/#customizing-docker-host-detection)  
+
+
+## 16、JMX连接失败怎么办
+
+详细见：[解决连接JMX失败](../dev_guide/%E8%A7%A3%E5%86%B3%E8%BF%9E%E6%8E%A5JMX%E5%A4%B1%E8%B4%A5.md)
+
+
+## 17、zk监控无数据问题
+
+**现象：** 
+zookeeper集群正常，但Ks上zk页面所有监控指标无数据，`KnowStreaming` log_error.log日志提示
+
+```vim
+[MetricCollect-Shard-0-8-thread-1] ERROR class=c.x.k.s.k.c.s.h.c.z.HealthCheckZookeeperService||method=checkWatchCount||param=ZookeeperParam(zkAddressList=[Tuple{v1=192.168.xxx.xx, v2=2181}, Tuple{v1=192.168.xxx.xx, v2=2181}, Tuple{v1=192.168.xxx.xx, v2=2181}], zkConfig=null)||config=HealthAmountRatioConfig(amount=100000, ratio=0.8)||result=Result{message='mntr is not executed because it is not in the whitelist.
+', code=8031, data=null}||errMsg=get metrics failed, may be collect failed or zk mntr command not in whitelist.
+2023-04-23 14:39:07.234 [MetricCollect-Shard-0-8-thread-1] ERROR class=c.x.k.s.k.c.s.h.checker.AbstractHeal
+```
+
+
+原因就很明确了。需要开放zk的四字命令，在`zoo.cfg`配置文件中添加
+```
+4lw.commands.whitelist=mntr,stat,ruok,envi,srvr,envi,cons,conf,wchs,wchp
+```
+
+
+建议至少开放上述几个四字命令，当然，您也可以全部开放
+```
+4lw.commands.whitelist=*
+```

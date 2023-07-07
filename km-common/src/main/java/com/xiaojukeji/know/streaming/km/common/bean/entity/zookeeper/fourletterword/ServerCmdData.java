@@ -20,11 +20,11 @@ public class ServerCmdData extends BaseFourLetterWordCmdData {
     private Float zkAvgLatency;
     private Float zkMaxLatency;
     private Float zkMinLatency;
-    private Long zkPacketsReceived;
-    private Long zkPacketsSent;
-    private Long zkNumAliveConnections;
-    private Long zkOutstandingRequests;
+    private Float zkPacketsReceived;
+    private Float zkPacketsSent;
+    private Float zkNumAliveConnections;
+    private Float zkOutstandingRequests;
     private String zkServerState;
-    private Long zkZnodeCount;
+    private Float zkZnodeCount;
     private Long zkZxid;
 }

@@ -48,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -131,17 +132,17 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
         } else if (checkpointResult.failed() && checkpointResult.failed()) {
             return Result.buildFromRSAndMsg(
                     ResultStatus.KAFKA_CONNECTOR_OPERATE_FAILED,
-                    String.format("创建 checkpoint & heartbeat 失败.\n失败信息分别为：%s\n\n%s", checkpointResult.getMessage(), heartbeatResult.getMessage())
+                    String.format("创建 checkpoint & heartbeat 失败.%n失败信息分别为：%s%n%n%s", checkpointResult.getMessage(), heartbeatResult.getMessage())
             );
         } else if (checkpointResult.failed()) {
             return Result.buildFromRSAndMsg(
                     ResultStatus.KAFKA_CONNECTOR_OPERATE_FAILED,
-                    String.format("创建 checkpoint 失败.\n失败信息分别为：%s", checkpointResult.getMessage())
+                    String.format("创建 checkpoint 失败.%n失败信息分别为：%s", checkpointResult.getMessage())
             );
         } else{
             return Result.buildFromRSAndMsg(
                     ResultStatus.KAFKA_CONNECTOR_OPERATE_FAILED,
-                    String.format("创建 heartbeat 失败.\n失败信息分别为：%s", heartbeatResult.getMessage())
+                    String.format("创建 heartbeat 失败.%n失败信息分别为：%s", heartbeatResult.getMessage())
             );
         }
     }
@@ -193,7 +194,7 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
             return rv;
         }
 
-        return connectorService.updateConnectorConfig(dto.getConnectClusterId(), dto.getConnectorName(), dto.getConfigs(), operator);
+        return connectorService.updateConnectorConfig(dto.getConnectClusterId(), dto.getConnectorName(), dto.getSuitableConfig(), operator);
     }
 
     @Override
@@ -425,7 +426,7 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
     public Result<List<ConnectConfigInfosVO>> validateConnectors(MirrorMakerCreateDTO dto) {
         List<ConnectConfigInfosVO> voList = new ArrayList<>();
 
-        Result<ConnectConfigInfos> infoResult = pluginService.validateConfig(dto.getConnectClusterId(), dto.getConfigs());
+        Result<ConnectConfigInfos> infoResult = pluginService.validateConfig(dto.getConnectClusterId(), dto.getSuitableConfig());
         if (infoResult.failed()) {
             return Result.buildFromIgnoreData(infoResult);
         }
@@ -479,11 +480,11 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
             return Result.buildFromRSAndMsg(ResultStatus.CLUSTER_NOT_EXIST, MsgConstant.getClusterPhyNotExist(connectCluster.getKafkaClusterPhyId()));
         }
 
-        if (!dto.getConfigs().containsKey(CONNECTOR_CLASS_FILED_NAME)) {
+        if (!dto.getSuitableConfig().containsKey(CONNECTOR_CLASS_FILED_NAME)) {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "SourceConnector缺少connector.class");
         }
 
-        if (!MIRROR_MAKER_SOURCE_CONNECTOR_TYPE.equals(dto.getConfigs().getProperty(CONNECTOR_CLASS_FILED_NAME))) {
+        if (!MIRROR_MAKER_SOURCE_CONNECTOR_TYPE.equals(dto.getSuitableConfig().getProperty(CONNECTOR_CLASS_FILED_NAME))) {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "SourceConnector的connector.class类型错误");
         }
 
@@ -588,16 +589,14 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
             }
         }
 
-        voList.forEach(elem -> {
-            elem.setMetricLines(metricLineMap.get(elem.getConnectClusterId() + "#" + elem.getConnectorName()));
-        });
+        voList.forEach(elem -> elem.setMetricLines(metricLineMap.get(elem.getConnectClusterId() + "#" + elem.getConnectorName())));
 
         return voList;
     }
 
     private List<ClusterMirrorMakerOverviewVO> completeClusterInfo(List<ClusterMirrorMakerOverviewVO> mirrorMakerVOList) {
 
-        Map<String, KSConnectorInfo> connectorInfoMap = new HashMap<>();
+        Map<String, KSConnectorInfo> connectorInfoMap = new ConcurrentHashMap<>();
 
         for (ClusterMirrorMakerOverviewVO mirrorMakerVO : mirrorMakerVOList) {
             ApiCallThreadPoolService.runnableTask(String.format("method=completeClusterInfo||connectClusterId=%d||connectorName=%s||getMirrorMakerInfo", mirrorMakerVO.getConnectClusterId(), mirrorMakerVO.getConnectorName()),
@@ -607,12 +606,10 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
                         if (connectorInfoRet.hasData()) {
                             connectorInfoMap.put(mirrorMakerVO.getConnectClusterId() + mirrorMakerVO.getConnectorName(), connectorInfoRet.getData());
                         }
-
-                        return connectorInfoRet.getData();
                     });
         }
 
-        ApiCallThreadPoolService.waitResult(1000);
+        ApiCallThreadPoolService.waitResult();
 
         List<ClusterMirrorMakerOverviewVO> newMirrorMakerVOList = new ArrayList<>();
         for (ClusterMirrorMakerOverviewVO mirrorMakerVO : mirrorMakerVOList) {

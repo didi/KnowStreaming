@@ -11,10 +11,17 @@ import org.springframework.stereotype.Service;
  */
 @Getter
 @Service
-public class ConfigUtils {
-    private ConfigUtils() {
+public class KSConfigUtils {
+    private KSConfigUtils() {
     }
 
     @Value("${cluster-balance.ignored-topics.time-second:300}")
     private Integer     clusterBalanceIgnoredTopicsTimeSecond;
+
+    @Value(value = "${request.api-call.timeout-unit-ms:8000}")
+    private Integer apiCallTimeoutUnitMs;
+
+    public Integer getApiCallLeftTimeUnitMs(Long costedUnitMs) {
+        return Math.max(1000, (int)(apiCallTimeoutUnitMs - costedUnitMs));
+    }
 }

@@ -123,6 +123,7 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
             tagsMap.put(CLUSTER_ID.getName(),     p.getClusterPhyId());
             tagsMap.put(BROKER_ID.getName(),      p.getBrokerId());
             tagsMap.put(PARTITION_ID.getName(),   p.getPartitionId());
+            tagsMap.put(TOPIC.getName(),          p.getTopic());
 
             pointList.addAll(genSinkPoint("Partition", p.getMetrics(), p.getTimestamp(), tagsMap));
         }

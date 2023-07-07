@@ -6,6 +6,7 @@ import com.xiaojukeji.know.streaming.km.common.annotations.enterprise.Enterprise
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.Broker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.broker.BrokerSpec;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
+import com.xiaojukeji.know.streaming.km.core.service.config.KSConfigUtils;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.entity.job.ClusterBalanceReassignDetail;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.entity.job.detail.ClusterBalanceDetailDataGroupByTopic;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.job.Job;
@@ -31,7 +32,6 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerSpecService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
-import com.xiaojukeji.know.streaming.km.core.service.config.ConfigUtils;
 import com.xiaojukeji.know.streaming.km.core.service.job.JobHandler;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.job.JobDAO;
@@ -88,7 +88,7 @@ public class ClusterBalanceJobHandler implements JobHandler {
     private TopicService topicService;
 
     @Autowired
-    private ConfigUtils configUtils;
+    private KSConfigUtils ksConfigUtils;
 
     @Override
     public JobTypeEnum type() {
@@ -115,7 +115,7 @@ public class ClusterBalanceJobHandler implements JobHandler {
         }
 
         //获取任务计划
-        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(dto.getClusterId(), configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
+        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(dto.getClusterId(), ksConfigUtils.getClusterBalanceIgnoredTopicsTimeSecond());
         BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(dto, brokers, brokerSpecMap, clusterPhy, esAddress, topicNames);
         try {
             ExecutionRebalance executionRebalance = new ExecutionRebalance();
@@ -200,7 +200,7 @@ public class ClusterBalanceJobHandler implements JobHandler {
         List<Broker> brokers = brokerService.listAllBrokersFromDB(clusterPhy.getId());
         Map<Integer, BrokerSpec> brokerSpecMap = brokerSpecService.getBrokerSpecMap(clusterPhy.getId());
 
-        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(job.getClusterId(), configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
+        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(job.getClusterId(), ksConfigUtils.getClusterBalanceIgnoredTopicsTimeSecond());
         JobClusterBalanceContent dto = ConvertUtil.str2ObjByJson(job.getJobData(), JobClusterBalanceContent.class);
         BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(dto, brokers, brokerSpecMap, clusterPhy, esAddress, topicNames);
         ExecutionRebalance executionRebalance = new ExecutionRebalance();

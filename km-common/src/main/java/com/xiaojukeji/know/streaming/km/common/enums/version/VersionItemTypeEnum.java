@@ -41,6 +41,8 @@ public enum VersionItemTypeEnum {
 
     SERVICE_OP_REASSIGNMENT(330, "service_reassign_operation"),
 
+    SERVICE_OP_GROUP(340, "service_group_operation"),
+
     SERVICE_OP_CONNECT_CLUSTER(400, "service_connect_cluster_operation"),
     SERVICE_OP_CONNECT_CONNECTOR(401, "service_connect_connector_operation"),
     SERVICE_OP_CONNECT_PLUGIN(402, "service_connect_plugin_operation"),
