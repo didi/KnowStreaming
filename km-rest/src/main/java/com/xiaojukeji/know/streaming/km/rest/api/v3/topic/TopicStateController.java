@@ -74,7 +74,7 @@ public class TopicStateController {
     @GetMapping(value = "clusters/{clusterPhyId}/topics/{topicName}/brokers-partitions-summary")
     @ResponseBody
     public Result<TopicBrokersPartitionsSummaryVO> getTopicBrokersPartitionsSummary(@PathVariable Long clusterPhyId,
-                                                                                    @PathVariable String topicName) throws Exception {
+                                                                                    @PathVariable String topicName) {
         return topicStateManager.getTopicBrokersPartitionsSummary(clusterPhyId, topicName);
     }
 
@@ -83,7 +83,7 @@ public class TopicStateController {
     @ResponseBody
     public Result<List<TopicPartitionVO>> getTopicPartitions(@PathVariable Long clusterPhyId,
                                                              @PathVariable String topicName,
-                                                             @RequestBody List<String> metricsNames) throws Exception {
+                                                             @RequestBody List<String> metricsNames) {
         return topicStateManager.getTopicPartitions(clusterPhyId, topicName, metricsNames);
     }
 

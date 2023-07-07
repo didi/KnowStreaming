@@ -10,6 +10,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 /**
@@ -57,6 +58,7 @@ public class GroupConverter {
         po.setTopicMembers(ConvertUtil.obj2Json(group.getTopicMembers()));
         po.setType(group.getType().getCode());
         po.setState(group.getState().getState());
+        po.setUpdateTime(new Date());
         return po;
     }
 }

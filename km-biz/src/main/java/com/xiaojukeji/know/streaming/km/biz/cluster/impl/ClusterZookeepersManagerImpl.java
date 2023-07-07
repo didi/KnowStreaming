@@ -62,7 +62,8 @@ public class ClusterZookeepersManagerImpl implements ClusterZookeepersManager {
         vo.setTotalObserverCount(0);
         vo.setAliveServerCount(0);
         for (ZookeeperInfo info: infoList) {
-            if (info.getRole().equals(ZKRoleEnum.LEADER.getRole())) {
+            if (info.getRole().equals(ZKRoleEnum.LEADER.getRole()) || info.getRole().equals(ZKRoleEnum.STANDALONE.getRole())) {
+                // leader 或者 standalone
                 vo.setLeaderNode(info.getHost());
             }
 

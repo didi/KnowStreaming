@@ -102,6 +102,10 @@ public class HealthCheckZookeeperService extends AbstractHealthCheckService {
         );
 
         long value = infoList.stream().filter(elem -> ZKRoleEnum.LEADER.getRole().equals(elem.getRole())).count();
+        if (value == 0) {
+            // ZK 在单机模式下，leader角色就是standalone
+            value = infoList.stream().filter(elem -> ZKRoleEnum.STANDALONE.getRole().equals(elem.getRole())).count();
+        }
 
         checkResult.setPassed(value == 1 ? Constant.YES : Constant.NO);
         return checkResult;

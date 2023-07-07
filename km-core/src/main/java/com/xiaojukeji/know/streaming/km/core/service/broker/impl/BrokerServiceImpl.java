@@ -360,7 +360,7 @@ public class BrokerServiceImpl extends BaseKafkaVersionControlService implements
 
     private Broker getStartTimeAndBuildBroker(Long clusterPhyId, Node newNode, JmxConfig jmxConfig) {
         try {
-            Long startTime = jmxDAO.getServerStartTime(clusterPhyId, newNode.host(), jmxConfig.getJmxPort(), jmxConfig);
+            Long startTime = jmxDAO.getServerStartTime(clusterPhyId, newNode.host(), jmxConfig.getFinallyJmxPort(String.valueOf(newNode.id())), jmxConfig);
 
             return Broker.buildFrom(clusterPhyId, newNode, startTime);
         } catch (Exception e) {

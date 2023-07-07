@@ -32,6 +32,8 @@ public enum OperationEnum {
 
     RESTART(11, "重启"),
 
+    TRUNCATE(12, "清空"),
+
     ;
 
     OperationEnum(int code, String desc) {

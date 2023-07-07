@@ -28,6 +28,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.topic.partition.TopicPart
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
+import com.xiaojukeji.know.streaming.km.common.constant.PaginationConstant;
 import com.xiaojukeji.know.streaming.km.common.converter.TopicVOConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.OffsetTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
@@ -38,6 +39,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.PaginationUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
+import com.xiaojukeji.know.streaming.km.core.service.config.KSConfigUtils;
 import com.xiaojukeji.know.streaming.km.core.service.group.GroupService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.partition.PartitionService;
@@ -45,8 +47,7 @@ import com.xiaojukeji.know.streaming.km.core.service.topic.TopicConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.TopicMetricVersionItems;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.xiaojukeji.know.streaming.km.core.utils.ApiCallThreadPoolService;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.TopicConfig;
@@ -60,7 +61,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class TopicStateManagerImpl implements TopicStateManager {
-    private static final ILog log = LogFactory.getLog(TopicStateManagerImpl.class);
+    private static final ILog LOGGER = LogFactory.getLog(TopicStateManagerImpl.class);
 
     @Autowired
     private TopicService topicService;
@@ -89,6 +90,9 @@ public class TopicStateManagerImpl implements TopicStateManager {
     @Autowired
     private GroupManager groupManager;
 
+    @Autowired
+    private KSConfigUtils ksConfigUtils;
+
     @Override
     public TopicBrokerAllVO getTopicBrokerAll(Long clusterPhyId, String topicName, String searchBrokerHost) throws NotExistException {
         Topic topic = topicService.getTopic(clusterPhyId, topicName);
@@ -101,7 +105,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
         TopicBrokerAllVO allVO = new TopicBrokerAllVO();
 
         allVO.setTotal(topic.getBrokerIdSet().size());
-        allVO.setLive((int)brokerMap.values().stream().filter(elem -> elem.alive()).count());
+        allVO.setLive((int)brokerMap.values().stream().filter(Broker::alive).count());
         allVO.setDead(allVO.getTotal() - allVO.getLive());
 
         allVO.setPartitionCount(topic.getPartitionNum());
@@ -153,97 +157,28 @@ public class TopicStateManagerImpl implements TopicStateManager {
             return Result.buildFromIgnoreData(endOffsetsMapResult);
         }
 
-        List<TopicRecordVO> voList = new ArrayList<>();
+        // 数据采集
+        List<TopicRecordVO> voList = this.getTopicMessages(clusterPhy, topicName, beginOffsetsMapResult.getData(), endOffsetsMapResult.getData(), startTime, dto);
 
-        KafkaConsumer<String, String> kafkaConsumer = null;
-        try {
-            // 创建kafka-consumer
-            kafkaConsumer = new KafkaConsumer<>(this.generateClientProperties(clusterPhy, dto.getMaxRecords()));
-
-            List<TopicPartition> partitionList = new ArrayList<>();
-            long maxMessage = 0;
-            for (Map.Entry<TopicPartition, Long> entry : endOffsetsMapResult.getData().entrySet()) {
-                long begin = beginOffsetsMapResult.getData().get(entry.getKey());
-                long end = entry.getValue();
-                if (begin == end){
-                    continue;
-                }
-                maxMessage += end - begin;
-                partitionList.add(entry.getKey());
-            }
-            maxMessage = Math.min(maxMessage, dto.getMaxRecords());
-            kafkaConsumer.assign(partitionList);
-
-            Map<TopicPartition, OffsetAndTimestamp> partitionOffsetAndTimestampMap = new HashMap<>();
-            // 获取指定时间每个分区的offset（按指定开始时间查询消息时）
-            if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
-                Map<TopicPartition, Long> timestampsToSearch = new HashMap<>();
-                partitionList.forEach(topicPartition -> {
-                    timestampsToSearch.put(topicPartition, dto.getStartTimestampUnitMs());
-                });
-                partitionOffsetAndTimestampMap = kafkaConsumer.offsetsForTimes(timestampsToSearch);
-            }
-
-            for (TopicPartition partition : partitionList) {
-                if (OffsetTypeEnum.EARLIEST.getResetType() == dto.getFilterOffsetReset()) {
-                    // 重置到最旧
-                    kafkaConsumer.seek(partition, beginOffsetsMapResult.getData().get(partition));
-                } else if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
-                    // 重置到指定时间
-                    kafkaConsumer.seek(partition, partitionOffsetAndTimestampMap.get(partition).offset());
-                } else if (OffsetTypeEnum.PRECISE_OFFSET.getResetType() == dto.getFilterOffsetReset()) {
-                    // 重置到指定位置
-
-                } else {
-                    // 默认，重置到最新
-                    kafkaConsumer.seek(partition, Math.max(beginOffsetsMapResult.getData().get(partition), endOffsetsMapResult.getData().get(partition) - dto.getMaxRecords()));
-                }
-            }
-
-            // 这里需要减去 KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS 是因为poll一次需要耗时，如果这里不减去，则可能会导致poll之后，超过要求的时间
-            while (System.currentTimeMillis() - startTime <= dto.getPullTimeoutUnitMs() && voList.size() < maxMessage) {
-                    ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS));
-                    for (ConsumerRecord<String, String> consumerRecord : consumerRecords) {
-                        if (this.checkIfIgnore(consumerRecord, dto.getFilterKey(), dto.getFilterValue())) {
-                            continue;
-                        }
-
-                        voList.add(TopicVOConverter.convert2TopicRecordVO(topicName, consumerRecord));
-                        if (voList.size() >= dto.getMaxRecords()) {
-                            break;
-                        }
-                    }
-
-                    // 超时则返回
-                    if (System.currentTimeMillis() - startTime + KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS > dto.getPullTimeoutUnitMs()
-                            || voList.size() > dto.getMaxRecords()) {
-                        break;
-                    }
-            }
-
-            // 排序
-            if (ObjectUtils.isNotEmpty(voList)) {
-                // 默认按时间倒序排序
-                if (StringUtils.isBlank(dto.getSortType())) {
-                    dto.setSortType(SortTypeEnum.DESC.getSortType());
-                }
-                PaginationUtil.pageBySort(voList, dto.getSortField(), dto.getSortType());
-            }
-
-            return Result.buildSuc(voList.subList(0, Math.min(dto.getMaxRecords(), voList.size())));
-        } catch (Exception e) {
-            log.error("method=getTopicMessages||clusterPhyId={}||topicName={}||param={}||errMsg=exception", clusterPhyId, topicName, dto, e);
-
-            throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
-        } finally {
-            if (kafkaConsumer != null) {
-                try {
-                    kafkaConsumer.close(Duration.ofMillis(KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS));
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
+        // 排序
+        if (ValidateUtils.isBlank(dto.getSortType())) {
+            // 默认按时间倒序排序
+            dto.setSortType(SortTypeEnum.DESC.getSortType());
         }
+        if (ValidateUtils.isBlank(dto.getSortField())) {
+            // 默认按照timestampUnitMs字段排序
+            dto.setSortField(PaginationConstant.TOPIC_RECORDS_TIME_SORTED_FIELD);
+        }
+
+        if (PaginationConstant.TOPIC_RECORDS_TIME_SORTED_FIELD.equals(dto.getSortField())) {
+            // 如果是时间类型，则第二排序规则是offset
+            PaginationUtil.pageBySort(voList, dto.getSortField(), dto.getSortType(), PaginationConstant.TOPIC_RECORDS_OFFSET_SORTED_FIELD, dto.getSortType());
+        } else {
+            // 如果是非时间类型，则第二排序规则是时间
+            PaginationUtil.pageBySort(voList, dto.getSortField(), dto.getSortType(), PaginationConstant.TOPIC_RECORDS_TIME_SORTED_FIELD, dto.getSortType());
+        }
+
+        return Result.buildSuc(voList.subList(0, Math.min(dto.getMaxRecords(), voList.size())));
     }
 
     @Override
@@ -298,26 +233,37 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
     @Override
     public Result<List<TopicPartitionVO>> getTopicPartitions(Long clusterPhyId, String topicName, List<String> metricsNames) {
+        long startTime = System.currentTimeMillis();
+
         List<Partition> partitionList = partitionService.listPartitionByTopic(clusterPhyId, topicName);
         if (ValidateUtils.isEmptyList(partitionList)) {
             return Result.buildSuc();
         }
 
-        Result<List<PartitionMetrics>> metricsResult = partitionMetricService.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, metricsNames);
-        if (metricsResult.failed()) {
-            // 仅打印错误日志，但是不直接返回错误
-            log.error(
-                    "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from es failed",
-                    clusterPhyId, topicName, metricsResult
-            );
-        }
-
-        // 转map
         Map<Integer, PartitionMetrics> metricsMap = new HashMap<>();
-        if (metricsResult.hasData()) {
-            for (PartitionMetrics metrics: metricsResult.getData()) {
-                metricsMap.put(metrics.getPartitionId(), metrics);
-            }
+        ApiCallThreadPoolService.runnableTask(
+                String.format("clusterPhyId=%d||topicName=%s||method=getTopicPartitions", clusterPhyId, topicName),
+                ksConfigUtils.getApiCallLeftTimeUnitMs(System.currentTimeMillis() - startTime),
+                () -> {
+                    Result<List<PartitionMetrics>> metricsResult = partitionMetricService.collectPartitionsMetricsFromKafka(clusterPhyId, topicName, metricsNames);
+                    if (metricsResult.failed()) {
+                        // 仅打印错误日志，但是不直接返回错误
+                        LOGGER.error(
+                                "method=getTopicPartitions||clusterPhyId={}||topicName={}||result={}||msg=get metrics from kafka failed",
+                                clusterPhyId, topicName, metricsResult
+                        );
+                    }
+
+                    for (PartitionMetrics metrics: metricsResult.getData()) {
+                        metricsMap.put(metrics.getPartitionId(), metrics);
+                    }
+                }
+        );
+        boolean finished = ApiCallThreadPoolService.waitResultAndReturnFinished(1);
+
+        if (!finished && metricsMap.isEmpty()) {
+            // 未完成 -> 打印日志
+            LOGGER.error("method=getTopicPartitions||clusterPhyId={}||topicName={}||msg=get metrics from kafka failed", clusterPhyId, topicName);
         }
 
         List<TopicPartitionVO> voList = new ArrayList<>();
@@ -336,7 +282,7 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
         // Broker统计信息
         vo.setBrokerCount(brokerMap.size());
-        vo.setLiveBrokerCount((int)brokerMap.values().stream().filter(elem -> elem.alive()).count());
+        vo.setLiveBrokerCount((int)brokerMap.values().stream().filter(Broker::alive).count());
         vo.setDeadBrokerCount(vo.getBrokerCount() - vo.getLiveBrokerCount());
 
         // Partition统计信息
@@ -360,13 +306,19 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
     @Override
     public PaginationResult<GroupTopicOverviewVO> pagingTopicGroupsOverview(Long clusterPhyId, String topicName, String searchGroupName, PaginationBaseDTO dto) {
+        long startTimeUnitMs = System.currentTimeMillis();
+
         PaginationResult<GroupMemberPO> paginationResult = groupService.pagingGroupMembers(clusterPhyId, topicName, "", "", searchGroupName, dto);
 
         if (!paginationResult.hasData()) {
             return PaginationResult.buildSuc(new ArrayList<>(), paginationResult);
         }
 
-        List<GroupTopicOverviewVO> groupTopicVOList = groupManager.getGroupTopicOverviewVOList(clusterPhyId, paginationResult.getData().getBizData());
+        List<GroupTopicOverviewVO> groupTopicVOList = groupManager.getGroupTopicOverviewVOList(
+                clusterPhyId,
+                paginationResult.getData().getBizData(),
+                ksConfigUtils.getApiCallLeftTimeUnitMs(System.currentTimeMillis() - startTimeUnitMs)    // 超时时间
+        );
 
         return PaginationResult.buildSuc(groupTopicVOList, paginationResult);
     }
@@ -386,11 +338,8 @@ public class TopicStateManagerImpl implements TopicStateManager {
             // ignore
             return true;
         }
-        if (filterValue != null && consumerRecord.value() != null && !consumerRecord.value().contains(filterValue)) {
-            return true;
-        }
 
-        return false;
+        return (filterValue != null && consumerRecord.value() != null && !consumerRecord.value().contains(filterValue));
     }
 
     private TopicBrokerSingleVO getTopicBrokerSingle(Long clusterPhyId,
@@ -449,5 +398,91 @@ public class TopicStateManagerImpl implements TopicStateManager {
 
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, Math.max(2, Math.min(5, maxPollRecords)));
         return props;
+    }
+
+    private List<TopicRecordVO> getTopicMessages(ClusterPhy clusterPhy,
+                                                 String topicName,
+                                                 Map<TopicPartition, Long> beginOffsetsMap,
+                                                 Map<TopicPartition, Long> endOffsetsMap,
+                                                 long startTime,
+                                                 TopicRecordDTO dto) throws AdminOperateException {
+        List<TopicRecordVO> voList = new ArrayList<>();
+
+        try (KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(this.generateClientProperties(clusterPhy, dto.getMaxRecords()))) {
+            // 移动到指定位置
+            long maxMessage = this.assignAndSeekToSpecifiedOffset(kafkaConsumer, beginOffsetsMap, endOffsetsMap, dto);
+
+            // 这里需要减去 KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS 是因为poll一次需要耗时，如果这里不减去，则可能会导致poll之后，超过要求的时间
+            while (System.currentTimeMillis() - startTime <= dto.getPullTimeoutUnitMs() && voList.size() < maxMessage) {
+                ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS));
+                for (ConsumerRecord<String, String> consumerRecord : consumerRecords) {
+                    if (this.checkIfIgnore(consumerRecord, dto.getFilterKey(), dto.getFilterValue())) {
+                        continue;
+                    }
+
+                    voList.add(TopicVOConverter.convert2TopicRecordVO(topicName, consumerRecord));
+                    if (voList.size() >= dto.getMaxRecords()) {
+                        break;
+                    }
+                }
+
+                // 超时则返回
+                if (System.currentTimeMillis() - startTime + KafkaConstant.POLL_ONCE_TIMEOUT_UNIT_MS > dto.getPullTimeoutUnitMs()
+                        || voList.size() > dto.getMaxRecords()) {
+                    break;
+                }
+            }
+
+            return voList;
+        } catch (Exception e) {
+            LOGGER.error("method=getTopicMessages||clusterPhyId={}||topicName={}||param={}||errMsg=exception", clusterPhy.getId(), topicName, dto, e);
+
+            throw new AdminOperateException(e.getMessage(), e, ResultStatus.KAFKA_OPERATE_FAILED);
+        }
+    }
+
+    private long assignAndSeekToSpecifiedOffset(KafkaConsumer<String, String> kafkaConsumer,
+                                                Map<TopicPartition, Long> beginOffsetsMap,
+                                                Map<TopicPartition, Long> endOffsetsMap,
+                                                TopicRecordDTO dto) {
+        List<TopicPartition> partitionList = new ArrayList<>();
+        long maxMessage = 0;
+        for (Map.Entry<TopicPartition, Long> entry : endOffsetsMap.entrySet()) {
+            long begin = beginOffsetsMap.get(entry.getKey());
+            long end = entry.getValue();
+            if (begin == end){
+                continue;
+            }
+            maxMessage += end - begin;
+            partitionList.add(entry.getKey());
+        }
+        maxMessage = Math.min(maxMessage, dto.getMaxRecords());
+        kafkaConsumer.assign(partitionList);
+
+        Map<TopicPartition, OffsetAndTimestamp> partitionOffsetAndTimestampMap = new HashMap<>();
+        // 获取指定时间每个分区的offset（按指定开始时间查询消息时）
+        if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
+            Map<TopicPartition, Long> timestampsToSearch = new HashMap<>();
+            partitionList.forEach(topicPartition -> timestampsToSearch.put(topicPartition, dto.getStartTimestampUnitMs()));
+            partitionOffsetAndTimestampMap = kafkaConsumer.offsetsForTimes(timestampsToSearch);
+        }
+
+        for (TopicPartition partition : partitionList) {
+            if (OffsetTypeEnum.EARLIEST.getResetType() == dto.getFilterOffsetReset()) {
+                // 重置到最旧
+                kafkaConsumer.seek(partition, beginOffsetsMap.get(partition));
+            } else if (OffsetTypeEnum.PRECISE_TIMESTAMP.getResetType() == dto.getFilterOffsetReset()) {
+                // 重置到指定时间
+                kafkaConsumer.seek(partition, partitionOffsetAndTimestampMap.get(partition).offset());
+            } else if (OffsetTypeEnum.PRECISE_OFFSET.getResetType() == dto.getFilterOffsetReset()) {
+                // 重置到指定位置
+
+            } else {
+                // 默认，重置到最新
+                kafkaConsumer.seek(partition, Math.max(beginOffsetsMap.get(partition), endOffsetsMap.get(partition) - dto.getMaxRecords()));
+            }
+        }
+
+        return maxMessage;
     }
 }

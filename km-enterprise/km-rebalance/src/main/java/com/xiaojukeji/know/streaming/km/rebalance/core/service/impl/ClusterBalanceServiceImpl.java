@@ -11,7 +11,7 @@ import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerSpecService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
-import com.xiaojukeji.know.streaming.km.core.service.config.ConfigUtils;
+import com.xiaojukeji.know.streaming.km.core.service.config.KSConfigUtils;
 import com.xiaojukeji.know.streaming.km.core.service.job.JobService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafka.BrokerMetricVersionItems;
@@ -96,7 +96,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
     private TopicService topicService;
 
     @Autowired
-    private ConfigUtils configUtils;
+    private KSConfigUtils ksConfigUtils;
 
     private final Cache<Long, Result<ClusterBalanceItemState>> balanceStateCache = Caffeine.newBuilder()
             .expireAfterWrite(150, TimeUnit.SECONDS)
@@ -134,7 +134,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
         } catch (ParseException e) {
             logger.error("method=state||clusterId:{}||errMsg=exception", clusterPhyId, e);
         }
-        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
+        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, ksConfigUtils.getClusterBalanceIgnoredTopicsTimeSecond());
 
         clusterBalanceStateVO.setEnable(configPOResult.getData().getStatus() == 1);
         Map<Resource, Double> resourceDoubleMap;
@@ -190,7 +190,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
         Map<Integer, BrokerBalanceState> brokerBalanceStateMap = new HashMap<>();
         if (configPOResult.hasData()) {
             try {
-                List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
+                List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, ksConfigUtils.getClusterBalanceIgnoredTopicsTimeSecond());
                 brokerBalanceStateMap = ExecutionRebalance
                         .getBrokerResourcesBalanceState(ClusterBalanceConverter.convert2BalanceParameter(configPOResult.getData(), brokerMap, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames));
             } catch (Exception e) {
@@ -268,7 +268,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
         // Topic信息
         List<String> recentTopicNameList = topicService.listRecentUpdateTopicNamesFromDB(
                 clusterPhyId,
-                configUtils.getClusterBalanceIgnoredTopicsTimeSecond()
+                ksConfigUtils.getClusterBalanceIgnoredTopicsTimeSecond()
         );
 
         ClusterBalanceItemState balanceState = new ClusterBalanceItemState();
@@ -382,7 +382,7 @@ public class ClusterBalanceServiceImpl implements ClusterBalanceService {
 
         //获取任务计划
         Map<Integer, Broker> brokerMap = allBrokers.stream().collect(Collectors.toMap(Broker::getBrokerId, Function.identity()));
-        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, configUtils.getClusterBalanceIgnoredTopicsTimeSecond());
+        List<String> topicNames = topicService.listRecentUpdateTopicNamesFromDB(clusterPhyId, ksConfigUtils.getClusterBalanceIgnoredTopicsTimeSecond());
         BalanceParameter balanceParameter = ClusterBalanceConverter.convert2BalanceParameter(clusterBalancePreviewDTO, brokerMap, brokerSpecMap, clusterPhy, esAddress, esPassword, topicNames);
         ExecutionRebalance executionRebalance = new ExecutionRebalance();
         try {

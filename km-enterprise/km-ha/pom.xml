@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.xiaojukeji.kafka</groupId>
     <artifactId>km-ha</artifactId>
-    <version>${km.revision}</version>
+    <version>${revision}</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>km</artifactId>
         <groupId>com.xiaojukeji.kafka</groupId>
-        <version>${km.revision}</version>
+        <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 

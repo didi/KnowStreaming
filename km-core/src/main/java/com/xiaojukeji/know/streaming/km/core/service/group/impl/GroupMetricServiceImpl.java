@@ -39,7 +39,7 @@ import static com.xiaojukeji.know.streaming.km.core.service.version.metrics.kafk
  */
 @Service("groupMetricService")
 public class GroupMetricServiceImpl extends BaseMetricService implements GroupMetricService {
-    private static final ILog LOGGER       = LogFactory.getLog( GroupMetricServiceImpl.class);
+    private static final ILog LOGGER       = LogFactory.getLog(GroupMetricServiceImpl.class);
 
     public static final String GROUP_METHOD_GET_JUST_FRO_TEST                       = "getMetricJustForTest";
     public static final String GROUP_METHOD_GET_HEALTH_SCORE                        = "getMetricHealthScore";
@@ -54,7 +54,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     @Override
     protected void initRegisterVCHandler(){
         registerVCHandler( GROUP_METHOD_GET_JUST_FRO_TEST,                              this::getMetricJustForTest);
-        registerVCHandler( GROUP_METHOD_GET_LAG_RELEVANT_FROM_ADMIN_CLIENT,             this::getLagRelevantFromAdminClient );
+        registerVCHandler( GROUP_METHOD_GET_LAG_RELEVANT_FROM_ADMIN_CLIENT,             this::getLagRelevantFromAdminClient);
         registerVCHandler( GROUP_METHOD_GET_HEALTH_SCORE,                               this::getMetricHealthScore);
         registerVCHandler( GROUP_METHOD_GET_STATE,                                      this::getGroupState);
     }
@@ -129,8 +129,14 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     @Override
     public Result<List<MetricMultiLinesVO>> listGroupMetricsFromES(Long clusterId, MetricGroupPartitionDTO dto) {
         Table<String/*metric*/, String/*topic&partition*/, List<MetricPointVO>> retTable = groupMetricESDAO.listGroupMetrics(
-                clusterId, dto.getGroup(), dto.getGroupTopics(), dto.getMetricsNames(),
-                dto.getAggType(), dto.getStartTime(), dto.getEndTime());
+                clusterId,
+                dto.getGroup(),
+                dto.getGroupTopics(),
+                dto.getMetricsNames(),
+                dto.getAggType(),
+                dto.getStartTime(),
+                dto.getEndTime()
+        );
 
         List<MetricMultiLinesVO> multiLinesVOS = metricMap2VO(clusterId, retTable.rowMap());
         return Result.buildSuc(multiLinesVOS);
@@ -140,7 +146,11 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     public Result<List<GroupMetrics>> listLatestMetricsAggByGroupTopicFromES(Long clusterPhyId, List<GroupTopic> groupTopicList,
                                                                              List<String> metricNames, AggTypeEnum aggType) {
         List<GroupMetricPO> groupMetricPOS = groupMetricESDAO.listLatestMetricsAggByGroupTopic(
-                clusterPhyId, groupTopicList, metricNames, aggType);
+                clusterPhyId,
+                groupTopicList,
+                metricNames,
+                aggType
+        );
 
         return Result.buildSuc( ConvertUtil.list2List(groupMetricPOS, GroupMetrics.class));
     }
@@ -149,7 +159,11 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     public Result<List<GroupMetrics>> listPartitionLatestMetricsFromES(Long clusterPhyId, String groupName, String topicName,
                                                                        List<String> metricNames) {
         List<GroupMetricPO> groupMetricPOS = groupMetricESDAO.listPartitionLatestMetrics(
-                clusterPhyId, groupName, topicName, metricNames);
+                clusterPhyId,
+                groupName,
+                topicName,
+                metricNames
+        );
 
         return Result.buildSuc( ConvertUtil.list2List(groupMetricPOS, GroupMetrics.class));
     }
@@ -158,9 +172,7 @@ public class GroupMetricServiceImpl extends BaseMetricService implements GroupMe
     public Result<Integer> countMetricValueOccurrencesFromES(Long clusterPhyId, String groupName,
                                                              SearchTerm term, Long startTime, Long endTime) {
         setQueryMetricFlag(term);
-        int count = groupMetricESDAO.countMetricValue(clusterPhyId, groupName,
-                term, startTime, endTime);
-
+        int count = groupMetricESDAO.countMetricValue(clusterPhyId, groupName, term, startTime, endTime);
         if(count < 0){
             return Result.buildFail();
         }

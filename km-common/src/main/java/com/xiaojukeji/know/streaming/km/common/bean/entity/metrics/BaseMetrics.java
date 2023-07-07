@@ -27,6 +27,10 @@ public abstract class BaseMetrics implements Serializable {
     protected Map<String, Float> metrics = new ConcurrentHashMap<>();
 
     public void putMetric(String key, Float value){
+        if (value == null || key == null) {
+            return;
+        }
+
         metrics.put(key, value);
     }
 

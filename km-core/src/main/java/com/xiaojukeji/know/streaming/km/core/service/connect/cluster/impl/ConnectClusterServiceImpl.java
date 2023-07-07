@@ -40,12 +40,6 @@ public class ConnectClusterServiceImpl implements ConnectClusterService {
 
     @Override
     public Long replaceAndReturnIdInDB(ConnectClusterMetadata metadata) {
-        //url去斜杠
-        String clusterUrl = metadata.getMemberLeaderUrl();
-        if (clusterUrl.charAt(clusterUrl.length() - 1) == '/') {
-            clusterUrl = clusterUrl.substring(0, clusterUrl.length() - 1);
-        }
-
         ConnectClusterPO oldPO = this.getPOFromDB(metadata.getKafkaClusterPhyId(), metadata.getGroupName());
         if (oldPO == null) {
             oldPO = new ConnectClusterPO();
@@ -54,7 +48,7 @@ public class ConnectClusterServiceImpl implements ConnectClusterService {
             oldPO.setName(metadata.getGroupName());
             oldPO.setState(metadata.getState().getCode());
             oldPO.setMemberLeaderUrl(metadata.getMemberLeaderUrl());
-            oldPO.setClusterUrl(clusterUrl);
+            oldPO.setClusterUrl("");
             oldPO.setVersion(KafkaConstant.DEFAULT_CONNECT_VERSION);
             connectClusterDAO.insert(oldPO);
 
@@ -69,11 +63,11 @@ public class ConnectClusterServiceImpl implements ConnectClusterService {
         if (ValidateUtils.isBlank(oldPO.getVersion())) {
             oldPO.setVersion(KafkaConstant.DEFAULT_CONNECT_VERSION);
         }
-        if (!ValidateUtils.isBlank(clusterUrl)) {
-            oldPO.setClusterUrl(clusterUrl);
+        if (ValidateUtils.isNull(oldPO.getClusterUrl())) {
+            oldPO.setClusterUrl("");
         }
-        connectClusterDAO.updateById(oldPO);
 
+        connectClusterDAO.updateById(oldPO);
         return oldPO.getId();
     }
 

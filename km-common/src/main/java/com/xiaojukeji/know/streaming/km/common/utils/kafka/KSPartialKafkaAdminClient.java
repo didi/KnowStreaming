@@ -78,6 +78,8 @@ import org.apache.kafka.common.utils.LogContext;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.common.utils.Utils;
 import org.apache.kafka.connect.runtime.distributed.ConnectProtocol;
+import org.apache.kafka.connect.runtime.distributed.ExtendedWorkerState;
+import org.apache.kafka.connect.runtime.distributed.IncrementalCooperativeConnectProtocol;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
@@ -1338,21 +1340,11 @@ public class KSPartialKafkaAdminClient {
                         if (groupMember.memberAssignment().length > 0) {
                             final Assignment assignment = ConsumerProtocol.deserializeAssignment(ByteBuffer.wrap(groupMember.memberAssignment()));
                             memberBaseAssignment = new KSMemberConsumerAssignment(new HashSet<>(assignment.partitions()));
+                        } else {
+                            memberBaseAssignment = new KSMemberConsumerAssignment(new HashSet<>());
                         }
                     } else {
-                        ConnectProtocol.Assignment assignment = null;
-                        if (groupMember.memberAssignment().length > 0) {
-                            assignment = ConnectProtocol.
-                                    deserializeAssignment(ByteBuffer.wrap(groupMember.memberAssignment()));
-                        }
-
-                        ConnectProtocol.WorkerState workerState = null;
-                        if (groupMember.memberMetadata().length > 0) {
-                            workerState = ConnectProtocol.
-                                    deserializeMetadata(ByteBuffer.wrap(groupMember.memberMetadata()));
-                        }
-
-                        memberBaseAssignment = new KSMemberConnectAssignment(assignment, workerState);
+                        memberBaseAssignment = deserializeConnectGroupDataCompatibility(groupMember);
                     }
 
                     memberDescriptions.add(new KSMemberDescription(
@@ -1379,6 +1371,36 @@ public class KSPartialKafkaAdminClient {
                 context.future().completeExceptionally(throwable);
             }
         };
+    }
+
+    private KSMemberBaseAssignment deserializeConnectGroupDataCompatibility(DescribedGroupMember groupMember) {
+        try {
+            // 高版本的反序列化方式
+            ExtendedWorkerState workerState = null;
+            if (groupMember.memberMetadata().length > 0) {
+                workerState = IncrementalCooperativeConnectProtocol.
+                        deserializeMetadata(ByteBuffer.wrap(groupMember.memberMetadata()));
+
+                return new KSMemberConnectAssignment(workerState.assignment(), workerState);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+
+        // 低版本的反序列化方式
+        ConnectProtocol.Assignment assignment = null;
+        if (groupMember.memberAssignment().length > 0) {
+            assignment = ConnectProtocol.
+                    deserializeAssignment(ByteBuffer.wrap(groupMember.memberAssignment()));
+        }
+
+        ConnectProtocol.WorkerState workerState = null;
+        if (groupMember.memberMetadata().length > 0) {
+            workerState = ConnectProtocol.
+                    deserializeMetadata(ByteBuffer.wrap(groupMember.memberMetadata()));
+        }
+
+        return new KSMemberConnectAssignment(assignment, workerState);
     }
 
 
