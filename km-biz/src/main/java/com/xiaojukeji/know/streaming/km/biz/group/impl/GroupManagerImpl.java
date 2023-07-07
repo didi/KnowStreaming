@@ -151,7 +151,7 @@ public class GroupManagerImpl implements GroupManager {
         List<Group> groupList = groupService.listClusterGroups(clusterPhyId);
 
         // 类型转化
-        List<GroupOverviewVO> voList = groupList.stream().map(elem -> GroupConverter.convert2GroupOverviewVO(elem)).collect(Collectors.toList());
+        List<GroupOverviewVO> voList = groupList.stream().map(GroupConverter::convert2GroupOverviewVO).collect(Collectors.toList());
 
         // 搜索groupName
         voList = PaginationUtil.pageByFuzzyFilter(voList, dto.getSearchGroupName(), Arrays.asList("name"));
@@ -301,7 +301,7 @@ public class GroupManagerImpl implements GroupManager {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "topicName不允许为空");
         }
         if (DeleteGroupTypeEnum.GROUP_TOPIC.getCode().equals(dto.getDeleteType())) {
-            return opGroupService.deleteGroupOffset(
+            return opGroupService.deleteGroupTopicOffset(
                     new DeleteGroupTopicParam(dto.getClusterPhyId(), dto.getGroupName(), DeleteGroupTypeEnum.GROUP, dto.getTopicName()),
                     operator
             );
@@ -313,7 +313,7 @@ public class GroupManagerImpl implements GroupManager {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "partitionId不允许为空或小于0");
         }
         if (DeleteGroupTypeEnum.GROUP_TOPIC_PARTITION.getCode().equals(dto.getDeleteType())) {
-            return opGroupService.deleteGroupOffset(
+            return opGroupService.deleteGroupTopicPartitionOffset(
                     new DeleteGroupTopicPartitionParam(dto.getClusterPhyId(), dto.getGroupName(), DeleteGroupTypeEnum.GROUP, dto.getTopicName(), dto.getPartitionId()),
                     operator
             );
