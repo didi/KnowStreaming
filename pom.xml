@@ -50,7 +50,7 @@
     </properties>
 
     <modules>
-        <module>km-console</module>
+<!--         <module>km-console</module> -->
         <module>km-common</module>
         <module>km-persistence</module>
         <module>km-core</module>
