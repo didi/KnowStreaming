@@ -8,6 +8,7 @@ import { IconFont } from '@knowdesign/icons';
 import API from '@src/api/index';
 import { hashDataParse } from '@src/constants/common';
 const { Option } = Select;
+import PubSub from 'pubsub-js'
 
 export interface MetricLine {
   createTime?: number;
@@ -213,6 +214,11 @@ export const ExpandedRow: any = ({ record, groupName }: any) => {
   // useEffect(() => {
   //   getTopicGroupMetric();
   // }, [sortObj]);
+
+  // 订阅重置offset成功的消息
+  PubSub.subscribe('ConsumerGroup-ResetOffset', function(data){
+    getTopicGroupMetric({});
+  })
 
   useEffect(() => {
     const hashData = hashDataParse(location.hash);

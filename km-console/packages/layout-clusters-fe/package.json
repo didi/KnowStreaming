@@ -82,6 +82,7 @@
     "@types/lodash": "^4.14.171",
     "@types/node": "^12.12.25",
     "@types/pubsub-js": "^1.5.18",
+    "pubsub-js": "^1.5.18",
     "@typescript-eslint/eslint-plugin": "4.13.0",
     "@typescript-eslint/parser": "4.13.0",
     "babel-eslint": "10.1.0",
