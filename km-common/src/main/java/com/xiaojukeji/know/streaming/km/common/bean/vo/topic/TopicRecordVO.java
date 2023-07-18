@@ -34,4 +34,7 @@ public class TopicRecordVO {
 
     @ApiModelProperty(value = "记录值", example = "测试Value测试Value测试Value测试Value")
     private String value;
+
+    @ApiModelProperty(value = "唯一键", example = "用于查询消息的唯一键")
+    private String index;
 }

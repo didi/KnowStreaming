@@ -191,7 +191,7 @@ const TopicMessages = (props: any) => {
         showQueryForm={false}
         tableProps={{
           showHeader: false,
-          rowKey: 'offset',
+          rowKey: 'index',
           loading: loading,
           columns: getTopicMessagesColmns(),
           dataSource: data,

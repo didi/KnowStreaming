@@ -49,6 +49,7 @@ public class TopicVOConverter {
         vo.setKey(consumerRecord.key());
         vo.setValue(consumerRecord.value());
         vo.setHeaderList(new ArrayList<>());
+        vo.setIndex(consumerRecord.partition()+"-"+consumerRecord.offset());
         for (Header header : consumerRecord.headers().toArray()) {
             vo.getHeaderList().add(new RecordHeaderKS(header.key(), new String(header.value(), StandardCharsets.UTF_8)));
         }

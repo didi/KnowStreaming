@@ -76,11 +76,13 @@ export const getTopicMessagesColmns = () => {
       title: 'Partition',
       dataIndex: 'partitionId',
       key: 'partitionId',
+      sorter: true,
     },
     {
       title: 'Offset',
       dataIndex: 'offset',
       key: 'offset',
+      sorter: true,
       render: (t: number) => (t ? t.toLocaleString() : '-'),
     },
     {
