@@ -1,6 +1,7 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.connect;
 
 import com.xiaojukeji.know.streaming.km.common.bean.entity.EntityIdInterface;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -53,6 +54,22 @@ public class ConnectCluster implements Serializable, Comparable<ConnectCluster>,
      * 集群地址
      */
     private String clusterUrl;
+
+    public String getSuitableRequestUrl() {
+        // 优先使用用户填写的url
+        String suitableRequestUrl = this.clusterUrl;
+        if (ValidateUtils.isBlank(suitableRequestUrl)) {
+            // 用户如果没有填写，则使用元信息中的url
+            suitableRequestUrl = this.memberLeaderUrl;
+        }
+
+        //url去斜杠
+        if (suitableRequestUrl.length() > 0 && suitableRequestUrl.charAt(suitableRequestUrl.length() - 1) == '/') {
+            return suitableRequestUrl.substring(0, suitableRequestUrl.length() - 1);
+        }
+
+        return suitableRequestUrl;
+    }
 
     @Override
     public int compareTo(ConnectCluster connectCluster) {

@@ -7,8 +7,8 @@ import com.xiaojukeji.know.streaming.km.common.bean.dto.pagination.PaginationBas
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectWorker;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.po.connect.ConnectWorkerPO;
-import com.xiaojukeji.know.streaming.km.common.bean.po.group.GroupMemberPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.connector.ClusterWorkerOverviewVO;
+import com.xiaojukeji.know.streaming.km.common.enums.jmx.JmxEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
@@ -50,6 +50,11 @@ public class WorkerServiceImpl implements WorkerService {
                     connectWorkerDAO.insert(newPO);
                 } else {
                     newPO.setId(oldPO.getId());
+                    if (JmxEnum.UNKNOWN.getPort().equals(newPO.getJmxPort())) {
+                        // 如果所获取的jmx端口未知，则不更新jmx端口
+                        newPO.setJmxPort(oldPO.getJmxPort());
+                    }
+
                     connectWorkerDAO.updateById(newPO);
                 }
             } catch (DuplicateKeyException dke) {

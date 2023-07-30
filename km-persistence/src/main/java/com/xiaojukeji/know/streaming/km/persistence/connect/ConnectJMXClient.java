@@ -78,16 +78,15 @@ public class ConnectJMXClient extends AbstractConnectClusterChangeHandler {
                 return jmxConnectorWrap;
             }
 
-            log.debug("method=createJmxConnectorWrap||connectClusterId={}||workerId={}||msg=create JmxConnectorWrap starting", connectCluster.getId(), workerId);
+            log.info("method=createJmxConnectorWrap||connectClusterId={}||workerId={}||msg=create JmxConnectorWrap starting", connectCluster.getId(), workerId);
 
             JmxConfig jmxConfig = ConvertUtil.str2ObjByJson(connectCluster.getJmxProperties(), JmxConfig.class);
             if (jmxConfig == null) {
                 jmxConfig = new JmxConfig();
             }
 
-
             jmxConnectorWrap = new JmxConnectorWrap(
-                    "connectClusterId: " + connectCluster.getId() + " workerId: " + workerId,
+                    String.format("clusterPhyId=%s,workerId=%s", connectCluster.getId(), workerId),
                     null,
                     connectWorker.getHost(),
                     jmxConfig.getFinallyJmxPort(workerId, connectWorker.getJmxPort()),
@@ -97,12 +96,16 @@ public class ConnectJMXClient extends AbstractConnectClusterChangeHandler {
             Map<String, JmxConnectorWrap> workerMap = JMX_MAP.getOrDefault(connectCluster.getId(), new ConcurrentHashMap<>());
             workerMap.put(workerId, jmxConnectorWrap);
             JMX_MAP.put(connectCluster.getId(), workerMap);
+
+            log.info("method=createJmxConnectorWrap||clusterPhyId={}||workerId={}||msg=create JmxConnectorWrap success", connectCluster.getId(), workerId);
+
             return jmxConnectorWrap;
         } catch (Exception e) {
-            log.debug("method=createJmxConnectorWrap||connectClusterId={}||workerId={}||msg=create JmxConnectorWrap failed||errMsg=exception||", connectCluster.getId(), workerId, e);
+            log.error("method=createJmxConnectorWrap||connectClusterId={}||workerId={}||msg=create JmxConnectorWrap failed||errMsg=exception||", connectCluster.getId(), workerId, e);
         } finally {
             modifyClientMapLock.unlock();
         }
+
         return null;
     }
 

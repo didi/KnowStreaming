@@ -61,6 +61,13 @@ public class TopicController {
         return opTopicManager.expandTopic(dto, HttpRequestUtil.getOperator());
     }
 
+    @ApiOperation(value = "Topic数据清空", notes = "")
+    @PostMapping(value = "topics/truncate-topic")
+    @ResponseBody
+    public Result<Void> truncateTopic(@Validated @RequestBody ClusterTopicDTO dto) {
+        return opTopicManager.truncateTopic(dto.getClusterId(), dto.getTopicName(), HttpRequestUtil.getOperator());
+    }
+
     @ApiOperation(value = "Topic元信息", notes = "带是否存在信息")
     @GetMapping(value = "clusters/{clusterPhyId}/topics/{topicName}/metadata-combine-exist")
     @ResponseBody

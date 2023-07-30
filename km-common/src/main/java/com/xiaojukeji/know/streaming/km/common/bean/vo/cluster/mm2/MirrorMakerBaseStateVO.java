@@ -13,7 +13,6 @@ import lombok.Data;
 @Data
 @ApiModel(description = "集群MM2状态信息")
 public class MirrorMakerBaseStateVO extends BaseVO {
-
     @ApiModelProperty(value = "worker数", example = "1")
     private Integer workerCount;
 

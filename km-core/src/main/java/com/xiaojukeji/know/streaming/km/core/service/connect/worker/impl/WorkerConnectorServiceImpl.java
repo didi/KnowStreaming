@@ -105,7 +105,7 @@ public class WorkerConnectorServiceImpl implements WorkerConnectorService {
             return Result.buildFailure(ResultStatus.NOT_EXIST);
         }
 
-        String url = String.format(RESTART_TASK_URI, connectCluster.getClusterUrl(), dto.getConnectorName(), dto.getTaskId());
+        String url = String.format(RESTART_TASK_URI, connectCluster.getSuitableRequestUrl(), dto.getConnectorName(), dto.getTaskId());
         try {
             restTool.postObjectWithJsonContent(url, null, String.class);
         } catch (Exception e) {

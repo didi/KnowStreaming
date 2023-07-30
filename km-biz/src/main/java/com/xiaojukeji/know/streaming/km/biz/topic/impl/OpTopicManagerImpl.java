@@ -10,10 +10,12 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicCreateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicPartitionExpandParam;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.param.topic.TopicTruncateParam;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.partition.Partition;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
+import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.utils.BackoffUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
@@ -156,6 +158,16 @@ public class OpTopicManagerImpl implements OpTopicManager {
         return rv;
     }
 
+    @Override
+    public Result<Void> truncateTopic(Long clusterPhyId, String topicName, String operator) {
+        // 清空Topic
+        Result<Void> rv = opTopicService.truncateTopic(new TopicTruncateParam(clusterPhyId, topicName, KafkaConstant.TOPICK_TRUNCATE_DEFAULT_OFFSET), operator);
+        if (rv.failed()) {
+            return rv;
+        }
+
+        return Result.buildSuc();
+    }
 
     /**************************************************** private method ****************************************************/
 
