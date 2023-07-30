@@ -816,6 +816,8 @@ const StepFormFifth = (props: SubFormProps) => {
                             <InputNumber />
                           ) : type.toUpperCase() === 'BOOLEAN' ? (
                             <Switch size="small" />
+                          ) : type.toUpperCase() === 'PASSWORD' ? (
+                            <Input.Password />
                           ) : (
                             <Input />
                           )}

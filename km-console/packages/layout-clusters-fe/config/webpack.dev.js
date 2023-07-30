@@ -34,11 +34,11 @@ module.exports = {
     proxy: {
       '/ks-km/api/v3': {
         changeOrigin: true,
-        target: 'https://api-kylin-xg02.intra.xiaojukeji.com/ks-km/',
+        target: 'http://116.85.33.188/',
       },
       '/logi-security/api/v1': {
         changeOrigin: true,
-        target: 'https://api-kylin-xg02.intra.xiaojukeji.com/ks-km/',
+        target: 'http://116.85.33.188/',
       },
     },
   },

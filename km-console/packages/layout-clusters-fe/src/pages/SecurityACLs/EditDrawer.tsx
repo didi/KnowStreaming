@@ -135,6 +135,7 @@ const AddDrawer = forwardRef((_, ref) => {
 
       if (configType === 'custom') {
         // 1. 自定义权限
+        // TODO: 需要和后端联调
         const { resourceType, resourcePatternType, aclPermissionType, aclOperation, aclClientHost } = formData;
         submitData.push({
           clusterId,
@@ -281,6 +282,42 @@ const AddDrawer = forwardRef((_, ref) => {
         </Form.Item>
         <Form.Item dependencies={['configType']} style={{ marginBottom: 0 }}>
           {({ getFieldValue }) => {
+            const SelectFormItems = (props: { type: string }) => {
+              const { type } = props;
+              return (
+                <Form.Item
+                  name={`${type}Name`}
+                  dependencies={[`${type}PatternType`]}
+                  validateTrigger="onBlur"
+                  rules={[
+                    ({ getFieldValue }) => ({
+                      validator: (rule: any, value: string) => {
+                        if (!value) {
+                          return Promise.reject(`${type}Name 不能为空`);
+                        }
+                        if (type === 'topic' && getFieldValue(`${type}PatternType`) === ACL_PATTERN_TYPE['Literal']) {
+                          return Utils.request(api.getTopicMetadata(clusterId as any, value)).then((res: any) => {
+                            return res?.exist ? Promise.resolve() : Promise.reject('该 Topic 不存在');
+                          });
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                >
+                  <AutoComplete
+                    filterOption={(value, option) => {
+                      if (option?.value.includes(value)) {
+                        return true;
+                      }
+                      return false;
+                    }}
+                    options={type === 'topic' ? topicMetaData : groupMetaData}
+                    placeholder={`请输入 ${type}Name`}
+                  />
+                </Form.Item>
+              );
+            };
             const PatternTypeFormItems = (props: { type: string }) => {
               const { type } = props;
               const UpperCaseType = type[0].toUpperCase() + type.slice(1);
@@ -387,6 +424,27 @@ const AddDrawer = forwardRef((_, ref) => {
                         value: ACL_RESOURCE_TYPE[type],
                       }))}
                     />
+                  </Form.Item>
+                  <Form.Item dependencies={['resourceType']}>
+                    {({ getFieldValue }) => {
+                      const type = getFieldValue('resourceType');
+                      if (type === ACL_RESOURCE_TYPE['Cluster'] || type === ACL_RESOURCE_TYPE['TransactionalId']) {
+                        //TODO需要和后端获取集群和事务接口联调
+                        return (
+                          <Form.Item
+                            name={`${type === 4 ? 'cluster' : 'transactionalId'}`}
+                            rules={[{ required: true, message: `${type === 4 ? 'Cluster名称' : 'TransactionalId'} 不能为空` }]}
+                          >
+                            <Input placeholder={`请输入${type === 4 ? 'Cluster名称' : 'TransactionalId'}`}></Input>
+                          </Form.Item>
+                        );
+                      } else if (type === ACL_RESOURCE_TYPE['Topic']) {
+                        return <PatternTypeFormItems type="topic" />;
+                      } else if (type === ACL_RESOURCE_TYPE['Group']) {
+                        return <PatternTypeFormItems type="group" />;
+                      }
+                      return null;
+                    }}
                   </Form.Item>
                   <Form.Item dependencies={['resourceType']} style={{ marginBottom: 0 }}>
                     {({ getFieldValue }) => {
