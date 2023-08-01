@@ -34,11 +34,11 @@ module.exports = {
     proxy: {
       '/ks-km/api/v3': {
         changeOrigin: true,
-        target: 'http://116.85.33.188/',
+        target: 'http://127.0.0.1/',
       },
       '/logi-security/api/v1': {
         changeOrigin: true,
-        target: 'http://116.85.33.188/',
+        target: 'http://127.0.0.1/',
       },
     },
   },
