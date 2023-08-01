@@ -79,7 +79,7 @@ public class LdapLoginServiceImpl implements LoginExtend {
             userService.addUser(userDTO, ldapAttrsInfo.getSAMAccountName());
 
             // user赋值
-            user = ConvertUtil.obj2Obj(userDTO, User.class);
+            user = userService.getUserByUserName(ldapAttrsInfo.getSAMAccountName());
         }
 
         // 记录登录状态
