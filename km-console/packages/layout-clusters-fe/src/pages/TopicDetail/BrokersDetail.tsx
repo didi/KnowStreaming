@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import TagsWithHide from '@src/components/TagsWithHide';
 import SwitchTab from '@src/components/SwitchTab';
 import RenderEmpty from '@src/components/RenderEmpty';
+import { useForceRefresh } from '@src/components/utils';
 
 interface PropsType {
   hashData: any;
@@ -401,11 +402,18 @@ export default (props: PropsType) => {
   const { hashData } = props;
   const [showMode, setShowMode] = useState<string>('card');
 
+  const [refreshKey, forceRefresh] = useForceRefresh();
   return (
     <>
-      <div className="brokers-tab-container">
+      <div className="brokers-tab-container" key={`${refreshKey}`}>
         <div className="overview">
           <div className="left">
+            <span
+              style={{ display: 'inline-block', padding: '0 10px', marginRight: '10px', borderRight: '1px solid #ccc', fontSize: '15px' }}
+              onClick={forceRefresh as () => void}
+            >
+              <i className="iconfont icon-shuaxin1" style={{ cursor: 'pointer' }} />
+            </span>
             <PartitionSummary clusterId={clusterId} topicName={hashData.topicName} />
           </div>
           <div className="cases-box">
