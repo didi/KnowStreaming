@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * @author wyb
  * @date 2022/11/9
  */
-public abstract class BaseConnectorMetricService extends BaseConnectorVersionControlService{
+public abstract class BaseConnectMetricService extends BaseConnectVersionControlService {
     private List<String> metricNames  = new ArrayList<>();
 
     @PostConstruct

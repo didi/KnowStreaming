@@ -24,9 +24,9 @@ import com.xiaojukeji.know.streaming.km.core.cache.CollectedMetricsLocalCache;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseConnectorMetricService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseConnectMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.connect.ConnectJMXClient;
-import com.xiaojukeji.know.streaming.km.persistence.es.dao.connect.ConnectClusterMetricESDAO;
+import com.xiaojukeji.know.streaming.km.persistence.es.dao.connect.cluster.ConnectClusterMetricESDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -43,7 +43,7 @@ import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultS
  * @author didi
  */
 @Service
-public class ConnectClusterMetricServiceImpl extends BaseConnectorMetricService implements ConnectClusterMetricService {
+public class ConnectClusterMetricServiceImpl extends BaseConnectMetricService implements ConnectClusterMetricService {
     protected static final ILog LOGGER = LogFactory.getLog(ConnectClusterMetricServiceImpl.class);
 
     public static final String CONNECT_CLUSTER_METHOD_GET_WORKER_METRIC_AVG = "getWorkerMetricAvg";
@@ -86,8 +86,7 @@ public class ConnectClusterMetricServiceImpl extends BaseConnectorMetricService 
         String connectClusterMetricKey = CollectedMetricsLocalCache.genConnectClusterMetricCacheKey(connectClusterPhyId, metric);
         Float keyValue = CollectedMetricsLocalCache.getConnectClusterMetrics(connectClusterMetricKey);
         if (keyValue != null) {
-            ConnectClusterMetrics connectClusterMetrics = ConnectClusterMetrics.initWithMetric(connectClusterPhyId,metric,keyValue);
-            return Result.buildSuc(connectClusterMetrics);
+            return Result.buildSuc(new ConnectClusterMetrics(connectClusterPhyId, metric, keyValue));
         }
 
         Result<ConnectClusterMetrics> ret = this.collectConnectClusterMetricsFromKafka(connectClusterPhyId, metric);
@@ -209,8 +208,7 @@ public class ConnectClusterMetricServiceImpl extends BaseConnectorMetricService 
         try {
             //2、获取jmx指标
             String value = jmxConnectorWrap.getAttribute(new ObjectName(jmxInfo.getJmxObjectName()), jmxInfo.getJmxAttribute()).toString();
-            ConnectWorkerMetrics connectWorkerMetrics = ConnectWorkerMetrics.initWithMetric(connectClusterId, workerId, metric, Float.valueOf(value));
-            return Result.buildSuc(connectWorkerMetrics);
+            return Result.buildSuc(new ConnectWorkerMetrics(connectClusterId, workerId, metric, Float.valueOf(value)));
         } catch (Exception e) {
             LOGGER.error("method=getConnectWorkerMetricsByJMX||connectClusterId={}||workerId={}||metrics={}||jmx={}||msg={}",
                     connectClusterId, workerId, metric, jmxInfo.getJmxObjectName(), e.getClass().getName());
@@ -231,8 +229,8 @@ public class ConnectClusterMetricServiceImpl extends BaseConnectorMetricService 
                 .collect(Collectors.toList());
     }
 
-    protected List<MetricMultiLinesVO> metricMap2VO(Long connectClusterId,
-                                                        Map<String/*metric*/, Map<Long, List<MetricPointVO>>> map){
+    private List<MetricMultiLinesVO> metricMap2VO(Long connectClusterId,
+                                                    Map<String/*metric*/, Map<Long, List<MetricPointVO>>> map){
         List<MetricMultiLinesVO> multiLinesVOS = new ArrayList<>();
         if (map == null || map.isEmpty()) {
             // 如果为空，则直接返回
