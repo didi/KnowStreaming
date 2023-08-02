@@ -27,7 +27,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.mm2.MirrorMakerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseConnectorMetricService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseConnectMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.connect.ConnectJMXClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.connect.mm2.MirrorMakerMetricESDAO;
@@ -49,7 +49,7 @@ import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemT
  * @date 2022/12/15
  */
 @Service
-public class MirrorMakerMetricServiceImpl extends BaseConnectorMetricService implements MirrorMakerMetricService {
+public class MirrorMakerMetricServiceImpl extends BaseConnectMetricService implements MirrorMakerMetricService {
     protected static final ILog LOGGER = LogFactory.getLog(MirrorMakerMetricServiceImpl.class);
 
     public static final String MIRROR_MAKER_METHOD_DO_NOTHING                          = "doNothing";
@@ -190,7 +190,7 @@ public class MirrorMakerMetricServiceImpl extends BaseConnectorMetricService imp
 
                 multiLinesVO.setMetricLines(metricLines);
                 multiLinesVOS.add(multiLinesVO);
-            }catch (Exception e){
+            } catch (Exception e){
                 LOGGER.error("method=metricMap2VO||connectClusterId={}||msg=exception!", connectClusterId, e);
             }
         }

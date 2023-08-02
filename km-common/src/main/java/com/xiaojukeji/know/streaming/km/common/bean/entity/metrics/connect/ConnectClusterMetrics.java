@@ -1,7 +1,6 @@
 package com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.connect;
 
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BaseMetrics;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -12,20 +11,18 @@ import lombok.ToString;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class ConnectClusterMetrics extends BaseMetrics {
-    private Long     connectClusterId;
+    protected Long     connectClusterId;
 
-    public ConnectClusterMetrics(Long clusterPhyId, Long connectClusterId){
+    public ConnectClusterMetrics(Long clusterPhyId, Long connectClusterId ){
         super(clusterPhyId);
         this.connectClusterId   = connectClusterId;
     }
 
-    public static ConnectClusterMetrics initWithMetric(Long connectClusterId, String metric, Float value) {
-        ConnectClusterMetrics brokerMetrics = new ConnectClusterMetrics(connectClusterId, connectClusterId);
-        brokerMetrics.putMetric(metric, value);
-        return brokerMetrics;
+    public ConnectClusterMetrics(Long connectClusterId, String metricName, Float metricValue) {
+        this(null, connectClusterId);
+        this.putMetric(metricName, metricValue);
     }
 
     @Override

@@ -3,7 +3,9 @@ package com.xiaojukeji.know.streaming.km.monitor.component;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.*;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.connect.ConnectorMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.event.metric.*;
+import com.xiaojukeji.know.streaming.km.common.bean.event.metric.connect.ConnectorMetricEvent;
 import com.xiaojukeji.know.streaming.km.common.utils.FutureUtil;
 import com.xiaojukeji.know.streaming.km.monitor.common.MetricSinkPoint;
 import org.springframework.context.ApplicationListener;
@@ -59,6 +61,10 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
             } else if(event instanceof ZookeeperMetricEvent) {
                 ZookeeperMetricEvent     zookeeperMetricEvent = (ZookeeperMetricEvent)event;
                 sinkMetrics(zookeeperMetric2SinkPoint(zookeeperMetricEvent.getZookeeperMetrics()));
+
+            } else if (event instanceof ConnectorMetricEvent) {
+                ConnectorMetricEvent     connectorMetricEvent = (ConnectorMetricEvent)event;
+                sinkMetrics(connectConnectorMetric2SinkPoint(connectorMetricEvent.getConnectorMetricsList()));
             }
         } );
     }
@@ -165,6 +171,21 @@ public abstract class AbstractMonitorSinkService implements ApplicationListener<
             tagsMap.put(CLUSTER_ID.getName(),     z.getClusterPhyId());
 
             pointList.addAll(genSinkPoint("Zookeeper", z.getMetrics(), z.getTimestamp(), tagsMap));
+        }
+
+        return pointList;
+    }
+
+    private List<MetricSinkPoint> connectConnectorMetric2SinkPoint(List<ConnectorMetrics> connectorMetricsList){
+        List<MetricSinkPoint> pointList = new ArrayList<>();
+
+        for(ConnectorMetrics metrics : connectorMetricsList){
+            Map<String, Object> tagsMap = new HashMap<>();
+            tagsMap.put(CLUSTER_ID.getName(),               metrics.getClusterPhyId());
+            tagsMap.put(CONNECT_CLUSTER_ID.getName(),       metrics.getConnectClusterId());
+            tagsMap.put(CONNECT_CONNECTOR.getName(),        metrics.getConnectorName());
+
+            pointList.addAll(genSinkPoint("ConnectConnector", metrics.getMetrics(), metrics.getTimestamp(), tagsMap));
         }
 
         return pointList;
