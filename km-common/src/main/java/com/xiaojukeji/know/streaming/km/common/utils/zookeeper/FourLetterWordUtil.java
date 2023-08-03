@@ -93,6 +93,16 @@ public class FourLetterWordUtil {
                     sslSock.connect(hostaddress, timeout);
                     sslSock.startHandshake();
                     socket = sslSock;
+                     if (sslSock != null) {
+                        try {
+                            sslSock.close();
+                        } catch (IOException e) {
+                            LOGGER.error(
+                                    "method=send4LetterWord||host={}||port={}||cmd={}||secure={}||timeout={}||errMsg=exception!",
+                                    host, port, cmd, secure, timeout, e
+                            );
+                        }
+                    }
                 }
             } else {
                 socket = new Socket();
