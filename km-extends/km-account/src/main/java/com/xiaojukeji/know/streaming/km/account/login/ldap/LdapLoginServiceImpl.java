@@ -80,8 +80,8 @@ public class LdapLoginServiceImpl implements LoginExtend {
 
             // user赋值
             user = userService.getUserByUserName(ldapAttrsInfo.getSAMAccountName());
-        } else {
-            // 不自动注册用户时，赋值默认id给临时用户
+        } else if (ValidateUtils.isNull(user)) {
+            // user为空，且不自动注册用户时，赋值默认id给临时用户
             user = new User();
             user.setId(Constant.INVALID_CODE);
         }
