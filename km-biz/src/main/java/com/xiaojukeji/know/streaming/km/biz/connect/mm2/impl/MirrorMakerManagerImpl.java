@@ -37,6 +37,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.cluster.ConnectClusterService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorService;
+import com.xiaojukeji.know.streaming.km.core.service.connect.connector.OpConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.mm2.MirrorMakerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.plugin.PluginService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerConnectorService;
@@ -66,6 +67,9 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
     @Autowired
     private ConnectorService connectorService;
+
+    @Autowired
+    private OpConnectorService opConnectorService;
 
     @Autowired
     private WorkerConnectorService workerConnectorService;
@@ -156,20 +160,20 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
         Result<Void> rv = Result.buildSuc();
         if (!ValidateUtils.isBlank(connectorPO.getCheckpointConnectorName())) {
-            rv = connectorService.deleteConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
+            rv = opConnectorService.deleteConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
         if (!ValidateUtils.isBlank(connectorPO.getHeartbeatConnectorName())) {
-            rv = connectorService.deleteConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
+            rv = opConnectorService.deleteConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
-        return connectorService.deleteConnector(connectClusterId, sourceConnectorName, operator);
+        return opConnectorService.deleteConnector(connectClusterId, sourceConnectorName, operator);
     }
 
     @Override
@@ -181,20 +185,20 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
         Result<Void> rv = Result.buildSuc();
         if (!ValidateUtils.isBlank(connectorPO.getCheckpointConnectorName()) && dto.getCheckpointConnectorConfigs() != null) {
-            rv = connectorService.updateConnectorConfig(dto.getConnectClusterId(), connectorPO.getCheckpointConnectorName(), dto.getCheckpointConnectorConfigs(), operator);
+            rv = opConnectorService.updateConnectorConfig(dto.getConnectClusterId(), connectorPO.getCheckpointConnectorName(), dto.getCheckpointConnectorConfigs(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
         if (!ValidateUtils.isBlank(connectorPO.getHeartbeatConnectorName()) && dto.getHeartbeatConnectorConfigs() != null) {
-            rv = connectorService.updateConnectorConfig(dto.getConnectClusterId(), connectorPO.getHeartbeatConnectorName(), dto.getHeartbeatConnectorConfigs(), operator);
+            rv = opConnectorService.updateConnectorConfig(dto.getConnectClusterId(), connectorPO.getHeartbeatConnectorName(), dto.getHeartbeatConnectorConfigs(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
-        return connectorService.updateConnectorConfig(dto.getConnectClusterId(), dto.getConnectorName(), dto.getSuitableConfig(), operator);
+        return opConnectorService.updateConnectorConfig(dto.getConnectClusterId(), dto.getConnectorName(), dto.getSuitableConfig(), operator);
     }
 
     @Override
@@ -206,20 +210,20 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
         Result<Void> rv = Result.buildSuc();
         if (!ValidateUtils.isBlank(connectorPO.getCheckpointConnectorName())) {
-            rv = connectorService.restartConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
+            rv = opConnectorService.restartConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
         if (!ValidateUtils.isBlank(connectorPO.getHeartbeatConnectorName())) {
-            rv = connectorService.restartConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
+            rv = opConnectorService.restartConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
-        return connectorService.restartConnector(connectClusterId, sourceConnectorName, operator);
+        return opConnectorService.restartConnector(connectClusterId, sourceConnectorName, operator);
     }
 
     @Override
@@ -231,20 +235,20 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
         Result<Void> rv = Result.buildSuc();
         if (!ValidateUtils.isBlank(connectorPO.getCheckpointConnectorName())) {
-            rv = connectorService.stopConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
+            rv = opConnectorService.stopConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
         if (!ValidateUtils.isBlank(connectorPO.getHeartbeatConnectorName())) {
-            rv = connectorService.stopConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
+            rv = opConnectorService.stopConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
-        return connectorService.stopConnector(connectClusterId, sourceConnectorName, operator);
+        return opConnectorService.stopConnector(connectClusterId, sourceConnectorName, operator);
     }
 
     @Override
@@ -256,20 +260,20 @@ public class MirrorMakerManagerImpl implements MirrorMakerManager {
 
         Result<Void> rv = Result.buildSuc();
         if (!ValidateUtils.isBlank(connectorPO.getCheckpointConnectorName())) {
-            rv = connectorService.resumeConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
+            rv = opConnectorService.resumeConnector(connectClusterId, connectorPO.getCheckpointConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
         if (!ValidateUtils.isBlank(connectorPO.getHeartbeatConnectorName())) {
-            rv = connectorService.resumeConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
+            rv = opConnectorService.resumeConnector(connectClusterId, connectorPO.getHeartbeatConnectorName(), operator);
         }
         if (rv.failed()) {
             return rv;
         }
 
-        return connectorService.resumeConnector(connectClusterId, sourceConnectorName, operator);
+        return opConnectorService.resumeConnector(connectClusterId, sourceConnectorName, operator);
     }
 
     @Override

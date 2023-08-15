@@ -15,7 +15,7 @@ import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectActionEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
-import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorService;
+import com.xiaojukeji.know.streaming.km.core.service.connect.connector.OpConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.plugin.PluginService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,9 +31,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ApiPrefix.API_V3_CONNECT_PREFIX)
 public class KafkaConnectorController {
-
     @Autowired
-    private ConnectorService connectorService;
+    private OpConnectorService opConnectorService;
 
     @Autowired
     private ConnectorManager connectorManager;
@@ -56,7 +55,7 @@ public class KafkaConnectorController {
     @DeleteMapping(value ="connectors")
     @ResponseBody
     public Result<Void> deleteConnectors(@Validated @RequestBody ConnectorDeleteDTO dto) {
-        return connectorService.deleteConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
+        return opConnectorService.deleteConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
     }
 
     @ApiOperation(value = "操作Connector", notes = "")
@@ -64,11 +63,11 @@ public class KafkaConnectorController {
     @ResponseBody
     public Result<Void> operateConnectors(@Validated @RequestBody ConnectorActionDTO dto) {
         if (ConnectActionEnum.RESTART.getValue().equals(dto.getAction())) {
-            return connectorService.restartConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
+            return opConnectorService.restartConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
         } else if (ConnectActionEnum.STOP.getValue().equals(dto.getAction())) {
-            return connectorService.stopConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
+            return opConnectorService.stopConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
         } else if (ConnectActionEnum.RESUME.getValue().equals(dto.getAction())) {
-            return connectorService.resumeConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
+            return opConnectorService.resumeConnector(dto.getConnectClusterId(), dto.getConnectorName(), HttpRequestUtil.getOperator());
         }
 
         return Result.buildFailure(ResultStatus.PARAM_ILLEGAL);
