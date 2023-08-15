@@ -8,6 +8,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.event.cluster.ClusterPhyAddedEvent;
+import com.xiaojukeji.know.streaming.km.common.bean.event.cluster.connect.ClusterPhyDeletedEvent;
 import com.xiaojukeji.know.streaming.km.common.bean.po.cluster.ClusterPhyPO;
 import com.xiaojukeji.know.streaming.km.common.component.SpringTool;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
@@ -145,6 +146,9 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
                     MsgConstant.getClusterBizStr(clusterPhy.getId(), clusterPhy.getName()),
                     String.format("删除集群:%s",clusterPhy.toString()));
             opLogWrapService.saveOplogAndIgnoreException(oplogDTO);
+
+            // 发布删除集群事件
+            SpringTool.publish(new ClusterPhyDeletedEvent(this, clusterPhyId));
 
             return Result.buildSuc();
         } catch (Exception e) {
