@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.core.service.zookeeper.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.cluster.ClusterPhy;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.config.ZKConfig;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
@@ -22,10 +23,8 @@ import com.xiaojukeji.know.streaming.km.persistence.mysql.zookeeper.ZookeeperDAO
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ZookeeperServiceImpl implements ZookeeperService {
@@ -35,14 +34,14 @@ public class ZookeeperServiceImpl implements ZookeeperService {
     private ZookeeperDAO zookeeperDAO;
 
     @Override
-    public Result<List<ZookeeperInfo>> listFromZookeeper(Long clusterPhyId, String zookeeperAddress, ZKConfig zkConfig) {
+    public Result<List<ZookeeperInfo>> getDataFromKafka(ClusterPhy clusterPhy) {
         List<Tuple<String, Integer>> addressList = null;
         try {
-            addressList = ZookeeperUtils.connectStringParser(zookeeperAddress);
+            addressList = ZookeeperUtils.connectStringParser(clusterPhy.getZookeeper());
         } catch (Exception e) {
             LOGGER.error(
-                    "method=listFromZookeeperCluster||clusterPhyId={}||zookeeperAddress={}||errMsg=exception!",
-                    clusterPhyId, zookeeperAddress, e
+                    "method=getDataFromKafka||clusterPhyId={}||zookeeperAddress={}||errMsg=exception!",
+                    clusterPhy.getId(), clusterPhy.getZookeeper(), e
             );
 
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, e.getMessage());
@@ -51,24 +50,25 @@ public class ZookeeperServiceImpl implements ZookeeperService {
         List<ZookeeperInfo> aliveZKList = new ArrayList<>();
         for (Tuple<String, Integer> hostPort: addressList) {
             aliveZKList.add(this.getFromZookeeperCluster(
-                    clusterPhyId,
+                    clusterPhy.getId(),
                     hostPort.getV1(),
                     hostPort.getV2(),
-                    zkConfig
+                    ConvertUtil.str2ObjByJson(clusterPhy.getZkProperties(), ZKConfig.class)
             ));
         }
+
         return Result.buildSuc(aliveZKList);
     }
 
     @Override
-    public void batchReplaceDataInDB(Long clusterPhyId, List<ZookeeperInfo> infoList) {
+    public void writeToDB(Long clusterId, List<ZookeeperInfo> dataList) {
         // DB 中的信息
-        List<ZookeeperInfoPO> dbInfoList = this.listRawFromDBByCluster(clusterPhyId);
-        Map<String, ZookeeperInfoPO> dbMap = new HashMap<>();
-        dbInfoList.stream().forEach(elem -> dbMap.put(elem.getHost() + elem.getPort(), elem));
+        Map<String, ZookeeperInfoPO> dbMap = this.listRawFromDBByCluster(clusterId)
+                .stream()
+                .collect(Collectors.toMap(elem -> elem.getHost() + elem.getPort(), elem -> elem, (oldValue, newValue) -> newValue));
 
         // 新获取到的信息
-        List<ZookeeperInfoPO> newInfoList = ConvertUtil.list2List(infoList, ZookeeperInfoPO.class);
+        List<ZookeeperInfoPO> newInfoList = ConvertUtil.list2List(dataList, ZookeeperInfoPO.class);
         for (ZookeeperInfoPO newInfo: newInfoList) {
             try {
                 ZookeeperInfoPO oldInfo = dbMap.remove(newInfo.getHost() + newInfo.getPort());
@@ -87,7 +87,7 @@ public class ZookeeperServiceImpl implements ZookeeperService {
                     zookeeperDAO.updateById(newInfo);
                 }
             } catch (Exception e) {
-                LOGGER.error("method=batchReplaceDataInDB||clusterPhyId={}||newInfo={}||errMsg=exception", clusterPhyId, newInfo, e);
+                LOGGER.error("method=writeToDB||clusterPhyId={}||newInfo={}||errMsg=exception", clusterId, newInfo, e);
             }
         }
 
@@ -96,9 +96,17 @@ public class ZookeeperServiceImpl implements ZookeeperService {
             try {
                 zookeeperDAO.deleteById(entry.getValue().getId());
             } catch (Exception e) {
-                LOGGER.error("method=batchReplaceDataInDB||clusterPhyId={}||expiredInfo={}||errMsg=exception", clusterPhyId, entry.getValue(), e);
+                LOGGER.error("method=writeToDB||clusterPhyId={}||expiredInfo={}||errMsg=exception", clusterId, entry.getValue(), e);
             }
         });
+    }
+
+    @Override
+    public int deleteInDBByKafkaClusterId(Long clusterPhyId) {
+        LambdaQueryWrapper<ZookeeperInfoPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ZookeeperInfoPO::getClusterPhyId, clusterPhyId);
+
+        return zookeeperDAO.delete(lambdaQueryWrapper);
     }
 
     @Override

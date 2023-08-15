@@ -11,6 +11,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.po.KafkaAclPO;
 import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
+import com.xiaojukeji.know.streaming.km.common.converter.KafkaAclConverter;
 import com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterAuthTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
@@ -18,8 +19,6 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.acl.KafkaAclService;
 import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
-import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.KafkaAclDAO;
@@ -36,11 +35,13 @@ import org.apache.kafka.common.resource.ResourceType;
 import org.apache.kafka.common.security.auth.KafkaPrincipal;
 import org.apache.kafka.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import scala.jdk.javaapi.CollectionConverters;
 
@@ -77,16 +78,47 @@ public class KafkaAclServiceImpl extends BaseKafkaVersionControlService implemen
     }
 
     @Override
-    public Result<List<AclBinding>> getAclFromKafka(Long clusterPhyId) {
-        if (LoadedClusterPhyCache.getByPhyId(clusterPhyId) == null) {
-            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(clusterPhyId));
-        }
-
+    public Result<List<AclBinding>> getDataFromKafka(ClusterPhy clusterPhy) {
         try {
-            return (Result<List<AclBinding>>) versionControlService.doHandler(getVersionItemType(), getMethodName(clusterPhyId, ACL_GET_FROM_KAFKA), new ClusterPhyParam(clusterPhyId));
+            Result<List<AclBinding>> dataResult = (Result<List<AclBinding>>) versionControlService.doHandler(getVersionItemType(), getMethodName(clusterPhy.getId(), ACL_GET_FROM_KAFKA), new ClusterPhyParam(clusterPhy.getId()));
+            if (dataResult.failed()) {
+                Result.buildFromIgnoreData(dataResult);
+            }
+
+            return Result.buildSuc(dataResult.getData());
         } catch (VCHandlerNotExistException e) {
             return Result.buildFailure(e.getResultStatus());
         }
+    }
+
+    @Override
+    public void writeToDB(Long clusterPhyId, List<AclBinding> dataList) {
+        Map<String, KafkaAclPO> dbPOMap = this.getKafkaAclFromDB(clusterPhyId).stream().collect(Collectors.toMap(KafkaAclPO::getUniqueField, Function.identity()));
+
+        long now = System.currentTimeMillis();
+        for (AclBinding aclBinding: dataList) {
+            KafkaAclPO newPO = KafkaAclConverter.convert2KafkaAclPO(clusterPhyId, aclBinding, now);
+            KafkaAclPO oldPO = dbPOMap.remove(newPO.getUniqueField());
+            if (oldPO == null) {
+                // 新增的ACL
+                this.insertAndIgnoreDuplicate(newPO);
+            }
+
+            // 不需要update
+        }
+
+        // 删除已经不存在的
+        for (KafkaAclPO dbPO: dbPOMap.values()) {
+            kafkaAclDAO.deleteById(dbPO);
+        }
+    }
+
+    @Override
+    public int deleteInDBByKafkaClusterId(Long clusterPhyId) {
+        LambdaQueryWrapper<KafkaAclPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(KafkaAclPO::getClusterPhyId, clusterPhyId);
+
+        return kafkaAclDAO.delete(lambdaQueryWrapper);
     }
 
     @Override
@@ -116,7 +148,7 @@ public class KafkaAclServiceImpl extends BaseKafkaVersionControlService implemen
             return 0;
         }
 
-        return (int)poList.stream().map(elem -> elem.getResourceName()).distinct().count();
+        return (int)poList.stream().map(KafkaAclPO::getResourceName).distinct().count();
     }
 
     @Override
@@ -130,15 +162,7 @@ public class KafkaAclServiceImpl extends BaseKafkaVersionControlService implemen
             return 0;
         }
 
-        return (int)poList.stream().map(elem -> elem.getPrincipal()).distinct().count();
-    }
-
-    @Override
-    public List<KafkaAclPO> getKafkaResTypeAclFromDB(Long clusterPhyId, Integer resType) {
-        LambdaQueryWrapper<KafkaAclPO> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(KafkaAclPO::getClusterPhyId, clusterPhyId);
-        queryWrapper.eq(KafkaAclPO::getResourceType, resType);
-        return kafkaAclDAO.selectList(queryWrapper);
+        return (int)poList.stream().map(KafkaAclPO::getPrincipal).distinct().count();
     }
 
     @Override
@@ -152,15 +176,6 @@ public class KafkaAclServiceImpl extends BaseKafkaVersionControlService implemen
         return kafkaAclDAO.selectList(queryWrapper);
     }
 
-    @Override
-    public List<KafkaAclPO> getGroupAclFromDB(Long clusterPhyId, String groupName) {
-        LambdaQueryWrapper<KafkaAclPO> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(KafkaAclPO::getClusterPhyId, clusterPhyId);
-        queryWrapper.eq(KafkaAclPO::getResourceType, ResourceType.GROUP.code());
-        queryWrapper.eq(KafkaAclPO::getResourceName, groupName);
-        return kafkaAclDAO.selectList(queryWrapper);
-    }
-
     /**************************************************** private method ****************************************************/
 
     private Result<List<AclBinding>> getAclByZKClient(VersionItemParam itemParam){
@@ -170,7 +185,7 @@ public class KafkaAclServiceImpl extends BaseKafkaVersionControlService implemen
         for (ZkAclStore store: CollectionConverters.asJava(ZkAclStore.stores())) {
             Result<List<AclBinding>> rl = this.getSpecifiedTypeAclByZKClient(param.getClusterPhyId(), store.patternType());
             if (rl.failed()) {
-                return rl;
+                return Result.buildFromIgnoreData(rl);
             }
 
             aclList.addAll(rl.getData());
@@ -228,5 +243,20 @@ public class KafkaAclServiceImpl extends BaseKafkaVersionControlService implemen
         }
 
         return Result.buildSuc(kafkaAclList);
+    }
+
+    private Result<Void> insertAndIgnoreDuplicate(KafkaAclPO kafkaAclPO) {
+        try {
+            kafkaAclDAO.insert(kafkaAclPO);
+
+            return Result.buildSuc();
+        } catch (DuplicateKeyException dke) {
+            // 直接写入，如果出现key冲突则直接忽略，因为key冲突时，表示该数据已完整存在，不需要替换任何数据
+            return Result.buildSuc();
+        } catch (Exception e) {
+            log.error("method=insertAndIgnoreDuplicate||kafkaAclPO={}||errMsg=exception", kafkaAclPO, e);
+
+            return Result.buildFromRSAndMsg(ResultStatus.MYSQL_OPERATE_FAILED, e.getMessage());
+        }
     }
 }

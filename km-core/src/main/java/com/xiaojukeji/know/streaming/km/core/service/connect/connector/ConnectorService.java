@@ -4,7 +4,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectCluste
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.connector.KSConnector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.connector.KSConnectorInfo;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.connector.KSConnectorStateInfo;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.meta.KafkaMetaService;
+import com.xiaojukeji.know.streaming.km.core.service.meta.MetaDataService;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.po.connect.ConnectorPO;
 import com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectorTypeEnum;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * 查看Connector
  */
-public interface ConnectorService extends KafkaMetaService<KSConnector> {
+public interface ConnectorService extends MetaDataService<KSConnector> {
     /**
      * 获取所有的连接器名称列表
      */
