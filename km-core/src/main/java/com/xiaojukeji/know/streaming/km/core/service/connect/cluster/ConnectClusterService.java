@@ -4,14 +4,16 @@ package com.xiaojukeji.know.streaming.km.core.service.connect.cluster;
 import com.xiaojukeji.know.streaming.km.common.bean.dto.connect.cluster.ConnectClusterDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectCluster;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectClusterMetadata;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.kafka.KSGroupDescription;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.core.service.meta.MetaDataService;
 
 import java.util.List;
 
 /**
  * Connect-Cluster
  */
-public interface ConnectClusterService {
+public interface ConnectClusterService extends MetaDataService<KSGroupDescription> {
     Long replaceAndReturnIdInDB(ConnectClusterMetadata metadata);
 
     List<ConnectCluster> listByKafkaCluster(Long kafkaClusterPhyId);
