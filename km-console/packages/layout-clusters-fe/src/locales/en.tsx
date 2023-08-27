@@ -1,8 +1,8 @@
 import { systemKey } from '../constants/menu';
 
 export default {
-  yes: 'yes',
-  no: 'no',
+  yes: 'Yes',
+  no: 'No',
   login: 'Login',
   logout: 'Logout',
   register: 'Register',
@@ -65,10 +65,10 @@ export default {
   [`menu.${systemKey}.zookeeper.servers`]: 'Servers',
 
   'access.cluster': 'Access Cluster',
-  'access.cluster.low.version.tip': '监测到当前Version较低，建议维护Zookeeper信息以便得到更好的产品体验',
+  'access.cluster.low.version.tip': 'Detected low version, suggested to configure the Zookeeper for better experience',
   'edit.cluster': 'Edit',
   'check.detail': 'Details',
-  'healthy.setting': '健康度设置',
+  'healthy.setting': 'Healthy Setting',
   'delete.cluster.confirm.title': 'Confirm to delete this cluster?',
   'delete.cluster.confirm.tip': 'Delete cluster will not release the cluster resources! It just let the cluster not managed by the platform. Please type the cluster name to confirm',
   'delete.cluster.confirm.cluster': 'Type the cluster name to confirm',
