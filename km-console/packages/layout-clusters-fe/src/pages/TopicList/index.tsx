@@ -112,10 +112,6 @@ const AutoPage = (props: any) => {
           message: '清除数据成功',
         });
         getTopicsList();
-      } else {
-        notification.error({
-          message: '清除数据失败',
-        });
       }
     });
   };
