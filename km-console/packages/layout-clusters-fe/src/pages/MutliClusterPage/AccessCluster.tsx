@@ -522,21 +522,15 @@ const ConnectorForm = (props: {
     const params = {
       ...values,
       id: initFieldsValue?.id,
-      jmxProperties: values.jmxProperties ? `{ "jmxProperties": "${values.jmxProperties}" }` : undefined,
+      jmxProperties: values.jmxProperties ? `{ "jmxPort": "${values.jmxProperties}" }` : undefined,
     };
-    Utils.put(api.batchConnectClusters, [params])
-      .then((res) => {
-        // setSelectedTabKey(undefined);
-        getConnectClustersList();
-        notification.success({
-          message: '修改Connect集群成功',
-        });
-      })
-      .catch((error) => {
-        notification.success({
-          message: '修改Connect集群失败',
-        });
+    Utils.put(api.batchConnectClusters, [params]).then((res) => {
+      // setSelectedTabKey(undefined);
+      getConnectClustersList();
+      notification.success({
+        message: '修改Connect集群成功',
       });
+    });
   };
 
   const onCancel = () => {
