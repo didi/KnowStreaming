@@ -95,7 +95,7 @@ const api = {
     getApi(`/clusters/${clusterPhyId}/groups/${groupName}/partitions`),
   resetGroupOffset: () => getApi('/group-offsets'),
   getGroupOverview: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/groups-overview`),
-
+  deleteGroupOffset: () => getApi('/group-offsets'),
   // topics列表
   getTopicsList: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/topics-overview`),
   getReassignmentList: () => getApi(`/reassignment/topics-overview`),

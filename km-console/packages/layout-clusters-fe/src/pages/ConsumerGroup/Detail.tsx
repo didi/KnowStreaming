@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Button, Space, Divider, Drawer, ProTable, Utils } from 'knowdesign';
+import { Button, Space, Divider, Drawer, ProTable, Utils, notification } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import API from '@src/api/index';
 import { defaultPagination, hashDataParse } from '@src/constants/common';
@@ -112,6 +112,23 @@ const GroupDetail = (props: any) => {
       groupName: record?.groupName,
     });
   };
+  // 删除消费组Topic
+  const deleteOffset = (record: any) => {
+    const params = {
+      clusterPhyId: +urlParams?.clusterId,
+      deleteType: 1, // 0:group纬度，1：Topic纬度，2：Partition纬度
+      groupName: record.groupName,
+      topicName: record.topicName,
+    };
+    Utils.delete(API.deleteGroupOffset(), { data: params }).then((data: any) => {
+      if (data === null) {
+        notification.success({
+          message: '删除Topic成功!',
+        });
+        genData({ pageNo: 1, pageSize: pagination.pageSize, groupName: hashData.groupName });
+      }
+    });
+  };
 
   const onTableChange = (pagination: any, filters: any, sorter: any) => {
     genData({ pageNo: pagination.current, pageSize: pagination.pageSize, filters, sorter, groupName: hashData.groupName });
@@ -199,7 +216,7 @@ const GroupDetail = (props: any) => {
           showHeader: false,
           rowKey: 'key',
           loading: loading,
-          columns: getGtoupTopicColumns({ resetOffset }),
+          columns: getGtoupTopicColumns({ resetOffset, deleteOffset }),
           dataSource: topicData,
           paginationProps: { ...pagination },
           // noPagination: true,
