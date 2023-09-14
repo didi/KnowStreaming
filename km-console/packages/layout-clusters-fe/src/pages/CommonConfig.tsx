@@ -39,6 +39,12 @@ export enum ClustersPermissionMap {
   MM2_DELETE = 'MM2-删除',
   MM2_RESTART = 'MM2-重启',
   MM2_STOP_RESUME = 'MM2-暂停&恢复',
+  // Connector
+  CONNECTOR_ADD = 'Connector-新增',
+  CONNECTOR_CHANGE_CONFIG = 'Connector-编辑',
+  CONNECTOR_DELETE = 'Connector-删除',
+  CONNECTOR_RESTART = 'Connector-重启',
+  CONNECTOR_STOP_RESUME = 'Connector-暂停&恢复',
 }
 
 export interface PermissionNode {

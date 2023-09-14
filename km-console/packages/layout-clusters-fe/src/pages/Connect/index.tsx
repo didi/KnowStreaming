@@ -12,6 +12,7 @@ import notification from '@src/components/Notification';
 import './index.less';
 import AddConnectorUseJSON from './AddConnectorUseJSON';
 import HasConnector from './HasConnector';
+import { ClustersPermissionMap } from '../CommonConfig';
 const { request } = Utils;
 
 const rateMap: any = {
@@ -174,21 +175,25 @@ const Connectors: React.FC = () => {
                     maxLength: 128,
                   }}
                 />
-                <span className="add-connect">
-                  <Button
-                    className="add-connect-btn"
-                    icon={<IconFont type="icon-jiahao" />}
-                    type="primary"
-                    onClick={() => addConnectorRef.current?.onOpen('create', addConnectorJsonRef.current)}
-                  >
-                    新增Connector
-                  </Button>
-                  <Dropdown overlayClassName="add-connect-dropdown-menu" overlay={menu}>
-                    <Button className="add-connect-json" type="primary">
-                      <IconFont type="icon-guanwangxiala" />
+                {global.hasPermission && global.hasPermission(ClustersPermissionMap.CONNECTOR_ADD) ? (
+                  <span className="add-connect">
+                    <Button
+                      className="add-connect-btn"
+                      icon={<IconFont type="icon-jiahao" />}
+                      type="primary"
+                      onClick={() => addConnectorRef.current?.onOpen('create', addConnectorJsonRef.current)}
+                    >
+                      新增Connector
                     </Button>
-                  </Dropdown>
-                </span>
+                    <Dropdown overlayClassName="add-connect-dropdown-menu" overlay={menu}>
+                      <Button className="add-connect-json" type="primary">
+                        <IconFont type="icon-guanwangxiala" />
+                      </Button>
+                    </Dropdown>
+                  </span>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
             <ProTable
