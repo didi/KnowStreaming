@@ -108,6 +108,7 @@ const api = {
   getTopicState: (clusterPhyId: number, topicName: string) => getApi(`/clusters/${clusterPhyId}/topics/${topicName}/state`),
   getTopicMetadata: (clusterPhyId: number, topicName: string) =>
     getApi(`/clusters/${clusterPhyId}/topics/${topicName}/metadata-combine-exist`),
+  deleteTopicData: () => getApi(`/topics/truncate-topic`),
 
   // 最新的指标值
   getMetricPointsLatest: (clusterPhyId: number) => getApi(`/physical-clusters/${clusterPhyId}/latest-metrics`),
