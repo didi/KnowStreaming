@@ -45,6 +45,12 @@ export enum ClustersPermissionMap {
   CONNECTOR_DELETE = 'Connector-删除',
   CONNECTOR_RESTART = 'Connector-重启',
   CONNECTOR_STOP_RESUME = 'Connector-暂停&恢复',
+  // Security
+  SECURITY_ACL_ADD = 'Security-ACL新增',
+  SECURITY_ACL_DELETE = 'Security-ACL删除',
+  SECURITY_USER_ADD = 'Security-User新增',
+  SECURITY_USER_DELETE = 'Security-User删除',
+  SECURITY_USER_EDIT_PASSWORD = 'Security-User修改密码',
 }
 
 export interface PermissionNode {
