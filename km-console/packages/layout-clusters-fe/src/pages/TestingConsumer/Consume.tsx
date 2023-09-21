@@ -144,6 +144,8 @@ const ConsumeClientTest = () => {
             ...configInfo,
             needFilterKeyValue: changeValue === 1 || changeValue === 2,
             needFilterSize: changeValue === 3 || changeValue === 4 || changeValue === 5,
+            needFilterKey: changeValue === 6,
+            needFilterValue: changeValue === 7,
           });
           break;
       }

@@ -39,6 +39,14 @@ export const filterList = [
     label: 'Under Size',
     value: 5,
   },
+  {
+      label: 'key_contains',
+      value: 6,
+  },
+  {
+      label: 'value_contains',
+      value: 7,
+  }
 ];
 
 export const untilList = [
@@ -324,10 +332,10 @@ export const getFormConfig = (topicMetaData: any, info = {} as any, partitionLis
       key: 'filterKey',
       label: 'Key',
       type: FormItemType.input,
-      invisible: !info?.needFilterKeyValue,
+      invisible: !info?.needFilterKeyValue && !info?.needFilterKey,
       rules: [
         {
-          required: info?.needFilterKeyValue,
+          required: info?.needFilterKeyValue || info?.needFilterKey,
           message: '请输入Key',
         },
       ],
@@ -336,10 +344,10 @@ export const getFormConfig = (topicMetaData: any, info = {} as any, partitionLis
       key: 'filterValue',
       label: 'Value',
       type: FormItemType.input,
-      invisible: !info?.needFilterKeyValue,
+      invisible: !info?.needFilterKeyValue && !info?.needFilterValue,
       rules: [
         {
-          required: info?.needFilterKeyValue,
+          required: info?.needFilterKeyValue || info?.needFilterValue,
           message: '请输入Value',
         },
       ],
