@@ -12,11 +12,13 @@ import com.xiaojukeji.know.streaming.km.common.bean.entity.kafkacontroller.Kafka
 import com.xiaojukeji.know.streaming.km.common.bean.entity.metrics.BrokerMetrics;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultStatus;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.topic.Topic;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.res.ClusterBrokersOverviewVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.res.ClusterBrokersStateVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.kafkacontroller.KafkaControllerVO;
 import com.xiaojukeji.know.streaming.km.common.constant.KafkaConstant;
+import com.xiaojukeji.know.streaming.km.common.constant.MsgConstant;
 import com.xiaojukeji.know.streaming.km.common.enums.SortTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.cluster.ClusterRunStateEnum;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
@@ -26,6 +28,7 @@ import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerConfigService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerMetricService;
 import com.xiaojukeji.know.streaming.km.core.service.broker.BrokerService;
+import com.xiaojukeji.know.streaming.km.core.service.cluster.ClusterPhyService;
 import com.xiaojukeji.know.streaming.km.core.service.kafkacontroller.KafkaControllerService;
 import com.xiaojukeji.know.streaming.km.core.service.topic.TopicService;
 import com.xiaojukeji.know.streaming.km.persistence.cache.LoadedClusterPhyCache;
@@ -59,6 +62,9 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
 
     @Autowired
     private KafkaJMXClient kafkaJMXClient;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     @Override
     public PaginationResult<ClusterBrokersOverviewVO> getClusterPhyBrokersOverview(Long clusterPhyId, ClusterBrokersOverviewDTO dto) {
@@ -108,7 +114,12 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
     }
 
     @Override
-    public ClusterBrokersStateVO getClusterPhyBrokersState(Long clusterPhyId) {
+    public Result<ClusterBrokersStateVO> getClusterPhyBrokersState(Long clusterPhyId) {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(clusterPhyId);
+        if (clusterPhy == null) {
+            return Result.buildFromRSAndMsg(ResultStatus.NOT_EXIST, MsgConstant.getClusterPhyNotExist(clusterPhyId));
+        }
+
         ClusterBrokersStateVO clusterBrokersStateVO = new ClusterBrokersStateVO();
 
         // 获取集群Broker列表
@@ -126,24 +137,25 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
         );
 
         // 获取controller信息
-        KafkaController kafkaController = kafkaControllerService.getKafkaControllerFromDB(clusterPhyId);
+        Result<KafkaController> controllerResult = kafkaControllerService.getControllerFromKafka(clusterPhy);
 
         // 设置kafka-controller信息
         clusterBrokersStateVO.setKafkaControllerAlive(false);
-        if(null != kafkaController) {
+        if(null != controllerResult.getData()) {
             clusterBrokersStateVO.setKafkaController(
                     this.convert2KafkaControllerVO(
-                            kafkaController,
-                            brokerService.getBroker(clusterPhyId, kafkaController.getBrokerId())
+                            controllerResult.getData(),
+                            brokerService.getBroker(clusterPhyId, controllerResult.getData().getBrokerId())
                     )
             );
             clusterBrokersStateVO.setKafkaControllerAlive(true);
         }
 
-        clusterBrokersStateVO.setConfigSimilar(brokerConfigService.countBrokerConfigDiffsFromDB(clusterPhyId, KafkaConstant.CONFIG_SIMILAR_IGNORED_CONFIG_KEY_LIST) <= 0
+        clusterBrokersStateVO.setConfigSimilar(
+                brokerConfigService.countBrokerConfigDiffsFromDB(clusterPhyId, KafkaConstant.CONFIG_SIMILAR_IGNORED_CONFIG_KEY_LIST) <= 0
         );
 
-        return clusterBrokersStateVO;
+        return Result.buildSuc(clusterBrokersStateVO);
     }
 
     /**************************************************** private method ****************************************************/
