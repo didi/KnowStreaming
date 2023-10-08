@@ -3,6 +3,7 @@ package com.xiaojukeji.know.streaming.km.rebalance.algorithm.model;
 import org.apache.kafka.common.TopicPartition;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -11,19 +12,16 @@ import java.util.stream.Collectors;
  * @date 2022/4/29
  */
 public class Broker implements Comparable<Broker> {
-    public static final Broker NONE = new Broker(new Rack("-1"), -1, "localhost", true, new Capacity());
 
     private final Rack rack;
     private final int id;
     private final String host;
     private final boolean isOffline;
-
     private final Set<Replica> replicas;
     private final Set<Replica> leaderReplicas;
     private final Map<String, Map<Integer, Replica>> topicReplicas;
-
+    private final Map<String, LogDir> logDirs;
     private final Load load;
-
     private final Capacity capacity;
 
     public Broker(Rack rack, int id, String host, boolean isOffline, Capacity capacity) {
@@ -34,8 +32,13 @@ public class Broker implements Comparable<Broker> {
         this.replicas = new HashSet<>();
         this.leaderReplicas = new HashSet<>();
         this.topicReplicas = new HashMap<>();
+        this.logDirs = new HashMap<>();
         this.load = new Load();
         this.capacity = capacity;
+    }
+
+    public void addLogDir(LogDir logDir) {
+        this.logDirs.put(logDir.name(), logDir);
     }
 
     public Rack rack() {
@@ -56,6 +59,10 @@ public class Broker implements Comparable<Broker> {
 
     public Set<Replica> replicas() {
         return Collections.unmodifiableSet(this.replicas);
+    }
+
+    public Map<String, LogDir> logDirs() {
+        return Collections.unmodifiableMap(this.logDirs);
     }
 
     public SortedSet<Replica> sortedReplicasFor(Resource resource, boolean reverse) {
@@ -84,25 +91,32 @@ public class Broker implements Comparable<Broker> {
     }
 
     public Load load() {
-        return load;
+        return this.load;
     }
 
     public Capacity capacity() {
         return capacity;
     }
 
+
     public double utilizationFor(Resource resource) {
         return this.load.loadFor(resource) / this.capacity.capacityFor(resource);
     }
+
 
     public double expectedUtilizationAfterAdd(Resource resource, Load loadToChange) {
         return (this.load.loadFor(resource) + ((loadToChange == null) ? 0 : loadToChange.loadFor(resource)))
                 / this.capacity.capacityFor(resource);
     }
 
+
     public double expectedUtilizationAfterRemove(Resource resource, Load loadToChange) {
         return (this.load.loadFor(resource) - ((loadToChange == null) ? 0 : loadToChange.loadFor(resource)))
                 / this.capacity.capacityFor(resource);
+    }
+
+    public LogDir logDir(String name) {
+        return this.logDirs.get(name);
     }
 
     public Replica replica(TopicPartition topicPartition) {
@@ -113,7 +127,7 @@ public class Broker implements Comparable<Broker> {
         return replicas.get(topicPartition.partition());
     }
 
-    void addReplica(Replica replica) {
+    void addReplica(String logDir, Replica replica) {
         // Add replica to list of all replicas in the broker.
         if (this.replicas.contains(replica)) {
             throw new IllegalStateException(String.format("Broker %d already has replica %s", this.id,
@@ -131,9 +145,12 @@ public class Broker implements Comparable<Broker> {
 
         // Add replica load to the broker load.
         this.load.addLoad(replica.load());
+
+        // Add replica to list of replicas in the logDir
+        this.logDirs.get(logDir).addReplica(replica);
     }
 
-    Replica removeReplica(TopicPartition topicPartition) {
+    Replica removeReplica(String sourceLogDir, TopicPartition topicPartition) {
         Replica replica = replica(topicPartition);
         if (replica != null) {
             this.replicas.remove(replica);
@@ -145,6 +162,7 @@ public class Broker implements Comparable<Broker> {
                 this.leaderReplicas.remove(replica);
             }
             this.load.subtractLoad(replica.load());
+            this.logDirs.get(sourceLogDir).removeReplica(topicPartition);
         }
         return replica;
     }
@@ -193,6 +211,7 @@ public class Broker implements Comparable<Broker> {
                 ", replicas=" + replicas +
                 ", leaderReplicas=" + leaderReplicas +
                 ", topicReplicas=" + topicReplicas +
+                ", logDirs=" + logDirs +
                 ", load=" + load +
                 ", capacity=" + capacity +
                 '}';
@@ -218,5 +237,9 @@ public class Broker implements Comparable<Broker> {
 
     public Set<Replica> currentOfflineReplicas() {
         return replicas.stream().filter(Replica::isCurrentOffline).collect(Collectors.toSet());
+    }
+
+    public LogDir randomLogDir() {
+        return logDirs.values().stream().collect(Collectors.toList()).get(ThreadLocalRandom.current().nextInt(logDirs.size()));
     }
 }

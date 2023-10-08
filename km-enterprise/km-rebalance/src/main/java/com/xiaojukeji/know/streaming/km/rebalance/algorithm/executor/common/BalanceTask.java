@@ -7,6 +7,7 @@ public class BalanceTask {
     private int partition;
     //副本分配列表
     private List<Integer> replicas;
+    private List<String> logDirs;
 
     public String getTopic() {
         return topic;
@@ -32,12 +33,21 @@ public class BalanceTask {
         this.replicas = replicas;
     }
 
+    public List<String> getLogDirs() {
+        return logDirs;
+    }
+
+    public void setLogDirs(List<String> logDirs) {
+        this.logDirs = logDirs;
+    }
+
     @Override
     public String toString() {
         return "BalanceTask{" +
                 "topic='" + topic + '\'' +
                 ", partition=" + partition +
                 ", replicas=" + replicas +
+                ", logDirs=" + logDirs +
                 '}';
     }
 }

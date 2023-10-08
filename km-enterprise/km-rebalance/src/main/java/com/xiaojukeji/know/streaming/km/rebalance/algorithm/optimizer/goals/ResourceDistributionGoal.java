@@ -8,16 +8,13 @@ import com.xiaojukeji.know.streaming.km.rebalance.algorithm.optimizer.Optimizati
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 
 /**
  * @author leewei
  * @date 2022/5/20
  */
-public abstract class ResourceDistributionGoal extends AbstractGoal {
+public abstract class ResourceDistributionGoal extends AbstractLogDirGoal {
     private static final Logger logger = LoggerFactory.getLogger(ResourceDistributionGoal.class);
     private double balanceUpperThreshold;
     private double balanceLowerThreshold;
@@ -35,66 +32,70 @@ public abstract class ResourceDistributionGoal extends AbstractGoal {
                                       ClusterModel clusterModel,
                                       Set<Goal> optimizedGoals,
                                       OptimizationOptions optimizationOptions) {
-        double utilization = broker.utilizationFor(resource());
+        for(LogDir logDir : broker.logDirs().values()) {
+            double utilization = logDir.utilizationFor(resource());
 
-        boolean requireLessLoad = utilization > this.balanceUpperThreshold;
-        boolean requireMoreLoad = utilization < this.balanceLowerThreshold;
-        if (!requireMoreLoad && !requireLessLoad) {
-            return;
-        }
+            boolean requireLessLoad = utilization > this.balanceUpperThreshold;
+            boolean requireMoreLoad = utilization < this.balanceLowerThreshold;
+            if (!requireMoreLoad && !requireLessLoad) {
+                return;
+            }
 
-        // First try leadership movement
-        if (resource() == Resource.NW_OUT || resource() == Resource.CPU) {
-            if (requireLessLoad && rebalanceByMovingLoadOut(broker, clusterModel, optimizedGoals,
-                    ActionType.LEADERSHIP_MOVEMENT, optimizationOptions)) {
-                logger.debug("Successfully balanced {} for broker {} by moving out leaders.", resource(), broker.id());
-                requireLessLoad = false;
+            // First try leadership movement
+            if (resource() == Resource.NW_OUT || resource() == Resource.CPU) {
+                if (requireLessLoad && rebalanceByMovingLoadOut(logDir, clusterModel, optimizedGoals,
+                        ActionType.LEADERSHIP_MOVEMENT, optimizationOptions)) {
+                    logger.debug("Successfully balanced {} for broker {} logDir {} by moving out leaders.", resource(), broker.id(), logDir.name());
+                    requireLessLoad = false;
+                }
+                if (requireMoreLoad && rebalanceByMovingLoadIn(logDir, clusterModel, optimizedGoals,
+                        ActionType.LEADERSHIP_MOVEMENT, optimizationOptions)) {
+                    logger.debug("Successfully balanced {} for broker {} logDir {} by moving in leaders.", resource(), broker.id(), logDir.name());
+                    requireMoreLoad = false;
+                }
             }
-            if (requireMoreLoad && rebalanceByMovingLoadIn(broker, clusterModel, optimizedGoals,
-                    ActionType.LEADERSHIP_MOVEMENT, optimizationOptions)) {
-                logger.debug("Successfully balanced {} for broker {} by moving in leaders.", resource(), broker.id());
-                requireMoreLoad = false;
-            }
-        }
 
-        boolean balanced = true;
-        if (requireLessLoad) {
-            if (!rebalanceByMovingLoadOut(broker, clusterModel, optimizedGoals,
-                    ActionType.REPLICA_MOVEMENT, optimizationOptions)) {
-                balanced = rebalanceBySwappingLoadOut(broker, clusterModel, optimizedGoals, optimizationOptions);
+            boolean balanced = true;
+            if (requireLessLoad) {
+                if (!rebalanceByMovingLoadOut(logDir, clusterModel, optimizedGoals,
+                        ActionType.REPLICA_MOVEMENT, optimizationOptions)) {
+                    balanced = rebalanceBySwappingLoadOut(logDir, clusterModel, optimizedGoals, optimizationOptions);
+                }
+            } else if (requireMoreLoad) {
+                if (!rebalanceByMovingLoadIn(logDir, clusterModel, optimizedGoals,
+                        ActionType.REPLICA_MOVEMENT, optimizationOptions)) {
+                    balanced = rebalanceBySwappingLoadIn(logDir, clusterModel, optimizedGoals, optimizationOptions);
+                }
             }
-        } else if (requireMoreLoad) {
-            if (!rebalanceByMovingLoadIn(broker, clusterModel, optimizedGoals,
-                    ActionType.REPLICA_MOVEMENT, optimizationOptions)) {
-                balanced = rebalanceBySwappingLoadIn(broker, clusterModel, optimizedGoals, optimizationOptions);
+            if (balanced) {
+                logger.debug("Successfully balanced {} for broker {} logDir {} by moving leaders and replicas.", resource(), broker.id(), logDir.name());
+            } else {
+                logger.debug("Balance {} for broker {} logDir {} failed.", resource(), broker.id(), logDir.name());
             }
-        }
-        if (balanced) {
-            logger.debug("Successfully balanced {} for broker {} by moving leaders and replicas.", resource(), broker.id());
         }
     }
 
-    private boolean rebalanceByMovingLoadOut(Broker broker,
+    private boolean rebalanceByMovingLoadOut(LogDir logDir,
                                              ClusterModel clusterModel,
                                              Set<Goal> optimizedGoals,
                                              ActionType actionType,
                                              OptimizationOptions optimizationOptions) {
 
-        SortedSet<Broker> candidateBrokers = sortedCandidateBrokersUnderThreshold(clusterModel, this.balanceUpperThreshold, optimizationOptions, broker, false);
-        SortedSet<Replica> replicasToMove = sortedCandidateReplicas(broker, actionType, optimizationOptions, true);
+        SortedSet<LogDir> candidateLogDirs = sortedCandidateLogDirsUnderThreshold(clusterModel, this.balanceUpperThreshold, optimizationOptions, logDir.broker(), false);
+        SortedSet<Replica> replicasToMove = sortedCandidateReplicas(logDir, actionType, optimizationOptions, true);
 
         for (Replica replica : replicasToMove) {
-            Broker acceptedBroker = maybeApplyBalancingAction(clusterModel, replica, candidateBrokers, actionType, optimizedGoals, optimizationOptions);
+            LogDir acceptedLogDir = maybeApplyBalancingAction(clusterModel, replica, candidateLogDirs, actionType, optimizedGoals, optimizationOptions);
 
-            if (acceptedBroker != null) {
-                if (broker.utilizationFor(resource()) < this.balanceUpperThreshold) {
+            if (acceptedLogDir != null) {
+                if (logDir.utilizationFor(resource()) < this.balanceUpperThreshold) {
                     return true;
                 }
-                // Remove and reinsert the broker so the order is correct.
+                // Remove and reinsert the logDir so the order is correct.
                 // candidateBrokers.remove(acceptedBroker);
-                candidateBrokers.removeIf(b -> b.id() == acceptedBroker.id());
-                if (acceptedBroker.utilizationFor(resource()) < this.balanceUpperThreshold) {
-                    candidateBrokers.add(acceptedBroker);
+                candidateLogDirs.removeIf(b -> b.broker().id() == acceptedLogDir.broker().id() && b.name().equals(acceptedLogDir.name()));
+                if (acceptedLogDir.utilizationFor(resource()) < this.balanceUpperThreshold) {
+                    candidateLogDirs.add(acceptedLogDir);
                 }
             }
         }
@@ -102,37 +103,37 @@ public abstract class ResourceDistributionGoal extends AbstractGoal {
         return false;
     }
 
-    private boolean rebalanceByMovingLoadIn(Broker broker,
+    private boolean rebalanceByMovingLoadIn(LogDir logDir,
                                             ClusterModel clusterModel,
                                             Set<Goal> optimizedGoals,
                                             ActionType actionType,
                                             OptimizationOptions optimizationOptions) {
-        SortedSet<Broker> candidateBrokers = sortedCandidateBrokersOverThreshold(clusterModel, this.balanceLowerThreshold, optimizationOptions, broker, true);
-        Iterator<Broker> candidateBrokersIt = candidateBrokers.iterator();
-        Broker nextCandidateBroker = null;
+        SortedSet<LogDir> candidateLogDirs = sortedCandidateLogDirsOverThreshold(clusterModel, this.balanceLowerThreshold, optimizationOptions, logDir.broker(), true);
+        Iterator<LogDir> candidateLogDirsIt = candidateLogDirs.iterator();
+        LogDir nextCandidateLogDir = null;
         while (true) {
-            Broker candidateBroker;
-            if (nextCandidateBroker != null) {
-                candidateBroker = nextCandidateBroker;
-                nextCandidateBroker = null;
-            } else if (candidateBrokersIt.hasNext()) {
-                candidateBroker = candidateBrokersIt.next();
+            LogDir candidateLogDir;
+            if (nextCandidateLogDir != null) {
+                candidateLogDir = nextCandidateLogDir;
+                nextCandidateLogDir = null;
+            } else if (candidateLogDirsIt.hasNext()) {
+                candidateLogDir = candidateLogDirsIt.next();
             } else {
                 break;
             }
-            SortedSet<Replica> replicasToMove = sortedCandidateReplicas(candidateBroker, actionType, optimizationOptions, true);
+            SortedSet<Replica> replicasToMove = sortedCandidateReplicas(candidateLogDir, actionType, optimizationOptions, true);
 
             for (Replica replica : replicasToMove) {
-                Broker acceptedBroker = maybeApplyBalancingAction(clusterModel, replica, Collections.singletonList(broker), actionType, optimizedGoals, optimizationOptions);
-                if (acceptedBroker != null) {
-                    if (broker.utilizationFor(resource()) > this.balanceLowerThreshold) {
+                LogDir acceptedLogDir = maybeApplyBalancingAction(clusterModel, replica, Collections.singletonList(logDir), actionType, optimizedGoals, optimizationOptions);
+                if (acceptedLogDir != null) {
+                    if (logDir.utilizationFor(resource()) > this.balanceLowerThreshold) {
                         return true;
                     }
-                    if (candidateBrokersIt.hasNext() || nextCandidateBroker != null) {
-                        if (nextCandidateBroker == null) {
-                            nextCandidateBroker = candidateBrokersIt.next();
+                    if (candidateLogDirsIt.hasNext() || nextCandidateLogDir != null) {
+                        if (nextCandidateLogDir == null) {
+                            nextCandidateLogDir = candidateLogDirsIt.next();
                         }
-                        if (candidateBroker.utilizationFor(resource()) < nextCandidateBroker.utilizationFor(resource())) {
+                        if (candidateLogDir.utilizationFor(resource()) < nextCandidateLogDir.utilizationFor(resource())) {
                             break;
                         }
                     }
@@ -143,25 +144,25 @@ public abstract class ResourceDistributionGoal extends AbstractGoal {
         return false;
     }
 
-    private boolean rebalanceBySwappingLoadOut(Broker broker,
-                                             ClusterModel clusterModel,
-                                             Set<Goal> optimizedGoals,
-                                             OptimizationOptions optimizationOptions) {
-        return false;
-    }
-
-    private boolean rebalanceBySwappingLoadIn(Broker broker,
+    private boolean rebalanceBySwappingLoadOut(LogDir logDir,
                                                ClusterModel clusterModel,
                                                Set<Goal> optimizedGoals,
                                                OptimizationOptions optimizationOptions) {
         return false;
     }
 
+    private boolean rebalanceBySwappingLoadIn(LogDir logDir,
+                                              ClusterModel clusterModel,
+                                              Set<Goal> optimizedGoals,
+                                              OptimizationOptions optimizationOptions) {
+        return false;
+    }
+
     private SortedSet<Broker> sortedCandidateBrokersUnderThreshold(ClusterModel clusterModel,
-                                                     double utilizationThreshold,
-                                                     OptimizationOptions optimizationOptions,
-                                                     Broker excludedBroker,
-                                                     boolean reverse) {
+                                                                   double utilizationThreshold,
+                                                                   OptimizationOptions optimizationOptions,
+                                                                   Broker excludedBroker,
+                                                                   boolean reverse) {
         return clusterModel.sortedBrokersFor(
                 b -> b.utilizationFor(resource()) < utilizationThreshold
                         && !excludedBroker.equals(b)
@@ -170,16 +171,45 @@ public abstract class ResourceDistributionGoal extends AbstractGoal {
                 , resource(), reverse);
     }
 
-    private SortedSet<Broker> sortedCandidateBrokersOverThreshold(ClusterModel clusterModel,
+    private SortedSet<LogDir> sortedCandidateLogDirsUnderThreshold(ClusterModel clusterModel,
                                                                    double utilizationThreshold,
                                                                    OptimizationOptions optimizationOptions,
                                                                    Broker excludedBroker,
                                                                    boolean reverse) {
+
+        return clusterModel.sortedLogDirsFor(
+                b -> b.utilizationFor(resource()) < utilizationThreshold
+                        && !excludedBroker.equals(b.broker())
+                        // filter brokers
+                        && (optimizationOptions.balanceBrokers().isEmpty() || optimizationOptions.balanceBrokers().contains(b.broker().id()))
+                , resource(), reverse);
+    }
+
+
+    private SortedSet<Broker> sortedCandidateBrokersOverThreshold(ClusterModel clusterModel,
+                                                                  double utilizationThreshold,
+                                                                  OptimizationOptions optimizationOptions,
+                                                                  Broker excludedBroker,
+                                                                  boolean reverse) {
         return clusterModel.sortedBrokersFor(
                 b -> b.utilizationFor(resource()) > utilizationThreshold
                         && !excludedBroker.equals(b)
                         // filter brokers
                         && (optimizationOptions.balanceBrokers().isEmpty() || optimizationOptions.balanceBrokers().contains(b.id()))
+                , resource(), reverse);
+    }
+
+    private SortedSet<LogDir> sortedCandidateLogDirsOverThreshold(ClusterModel clusterModel,
+                                                                  double utilizationThreshold,
+                                                                  OptimizationOptions optimizationOptions,
+                                                                  Broker excludedBroker,
+                                                                  boolean reverse) {
+
+        return clusterModel.sortedLogDirsFor(
+                b -> b.utilizationFor(resource()) > utilizationThreshold
+                        && !excludedBroker.equals(b.broker())
+                        // filter brokers
+                        && (optimizationOptions.balanceBrokers().isEmpty() || optimizationOptions.balanceBrokers().contains(b.broker().id()))
                 , resource(), reverse);
     }
 
@@ -196,12 +226,27 @@ public abstract class ResourceDistributionGoal extends AbstractGoal {
                 , resource(), reverse);
     }
 
+    private SortedSet<Replica> sortedCandidateReplicas(LogDir logDir,
+                                                       ActionType actionType,
+                                                       OptimizationOptions optimizationOptions,
+                                                       boolean reverse) {
+        return logDir.sortedReplicasFor(
+                // exclude topic
+                r -> !optimizationOptions.excludedTopics().contains(r.topicPartition().topic())
+                        && r.load().loadFor(resource()) > 0.0
+                        // LEADERSHIP_MOVEMENT or NW_OUT is require leader replica
+                        && (actionType != ActionType.LEADERSHIP_MOVEMENT && resource() != Resource.NW_OUT || r.isLeader())
+                , resource(), reverse);
+    }
+
     protected abstract Resource resource();
 
     @Override
     protected boolean selfSatisfied(ClusterModel clusterModel, BalancingAction action) {
         Broker destinationBroker = clusterModel.broker(action.destinationBrokerId());
+        LogDir destinationLogDir = destinationBroker.logDir(action.destinationLogDir());
         Broker sourceBroker = clusterModel.broker(action.sourceBrokerId());
+        LogDir sourceLogDir = sourceBroker.logDir(action.sourceLogDir());
         Replica sourceReplica = sourceBroker.replica(action.topicPartition());
 
         Load loadToChange;
@@ -214,8 +259,8 @@ public abstract class ResourceDistributionGoal extends AbstractGoal {
         } else {
             loadToChange = sourceReplica.load();
         }
-        double sourceUtilization = sourceBroker.expectedUtilizationAfterRemove(resource(), loadToChange);
-        double destinationUtilization = destinationBroker.expectedUtilizationAfterAdd(resource(), loadToChange);
+        double sourceUtilization = sourceLogDir.expectedUtilizationAfterRemove(resource(), loadToChange);
+        double destinationUtilization = destinationLogDir.expectedUtilizationAfterAdd(resource(), loadToChange);
 
         return sourceUtilization >= this.balanceLowerThreshold && destinationUtilization <= this.balanceUpperThreshold;
     }

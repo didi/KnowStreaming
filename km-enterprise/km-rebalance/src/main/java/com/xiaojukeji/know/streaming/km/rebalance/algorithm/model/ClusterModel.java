@@ -67,6 +67,25 @@ public class ClusterModel {
         return sortedBrokers;
     }
 
+    public SortedSet<LogDir> sortedLogDirsFor(Predicate<? super LogDir> filter, Resource resource, boolean reverse) {
+        Comparator<LogDir> comparator =
+                Comparator.<LogDir>comparingDouble(b -> b.utilizationFor(resource));
+        if (reverse)
+            comparator = comparator.reversed();
+
+        SortedSet<LogDir> sortedLogDirs = new TreeSet<>(comparator);
+        this.brokersById.values().stream().forEach(broker -> {
+            if (filter == null) {
+                sortedLogDirs.addAll(broker.logDirs().values());
+            } else {
+                sortedLogDirs.addAll(broker.logDirs().values().stream()
+                        .filter(filter).collect(Collectors.toList()));
+            }
+        });
+
+        return sortedLogDirs;
+    }
+
     public Load load() {
         Load load = new Load();
         for (Broker broker : this.brokersById.values()) {
@@ -101,30 +120,33 @@ public class ClusterModel {
         return this.brokersById.get(brokerId);
     }
 
-    public Broker addBroker(String rackId, int brokerId, String host, boolean isOffline, Capacity capacity) {
+    public Broker addBroker(String rackId, int brokerId, String host, boolean isOffline, Capacity capacity, Map<String, Capacity> logDirCapacities) {
         Rack rack = rack(rackId);
         if (rack == null)
             throw new IllegalArgumentException("Rack: " + rackId + "is not exists.");
         Broker broker = new Broker(rack, brokerId, host, isOffline, capacity);
+        for(Map.Entry<String, Capacity> entry : logDirCapacities.entrySet()) {
+            broker.addLogDir(new LogDir(entry.getKey(), broker, entry.getValue()));
+        }
         rack.addBroker(broker);
         this.brokersById.put(brokerId, broker);
         return broker;
     }
 
-    public Replica addReplica(int brokerId, TopicPartition topicPartition, boolean isLeader, Load load) {
-        return addReplica(brokerId, topicPartition, isLeader, false, load);
+    public Replica addReplica(int brokerId, String logDir, TopicPartition topicPartition, boolean isLeader, Load load) {
+        return addReplica(brokerId, logDir, topicPartition, isLeader, false, load);
     }
 
-    public Replica addReplica(int brokerId, TopicPartition topicPartition, boolean isLeader, boolean isOffline, Load load) {
+    public Replica addReplica(int brokerId, String logDir, TopicPartition topicPartition, boolean isLeader, boolean isOffline, Load load) {
         Broker broker = broker(brokerId);
         if (broker == null) {
             throw new IllegalArgumentException("Broker: " + brokerId + "is not exists.");
         }
 
-        Replica replica = new Replica(broker, topicPartition, isLeader, isOffline);
+        Replica replica = new Replica(broker, logDir, topicPartition, isLeader, isOffline);
         replica.setLoad(load);
         // add to broker
-        broker.addReplica(replica);
+        broker.addReplica(logDir, replica);
 
         Map<TopicPartition, Partition> partitions = this.partitionsByTopic
                 .computeIfAbsent(topicPartition.topic(), k -> new HashMap<>());
@@ -139,9 +161,9 @@ public class ClusterModel {
         return replica;
     }
 
-    public Replica removeReplica(int brokerId, TopicPartition topicPartition) {
+    public Replica removeReplica(int brokerId, String sourceLogDir, TopicPartition topicPartition) {
         Broker broker = broker(brokerId);
-        return broker.removeReplica(topicPartition);
+        return broker.removeReplica(sourceLogDir, topicPartition);
     }
 
     public void relocateLeadership(String goal, String actionType, TopicPartition topicPartition, int sourceBrokerId, int destinationBrokerId) {
@@ -171,19 +193,20 @@ public class ClusterModel {
         partition.relocateLeadership(destinationReplica);
     }
 
-    public void relocateReplica(String goal, String actionType, TopicPartition topicPartition, int sourceBrokerId, int destinationBrokerId) {
-        relocateReplica(topicPartition, sourceBrokerId, destinationBrokerId);
+    public void relocateReplica(String goal, String actionType, TopicPartition topicPartition, int sourceBrokerId, String sourceLogDir, int destinationBrokerId, String destinationLogDir) {
+        relocateReplica(topicPartition, sourceBrokerId, sourceLogDir, destinationBrokerId, destinationLogDir);
         addBalanceActionHistory(goal, actionType, topicPartition, sourceBrokerId, destinationBrokerId);
     }
 
-    public void relocateReplica(TopicPartition topicPartition, int sourceBrokerId, int destinationBrokerId) {
-        Replica replica = removeReplica(sourceBrokerId, topicPartition);
+    public void relocateReplica(TopicPartition topicPartition, int sourceBrokerId, String sourceLogDir, int destinationBrokerId, String destinationLogDir) {
+        Replica replica = removeReplica(sourceBrokerId, sourceLogDir, topicPartition);
         if (replica == null) {
             throw new IllegalArgumentException("Replica is not in the cluster.");
         }
         Broker destinationBroker = broker(destinationBrokerId);
         replica.setBroker(destinationBroker);
-        destinationBroker.addReplica(replica);
+        replica.setLogDir(destinationLogDir);
+        destinationBroker.addReplica(destinationLogDir, replica);
     }
 
     private void addBalanceActionHistory(String goal, String actionType, TopicPartition topicPartition, int sourceBrokerId, int destinationBrokerId) {
@@ -208,7 +231,7 @@ public class ClusterModel {
         for (Map<TopicPartition, Partition> tp : partitionsByTopic.values()) {
             tp.values().forEach(i -> {
                 i.replicas().forEach(j -> replicaDistribution.computeIfAbsent(j.topicPartition(), k -> new ArrayList<>())
-                        .add(new ReplicaPlacementInfo(j.broker().id(), "")));
+                        .add(new ReplicaPlacementInfo(j.broker().id(), j.logDir())));
             });
         }
         return replicaDistribution;
@@ -221,7 +244,7 @@ public class ClusterModel {
     public Map<TopicPartition, ReplicaPlacementInfo> getLeaderDistribution() {
         Map<TopicPartition, ReplicaPlacementInfo> leaderDistribution = new HashMap<>();
         for (Broker broker : brokersById.values()) {
-            broker.leaderReplicas().forEach(i -> leaderDistribution.put(i.topicPartition(), new ReplicaPlacementInfo(broker.id(), "")));
+            broker.leaderReplicas().forEach(i -> leaderDistribution.put(i.topicPartition(), new ReplicaPlacementInfo(broker.id(), i.logDir())));
         }
         return leaderDistribution;
     }
