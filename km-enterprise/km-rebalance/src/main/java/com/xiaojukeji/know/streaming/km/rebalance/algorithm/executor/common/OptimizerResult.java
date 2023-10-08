@@ -120,6 +120,8 @@ public class OptimizerResult {
             task.setPartition(proposal.tp().partition());
             List<Integer> replicas = proposal.newReplicas().stream().map(ReplicaPlacementInfo::brokerId).collect(Collectors.toList());
             task.setReplicas(replicas);
+            List<String> logDirs = proposal.newReplicas().stream().map(ReplicaPlacementInfo::logdir).collect(Collectors.toList());
+            task.setLogDirs(logDirs);
             balanceTasks.add(task);
         });
         return balanceTasks;

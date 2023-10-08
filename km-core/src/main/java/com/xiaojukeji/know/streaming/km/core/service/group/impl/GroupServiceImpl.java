@@ -156,7 +156,9 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
             ListConsumerGroupOffsetsResult listConsumerGroupOffsetsResult = adminClient.listConsumerGroupOffsets(groupName);
             Map<TopicPartition, OffsetAndMetadata> offsetAndMetadataMap = listConsumerGroupOffsetsResult.partitionsToOffsetAndMetadata().get();
             for (Map.Entry<TopicPartition, OffsetAndMetadata> entry: offsetAndMetadataMap.entrySet()) {
-                offsetMap.put(entry.getKey(), entry.getValue().offset());
+                if(entry != null && entry.getValue() != null) {
+                    offsetMap.put(entry.getKey(), entry.getValue().offset());
+                }
             }
 
             return offsetMap;

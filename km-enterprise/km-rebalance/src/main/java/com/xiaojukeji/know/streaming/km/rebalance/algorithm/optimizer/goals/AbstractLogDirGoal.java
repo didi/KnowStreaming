@@ -2,13 +2,14 @@ package com.xiaojukeji.know.streaming.km.rebalance.algorithm.optimizer.goals;
 
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.model.Broker;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.model.ClusterModel;
+import com.xiaojukeji.know.streaming.km.rebalance.algorithm.model.LogDir;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.model.Replica;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.optimizer.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class AbstractGoal implements Goal {
+public abstract class AbstractLogDirGoal implements Goal {
 
     /**
      * 均衡算法逻辑处理
@@ -36,23 +37,29 @@ public abstract class AbstractGoal implements Goal {
     protected abstract void initGoalState(ClusterModel clusterModel, OptimizationOptions optimizationOptions);
 
     /**
-     * 根据已经计算完的均衡副本、候选目标Broker、执行类型来
+     * 根据已经计算完的均衡副本、候选目标LogDir、执行类型来
      * 执行不同的集群模型数据更改操作
      */
-    protected Broker maybeApplyBalancingAction(ClusterModel clusterModel,
+    protected LogDir maybeApplyBalancingAction(ClusterModel clusterModel,
                                                Replica replica,
-                                               Collection<Broker> candidateBrokers,
+                                               Collection<LogDir> candidateLogDirs,
                                                ActionType action,
                                                Set<Goal> optimizedGoals,
                                                OptimizationOptions optimizationOptions) {
-        List<Broker> eligibleBrokers = eligibleBrokers(replica, candidateBrokers, action, optimizationOptions);
-        for (Broker broker : eligibleBrokers) {
-            BalancingAction proposal = new BalancingAction(replica.topicPartition(), replica.broker().id(), broker.id(), action);
-            //均衡的副本如果存在当前的Broker上则进行下次Broker
-            if (!legitMove(replica, broker, action)) {
+        //如果该topicPartiton的其他副本已经参与过迁移，则跳过，避免出现tp-replica1:[broker1/data1 -> broker2/data3], tp-replica2:[broker4/data2 -> broker1/data2]的情况（同一个tp的不同副本先从broker1迁走，随后另一个副本又迁回broker1），触发kafka bug:https://issues.apache.org/jira/browse/KAFKA-9087
+        if(action == ActionType.REPLICA_MOVEMENT && clusterModel.balanceActionHistory().containsKey(replica.topicPartition())) {
+            return null;
+        }
+
+        List<LogDir> eligibleLogDirs = eligibleLogDirs(replica, candidateLogDirs, action, optimizationOptions);
+        for (LogDir logDir : eligibleLogDirs) {
+
+            BalancingAction proposal = new BalancingAction(replica.topicPartition(), replica.broker().id(), replica.logDir(), logDir.broker().id(), logDir.name(), action);
+            //均衡的副本如果存在当前的Broker上则尝试下一个logDir
+            if (!legitMove(replica, logDir.broker(), action)) {
                 continue;
             }
-            //均衡条件已经满足进行下次Broker
+            //均衡条件不满足则尝试下一个logDir
             if (!selfSatisfied(clusterModel, proposal)) {
                 continue;
             }
@@ -60,11 +67,11 @@ public abstract class AbstractGoal implements Goal {
             ActionAcceptance acceptance = AnalyzerUtils.isProposalAcceptableForOptimizedGoals(optimizedGoals, proposal, clusterModel);
             if (acceptance == ActionAcceptance.ACCEPT) {
                 if (action == ActionType.LEADERSHIP_MOVEMENT) {
-                    clusterModel.relocateLeadership(name(), action.toString(), replica.topicPartition(), replica.broker().id(), broker.id());
+                    clusterModel.relocateLeadership(name(), action.toString(), replica.topicPartition(), replica.broker().id(), logDir.broker().id());
                 } else if (action == ActionType.REPLICA_MOVEMENT) {
-                    clusterModel.relocateReplica(name(), action.toString(), replica.topicPartition(), replica.broker().id(), replica.logDir(), broker.id(), broker.randomLogDir().name());
+                    clusterModel.relocateReplica(name(), action.toString(), replica.topicPartition(), replica.broker().id(), replica.logDir(), logDir.broker().id(), logDir.name());
                 }
-                return broker;
+                return logDir;
             }
         }
         return null;
@@ -92,11 +99,11 @@ public abstract class AbstractGoal implements Goal {
     /**
      * 候选Broker列表筛选过滤
      */
-    public static List<Broker> eligibleBrokers(Replica replica,
-                                               Collection<Broker> candidates,
+    public static List<LogDir> eligibleLogDirs(Replica replica,
+                                               Collection<LogDir> candidates,
                                                ActionType action,
                                                OptimizationOptions optimizationOptions) {
-        List<Broker> eligibleBrokers = new ArrayList<>(candidates);
+        List<LogDir> eligibleBrokers = new ArrayList<>(candidates);
         filterOutBrokersExcludedForLeadership(eligibleBrokers, optimizationOptions, replica, action);
         filterOutBrokersExcludedForReplicaMove(eligibleBrokers, optimizationOptions, action);
         return eligibleBrokers;
@@ -105,25 +112,25 @@ public abstract class AbstractGoal implements Goal {
     /**
      * Leader切换，从候选的Broker列表中排除掉excludedBroker
      */
-    public static void filterOutBrokersExcludedForLeadership(List<Broker> eligibleBrokers,
+    public static void filterOutBrokersExcludedForLeadership(List<LogDir> eligibleLogDirs,
                                                              OptimizationOptions optimizationOptions,
                                                              Replica replica,
                                                              ActionType action) {
         Set<Integer> excludedBrokers = optimizationOptions.offlineBrokers();
         if (!excludedBrokers.isEmpty() && (action == ActionType.LEADERSHIP_MOVEMENT || replica.isLeader())) {
-            eligibleBrokers.removeIf(broker -> excludedBrokers.contains(broker.id()));
+            eligibleLogDirs.removeIf(logDir -> excludedBrokers.contains(logDir.broker().id()));
         }
     }
 
     /**
      * 副本迁移，从候选的Broker列表中排除掉excludedBroker
      */
-    public static void filterOutBrokersExcludedForReplicaMove(List<Broker> eligibleBrokers,
+    public static void filterOutBrokersExcludedForReplicaMove(List<LogDir> eligibleLogDirs,
                                                               OptimizationOptions optimizationOptions,
                                                               ActionType action) {
         Set<Integer> excludedBrokers = optimizationOptions.offlineBrokers();
         if (!excludedBrokers.isEmpty() && action == ActionType.REPLICA_MOVEMENT) {
-            eligibleBrokers.removeIf(broker -> excludedBrokers.contains(broker.id()));
+            eligibleLogDirs.removeIf(logDir -> excludedBrokers.contains(logDir.broker().id()));
         }
     }
 }

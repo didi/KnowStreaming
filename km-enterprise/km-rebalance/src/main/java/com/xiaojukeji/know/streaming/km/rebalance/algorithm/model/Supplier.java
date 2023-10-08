@@ -4,6 +4,7 @@ import com.xiaojukeji.know.streaming.km.rebalance.algorithm.metric.MetricStore;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.metric.Metrics;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.metric.elasticsearch.ElasticsearchMetricStore;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.utils.MetadataUtils;
+import org.apache.kafka.clients.admin.LogDirDescription;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.Node;
@@ -40,10 +41,10 @@ public class Supplier {
     public static ClusterModel load(Properties kafkaProperties, Map<Integer, Capacity> capacitiesById, Metrics metrics, Set<String> ignoredTopics) {
         ClusterModel model = new ClusterModel();
         Cluster cluster = MetadataUtils.metadata(kafkaProperties);
-
+        Map<Integer, Map<String, LogDirDescription>> logDirDescriptions = MetadataUtils.describeLogDirs(kafkaProperties, cluster.nodes());
         // nodes
         for (Node node: cluster.nodes()) {
-            addBroker(node, false, model, capacitiesById);
+            addBroker(node, false, model, capacitiesById, logDirDescriptions.get(node.id()).keySet());
         }
 
         // replicas
@@ -61,12 +62,12 @@ public class Supplier {
                 TopicPartition topicPartition = new TopicPartition(partition.topic(), partition.partition());
                 Load leaderLoad = metrics.load(topicPartition);
                 if (leaderLoad == null) {
-                    if (partition.leader() == null) {
+//                    if (partition.leader() == null) {
                         // set empty load
-                        leaderLoad = new Load();
-                    } else {
-                        throw new IllegalArgumentException("Cannot get leader load of topic partiton: " + topicPartition);
-                    }
+                    leaderLoad = new Load();
+//                    } else {
+//                        throw new IllegalArgumentException("Cannot get leader load of topic partiton: " + topicPartition);
+//                    }
                 }
 
                 // leader nw out + follower nw out
@@ -84,10 +85,21 @@ public class Supplier {
                     if (isOffline) {
                         if (model.broker(n.id()) == null) {
                             // add offline broker
-                            addBroker(n, true, model, capacitiesById);
+                            addBroker(n, true, model, capacitiesById, logDirDescriptions.get(n.id()).keySet());
                         }
                     }
-                    model.addReplica(n.id(), topicPartition, isLeader, isOffline, isLeader ? leaderLoad : followerLoad);
+
+                    Map<String, LogDirDescription> logDirDescriptionMap = logDirDescriptions.get(n.id());
+                    Optional<String> logDir = logDirDescriptionMap.entrySet()
+                            .stream()
+                            .filter(entry -> entry.getValue().replicaInfos().containsKey(topicPartition))
+                            .map(Map.Entry::getKey)
+                            .findFirst();
+                    if(!logDir.isPresent()) {
+                        throw new IllegalArgumentException("Cannot get logDir of topic partiton:" + topicPartition);
+                    }
+
+                    model.addReplica(n.id(), logDir.get(), topicPartition, isLeader, isOffline, isLeader ? leaderLoad : followerLoad);
                 }
             }
         });
@@ -98,7 +110,7 @@ public class Supplier {
         return (node.rack() == null || "".equals(node.rack())) ? node.host() : node.rack();
     }
 
-    private static void addBroker(Node node, boolean isOffline, ClusterModel model, Map<Integer, Capacity> capacitiesById) {
+    private static void addBroker(Node node, boolean isOffline, ClusterModel model, Map<Integer, Capacity> capacitiesById, Set<String> logDirs) {
         // rack
         Rack rack = model.addRack(rack(node));
         // broker
@@ -106,7 +118,19 @@ public class Supplier {
         if (capacity == null)
             throw new IllegalArgumentException("Cannot get capacity of node: " + node);
 
-        model.addBroker(rack.id(), node.id(), node.host(), isOffline, capacity);
+        Map<String, Capacity> subCapacities = new HashMap<>();
+        int logDirSize = logDirs.size();
+        for(String name : logDirs) {
+            Capacity subCapacity = new Capacity();
+            // TODO 默认每个logDir大小相同，均分node的资源，需要改为从配置加载
+            subCapacity.setCapacity(Resource.CPU, capacity.capacityFor(Resource.CPU) / logDirSize);
+            subCapacity.setCapacity(Resource.DISK, capacity.capacityFor(Resource.DISK) / logDirSize);
+            subCapacity.setCapacity(Resource.NW_IN, capacity.capacityFor(Resource.NW_IN) / logDirSize);
+            subCapacity.setCapacity(Resource.NW_OUT, capacity.capacityFor(Resource.NW_OUT) / logDirSize);
+            subCapacities.put(name, subCapacity);
+        }
+
+        model.addBroker(rack.id(), node.id(), node.host(), isOffline, capacity, subCapacities);
     }
 
 }

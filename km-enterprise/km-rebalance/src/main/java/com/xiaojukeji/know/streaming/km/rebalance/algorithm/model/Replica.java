@@ -13,22 +13,24 @@ public class Replica {
     private final Replica original;
     private final TopicPartition topicPartition;
     private Broker broker;
+    private String logDir;
     private boolean isLeader;
     private boolean isOffline;
 
-    public Replica(Broker broker, TopicPartition topicPartition, boolean isLeader, boolean isOffline) {
-        this(broker, topicPartition, isLeader, isOffline, false);
+    public Replica(Broker broker, String logDir, TopicPartition topicPartition, boolean isLeader, boolean isOffline) {
+        this(broker, logDir, topicPartition, isLeader, isOffline, false);
     }
 
-    private Replica(Broker broker, TopicPartition topicPartition, boolean isLeader, boolean isOffline, boolean isOriginal) {
+    private Replica(Broker broker, String logDir, TopicPartition topicPartition, boolean isLeader, boolean isOffline, boolean isOriginal) {
         if (isOriginal) {
             this.original = null;
         } else {
-            this.original = new Replica(broker, topicPartition, isLeader, isOffline, true);
+            this.original = new Replica(broker, logDir, topicPartition, isLeader, isOffline, true);
         }
         this.load = new Load();
         this.topicPartition = topicPartition;
         this.broker = broker;
+        this.logDir = logDir;
         this.isLeader = isLeader;
         this.isOffline = isOffline;
     }
@@ -48,6 +50,14 @@ public class Replica {
     public void setBroker(Broker broker) {
         checkOriginal();
         this.broker = broker;
+    }
+
+    public String logDir() {
+        return logDir;
+    }
+
+    public void setLogDir(String logDir) {
+        this.logDir = logDir;
     }
 
     public boolean isLeader() {

@@ -5,7 +5,9 @@ import org.apache.kafka.common.TopicPartition;
 public class BalancingAction {
     private final TopicPartition _tp;
     private final Integer _sourceBrokerId;
+    private final String _sourceLogDir;
     private final Integer _destinationBrokerId;
+    private final String _destinationLogDir;
     private final ActionType _actionType;
 
     public BalancingAction(TopicPartition tp,
@@ -14,7 +16,23 @@ public class BalancingAction {
                            ActionType actionType) {
         _tp = tp;
         _sourceBrokerId = sourceBrokerId;
+        _sourceLogDir = "any";
         _destinationBrokerId = destinationBrokerId;
+        _destinationLogDir = "any";
+        _actionType = actionType;
+    }
+
+    public BalancingAction(TopicPartition tp,
+                           Integer sourceBrokerId,
+                           String sourceLogDir,
+                           Integer destinationBrokerId,
+                           String destinationLogDir,
+                           ActionType actionType) {
+        _tp = tp;
+        _sourceBrokerId = sourceBrokerId;
+        _sourceLogDir = sourceLogDir;
+        _destinationBrokerId = destinationBrokerId;
+        _destinationLogDir = destinationLogDir;
         _actionType = actionType;
     }
 
@@ -22,8 +40,16 @@ public class BalancingAction {
         return _sourceBrokerId;
     }
 
+    public String sourceLogDir() {
+        return _sourceLogDir;
+    }
+
     public Integer destinationBrokerId() {
         return _destinationBrokerId;
+    }
+
+    public String destinationLogDir() {
+        return _destinationLogDir;
     }
 
     public ActionType balancingAction() {

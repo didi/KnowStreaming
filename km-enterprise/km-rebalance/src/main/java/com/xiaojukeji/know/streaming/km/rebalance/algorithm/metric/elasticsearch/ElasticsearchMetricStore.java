@@ -50,7 +50,7 @@ public class ElasticsearchMetricStore implements MetricStore {
             String metricsQueryJson = IOUtils.resourceToString("/MetricsQuery.json", StandardCharsets.UTF_8);
             metricsQueryJson = metricsQueryJson.replaceAll("<var_before_time>", Integer.toString(beforeSeconds))
                     .replaceAll("<var_cluster_name>", clusterName);
-            try (RestClient restClient = RestClient.builder(toHttpHosts(this.hosts)).build()) {
+            try (RestClient restClient = RestClient.builder(toHttpHosts(this.hosts)).setMaxRetryTimeoutMillis(60000).build()) {
                 Request request = new Request(
                         "GET",
                         "/" + indices(beforeSeconds) + "/_search");
