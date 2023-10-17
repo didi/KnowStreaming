@@ -16,19 +16,19 @@ export const cardList = [
 
 export const filterList = [
   {
-    label: 'none',
+    label: 'None',
     value: 0,
   },
   {
-    label: 'contains',
+    label: 'Contains',
     value: 1,
   },
   {
-    label: 'does not contains',
+    label: 'Does Not Contains',
     value: 2,
   },
   {
-    label: 'equals',
+    label: 'Equals',
     value: 3,
   },
   {
@@ -40,11 +40,11 @@ export const filterList = [
     value: 5,
   },
   {
-      label: 'key_contains',
+      label: 'Key Contains',
       value: 6,
   },
   {
-      label: 'value_contains',
+      label: 'Value Contains',
       value: 7,
   }
 ];
