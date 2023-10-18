@@ -52,7 +52,7 @@ public class ClusterBrokersController {
     @GetMapping(value = "clusters/{clusterPhyId}/brokers-state")
     @ResponseBody
     public Result<ClusterBrokersStateVO> getClusterPhyBrokersState(@PathVariable Long clusterPhyId) {
-        return Result.buildSuc(clusterBrokersManager.getClusterPhyBrokersState(clusterPhyId));
+        return clusterBrokersManager.getClusterPhyBrokersState(clusterPhyId);
     }
 
     @ApiOperation(value = "集群brokers信息列表")
