@@ -956,7 +956,7 @@ export default forwardRef(
         success?: {
           connectClusterId: number;
           connectorName: string;
-          configs: {
+          config: {
             [key: string]: any;
           };
         };
@@ -1010,7 +1010,7 @@ export default forwardRef(
             success: {
               connectClusterId: res[0].connectClusterId,
               connectorName: result['name'],
-              configs: newCompareConfig,
+              config: newCompareConfig,
             },
           });
         },
@@ -1034,7 +1034,7 @@ export default forwardRef(
               curClusterName = cluster.label;
             }
           });
-          (jsonRef as any)?.onOpen(operateInfo.type, curClusterName, info.success.configs);
+          (jsonRef as any)?.onOpen(operateInfo.type, curClusterName, info.success.config);
           onClose();
         }
       });
@@ -1047,9 +1047,9 @@ export default forwardRef(
           setCurrentStep(info.error);
         } else {
           setSubmitLoading(true);
-          Object.entries(info.success.configs).forEach(([key, val]) => {
+          Object.entries(info.success.config).forEach(([key, val]) => {
             if (val === null) {
-              delete info.success.configs[key];
+              delete info.success.config[key];
             }
           });
           Utils.put(api.validateConnectorConfig, info.success).then(
