@@ -10,7 +10,7 @@ const PLACEHOLDER = `配置格式如下
 
 {
   "connectClusterName": "",  // Connect Cluster 名称
-  "config": {  // 具体配置项
+  "configs": {  // 具体配置项
     "name": "",
     "connector.class": "",
     "tasks.max": 1,
@@ -47,7 +47,7 @@ export default forwardRef((props: any, ref) => {
         configs: JSON.stringify(
           {
             connectClusterName,
-            config: defaultConfigs,
+            configs: defaultConfigs,
           },
           null,
           2
@@ -63,13 +63,13 @@ export default forwardRef((props: any, ref) => {
     form.validateFields().then(
       (data) => {
         const postData = JSON.parse(data.configs);
-        postData.connectorName = postData.config.name;
+        postData.connectorName = postData.configs.name;
         postData.connectClusterId = connectClusters.find((cluster) => cluster.label === postData.connectClusterName).value;
         delete postData.connectClusterName;
 
-        Object.entries(postData.config).forEach(([key, val]) => {
+        Object.entries(postData.configs).forEach(([key, val]) => {
           if (val === null) {
-            delete postData.config[key];
+            delete postData.configs[key];
           }
         });
         Utils.put(api.validateConnectorConfig, postData).then(
@@ -198,20 +198,20 @@ export default forwardRef((props: any, ref) => {
                     }
                   }
 
-                  if (!v.config || typeof v.config !== 'object') {
-                    return Promise.reject('内容缺少 config 字段或字段格式错误');
+                  if (!v.configs || typeof v.configs !== 'object') {
+                    return Promise.reject('内容缺少 configs 字段或字段格式错误');
                   } else {
                     // 校验 connectorName 字段
-                    if (!v.config.name) {
-                      return Promise.reject('config 字段下缺少 name 项');
+                    if (!v.configs.name) {
+                      return Promise.reject('configs 字段下缺少 name 项');
                     } else {
-                      if (type === 'edit' && v.config.name !== defaultConfigs.name) {
+                      if (type === 'edit' && v.configs.name !== defaultConfigs.name) {
                         return Promise.reject('编辑模式下不允许修改 name 字段');
                       }
                     }
-                    if (!v.config['connector.class']) {
-                      return Promise.reject('config 字段下缺少 connector.class 项');
-                    } else if (type === 'edit' && v.config['connector.class'] !== defaultConfigs['connector.class']) {
+                    if (!v.configs['connector.class']) {
+                      return Promise.reject('configs 字段下缺少 connector.class 项');
+                    } else if (type === 'edit' && v.configs['connector.class'] !== defaultConfigs['connector.class']) {
                       return Promise.reject('编辑模式下不允许修改 connector.class 字段');
                     }
                   }
@@ -219,13 +219,13 @@ export default forwardRef((props: any, ref) => {
                   if (type === 'create') {
                     // 异步校验 connector 名称是否重复 以及 className 是否存在
                     return Promise.all([
-                      Utils.request(api.isConnectorExist(connectClusterId, v.config.name)),
+                      Utils.request(api.isConnectorExist(connectClusterId, v.configs.name)),
                       Utils.request(api.getConnectorPlugins(connectClusterId)),
                     ]).then(
                       ([data, plugins]: [any, ConnectorPlugin[]]) => {
                         return data?.exist
                           ? Promise.reject('name 与已有 Connector 重复')
-                          : plugins.every((plugin) => plugin.className !== v.config['connector.class'])
+                          : plugins.every((plugin) => plugin.className !== v.configs['connector.class'])
                           ? Promise.reject('该 connectCluster 下不存在 connector.class 项配置的插件')
                           : Promise.resolve();
                       },

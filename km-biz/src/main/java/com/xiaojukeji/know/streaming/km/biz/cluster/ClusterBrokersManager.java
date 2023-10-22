@@ -2,7 +2,6 @@ package com.xiaojukeji.know.streaming.km.biz.cluster;
 
 import com.xiaojukeji.know.streaming.km.common.bean.dto.cluster.ClusterBrokersOverviewDTO;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.PaginationResult;
-import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.res.ClusterBrokersOverviewVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.cluster.res.ClusterBrokersStateVO;
 
@@ -23,5 +22,5 @@ public interface ClusterBrokersManager {
      * @param clusterPhyId 物理集群 id
      * @return 返回根据物理集群id获取到的集群对应broker状态信息
      */
-    Result<ClusterBrokersStateVO> getClusterPhyBrokersState(Long clusterPhyId);
+    ClusterBrokersStateVO getClusterPhyBrokersState(Long clusterPhyId);
 }
