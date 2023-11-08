@@ -100,7 +100,8 @@
 
 
 **点击 [这里](https://doc.knowstreaming.com/product)，也可以从官网获取到更多文档**
-
+- [产品官网https://knowstreaming.com](https://knowstreaming.com)
+- [产品demo]
 
 
 
