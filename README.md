@@ -100,9 +100,10 @@
 
 
 **点击 [这里](https://doc.knowstreaming.com/product)，也可以从官网获取到更多文档**
-- [产品官网https://knowstreaming.com](https://knowstreaming.com)
-- [产品demo]
 
+**`产品网址`**
+- [产品官网：https://knowstreaming.com](https://knowstreaming.com)
+- [体验环境：admin/admin](https://demo.knowstreaming.com)
 
 
 
