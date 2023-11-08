@@ -103,7 +103,7 @@
 
 **`产品网址`**
 - [产品官网：https://knowstreaming.com](https://knowstreaming.com)
-- [体验环境：admin/admin](https://demo.knowstreaming.com)
+- [体验环境：https://demo.knowstreaming.com](https://demo.knowstreaming.com),登陆账号：admin/admin
 
 
 
