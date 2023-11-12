@@ -24,7 +24,7 @@ import javax.sql.DataSource;
  * @date 20/3/17
  */
 @Configuration
-@MapperScan("com.xiaojukeji.know.streaming.km.persistence.mysql")
+@MapperScan({"com.xiaojukeji.know.streaming.km.persistence.mysql", "com.xiaojukeji.know.streaming.km.rebalance.persistence"})
 public class DataSourceConfig {
     @Bean(name = "dataSource")
     @ConfigurationProperties(prefix = "spring.datasource.know-streaming")

@@ -15,6 +15,9 @@ public class KSConfigUtils {
     private KSConfigUtils() {
     }
 
+    @Value("${cluster-balance.ignored-topics.time-second:300}")
+    private Integer     clusterBalanceIgnoredTopicsTimeSecond;
+
     @Value(value = "${request.api-call.timeout-unit-ms:8000}")
     private Integer apiCallTimeoutUnitMs;
 

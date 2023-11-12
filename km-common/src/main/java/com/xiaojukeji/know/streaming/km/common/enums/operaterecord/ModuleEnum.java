@@ -2,6 +2,7 @@ package com.xiaojukeji.know.streaming.km.common.enums.operaterecord;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.xiaojukeji.know.streaming.km.common.annotations.enterprise.EnterpriseLoadReBalance;
 import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 
 import java.util.List;
@@ -39,6 +40,9 @@ public enum ModuleEnum {
     PLATFORM_CONFIG(100, "平台配置"),
 
     JOB_KAFKA_REPLICA_REASSIGN(110, "Job-KafkaReplica迁移"),
+
+    @EnterpriseLoadReBalance
+    JOB_CLUSTER_BALANCE(111, "Job-ClusterBalance"),
 
     ;
 

@@ -1,0 +1,75 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "clusterPhyId": "<var_cluster_name>"
+          }
+        },
+        {
+          "range": {
+            "timestamp": {
+              "gte": "now-<var_before_time>s",
+              "lte": "now"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "by_topic": {
+      "terms": {
+        "field": "topic",
+        "size": 5000
+      },
+      "aggs": {
+        "by_partition": {
+          "terms": {
+            "field": "partitionId",
+            "size": 2000
+          },
+          "aggs": {
+            "avg_cpu": {
+              "avg": {
+                "field": "metrics.CPU"
+              }
+            },
+            "avg_bytes_in": {
+              "avg": {
+                "field": "metrics.BytesIn"
+              }
+            },
+            "avg_bytes_out": {
+              "avg": {
+                "field": "metrics.BytesOut"
+              }
+            },
+            "avg_disk": {
+              "avg": {
+                "field": "metrics.LogSize"
+              }
+            },
+            "lastest_disk": {
+              "top_hits": {
+                "sort": [
+                  {
+                    "timestamp": {
+                      "order": "desc"
+                    }
+                  }
+                ],
+                "_source": {
+                  "includes": [ "metrics.LogSize"]
+                },
+                "size": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

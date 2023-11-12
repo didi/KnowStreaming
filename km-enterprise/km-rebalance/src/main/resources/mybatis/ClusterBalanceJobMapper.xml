@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.xiaojukeji.know.streaming.km.rebalance.persistence.ClusterBalanceJobDao">
+
+    <resultMap id="ClusterBalanceJobMap" type="com.xiaojukeji.know.streaming.km.rebalance.common.bean.po.ClusterBalanceJobPO">
+        <result property="id" column="id"/>
+        <result property="clusterId" column="cluster_id"/>
+        <result property="brokers" column="brokers"/>
+        <result property="topicBlackList" column="topic_black_list"/>
+        <result property="type" column="type"/>
+        <result property="balanceIntervalJson" column="balance_interval_json"/>
+        <result property="metricCalculationPeriod" column="metric_calculation_period"/>
+        <result property="reassignmentJson" column="reassignment_json"/>
+        <result property="parallelNum" column="parallel_num"/>
+        <result property="executionStrategy" column="execution_strategy"/>
+        <result property="throttleUnitB" column="throttle_unit_b"/>
+        <result property="totalReassignSize" column="total_reassign_size"/>
+        <result property="totalReassignReplicaNum" column="total_reassign_replica_num"/>
+        <result property="moveInTopicList" column="move_in_topic_list"/>
+        <result property="brokerBalanceDetail" column="broker_balance_detail"/>
+        <result property="status" column="status"/>
+        <result property="creator" column="creator"/>
+        <result property="startTime" column="start_time"/>
+        <result property="finishedTime" column="finished_time"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="addClusterBalanceJob" useGeneratedKeys="true" keyProperty="id">
+        <![CDATA[
+            INSERT INTO ks_km_cluster_balance_job (
+                id,
+                cluster_id,
+                brokers,
+                topic_black_list,
+                type,
+                balance_interval_json,
+                metric_calculation_period,
+                reassignment_json,
+                parallel_num,
+                execution_strategy,
+                throttle_unit_b,
+                total_reassign_size,
+                total_reassign_replica_num,
+                move_in_topic_list,
+                broker_balance_detail,
+                status,
+                creator,
+                start_time,
+                finished_time,
+                description,
+                create_time,
+                update_time
+            ) VALUES (
+                #{id},
+                #{clusterId},
+                #{brokers},
+                #{topicBlackList},
+                #{type},
+                #{balanceIntervalJson},
+                #{metricCalculationPeriod},
+                #{reassignmentJson},
+                #{parallelNum},
+                #{executionStrategy},
+                #{throttleUnitB},
+                #{totalReassignSize},
+                #{totalReassignReplicaNum},
+                #{moveInTopicList},
+                #{brokerBalanceDetail},
+                #{status},
+                #{creator},
+                #{startTime},
+                #{finishedTime},
+                #{description},
+                #{createTime},
+                #{updateTime}
+            )
+        ]]>
+    </insert>
+
+</mapper>
+

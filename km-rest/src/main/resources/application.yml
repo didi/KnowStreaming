@@ -95,6 +95,11 @@ es:
   index:
     expire: 15                    # 索引过期天数，15表示超过15天的索引会被KS过期删除
 
+# 集群自动均衡相关配置
+cluster-balance:
+  ignored-topics:
+    time-second: 300
+
 request:                          # 请求相关的配置
   api-call:                       # api调用
     timeout-unit-ms: 8000         # 超时时间，默认8000毫秒

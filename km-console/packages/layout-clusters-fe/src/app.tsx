@@ -73,50 +73,13 @@ const logout = () => {
   localStorage.removeItem('userInfo');
 };
 
-const LicenseLimitModal = () => {
-  const [visible, setVisible] = useState<boolean>(false);
-  const [msg, setMsg] = useState<string>('');
-
-  useLayoutEffect(() => {
-    licenseEventBus.on('licenseError', (desc: string) => {
-      !visible && setVisible(true);
-      setMsg(desc);
-    });
-    return () => {
-      licenseEventBus.removeAll('licenseError');
-    };
-  }, []);
-
-  return (
-    <Modal
-      visible={visible}
-      centered={true}
-      width={400}
-      zIndex={10001}
-      title={
-        <>
-          <IconFont type="icon-yichang" style={{ marginRight: 10, fontSize: 18 }} />
-          许可证限制
-        </>
-      }
-      footer={null}
-      onCancel={() => setVisible(false)}
-    >
-      <div style={{ margin: '0 28px', lineHeight: '24px' }}>
-        <div>
-          {msg}，<a>前往帮助文档</a>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
 const AppContent = (props: { setlanguage: (language: string) => void }) => {
   const { pathname } = useLocation();
   const history = useHistory();
   const userInfo = localStorage.getItem('userInfo');
   const [curActiveAppName, setCurActiveAppName] = useState('');
   const [versionInfo, setVersionInfo] = useState<VersionInfo>();
+
   const [global] = AppContainer.useGlobalValue();
   const quickEntries=[];
 
@@ -186,7 +149,7 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
       }}
       onMount={(customProps: any) => {
         judgePage404();
-        registerApps(systemsConfig, { ...customProps, getLicenseInfo, licenseEventBus }, () => {
+        registerApps(systemsConfig, { ...customProps }, () => {
           // postMessage();
         });
       }}
@@ -207,7 +170,6 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
             }}
           />
         </Switch>
-        <LicenseLimitModal />
       </>
     </DProLayout.Container>
   );
@@ -241,7 +203,6 @@ export default function App(): JSX.Element {
         <BrowserRouter basename="">
           <Switch>
             <Route path="/login" component={Login} />
-            <Route path="/no-license" exact component={NoLicense} />
             <Route render={() => <AppContent setlanguage={setlanguage} />} />
           </Switch>
         </BrowserRouter>
