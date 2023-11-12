@@ -12,6 +12,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.connect.ConnectorPO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.connect.connector.ConnectorStateVO;
 import com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant;
 import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorService;
+import com.xiaojukeji.know.streaming.km.core.service.connect.connector.OpConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.plugin.PluginService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerConnectorService;
 import org.apache.kafka.connect.runtime.AbstractStatus;
@@ -31,6 +32,9 @@ public class ConnectorManagerImpl implements ConnectorManager {
     private ConnectorService connectorService;
 
     @Autowired
+    private OpConnectorService opConnectorService;
+
+    @Autowired
     private WorkerConnectorService workerConnectorService;
 
     @Override
@@ -44,24 +48,24 @@ public class ConnectorManagerImpl implements ConnectorManager {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "Connector参数错误");
         }
 
-        return connectorService.updateConnectorConfig(connectClusterId, connectorName, configs, operator);
+        return opConnectorService.updateConnectorConfig(connectClusterId, connectorName, configs, operator);
     }
 
     @Override
     public Result<Void> createConnector(ConnectorCreateDTO dto, String operator) {
         dto.getSuitableConfig().put(KafkaConnectConstant.MIRROR_MAKER_NAME_FIELD_NAME, dto.getConnectorName());
 
-        Result<KSConnectorInfo> createResult = connectorService.createConnector(dto.getConnectClusterId(), dto.getConnectorName(), dto.getSuitableConfig(), operator);
+        Result<KSConnectorInfo> createResult = opConnectorService.createConnector(dto.getConnectClusterId(), dto.getConnectorName(), dto.getSuitableConfig(), operator);
         if (createResult.failed()) {
             return Result.buildFromIgnoreData(createResult);
         }
 
-        Result<KSConnector> ksConnectorResult = connectorService.getAllConnectorInfoFromCluster(dto.getConnectClusterId(), dto.getConnectorName());
+        Result<KSConnector> ksConnectorResult = connectorService.getConnectorFromKafka(dto.getConnectClusterId(), dto.getConnectorName());
         if (ksConnectorResult.failed()) {
             return Result.buildFromRSAndMsg(ResultStatus.SUCCESS, "创建成功，但是获取元信息失败，页面元信息会存在1分钟延迟");
         }
 
-        connectorService.addNewToDB(ksConnectorResult.getData());
+        opConnectorService.addNewToDB(ksConnectorResult.getData());
         return Result.buildSuc();
     }
 
@@ -69,12 +73,12 @@ public class ConnectorManagerImpl implements ConnectorManager {
     public Result<Void> createConnector(ConnectorCreateDTO dto, String heartbeatName, String checkpointName, String operator) {
         dto.getSuitableConfig().put(KafkaConnectConstant.MIRROR_MAKER_NAME_FIELD_NAME, dto.getConnectorName());
 
-        Result<KSConnectorInfo> createResult = connectorService.createConnector(dto.getConnectClusterId(), dto.getConnectorName(), dto.getSuitableConfig(), operator);
+        Result<KSConnectorInfo> createResult = opConnectorService.createConnector(dto.getConnectClusterId(), dto.getConnectorName(), dto.getSuitableConfig(), operator);
         if (createResult.failed()) {
             return Result.buildFromIgnoreData(createResult);
         }
 
-        Result<KSConnector> ksConnectorResult = connectorService.getAllConnectorInfoFromCluster(dto.getConnectClusterId(), dto.getConnectorName());
+        Result<KSConnector> ksConnectorResult = connectorService.getConnectorFromKafka(dto.getConnectClusterId(), dto.getConnectorName());
         if (ksConnectorResult.failed()) {
             return Result.buildFromRSAndMsg(ResultStatus.SUCCESS, "创建成功，但是获取元信息失败，页面元信息会存在1分钟延迟");
         }
@@ -83,7 +87,7 @@ public class ConnectorManagerImpl implements ConnectorManager {
         connector.setCheckpointConnectorName(checkpointName);
         connector.setHeartbeatConnectorName(heartbeatName);
 
-        connectorService.addNewToDB(connector);
+        opConnectorService.addNewToDB(connector);
         return Result.buildSuc();
     }
 

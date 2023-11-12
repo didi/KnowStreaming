@@ -95,7 +95,7 @@ const api = {
     getApi(`/clusters/${clusterPhyId}/groups/${groupName}/partitions`),
   resetGroupOffset: () => getApi('/group-offsets'),
   getGroupOverview: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/groups-overview`),
-
+  deleteGroupOffset: () => getApi('/group-offsets'),
   // topics列表
   getTopicsList: (clusterPhyId: number) => getApi(`/clusters/${clusterPhyId}/topics-overview`),
   getReassignmentList: () => getApi(`/reassignment/topics-overview`),
@@ -108,6 +108,7 @@ const api = {
   getTopicState: (clusterPhyId: number, topicName: string) => getApi(`/clusters/${clusterPhyId}/topics/${topicName}/state`),
   getTopicMetadata: (clusterPhyId: number, topicName: string) =>
     getApi(`/clusters/${clusterPhyId}/topics/${topicName}/metadata-combine-exist`),
+  deleteTopicData: () => getApi(`/topics/truncate-topic`),
 
   // 最新的指标值
   getMetricPointsLatest: (clusterPhyId: number) => getApi(`/physical-clusters/${clusterPhyId}/latest-metrics`),

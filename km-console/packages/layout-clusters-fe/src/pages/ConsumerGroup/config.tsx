@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import React from 'react';
-import { AppContainer } from 'knowdesign';
+import { AppContainer, Button, Popconfirm } from 'knowdesign';
 import TagsWithHide from '@src/components/TagsWithHide';
 import { ClustersPermissionMap } from '../CommonConfig';
+import Delete from './Delete';
 
 export const runningStatusEnum: any = {
   1: 'Doing',
@@ -62,6 +63,21 @@ export const getGroupColumns = (arg?: any) => {
       width: 200,
       render: (t: number) => (t ? t.toLocaleString() : '-'),
     },
+    {
+      title: '操作',
+      dataIndex: 'options',
+      key: 'options',
+      width: 200,
+      filterTitle: true,
+      fixed: 'right',
+      render: (_t: any, r: any) => {
+        return (
+          <div>
+            <Delete record={r} onConfirm={arg?.deleteTesk}></Delete>
+          </div>
+        );
+      },
+    },
   ];
   return columns;
 };
@@ -103,11 +119,20 @@ export const getGtoupTopicColumns = (arg?: any) => {
       title: '操作',
       dataIndex: 'desc',
       key: 'desc',
-      width: 150,
+      width: 200,
       render: (value: any, record: any) => {
         return (
           <div>
             <a onClick={() => arg.resetOffset(record)}>重置Offset</a>
+            <Popconfirm
+              placement="top"
+              title={`是否要删除当前Topic？`}
+              onConfirm={() => arg.deleteOffset(record)}
+              okText="是"
+              cancelText="否"
+            >
+              <Button type="link">删除</Button>
+            </Popconfirm>
           </div>
         );
       },

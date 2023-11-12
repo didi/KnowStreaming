@@ -78,6 +78,7 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
             }
 
             props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, clusterPhy.getBootstrapServers());
+            props.put(AdminClientConfig.CLIENT_ID_CONFIG, String.format("KSPartialAdminClient||clusterPhyId=%d||timestamp=%d", clusterPhy.getId(), System.currentTimeMillis()));
 
             adminClient = KSPartialKafkaAdminClient.create(props);
             KSListGroupsResult listConsumerGroupsResult = adminClient.listConsumerGroups(
@@ -178,6 +179,7 @@ public class GroupServiceImpl extends BaseKafkaVersionControlService implements 
             }
 
             props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, clusterPhy.getBootstrapServers());
+            props.put(AdminClientConfig.CLIENT_ID_CONFIG, String.format("KSPartialAdminClient||clusterPhyId=%d||timestamp=%d", clusterPhy.getId(), System.currentTimeMillis()));
 
             adminClient = KSPartialKafkaAdminClient.create(props);
 

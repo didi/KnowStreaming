@@ -2,9 +2,9 @@ name: KnowStreaming Build
 
 on:
   push:
-    branches: [ "master", "ve_3.x", "ve_demo_3.x" ]
+    branches: [ "*" ]
   pull_request:
-    branches: [ "master", "ve_3.x", "ve_demo_3.x" ]
+    branches: [ "*" ]
 
 jobs:
   build:

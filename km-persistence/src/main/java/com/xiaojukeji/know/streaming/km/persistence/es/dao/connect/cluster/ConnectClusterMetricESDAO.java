@@ -1,4 +1,4 @@
-package com.xiaojukeji.know.streaming.km.persistence.es.dao.connect;
+package com.xiaojukeji.know.streaming.km.persistence.es.dao.connect.cluster;
 
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;

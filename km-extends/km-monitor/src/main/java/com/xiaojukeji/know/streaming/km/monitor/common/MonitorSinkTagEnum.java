@@ -16,6 +16,11 @@ public enum MonitorSinkTagEnum {
     CONSUMER_GROUP("consumerGroup"),
 
     REPLICATION("replication"),
+
+    CONNECT_CLUSTER_ID("connectClusterId"),
+
+    CONNECT_CONNECTOR("connectConnector"),
+
     ;
 
     private final String name;

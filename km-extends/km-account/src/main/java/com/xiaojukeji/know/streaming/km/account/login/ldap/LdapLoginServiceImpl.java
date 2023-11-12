@@ -16,8 +16,8 @@ import com.xiaojukeji.know.streaming.km.account.KmAccountConfig;
 import com.xiaojukeji.know.streaming.km.account.common.bizenum.LoginServiceNameEnum;
 import com.xiaojukeji.know.streaming.km.account.common.ldap.LdapPrincipal;
 import com.xiaojukeji.know.streaming.km.account.login.ldap.remote.LdapAuthentication;
+import com.xiaojukeji.know.streaming.km.common.constant.Constant;
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
-import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
 import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +79,11 @@ public class LdapLoginServiceImpl implements LoginExtend {
             userService.addUser(userDTO, ldapAttrsInfo.getSAMAccountName());
 
             // user赋值
-            user = ConvertUtil.obj2Obj(userDTO, User.class);
+            user = userService.getUserByUserName(ldapAttrsInfo.getSAMAccountName());
+        } else if (ValidateUtils.isNull(user)) {
+            // user为空，且不自动注册用户时，赋值默认id给临时用户
+            user = new User();
+            user.setId(Constant.INVALID_CODE);
         }
 
         // 记录登录状态

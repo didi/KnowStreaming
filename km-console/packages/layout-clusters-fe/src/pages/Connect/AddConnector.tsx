@@ -189,7 +189,14 @@ const StepFormFirst = (props: SubFormProps) => {
         const result: FormConnectorConfigs = {
           pluginConfig: {},
         };
+
+        // 获取一份默认配置
+        const defaultPluginConfig: any = {};
+
         pluginConfig.configs.forEach(({ definition }) => {
+          // 获取一份默认配置
+          defaultPluginConfig[definition.name] = definition?.defaultValue;
+
           if (!getExistFormItems(pluginType).includes(definition.name)) {
             const pluginConfigs = result.pluginConfig;
             const group = definition.group || 'Others';
@@ -205,7 +212,7 @@ const StepFormFirst = (props: SubFormProps) => {
 
         Object.keys(result).length &&
           form.setFieldsValue({
-            configs: result,
+            configs: { ...result, defaultPluginConfig, editConnectorConfig: result.connectorConfig },
           });
       })
       .finally(() => props.setSubmitLoading(false));
@@ -816,6 +823,8 @@ const StepFormFifth = (props: SubFormProps) => {
                             <InputNumber />
                           ) : type.toUpperCase() === 'BOOLEAN' ? (
                             <Switch size="small" />
+                          ) : type.toUpperCase() === 'PASSWORD' ? (
+                            <Input.Password />
                           ) : (
                             <Input />
                           )}
@@ -947,7 +956,7 @@ export default forwardRef(
         success?: {
           connectClusterId: number;
           connectorName: string;
-          configs: {
+          config: {
             [key: string]: any;
           };
         };
@@ -955,6 +964,7 @@ export default forwardRef(
       }) => void
     ) => {
       const promises: Promise<any>[] = [];
+      const compareConfig = stepsFormRef.current[0].getFieldValue('configs'); // 获取步骤一的form信息
       Object.values(stepsFormRef.current).forEach((form, i) => {
         const promise = form
           .validateFields()
@@ -985,11 +995,22 @@ export default forwardRef(
                 const [k, ...v] = l.split('=');
                 result[k] = v.join('=');
               });
+
+          const editConnectorConfig = operateInfo.type === 'edit' ? compareConfig.editConnectorConfig : {}; // 编辑状态时拿到config配置
+          const newCompareConfig = { ...compareConfig.defaultPluginConfig, ...editConnectorConfig, ...result }; // 整合后的表单提交信息
+          Object.keys(newCompareConfig).forEach((item) => {
+            if (
+              newCompareConfig[item] === compareConfig.defaultPluginConfig[item] ||
+              newCompareConfig[item]?.toString() === compareConfig.defaultPluginConfig[item]?.toString()
+            ) {
+              delete newCompareConfig[item]; // 清除默认值
+            }
+          });
           callback({
             success: {
               connectClusterId: res[0].connectClusterId,
               connectorName: result['name'],
-              configs: result,
+              config: newCompareConfig,
             },
           });
         },
@@ -1013,7 +1034,7 @@ export default forwardRef(
               curClusterName = cluster.label;
             }
           });
-          (jsonRef as any)?.onOpen(operateInfo.type, curClusterName, info.success.configs);
+          (jsonRef as any)?.onOpen(operateInfo.type, curClusterName, info.success.config);
           onClose();
         }
       });
@@ -1026,9 +1047,9 @@ export default forwardRef(
           setCurrentStep(info.error);
         } else {
           setSubmitLoading(true);
-          Object.entries(info.success.configs).forEach(([key, val]) => {
+          Object.entries(info.success.config).forEach(([key, val]) => {
             if (val === null) {
-              delete info.success.configs[key];
+              delete info.success.config[key];
             }
           });
           Utils.put(api.validateConnectorConfig, info.success).then(

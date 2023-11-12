@@ -44,7 +44,7 @@ public class ConnectConnectorMetricCollector extends AbstractConnectMetricCollec
         Long connectClusterId   = connectCluster.getId();
 
         List<VersionControlItem> items      = versionControlService.listVersionControlItem(this.getClusterVersion(connectCluster), collectorType().getCode());
-        Result<List<String>> connectorList  = connectorService.listConnectorsFromCluster(connectClusterId);
+        Result<List<String>> connectorList  = connectorService.listConnectorsFromCluster(connectCluster);
 
         FutureWaitUtil<Void> future         = this.getFutureUtilByClusterPhyId(connectClusterId);
 

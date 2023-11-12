@@ -7,6 +7,9 @@ import { goLogin } from '@src/constants/axiosConfig';
 export enum ClustersPermissionMap {
   CLUSTERS_MANAGE = '多集群管理',
   CLUSTERS_MANAGE_VIEW = '多集群管理查看',
+  //仅用作隐藏掉系统管理菜单
+  SYS_MANAGE = '系统管理',
+  SYS_MANAGE_VIEW = '系统管理查看',
   // Cluster
   CLUSTER_ADD = '接入集群',
   CLUSTER_DEL = '删除集群',
@@ -39,6 +42,12 @@ export enum ClustersPermissionMap {
   MM2_DELETE = 'MM2-删除',
   MM2_RESTART = 'MM2-重启',
   MM2_STOP_RESUME = 'MM2-暂停&恢复',
+  // Connector
+  CONNECTOR_ADD = 'Connector-新增',
+  CONNECTOR_CHANGE_CONFIG = 'Connector-编辑',
+  CONNECTOR_DELETE = 'Connector-删除',
+  CONNECTOR_RESTART = 'Connector-重启',
+  CONNECTOR_STOP_RESUME = 'Connector-暂停&恢复',
 }
 
 export interface PermissionNode {
@@ -87,6 +96,13 @@ const CommonConfig = () => {
       const userPermissions: ClustersPermissionMap[] = [];
       clustersPermissions &&
         clustersPermissions.childList.forEach((node: PermissionNode) => node.has && userPermissions.push(node.permissionName));
+
+      // 获取用户在系统管理拥有的权限
+      const configPermissions = userPermissionTree.find(
+          (sys: PermissionNode) => sys.permissionName === ClustersPermissionMap.SYS_MANAGE
+      );
+      configPermissions &&
+        configPermissions.childList.forEach((node: PermissionNode) => node.has && userPermissions.push(node.permissionName));
 
       const hasPermission = (permissionName: ClustersPermissionMap) => permissionName && userPermissions.includes(permissionName);
 

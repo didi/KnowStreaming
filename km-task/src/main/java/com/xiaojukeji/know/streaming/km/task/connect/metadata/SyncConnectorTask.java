@@ -3,17 +3,15 @@ package com.xiaojukeji.know.streaming.km.task.connect.metadata;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.consensual.ConsensualEnum;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.ConnectCluster;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.connect.connector.KSConnector;
 import com.xiaojukeji.know.streaming.km.common.bean.entity.result.Result;
+import com.xiaojukeji.know.streaming.km.common.utils.Tuple;
 import com.xiaojukeji.know.streaming.km.core.service.connect.connector.ConnectorService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Task(name = "SyncConnectorTask",
@@ -23,40 +21,21 @@ import java.util.List;
         consensual = ConsensualEnum.BROADCAST,
         timeout = 2 * 60)
 public class SyncConnectorTask extends AbstractAsyncMetadataDispatchTask {
-    private static final ILog LOGGER = LogFactory.getLog(SyncConnectorTask.class);
-
     @Autowired
     private ConnectorService connectorService;
+
     @Override
     public TaskResult processClusterTask(ConnectCluster connectCluster, long triggerTimeUnitMs) {
-        Result<List<String>> nameListResult = connectorService.listConnectorsFromCluster(connectCluster.getId());
-        if (nameListResult.failed()) {
-            return TaskResult.FAIL;
+        // 获取信息
+        Result<Tuple<Set<String>, List<KSConnector>>> dataResult = connectorService.getDataFromKafka(connectCluster);
+        if (dataResult.failed()) {
+            return new TaskResult(TaskResult.FAIL_CODE, dataResult.getMessage());
         }
 
-        boolean allSuccess = true;
+        // 更新到DB
+        connectorService.writeToDB( connectCluster.getId(), dataResult.getData().v1(), dataResult.getData().v2());
 
-        List<KSConnector> connectorList = new ArrayList<>();
-        for (String connectorName: nameListResult.getData()) {
-            Result<KSConnector> ksConnectorResult = connectorService.getAllConnectorInfoFromCluster(connectCluster.getId(), connectorName);
-            if (ksConnectorResult.failed()) {
-                LOGGER.error(
-                        "method=processClusterTask||connectClusterId={}||connectorName={}||result={}",
-                        connectCluster.getId(), connectorName, ksConnectorResult
-                );
-
-                allSuccess = false;
-                continue;
-            }
-
-            connectorList.add(ksConnectorResult.getData());
-        }
-
-        //mm2相关信息的添加
-        connectorService.completeMirrorMakerInfo(connectCluster, connectorList);
-
-        connectorService.batchReplace(connectCluster.getKafkaClusterPhyId(), connectCluster.getId(), connectorList, new HashSet<>(nameListResult.getData()));
-
-        return allSuccess? TaskResult.SUCCESS: TaskResult.FAIL;
+        // 返回结果
+        return dataResult.getData().v1().size() == dataResult.getData().v2().size()? TaskResult.SUCCESS: TaskResult.FAIL;
     }
 }

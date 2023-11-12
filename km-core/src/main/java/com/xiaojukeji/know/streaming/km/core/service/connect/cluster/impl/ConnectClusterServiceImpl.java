@@ -39,6 +39,14 @@ public class ConnectClusterServiceImpl implements ConnectClusterService {
     private OpLogWrapService opLogWrapService;
 
     @Override
+    public int deleteInDBByKafkaClusterId(Long clusterPhyId) {
+        LambdaQueryWrapper<ConnectClusterPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(ConnectClusterPO::getKafkaClusterPhyId, clusterPhyId);
+
+        return connectClusterDAO.deleteById(lambdaQueryWrapper);
+    }
+
+    @Override
     public Long replaceAndReturnIdInDB(ConnectClusterMetadata metadata) {
         ConnectClusterPO oldPO = this.getPOFromDB(metadata.getKafkaClusterPhyId(), metadata.getGroupName());
         if (oldPO == null) {

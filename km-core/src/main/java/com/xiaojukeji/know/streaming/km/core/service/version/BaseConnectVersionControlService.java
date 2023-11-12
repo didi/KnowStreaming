@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
  * @author wyb
  * @date 2022/11/8
  */
-public abstract class BaseConnectorVersionControlService extends BaseVersionControlService {
+public abstract class BaseConnectVersionControlService extends BaseVersionControlService {
 
     @Autowired
     ConnectClusterService connectClusterService;
