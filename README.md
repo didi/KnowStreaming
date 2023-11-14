@@ -146,7 +146,7 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 **`2、微信群`**
 
-微信加群：添加`mike_zhangliang`、`PenceXie` 、`szzdzhp001`的微信号备注KnowStreaming加群。
+微信加群：添加`PenceXie` 、`szzdzhp001`的微信号备注KnowStreaming加群。
 <br/>
 
 加群之前有劳点一下 star，一个小小的 star 是对KnowStreaming作者们努力建设社区的动力。
