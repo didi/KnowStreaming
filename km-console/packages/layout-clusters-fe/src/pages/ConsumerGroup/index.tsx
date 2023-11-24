@@ -58,6 +58,11 @@ const BrokerList: React.FC = (props: any) => {
     genData({ pageNo: pagination.current, pageSize: pagination.pageSize, filters, sorter });
   };
 
+  // 删除Group
+  const deleteTesk = () => {
+    genData({ pageNo: 1, pageSize: pagination.pageSize });
+  };
+
   useEffect(() => {
     genData({
       pageNo: 1,
@@ -115,7 +120,7 @@ const BrokerList: React.FC = (props: any) => {
             showHeader: false,
             rowKey: 'group_list',
             loading: loading,
-            columns: getGroupColumns(),
+            columns: getGroupColumns(deleteTesk),
             dataSource: data,
             paginationProps: { ...pagination },
             attrs: {
