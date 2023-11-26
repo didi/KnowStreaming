@@ -49,7 +49,7 @@ const ConnectDetailCard = (props: { record: any }) => {
             return (
               <>
                 {
-                  <span style={{ fontFamily: 'HelveticaNeue-Medium', fontSize: 32, color: '#212529' }}>
+                  <span style={{ fontFamily: 'HelveticaNeue-Medium', fontSize: 28, color: '#212529' }}>
                     {Utils.firstCharUppercase(type) || '-'}
                   </span>
                 }
@@ -64,7 +64,7 @@ const ConnectDetailCard = (props: { record: any }) => {
             return (
               <>
                 {
-                  <span style={{ fontFamily: 'HelveticaNeue-Medium', fontSize: 32, color: stateEnum[state].color }}>
+                  <span style={{ fontFamily: 'HelveticaNeue-Medium', fontSize: 28, color: stateEnum[state].color }}>
                     {Utils.firstCharUppercase(state) || '-'}
                   </span>
                 }
