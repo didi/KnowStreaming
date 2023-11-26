@@ -108,6 +108,7 @@
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "prettier": "2.3.2",
     "progress-bar-webpack-plugin": "^1.12.1",
+    "pubsub-js": "^1.9.4",
     "query-string": "^7.0.1",
     "react-refresh": "^0.10.0",
     "react-router-dom": "5.2.1",

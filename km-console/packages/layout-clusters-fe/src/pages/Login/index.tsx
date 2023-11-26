@@ -13,7 +13,7 @@ const carouselList = [
       <img className="carousel-eg-ctr-two-img img-one" src={egTwoContent} />
       <div className="carousel-eg-ctr-two-desc desc-one">
         <span>Github: </span>
-        <span>5.8K</span>
+        <span>6.8K</span>
         <span>+ Star的的实时流处理平台</span>
       </div>
       <div className="carousel-eg-ctr-two-desc desc-two">
