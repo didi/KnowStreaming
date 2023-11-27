@@ -22,7 +22,8 @@ export const defaultPagination = {
 };
 
 export const getGroupColumns = (arg?: any) => {
-  const columns = [
+  const [global] = AppContainer.useGlobalValue();
+  const columns: any = [
     {
       title: 'ConsumerGroup',
       dataIndex: 'name',
@@ -63,7 +64,9 @@ export const getGroupColumns = (arg?: any) => {
       width: 200,
       render: (t: number) => (t ? t.toLocaleString() : '-'),
     },
-    {
+  ];
+  if (global.hasPermission && global.hasPermission(ClustersPermissionMap.GROUP_DELETE)) {
+    columns.push({
       title: '操作',
       dataIndex: 'options',
       key: 'options',
@@ -77,8 +80,8 @@ export const getGroupColumns = (arg?: any) => {
           </div>
         );
       },
-    },
-  ];
+    });
+  }
   return columns;
 };
 
@@ -114,7 +117,7 @@ export const getGtoupTopicColumns = (arg?: any) => {
       render: (t: number) => (t ? t.toLocaleString() : '-'),
     },
   ];
-  if (global.hasPermission && global.hasPermission(ClustersPermissionMap.CONSUMERS_RESET_OFFSET)) {
+  if (global.hasPermission) {
     columns.push({
       title: '操作',
       dataIndex: 'desc',
@@ -123,16 +126,24 @@ export const getGtoupTopicColumns = (arg?: any) => {
       render: (value: any, record: any) => {
         return (
           <div>
-            <a onClick={() => arg.resetOffset(record)}>重置Offset</a>
-            <Popconfirm
-              placement="top"
-              title={`是否要删除当前Topic？`}
-              onConfirm={() => arg.deleteOffset(record)}
-              okText="是"
-              cancelText="否"
-            >
-              <Button type="link">删除</Button>
-            </Popconfirm>
+            {global.hasPermission(ClustersPermissionMap.CONSUMERS_RESET_OFFSET) ? (
+              <a onClick={() => arg.resetOffset(record)}>重置Offset</a>
+            ) : (
+              <></>
+            )}
+            {global.hasPermission(ClustersPermissionMap.GROUP_TOPIC_DELETE) ? (
+              <Popconfirm
+                placement="top"
+                title={`是否要删除当前Topic？`}
+                onConfirm={() => arg.deleteOffset(record)}
+                okText="是"
+                cancelText="否"
+              >
+                <Button type="link">删除</Button>
+              </Popconfirm>
+            ) : (
+              <></>
+            )}
           </div>
         );
       },

@@ -33,6 +33,9 @@ export enum ClustersPermissionMap {
   TOPIC_CANCEL_REPLICATOR = 'Topic-详情-取消Topic复制',
   // Consumers
   CONSUMERS_RESET_OFFSET = 'Consumers-重置Offset',
+  GROUP_DELETE = 'Group-删除',
+  GROUP_TOPIC_DELETE = 'GroupOffset-Topic纬度删除',
+  GROUP_PARTITION_DELETE = 'GroupOffset-Partition纬度删除',
   // Test
   TEST_CONSUMER = 'Test-Consumer',
   TEST_PRODUCER = 'Test-Producer',
@@ -54,6 +57,7 @@ export enum ClustersPermissionMap {
   SECURITY_USER_ADD = 'Security-User新增',
   SECURITY_USER_DELETE = 'Security-User删除',
   SECURITY_USER_EDIT_PASSWORD = 'Security-User修改密码',
+  SECURITY_USER_VIEW_PASSWORD = 'Security-User查看密码',
 }
 
 export interface PermissionNode {
