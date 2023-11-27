@@ -537,7 +537,7 @@ const ConnectorForm = (props: {
     setSelectedTabKey(undefined);
     try {
       const jmxPortInfo = JSON.parse(initFieldsValue.jmxProperties) || {};
-      form.setFieldsValue({ ...initFieldsValue, jmxProperties: jmxPortInfo.jmxProperties });
+      form.setFieldsValue({ ...initFieldsValue, jmxProperties: jmxPortInfo.jmxPort });
     } catch {
       form.setFieldsValue({ ...initFieldsValue });
     }
@@ -546,7 +546,7 @@ const ConnectorForm = (props: {
   useLayoutEffect(() => {
     try {
       const jmxPortInfo = JSON.parse(initFieldsValue.jmxProperties) || {};
-      form.setFieldsValue({ ...initFieldsValue, jmxProperties: jmxPortInfo.jmxProperties });
+      form.setFieldsValue({ ...initFieldsValue, jmxProperties: jmxPortInfo.jmxPort });
     } catch {
       form.setFieldsValue({ ...initFieldsValue });
     }
