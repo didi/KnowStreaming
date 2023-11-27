@@ -315,6 +315,7 @@ export const getWorkersColumns = (arg?: any) => {
 
 // Detail
 export const getConnectorsDetailColumns = (arg?: any) => {
+  const [global] = AppContainer.useGlobalValue();
   const columns = [
     {
       title: 'Task ID',
@@ -363,16 +364,20 @@ export const getConnectorsDetailColumns = (arg?: any) => {
       render: (_t: any, r: any) => {
         return (
           <div>
-            <Popconfirm
-              title="是否重试当前任务？"
-              onConfirm={() => arg?.retryOption(r.taskId)}
-              // onCancel={cancel}
-              okText="是"
-              cancelText="否"
-              overlayClassName="connect-popconfirm"
-            >
-              <a>重试</a>
-            </Popconfirm>
+            {global.hasPermission(ClustersPermissionMap.CONNECTOR_RESTART) ? (
+              <Popconfirm
+                title="是否重试当前任务？"
+                onConfirm={() => arg?.retryOption(r.taskId)}
+                // onCancel={cancel}
+                okText="是"
+                cancelText="否"
+                overlayClassName="connect-popconfirm"
+              >
+                <a>重试</a>
+              </Popconfirm>
+            ) : (
+              <></>
+            )}
           </div>
         );
       },

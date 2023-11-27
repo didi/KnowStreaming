@@ -82,7 +82,7 @@ export const getTopicMessagesColmns = () => {
       dataIndex: 'offset',
       key: 'offset',
       sorter: true,
-      render: (t: number) => (+t ? t.toLocaleString() : '-'),
+      render: (t: number) => (+t || +t === 0 ? t.toLocaleString() : '-'), // TODO: 千分位展示
     },
     {
       title: 'Timestamp',

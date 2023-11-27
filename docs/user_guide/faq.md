@@ -22,6 +22,7 @@
   - [16、JMX连接失败怎么办](#16jmx连接失败怎么办)
   - [17、zk监控无数据问题](#17zk监控无数据问题)
   - [18、启动失败，报NoClassDefFoundError如何解决](#18启动失败报noclassdeffounderror如何解决)
+  - [19、依赖ElasticSearch 8.0以上版本部署后指标信息无法正常显示如何解决]
 
 ## 1、支持哪些 Kafka 版本？
 
@@ -306,4 +307,15 @@ at org.springframework.beans.factory.support.ConstructorResolver.instantiate(Con
 
 如果在在 `Windows`、`Mac`、`CentOS` 这几个操作系统下也出现了启动失败的问题，可以重试2-3次看是否还是启动失败，或者换一台机器试试。
 
+## 依赖ElasticSearch 8.0以上版本部署后指标信息无法正常显示如何解决
+**错误现象**
+```log
+Warnings: [299 Elasticsearch-8.9.1-a813d015ef1826148d9d389bd1c0d781c6e349f0 "Legacy index templates are deprecated in favor of composable templates."]
+```
+**问题原因**
+1. ES8.0和ES7.0版本存在Template模式的差异，建议使用 /_index_template 端点来管理模板；
+2. ES java client在此版本的行为很奇怪表现为读取数据为空；
+
+**解决方法**
+修改`es_template_create.sh`脚本中所有的`/_template`为`/_index_template`后执行即可。
 

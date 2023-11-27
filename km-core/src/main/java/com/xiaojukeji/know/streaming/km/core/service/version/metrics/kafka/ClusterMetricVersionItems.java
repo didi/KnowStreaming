@@ -299,7 +299,7 @@ public class ClusterMetricVersionItems extends BaseMetricVersionMetric {
 
         // MessagesIn 指标
         itemList.add( buildAllVersionsItem()
-                .name(CLUSTER_METRIC_MESSAGES_IN).unit("条/s").desc("集群每条消息写入条数").category(CATEGORY_CLUSTER)
+                .name(CLUSTER_METRIC_MESSAGES_IN).unit("条/s").desc("集群每秒消息写入条数").category(CATEGORY_CLUSTER)
                 .extend( buildJMXMethodExtend( CLUSTER_METHOD_GET_METRIC_FROM_KAFKA_BY_TOTAL_BROKERS_JMX )
                         .jmxObjectName( JMX_SERVER_BROKER_MESSAGES_IN ).jmxAttribute(RATE_MIN_1)));
 

@@ -14,6 +14,7 @@ import AddACLDrawer, {
   RESOURCE_TO_OPERATIONS_MAP,
   RESOURCE_MAP_KEYS,
 } from './EditDrawer';
+import { ClustersPermissionMap } from '../CommonConfig';
 import './index.less';
 
 const { confirm } = Modal;
@@ -105,7 +106,7 @@ const SecurityACLs = (): JSX.Element => {
   };
 
   const columns = () => {
-    const baseColumns = [
+    const baseColumns: any = [
       {
         title: 'Principal',
         dataIndex: 'kafkaUser',
@@ -143,7 +144,9 @@ const SecurityACLs = (): JSX.Element => {
         title: 'Host',
         dataIndex: 'aclClientHost',
       },
-      {
+    ];
+    if (global.hasPermission && global.hasPermission(ClustersPermissionMap.SECURITY_ACL_DELETE)) {
+      baseColumns.push({
         title: '操作',
         dataIndex: '',
         width: 120,
@@ -156,8 +159,8 @@ const SecurityACLs = (): JSX.Element => {
             </>
           );
         },
-      },
-    ];
+      });
+    }
 
     return baseColumns;
   };
@@ -238,15 +241,19 @@ const SecurityACLs = (): JSX.Element => {
               </Form.Item>
             </Form>
           </div>
-          <div className={`${tableHeaderPrefix}-right`}>
-            <Button
-              type="primary"
-              // icon={<PlusOutlined />}
-              onClick={() => editDrawerRef.current.onOpen(true, getACLs)}
-            >
-              新增ACL
-            </Button>
-          </div>
+          {global.hasPermission && global.hasPermission(ClustersPermissionMap.SECURITY_ACL_ADD) ? (
+            <div className={`${tableHeaderPrefix}-right`}>
+              <Button
+                type="primary"
+                // icon={<PlusOutlined />}
+                onClick={() => editDrawerRef.current.onOpen(true, getACLs)}
+              >
+                新增ACL
+              </Button>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
         <ProTable
           tableProps={{
