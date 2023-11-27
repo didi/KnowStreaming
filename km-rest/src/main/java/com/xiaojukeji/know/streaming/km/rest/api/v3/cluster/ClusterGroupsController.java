@@ -77,7 +77,7 @@ public class ClusterGroupsController {
     @GetMapping(value = "clusters/{clusterPhyId}/groups/{groupName}/topics-overview")
     public PaginationResult<GroupTopicOverviewVO> getGroupTopicsOverview(@PathVariable Long clusterPhyId,
                                                                          @PathVariable String groupName,
-                                                                         PaginationBaseDTO dto) {
+                                                                         PaginationBaseDTO dto) throws Exception {
         return groupManager.pagingGroupTopicMembers(clusterPhyId, groupName, dto);
     }
 
