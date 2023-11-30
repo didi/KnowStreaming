@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import EditTable from '../TestingProduce/component/EditTable';
 import Api from '@src/api/index';
 import moment from 'moment';
-import PubSub from 'pubsub-js';
 
 const CustomSelectResetTime = (props: { value?: string; onChange?: (val: Number | String) => void }) => {
   const { value, onChange } = props;
@@ -45,7 +44,7 @@ const CustomSelectResetTime = (props: { value?: string; onChange?: (val: Number 
 };
 
 export default (props: any) => {
-  const { record, visible, setVisible } = props;
+  const { record, visible, setVisible, resetOffsetFn } = props;
   const routeParams = useParams<{
     clusterId: string;
   }>();
@@ -108,7 +107,7 @@ export default (props: any) => {
         });
         setVisible(false);
         // 发布重置offset成功的消息
-        PubSub.publish('ConsumerGroup-ResetOffset', '1');
+        resetOffsetFn();
       } else {
         notification.error({
           message: '重置offset失败',
