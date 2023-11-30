@@ -8,7 +8,6 @@ import { IconFont } from '@knowdesign/icons';
 import API from '@src/api/index';
 import { hashDataParse } from '@src/constants/common';
 const { Option } = Select;
-import PubSub from 'pubsub-js'
 
 export interface MetricLine {
   createTime?: number;
@@ -42,7 +41,7 @@ const metricWithType = [
   { metricName: 'Lag', metricType: 102 },
 ];
 
-export const ExpandedRow: any = ({ record, groupName }: any) => {
+export const ExpandedRow: any = ({ record, groupName, refreshKey }: any) => {
   const params: any = useParams<{
     clusterId: string;
   }>();
@@ -194,7 +193,7 @@ export const ExpandedRow: any = ({ record, groupName }: any) => {
       endTime: timeRange[1],
       topNu: 0,
     };
-    Utils.post(API.getTopicGroupMetricHistory(clusterId), params).then((data: Array<MetricData>) => {
+    Utils.post(API.getTopicGroupMetricHistory(clusterId), params, { timeout: 300000 }).then((data: Array<MetricData>) => {
       // ! 替换接口返回
       setAllGroupMetricsData(data);
     });
@@ -210,15 +209,6 @@ export const ExpandedRow: any = ({ record, groupName }: any) => {
   const onTableChange = (pagination: any, filters: any, sorter: any) => {
     getTopicGroupMetric({ pagination, sorter });
   };
-
-  // useEffect(() => {
-  //   getTopicGroupMetric();
-  // }, [sortObj]);
-
-  // 订阅重置offset成功的消息
-  PubSub.subscribe('ConsumerGroup-ResetOffset', function(data){
-    getTopicGroupMetric({});
-  })
 
   useEffect(() => {
     const hashData = hashDataParse(location.hash);
@@ -248,7 +238,7 @@ export const ExpandedRow: any = ({ record, groupName }: any) => {
       // 获取Consumer列表 表格模式
       getTopicGroupMetric({});
     });
-  }, [hashDataParse(location.hash).groupName]);
+  }, [hashDataParse(location.hash).groupName, refreshKey]);
 
   useEffect(() => {
     if (partitionList.length === 0) return;

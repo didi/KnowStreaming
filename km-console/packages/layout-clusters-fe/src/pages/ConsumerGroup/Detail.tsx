@@ -236,6 +236,7 @@ const GroupDetail = (props: any) => {
                   chartData={chartData}
                   groupName={hashDataParse(location.hash).groupName}
                   loading={loadingObj}
+                  refreshKey={refreshKey}
                 />
               ),
               // expandedRowRender,
@@ -268,7 +269,12 @@ const GroupDetail = (props: any) => {
           },
         }}
       />
-      <ResetOffsetDrawer visible={resetOffsetVisible} setVisible={setResetOffsetVisible} record={resetOffsetArg}></ResetOffsetDrawer>
+      <ResetOffsetDrawer
+        visible={resetOffsetVisible}
+        setVisible={setResetOffsetVisible}
+        record={resetOffsetArg}
+        resetOffsetFn={forceRefresh}
+      ></ResetOffsetDrawer>
     </Drawer>
   );
 };
