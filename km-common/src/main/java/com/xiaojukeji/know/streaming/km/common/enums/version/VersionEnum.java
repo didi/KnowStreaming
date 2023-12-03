@@ -73,9 +73,27 @@ public enum VersionEnum {
      * 3.x.x
      */
     V_3_0_0("3.0.0", normailze("3.0.0")),
+
     V_3_1_0("3.1.0", normailze("3.1.0")),
+    V_3_1_1("3.1.1", normailze("3.1.1")),
+    V_3_1_2("3.1.2", normailze("3.1.2")),
+
     V_3_2_0("3.2.0", normailze("3.2.0")),
+    V_3_2_1("3.2.1", normailze("3.2.1")),
+    V_3_2_3("3.2.3", normailze("3.2.3")),
+
     V_3_3_0("3.3.0", normailze("3.3.0")),
+    V_3_3_1("3.3.1", normailze("3.3.1")),
+    V_3_3_2("3.3.2", normailze("3.3.2")),
+
+    V_3_4_0("3.4.0", normailze("3.4.0")),
+    V_3_4_1("3.4.1", normailze("3.4.1")),
+
+    V_3_5_0("3.5.0", normailze("3.5.0")),
+    V_3_5_1("3.5.1", normailze("3.5.1")),
+
+    V_3_6_0("3.6.0", normailze("3.6.0")),
+
 
     V_MAX("x.x.x.x", Long.MAX_VALUE),
 
