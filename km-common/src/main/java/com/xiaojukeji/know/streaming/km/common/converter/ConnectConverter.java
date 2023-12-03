@@ -16,6 +16,8 @@ import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiL
 import com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant;
 import com.xiaojukeji.know.streaming.km.common.utils.CommonUtils;
 import com.xiaojukeji.know.streaming.km.common.utils.ConvertUtil;
+import com.xiaojukeji.know.streaming.km.common.utils.Triple;
+import com.xiaojukeji.know.streaming.km.common.utils.ValidateUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant.MIRROR_MAKER_SOURCE_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME;
+import static com.xiaojukeji.know.streaming.km.common.constant.connect.KafkaConnectConstant.MIRROR_MAKER_TARGET_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME;
 
 public class ConnectConverter {
     public static ConnectorBasicCombineExistVO convert2BasicVO(ConnectCluster connectCluster, ConnectorPO connectorPO) {
@@ -151,6 +156,66 @@ public class ConnectConverter {
         ksConnector.setState(stateInfo != null? stateInfo.getConnector().getState(): "");
 
         return ksConnector;
+    }
+
+    public static List<KSConnector> convertAndSupplyMirrorMakerInfo(ConnectCluster connectCluster, List<Triple<KSConnectorInfo, List<String>, KSConnectorStateInfo>> connectorFullInfoList) {
+        // <connectorName, targetBootstrapServers + "@" + sourceBootstrapServers>
+        Map<String, String> sourceMap = new HashMap<>();
+
+        // <targetBootstrapServers + "@" + sourceBootstrapServers, connectorName>
+        Map<String, String> heartbeatMap = new HashMap<>();
+        Map<String, String> checkpointMap = new HashMap<>();
+
+        // 获取每个类型的connector的map信息
+        connectorFullInfoList.forEach(connector -> {
+            Map<String, String> mm2Map = null;
+            if (KafkaConnectConstant.MIRROR_MAKER_SOURCE_CONNECTOR_TYPE.equals(connector.v1().getConfig().get(KafkaConnectConstant.CONNECTOR_CLASS_FILED_NAME))) {
+                mm2Map = sourceMap;
+            } else if (KafkaConnectConstant.MIRROR_MAKER_HEARTBEAT_CONNECTOR_TYPE.equals(connector.v1().getConfig().get(KafkaConnectConstant.CONNECTOR_CLASS_FILED_NAME))) {
+                mm2Map = heartbeatMap;
+            } else if (KafkaConnectConstant.MIRROR_MAKER_CHECKPOINT_CONNECTOR_TYPE.equals(connector.v1().getConfig().get(KafkaConnectConstant.CONNECTOR_CLASS_FILED_NAME))) {
+                mm2Map = checkpointMap;
+            }
+
+            String targetBootstrapServers = connector.v1().getConfig().get(MIRROR_MAKER_TARGET_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME);
+            String sourceBootstrapServers = connector.v1().getConfig().get(MIRROR_MAKER_SOURCE_CLUSTER_BOOTSTRAP_SERVERS_FIELD_NAME);
+
+            if (ValidateUtils.anyBlank(targetBootstrapServers, sourceBootstrapServers) || mm2Map == null) {
+                return;
+            }
+
+            if (KafkaConnectConstant.MIRROR_MAKER_SOURCE_CONNECTOR_TYPE.equals(connector.v1().getConfig().get(KafkaConnectConstant.CONNECTOR_CLASS_FILED_NAME))) {
+                // source 类型的格式和 heartbeat & checkpoint 的不一样
+                mm2Map.put(connector.v1().getName(), targetBootstrapServers + "@" + sourceBootstrapServers);
+            } else {
+                mm2Map.put(targetBootstrapServers + "@" + sourceBootstrapServers, connector.v1().getName());
+            }
+        });
+
+
+        List<KSConnector> connectorList = new ArrayList<>();
+        connectorFullInfoList.forEach(connector -> {
+            // 转化并添加到list中
+            KSConnector ksConnector = ConnectConverter.convert2KSConnector(
+                    connectCluster.getKafkaClusterPhyId(),
+                    connectCluster.getId(),
+                    connector.v1(),
+                    connector.v3(),
+                    connector.v2()
+            );
+            connectorList.add(ksConnector);
+
+            // 补充mm2信息
+            String targetAndSource = sourceMap.get(ksConnector.getConnectorName());
+            if (ValidateUtils.isBlank(targetAndSource)) {
+                return;
+            }
+
+            ksConnector.setHeartbeatConnectorName(heartbeatMap.getOrDefault(targetAndSource, ""));
+            ksConnector.setCheckpointConnectorName(checkpointMap.getOrDefault(targetAndSource, ""));
+        });
+
+        return connectorList;
     }
 
     private static String genConnectorKey(Long connectorId, String connectorName){

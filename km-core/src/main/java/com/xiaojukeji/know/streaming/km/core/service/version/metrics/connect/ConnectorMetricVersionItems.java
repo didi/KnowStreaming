@@ -24,6 +24,8 @@ public class ConnectorMetricVersionItems extends BaseMetricVersionMetric {
 
     public static final String CONNECTOR_METRIC_HEALTH_STATE                         = "HealthState";
 
+    public static final String CONNECTOR_METRIC_RUNNING_STATUS                       = "RunningStatus";
+
     public static final String CONNECTOR_METRIC_CONNECTOR_TOTAL_TASK_COUNT           = "ConnectorTotalTaskCount";
 
     public static final String CONNECTOR_METRIC_HEALTH_CHECK_PASSED                  = "HealthCheckPassed";
@@ -128,6 +130,9 @@ public class ConnectorMetricVersionItems extends BaseMetricVersionMetric {
         items.add(buildAllVersionsItem()
                 .name(CONNECTOR_METRIC_HEALTH_STATE).unit("0:好 1:中 2:差 3:宕机").desc("健康状态(0:好 1:中 2:差 3:宕机)").category(CATEGORY_HEALTH)
                 .extendMethod(CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE));
+        items.add(buildAllVersionsItem()
+                .name(CONNECTOR_METRIC_RUNNING_STATUS).unit("0:UNASSIGNED 1:RUNNING 2:PAUSED 3:FAILED 4:DESTROYED -1:UNKNOWN").desc("运行状态(0:UNASSIGNED 1:RUNNING 2:PAUSED 3:FAILED 4:DESTROYED -1:UNKNOWN)").category(CATEGORY_PERFORMANCE)
+                .extendMethod(CONNECTOR_METHOD_GET_METRIC_RUNNING_STATUS));
         items.add(buildAllVersionsItem()
                 .name(CONNECTOR_METRIC_HEALTH_CHECK_PASSED).unit("个").desc("健康项检查通过数").category(CATEGORY_HEALTH)
                 .extendMethod(CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE));

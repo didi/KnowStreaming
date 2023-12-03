@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Drawer, ProTable, Utils } from 'knowdesign';
+import { Button, Space, Divider, Drawer, ProTable, Utils, notification } from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import API from '@src/api/index';
 import { defaultPagination, hashDataParse } from '@src/constants/common';
 import { getGtoupTopicColumns } from './config';
 import { ExpandedRow } from './ExpandedRow';
 import ResetOffsetDrawer from './ResetOffsetDrawer';
+import { useForceRefresh } from '@src/components/utils';
 const { request } = Utils;
 
 export interface MetricLine {
@@ -63,6 +64,7 @@ const GroupDetail = (props: any) => {
   const [openKeys, setOpenKeys] = useState();
   const [resetOffsetVisible, setResetOffsetVisible] = useState(false);
   const [resetOffsetArg, setResetOffsetArg] = useState({});
+  const [refreshKey, forceRefresh] = useForceRefresh();
 
   const genData = async ({ pageNo, pageSize, groupName }: any) => {
     if (urlParams?.clusterId === undefined) return;
@@ -108,6 +110,23 @@ const GroupDetail = (props: any) => {
     setResetOffsetArg({
       topicName: record?.topicName,
       groupName: record?.groupName,
+    });
+  };
+  // 删除消费组Topic
+  const deleteOffset = (record: any) => {
+    const params = {
+      clusterPhyId: +urlParams?.clusterId,
+      deleteType: 1, // 0:group纬度，1：Topic纬度，2：Partition纬度
+      groupName: record.groupName,
+      topicName: record.topicName,
+    };
+    Utils.delete(API.deleteGroupOffset(), { data: params }).then((data: any) => {
+      if (data === null) {
+        notification.success({
+          message: '删除Topic成功!',
+        });
+        genData({ pageNo: 1, pageSize: pagination.pageSize, groupName: hashData.groupName });
+      }
     });
   };
 
@@ -160,7 +179,7 @@ const GroupDetail = (props: any) => {
     //   // 获取Consumer列表 表格模式
     //   getTopicGroupMetric(hashData);
     // });
-  }, [hashDataParse(location.hash).groupName]);
+  }, [hashDataParse(location.hash).groupName, refreshKey]);
 
   return (
     <Drawer
@@ -182,6 +201,14 @@ const GroupDetail = (props: any) => {
       //     <Divider type="vertical" />
       //   </Space>
       // }
+      extra={
+        <Space>
+          <span style={{ display: 'inline-block', fontSize: '15px' }} onClick={forceRefresh as () => void}>
+            <i className="iconfont icon-shuaxin1" style={{ cursor: 'pointer' }} />
+          </span>
+          <Divider type="vertical" />
+        </Space>
+      }
     >
       <ProTable
         showQueryForm={false}
@@ -189,7 +216,7 @@ const GroupDetail = (props: any) => {
           showHeader: false,
           rowKey: 'key',
           loading: loading,
-          columns: getGtoupTopicColumns({ resetOffset }),
+          columns: getGtoupTopicColumns({ resetOffset, deleteOffset }),
           dataSource: topicData,
           paginationProps: { ...pagination },
           // noPagination: true,
@@ -209,6 +236,7 @@ const GroupDetail = (props: any) => {
                   chartData={chartData}
                   groupName={hashDataParse(location.hash).groupName}
                   loading={loadingObj}
+                  refreshKey={refreshKey}
                 />
               ),
               // expandedRowRender,
@@ -241,7 +269,12 @@ const GroupDetail = (props: any) => {
           },
         }}
       />
-      <ResetOffsetDrawer visible={resetOffsetVisible} setVisible={setResetOffsetVisible} record={resetOffsetArg}></ResetOffsetDrawer>
+      <ResetOffsetDrawer
+        visible={resetOffsetVisible}
+        setVisible={setResetOffsetVisible}
+        record={resetOffsetArg}
+        resetOffsetFn={forceRefresh}
+      ></ResetOffsetDrawer>
     </Drawer>
   );
 };

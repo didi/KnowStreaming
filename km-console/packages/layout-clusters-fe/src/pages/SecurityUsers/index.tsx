@@ -23,7 +23,7 @@ import api from '@src/api';
 import { useParams } from 'react-router-dom';
 import { regKafkaPassword } from '@src/constants/reg';
 import { tableHeaderPrefix } from '@src/constants/common';
-
+import { ClustersPermissionMap } from '../CommonConfig';
 export const randomString = (len = 32, chars = 'abcdefghijklmnopqrstuvwxyz1234567890'): string => {
   const maxPos = chars.length;
   let str = '';
@@ -85,7 +85,7 @@ const PasswordContent = (props: { clusterId: string; name: string }) => {
   const { clusterId, name } = props;
   const [loading, setLoading] = useState(false);
   const [pw, setPw] = useState(initialShowPassword);
-
+  const [global] = AppContainer.useGlobalValue();
   const switchPwStatus = () => {
     if (!loading) {
       setLoading(true);
@@ -113,9 +113,13 @@ const PasswordContent = (props: { clusterId: string; name: string }) => {
       <Tooltip title={pw} placement="bottom">
         <div style={{ maxWidth: '80%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pw}</div>
       </Tooltip>
-      <span style={{ marginLeft: 6 }} onClick={switchPwStatus}>
-        {loading ? <LoadingOutlined /> : pw === initialShowPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-      </span>
+      {global.hasPermission(ClustersPermissionMap.SECURITY_USER_VIEW_PASSWORD) ? (
+        <span style={{ marginLeft: 6 }} onClick={switchPwStatus}>
+          {loading ? <LoadingOutlined /> : pw === initialShowPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        </span>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
@@ -323,7 +327,7 @@ const SecurityUsers = (): JSX.Element => {
   };
 
   const columns = () => {
-    const baseColumns = [
+    const baseColumns: any = [
       {
         title: 'KafkaUser',
         dataIndex: 'name',
@@ -348,30 +352,39 @@ const SecurityUsers = (): JSX.Element => {
           return <PasswordContent clusterId={clusterId} name={record.name} />;
         },
       },
-      {
+    ];
+    if (global.hasPermission) {
+      baseColumns.push({
         title: '操作',
         dataIndex: '',
         width: 240,
         render(record: UsersProps) {
           return (
             <>
-              <Button
-                type="link"
-                size="small"
-                style={{ paddingLeft: 0 }}
-                onClick={() => editDrawerRef.current.onOpen(true, UsersOperate.ChangePassword, getKafkaUserList, record)}
-              >
-                修改密码
-              </Button>
-              <Button type="link" size="small" onClick={() => onDelete(record)}>
-                删除
-              </Button>
+              {global.hasPermission(ClustersPermissionMap.SECURITY_USER_EDIT_PASSWORD) ? (
+                <Button
+                  type="link"
+                  size="small"
+                  style={{ paddingLeft: 0 }}
+                  onClick={() => editDrawerRef.current.onOpen(true, UsersOperate.ChangePassword, getKafkaUserList, record)}
+                >
+                  修改密码
+                </Button>
+              ) : (
+                <></>
+              )}
+              {global.hasPermission(ClustersPermissionMap.SECURITY_USER_DELETE) ? (
+                <Button type="link" size="small" onClick={() => onDelete(record)}>
+                  删除
+                </Button>
+              ) : (
+                <></>
+              )}
             </>
           );
         },
-      },
-    ];
-
+      });
+    }
     return baseColumns;
   };
 
@@ -454,13 +467,17 @@ const SecurityUsers = (): JSX.Element => {
                 setSearchKeywordsInput(e.target.value);
               }}
             />
-            <Button
-              type="primary"
-              // icon={<PlusOutlined />}
-              onClick={() => editDrawerRef.current.onOpen(true, UsersOperate.Add, getKafkaUserList)}
-            >
-              新增KafkaUser
-            </Button>
+            {global.hasPermission && global.hasPermission(ClustersPermissionMap.SECURITY_USER_ADD) ? (
+              <Button
+                type="primary"
+                // icon={<PlusOutlined />}
+                onClick={() => editDrawerRef.current.onOpen(true, UsersOperate.Add, getKafkaUserList)}
+              >
+                新增KafkaUser
+              </Button>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
 

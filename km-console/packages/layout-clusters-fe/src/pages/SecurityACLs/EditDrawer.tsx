@@ -132,16 +132,35 @@ const AddDrawer = forwardRef((_, ref) => {
     form.validateFields().then((formData) => {
       const submitData = [];
       const { configType, principle, kafkaUser } = formData;
-
       if (configType === 'custom') {
         // 1. 自定义权限
-        const { resourceType, resourcePatternType, aclPermissionType, aclOperation, aclClientHost } = formData;
+        // TODO: 需要和后端联调
+        const {
+          resourceType,
+          resourcePatternType,
+          aclPermissionType,
+          aclOperation,
+          aclClientHost,
+          cluster,
+          topicName,
+          topicPatternType,
+          groupName,
+          groupPatternType,
+          transactionalId,
+          transactionalIdPatternType,
+        } = formData;
         submitData.push({
           clusterId,
           kafkaUser: principle === 'all' ? '*' : kafkaUser,
           resourceType,
-          resourcePatternType,
-          resourceName: '*',
+          resourcePatternType: cluster
+            ? 3
+            : topicPatternType
+            ? topicPatternType
+            : groupPatternType
+            ? groupPatternType
+            : transactionalIdPatternType,
+          resourceName: cluster ? cluster : topicName ? topicName : groupName ? groupName : transactionalId,
           aclPermissionType,
           aclOperation,
           aclClientHost,
@@ -281,6 +300,42 @@ const AddDrawer = forwardRef((_, ref) => {
         </Form.Item>
         <Form.Item dependencies={['configType']} style={{ marginBottom: 0 }}>
           {({ getFieldValue }) => {
+            const SelectFormItems = (props: { type: string }) => {
+              const { type } = props;
+              return (
+                <Form.Item
+                  name={`${type}Name`}
+                  dependencies={[`${type}PatternType`]}
+                  validateTrigger="onBlur"
+                  rules={[
+                    ({ getFieldValue }) => ({
+                      validator: (rule: any, value: string) => {
+                        if (!value) {
+                          return Promise.reject(`${type}Name 不能为空`);
+                        }
+                        if (type === 'topic' && getFieldValue(`${type}PatternType`) === ACL_PATTERN_TYPE['Literal']) {
+                          return Utils.request(api.getTopicMetadata(clusterId as any, value)).then((res: any) => {
+                            return res?.exist ? Promise.resolve() : Promise.reject('该 Topic 不存在');
+                          });
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                >
+                  <AutoComplete
+                    filterOption={(value, option) => {
+                      if (option?.value.includes(value)) {
+                        return true;
+                      }
+                      return false;
+                    }}
+                    options={type === 'topic' ? topicMetaData : groupMetaData}
+                    placeholder={`请输入 ${type}Name`}
+                  />
+                </Form.Item>
+              );
+            };
             const PatternTypeFormItems = (props: { type: string }) => {
               const { type } = props;
               const UpperCaseType = type[0].toUpperCase() + type.slice(1);
@@ -311,37 +366,43 @@ const AddDrawer = forwardRef((_, ref) => {
                   <Form.Item dependencies={[`${type}Principle`]} style={{ marginBottom: 0 }}>
                     {({ getFieldValue }) =>
                       getFieldValue(`${type}Principle`) === 'special' ? (
-                        <Form.Item
-                          name={`${type}Name`}
-                          dependencies={[`${type}PatternType`]}
-                          validateTrigger="onBlur"
-                          rules={[
-                            ({ getFieldValue }) => ({
-                              validator: (rule: any, value: string) => {
-                                if (!value) {
-                                  return Promise.reject(`${UpperCaseType}Name 不能为空`);
+                        type !== 'transactionalId' ? (
+                          <Form.Item
+                            name={`${type}Name`}
+                            dependencies={[`${type}PatternType`]}
+                            validateTrigger="onBlur"
+                            rules={[
+                              ({ getFieldValue }) => ({
+                                validator: (rule: any, value: string) => {
+                                  if (!value) {
+                                    return Promise.reject(`${UpperCaseType}Name 不能为空`);
+                                  }
+                                  if (type === 'topic' && getFieldValue(`${type}PatternType`) === ACL_PATTERN_TYPE['Literal']) {
+                                    return Utils.request(api.getTopicMetadata(clusterId as any, value)).then((res: any) => {
+                                      return res?.exist ? Promise.resolve() : Promise.reject('该 Topic 不存在');
+                                    });
+                                  }
+                                  return Promise.resolve();
+                                },
+                              }),
+                            ]}
+                          >
+                            <AutoComplete
+                              filterOption={(value, option) => {
+                                if (option?.value.includes(value)) {
+                                  return true;
                                 }
-                                if (type === 'topic' && getFieldValue(`${type}PatternType`) === ACL_PATTERN_TYPE['Literal']) {
-                                  return Utils.request(api.getTopicMetadata(clusterId as any, value)).then((res: any) => {
-                                    return res?.exist ? Promise.resolve() : Promise.reject('该 Topic 不存在');
-                                  });
-                                }
-                                return Promise.resolve();
-                              },
-                            }),
-                          ]}
-                        >
-                          <AutoComplete
-                            filterOption={(value, option) => {
-                              if (option?.value.includes(value)) {
-                                return true;
-                              }
-                              return false;
-                            }}
-                            options={type === 'topic' ? topicMetaData : groupMetaData}
-                            placeholder={`请输入 ${type}Name`}
-                          />
-                        </Form.Item>
+                                return false;
+                              }}
+                              options={type === 'topic' ? topicMetaData : groupMetaData}
+                              placeholder={`请输入 ${type}Name`}
+                            />
+                          </Form.Item>
+                        ) : (
+                          <Form.Item name={`transactionalId`} rules={[{ required: true, message: `TransactionalId不能为空` }]}>
+                            <Input placeholder={`请输入TransactionalId`}></Input>
+                          </Form.Item>
+                        )
                       ) : null
                     }
                   </Form.Item>
@@ -363,7 +424,7 @@ const AddDrawer = forwardRef((_, ref) => {
                       <Radio value={ACL_PERMISSION_TYPE['Deny']}>Deny</Radio>
                     </Radio.Group>
                   </Form.Item>
-                  <Form.Item
+                  {/* <Form.Item
                     label="Pattern Type"
                     name="resourcePatternType"
                     rules={[{ required: true, message: 'Pattern Type 不能为空' }]}
@@ -373,7 +434,7 @@ const AddDrawer = forwardRef((_, ref) => {
                       <Radio value={ACL_PATTERN_TYPE['Literal']}>Literal</Radio>
                       <Radio value={ACL_PATTERN_TYPE['Prefixed']}>Prefixed</Radio>
                     </Radio.Group>
-                  </Form.Item>
+                  </Form.Item> */}
                   <Form.Item
                     label="Resource Type"
                     name="resourceType"
@@ -387,6 +448,29 @@ const AddDrawer = forwardRef((_, ref) => {
                         value: ACL_RESOURCE_TYPE[type],
                       }))}
                     />
+                  </Form.Item>
+                  <Form.Item dependencies={['resourceType']}>
+                    {({ getFieldValue }) => {
+                      const type = getFieldValue('resourceType');
+                      if (type === ACL_RESOURCE_TYPE['Cluster']) {
+                        //TODO需要和后端获取集群和事务接口联调
+                        return (
+                          <Form.Item
+                            name={`${type === 4 ? 'cluster' : 'transactionalId'}`}
+                            rules={[{ required: true, message: `${type === 4 ? 'Cluster名称' : 'TransactionalId'} 不能为空` }]}
+                          >
+                            <Input placeholder={`请输入${type === 4 ? 'Cluster名称' : 'TransactionalId'}`}></Input>
+                          </Form.Item>
+                        );
+                      } else if (type === ACL_RESOURCE_TYPE['TransactionalId']) {
+                        return <PatternTypeFormItems type="transactionalId" />;
+                      } else if (type === ACL_RESOURCE_TYPE['Topic']) {
+                        return <PatternTypeFormItems type="topic" />;
+                      } else if (type === ACL_RESOURCE_TYPE['Group']) {
+                        return <PatternTypeFormItems type="group" />;
+                      }
+                      return null;
+                    }}
                   </Form.Item>
                   <Form.Item dependencies={['resourceType']} style={{ marginBottom: 0 }}>
                     {({ getFieldValue }) => {

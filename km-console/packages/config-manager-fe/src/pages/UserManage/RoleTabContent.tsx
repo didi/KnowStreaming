@@ -96,7 +96,7 @@ const RoleDetailAndUpdate = forwardRef((props, ref): JSX.Element => {
           arr.push(permissions[i].id);
         }
       });
-      formData.permissionIdList = formData.permissionIdList.flat();
+      formData.permissionIdList = formData.permissionIdList.flat().filter((item) => item !== undefined);
       setConfirmLoading(true);
       request(api.editRole, {
         method: type === RoleOperate.Add ? 'POST' : 'PUT',
@@ -250,7 +250,7 @@ const RoleDetailAndUpdate = forwardRef((props, ref): JSX.Element => {
                     <CheckboxGroupContainer
                       key={i}
                       formInstance={form}
-                      fieldName="permissionIdList"
+                      fieldName={`permissionIdList`}
                       options={permission.options}
                       initSelectedOptions={initSelectedPermissions[permission.id] || []}
                       groupIdx={i}

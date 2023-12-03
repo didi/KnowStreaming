@@ -15,8 +15,20 @@ import Replicator from './Replicator';
 import './index.less';
 import TopicDetailHealthCheck from '@src/components/CardBar/TopicDetailHealthCheck';
 import { hashDataParse } from '@src/constants/common';
+import { useForceRefresh } from '@src/components/utils';
 
 const { TabPane } = Tabs;
+
+const Reload = (props: any) => {
+  return (
+    <span
+      style={{ display: 'inline-block', padding: '0 10px', marginRight: '10px', borderRight: '1px solid #ccc', fontSize: '15px' }}
+      onClick={props.forceRefresh as () => void}
+    >
+      <i className="iconfont icon-shuaxin1" style={{ cursor: 'pointer' }} />
+    </span>
+  );
+};
 
 const OperationsSlot: any = {
   // eslint-disable-next-line react/display-name
@@ -70,17 +82,20 @@ const OperationsSlot: any = {
   // eslint-disable-next-line react/display-name
   ['ConsumerGroups']: (arg: any) => {
     return (
-      <SearchInput
-        onSearch={arg.setSearchKeywords}
-        attrs={{
-          value: arg.searchValue,
-          onChange: arg.setSearchValue,
-          placeholder: '请输入Consumer Group',
-          size: 'small',
-          style: { width: '210px', marginRight: '2px' },
-          maxLength: 128,
-        }}
-      />
+      <>
+        <Reload {...arg} />
+        <SearchInput
+          onSearch={arg.setSearchKeywords}
+          attrs={{
+            value: arg.searchValue,
+            onChange: arg.setSearchValue,
+            placeholder: '请输入Consumer Group',
+            size: 'small',
+            style: { width: '210px', marginRight: '2px' },
+            maxLength: 128,
+          }}
+        />
+      </>
     );
   },
 };
@@ -94,6 +109,7 @@ const TopicDetail = (props: any) => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [visible, setVisible] = useState(false);
   const [hashData, setHashData] = useState<any>({});
+  const [refreshKey, forceRefresh] = useForceRefresh();
 
   const callback = (key: any) => {
     setSearchValue('');
@@ -184,7 +200,7 @@ const TopicDetail = (props: any) => {
         onChange={callback}
         tabBarExtraContent={
           OperationsSlot[positionType] &&
-          OperationsSlot[positionType]({ ...props, setSearchKeywords, setSearchValue, searchValue, positionType })
+          OperationsSlot[positionType]({ ...props, setSearchKeywords, setSearchValue, searchValue, positionType, forceRefresh })
         }
         destroyInactiveTabPane
       >
@@ -196,7 +212,7 @@ const TopicDetail = (props: any) => {
         </TabPane>
         <TabPane tab="ConsumerGroups" key="ConsumerGroups">
           {positionType === 'ConsumerGroups' && (
-            <Consumers searchKeywords={searchKeywords} positionType={positionType} hashData={hashData} />
+            <Consumers searchKeywords={searchKeywords} positionType={positionType} hashData={hashData} key={`${refreshKey}`} />
           )}
         </TabPane>
         <TabPane tab="ACLs" key="ACLs">

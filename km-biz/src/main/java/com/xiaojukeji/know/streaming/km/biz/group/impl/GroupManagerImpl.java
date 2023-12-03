@@ -118,10 +118,15 @@ public class GroupManagerImpl implements GroupManager {
     }
 
     @Override
-    public PaginationResult<GroupTopicOverviewVO> pagingGroupTopicMembers(Long clusterPhyId, String groupName, PaginationBaseDTO dto) {
+    public PaginationResult<GroupTopicOverviewVO> pagingGroupTopicMembers(Long clusterPhyId, String groupName, PaginationBaseDTO dto) throws Exception {
         long startTimeUnitMs = System.currentTimeMillis();
 
-        Group group = groupService.getGroupFromDB(clusterPhyId, groupName);
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByCluster(clusterPhyId);
+        if (clusterPhy == null) {
+            return PaginationResult.buildFailure(MsgConstant.getClusterPhyNotExist(clusterPhyId), dto);
+        }
+
+        Group group = groupService.getGroupFromKafka(clusterPhy, groupName);
 
         //没有topicMember则直接返回
         if (group == null || ValidateUtils.isEmptyList(group.getTopicMembers())) {

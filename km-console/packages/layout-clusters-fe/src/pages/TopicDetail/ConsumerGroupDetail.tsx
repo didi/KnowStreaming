@@ -10,6 +10,7 @@ import { ClustersPermissionMap } from '../CommonConfig';
 import ResetOffsetDrawer from './ResetOffsetDrawer';
 import SwitchTab from '@src/components/SwitchTab';
 import ContentWithCopy from '@src/components/CopyContent';
+import PubSub from "pubsub-js";
 
 const { Option } = Select;
 
@@ -334,6 +335,11 @@ export default (props: any) => {
         getTopicGroupMetric({ hashData: hashData as HashData });
       });
   }, [visible]);
+
+// 订阅重置offset成功的消息
+  PubSub.subscribe('TopicDetail-ResetOffset', function(message, data){
+    getTopicGroupMetric({hashData: data});
+  })
 
   useEffect(() => {
     if (partitionList.length === 0) return;

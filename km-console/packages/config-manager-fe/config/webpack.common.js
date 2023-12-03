@@ -16,6 +16,13 @@ const babelOptions = {
   cacheDirectory: true,
   babelrc: false,
   presets: [require.resolve('@babel/preset-env'), require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
+  overrides: [
+    // TODO：编译时需要做的事情更多，应该只针对目标第三方库
+    {
+      include: './node_modules',
+      sourceType: 'unambiguous'
+    }
+  ],
   plugins: [
     [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
     [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],

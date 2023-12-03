@@ -1,7 +1,7 @@
 import api from '@src/api';
 import CodeMirrorFormItem from '@src/components/CodeMirrorFormItem';
 import customMessage from '@src/components/Message';
-import { Button, Divider, Drawer, Form, message, Space, Utils } from 'knowdesign';
+import { Button, Divider, Drawer, Form, message, Space, Utils, Select } from 'knowdesign';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ConnectCluster, ConnectorPlugin, ConnectorPluginConfig, OperateInfo } from './AddConnector';
@@ -9,9 +9,8 @@ import { ConnectCluster, ConnectorPlugin, ConnectorPluginConfig, OperateInfo } f
 const PLACEHOLDER = `配置格式如下
 
 {
-  "connectClusterName": "",  // Connect Cluster 名称
-  "configs": {  // 具体配置项
-    "name": "",
+  "name": "",  // Connect Cluster 名称
+  "config": {  // 具体配置项
     "connector.class": "",
     "tasks.max": 1,
     ...
@@ -43,11 +42,16 @@ export default forwardRef((props: any, ref) => {
   const onOpen = (type: 'create' | 'edit', connectClusterName?: string, defaultConfigs?: { [key: string]: any }) => {
     if (defaultConfigs) {
       setDefaultConfigs({ ...defaultConfigs, connectClusterName });
+      const connectorName = connectClusterName;
+      const connectClusterId = connectClusters.find((cluster) => cluster.label === connectClusterName).value;
       form.setFieldsValue({
+        connectClusterId,
+        connectorName,
         configs: JSON.stringify(
           {
-            connectClusterName,
-            configs: defaultConfigs,
+            // connectClusterName,
+            name: defaultConfigs.name,
+            config: { ...defaultConfigs, name: undefined },
           },
           null,
           2
@@ -63,13 +67,14 @@ export default forwardRef((props: any, ref) => {
     form.validateFields().then(
       (data) => {
         const postData = JSON.parse(data.configs);
-        postData.connectorName = postData.configs.name;
-        postData.connectClusterId = connectClusters.find((cluster) => cluster.label === postData.connectClusterName).value;
-        delete postData.connectClusterName;
-
-        Object.entries(postData.configs).forEach(([key, val]) => {
+        postData.connectorName = postData.name;
+        postData.connectClusterId = data.connectClusterId;
+        postData.config.name = postData.name;
+        // delete postData.connectClusterName;
+        delete postData.name;
+        Object.entries(postData.config).forEach(([key, val]) => {
           if (val === null) {
-            delete postData.configs[key];
+            delete postData.config[key];
           }
         });
         Utils.put(api.validateConnectorConfig, postData).then(
@@ -162,6 +167,26 @@ export default forwardRef((props: any, ref) => {
     >
       <Form form={form} layout="vertical">
         <Form.Item
+          name="connectClusterId"
+          label="Connect 集群"
+          rules={[
+            {
+              required: true,
+              validator(rule, value) {
+                if (!value) {
+                  return Promise.reject('Connect 集群不能为空');
+                } else {
+                  return Promise.resolve();
+                }
+              },
+            },
+          ]}
+          initialValue={defaultConfigs?.connectClusterId}
+          className="connector-json-connectCluster"
+        >
+          <Select options={connectClusters} placeholder="请选择 Connect 集群" disabled={type === 'edit'} />
+        </Form.Item>
+        <Form.Item
           name="configs"
           validateTrigger="onBlur"
           rules={[
@@ -175,57 +200,48 @@ export default forwardRef((props: any, ref) => {
                   if (typeof v !== 'object') {
                     return Promise.reject('输入内容必须为 JSON');
                   }
-                  let connectClusterId = -1;
-                  // 校验 connectClusterName 字段
-                  if (!v.connectClusterName) {
-                    return Promise.reject('内容缺少 connectClusterName 字段或字段内容为空');
+                  let connectClusterId = form.getFieldValue('connectClusterId');
+                  // 校验 connectorName 字段
+                  if (!v.name) {
+                    return Promise.reject('内容缺少 name 项');
                   } else {
-                    if (type === 'edit') {
-                      if (v.connectClusterName !== defaultConfigs.connectClusterName) {
-                        return Promise.reject('编辑模式下不允许修改 connectClusterName 字段');
-                      }
-                    } else {
-                      if (!connectClusters.length) {
-                        getConnectClusters();
-                        return Promise.reject('connectClusterName 列表获取失败，请重试');
-                      }
-                      const targetConnectCluster = connectClusters.find((cluster) => cluster.label === v.connectClusterName);
-                      if (!targetConnectCluster) {
-                        return Promise.reject('connectClusterName 不存在，请检查');
-                      } else {
-                        connectClusterId = targetConnectCluster.value;
-                      }
+                    if (type === 'edit' && v.name !== defaultConfigs.name) {
+                      return Promise.reject('编辑模式下不允许修改 name 字段');
                     }
                   }
 
-                  if (!v.configs || typeof v.configs !== 'object') {
-                    return Promise.reject('内容缺少 configs 字段或字段格式错误');
+                  if (!v.config || typeof v.config !== 'object') {
+                    return Promise.reject('内容缺少 config 字段或字段格式错误');
                   } else {
-                    // 校验 connectorName 字段
-                    if (!v.configs.name) {
-                      return Promise.reject('configs 字段下缺少 name 项');
-                    } else {
-                      if (type === 'edit' && v.configs.name !== defaultConfigs.name) {
-                        return Promise.reject('编辑模式下不允许修改 name 字段');
-                      }
-                    }
-                    if (!v.configs['connector.class']) {
-                      return Promise.reject('configs 字段下缺少 connector.class 项');
-                    } else if (type === 'edit' && v.configs['connector.class'] !== defaultConfigs['connector.class']) {
+                    // // 校验 connectorName 字段
+                    // if (!v.config.name) {
+                    //   return Promise.reject('config 字段下缺少 name 项');
+                    // } else {
+                    //   if (type === 'edit' && v.config.name !== defaultConfigs.name) {
+                    //     return Promise.reject('编辑模式下不允许修改 name 字段');
+                    //   }
+                    // }
+                    if (!v.config['connector.class']) {
+                      return Promise.reject('config 字段下缺少 connector.class 项');
+                    } else if (type === 'edit' && v.config['connector.class'] !== defaultConfigs['connector.class']) {
                       return Promise.reject('编辑模式下不允许修改 connector.class 字段');
                     }
                   }
 
                   if (type === 'create') {
+                    // 校验创建时是否选择了connect集群
+                    if (!connectClusterId) {
+                      return Promise.reject('请先选择 Connect 集群');
+                    }
                     // 异步校验 connector 名称是否重复 以及 className 是否存在
                     return Promise.all([
-                      Utils.request(api.isConnectorExist(connectClusterId, v.configs.name)),
+                      Utils.request(api.isConnectorExist(connectClusterId, v.config.name)),
                       Utils.request(api.getConnectorPlugins(connectClusterId)),
                     ]).then(
                       ([data, plugins]: [any, ConnectorPlugin[]]) => {
                         return data?.exist
                           ? Promise.reject('name 与已有 Connector 重复')
-                          : plugins.every((plugin) => plugin.className !== v.configs['connector.class'])
+                          : plugins.every((plugin) => plugin.className !== v.config['connector.class'])
                           ? Promise.reject('该 connectCluster 下不存在 connector.class 项配置的插件')
                           : Promise.resolve();
                       },
