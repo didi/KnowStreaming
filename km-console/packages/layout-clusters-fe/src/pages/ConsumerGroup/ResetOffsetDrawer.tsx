@@ -44,7 +44,7 @@ const CustomSelectResetTime = (props: { value?: string; onChange?: (val: Number 
 };
 
 export default (props: any) => {
-  const { record, visible, setVisible } = props;
+  const { record, visible, setVisible, resetOffsetFn } = props;
   const routeParams = useParams<{
     clusterId: string;
   }>();
@@ -106,6 +106,8 @@ export default (props: any) => {
           message: '重置offset成功',
         });
         setVisible(false);
+        // 发布重置offset成功的消息
+        resetOffsetFn();
       } else {
         notification.error({
           message: '重置offset失败',

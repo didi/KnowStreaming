@@ -1,8 +1,9 @@
 import SmallChart from '@src/components/SmallChart';
 import TagsWithHide from '@src/components/TagsWithHide';
-import { Button, Tag, Tooltip, Utils, Popconfirm } from 'knowdesign';
+import { Button, Tag, Tooltip, Utils, Popconfirm, AppContainer } from 'knowdesign';
 import React from 'react';
 import Delete from './Delete';
+import { ClustersPermissionMap } from '../CommonConfig';
 export const defaultPagination = {
   current: 1,
   pageSize: 10,
@@ -93,7 +94,8 @@ const renderLine = (record: any, metricName: string) => {
 };
 
 export const getConnectorsColumns = (arg?: any) => {
-  const columns = [
+  const [global] = AppContainer.useGlobalValue();
+  const columns: any = [
     {
       title: 'Connector Name',
       dataIndex: 'connectorName',
@@ -213,7 +215,10 @@ export const getConnectorsColumns = (arg?: any) => {
         return t && t.length > 0 ? <TagsWithHide placement="bottom" list={t} expandTagContent={(num: any) => `共有${num}个`} /> : '-';
       },
     },
-    {
+  ];
+
+  if (global.hasPermission) {
+    columns.push({
       title: '操作',
       dataIndex: 'options',
       key: 'options',
@@ -224,20 +229,24 @@ export const getConnectorsColumns = (arg?: any) => {
       render: (_t: any, r: any) => {
         return (
           <div>
-            <Popconfirm
-              title="是否重启当前任务？"
-              onConfirm={() => arg?.optionConnect(r, 'restart')}
-              // onCancel={cancel}
-              okText="是"
-              cancelText="否"
-              overlayClassName="connect-popconfirm"
-            >
-              <Button key="restart" type="link" size="small">
-                重启
-              </Button>
-            </Popconfirm>
+            {global.hasPermission(ClustersPermissionMap.CONNECTOR_RESTART) ? (
+              <Popconfirm
+                title="是否重启当前任务？"
+                onConfirm={() => arg?.optionConnect(r, 'restart')}
+                // onCancel={cancel}
+                okText="是"
+                cancelText="否"
+                overlayClassName="connect-popconfirm"
+              >
+                <Button key="restart" type="link" size="small">
+                  重启
+                </Button>
+              </Popconfirm>
+            ) : (
+              <></>
+            )}
 
-            {(r.state === 'RUNNING' || r.state === 'PAUSED') && (
+            {global.hasPermission(ClustersPermissionMap.CONNECTOR_STOP_RESUME) && (r.state === 'RUNNING' || r.state === 'PAUSED') && (
               <Popconfirm
                 title={`是否${r.state === 'RUNNING' ? '暂停' : '继续'}当前任务？`}
                 onConfirm={() => arg?.optionConnect(r, r.state === 'RUNNING' ? 'stop' : 'resume')}
@@ -252,16 +261,24 @@ export const getConnectorsColumns = (arg?: any) => {
                 </Button>
               </Popconfirm>
             )}
+            {global.hasPermission(ClustersPermissionMap.CONNECTOR_CHANGE_CONFIG) ? (
+              <Button type="link" size="small" onClick={() => arg?.editConnector(r)}>
+                编辑
+              </Button>
+            ) : (
+              <></>
+            )}
 
-            <Button type="link" size="small" onClick={() => arg?.editConnector(r)}>
-              编辑
-            </Button>
-            <Delete record={r} onConfirm={arg?.deleteTesk}></Delete>
+            {global.hasPermission(ClustersPermissionMap.CONNECTOR_DELETE) ? (
+              <Delete record={r} onConfirm={arg?.deleteTesk}></Delete>
+            ) : (
+              <></>
+            )}
           </div>
         );
       },
-    },
-  ];
+    });
+  }
   return columns;
 };
 
@@ -298,6 +315,7 @@ export const getWorkersColumns = (arg?: any) => {
 
 // Detail
 export const getConnectorsDetailColumns = (arg?: any) => {
+  const [global] = AppContainer.useGlobalValue();
   const columns = [
     {
       title: 'Task ID',
@@ -346,16 +364,20 @@ export const getConnectorsDetailColumns = (arg?: any) => {
       render: (_t: any, r: any) => {
         return (
           <div>
-            <Popconfirm
-              title="是否重试当前任务？"
-              onConfirm={() => arg?.retryOption(r.taskId)}
-              // onCancel={cancel}
-              okText="是"
-              cancelText="否"
-              overlayClassName="connect-popconfirm"
-            >
-              <a>重试</a>
-            </Popconfirm>
+            {global.hasPermission(ClustersPermissionMap.CONNECTOR_RESTART) ? (
+              <Popconfirm
+                title="是否重试当前任务？"
+                onConfirm={() => arg?.retryOption(r.taskId)}
+                // onCancel={cancel}
+                okText="是"
+                cancelText="否"
+                overlayClassName="connect-popconfirm"
+              >
+                <a>重试</a>
+              </Popconfirm>
+            ) : (
+              <></>
+            )}
           </div>
         );
       },

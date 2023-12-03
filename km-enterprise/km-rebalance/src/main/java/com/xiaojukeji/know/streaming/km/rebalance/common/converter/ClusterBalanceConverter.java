@@ -1,6 +1,7 @@
 package com.xiaojukeji.know.streaming.km.rebalance.common.converter;
 
 import com.xiaojukeji.know.streaming.km.common.annotations.enterprise.EnterpriseLoadReBalance;
+import com.xiaojukeji.know.streaming.km.persistence.es.template.TemplateConstant;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.dto.ClusterBalanceIntervalDTO;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.dto.ClusterBalancePreviewDTO;
 import com.xiaojukeji.know.streaming.km.rebalance.common.bean.dto.ClusterBalanceStrategyDTO;
@@ -34,13 +35,16 @@ import java.util.stream.Collectors;
 
 @EnterpriseLoadReBalance
 public class ClusterBalanceConverter {
-
-    public final static String PARTITION_INDEX = "ks_kafka_partition_metric";
-
     private ClusterBalanceConverter() {
     }
 
-    public static BalanceParameter convert2BalanceParameter(ClusterBalanceJobConfigPO configPO, Map<Integer, Broker> brokerMap, Map<Integer, BrokerSpec> brokerSpecMap, ClusterPhy clusterPhy, String esUrl, List<String> topicNames) {
+    public static BalanceParameter convert2BalanceParameter(ClusterBalanceJobConfigPO configPO,
+                                                            Map<Integer, Broker> brokerMap,
+                                                            Map<Integer, BrokerSpec> brokerSpecMap,
+                                                            ClusterPhy clusterPhy,
+                                                            String esUrl,
+                                                            String esPassword,
+                                                            List<String> topicNames) {
         BalanceParameter balanceParameter = new BalanceParameter();
         List<ClusterBalanceIntervalDTO> clusterBalanceIntervalDTOS = ConvertUtil.str2ObjArrayByJson(configPO.getBalanceIntervalJson(), ClusterBalanceIntervalDTO.class);
 
@@ -63,8 +67,7 @@ public class ClusterBalanceConverter {
         balanceParameter.setGoals(goals);
         balanceParameter.setCluster(clusterPhy.getId().toString());
         balanceParameter.setExcludedTopics(configPO.getTopicBlackList());
-        balanceParameter.setEsIndexPrefix(PARTITION_INDEX + "_");
-        balanceParameter.setEsRestURL(esUrl);
+        balanceParameter.setEsInfo(esUrl, esPassword, TemplateConstant.PARTITION_INDEX + "_");
         balanceParameter.setBalanceBrokers(CommonUtils.intSet2String(brokerMap.keySet()));
         balanceParameter.setHardwareEnv(convert2ListHostEnv(brokerMap, brokerSpecMap));
         balanceParameter.setBeforeSeconds(configPO.getMetricCalculationPeriod());
@@ -78,7 +81,13 @@ public class ClusterBalanceConverter {
 
     }
 
-    public static BalanceParameter convert2BalanceParameter(ClusterBalanceJobPO clusterBalanceJobPO, Map<Integer, Broker> brokerMap, Map<Integer, BrokerSpec> brokerSpecMap, ClusterPhy clusterPhy, String esUrl, List<String> topicNames) {
+    public static BalanceParameter convert2BalanceParameter(ClusterBalanceJobPO clusterBalanceJobPO,
+                                                            Map<Integer, Broker> brokerMap,
+                                                            Map<Integer, BrokerSpec> brokerSpecMap,
+                                                            ClusterPhy clusterPhy,
+                                                            String esUrl,
+                                                            String esPassword,
+                                                            List<String> topicNames) {
         BalanceParameter balanceParameter = new BalanceParameter();
         List<ClusterBalanceIntervalDTO> clusterBalanceIntervalDTOS = ConvertUtil.str2ObjArrayByJson(clusterBalanceJobPO.getBalanceIntervalJson(), ClusterBalanceIntervalDTO.class);
 
@@ -101,8 +110,7 @@ public class ClusterBalanceConverter {
         balanceParameter.setGoals(goals);
         balanceParameter.setCluster(clusterPhy.getId().toString());
         balanceParameter.setExcludedTopics(clusterBalanceJobPO.getTopicBlackList());
-        balanceParameter.setEsIndexPrefix(PARTITION_INDEX + "_");
-        balanceParameter.setEsRestURL(esUrl);
+        balanceParameter.setEsInfo(esUrl, esPassword, TemplateConstant.PARTITION_INDEX + "_");
         balanceParameter.setBalanceBrokers(clusterBalanceJobPO.getBrokers());
         balanceParameter.setHardwareEnv(convert2ListHostEnv(brokerMap, brokerSpecMap));
         balanceParameter.setBeforeSeconds(clusterBalanceJobPO.getMetricCalculationPeriod());
@@ -116,7 +124,13 @@ public class ClusterBalanceConverter {
 
     }
 
-    public static BalanceParameter convert2BalanceParameter(JobClusterBalanceContent dto, List<Broker> brokers, Map<Integer, BrokerSpec> brokerSpecMap, ClusterPhy clusterPhy, String esUrl, List<String> topicNames) {
+    public static BalanceParameter convert2BalanceParameter(JobClusterBalanceContent dto,
+                                                            List<Broker> brokers,
+                                                            Map<Integer, BrokerSpec> brokerSpecMap,
+                                                            ClusterPhy clusterPhy,
+                                                            String esUrl,
+                                                            String esPassword,
+                                                            List<String> topicNames) {
         BalanceParameter balanceParameter = new BalanceParameter();
         List<ClusterBalanceIntervalDTO> clusterBalanceIntervalDTOS =  dto.getClusterBalanceIntervalList().stream()
                 .sorted(Comparator.comparing(ClusterBalanceIntervalDTO::getPriority)).collect(Collectors.toList());
@@ -141,8 +155,7 @@ public class ClusterBalanceConverter {
         balanceParameter.setGoals(goals);
         balanceParameter.setCluster(clusterPhy.getId().toString());
         balanceParameter.setExcludedTopics(CommonUtils.strList2String(dto.getTopicBlackList()));
-        balanceParameter.setEsIndexPrefix(PARTITION_INDEX + "_");
-        balanceParameter.setEsRestURL(esUrl);
+        balanceParameter.setEsInfo(esUrl, esPassword, TemplateConstant.PARTITION_INDEX + "_");
         balanceParameter.setBalanceBrokers(CommonUtils.intSet2String(brokerMap.keySet()));
         balanceParameter.setHardwareEnv(convert2ListHostEnv(brokerMap, brokerSpecMap));
         balanceParameter.setBeforeSeconds(dto.getMetricCalculationPeriod());
@@ -156,7 +169,13 @@ public class ClusterBalanceConverter {
 
     }
 
-    public static BalanceParameter convert2BalanceParameter(ClusterBalancePreviewDTO dto, Map<Integer, Broker> brokerMap, Map<Integer, BrokerSpec> brokerSpecMap, ClusterPhy clusterPhy, String esUrl, List<String> topicNames) {
+    public static BalanceParameter convert2BalanceParameter(ClusterBalancePreviewDTO dto,
+                                                            Map<Integer, Broker> brokerMap,
+                                                            Map<Integer, BrokerSpec> brokerSpecMap,
+                                                            ClusterPhy clusterPhy,
+                                                            String esUrl,
+                                                            String esPassword,
+                                                            List<String> topicNames) {
         BalanceParameter balanceParameter = new BalanceParameter();
         List<ClusterBalanceIntervalDTO> clusterBalanceIntervalDTOS =  dto.getClusterBalanceIntervalList().stream()
                 .sorted(Comparator.comparing(ClusterBalanceIntervalDTO::getPriority)).collect(Collectors.toList());
@@ -179,8 +198,7 @@ public class ClusterBalanceConverter {
         balanceParameter.setGoals(goals);
         balanceParameter.setCluster(clusterPhy.getId().toString());
         balanceParameter.setExcludedTopics(CommonUtils.strList2String(dto.getTopicBlackList()));
-        balanceParameter.setEsIndexPrefix(PARTITION_INDEX + "_");
-        balanceParameter.setEsRestURL(esUrl);
+        balanceParameter.setEsInfo(esUrl, esPassword, TemplateConstant.PARTITION_INDEX + "_");
         balanceParameter.setBalanceBrokers(CommonUtils.intList2String(dto.getBrokers()));
         balanceParameter.setHardwareEnv(convert2ListHostEnv(brokerMap, brokerSpecMap));
         balanceParameter.setBeforeSeconds(dto.getMetricCalculationPeriod());

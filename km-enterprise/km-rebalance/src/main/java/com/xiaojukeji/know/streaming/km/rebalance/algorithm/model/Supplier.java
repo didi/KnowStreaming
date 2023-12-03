@@ -25,14 +25,14 @@ public class Supplier {
                         Map.Entry::getValue));
     }
 
-    public static ClusterModel load(String clusterName, int beforeSeconds, String kafkaBootstrapServer, String esUrls, String esIndexPrefix, Map<Integer, Capacity> capacitiesById, Set<String> ignoredTopics) {
+    public static ClusterModel load(String clusterName, int beforeSeconds, String kafkaBootstrapServer, String esUrls, String esPassword, String esIndexPrefix, Map<Integer, Capacity> capacitiesById, Set<String> ignoredTopics) {
         Properties kafkaProperties = new Properties();
         kafkaProperties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServer);
-        return load(clusterName, beforeSeconds, kafkaProperties, esUrls, esIndexPrefix, capacitiesById, ignoredTopics);
+        return load(clusterName, beforeSeconds, kafkaProperties, esUrls, esPassword, esIndexPrefix, capacitiesById, ignoredTopics);
     }
 
-    public static ClusterModel load(String clusterName, int beforeSeconds, Properties kafkaProperties, String esUrls, String esIndexPrefix, Map<Integer, Capacity> capacitiesById, Set<String> ignoredTopics) {
-        MetricStore store = new ElasticsearchMetricStore(esUrls, esIndexPrefix);
+    public static ClusterModel load(String clusterName, int beforeSeconds, Properties kafkaProperties, String esUrls, String esPassword, String esIndexPrefix, Map<Integer, Capacity> capacitiesById, Set<String> ignoredTopics) {
+        MetricStore store = new ElasticsearchMetricStore(esUrls, esPassword, esIndexPrefix);
         Metrics metrics = store.getMetrics(clusterName, beforeSeconds);
         return load(kafkaProperties, capacitiesById, metrics, ignoredTopics);
     }

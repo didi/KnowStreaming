@@ -44,8 +44,16 @@ public class GoalUtils {
             capacity.setCapacity(Resource.NW_OUT, env.getNetwork());
             capacities.put(env.getId(), capacity);
         }
-        return Supplier.load(parameter.getCluster(), parameter.getBeforeSeconds(), parameter.getKafkaConfig(),
-                parameter.getEsRestURL(), parameter.getEsIndexPrefix(), capacities, AnalyzerUtils.getSplitTopics(parameter.getIgnoredTopics()));
+        return Supplier.load(
+                parameter.getCluster(),
+                parameter.getBeforeSeconds(),
+                parameter.getKafkaConfig(),
+                parameter.getEsRestURL(),
+                parameter.getEsPassword(),
+                parameter.getEsIndexPrefix(),
+                capacities,
+                AnalyzerUtils.getSplitTopics(parameter.getIgnoredTopics())
+        );
     }
 
     public static Map<String, BalanceThreshold> getBalanceThreshold(BalanceParameter parameter, double[] clusterAvgResource) {

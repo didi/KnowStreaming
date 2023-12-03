@@ -1,7 +1,22 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { AppContainer, Input, ProTable, Select, Switch, Tooltip, Utils, Dropdown, Menu, Button, Divider, Tag } from 'knowdesign';
+import {
+  AppContainer,
+  Input,
+  ProTable,
+  Select,
+  Switch,
+  Tooltip,
+  Utils,
+  Dropdown,
+  Menu,
+  Button,
+  Divider,
+  Tag,
+  Popconfirm,
+  notification,
+} from 'knowdesign';
 import { IconFont } from '@knowdesign/icons';
 import Create from './Create';
 import './index.less';
@@ -84,6 +99,21 @@ const AutoPage = (props: any) => {
       .catch((e) => {
         setTopicListLoading(false);
       });
+  };
+  const deleteTopicData = (record: any) => {
+    console.log(record, 'record');
+    const params = {
+      clusterId: Number(routeParams.clusterId),
+      topicName: record.topicName,
+    };
+    Utils.post(Api.deleteTopicData(), params).then((data: any) => {
+      if (data === null) {
+        notification.success({
+          message: '清除数据成功',
+        });
+        getTopicsList();
+      }
+    });
   };
   useEffect(() => {
     getTopicsList();
@@ -247,7 +277,7 @@ const AutoPage = (props: any) => {
         dataIndex: 'desc',
         key: 'desc',
         fixed: 'right',
-        width: 140,
+        width: 200,
         render: (value: any, record: any) => {
           return (
             <div className="operation-list">
@@ -257,6 +287,19 @@ const AutoPage = (props: any) => {
                 <></>
               )}
               {global.hasPermission(ClustersPermissionMap.TOPIC_DEL) ? <Delete record={record} onConfirm={getTopicsList}></Delete> : <></>}
+              {global.hasPermission(ClustersPermissionMap.TOPIC_DEL) ? ( // TODO：替换为清除数据的权限
+                <Popconfirm
+                  placement="topRight"
+                  title={`是否要清空当前Topic的数据？`}
+                  onConfirm={() => deleteTopicData(record)}
+                  okText="是"
+                  cancelText="否"
+                >
+                  <Button type="link">清除数据</Button>
+                </Popconfirm>
+              ) : (
+                <></>
+              )}
             </div>
           );
         },

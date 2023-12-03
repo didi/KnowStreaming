@@ -21,6 +21,7 @@ import { getLicenseInfo } from './constants/common';
 import api from './api';
 import ClusterContainer from './pages/index';
 import ksLogo from './assets/ks-logo.png';
+import {ClustersPermissionMap} from "./pages/CommonConfig";
 
 interface ILocaleMap {
   [index: string]: any;
@@ -79,6 +80,9 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
   const userInfo = localStorage.getItem('userInfo');
   const [curActiveAppName, setCurActiveAppName] = useState('');
   const [versionInfo, setVersionInfo] = useState<VersionInfo>();
+  const [global] = AppContainer.useGlobalValue();
+  const quickEntries=[];
+
   useEffect(() => {
     if (pathname.startsWith('/config')) {
       setCurActiveAppName('config');
@@ -105,6 +109,23 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
     });
   }, []);
 
+  if (global.hasPermission && global.hasPermission(ClustersPermissionMap.CLUSTERS_MANAGE_VIEW)){
+    quickEntries.push({
+      icon: <IconFont type="icon-duojiqunguanli"/>,
+      txt: '多集群管理',
+      ident: '',
+      active: curActiveAppName === 'cluster',
+    });
+  }
+  if (global.hasPermission && global.hasPermission(ClustersPermissionMap.SYS_MANAGE_VIEW)){
+    quickEntries.push({
+      icon: <IconFont type="icon-xitongguanli" />,
+      txt: '系统管理',
+      ident: 'config',
+      active: curActiveAppName === 'config',
+    });
+  }
+
   return (
     <DProLayout.Container
       headerProps={{
@@ -115,20 +136,7 @@ const AppContent = (props: { setlanguage: (language: string) => void }) => {
         ),
         username: userInfo ? JSON.parse(userInfo)?.userName : '',
         icon: <DotChartOutlined />,
-        quickEntries: [
-          {
-            icon: <IconFont type="icon-duojiqunguanli" />,
-            txt: '多集群管理',
-            ident: '',
-            active: curActiveAppName === 'cluster',
-          },
-          {
-            icon: <IconFont type="icon-xitongguanli" />,
-            txt: '系统管理',
-            ident: 'config',
-            active: curActiveAppName === 'config',
-          },
-        ],
+        quickEntries: quickEntries,
         isFixed: false,
         userDropMenuItems: [
           <Menu.Item key={0}>

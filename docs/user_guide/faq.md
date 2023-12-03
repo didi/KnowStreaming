@@ -7,7 +7,7 @@
   - [1、支持哪些 Kafka 版本？](#1支持哪些-kafka-版本)
   - [1、2.x 版本和 3.0 版本有什么差异？](#12x-版本和-30-版本有什么差异)
   - [3、页面流量信息等无数据？](#3页面流量信息等无数据)
-  - [8.4、`Jmx`连接失败如何解决？](#84jmx连接失败如何解决)
+  - [4、`Jmx`连接失败如何解决？](#4jmx连接失败如何解决)
   - [5、有没有 API 文档？](#5有没有-api-文档)
   - [6、删除 Topic 成功后，为何过段时间又出现了？](#6删除-topic-成功后为何过段时间又出现了)
   - [7、如何在不登录的情况下，调用接口？](#7如何在不登录的情况下调用接口)
@@ -21,6 +21,8 @@
   - [15、测试时使用Testcontainers的说明](#15测试时使用testcontainers的说明)
   - [16、JMX连接失败怎么办](#16jmx连接失败怎么办)
   - [17、zk监控无数据问题](#17zk监控无数据问题)
+  - [18、启动失败，报NoClassDefFoundError如何解决](#18启动失败报noclassdeffounderror如何解决)
+  - [19、依赖ElasticSearch 8.0以上版本部署后指标信息无法正常显示如何解决]
 
 ## 1、支持哪些 Kafka 版本？
 
@@ -57,7 +59,7 @@
 
 &nbsp;
 
-## 8.4、`Jmx`连接失败如何解决？
+## 4、`Jmx`连接失败如何解决？
 
 - 参看 [Jmx 连接配置&问题解决](https://doc.knowstreaming.com/product/9-attachment#91jmx-%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3) 说明。
 
@@ -278,3 +280,42 @@ zookeeper集群正常，但Ks上zk页面所有监控指标无数据，`KnowStrea
 ```
 4lw.commands.whitelist=*
 ```
+
+## 18、启动失败，报NoClassDefFoundError如何解决
+
+**错误现象：** 
+```log
+# 启动失败，报nested exception is java.lang.NoClassDefFoundError: Could not initialize class com.didiglobal.logi.job.core.WorkerSingleton$Singleton
+
+
+2023-08-11 22:54:29.842 [main] ERROR class=org.springframework.boot.SpringApplication||Application run failed
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'quartzScheduler' defined in class path resource [com/didiglobal/logi/job/LogIJobAutoConfiguration.class]: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.didiglobal.logi.job.core.Scheduler]: Factory method 'quartzScheduler' threw exception; nested exception is java.lang.NoClassDefFoundError: Could not initialize class com.didiglobal.logi.job.core.WorkerSingleton$Singleton
+at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657)
+```
+
+
+**问题原因：**
+1. `KnowStreaming` 依赖的 `Logi-Job` 初始化 `WorkerSingleton$Singleton` 失败。
+2. `WorkerSingleton$Singleton` 初始化的过程中，会去获取一些操作系统的信息，如果获取时出现了异常，则会导致 `WorkerSingleton$Singleton` 初始化失败。
+
+
+**临时建议：**
+
+`Logi-Job` 问题的修复时间不好控制，之前我们测试验证了一下，在 `Windows`、`Mac`、`CentOS` 这几个操作系统下基本上都是可以正常运行的。
+
+所以，如果有条件的话，可以暂时先使用这几个系统部署 `KnowStreaming`。
+
+如果在在 `Windows`、`Mac`、`CentOS` 这几个操作系统下也出现了启动失败的问题，可以重试2-3次看是否还是启动失败，或者换一台机器试试。
+
+## 依赖ElasticSearch 8.0以上版本部署后指标信息无法正常显示如何解决
+**错误现象**
+```log
+Warnings: [299 Elasticsearch-8.9.1-a813d015ef1826148d9d389bd1c0d781c6e349f0 "Legacy index templates are deprecated in favor of composable templates."]
+```
+**问题原因**
+1. ES8.0和ES7.0版本存在Template模式的差异，建议使用 /_index_template 端点来管理模板；
+2. ES java client在此版本的行为很奇怪表现为读取数据为空；
+
+**解决方法**
+修改`es_template_create.sh`脚本中所有的`/_template`为`/_index_template`后执行即可。
+

@@ -18,6 +18,7 @@ import com.xiaojukeji.know.streaming.km.common.bean.po.metrice.connect.Connector
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricLineVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.line.MetricMultiLinesVO;
 import com.xiaojukeji.know.streaming.km.common.bean.vo.metrics.point.MetricPointVO;
+import com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectStatusEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.connect.ConnectorTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.enums.version.VersionItemTypeEnum;
 import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistException;
@@ -32,7 +33,7 @@ import com.xiaojukeji.know.streaming.km.core.service.connect.connector.Connector
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerConnectorService;
 import com.xiaojukeji.know.streaming.km.core.service.connect.worker.WorkerService;
 import com.xiaojukeji.know.streaming.km.core.service.health.state.HealthStateService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseConnectorMetricService;
+import com.xiaojukeji.know.streaming.km.core.service.version.BaseConnectMetricService;
 import com.xiaojukeji.know.streaming.km.persistence.connect.ConnectJMXClient;
 import com.xiaojukeji.know.streaming.km.persistence.es.dao.connect.connector.ConnectorMetricESDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ import static com.xiaojukeji.know.streaming.km.common.bean.entity.result.ResultS
  * @author didi
  */
 @Service
-public class ConnectorMetricServiceImpl extends BaseConnectorMetricService implements ConnectorMetricService {
+public class ConnectorMetricServiceImpl extends BaseConnectMetricService implements ConnectorMetricService {
     protected static final ILog LOGGER = LogFactory.getLog(ConnectorMetricServiceImpl.class);
 
     public static final String CONNECTOR_METHOD_DO_NOTHING                               = "doNothing";
@@ -66,6 +67,8 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
     public static final String CONNECTOR_METHOD_GET_CONNECTOR_TASK_METRICS_SUM           = "getConnectorTaskMetricsSum";
 
     public static final String CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE                  = "getMetricHealthScore";
+
+    public static final String CONNECTOR_METHOD_GET_METRIC_RUNNING_STATUS                = "getMetricRunningStatus";
 
     @Autowired
     private ConnectorMetricESDAO connectorMetricESDAO;
@@ -98,11 +101,12 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
     @Override
     protected void initRegisterVCHandler() {
         registerVCHandler(CONNECTOR_METHOD_DO_NOTHING, this::doNothing);
-        registerVCHandler(CONNECTOR_METHOD_GET_CONNECT_WORKER_METRIC_SUM, this::getConnectWorkerMetricSum);
-        registerVCHandler(CONNECTOR_METHOD_GET_CONNECTOR_TASK_METRICS_AVG, this::getConnectorTaskMetricsAvg);
-        registerVCHandler(CONNECTOR_METHOD_GET_CONNECTOR_TASK_METRICS_MAX, this::getConnectorTaskMetricsMax);
-        registerVCHandler(CONNECTOR_METHOD_GET_CONNECTOR_TASK_METRICS_SUM, this::getConnectorTaskMetricsSum);
-        registerVCHandler(CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE, this::getMetricHealthScore);
+        registerVCHandler(CONNECTOR_METHOD_GET_CONNECT_WORKER_METRIC_SUM,   this::getConnectWorkerMetricSum);
+        registerVCHandler(CONNECTOR_METHOD_GET_CONNECTOR_TASK_METRICS_AVG,  this::getConnectorTaskMetricsAvg);
+        registerVCHandler(CONNECTOR_METHOD_GET_CONNECTOR_TASK_METRICS_MAX,  this::getConnectorTaskMetricsMax);
+        registerVCHandler(CONNECTOR_METHOD_GET_CONNECTOR_TASK_METRICS_SUM,  this::getConnectorTaskMetricsSum);
+        registerVCHandler(CONNECTOR_METHOD_GET_METRIC_HEALTH_SCORE,         this::getMetricHealthScore);
+        registerVCHandler(CONNECTOR_METHOD_GET_METRIC_RUNNING_STATUS,       this::getMetricRunningStatus);
     }
 
     @Override
@@ -111,8 +115,7 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         Float  keyValue           = CollectedMetricsLocalCache.getConnectorMetrics(connectorMetricKey);
 
         if (null != keyValue) {
-            ConnectorMetrics connectorMetrics = ConnectorMetrics.initWithMetric(connectClusterPhyId, connectorName, metric, keyValue);
-            return Result.buildSuc(connectorMetrics);
+            return Result.buildSuc(new ConnectorMetrics(connectClusterPhyId, connectorName, metric, keyValue));
         }
 
         Result<ConnectorMetrics> ret = this.collectConnectClusterMetricsFromKafka(connectClusterPhyId, connectorName, metric);
@@ -216,6 +219,20 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         return Result.buildSuc(metrics);
     }
 
+    private Result<ConnectorMetrics> getMetricRunningStatus(VersionItemParam metricParam) {
+        ConnectorMetricParam param          = (ConnectorMetricParam) metricParam;
+        Long connectClusterId               = param.getConnectClusterId();
+        String connectorName                = param.getConnectorName();
+        String metricName                   = param.getMetricName();
+
+        ConnectorPO connector = connectorService.getConnectorFromDB(connectClusterId, connectorName);
+        if (connector == null) {
+            return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName, metricName, (float)ConnectStatusEnum.UNKNOWN.getStatus()));
+        }
+
+        return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName, metricName, (float)ConnectStatusEnum.getByValue(connector.getState()).getStatus()));
+    }
+
     private Result<ConnectorMetrics> getConnectWorkerMetricSum(VersionItemParam metricParam) {
         ConnectorMetricParam param          = (ConnectorMetricParam) metricParam;
         Long connectClusterId               = param.getConnectClusterId();
@@ -240,12 +257,16 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         if (!isCollected) {
             return Result.buildFailure(NOT_EXIST);
         }
-        return Result.buildSuc(ConnectorMetrics.initWithMetric(connectClusterId, connectorName, metric, sum));
+
+        return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName, metric, sum));
     }
 
     //kafka.connect:type=connect-worker-metrics,connector="{connector}" 指标
     private Result<ConnectorMetrics> getConnectorMetric(Long connectClusterId, String workerId, String connectorName, String metric, ConnectorTypeEnum connectorType) {
         VersionConnectJmxInfo jmxInfo = getJMXInfo(connectClusterId, metric);
+        if (null == jmxInfo) {
+            return Result.buildFailure(VC_ITEM_JMX_NOT_EXIST);
+        }
 
         if (jmxInfo.getType() != null) {
             if (connectorType == null) {
@@ -257,9 +278,6 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
             }
         }
 
-        if (null == jmxInfo) {
-            return Result.buildFailure(VC_ITEM_JMX_NOT_EXIST);
-        }
         String jmxObjectName = String.format(jmxInfo.getJmxObjectName(), connectorName);
 
         JmxConnectorWrap jmxConnectorWrap = connectJMXClient.getClientWithCheck(connectClusterId, workerId);
@@ -270,8 +288,7 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         try {
             //2、获取jmx指标
             String value = jmxConnectorWrap.getAttribute(new ObjectName(jmxObjectName), jmxInfo.getJmxAttribute()).toString();
-            ConnectorMetrics connectorMetrics = ConnectorMetrics.initWithMetric(connectClusterId, connectorName, metric, Float.valueOf(value));
-            return Result.buildSuc(connectorMetrics);
+            return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName, metric, Float.valueOf(value)));
         }  catch (InstanceNotFoundException e) {
             // 忽略该错误，该错误出现的原因是该指标在JMX中不存在
             return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName));
@@ -296,8 +313,7 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         }
 
         Float sum = ret.getData().stream().map(elem -> elem.getMetric(metric)).reduce(Float::sum).get();
-        ConnectorMetrics connectorMetrics = ConnectorMetrics.initWithMetric(connectClusterId, connectorName, metric, sum / ret.getData().size());
-        return Result.buildSuc(connectorMetrics);
+        return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName, metric, sum / ret.getData().size()));
     }
 
     private Result<ConnectorMetrics> getConnectorTaskMetricsMax(VersionItemParam metricParam){
@@ -313,8 +329,7 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         }
 
         Float max = ret.getData().stream().max((a, b) -> a.getMetric(metric).compareTo(b.getMetric(metric))).get().getMetric(metric);
-        ConnectorMetrics connectorMetrics = ConnectorMetrics.initWithMetric(connectClusterId, connectorName, metric, max);
-        return Result.buildSuc(connectorMetrics);
+        return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName, metric, max));
     }
 
     private Result<ConnectorMetrics> getConnectorTaskMetricsSum(VersionItemParam metricParam){
@@ -330,8 +345,7 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         }
 
         Float sum = ret.getData().stream().map(elem -> elem.getMetric(metric)).reduce(Float::sum).get();
-        ConnectorMetrics connectorMetrics = ConnectorMetrics.initWithMetric(connectClusterId, connectorName, metric, sum);
-        return Result.buildSuc(connectorMetrics);
+        return Result.buildSuc(new ConnectorMetrics(connectClusterId, connectorName, metric, sum));
     }
 
 
@@ -358,6 +372,9 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
 
     private Result<ConnectorTaskMetrics> getConnectorTaskMetric(Long connectClusterId, String workerId, String connectorName, Integer taskId, String metric, ConnectorTypeEnum connectorType) {
         VersionConnectJmxInfo jmxInfo = getJMXInfo(connectClusterId, metric);
+        if (null == jmxInfo) {
+            return Result.buildFailure(VC_ITEM_JMX_NOT_EXIST);
+        }
 
         if (jmxInfo.getType() != null) {
             if (connectorType == null) {
@@ -369,9 +386,6 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
             }
         }
 
-        if (null == jmxInfo) {
-            return Result.buildFailure(VC_ITEM_JMX_NOT_EXIST);
-        }
         String jmxObjectName=String.format(jmxInfo.getJmxObjectName(), connectorName, taskId);
 
         JmxConnectorWrap jmxConnectorWrap = connectJMXClient.getClientWithCheck(connectClusterId, workerId);
@@ -382,8 +396,7 @@ public class ConnectorMetricServiceImpl extends BaseConnectorMetricService imple
         try {
             //2、获取jmx指标
             String value = jmxConnectorWrap.getAttribute(new ObjectName(jmxObjectName), jmxInfo.getJmxAttribute()).toString();
-            ConnectorTaskMetrics connectorTaskMetrics = ConnectorTaskMetrics.initWithMetric(connectClusterId, connectorName, taskId, metric, Float.valueOf(value));
-            return Result.buildSuc(connectorTaskMetrics);
+            return Result.buildSuc(new ConnectorTaskMetrics(connectClusterId, connectorName, taskId, metric, Float.valueOf(value)));
         } catch (Exception e) {
             LOGGER.error("method=getConnectorTaskMetric||connectClusterId={}||workerId={}||connectorName={}||taskId={}||metrics={}||jmx={}||msg={}",
                     connectClusterId, workerId, connectorName, taskId, metric, jmxObjectName, e.getClass().getName());

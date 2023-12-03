@@ -67,8 +67,11 @@ public class KafkaRebalanceMain {
             Properties kafkaConfig = new Properties();
             kafkaConfig.setProperty(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, options.valueOf("bootstrap-servers").toString());
             balanceParameter.setKafkaConfig(kafkaConfig);
-            balanceParameter.setEsRestURL(options.valueOf("es-rest-url").toString());
-            balanceParameter.setEsIndexPrefix(options.valueOf("es-index-prefix").toString());
+            if (options.has("es-password")) {
+                balanceParameter.setEsInfo(options.valueOf("es-rest-url").toString(), options.valueOf("es-password").toString(), options.valueOf("es-index-prefix").toString());
+            } else {
+                balanceParameter.setEsInfo(options.valueOf("es-rest-url").toString(), "", options.valueOf("es-index-prefix").toString());
+            }
             balanceParameter.setBeforeSeconds((Integer) options.valueOf("before-seconds"));
             String envFile = options.valueOf("hardware-env-file").toString();
             String envJson = FileUtils.readFileToString(new File(envFile), "UTF-8");
@@ -89,6 +92,7 @@ public class KafkaRebalanceMain {
         OptionParser parser = new OptionParser();
         parser.accepts("bootstrap-servers", "Kafka cluster boot server").withRequiredArg().ofType(String.class);
         parser.accepts("es-rest-url", "The url of elasticsearch").withRequiredArg().ofType(String.class);
+        parser.accepts("es-password", "The password of elasticsearch").withRequiredArg().ofType(String.class);
         parser.accepts("es-index-prefix", "The Index Prefix of elasticsearch").withRequiredArg().ofType(String.class);
         parser.accepts("goals", "Balanced goals include TopicLeadersDistributionGoal,TopicReplicaDistributionGoal,DiskDistributionGoal,NetworkInboundDistributionGoal,NetworkOutboundDistributionGoal").withRequiredArg().ofType(String.class);
         parser.accepts("cluster", "Balanced cluster name").withRequiredArg().ofType(String.class);

@@ -6,7 +6,10 @@ import com.xiaojukeji.know.streaming.km.rebalance.algorithm.metric.Metric;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.metric.MetricStore;
 import com.xiaojukeji.know.streaming.km.rebalance.algorithm.metric.Metrics;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
@@ -17,9 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @author leewei
@@ -30,15 +31,19 @@ public class ElasticsearchMetricStore implements MetricStore {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final String hosts;
+
+    private final String password;
+
     private final String indexPrefix;
     private final String format;
 
-    public ElasticsearchMetricStore(String hosts, String indexPrefix) {
-        this(hosts, indexPrefix, "yyyy-MM-dd");
+    public ElasticsearchMetricStore(String hosts, String password, String indexPrefix) {
+        this(hosts, password, indexPrefix, "yyyy-MM-dd");
     }
 
-    public ElasticsearchMetricStore(String hosts, String indexPrefix, String format) {
+    public ElasticsearchMetricStore(String hosts, String password, String indexPrefix, String format) {
         this.hosts = hosts;
+        this.password = password;
         this.indexPrefix = indexPrefix;
         this.format = format;
     }
@@ -50,7 +55,17 @@ public class ElasticsearchMetricStore implements MetricStore {
             String metricsQueryJson = IOUtils.resourceToString("/MetricsQuery.json", StandardCharsets.UTF_8);
             metricsQueryJson = metricsQueryJson.replaceAll("<var_before_time>", Integer.toString(beforeSeconds))
                     .replaceAll("<var_cluster_name>", clusterName);
-            try (RestClient restClient = RestClient.builder(toHttpHosts(this.hosts)).build()) {
+
+            List<Header> defaultHeaders = new ArrayList<>();
+            if (StringUtils.isNotBlank(password)) {
+                String encode = Base64.getEncoder().encodeToString(String.format("%s", this.password).getBytes(StandardCharsets.UTF_8));
+                Header header = new BasicHeader("Authorization", "Basic " + encode);
+                defaultHeaders.add(header);
+            }
+
+            Header[] headers = new Header[defaultHeaders.size()];
+            defaultHeaders.toArray(headers);
+            try (RestClient restClient = RestClient.builder(toHttpHosts(this.hosts)).setDefaultHeaders(headers).build()) {
                 Request request = new Request(
                         "GET",
                         "/" + indices(beforeSeconds) + "/_search");

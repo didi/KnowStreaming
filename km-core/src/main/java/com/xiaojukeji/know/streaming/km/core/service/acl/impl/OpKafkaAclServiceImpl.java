@@ -20,7 +20,6 @@ import com.xiaojukeji.know.streaming.km.common.exception.VCHandlerNotExistExcept
 import com.xiaojukeji.know.streaming.km.core.service.acl.OpKafkaAclService;
 import com.xiaojukeji.know.streaming.km.core.service.oprecord.OpLogWrapService;
 import com.xiaojukeji.know.streaming.km.core.service.version.BaseKafkaVersionControlService;
-import com.xiaojukeji.know.streaming.km.core.service.version.BaseVersionControlService;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminClient;
 import com.xiaojukeji.know.streaming.km.persistence.kafka.KafkaAdminZKClient;
 import com.xiaojukeji.know.streaming.km.persistence.mysql.KafkaAclDAO;
@@ -32,7 +31,6 @@ import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.acl.*;
 import org.apache.kafka.common.resource.ResourcePattern;
 import org.apache.kafka.common.resource.ResourcePatternFilter;
-import org.apache.kafka.common.resource.ResourceType;
 import org.apache.kafka.common.security.auth.KafkaPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -41,8 +39,6 @@ import scala.jdk.javaapi.CollectionConverters;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.*;
 
@@ -170,11 +166,6 @@ public class OpKafkaAclServiceImpl extends BaseKafkaVersionControlService implem
     }
 
     @Override
-    public Result<Void> deleteKafkaAclByResName(ResourceType resourceType, String resourceName, String operator) {
-        return Result.buildSuc();
-    }
-
-    @Override
     public Result<Void> insertAndIgnoreDuplicate(KafkaAclPO kafkaAclPO) {
         try {
             kafkaAclDAO.insert(kafkaAclPO);
@@ -188,34 +179,6 @@ public class OpKafkaAclServiceImpl extends BaseKafkaVersionControlService implem
 
             return Result.buildFromRSAndMsg(ResultStatus.MYSQL_OPERATE_FAILED, e.getMessage());
         }
-    }
-
-    @Override
-    public void batchUpdateAcls(Long clusterPhyId, List<KafkaAclPO> poList) {
-        LambdaQueryWrapper<KafkaAclPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(KafkaAclPO::getClusterPhyId, clusterPhyId);
-
-        Map<String, KafkaAclPO> dbPOMap = kafkaAclDAO.selectList(lambdaQueryWrapper).stream().collect(Collectors.toMap(KafkaAclPO::getUniqueField, Function.identity()));
-        for (KafkaAclPO po: poList) {
-            KafkaAclPO dbPO = dbPOMap.remove(po.getUniqueField());
-            if (dbPO == null) {
-                // 新增的ACL
-                this.insertAndIgnoreDuplicate(po);
-            }
-        }
-
-        // 删除已经不存在的
-        for (KafkaAclPO dbPO: dbPOMap.values()) {
-            kafkaAclDAO.deleteById(dbPO);
-        }
-    }
-
-    @Override
-    public int deleteByUpdateTimeBeforeInDB(Long clusterPhyId, Date beforeTime) {
-        LambdaQueryWrapper<KafkaAclPO> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(KafkaAclPO::getClusterPhyId, clusterPhyId);
-        lambdaQueryWrapper.le(KafkaAclPO::getUpdateTime, beforeTime);
-        return kafkaAclDAO.delete(lambdaQueryWrapper);
     }
 
     /**************************************************** private method ****************************************************/
