@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <revision>3.3.0</revision>
+        <revision>3.4.0</revision>
 
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
