@@ -451,6 +451,18 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
             return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "包含的方式过滤，必须有过滤的key或value");
         }
 
+        // key包含过滤
+        if (KafkaConsumerFilterEnum.KEY_CONTAINS.getCode().equals(filter.getFilterType())
+            && ValidateUtils.isBlank(filter.getFilterCompareKey())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "key包含的方式过滤，必须有过滤的key");
+        }
+
+        // value包含过滤
+        if (KafkaConsumerFilterEnum.VALUE_CONTAINS.getCode().equals(filter.getFilterType())
+            && ValidateUtils.isBlank(filter.getFilterCompareValue())) {
+            return Result.buildFromRSAndMsg(ResultStatus.PARAM_ILLEGAL, "value包含的方式过滤，必须有过滤的value");
+        }
+
         // 不包含过滤
         if (KafkaConsumerFilterEnum.NOT_CONTAINS.getCode().equals(filter.getFilterType())
                 && ValidateUtils.isBlank(filter.getFilterCompareKey()) && ValidateUtils.isBlank(filter.getFilterCompareValue())) {
@@ -547,6 +559,18 @@ public class KafkaClientTestManagerImpl implements KafkaClientTestManager {
         if (KafkaConsumerFilterEnum.CONTAINS.getCode().equals(filter.getFilterType())
                 && (!ValidateUtils.isBlank(filter.getFilterCompareKey()) && consumerRecord.key() != null && consumerRecord.key().toString().contains(filter.getFilterCompareKey()))
                 && (!ValidateUtils.isBlank(filter.getFilterCompareValue()) && consumerRecord.value() != null && consumerRecord.value().toString().contains(filter.getFilterCompareValue()))) {
+            return true;
+        }
+
+        // key包含过滤
+        if (KafkaConsumerFilterEnum.KEY_CONTAINS.getCode().equals(filter.getFilterType())
+            && (!ValidateUtils.isBlank(filter.getFilterCompareKey()) && consumerRecord.key() != null && consumerRecord.key().toString().contains(filter.getFilterCompareKey()))) {
+            return true;
+        }
+
+        // value包含过滤
+        if (KafkaConsumerFilterEnum.VALUE_CONTAINS.getCode().equals(filter.getFilterType())
+            && (!ValidateUtils.isBlank(filter.getFilterCompareValue()) && consumerRecord.value() != null && consumerRecord.value().toString().contains(filter.getFilterCompareValue()))) {
             return true;
         }
 

@@ -22,6 +22,10 @@ public enum KafkaConsumerFilterEnum {
 
     UNDER_SIZE(5, "size小于"),
 
+    KEY_CONTAINS(6, "key包含"),
+
+    VALUE_CONTAINS(7, "value包含"),
+
     ;
 
     private final Integer code;
