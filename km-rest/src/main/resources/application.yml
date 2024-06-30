@@ -116,3 +116,6 @@ management:
         enabled: true
     tags:
       application: know-streaming
+
+swagger:
+  enabled: true

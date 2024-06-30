@@ -6,6 +6,7 @@ import com.xiaojukeji.know.streaming.km.common.constant.ApiPrefix;
 import com.xiaojukeji.know.streaming.km.common.utils.GitPropUtil;
 import com.xiaojukeji.know.streaming.km.rest.interceptor.PermissionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
@@ -23,6 +24,9 @@ public class WebConfig implements WebMvcConfigurer {
     private PermissionInterceptor permissionInterceptor;
 
     private static final String FE_INDEX_PAGE_HTML = "layout/index";
+
+    @Value(value = "${swagger.enabled:true}")
+    private Boolean swaggerEnabled;
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
@@ -69,7 +73,7 @@ public class WebConfig implements WebMvcConfigurer {
                         RequestHandlerSelectors.basePackage("com.didiglobal.logi.security.controller")))
                 .paths(PathSelectors.any())
                 .build()
-                .enable(true);
+                .enable(swaggerEnabled != null && swaggerEnabled);
     }
 
     private ApiInfo apiInfo() {
