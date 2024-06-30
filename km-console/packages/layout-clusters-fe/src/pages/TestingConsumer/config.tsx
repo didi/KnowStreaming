@@ -16,19 +16,19 @@ export const cardList = [
 
 export const filterList = [
   {
-    label: 'none',
+    label: 'None',
     value: 0,
   },
   {
-    label: 'contains',
+    label: 'Contains',
     value: 1,
   },
   {
-    label: 'does not contains',
+    label: 'Does Not Contains',
     value: 2,
   },
   {
-    label: 'equals',
+    label: 'Equals',
     value: 3,
   },
   {
@@ -39,6 +39,14 @@ export const filterList = [
     label: 'Under Size',
     value: 5,
   },
+  {
+      label: 'Key Contains',
+      value: 6,
+  },
+  {
+      label: 'Value Contains',
+      value: 7,
+  }
 ];
 
 export const untilList = [
@@ -324,10 +332,10 @@ export const getFormConfig = (topicMetaData: any, info = {} as any, partitionLis
       key: 'filterKey',
       label: 'Key',
       type: FormItemType.input,
-      invisible: !info?.needFilterKeyValue,
+      invisible: !info?.needFilterKeyValue && !info?.needFilterKey,
       rules: [
         {
-          required: info?.needFilterKeyValue,
+          required: info?.needFilterKeyValue || info?.needFilterKey,
           message: '请输入Key',
         },
       ],
@@ -336,10 +344,10 @@ export const getFormConfig = (topicMetaData: any, info = {} as any, partitionLis
       key: 'filterValue',
       label: 'Value',
       type: FormItemType.input,
-      invisible: !info?.needFilterKeyValue,
+      invisible: !info?.needFilterKeyValue && !info?.needFilterValue,
       rules: [
         {
-          required: info?.needFilterKeyValue,
+          required: info?.needFilterKeyValue || info?.needFilterValue,
           message: '请输入Value',
         },
       ],

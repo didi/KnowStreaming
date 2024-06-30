@@ -19,7 +19,7 @@ public class KafkaConsumerFilterDTO extends BaseDTO {
     /**
      * @see KafkaConsumerFilterEnum
      */
-    @Range(min = 0, max = 5, message = "filterType最大和最小值必须在[0, 5]之间")
+    @Range(min = 0, max = 7, message = "filterType最大和最小值必须在[0, 7]之间")
     @ApiModelProperty(value = "开始消费位置的类型", example = "2")
     private Integer filterType;
 
