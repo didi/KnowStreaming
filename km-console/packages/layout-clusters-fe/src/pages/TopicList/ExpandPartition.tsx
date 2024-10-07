@@ -44,7 +44,7 @@ const ExpandPartition = (props: { record: any; onConfirm: () => void }) => {
 
     setLoading(true);
     const metricParams = {
-      aggType: 'avg',
+      aggType: 'sum',
       endTime: Math.round(endStamp),
       metricsNames: ['BytesIn', 'BytesOut'],
       startTime: Math.round(startStamp),
