@@ -18,6 +18,13 @@
           }
         },
         {
+          "term": {
+            "brokerAgg" : {
+              "value": "1"
+            }
+          }
+        },
+        {
           "range": {
             "timestamp": {
               "gte": %d,
