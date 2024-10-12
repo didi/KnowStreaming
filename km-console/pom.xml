@@ -32,8 +32,6 @@
                         <configuration>
                             <nodeVersion>v12.22.12</nodeVersion>
                             <npmVersion>6.14.16</npmVersion>
-                            <nodeDownloadRoot>https://npm.taobao.org/mirrors/node/</nodeDownloadRoot>
-                            <npmDownloadRoot>https://registry.npm.taobao.org/npm/-/</npmDownloadRoot>
                         </configuration>
                     </execution>
                     <execution>
