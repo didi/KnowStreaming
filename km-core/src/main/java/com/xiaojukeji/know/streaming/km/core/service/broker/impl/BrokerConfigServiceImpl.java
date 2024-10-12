@@ -37,6 +37,7 @@ import scala.jdk.javaapi.CollectionConverters;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.xiaojukeji.know.streaming.km.common.enums.version.VersionEnum.*;
 
@@ -154,9 +155,11 @@ public class BrokerConfigServiceImpl extends BaseKafkaVersionControlService impl
         if (propertiesResult.failed()) {
             return Result.buildFromIgnoreData(propertiesResult);
         }
+        List<String> configKeyList = propertiesResult.getData().keySet().stream().map(Object::toString).collect(Collectors.toList());
+
 
         return Result.buildSuc(KafkaConfigConverter.convert2KafkaBrokerConfigDetailList(
-                new ArrayList<>(),
+                configKeyList,
                 propertiesResult.getData()
         ));
     }
