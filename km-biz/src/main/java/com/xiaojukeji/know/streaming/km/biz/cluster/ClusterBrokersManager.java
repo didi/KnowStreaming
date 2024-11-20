@@ -24,7 +24,7 @@ public interface ClusterBrokersManager {
      * @param dto 封装分页查询参数对象
      * @return 返回获取到的缓存查询结果 & broker 表查询结果并集
      */
-    PaginationResult<ClusterBrokersOverviewVO> deleteInactiveClusterPhyBrokers(Long clusterPhyId, ClusterBrokersOverviewDTO dto);
+    PaginationResult<ClusterBrokersOverviewVO> clearInactiveClusterPhyBrokers(Long clusterPhyId, ClusterBrokersOverviewDTO dto);
 
 
     /**

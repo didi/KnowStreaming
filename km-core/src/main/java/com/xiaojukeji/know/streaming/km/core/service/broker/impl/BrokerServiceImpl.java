@@ -187,7 +187,7 @@ public class BrokerServiceImpl extends BaseKafkaVersionControlService implements
                 .filter(elem -> elem.getStatus().equals(Constant.DOWN))
                 .forEach(elem -> brokerDAO.deleteById(elem.getId()));
         } catch (Exception e) {
-            log.error("method=deleteInactiveClusterPhyBrokers||clusterPhyId={}||errMsg=exception!", clusterPhyId, e);
+            log.error("method=clearInactiveClusterPhyBrokers||clusterPhyId={}||errMsg=exception!", clusterPhyId, e);
         }
     }
     @Override

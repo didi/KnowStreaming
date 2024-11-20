@@ -108,8 +108,8 @@ public class ClusterBrokersManagerImpl implements ClusterBrokersManager {
     }
 
     @Override
-    public PaginationResult<ClusterBrokersOverviewVO> deleteInactiveClusterPhyBrokers(Long clusterPhyId, ClusterBrokersOverviewDTO dto) {
-        brokerService.deleteInactiveClusterPhyBrokers(clusterPhyId);
+    public PaginationResult<ClusterBrokersOverviewVO> clearInactiveClusterPhyBrokers(Long clusterPhyId, ClusterBrokersOverviewDTO dto) {
+        brokerService.clearInactiveClusterPhyBrokers(clusterPhyId);
         return this.getClusterPhyBrokersOverview(clusterPhyId, dto);
     }
 
