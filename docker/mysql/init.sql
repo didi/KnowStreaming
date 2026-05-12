@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS know_streaming DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+GRANT ALL PRIVILEGES ON know_streaming.* TO 'root'@'%';
+FLUSH PRIVILEGES;

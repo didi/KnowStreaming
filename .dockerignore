@@ -1,0 +1,9 @@
+.git
+.github
+.idea
+.vscode
+*.iml
+*/target
+**/target
+**/node_modules
+docs

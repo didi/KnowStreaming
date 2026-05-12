@@ -1,0 +1,115 @@
+version: "3.8"
+
+services:
+  knowstreaming-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    image: knowstreaming/manager:local
+    container_name: knowstreaming-manager
+    restart: always
+    depends_on:
+      knowstreaming-mysql:
+        condition: service_healthy
+      elasticsearch-single:
+        condition: service_started
+    expose:
+      - "80"
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_MYSQL_ADDRESS: knowstreaming-mysql:3306
+      SERVER_MYSQL_DB: ${MYSQL_DATABASE:-know_streaming}
+      SERVER_MYSQL_USER: root
+      SERVER_MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin2022_}
+      SERVER_ES_ADDRESS: elasticsearch-single:9200
+      JAVA_OPTS: ${JAVA_OPTS:--Xmx1g -Xms1g}
+    volumes:
+      - ks-manager-logs:/opt/ks/logs
+    networks:
+      - ks-network
+
+  knowstreaming-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ui
+    image: knowstreaming/ui:local
+    container_name: knowstreaming-ui
+    restart: always
+    ports:
+      - "${KS_PORT:-80}:80"
+    depends_on:
+      - knowstreaming-manager
+    networks:
+      - ks-network
+
+  knowstreaming-init:
+    image: knowstreaming/manager:local
+    container_name: knowstreaming-init
+    depends_on:
+      - elasticsearch-single
+    restart: "no"
+    entrypoint: ["/bin/bash", "/init-es-templates.sh"]
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_ES_ADDRESS: elasticsearch-single:9200
+    volumes:
+      - ./docker/es/init-es-templates.sh:/init-es-templates.sh:ro
+      - ./km-persistence/src/main/resources/es/template:/init/template:ro
+    networks:
+      - ks-network
+
+  knowstreaming-mysql:
+    image: mysql:5.7
+    container_name: knowstreaming-mysql
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin2022_}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-know_streaming}
+      MYSQL_ROOT_HOST: '%'
+    expose:
+      - "3306"
+    volumes:
+      - ks-mysql-data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+      - ./km-persistence/src/main/resources/sql/ddl-ks-km.sql:/docker-entrypoint-initdb.d/01-ddl-ks-km.sql:ro
+      - ./km-persistence/src/main/resources/sql/ddl-logi-job.sql:/docker-entrypoint-initdb.d/02-ddl-logi-job.sql:ro
+      - ./km-persistence/src/main/resources/sql/ddl-logi-security.sql:/docker-entrypoint-initdb.d/03-ddl-logi-security.sql:ro
+      - ./km-persistence/src/main/resources/sql/dml-ks-km.sql:/docker-entrypoint-initdb.d/04-dml-ks-km.sql:ro
+      - ./km-persistence/src/main/resources/sql/dml-logi.sql:/docker-entrypoint-initdb.d/05-dml-logi.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-admin2022_}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - ks-network
+
+  elasticsearch-single:
+    image: docker.io/library/elasticsearch:7.6.2
+    container_name: elasticsearch-single
+    restart: always
+    expose:
+      - "9200"
+      - "9300"
+    environment:
+      TZ: Asia/Shanghai
+      ES_JAVA_OPTS: ${ES_JAVA_OPTS:--Xms512m -Xmx512m}
+      discovery.type: single-node
+    volumes:
+      - ks-es-data:/usr/share/elasticsearch/data
+    networks:
+      - ks-network
+
+volumes:
+  ks-mysql-data:
+  ks-es-data:
+  ks-manager-logs:
+
+networks:
+  ks-network:
+    driver: bridge
