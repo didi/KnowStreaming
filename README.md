@@ -157,5 +157,5 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=didi/KnowStreaming&type=Date)](https://star-history.com/#didi/KnowStreaming&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=didi/KnowStreaming&type=Date)](https://star-history.dera.page/#didi/KnowStreaming&Date)
 
