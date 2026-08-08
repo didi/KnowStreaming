@@ -156,6 +156,10 @@ PS: 提问请尽量把问题一次性描述清楚，并告知环境信息情况�
 <img width="116" alt="wx" src="https://user-images.githubusercontent.com/71620349/192257217-c4ebc16c-3ad9-485d-a914-5911d3a4f46b.png">
 
 ## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=didi/KnowStreaming&type=Date)](https://star-history.com/#didi/KnowStreaming&Date)
-
+<a href="https://www.star-history.com/?type=date&repos=didi%2FKnowStreaming">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=didi/KnowStreaming&type=date&theme=dark&legend=top-left&sealed_token=68g17aqTzrmcdOe_g-6xqNrT5sZ5Edu24SLjSA9H9lBIlquHqg9Qtt2DGov_O2CqZH0rslmofg6wyEw4E7s3qiaYM9fdKTvol0-xlUNZkCLjCrnfkj2dfKB5xFDC2MsgXAhyYTtuCf1g0W30HeU93YVk" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=didi/KnowStreaming&type=date&legend=top-left&sealed_token=68g17aqTzrmcdOe_g-6xqNrT5sZ5Edu24SLjSA9H9lBIlquHqg9Qtt2DGov_O2CqZH0rslmofg6wyEw4E7s3qiaYM9fdKTvol0-xlUNZkCLjCrnfkj2dfKB5xFDC2MsgXAhyYTtuCf1g0W30HeU93YVk" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=didi/KnowStreaming&type=date&legend=top-left&sealed_token=68g17aqTzrmcdOe_g-6xqNrT5sZ5Edu24SLjSA9H9lBIlquHqg9Qtt2DGov_O2CqZH0rslmofg6wyEw4E7s3qiaYM9fdKTvol0-xlUNZkCLjCrnfkj2dfKB5xFDC2MsgXAhyYTtuCf1g0W30HeU93YVk" />
+ </picture>
+</a>
