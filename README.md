@@ -98,15 +98,6 @@
 - [2.x与3.x新旧对比手册](docs/user_guide/新旧对比手册.md)
 - [FAQ](docs/user_guide/faq.md)
 
-
-**点击 [这里](https://doc.knowstreaming.com/product)，也可以从官网获取到更多文档**
-
-**`产品网址`**
-- [产品官网：https://knowstreaming.com](https://knowstreaming.com)
-- [体验环境：https://demo.knowstreaming.com](https://demo.knowstreaming.com),登陆账号：admin/admin
-
-
-
 ## 成为社区贡献者
 
 1. [贡献源码](https://doc.knowstreaming.com/product/10-contribution) 了解如何成为 Know Streaming 的贡献者
