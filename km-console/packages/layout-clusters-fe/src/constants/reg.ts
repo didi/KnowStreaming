@@ -22,3 +22,5 @@ export const regTemplateName = /^[a-z0-9\._-]*$/; // 仅支持小写字母、数
 export const regIp = /((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3}/g; // ip
 
 export const regKafkaPassword = /^[A-Za-z0-9_\-!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]*$/;
+
+export const regJmxPassword = /^[_a-zA-Z0-9-]*$/; // JMX密码：支持大小写字母、数字、下划线、短划线
