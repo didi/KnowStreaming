@@ -1,0 +1,13 @@
+# Set the absolute path for this installation. See README.md for scheduling.
+"/data/KnowStreaming/logs/start.out" {
+    daily
+    maxsize 100M
+    rotate 14
+    maxage 7
+    dateext
+    dateformat -%Y%m%d-%s
+    compress
+    copytruncate
+    missingok
+    notifempty
+}

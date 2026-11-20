@@ -60,6 +60,11 @@
             <outputDirectory>.</outputDirectory>
         </file>
         <file>
+            <source>conf/start-out.logrotate</source>
+            <outputDirectory>conf</outputDirectory>
+            <fileMode>0644</fileMode>
+        </file>
+        <file>
             <source>../LICENSE</source>
             <outputDirectory>.</outputDirectory>
         </file>

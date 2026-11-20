@@ -62,21 +62,17 @@ JAVA_OPT="${JAVA_OPT} --server.max-http-header-size=524288"
 
 
 
-if [ ! -d "${BASE_DIR}/logs" ]; then
-  mkdir ${BASE_DIR}/logs
-fi
+LOG_DIR="${BASE_DIR}/logs"
+START_OUT="${LOG_DIR}/start.out"
+
+mkdir -p "${LOG_DIR}" || error_exit "Cannot create log directory ${LOG_DIR}"
 
 echo "$JAVA ${JAVA_OPT}"
 
-# check the start.out log output file
-if [ ! -f "${BASE_DIR}/logs/start.out" ]; then
-  touch "${BASE_DIR}/logs/start.out"
-fi
+# Write the marker before the JVM starts so its first messages follow it.
+printf '%s\n' "---- 启动脚本 $(date '+%Y-%m-%d %H:%M:%S') ------" "$JAVA ${JAVA_OPT}" >> "${START_OUT}" \
+  || error_exit "Cannot write startup marker to ${START_OUT}"
 
-# start
-echo -e "---- 启动脚本 ------\n $JAVA ${JAVA_OPT}" > ${BASE_DIR}/logs/start.out 2>&1 &
+nohup "$JAVA" ${JAVA_OPT} >> "${START_OUT}" 2>&1 &
 
-
-nohup $JAVA ${JAVA_OPT} >> ${BASE_DIR}/logs/start.out 2>&1 &
-
-echo "${WEB_SERVER} is starting，you can check the ${BASE_DIR}/logs/start.out"
+echo "${WEB_SERVER} is starting，you can check the ${START_OUT}"
