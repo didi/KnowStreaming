@@ -4,6 +4,7 @@ import com.didiglobal.logi.security.common.constant.Constants;
 import com.google.common.base.Predicates;
 import com.xiaojukeji.know.streaming.km.common.constant.ApiPrefix;
 import com.xiaojukeji.know.streaming.km.common.utils.GitPropUtil;
+import com.xiaojukeji.know.streaming.km.rest.interceptor.IdentityAuthorizationInterceptor;
 import com.xiaojukeji.know.streaming.km.rest.interceptor.PermissionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private PermissionInterceptor permissionInterceptor;
+
+    @Autowired
+    private IdentityAuthorizationInterceptor identityAuthorizationInterceptor;
 
     private static final String FE_INDEX_PAGE_HTML = "layout/index";
 
@@ -47,6 +51,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // 会进行拦截的接口
         registry.addInterceptor(permissionInterceptor).addPathPatterns(ApiPrefix.API_PREFIX + "**", Constants.API_PREFIX + "/**");
+        // 服务端权限校验：在登录校验之后执行（注册顺序即执行顺序），
+        // see https://github.com/didi/KnowStreaming/issues/1263
+        registry.addInterceptor(identityAuthorizationInterceptor).addPathPatterns("/logi-security/**");
     }
 
     @Override
