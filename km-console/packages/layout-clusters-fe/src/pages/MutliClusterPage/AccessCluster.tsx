@@ -1,9 +1,9 @@
-import { Button, Divider, Drawer, Form, Input, InputNumber, Radio, Select, Spin, Space, Utils, Tabs, Collapse, Empty } from 'knowdesign';
+import { Button, Divider, Drawer, Form, Input, InputNumber, Radio, Select, Spin, Space, Utils, Tabs, Collapse, Empty, Checkbox } from 'knowdesign';
 import message from '@src/components/Message';
 import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import api from '@src/api';
-import { regClusterName, regIpAndPort, regUsername } from '@src/constants/reg';
+import { regClusterName, regIpAndPort, regUsername, regJmxPassword } from '@src/constants/reg';
 import { bootstrapServersErrCodes, jmxErrCodes, zkErrCodes } from './config';
 import CodeMirrorFormItem from '@src/components/CodeMirrorFormItem';
 import { IconFont } from '@knowdesign/icons';
@@ -169,7 +169,16 @@ const ClusterTabContent = forwardRef((props: any, ref): JSX.Element => {
           const originValue = obj?.jmxProperties;
           if (originValue) {
             const jmxProperties = JSON.parse(originValue);
-            typeof jmxProperties === 'object' && jmxProperties !== null && Object.assign(res, jmxProperties);
+            if (typeof jmxProperties === 'object' && jmxProperties !== null) {
+              Object.assign(res, jmxProperties);
+              // 根据是否有 username/token 判断是否启用密码认证
+              const hasPasswordAuth = !!(jmxProperties.username && jmxProperties.token);
+              res.hasPasswordAuth = hasPasswordAuth;
+              // 如果没有密码认证，确保 openSSL 为 false
+              if (!hasPasswordAuth) {
+                res.openSSL = false;
+              }
+            }
           }
         } catch (err) {
           console.error('jmxProperties not JSON: ', err);
@@ -257,8 +266,8 @@ const ClusterTabContent = forwardRef((props: any, ref): JSX.Element => {
       if (!value) {
         return Promise.reject('密码不能为空');
       }
-      if (!new RegExp(regUsername).test(value)) {
-        return Promise.reject('密码只能由大小写、下划线、短划线（-）组成');
+      if (!new RegExp(regJmxPassword).test(value)) {
+        return Promise.reject('密码只能由大小写字母、数字、下划线、短划线（-）组成');
       }
       if (value.length < 6 || value.length > 32) {
         return Promise.reject('密码长度限制在6～32字符');
@@ -360,15 +369,15 @@ const ClusterTabContent = forwardRef((props: any, ref): JSX.Element => {
                 <InputNumber addonAfter="个" min={0} max={99999} style={{ width: 124 }} />
               </Form.Item>
             </div>
-            <Form.Item name="openSSL" label="Security :">
+            <Form.Item name="hasPasswordAuth" label="Security :">
               <Radio.Group>
                 <Radio value={false}>None</Radio>
                 <Radio value={true}>Password Authentication</Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item dependencies={['openSSL']} noStyle>
+            <Form.Item dependencies={['hasPasswordAuth']} noStyle>
               {({ getFieldValue }) => {
-                return getFieldValue('openSSL') ? (
+                return getFieldValue('hasPasswordAuth') ? (
                   <div className="user-info-form-items">
                     <Form.Item className="user-info-label" label="User Info :" required />
                     <div className="inline-items">
@@ -379,6 +388,7 @@ const ClusterTabContent = forwardRef((props: any, ref): JSX.Element => {
                             validator: validators.securityUserName,
                           },
                         ]}
+                        style={{ width: '140px', marginRight: '8px' }}
                       >
                         <Input placeholder="请输入用户名" />
                       </Form.Item>
@@ -390,8 +400,12 @@ const ClusterTabContent = forwardRef((props: any, ref): JSX.Element => {
                             validator: validators.securityToken,
                           },
                         ]}
+                        style={{ width: '140px', marginRight: '8px' }}
                       >
                         <Input placeholder="请输入密码" />
+                      </Form.Item>
+                      <Form.Item name="openSSL" valuePropName="checked" style={{ marginBottom: 0, alignSelf: 'center' }}>
+                        <Checkbox>启用 SSL</Checkbox>
                       </Form.Item>
                     </div>
                   </div>
@@ -759,9 +773,9 @@ const AccessClusterDrawer = (props: AccessClusterDrawerProps) => {
         jmxProperties: {
           jmxPort: res.jmxPort,
           maxConn: res.maxConn,
-          openSSL: res.openSSL || false,
-          token: res.token,
-          username: res.username,
+          openSSL: res.hasPasswordAuth ? (res.openSSL || false) : false,
+          token: res.hasPasswordAuth ? res.token : '',
+          username: res.hasPasswordAuth ? res.username : '',
         },
         kafkaVersion: res.kafkaVersion,
         name: res.name,
